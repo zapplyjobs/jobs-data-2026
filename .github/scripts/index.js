@@ -17,8 +17,11 @@ const path = require('path');
 
 // Import fetchers
 const { fetchFromJSearch, getUsageStats } = require('./fetchers/jsearch-fetcher');
+const { fetchFromAllATS, getUsageStats: getATSUsageStats } = require('./fetchers/ats-fetcher');
 
 // Import processors
+const { validateAndNormalizeJobs, printValidationSummary } = require('./processors/validator');
+const { filterSeniorJobs, printSeniorFilterSummary } = require('./processors/senior-filter');
 const { deduplicateJobs } = require('./processors/deduplicator');
 const { tagJobs, generateTagStats } = require('./processors/tag-engine');
 const { printTagDistribution } = require('./processors/tag-monitor');
@@ -63,27 +66,47 @@ async function main() {
     const jsearchJobs = await fetchFromJSearch();
     allJobs.push(...jsearchJobs);
 
+    // Fetch from ATS sources (Greenhouse, Lever, Ashby)
+    const atsResult = await fetchFromAllATS();
+    allJobs.push(...atsResult.jobs);
+
     console.log('');
     console.log(`📊 Step 1 complete: ${allJobs.length} jobs fetched`);
+    console.log(`   - JSearch: ${jsearchJobs.length} jobs`);
+    console.log(`   - ATS: ${atsResult.jobs.length} jobs`);
     console.log('');
 
-    // Step 2: Normalize jobs
-    console.log('📝 Step 2: Normalizing jobs...');
+    // Step 2: Validate and normalize jobs
+    console.log('📝 Step 2: Validating and normalizing jobs...');
     console.log('━'.repeat(60));
 
-    // Jobs are already normalized by fetchers, but we ensure consistency
-    const normalizedJobs = allJobs; // Already normalized
+    const { validJobs, invalidJobs, metrics: validationMetrics } = validateAndNormalizeJobs(allJobs);
 
-    console.log(`✅ Step 2 complete: ${normalizedJobs.length} jobs normalized`);
+    console.log('');
+    printValidationSummary(validationMetrics);
+    console.log('');
+    console.log(`✅ Step 2 complete: ${validJobs.length} valid jobs (${invalidJobs.length} filtered)`);
     console.log('');
 
-    // Step 2.5: Apply tags
-    console.log('🏷️  Step 2.5: Applying tags...');
+    // Step 2.5: Filter senior jobs
+    console.log('🎓 Step 2.5: Filtering senior-level jobs...');
     console.log('━'.repeat(60));
 
-    const taggedJobs = tagJobs(normalizedJobs);
+    const { entryLevelJobs, seniorJobs, metrics: seniorFilterMetrics } = filterSeniorJobs(validJobs);
 
-    console.log(`✅ Step 2.5 complete: ${taggedJobs.length} jobs tagged`);
+    console.log('');
+    printSeniorFilterSummary(seniorFilterMetrics);
+    console.log('');
+    console.log(`✅ Step 2.5 complete: ${entryLevelJobs.length} entry-level jobs (${seniorJobs.length} senior filtered)`);
+    console.log('');
+
+    // Step 2.75: Apply tags
+    console.log('🏷️  Step 2.75: Applying tags...');
+    console.log('━'.repeat(60));
+
+    const taggedJobs = tagJobs(entryLevelJobs);
+
+    console.log(`✅ Step 2.75 complete: ${taggedJobs.length} jobs tagged`);
     console.log('');
 
     // Step 3: Deduplicate
@@ -127,7 +150,7 @@ async function main() {
 
     // Write metadata
     const duration = Date.now() - startTime;
-    const metadata = generateMetadata(sortedJobs, dedupedJobs.length, duplicates, duration, tagStats);
+    const metadata = generateMetadata(sortedJobs, dedupedJobs.length, duplicates, duration, tagStats, validationMetrics, seniorFilterMetrics);
     await writeMetadata(metadata, METADATA_OUTPUT_FILE);
 
     console.log('');
@@ -178,9 +201,11 @@ async function main() {
  * @param {number} duplicateCount - Duplicate count
  * @param {number} duration - Duration in ms
  * @param {Object} tagStats - Tag statistics from tag engine
+ * @param {Object} validationMetrics - Validation metrics
+ * @param {Object} seniorFilterMetrics - Senior filter metrics
  * @returns {Object} - Metadata object
  */
-function generateMetadata(jobs, uniqueCount, duplicateCount, duration, tagStats) {
+function generateMetadata(jobs, uniqueCount, duplicateCount, duration, tagStats, validationMetrics, seniorFilterMetrics) {
   const bySource = {};
   const byEmploymentType = {};
   const byInternship = { internship: 0, 'new-grad': 0, other: 0 };
@@ -227,6 +252,13 @@ function generateMetadata(jobs, uniqueCount, duplicateCount, duration, tagStats)
     by_location: byRemote,
 
     jsearch_stats: getUsageStats(),
+    ats_stats: getATSUsageStats(),
+
+    // Validation statistics
+    validation_stats: validationMetrics,
+
+    // Senior filter statistics
+    senior_filter_stats: seniorFilterMetrics,
 
     // Tag statistics (Phase 1)
     tag_stats: tagStats
