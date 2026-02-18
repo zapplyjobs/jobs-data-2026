@@ -32,8 +32,7 @@ const REPOS = [
   { owner: 'zapplyjobs', repo: 'New-Grad-Data-Science-Jobs-2026', name: 'Data-Science' },
   { owner: 'zapplyjobs', repo: 'New-Grad-Hardware-Engineering-Jobs-2026', name: 'Hardware' },
   { owner: 'zapplyjobs', repo: 'New-Grad-Nursing-Jobs-2026', name: 'Nursing' },
-  { owner: 'zapplyjobs', repo: 'New-Grad-Software-Engineering-Jobs-2026', name: 'Software-Engineering' },
-  { owner: 'zapplyjobs', repo: 'Remote-Jobs-2026', name: 'Remote' }
+  { owner: 'zapplyjobs', repo: 'New-Grad-Software-Engineering-Jobs-2026', name: 'Software-Engineering' }
 ];
 
 // Data directory
