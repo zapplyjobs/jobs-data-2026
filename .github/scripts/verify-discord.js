@@ -144,10 +144,11 @@ function verifyRouting(message, channelName, channelId) {
   // Tech channel - software/tech jobs + product/project management (consolidated per router.js)
   if (channelName === 'tech') {
     // Exclude ONLY healthcare ROLE titles (nurse, doctor, etc.) - NOT healthcare companies hiring for tech/product roles
-    const healthcareRoleKeywords = ['nurse', 'nursing', 'rn ', 'registered nurse', 'physician',
-                                     'doctor', 'medical doctor', 'surgeon', 'pharmacist',
-                                     'radiologist', 'therapist', 'clinical nurse'];
-    const isHealthcareRole = healthcareRoleKeywords.some(kw => title.includes(kw));
+    // Use word-boundary regex for 'rn' — plain 'rn ' is a substring of 'intern '.
+    const healthcareRolePatterns = [/\bnurse\b/, /\bnursing\b/, /\b(rn|lpn|cna)\b/, /\bregistered nurse\b/,
+                                    /\bphysician\b/, /\bdoctor\b/, /\bmedical doctor\b/, /\bsurgeon\b/,
+                                    /\bpharmacist\b/, /\bradiologist\b/, /\btherapist\b/, /\bclinical nurse\b/];
+    const isHealthcareRole = healthcareRolePatterns.some(re => re.test(title));
 
     if (isHealthcareRole) {
       issues.push(`Healthcare ROLE job in tech channel (should be filtered out)`);
@@ -213,21 +214,31 @@ async function verifyChannel(channelName, channelId) {
       routingErrors: 0
     };
 
-    // Check for duplicates
-    const fingerprints = new Map();
+    // Check for duplicates — only flag as critical if both the original AND the duplicate
+    // were posted within the last 24 hours. Historical spam already in Discord is not actionable.
+    const RECENT_WINDOW_MS = 24 * 60 * 60 * 1000;
+    const cutoff = Date.now() - RECENT_WINDOW_MS;
+    const fingerprints = new Map(); // fingerprint -> { messageId, timestamp }
     for (const [id, message] of embedMessages) {
       const fingerprint = generateJobFingerprint(message);
       if (fingerprint) {
+        const ts = message.createdTimestamp;
         if (fingerprints.has(fingerprint)) {
+          const original = fingerprints.get(fingerprint);
+          // Only a critical duplicate if BOTH messages are recent
+          const isRecent = ts > cutoff && original.timestamp > cutoff;
           results.duplicates.push({
             channel: channelName,
-            originalMessage: fingerprints.get(fingerprint),
+            originalMessage: original.messageId,
             duplicateMessage: id,
-            title: message.embeds[0]?.title
+            title: message.embeds[0]?.title,
+            isRecent
           });
-          results.channelSummary[channelName].duplicates++;
+          if (isRecent) {
+            results.channelSummary[channelName].duplicates++;
+          }
         } else {
-          fingerprints.set(fingerprint, id);
+          fingerprints.set(fingerprint, { messageId: id, timestamp: ts });
         }
       }
     }
@@ -305,9 +316,11 @@ async function main() {
     console.log(`    Routing Errors: ${summary.routingErrors}`);
   }
 
-  // Critical issues (only duplicates and missing channels cause failure)
-  // Location and routing errors are informational - data quality varies
-  const hasCriticalIssues = results.duplicates.length > 0 ||
+  // Critical issues: only RECENT duplicates (last 24h) and missing channels cause failure.
+  // Historical duplicates already in Discord are not actionable — they scroll off naturally.
+  // Routing errors are informational — data quality varies.
+  const recentDuplicates = results.duplicates.filter(d => d.isRecent);
+  const hasCriticalIssues = recentDuplicates.length > 0 ||
                            results.missingChannels.length > 0;
 
   if (hasCriticalIssues) {
@@ -320,13 +333,13 @@ async function main() {
       });
     }
 
-    if (results.duplicates.length > 0) {
-      console.log(`\n🔄 Duplicates Found (${results.duplicates.length}):`);
-      results.duplicates.slice(0, 10).forEach(dup => {
+    if (recentDuplicates.length > 0) {
+      console.log(`\n🔄 Recent Duplicates (last 24h) (${recentDuplicates.length}):`);
+      recentDuplicates.slice(0, 10).forEach(dup => {
         console.log(`  - [${dup.channel}] ${dup.title}`);
       });
-      if (results.duplicates.length > 10) {
-        console.log(`  ... and ${results.duplicates.length - 10} more`);
+      if (recentDuplicates.length > 10) {
+        console.log(`  ... and ${recentDuplicates.length - 10} more`);
       }
     }
 
@@ -354,13 +367,20 @@ async function main() {
     console.log('\n✅ NO CRITICAL ISSUES FOUND - Verification passed!');
   }
 
+  // Always show historical duplicate count for visibility (informational only)
+  const historicalDuplicates = results.duplicates.filter(d => !d.isRecent);
+  if (historicalDuplicates.length > 0) {
+    console.log(`\nℹ️  Historical duplicates in last 100 messages: ${historicalDuplicates.length} (pre-existing spam, scrolls off naturally — not a failure)`);
+  }
+
   // Create public summary (no sensitive details)
   const summary = {
     timestamp: new Date().toISOString(),
     totalMessages: results.totalMessages,
     channelSummary: results.channelSummary,
     criticalIssuesCount: {
-      duplicates: results.duplicates.length,
+      recentDuplicates: recentDuplicates.length,
+      historicalDuplicates: historicalDuplicates.length,
       locationErrors: results.locationErrors.length,
       routingErrors: results.routingErrors.length,
       missingChannels: results.missingChannels.length

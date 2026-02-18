@@ -148,10 +148,10 @@ function isAIRole(title, description) {
     { regex: /\b(neural network|generative ai|large language model|llm)\b/, keyword: 'AI/ML' }
   ];
 
-  const combined = `${title} ${description}`;
-
+  // Title-only: description mentions of ML/AI are too noisy and misroute finance/mobile/quant jobs.
+  // A "quantitative analyst" job description saying "we use ML to analyze markets" is not an ML job.
   for (const pattern of aiPatterns) {
-    const match = combined.match(pattern.regex);
+    const match = title.match(pattern.regex);
     if (match) {
       return {
         matched: true,
@@ -178,10 +178,9 @@ function isDataScienceRole(title, description) {
     { regex: /\b(analytics engineer|data insights)\b/, keyword: 'analytics' }
   ];
 
-  const combined = `${title} ${description}`;
-
+  // Title-only: same reasoning as isAIRole — description contamination misroutes non-DS jobs.
   for (const pattern of dsPatterns) {
-    const match = combined.match(pattern.regex);
+    const match = title.match(pattern.regex);
     if (match) {
       return {
         matched: true,
