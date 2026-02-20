@@ -3,11 +3,10 @@
 /**
  * Discord Poster - Aggregator Script
  *
- * Fetches jobs from all repos and posts to Discord
- * Implements global deduplication across repos
+ * Reads all_jobs.json directly from local .github/data/ and posts to Discord.
+ * Option A: Single local file read, no inter-repo HTTP calls.
  */
 
-const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
@@ -21,54 +20,30 @@ const { LOCATION_CHANNEL_CONFIG, CHANNEL_CONFIG } = require('./src/discord/confi
 // Load company data for emoji and tier detection
 const companies = JSON.parse(fs.readFileSync(path.join(__dirname, 'companies.json'), 'utf8'));
 
-// GitHub token for API requests
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
-
-// Repositories to fetch jobs from
-const REPOS = [
-  { owner: 'zapplyjobs', repo: 'New-Grad-Jobs-2026', name: 'New-Grad' },
-  { owner: 'zapplyjobs', repo: 'Internships-2026', name: 'Internships' },
-  { owner: 'zapplyjobs', repo: 'New-Grad-Data-Science-Jobs-2026', name: 'Data-Science' },
-  { owner: 'zapplyjobs', repo: 'New-Grad-Hardware-Engineering-Jobs-2026', name: 'Hardware' },
-  { owner: 'zapplyjobs', repo: 'New-Grad-Nursing-Jobs-2026', name: 'Nursing' },
-  { owner: 'zapplyjobs', repo: 'New-Grad-Software-Engineering-Jobs-2026', name: 'Software-Engineering' }
-];
 
 // Data directory
 const DATA_DIR = path.join(process.cwd(), '.github', 'data');
 
 /**
- * Fetch file content from GitHub (raw URL)
- * Uses raw.githubusercontent.com instead of Contents API to avoid 1MB limit
+ * Read all_jobs.json (JSONL format) and normalize field names to match
+ * the job_* schema expected by router, location, and posting functions.
  */
-function fetchGitHubFile(owner, repo, filePath) {
-  return new Promise((resolve, reject) => {
-    // Use raw.githubusercontent.com instead of Contents API (no size limit)
-    const url = `https://raw.githubusercontent.com/${owner}/${repo}/main/${filePath}`;
-
-    https.get(url, {
-      headers: {
-        'User-Agent': 'Zapply-Aggregator',
-        'Authorization': `Bearer ${GITHUB_TOKEN}`, // Still needed for private repos
-      }
-    }, (res) => {
-      // Handle 404 gracefully
-      if (res.statusCode === 404) {
-        resolve(null);
-        return;
-      }
-
-      // Handle other errors
-      if (res.statusCode !== 200) {
-        reject(new Error(`HTTP ${res.statusCode} for ${owner}/${repo}/${filePath}`));
-        return;
-      }
-
-      let data = '';
-      res.on('data', chunk => data += chunk);
-      res.on('end', () => resolve(data));
-    }).on('error', reject);
+function loadAllJobs() {
+  const filePath = path.join(DATA_DIR, 'all_jobs.json');
+  const raw = fs.readFileSync(filePath, 'utf8');
+  return raw.trim().split('\n').map(line => {
+    const j = JSON.parse(line);
+    return {
+      ...j,
+      job_title: j.title,
+      job_description: j.description,
+      employer_name: j.company_name,
+      job_apply_link: j.apply_url || j.url,
+      job_posted_at_datetime_utc: j.posted_at,
+      job_is_remote: j.workplace_type === 'Remote',
+      _sourceRepo: (j.tags && j.tags[0]) ? j.tags[0] : 'aggregator',
+    };
   });
 }
 
@@ -258,7 +233,7 @@ function generateMinimalJobFingerprint(job) {
   const crypto = require('crypto');
 
   // Use URL as primary key (most unique identifier)
-  const url = job.job_apply_link || job.job_google_link || job.url || '';
+  const url = job.job_apply_link || job.url || '';
   const title = (job.job_title || '').toLowerCase().trim();
   const company = (job.employer_name || '').toLowerCase().trim();
 
@@ -290,8 +265,8 @@ async function postJobToDiscord(job, channelId, discordClient, channelName, chan
 
   const embed = new EmbedBuilder()
     .setTitle(job.job_title || 'Untitled Position')
-    .setURL(job.job_apply_link || job.job_google_link || '#')
-    .setColor(0x00A8E8) // Match New-Grad color
+    .setURL(job.job_apply_link || '#')
+    .setColor(0x00A8E8)
     .addFields(
       { name: '🏢 Company', value: job.employer_name || 'Not specified', inline: true },
       { name: '📍 Location', value: formatLocationWithAbbr(job), inline: true },
@@ -313,9 +288,8 @@ async function postJobToDiscord(job, channelId, discordClient, channelName, chan
       text: `Job #${channelJobNumber} in #${channelName}`
     });
   } else {
-    // Fallback footer if no channel info
     embed.setFooter({
-      text: job._sourceRepo || 'Unknown'
+      text: job._sourceRepo || 'aggregator'
     });
   }
 
@@ -345,33 +319,10 @@ async function main() {
   const postedJobsManager = new PostedJobsManager();
   const globalDedupeManager = new GlobalDedupeManager();
 
-  // Fetch jobs from all repos
-  console.log('\n📡 Fetching jobs from repos...');
-  const allJobs = [];
-
-  for (const repo of REPOS) {
-    console.log(`  📥 ${repo.name}...`);
-
-    try {
-      const jobsData = await fetchGitHubFile(repo.owner, repo.repo, '.github/data/current_jobs.json');
-
-      if (jobsData) {
-        const jobs = JSON.parse(jobsData);
-        // Add source repo to each job
-        jobs.forEach(job => {
-          job._sourceRepo = repo.name;
-        });
-        allJobs.push(...jobs);
-        console.log(`    ✅ Got ${jobs.length} jobs`);
-      } else {
-        console.log(`    ⚠️  No current_jobs.json found`);
-      }
-    } catch (error) {
-      console.error(`    ❌ Error: ${error.message}`);
-    }
-  }
-
-  console.log(`\n📊 Total jobs fetched: ${allJobs.length}`);
+  // Load jobs from local all_jobs.json (Option A)
+  console.log('\n📂 Loading jobs from all_jobs.json...');
+  const allJobs = loadAllJobs();
+  console.log(`✅ Loaded ${allJobs.length} jobs`);
 
   // Global deduplication (in-memory for current batch)
   console.log('\n🔄 Deduplicating jobs within batch...');
@@ -387,27 +338,6 @@ async function main() {
   });
 
   console.log(`✅ After batch deduplication: ${uniqueJobs.length} jobs`);
-
-  // Get channels from environment
-  const channels = {
-    // New-Grad channels
-    tech: process.env.DISCORD_TECH_CHANNEL_ID,
-    ai: process.env.DISCORD_AI_CHANNEL_ID,
-    ds: process.env.DISCORD_DS_CHANNEL_ID,
-    finance: process.env.DISCORD_FINANCE_CHANNEL_ID,
-    bayArea: process.env.DISCORD_BAY_AREA_CHANNEL_ID,
-    ny: process.env.DISCORD_NY_CHANNEL_ID,
-    pnw: process.env.DISCORD_PNW_CHANNEL_ID,
-    remoteUsa: process.env.DISCORD_REMOTE_USA_CHANNEL_ID,
-    otherUsa: process.env.DISCORD_OTHER_USA_CHANNEL_ID,
-
-    // Internships channels
-    sales: process.env.DISCORD_SALES_CHANNEL_ID,
-    marketing: process.env.DISCORD_MARKETING_CHANNEL_ID,
-    other: process.env.DISCORD_OTHER_CHANNEL_ID,
-    bayAreaInt: process.env.DISCORD_BAY_AREA_INT_CHANNEL_ID,
-    socalInt: process.env.DISCORD_SOCAL_INT_CHANNEL_ID
-  };
 
   // Post jobs
   console.log('\n📤 Posting jobs to Discord...');
@@ -447,7 +377,6 @@ async function main() {
           type: 'industry'
         });
       } else if (industryRouting && industryRouting.category === 'filtered') {
-        // Job was filtered out (doesn't match any active channels)
         console.log(`  🚫 Filtered: ${job.job_title} @ ${job.employer_name} (${industryRouting.reason})`);
         filteredCount++;
         continue;
@@ -497,7 +426,7 @@ async function main() {
         const fingerprint = generateMinimalJobFingerprint(job);
         globalDedupeManager.markAsPosted(
           fingerprint,
-          job.job_id || job.id,
+          job.id,
           job._sourceRepo,
           channelInfo.channelId,
           message.id
