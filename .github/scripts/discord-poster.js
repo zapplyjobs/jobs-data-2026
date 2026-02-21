@@ -358,7 +358,8 @@ async function main() {
       }
 
       // Check if already posted locally (this run's database)
-      if (postedJobsManager.hasBeenPosted(job)) {
+      const localJobId = postedJobsManager.generateJobId(job);
+      if (postedJobsManager.hasBeenPosted(localJobId, job)) {
         skippedCount++;
         continue;
       }
