@@ -15,7 +15,10 @@ const Router = require('./src/routing/router');
 const Location = require('./src/routing/location');
 const PostedJobsManager = require('./src/data/posted-jobs-manager-v2');
 const GlobalDedupeManager = require('./src/data/global-dedupe-manager');
-const { LOCATION_CHANNEL_CONFIG, CHANNEL_CONFIG } = require('./src/discord/config');
+const {
+  LOCATION_CHANNEL_CONFIG, CHANNEL_CONFIG,
+  INTERNSHIP_CHANNEL_CONFIG, INTERNSHIP_LOCATION_CHANNEL_CONFIG
+} = require('./src/discord/config');
 
 // Load company data for emoji and tier detection
 const companies = JSON.parse(fs.readFileSync(path.join(__dirname, 'companies.json'), 'utf8'));
@@ -364,9 +367,27 @@ async function main() {
         continue;
       }
 
-      // Route job to channels (get both industry and location channels)
-      const industryRouting = Router.getJobChannelDetails(job, CHANNEL_CONFIG);
-      const locationChannelId = Location.getJobLocationChannel(job);
+      // Determine board type: internship vs new-grad
+      const isInternship = job.tags?.employment === 'internship';
+      const activeCHANNEL_CONFIG = isInternship ? INTERNSHIP_CHANNEL_CONFIG : CHANNEL_CONFIG;
+      const activeLOCATION_CONFIG = isInternship ? INTERNSHIP_LOCATION_CHANNEL_CONFIG : LOCATION_CHANNEL_CONFIG;
+
+      // For internships: check sales/marketing before generic router (router removed these channels)
+      let industryRouting;
+      if (isInternship) {
+        const title = (job.job_title || '').toLowerCase();
+        if (/\b(sales|account executive|business development)\b/.test(title) && activeCHANNEL_CONFIG.sales) {
+          industryRouting = { channelId: activeCHANNEL_CONFIG.sales, category: 'sales', matchType: 'internship-sales' };
+        } else if (/\b(marketing|growth|brand|content|social media|seo|communications)\b/.test(title) && activeCHANNEL_CONFIG.marketing) {
+          industryRouting = { channelId: activeCHANNEL_CONFIG.marketing, category: 'marketing', matchType: 'internship-marketing' };
+        } else {
+          industryRouting = Router.getJobChannelDetails(job, activeCHANNEL_CONFIG);
+        }
+      } else {
+        // Route job to channels (get both industry and location channels)
+        industryRouting = Router.getJobChannelDetails(job, activeCHANNEL_CONFIG);
+      }
+      const locationChannelId = Location.getJobLocationChannelWithConfig(job, activeLOCATION_CONFIG);
 
       const channelsToPost = [];
 
