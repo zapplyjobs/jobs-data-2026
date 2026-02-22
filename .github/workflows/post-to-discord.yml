@@ -55,6 +55,9 @@ jobs:
           DISCORD_SOCAL_INT_CHANNEL_ID: ${{ secrets.DISCORD_SOCAL_INT_CHANNEL_ID }}
           DISCORD_OTHER_USA_INT_CHANNEL_ID: ${{ secrets.DISCORD_OTHER_USA_INT_CHANNEL_ID }}
 
+          # Posting limit (override via repo variable MAX_POSTS_PER_RUN, default 20)
+          MAX_POSTS_PER_RUN: ${{ vars.MAX_POSTS_PER_RUN || 20 }}
+
           # GitHub token for reading repos
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
