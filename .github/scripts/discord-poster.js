@@ -41,7 +41,7 @@ function loadAllJobs() {
       employer_name: j.company_name,
       job_apply_link: j.apply_url || j.url,
       job_posted_at_datetime_utc: j.posted_at,
-      job_is_remote: j.workplace_type === 'Remote',
+      job_is_remote: j.workplace_type?.toLowerCase() === 'remote' || j.tags?.locations?.includes('remote') || false,
       _sourceRepo: (j.tags && j.tags[0]) ? j.tags[0] : 'aggregator',
     };
   });
