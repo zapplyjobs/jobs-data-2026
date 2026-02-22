@@ -13,6 +13,9 @@ const path = require('path');
 // Import modules
 const Router = require('./src/routing/router');
 const Location = require('./src/routing/location');
+// Two-layer dedup — intentional TTL difference:
+//   PostedJobsManager (7-day): matches Discord scroll window — prevents re-posting jobs still visible
+//   GlobalDedupeManager (14-day): matches pipeline window — prevents re-posting jobs in all_jobs.json
 const PostedJobsManager = require('./src/data/posted-jobs-manager-v2');
 const GlobalDedupeManager = require('./src/data/global-dedupe-manager');
 const {
