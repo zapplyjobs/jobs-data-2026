@@ -170,7 +170,7 @@ function getJobLocationChannel(job) {
   // 5. Remote USA - Check for remote indicators
   // Jobs are considered "Remote USA" if they have remote keywords
   // AND don't have non-US location indicators (like "London" or "Toronto")
-  const isRemoteLocation = city.includes('remote') || state.includes('remote');
+  const isRemoteLocation = job.job_is_remote === true || city.includes('remote') || state.includes('remote');
   const hasStrongRemoteKeyword = /\b(remote|work from home|wfh|distributed|anywhere|location independent)\b/i.test(combined);
   const isUSBased = /\b(usa|united states|u\.s\.|us only|us-based|us remote)\b/i.test(combined);
 
