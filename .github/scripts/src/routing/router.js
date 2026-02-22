@@ -62,7 +62,8 @@ function isTechRole(title) {
     // Tech specializations
     { regex: /\b(web|mobile|ios|android|react|angular|vue)\b/, keyword: 'web/mobile dev' },
     { regex: /\b(cloud|aws|azure|gcp|kubernetes|docker)\b/, keyword: 'cloud' },
-    { regex: /\b(security|cybersecurity|infosec|appsec)\b/, keyword: 'security' },
+    { regex: /\b(security|cybersecurity|infosec|appsec)\b/, keyword: 'security',
+      validate: (title) => !/(security\s+sales|sales\s+security|sales\s+specialist|sales\s+engineer|security\s+account)/i.test(title) },
 
     // Programming languages (strong tech indicator)
     { regex: /\b(python|java|javascript|typescript|c\+\+|golang|rust|ruby)\b/, keyword: 'programming' }
@@ -98,18 +99,20 @@ function isNonTechRole(title) {
     // REMOVED: sales, marketing, healthcare, supply-chain, hr (archived channels)
     // These will now fall back to 'tech' as the default
 
-    // Finance (explicit titles only)
+    // Finance (title-only — description matching causes massive false positives from AE/CS job descriptions
+    // mentioning "controller", "tax", "investment banking" in stakeholder/background contexts)
     {
       category: 'finance',
-      regex: /\b(financial analyst|accountant|controller|treasury|audit|tax (analyst|specialist)|investment (analyst|banker))\b/,
+      regex: /\b(financial analyst|accountant|controller|treasurer|treasury analyst|fp&a|audit(or)?|tax (analyst|specialist|manager|accountant)|investment (analyst|banker)|strategic finance|finance analyst|finance (manager|director)|payroll (specialist|manager|analyst)|accounts (payable|receivable)|technical accounting|corporate finance|quantitative analyst|quant analyst)\b/i,
       keyword: 'finance'
     },
 
-    // Product Management (consolidated into tech)
+    // Product Management (consolidated into tech) — exclude designer/advocate roles
     {
       category: 'tech',
       regex: /\b(product manager|product owner|product lead)\b/,
-      keyword: 'product'
+      keyword: 'product',
+      validate: (title) => !/(designer|advocate|design lead)/i.test(title)
     },
 
     // Project Management (consolidated into tech)
@@ -123,6 +126,9 @@ function isNonTechRole(title) {
   for (const pattern of nonTechPatterns) {
     const match = title.match(pattern.regex);
     if (match) {
+      if (pattern.validate && !pattern.validate(title)) {
+        continue;
+      }
       return {
         category: pattern.category,
         keyword: pattern.keyword,
@@ -296,19 +302,15 @@ function getJobChannelDetails(job, CHANNEL_CONFIG) {
   const combined = `${title} ${description}`;
 
   const descriptionPatterns = [
-    // REMOVED: sales, marketing, healthcare, supply-chain, hr (archived channels)
-    // These will now fall back to 'tech' as the default
-    {
-      category: 'finance',
-      channelId: CHANNEL_CONFIG.finance,
-      regex: /\b(finance|accounting|financial analyst|controller|treasury|audit|tax|bookkeep|cfo|actuarial|investment|banker)\b/,
-      keywords: ['finance', 'accounting', 'financial analyst', 'controller', 'treasury', 'audit', 'tax', 'bookkeep', 'cfo', 'actuarial', 'investment', 'banker']
-    },
+    // NOTE: Finance deliberately omitted — description keywords ('tax', 'controller', 'investment',
+    // 'finance') appear in AE/CS/Ops job descriptions as stakeholder context and background requirements.
+    // Finance routing is title-only (handled in isNonTechRole above).
     {
       category: 'tech', // Product roles consolidated into tech
       channelId: CHANNEL_CONFIG.tech,
-      regex: /\b(product manager|product owner|product marketing|(\bpm\b)|product lead|product strategy|product analyst)\b/,
-      keywords: ['product manager', 'product owner', 'product marketing', 'pm', 'product lead', 'product strategy', 'product analyst']
+      regex: /\b(product manager|product owner|product marketing|product lead|product strategy|product analyst)\b/,
+      keywords: ['product manager', 'product owner', 'product marketing', 'product lead', 'product strategy', 'product analyst'],
+      validate: (title) => !/(designer|advocate|design lead)/i.test(title)
     },
     {
       category: 'tech', // Project management roles consolidated into tech
@@ -322,6 +324,11 @@ function getJobChannelDetails(job, CHANNEL_CONFIG) {
   for (const pattern of descriptionPatterns) {
     const match = combined.match(pattern.regex);
     if (match) {
+      // If pattern has a validate function, skip if validation fails
+      if (pattern.validate && !pattern.validate(title)) {
+        continue;
+      }
+
       // Find which specific keyword was matched
       const matchedKeyword = pattern.keywords.find(keyword =>
         combined.includes(keyword.toLowerCase())
