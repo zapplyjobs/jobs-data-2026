@@ -41,7 +41,7 @@ const BOARD_CONFIGS = {
     channelType: 'text',
     envPrefix: 'DISCORD',
 
-    // Consolidated industry channels (4 channels, 64%+ coverage)
+    // Industry channels (6 channels)
     industryChannels: [
       {
         key: 'tech',
@@ -66,6 +66,16 @@ const BOARD_CONFIGS = {
         envVar: 'DISCORD_FINANCE_CHANNEL_ID',
         coverage: 10,
         description: 'Finance, accounting, quant'
+      },
+      {
+        key: 'nursing',
+        envVar: 'DISCORD_NURSING_CHANNEL_ID',
+        description: 'RN, LPN, CNA, NP, Travel Nurse roles'
+      },
+      {
+        key: 'other-industry',
+        envVar: 'DISCORD_OTHER_INDUSTRY_CHANNEL_ID',
+        description: 'All other industries not matching above'
       }
     ],
 
