@@ -204,6 +204,24 @@ function getJobChannelDetails(job, CHANNEL_CONFIG) {
   const description = (job.job_description || '').toLowerCase();
 
   // ============================================================================
+  // PRIORITY 0 (CRITICAL): Nursing Roles (credential-based — must check before tech)
+  // ============================================================================
+  if (CHANNEL_CONFIG.nursing) {
+    const nursingExact = ['registered nurse', 'nurse practitioner', 'nursing', 'travel nurse', 'lvn'];
+    const nursingCredentials = /\b(rn|lpn|cna|crna|np)\b/i;
+    if (nursingExact.some(kw => title.includes(kw)) || nursingCredentials.test(title)) {
+      return {
+        channelId: CHANNEL_CONFIG.nursing,
+        category: 'nursing',
+        matchedKeyword: 'nursing credential',
+        matchType: 'title-nursing',
+        priority: 'CRITICAL',
+        source: 'title'
+      };
+    }
+  }
+
+  // ============================================================================
   // PRIORITY 0 (CRITICAL): AI/ML Roles (if AI channel configured)
   // ============================================================================
   if (CHANNEL_CONFIG.ai) {
@@ -326,10 +344,19 @@ function getJobChannelDetails(job, CHANNEL_CONFIG) {
   }
 
   // ============================================================================
-  // PRIORITY 4 (LOWEST): No Match - Filter Out
-  // Jobs that don't match any of the 4 active channels are filtered out
-  // (Updated 2026-02-14: Consolidated board to tech-focused roles only)
+  // PRIORITY 4 (LOWEST): No Match - route to other-industry if configured
   // ============================================================================
+  if (CHANNEL_CONFIG['other-industry']) {
+    return {
+      channelId: CHANNEL_CONFIG['other-industry'],
+      category: 'other-industry',
+      matchedKeyword: null,
+      matchType: 'no-match-other-industry',
+      priority: 'LOWEST',
+      source: 'none'
+    };
+  }
+
   return {
     channelId: null,
     category: 'filtered',
@@ -337,7 +364,7 @@ function getJobChannelDetails(job, CHANNEL_CONFIG) {
     matchType: 'no-match-filtered',
     priority: 'FILTERED',
     source: 'none',
-    reason: 'Job does not match any active channel categories (tech, ai, data-science, finance)'
+    reason: 'Job does not match any active channel categories'
   };
 }
 
