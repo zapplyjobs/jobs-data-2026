@@ -344,6 +344,7 @@ async function main() {
 
   // Post jobs
   console.log('\n📤 Posting jobs to Discord...');
+  const MAX_POSTS_PER_RUN = 20;
   let postedCount = 0;
   let skippedCount = 0;
   let filteredCount = 0;
@@ -457,6 +458,10 @@ async function main() {
 
       postedCount++;
       console.log(`  ✅ Posted: ${job.job_title} @ ${job.employer_name}`);
+      if (postedCount >= MAX_POSTS_PER_RUN) {
+        console.log(`\n⏸️  Reached per-run limit (${MAX_POSTS_PER_RUN}). Remaining jobs deferred to next run.`);
+        break;
+      }
     } catch (error) {
       console.error(`  ❌ Error posting ${job.job_title}: ${error.message}`);
     }
