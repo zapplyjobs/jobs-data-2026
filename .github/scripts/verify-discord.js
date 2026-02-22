@@ -26,25 +26,36 @@ const DATA_DIR = process.env.GITHUB_ACTIONS ? '/tmp' : path.join(process.cwd(), 
 
 // Channel configuration (industry channels)
 const CHANNELS = {
-  // Industry channels
+  // New-Grad industry channels
   tech: process.env.DISCORD_TECH_CHANNEL_ID,
   ai: process.env.DISCORD_AI_CHANNEL_ID,
   'data-science': process.env.DISCORD_DS_CHANNEL_ID,
   finance: process.env.DISCORD_FINANCE_CHANNEL_ID,
+  nursing: process.env.DISCORD_NURSING_CHANNEL_ID,
+  'other-industry': process.env.DISCORD_OTHER_INDUSTRY_CHANNEL_ID,
 
-  // Location channels
+  // New-Grad location channels
   'bay-area': process.env.DISCORD_BAY_AREA_CHANNEL_ID,
   'new-york': process.env.DISCORD_NY_CHANNEL_ID,
   'pacific-northwest': process.env.DISCORD_PNW_CHANNEL_ID,
   'remote-usa': process.env.DISCORD_REMOTE_USA_CHANNEL_ID,
   'other-usa': process.env.DISCORD_OTHER_USA_CHANNEL_ID,
 
-  // Internships-specific channels
-  sales: process.env.DISCORD_SALES_CHANNEL_ID,
-  marketing: process.env.DISCORD_MARKETING_CHANNEL_ID,
-  other: process.env.DISCORD_OTHER_CHANNEL_ID,
+  // Internship industry channels
+  'tech-int': process.env.DISCORD_TECH_INT_CHANNEL_ID,
+  'ai-int': process.env.DISCORD_AI_INT_CHANNEL_ID,
+  'data-science-int': process.env.DISCORD_DS_INT_CHANNEL_ID,
+  'sales-int': process.env.DISCORD_SALES_INT_CHANNEL_ID,
+  'marketing-int': process.env.DISCORD_MARKETING_INT_CHANNEL_ID,
+  'other-industry-int': process.env.DISCORD_OTHER_INDUSTRY_INT_CHANNEL_ID,
+
+  // Internship location channels
+  'remote-usa-int': process.env.DISCORD_REMOTE_USA_INT_CHANNEL_ID,
   'bay-area-int': process.env.DISCORD_BAY_AREA_INT_CHANNEL_ID,
-  'socal-int': process.env.DISCORD_SOCAL_INT_CHANNEL_ID
+  'new-york-int': process.env.DISCORD_NY_INT_CHANNEL_ID,
+  'pacific-northwest-int': process.env.DISCORD_PNW_INT_CHANNEL_ID,
+  'socal-int': process.env.DISCORD_SOCAL_INT_CHANNEL_ID,
+  'other-usa-int': process.env.DISCORD_OTHER_USA_INT_CHANNEL_ID
 };
 
 // Verification results

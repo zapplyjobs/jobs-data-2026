@@ -28,8 +28,14 @@
 
 const { BOARD_TYPES, generateLegacyConfig } = require('../board-types');
 
-// Generate channel configuration from board type template
+// New-Grad channel configuration
 const { CHANNEL_CONFIG, LOCATION_CHANNEL_CONFIG, CATEGORY_CHANNEL_CONFIG } = generateLegacyConfig(BOARD_TYPES.NEW_GRAD);
+
+// Internship channel configuration
+const {
+  CHANNEL_CONFIG: INTERNSHIP_CHANNEL_CONFIG,
+  LOCATION_CHANNEL_CONFIG: INTERNSHIP_LOCATION_CHANNEL_CONFIG
+} = generateLegacyConfig(BOARD_TYPES.INTERNSHIPS);
 
 // Legacy single channel support
 const LEGACY_CHANNEL_ID = process.env.DISCORD_CHANNEL_ID;
@@ -42,6 +48,8 @@ module.exports = {
   CHANNEL_CONFIG,
   LOCATION_CHANNEL_CONFIG,
   CATEGORY_CHANNEL_CONFIG,
+  INTERNSHIP_CHANNEL_CONFIG,
+  INTERNSHIP_LOCATION_CHANNEL_CONFIG,
   LEGACY_CHANNEL_ID,
   MULTI_CHANNEL_MODE,
   LOCATION_MODE_ENABLED
