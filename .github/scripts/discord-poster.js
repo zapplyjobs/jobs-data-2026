@@ -45,7 +45,7 @@ function loadAllJobs() {
       job_apply_link: j.apply_url || j.url,
       job_posted_at_datetime_utc: j.posted_at,
       job_is_remote: j.workplace_type?.toLowerCase() === 'remote' || j.tags?.locations?.includes('remote') || false,
-      _sourceRepo: (j.tags && j.tags[0]) ? j.tags[0] : 'aggregator',
+      _sourceRepo: j.id?.split('-')[0] || 'aggregator',
     };
   });
 }
@@ -344,7 +344,7 @@ async function main() {
 
   // Post jobs
   console.log('\n📤 Posting jobs to Discord...');
-  const MAX_POSTS_PER_RUN = 20;
+  const MAX_POSTS_PER_RUN = parseInt(process.env.MAX_POSTS_PER_RUN) || 20;
   let postedCount = 0;
   let skippedCount = 0;
   let filteredCount = 0;
@@ -470,7 +470,7 @@ async function main() {
   console.log(`\n📊 Posting Summary:`);
   console.log(`  ✅ Posted: ${postedCount} jobs`);
   console.log(`  ⏭️  Skipped (already posted): ${skippedCount} jobs`);
-  console.log(`  🚫 Filtered (non-tech roles): ${filteredCount} jobs`);
+  console.log(`  🚫 Filtered (no channel matched): ${filteredCount} jobs`);
 
   // Save databases
   console.log('\n💾 Saving databases...');
