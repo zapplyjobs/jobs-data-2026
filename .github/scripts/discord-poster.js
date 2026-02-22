@@ -348,6 +348,7 @@ async function main() {
   let postedCount = 0;
   let skippedCount = 0;
   let filteredCount = 0;
+  let nonUsCount = 0;
 
   for (const job of uniqueJobs) {
     try {
@@ -365,6 +366,12 @@ async function main() {
       const localJobId = postedJobsManager.generateJobId(job);
       if (postedJobsManager.hasBeenPosted(localJobId, job)) {
         skippedCount++;
+        continue;
+      }
+
+      // Skip non-US jobs (settled rule: no us tag = don't post)
+      if (!job.tags?.locations?.includes('us')) {
+        nonUsCount++;
         continue;
       }
 
@@ -470,6 +477,7 @@ async function main() {
   console.log(`\n📊 Posting Summary:`);
   console.log(`  ✅ Posted: ${postedCount} jobs`);
   console.log(`  ⏭️  Skipped (already posted): ${skippedCount} jobs`);
+  console.log(`  🌍 Filtered (non-US): ${nonUsCount} jobs`);
   console.log(`  🚫 Filtered (no channel matched): ${filteredCount} jobs`);
 
   // Save databases
