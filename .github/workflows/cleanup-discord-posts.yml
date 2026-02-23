@@ -3,12 +3,20 @@ name: Cleanup Discord Posts
 on:
   workflow_dispatch:
     inputs:
+      window_older_than_hours:
+        description: 'WINDOW mode: delete messages at least this many hours old (e.g. 3 = older than 3h ago). Requires window_newer_than_hours. Takes priority over all other modes.'
+        required: false
+        default: ''
+      window_newer_than_hours:
+        description: 'WINDOW mode: delete messages no more than this many hours old (e.g. 1 = newer than 1h ago). Both window fields required to activate window mode.'
+        required: false
+        default: ''
       last_n_hours:
-        description: 'Delete messages from the LAST N hours (e.g. 1 = undo last hour). Takes priority over older_than_hours if set.'
+        description: 'Delete messages from the LAST N hours (e.g. 1 = undo last hour). Ignored if window mode active.'
         required: false
         default: ''
       older_than_hours:
-        description: 'Delete messages OLDER than N hours (default: 336 = 14 days). Ignored if last_n_hours is set.'
+        description: 'Delete messages OLDER than N hours (default: 336 = 14 days). Ignored if window or last_n_hours set.'
         required: false
         default: '336'
       dry_run:
@@ -16,6 +24,11 @@ on:
         type: boolean
         required: false
         default: true
+      remove_from_posted:
+        description: 'Also remove deleted messages from posted_jobs.json so they get reposted (default: false)'
+        type: boolean
+        required: false
+        default: false
       channel_ids:
         description: 'Comma-separated channel IDs to clean (leave empty for all 23 channels)'
         required: false
@@ -43,9 +56,12 @@ jobs:
       - name: Run Discord cleanup
         env:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+          WINDOW_OLDER_THAN_HOURS: ${{ inputs.window_older_than_hours }}
+          WINDOW_NEWER_THAN_HOURS: ${{ inputs.window_newer_than_hours }}
           LAST_N_HOURS: ${{ inputs.last_n_hours }}
           OLDER_THAN_HOURS: ${{ inputs.older_than_hours }}
           DRY_RUN: ${{ inputs.dry_run }}
+          REMOVE_FROM_POSTED: ${{ inputs.remove_from_posted }}
           CHANNEL_IDS: ${{ inputs.channel_ids }}
 
           # New-Grad channels (11)
@@ -76,3 +92,12 @@ jobs:
           DISCORD_OTHER_USA_INT_CHANNEL_ID: ${{ secrets.DISCORD_OTHER_USA_INT_CHANNEL_ID }}
 
         run: node .github/scripts/cleanup-discord-posts.js
+
+      - name: Commit updated posted_jobs.json
+        if: ${{ inputs.dry_run == false && inputs.remove_from_posted == true }}
+        run: |
+          git config user.email "bot@zapplyjobs.com"
+          git config user.name "Aggregator Bot"
+          git add .github/data/posted_jobs.json || exit 0
+          git diff --staged --quiet || git commit -m "chore: remove cleanup-deleted messages from posted_jobs.json for repost [skip ci]"
+          git push
