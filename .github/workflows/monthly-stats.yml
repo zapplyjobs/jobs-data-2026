@@ -1,0 +1,40 @@
+name: Monthly GitHub Summary to Discord
+
+on:
+  schedule:
+    - cron: '0 5 1 * *'  # 1st of each month, midnight US Central (5 AM UTC)
+  workflow_dispatch:
+
+jobs:
+  monthly-stats:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Post monthly summary to Discord
+        env:
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+          DISCORD_WEEKLY_STATS_CHANNEL_ID: ${{ secrets.DISCORD_WEEKLY_STATS_CHANNEL_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node .github/scripts/monthly-summary.js
+
+      - name: Commit updated stats file
+        run: |
+          git config user.email "bot@zapplyjobs.com"
+          git config user.name "Aggregator Bot"
+          git add .github/data/monthly-stats.json || exit 0
+          git commit -m "chore: update monthly-stats.json [skip ci]" || exit 0
+          git push

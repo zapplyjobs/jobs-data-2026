@@ -3,17 +3,22 @@
 /**
  * Cleanup Discord Posts
  *
- * Deletes messages older than OLDER_THAN_HOURS from all job board channels.
+ * Two modes (mutually exclusive):
+ *   OLDER_THAN_HOURS  — delete messages older than N hours (default: 336 = 14 days)
+ *   LAST_N_HOURS      — delete messages from the last N hours (e.g. undo recent posts)
+ *
  * Default: dry-run mode (set DRY_RUN=false to actually delete).
  *
  * Usage (via workflow_dispatch only — no cron schedule):
- *   OLDER_THAN_HOURS=336  (default: 14 days)
+ *   OLDER_THAN_HOURS=336  (default: 14 days; ignored if LAST_N_HOURS is set)
+ *   LAST_N_HOURS=1        (delete messages posted in the last 1 hour)
  *   DRY_RUN=true          (default: true — set to false to actually delete)
  *   CHANNEL_IDS=id1,id2   (optional: specific channels only, empty = all 23 channels)
  */
 
 const { Client, GatewayIntentBits } = require('discord.js');
 
+const LAST_N_HOURS = process.env.LAST_N_HOURS ? parseInt(process.env.LAST_N_HOURS) : null;
 const OLDER_THAN_HOURS = parseInt(process.env.OLDER_THAN_HOURS) || 336; // 14 days
 const DRY_RUN = process.env.DRY_RUN !== 'false'; // default true
 const SPECIFIC_CHANNELS = process.env.CHANNEL_IDS ? process.env.CHANNEL_IDS.split(',').map(s => s.trim()).filter(Boolean) : [];
@@ -50,14 +55,13 @@ const ALL_CHANNELS = [
 ].filter(Boolean);
 
 const CHANNEL_IDS = SPECIFIC_CHANNELS.length > 0 ? SPECIFIC_CHANNELS : ALL_CHANNELS;
-const CUTOFF_MS = OLDER_THAN_HOURS * 60 * 60 * 1000;
 const BULK_DELETE_MAX_AGE_MS = 14 * 24 * 60 * 60 * 1000; // Discord: bulk delete only for <14d messages
 
 async function sleep(ms) {
   return new Promise(r => setTimeout(r, ms));
 }
 
-async function cleanChannel(channel, cutoffDate) {
+async function cleanChannel(channel, cutoffDate, newerThanDate) {
   let scanned = 0;
   let deleted = 0;
   let skipped = 0;
@@ -72,8 +76,18 @@ async function cleanChannel(channel, cutoffDate) {
     const messages = await channel.messages.fetch(options);
     if (messages.size === 0) break;
 
-    const toDelete = messages.filter(m => m.createdAt < cutoffDate);
-    const toSkip = messages.filter(m => m.createdAt >= cutoffDate);
+    // LAST_N_HOURS mode: delete messages newer than newerThanDate, stop scanning once we pass it
+    // OLDER_THAN_HOURS mode: delete messages older than cutoffDate
+    let toDelete, toSkip;
+    if (newerThanDate) {
+      toDelete = messages.filter(m => m.createdAt >= newerThanDate);
+      toSkip = messages.filter(m => m.createdAt < newerThanDate);
+      // Once all messages in this batch are older than our window, stop scanning
+      if (messages.every(m => m.createdAt < newerThanDate)) break;
+    } else {
+      toDelete = messages.filter(m => m.createdAt < cutoffDate);
+      toSkip = messages.filter(m => m.createdAt >= cutoffDate);
+    }
 
     scanned += messages.size;
     skipped += toSkip.size;
@@ -115,8 +129,15 @@ async function cleanChannel(channel, cutoffDate) {
 }
 
 async function main() {
+  const newerThanDate = LAST_N_HOURS ? new Date(Date.now() - LAST_N_HOURS * 60 * 60 * 1000) : null;
+  const cutoffDate = new Date(Date.now() - OLDER_THAN_HOURS * 60 * 60 * 1000);
+
   console.log(`🧹 Discord Cleanup — ${DRY_RUN ? 'DRY RUN (no deletions)' : 'LIVE MODE'}`);
-  console.log(`   Cutoff: ${OLDER_THAN_HOURS}h (messages older than ${new Date(Date.now() - CUTOFF_MS).toISOString()})`);
+  if (newerThanDate) {
+    console.log(`   Mode: LAST_N_HOURS=${LAST_N_HOURS} (messages newer than ${newerThanDate.toISOString()})`);
+  } else {
+    console.log(`   Mode: OLDER_THAN_HOURS=${OLDER_THAN_HOURS} (messages older than ${cutoffDate.toISOString()})`);
+  }
   console.log(`   Channels: ${CHANNEL_IDS.length} (${SPECIFIC_CHANNELS.length > 0 ? 'specific' : 'all'})`);
   console.log('');
 
@@ -126,7 +147,6 @@ async function main() {
   await new Promise(r => client.once('ready', r));
   console.log(`✅ Logged in as ${client.user.tag}\n`);
 
-  const cutoffDate = new Date(Date.now() - CUTOFF_MS);
   let totalScanned = 0, totalDeleted = 0, totalSkipped = 0;
 
   for (const channelId of CHANNEL_IDS) {
@@ -136,7 +156,7 @@ async function main() {
         console.log(`  ⚠️  Channel ${channelId} not found or not text-based`);
         continue;
       }
-      const result = await cleanChannel(channel, cutoffDate);
+      const result = await cleanChannel(channel, cutoffDate, newerThanDate);
       totalScanned += result.scanned;
       totalDeleted += result.deleted;
       totalSkipped += result.skipped;

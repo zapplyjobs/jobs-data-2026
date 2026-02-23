@@ -3,8 +3,12 @@ name: Cleanup Discord Posts
 on:
   workflow_dispatch:
     inputs:
+      last_n_hours:
+        description: 'Delete messages from the LAST N hours (e.g. 1 = undo last hour). Takes priority over older_than_hours if set.'
+        required: false
+        default: ''
       older_than_hours:
-        description: 'Delete messages older than N hours (default: 336 = 14 days)'
+        description: 'Delete messages OLDER than N hours (default: 336 = 14 days). Ignored if last_n_hours is set.'
         required: false
         default: '336'
       dry_run:
@@ -39,6 +43,7 @@ jobs:
       - name: Run Discord cleanup
         env:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+          LAST_N_HOURS: ${{ inputs.last_n_hours }}
           OLDER_THAN_HOURS: ${{ inputs.older_than_hours }}
           DRY_RUN: ${{ inputs.dry_run }}
           CHANNEL_IDS: ${{ inputs.channel_ids }}
