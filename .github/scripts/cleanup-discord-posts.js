@@ -3,24 +3,34 @@
 /**
  * Cleanup Discord Posts
  *
- * Two modes (mutually exclusive):
- *   OLDER_THAN_HOURS  — delete messages older than N hours (default: 336 = 14 days)
- *   LAST_N_HOURS      — delete messages from the last N hours (e.g. undo recent posts)
+ * Three modes (mutually exclusive, checked in priority order):
+ *   WINDOW mode      — delete messages between WINDOW_OLDER_THAN_HOURS and WINDOW_NEWER_THAN_HOURS ago
+ *                      e.g. WINDOW_OLDER_THAN_HOURS=1 WINDOW_NEWER_THAN_HOURS=3 → delete posted 1–3 hours ago
+ *   LAST_N_HOURS     — delete messages from the last N hours (e.g. undo recent posts)
+ *   OLDER_THAN_HOURS — delete messages older than N hours (default: 336 = 14 days)
  *
  * Default: dry-run mode (set DRY_RUN=false to actually delete).
  *
  * Usage (via workflow_dispatch only — no cron schedule):
- *   OLDER_THAN_HOURS=336  (default: 14 days; ignored if LAST_N_HOURS is set)
- *   LAST_N_HOURS=1        (delete messages posted in the last 1 hour)
- *   DRY_RUN=true          (default: true — set to false to actually delete)
- *   CHANNEL_IDS=id1,id2   (optional: specific channels only, empty = all 23 channels)
+ *   WINDOW_OLDER_THAN_HOURS=1   (window mode: delete messages at least 1 hour old...)
+ *   WINDOW_NEWER_THAN_HOURS=3   (...but no more than 3 hours old — both required for window mode)
+ *   LAST_N_HOURS=1              (delete messages posted in the last 1 hour; ignored if window mode active)
+ *   OLDER_THAN_HOURS=336        (default: 14 days; ignored if LAST_N_HOURS or window mode set)
+ *   DRY_RUN=true                (default: true — set to false to actually delete)
+ *   CHANNEL_IDS=id1,id2         (optional: specific channels only, empty = all 23 channels)
  */
 
 const { Client, GatewayIntentBits } = require('discord.js');
+const fs = require('fs');
+const path = require('path');
 
-const LAST_N_HOURS = process.env.LAST_N_HOURS ? parseInt(process.env.LAST_N_HOURS) : null;
+const WINDOW_OLDER_THAN_HOURS = process.env.WINDOW_OLDER_THAN_HOURS ? parseFloat(process.env.WINDOW_OLDER_THAN_HOURS) : null;
+const WINDOW_NEWER_THAN_HOURS = process.env.WINDOW_NEWER_THAN_HOURS ? parseFloat(process.env.WINDOW_NEWER_THAN_HOURS) : null;
+const WINDOW_MODE = WINDOW_OLDER_THAN_HOURS !== null && WINDOW_NEWER_THAN_HOURS !== null;
+const LAST_N_HOURS = (!WINDOW_MODE && process.env.LAST_N_HOURS) ? parseInt(process.env.LAST_N_HOURS) : null;
 const OLDER_THAN_HOURS = parseInt(process.env.OLDER_THAN_HOURS) || 336; // 14 days
 const DRY_RUN = process.env.DRY_RUN !== 'false'; // default true
+const REMOVE_FROM_POSTED = process.env.REMOVE_FROM_POSTED === 'true'; // default false
 const SPECIFIC_CHANNELS = process.env.CHANNEL_IDS ? process.env.CHANNEL_IDS.split(',').map(s => s.trim()).filter(Boolean) : [];
 
 // All 23 active channel IDs (New-Grad: 11, Internships: 12)
@@ -61,11 +71,12 @@ async function sleep(ms) {
   return new Promise(r => setTimeout(r, ms));
 }
 
-async function cleanChannel(channel, cutoffDate, newerThanDate) {
+async function cleanChannel(channel, cutoffDate, newerThanDate, windowStart, windowEnd) {
   let scanned = 0;
   let deleted = 0;
   let skipped = 0;
   let lastId = null;
+  const deletedMessageIds = [];
 
   console.log(`  📋 ${channel.name} (${channel.id})`);
 
@@ -76,10 +87,16 @@ async function cleanChannel(channel, cutoffDate, newerThanDate) {
     const messages = await channel.messages.fetch(options);
     if (messages.size === 0) break;
 
+    // WINDOW mode: delete messages between windowStart and windowEnd (older boundary to newer boundary)
     // LAST_N_HOURS mode: delete messages newer than newerThanDate, stop scanning once we pass it
     // OLDER_THAN_HOURS mode: delete messages older than cutoffDate
     let toDelete, toSkip;
-    if (newerThanDate) {
+    if (windowStart && windowEnd) {
+      toDelete = messages.filter(m => m.createdAt <= windowStart && m.createdAt >= windowEnd);
+      toSkip = messages.filter(m => m.createdAt > windowStart || m.createdAt < windowEnd);
+      // Stop scanning once all messages are older than our window
+      if (messages.every(m => m.createdAt < windowEnd)) break;
+    } else if (newerThanDate) {
       toDelete = messages.filter(m => m.createdAt >= newerThanDate);
       toSkip = messages.filter(m => m.createdAt < newerThanDate);
       // Once all messages in this batch are older than our window, stop scanning
@@ -97,6 +114,7 @@ async function cleanChannel(channel, cutoffDate, newerThanDate) {
     if (DRY_RUN) {
       console.log(`    [DRY RUN] Would delete ${toDelete.size} messages`);
       deleted += toDelete.size;
+      toDelete.forEach(m => deletedMessageIds.push(m.id));
     } else {
       // Split into bulk-deletable (<14d) and individual (>=14d old)
       const now = Date.now();
@@ -105,6 +123,7 @@ async function cleanChannel(channel, cutoffDate, newerThanDate) {
 
       if (bulkEligible.size > 0) {
         await channel.bulkDelete(bulkEligible, true);
+        bulkEligible.forEach(m => deletedMessageIds.push(m.id));
         deleted += bulkEligible.size;
         await sleep(1000);
       }
@@ -112,6 +131,7 @@ async function cleanChannel(channel, cutoffDate, newerThanDate) {
       for (const [, msg] of individual) {
         try {
           await msg.delete();
+          deletedMessageIds.push(msg.id);
           deleted++;
           await sleep(1000); // 1 req/sec for old messages
         } catch (err) {
@@ -125,15 +145,22 @@ async function cleanChannel(channel, cutoffDate, newerThanDate) {
   }
 
   console.log(`    Scanned: ${scanned} | Deleted: ${deleted} | Kept: ${skipped}`);
-  return { scanned, deleted, skipped };
+  return { scanned, deleted, skipped, deletedMessageIds };
 }
 
 async function main() {
-  const newerThanDate = LAST_N_HOURS ? new Date(Date.now() - LAST_N_HOURS * 60 * 60 * 1000) : null;
-  const cutoffDate = new Date(Date.now() - OLDER_THAN_HOURS * 60 * 60 * 1000);
+  const now = Date.now();
+  const newerThanDate = LAST_N_HOURS ? new Date(now - LAST_N_HOURS * 60 * 60 * 1000) : null;
+  const cutoffDate = new Date(now - OLDER_THAN_HOURS * 60 * 60 * 1000);
+  // Window: windowStart = older boundary (further back), windowEnd = newer boundary (more recent)
+  const windowStart = WINDOW_MODE ? new Date(now - WINDOW_NEWER_THAN_HOURS * 60 * 60 * 1000) : null;
+  const windowEnd   = WINDOW_MODE ? new Date(now - WINDOW_OLDER_THAN_HOURS * 60 * 60 * 1000) : null;
 
   console.log(`🧹 Discord Cleanup — ${DRY_RUN ? 'DRY RUN (no deletions)' : 'LIVE MODE'}`);
-  if (newerThanDate) {
+  if (WINDOW_MODE) {
+    console.log(`   Mode: WINDOW — messages between ${WINDOW_OLDER_THAN_HOURS}h ago and ${WINDOW_NEWER_THAN_HOURS}h ago`);
+    console.log(`   Window: ${windowEnd.toISOString()} → ${windowStart.toISOString()}`);
+  } else if (newerThanDate) {
     console.log(`   Mode: LAST_N_HOURS=${LAST_N_HOURS} (messages newer than ${newerThanDate.toISOString()})`);
   } else {
     console.log(`   Mode: OLDER_THAN_HOURS=${OLDER_THAN_HOURS} (messages older than ${cutoffDate.toISOString()})`);
@@ -148,6 +175,7 @@ async function main() {
   console.log(`✅ Logged in as ${client.user.tag}\n`);
 
   let totalScanned = 0, totalDeleted = 0, totalSkipped = 0;
+  const allDeletedMessageIds = [];
 
   for (const channelId of CHANNEL_IDS) {
     try {
@@ -156,10 +184,11 @@ async function main() {
         console.log(`  ⚠️  Channel ${channelId} not found or not text-based`);
         continue;
       }
-      const result = await cleanChannel(channel, cutoffDate, newerThanDate);
+      const result = await cleanChannel(channel, cutoffDate, newerThanDate, windowStart, windowEnd);
       totalScanned += result.scanned;
       totalDeleted += result.deleted;
       totalSkipped += result.skipped;
+      allDeletedMessageIds.push(...result.deletedMessageIds);
     } catch (err) {
       console.log(`  ❌ Error on channel ${channelId}: ${err.message}`);
     }
@@ -170,7 +199,64 @@ async function main() {
   console.log(`Total deleted: ${totalDeleted}${DRY_RUN ? ' (dry run — no actual deletions)' : ''}`);
   console.log(`Total kept:    ${totalSkipped}`);
 
+  if (REMOVE_FROM_POSTED && allDeletedMessageIds.length > 0) {
+    removeFromPostedJobs(allDeletedMessageIds);
+  } else if (REMOVE_FROM_POSTED && allDeletedMessageIds.length === 0) {
+    console.log('\n📝 remove_from_posted: no messages deleted, nothing to remove from posted_jobs.json');
+  }
+
   await client.destroy();
+}
+
+/**
+ * Remove deleted messages from posted_jobs.json so they can be reposted.
+ * Matches by discordPosts[channelId].messageId — removes the entire job entry
+ * if ALL of its channel posts were deleted, otherwise just removes those channels.
+ */
+function removeFromPostedJobs(deletedMessageIds) {
+  const postedPath = path.join(process.cwd(), '.github', 'data', 'posted_jobs.json');
+
+  if (!fs.existsSync(postedPath)) {
+    console.log('\n📝 remove_from_posted: posted_jobs.json not found, skipping');
+    return;
+  }
+
+  const deletedSet = new Set(deletedMessageIds);
+  const data = JSON.parse(fs.readFileSync(postedPath, 'utf8'));
+  const before = data.jobs.length;
+  let removedJobs = 0;
+  let removedChannels = 0;
+
+  data.jobs = data.jobs.filter(job => {
+    if (!job.discordPosts) return true;
+
+    // Remove individual channel entries whose messageId was deleted
+    for (const [channelId, post] of Object.entries(job.discordPosts)) {
+      if (deletedSet.has(post.messageId)) {
+        delete job.discordPosts[channelId];
+        removedChannels++;
+      }
+    }
+
+    // If all channel posts were removed, drop the entire job record
+    if (Object.keys(job.discordPosts).length === 0) {
+      removedJobs++;
+      return false;
+    }
+
+    return true;
+  });
+
+  data.metadata.totalJobs = data.jobs.length;
+  data.lastUpdated = new Date().toISOString();
+
+  if (DRY_RUN) {
+    console.log(`\n📝 [DRY RUN] remove_from_posted: would remove ${removedJobs} job entries, ${removedChannels} channel postings from posted_jobs.json`);
+  } else {
+    fs.writeFileSync(postedPath, JSON.stringify(data, null, 2) + '\n');
+    console.log(`\n📝 remove_from_posted: removed ${removedJobs} job entries (${removedChannels} channel postings) from posted_jobs.json`);
+    console.log(`   Before: ${before} jobs → After: ${data.jobs.length} jobs`);
+  }
 }
 
 main().catch(err => {
