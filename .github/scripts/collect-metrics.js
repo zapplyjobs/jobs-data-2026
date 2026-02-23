@@ -23,8 +23,7 @@ const REPOS = [
   { owner: 'zapplyjobs', repo: 'New-Grad-Software-Engineering-Jobs-2026', type: 'seo', name: 'Software' },
   { owner: 'zapplyjobs', repo: 'New-Grad-Data-Science-Jobs-2026', type: 'seo', name: 'Data-Science' },
   { owner: 'zapplyjobs', repo: 'New-Grad-Hardware-Engineering-Jobs-2026', type: 'seo', name: 'Hardware' },
-  { owner: 'zapplyjobs', repo: 'New-Grad-Nursing-Jobs-2026', type: 'seo', name: 'Nursing' },
-  { owner: 'zapplyjobs', repo: 'Remote-Jobs-2026', type: 'seo', name: 'Remote' }
+  { owner: 'zapplyjobs', repo: 'New-Grad-Nursing-Jobs-2026', type: 'seo', name: 'Nursing' }
 ];
 
 /**
@@ -32,29 +31,18 @@ const REPOS = [
  */
 function fetchGitHubFile(owner, repo, filePath) {
   return new Promise((resolve, reject) => {
-    const url = `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`;
+    const url = `https://raw.githubusercontent.com/${owner}/${repo}/main/${filePath}`;
 
     https.get(url, {
-      headers: {
-        'User-Agent': 'Zapply-Metrics-Bot',
-        'Authorization': `Bearer ${process.env.GITHUB_TOKEN}`,
-        'Accept': 'application/vnd.github.v3+json'
-      }
+      headers: { 'User-Agent': 'Zapply-Metrics-Bot' }
     }, (res) => {
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
-        try {
-          const json = JSON.parse(data);
-          if (json.content) {
-            // Base64 decode
-            const content = Buffer.from(json.content, 'base64').toString('utf8');
-            resolve(content);
-          } else {
-            resolve(null);
-          }
-        } catch (error) {
-          reject(error);
+        if (res.statusCode === 200) {
+          resolve(data);
+        } else {
+          resolve(null);
         }
       });
     }).on('error', reject);

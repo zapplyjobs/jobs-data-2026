@@ -352,6 +352,7 @@ async function main() {
   let skippedCount = 0;
   let filteredCount = 0;
   let nonUsCount = 0;
+  let staleCount = 0;
 
   for (const job of uniqueJobs) {
     try {
@@ -375,6 +376,15 @@ async function main() {
       // Skip non-US jobs (settled rule: no us tag = don't post)
       if (!job.tags?.locations?.includes('us')) {
         nonUsCount++;
+        continue;
+      }
+
+      // Skip jobs older than 14 days (prevents stale ATS listings from posting)
+      const jobAge = job.job_posted_at_datetime_utc
+        ? (Date.now() - new Date(job.job_posted_at_datetime_utc).getTime()) / (1000 * 60 * 60 * 24)
+        : 0;
+      if (jobAge > 14) {
+        staleCount++;
         continue;
       }
 
@@ -481,6 +491,7 @@ async function main() {
   console.log(`  ✅ Posted: ${postedCount} jobs`);
   console.log(`  ⏭️  Skipped (already posted): ${skippedCount} jobs`);
   console.log(`  🌍 Filtered (non-US): ${nonUsCount} jobs`);
+  console.log(`  📅 Filtered (too old): ${staleCount} jobs`);
   console.log(`  🚫 Filtered (no channel matched): ${filteredCount} jobs`);
 
   // Save databases
