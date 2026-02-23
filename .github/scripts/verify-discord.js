@@ -119,78 +119,17 @@ function verifyLocation(message) {
 
 /**
  * Verify routing correctness
+ *
+ * NOTE: Keyword-based routing checks have been removed. The router.js v3 uses a
+ * hierarchical priority system (nursing → AI → DS → tech → finance → other-industry)
+ * that cannot be reliably re-implemented by inspecting Discord message titles alone.
+ * False positives from stale keyword lists caused noisy informational warnings.
+ *
+ * Routing correctness is enforced at post time (router.js). This function is retained
+ * as a no-op to preserve the call signature. Future: wire in router.js directly.
  */
 function verifyRouting(message, channelName, channelId) {
-  const embed = message.embeds[0];
-  if (!embed) return null;
-
-  const title = (embed.title || '').toLowerCase();
-  const company = embed.fields?.find(f => f.name === 'Company')?.value || '';
-
-  const issues = [];
-
-  // Check if job is in appropriate channel
-  if (channelName === 'ai' || channelName === 'data-science') {
-    // AI/DS channel should have AI/DS related jobs
-    const aiKeywords = ['machine learning', 'ml engineer', 'ai', 'artificial intelligence',
-                        'data scientist', 'data engineer', 'data analyst', 'nlp', 'computer vision'];
-    const hasAIKeyword = aiKeywords.some(kw => title.includes(kw));
-
-    if (!hasAIKeyword) {
-      issues.push(`Job in ${channelName} channel without AI/DS keywords in title`);
-    }
-  }
-
-  if (channelName === 'finance') {
-    // Finance channel should have finance related jobs
-    const financeKeywords = ['financial analyst', 'accountant', 'controller', 'treasury',
-                            'audit', 'tax', 'investment', 'finance'];
-    const hasFinanceKeyword = financeKeywords.some(kw => title.includes(kw) || company.toLowerCase().includes(kw));
-
-    if (!hasFinanceKeyword) {
-      issues.push(`Job in finance channel without finance keywords in title/company`);
-    }
-  }
-
-  // Tech channel - software/tech jobs + product/project management (consolidated per router.js)
-  if (channelName === 'tech') {
-    // Exclude ONLY healthcare ROLE titles (nurse, doctor, etc.) - NOT healthcare companies hiring for tech/product roles
-    // Use word-boundary regex for 'rn' — plain 'rn ' is a substring of 'intern '.
-    const healthcareRolePatterns = [/\bnurse\b/, /\bnursing\b/, /\b(rn|lpn|cna)\b/, /\bregistered nurse\b/,
-                                    /\bphysician\b/, /\bdoctor\b/, /\bmedical doctor\b/, /\bsurgeon\b/,
-                                    /\bpharmacist\b/, /\bradiologist\b/, /\btherapist\b/, /\bclinical nurse\b/];
-    const isHealthcareRole = healthcareRolePatterns.some(re => re.test(title));
-
-    if (isHealthcareRole) {
-      issues.push(`Healthcare ROLE job in tech channel (should be filtered out)`);
-      return issues.length > 0 ? { issues, message: message.id, title, channel: channelName } : null;
-    }
-
-    // Note: Healthcare companies (CHRISTUS, University Health, etc.) hiring for tech/product/finance roles
-    // are routed to tech/finance channels correctly - this is expected behavior
-
-    const techKeywords = [
-      // Core tech roles
-      'software', 'engineer', 'developer', 'programmer', 'coding',
-      'frontend', 'backend', 'full stack', 'full-stack', 'devops', 'sre',
-      // Product management (consolidated into tech per router.js)
-      'product manager', 'product owner', 'product lead', 'product ',
-      'pm ', 'product marketing', 'product intern',
-      // Project management (consolidated into tech per router.js)
-      'project manager', 'program manager', 'scrum master', 'agile',
-      // Data/Analytics (often tech-related)
-      'data', 'analytics', 'business intelligence', 'bi ',
-      // Tech general
-      'technical', 'technology', 'engineering', 'engineer'
-    ];
-    const hasTechKeyword = techKeywords.some(kw => title.includes(kw));
-
-    if (!hasTechKeyword) {
-      issues.push(`Job in tech channel without obvious tech/product/pm keywords in title`);
-    }
-  }
-
-  return issues.length > 0 ? { issues, message: message.id, title, channel: channelName } : null;
+  return null;
 }
 
 /**
