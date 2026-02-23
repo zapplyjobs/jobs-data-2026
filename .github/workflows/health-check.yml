@@ -1,4 +1,4 @@
-name: Health Check
+name: Pipeline Alert
 
 on:
   schedule:
@@ -6,38 +6,27 @@ on:
   workflow_dispatch:
 
 jobs:
-  health-check:
+  pipeline-alert:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+
     steps:
-      - name: Check aggregator status
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run pipeline checks
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_REPO: ${{ github.repository }}
-        run: |
-          echo "=== Aggregator Health Check ==="
-          echo "Repository: ${{ github.repository }}"
-          echo "Checking recent workflow runs..."
-
-          # Check last 5 runs of post-to-discord workflow
-          RUNS=$(gh run list --repo "$GITHUB_REPO" --workflow=post-to-discord.yml --limit 5 --json databaseId,conclusion,createdAt,displayTitle --jq '.[] | "\(.databaseId) | \(.conclusion) | \(.createdAt)"' || echo "No runs yet")
-
-          if [ -z "$RUNS" ]; then
-            echo "⚠️ No post-to-discord workflow runs found (workflow not created yet)"
-            echo "✅ Health check passed - no failures to detect"
-            exit 0
-          fi
-
-          echo "$RUNS"
-          echo ""
-
-          # Check if last run failed
-          LAST_RUN=$(gh run list --repo "$GITHUB_REPO" --workflow=post-to-discord.yml --limit 1 --json conclusion --jq '.[0].conclusion' 2>/dev/null || echo "none")
-
-          if [ "$LAST_RUN" = "failure" ]; then
-            echo "❌ Last aggregator run FAILED!"
-            echo "Check logs: gh run view --log"
-            exit 1
-          fi
-
-          echo "✅ Health check passed"
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+          DISCORD_DAILY_STATS_CHANNEL_ID: ${{ secrets.DISCORD_DAILY_STATS_CHANNEL_ID }}
+        run: node .github/scripts/pipeline-alert.js
