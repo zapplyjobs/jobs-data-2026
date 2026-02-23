@@ -248,15 +248,44 @@ function removeFromPostedJobs(deletedMessageIds) {
       return true;
     });
 
+    // Recalculate counters: set each channel's counter to the highest remaining job number
+    const maxPerChannel = {};
+    for (const job of data.jobs) {
+      if (!job.discordPosts) continue;
+      for (const [channelId, post] of Object.entries(job.discordPosts)) {
+        if (post.channelJobNumber && post.channelJobNumber > (maxPerChannel[channelId] || 0)) {
+          maxPerChannel[channelId] = post.channelJobNumber;
+        }
+      }
+    }
+    // Only update channels that had deletions (don't touch unaffected channels)
+    const updatedCounters = {};
+    for (const [channelId, max] of Object.entries(maxPerChannel)) {
+      const current = data.metadata.channelJobNumbers[channelId] || 0;
+      if (max < current) {
+        data.metadata.channelJobNumbers[channelId] = max;
+        updatedCounters[channelId] = { from: current, to: max };
+      }
+    }
+
     data.metadata.totalJobs = data.jobs.length;
     data.lastUpdated = new Date().toISOString();
 
     if (DRY_RUN) {
       console.log(`\n📝 [DRY RUN] posted_jobs.json: would remove ${removedJobs} job entries (${removedChannels} channel postings)`);
+      if (Object.keys(updatedCounters).length > 0) {
+        console.log(`📝 [DRY RUN] counters would reset:`, JSON.stringify(updatedCounters));
+      }
     } else {
       fs.writeFileSync(postedPath, JSON.stringify(data, null, 2) + '\n');
       console.log(`\n📝 posted_jobs.json: removed ${removedJobs} job entries (${removedChannels} channel postings)`);
       console.log(`   Before: ${before} jobs → After: ${data.jobs.length} jobs`);
+      if (Object.keys(updatedCounters).length > 0) {
+        console.log(`📝 Counters reset to last remaining job number:`);
+        for (const [ch, v] of Object.entries(updatedCounters)) {
+          console.log(`   Channel ${ch}: ${v.from} → ${v.to}`);
+        }
+      }
     }
   }
 
