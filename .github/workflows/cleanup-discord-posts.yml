@@ -98,6 +98,6 @@ jobs:
         run: |
           git config user.email "bot@zapplyjobs.com"
           git config user.name "Aggregator Bot"
-          git add .github/data/posted_jobs.json || exit 0
-          git diff --staged --quiet || git commit -m "chore: remove cleanup-deleted messages from posted_jobs.json for repost [skip ci]"
+          git add .github/data/posted_jobs.json .github/data/global-dedupe-store.json || exit 0
+          git diff --staged --quiet || git commit -m "chore: remove cleanup-deleted messages from dedup stores for repost [skip ci]"
           git push
