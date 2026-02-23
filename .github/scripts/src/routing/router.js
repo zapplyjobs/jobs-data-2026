@@ -332,7 +332,7 @@ function getJobChannelDetails(job, CHANNEL_CONFIG) {
       channelId: CHANNEL_CONFIG.tech,
       regex: /\b(product manager|product owner|product marketing|product lead|product strategy|product analyst)\b/,
       keywords: ['product manager', 'product owner', 'product marketing', 'product lead', 'product strategy', 'product analyst'],
-      validate: (title) => !/(designer|advocate|design lead)/i.test(title)
+      validate: (title) => !/(designer|strategist|advocate|design lead)/i.test(title)
     },
     {
       category: 'tech', // Project management roles consolidated into tech
