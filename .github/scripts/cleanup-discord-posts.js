@@ -250,8 +250,9 @@ function removeFromPostedJobs(deletedMessageIds) {
         removedChannels++;
       }
 
+      removedJobRecords.push(snapshot); // track partial deletions too — counter delta needs all channel removals
+
       if (Object.keys(job.discordPosts).length === 0) {
-        removedJobRecords.push(snapshot);
         removedJobs++;
         return false;
       }
