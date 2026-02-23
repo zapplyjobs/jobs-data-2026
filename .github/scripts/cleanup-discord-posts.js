@@ -209,53 +209,81 @@ async function main() {
 }
 
 /**
- * Remove deleted messages from posted_jobs.json so they can be reposted.
- * Matches by discordPosts[channelId].messageId — removes the entire job entry
- * if ALL of its channel posts were deleted, otherwise just removes those channels.
+ * Remove deleted messages from posted_jobs.json AND global-dedupe-store.json
+ * so they can be reposted by the next cron run.
+ *
+ * posted_jobs.json: matched by discordPosts[channelId].messageId
+ * global-dedupe-store.json: matched by fingerprints[fp].messageId
+ * Both must be cleared — poster checks global dedupe first and will skip if only posted_jobs is cleared.
  */
 function removeFromPostedJobs(deletedMessageIds) {
-  const postedPath = path.join(process.cwd(), '.github', 'data', 'posted_jobs.json');
+  const dataDir = path.join(process.cwd(), '.github', 'data');
+  const postedPath = path.join(dataDir, 'posted_jobs.json');
+  const dedupePath = path.join(dataDir, 'global-dedupe-store.json');
+  const deletedSet = new Set(deletedMessageIds);
 
+  // --- posted_jobs.json ---
   if (!fs.existsSync(postedPath)) {
     console.log('\n📝 remove_from_posted: posted_jobs.json not found, skipping');
-    return;
+  } else {
+    const data = JSON.parse(fs.readFileSync(postedPath, 'utf8'));
+    const before = data.jobs.length;
+    let removedJobs = 0;
+    let removedChannels = 0;
+
+    data.jobs = data.jobs.filter(job => {
+      if (!job.discordPosts) return true;
+
+      for (const [channelId, post] of Object.entries(job.discordPosts)) {
+        if (deletedSet.has(post.messageId)) {
+          delete job.discordPosts[channelId];
+          removedChannels++;
+        }
+      }
+
+      if (Object.keys(job.discordPosts).length === 0) {
+        removedJobs++;
+        return false;
+      }
+      return true;
+    });
+
+    data.metadata.totalJobs = data.jobs.length;
+    data.lastUpdated = new Date().toISOString();
+
+    if (DRY_RUN) {
+      console.log(`\n📝 [DRY RUN] posted_jobs.json: would remove ${removedJobs} job entries (${removedChannels} channel postings)`);
+    } else {
+      fs.writeFileSync(postedPath, JSON.stringify(data, null, 2) + '\n');
+      console.log(`\n📝 posted_jobs.json: removed ${removedJobs} job entries (${removedChannels} channel postings)`);
+      console.log(`   Before: ${before} jobs → After: ${data.jobs.length} jobs`);
+    }
   }
 
-  const deletedSet = new Set(deletedMessageIds);
-  const data = JSON.parse(fs.readFileSync(postedPath, 'utf8'));
-  const before = data.jobs.length;
-  let removedJobs = 0;
-  let removedChannels = 0;
+  // --- global-dedupe-store.json ---
+  if (!fs.existsSync(dedupePath)) {
+    console.log('📝 remove_from_posted: global-dedupe-store.json not found, skipping');
+  } else {
+    const dedupeData = JSON.parse(fs.readFileSync(dedupePath, 'utf8'));
+    const beforeDedupeCount = Object.keys(dedupeData.fingerprints).length;
+    let removedFingerprints = 0;
 
-  data.jobs = data.jobs.filter(job => {
-    if (!job.discordPosts) return true;
-
-    // Remove individual channel entries whose messageId was deleted
-    for (const [channelId, post] of Object.entries(job.discordPosts)) {
-      if (deletedSet.has(post.messageId)) {
-        delete job.discordPosts[channelId];
-        removedChannels++;
+    for (const [fp, entry] of Object.entries(dedupeData.fingerprints)) {
+      if (deletedSet.has(entry.messageId)) {
+        delete dedupeData.fingerprints[fp];
+        removedFingerprints++;
       }
     }
 
-    // If all channel posts were removed, drop the entire job record
-    if (Object.keys(job.discordPosts).length === 0) {
-      removedJobs++;
-      return false;
+    dedupeData.lastUpdated = new Date().toISOString();
+
+    if (DRY_RUN) {
+      console.log(`📝 [DRY RUN] global-dedupe-store.json: would remove ${removedFingerprints} fingerprints`);
+    } else {
+      fs.writeFileSync(dedupePath, JSON.stringify(dedupeData, null, 2) + '\n');
+      console.log(`📝 global-dedupe-store.json: removed ${removedFingerprints} fingerprints`);
+      console.log(`   Before: ${beforeDedupeCount} → After: ${Object.keys(dedupeData.fingerprints).length}`);
     }
-
-    return true;
-  });
-
-  data.metadata.totalJobs = data.jobs.length;
-  data.lastUpdated = new Date().toISOString();
-
-  if (DRY_RUN) {
-    console.log(`\n📝 [DRY RUN] remove_from_posted: would remove ${removedJobs} job entries, ${removedChannels} channel postings from posted_jobs.json`);
-  } else {
-    fs.writeFileSync(postedPath, JSON.stringify(data, null, 2) + '\n');
-    console.log(`\n📝 remove_from_posted: removed ${removedJobs} job entries (${removedChannels} channel postings) from posted_jobs.json`);
-    console.log(`   Before: ${before} jobs → After: ${data.jobs.length} jobs`);
   }
 }
 
