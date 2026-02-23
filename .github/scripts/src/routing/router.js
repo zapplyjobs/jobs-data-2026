@@ -228,6 +228,28 @@ function getJobChannelDetails(job, CHANNEL_CONFIG) {
   }
 
   // ============================================================================
+  // PRIORITY 0 (NEW): Use pre-computed tags.domains from tag-engine if non-general
+  // Falls through to title/description logic below for general-tagged jobs.
+  // Note: Future improvement paths — Option B (LLM) or Option C (embeddings) —
+  // would replace the title/description fallback logic below, not this block.
+  // ============================================================================
+  const tagDomains = job.tags?.domains || [];
+  if (tagDomains.length > 0 && !tagDomains.includes('general')) {
+    if (tagDomains.includes('data_science') && CHANNEL_CONFIG['data-science']) {
+      return { channelId: CHANNEL_CONFIG['data-science'], category: 'data-science', matchType: 'tag-domain', priority: 'HIGH', source: 'tags' };
+    }
+    if (tagDomains.includes('software') && CHANNEL_CONFIG.tech) {
+      return { channelId: CHANNEL_CONFIG.tech, category: 'tech', matchType: 'tag-domain', priority: 'HIGH', source: 'tags' };
+    }
+    if (tagDomains.includes('hardware') && CHANNEL_CONFIG.tech) {
+      return { channelId: CHANNEL_CONFIG.tech, category: 'tech', matchType: 'tag-domain', priority: 'HIGH', source: 'tags' };
+    }
+    if (tagDomains.includes('product') && CHANNEL_CONFIG.tech) {
+      return { channelId: CHANNEL_CONFIG.tech, category: 'tech', matchType: 'tag-domain', priority: 'HIGH', source: 'tags' };
+    }
+  }
+
+  // ============================================================================
   // PRIORITY 0 (CRITICAL): AI/ML Roles (if AI channel configured)
   // ============================================================================
   if (CHANNEL_CONFIG.ai) {
