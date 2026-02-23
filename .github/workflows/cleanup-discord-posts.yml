@@ -4,33 +4,33 @@ on:
   workflow_dispatch:
     inputs:
       window_older_than_hours:
-        description: '[WINDOW] Far end of window — how many hours ago the window ENDS. e.g. 3 = stop at messages posted 3h ago. Set BOTH window fields to activate window mode. Example: window_older=3, window_newer=1 → deletes messages posted between 1h and 3h ago.'
+        description: 'WINDOW start (hours ago). e.g. 3 = begin at 3h ago. Pair with window_newer_than_hours. Example: older=3, newer=1 → deletes 11am–1pm if run at 2pm.'
         required: false
         default: ''
       window_newer_than_hours:
-        description: '[WINDOW] Near end of window — how many hours ago the window STARTS. e.g. 1 = start from messages posted 1h ago. Set BOTH window fields to activate window mode. Example: window_older=3, window_newer=1 → deletes messages posted between 1h and 3h ago.'
+        description: 'WINDOW end (hours ago). e.g. 1 = stop at 1h ago. Pair with window_older_than_hours. Example: older=3, newer=1 → deletes 11am–1pm if run at 2pm.'
         required: false
         default: ''
       last_n_hours:
-        description: '[SIMPLE] Delete all messages posted in the last N hours. e.g. 4 = delete everything posted in the last 4 hours. Ignored if both window fields are set.'
+        description: 'Delete everything posted in the last N hours. e.g. 4 = last 4 hours.'
         required: false
         default: ''
       older_than_hours:
-        description: '[EXPIRY] Delete messages older than N hours. Default 336 = 14 days (standard expiry run). Ignored if window or last_n_hours is set.'
+        description: 'Delete messages older than N hours. Default 336 = 14 days.'
         required: false
         default: '336'
       dry_run:
-        description: 'Preview only — shows what would be deleted without actually deleting. Set to false to execute. Default: true.'
+        description: 'Preview without deleting. Set false to execute.'
         type: boolean
         required: false
         default: true
       remove_from_posted:
-        description: 'After deleting, also remove those jobs from posted_jobs.json so they get reposted by the next cron run. Default: false (deleted messages stay gone).'
+        description: 'Remove deleted jobs from posted_jobs.json so they repost next cron run.'
         type: boolean
         required: false
         default: false
       channel_ids:
-        description: 'Limit to specific channels. Comma-separated channel IDs. Leave empty to run across all 23 channels.'
+        description: 'Specific channel IDs to clean (comma-separated). Empty = all 23 channels.'
         required: false
         default: ''
 
