@@ -3,59 +3,35 @@
 /**
  * Collect Metrics for Aggregator Monitoring
  *
- * Gathers metrics from all job board repos for visibility
+ * Pipeline-level data is read locally from jobs-metadata.json + all_jobs.json.
+ * Per-repo data is fetched from GitHub API (workflow status filtered to update-jobs.yml,
+ * last jobs update from commits API filtered to the data file path).
+ *
+ * Output: overwrites .github/data/metrics/latest.json, appends to history.jsonl.
+ * Cron: every 6 hours (collect-metrics.yml).
  */
 
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
 
-// Configuration
-const METRICS_DIR = path.join(process.cwd(), '.github', 'data', 'metrics');
+const DATA_DIR = path.join(process.cwd(), '.github', 'data');
+const METRICS_DIR = path.join(DATA_DIR, 'metrics');
 const LATEST_FILE = path.join(METRICS_DIR, 'latest.json');
 const HISTORY_FILE = path.join(METRICS_DIR, 'history.jsonl');
 
-// Repositories to monitor
+// Repos to monitor. New-Grad has no current_jobs.json by design — jobCount will be null.
 const REPOS = [
-  { owner: 'zapplyjobs', repo: 'New-Grad-Jobs-2026', type: 'main', name: 'New-Grad' },
-  { owner: 'zapplyjobs', repo: 'Internships-2026', type: 'main', name: 'Internships' },
-  { owner: 'zapplyjobs', repo: 'jobs-data-2026', type: 'aggregator', name: 'Aggregator' },
-  { owner: 'zapplyjobs', repo: 'New-Grad-Software-Engineering-Jobs-2026', type: 'seo', name: 'Software' },
-  { owner: 'zapplyjobs', repo: 'New-Grad-Data-Science-Jobs-2026', type: 'seo', name: 'Data-Science' },
-  { owner: 'zapplyjobs', repo: 'New-Grad-Hardware-Engineering-Jobs-2026', type: 'seo', name: 'Hardware' },
-  { owner: 'zapplyjobs', repo: 'New-Grad-Nursing-Jobs-2026', type: 'seo', name: 'Nursing' }
+  { owner: 'zapplyjobs', repo: 'New-Grad-Jobs-2026',                      name: 'New-Grad',      hasJobsFile: false },
+  { owner: 'zapplyjobs', repo: 'Internships-2026',                         name: 'Internships',   hasJobsFile: true  },
+  { owner: 'zapplyjobs', repo: 'New-Grad-Software-Engineering-Jobs-2026',  name: 'Software',      hasJobsFile: true  },
+  { owner: 'zapplyjobs', repo: 'New-Grad-Data-Science-Jobs-2026',          name: 'Data-Science',  hasJobsFile: true  },
+  { owner: 'zapplyjobs', repo: 'New-Grad-Hardware-Engineering-Jobs-2026',  name: 'Hardware',      hasJobsFile: true  },
+  { owner: 'zapplyjobs', repo: 'New-Grad-Nursing-Jobs-2026',               name: 'Nursing',       hasJobsFile: true  },
 ];
 
-/**
- * Fetch file content from GitHub API
- */
-function fetchGitHubFile(owner, repo, filePath) {
+function ghRequest(url) {
   return new Promise((resolve, reject) => {
-    const url = `https://raw.githubusercontent.com/${owner}/${repo}/main/${filePath}`;
-
-    https.get(url, {
-      headers: { 'User-Agent': 'Zapply-Metrics-Bot' }
-    }, (res) => {
-      let data = '';
-      res.on('data', chunk => data += chunk);
-      res.on('end', () => {
-        if (res.statusCode === 200) {
-          resolve(data);
-        } else {
-          resolve(null);
-        }
-      });
-    }).on('error', reject);
-  });
-}
-
-/**
- * Fetch workflow run status
- */
-function fetchWorkflowStatus(owner, repo, workflowName) {
-  return new Promise((resolve, reject) => {
-    const url = `https://api.github.com/repos/${owner}/${repo}/actions/runs?per_page=1`;
-
     https.get(url, {
       headers: {
         'User-Agent': 'Zapply-Metrics-Bot',
@@ -66,156 +42,175 @@ function fetchWorkflowStatus(owner, repo, workflowName) {
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
-        try {
-          const json = JSON.parse(data);
-          if (json.workflow_runs && json.workflow_runs.length > 0) {
-            const run = json.workflow_runs[0];
-            resolve({
-              id: run.id,
-              status: run.status,
-              conclusion: run.conclusion,
-              createdAt: run.created_at,
-              updatedAt: run.updated_at
-            });
-          } else {
-            resolve(null);
-          }
-        } catch (error) {
-          reject(error);
-        }
+        try { resolve({ status: res.statusCode, body: JSON.parse(data) }); }
+        catch { resolve({ status: res.statusCode, body: null }); }
       });
     }).on('error', reject);
   });
 }
 
-/**
- * Get metrics for a single repo
- */
-async function getRepoMetrics(repo) {
-  const metrics = {
-    name: repo.name,
-    type: repo.type,
-    jobs: 0,
-    lastUpdate: null,
-    workflowStatus: null,
-    error: null
-  };
+function rawRequest(url) {
+  return new Promise((resolve, reject) => {
+    https.get(url, { headers: { 'User-Agent': 'Zapply-Metrics-Bot' } }, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => resolve({ status: res.statusCode, body: data }));
+    }).on('error', reject);
+  });
+}
 
+/**
+ * Get job count from current_jobs.json via raw GitHub URL.
+ * Returns null for repos that don't write this file (New-Grad).
+ */
+async function getJobCount(owner, repo) {
+  const url = `https://raw.githubusercontent.com/${owner}/${repo}/main/.github/data/current_jobs.json`;
   try {
-    // Try to fetch current_jobs.json (main repos) or current_jobs.json (SEO repos)
-    let jobsData = null;
-    try {
-      jobsData = await fetchGitHubFile(repo.owner, repo.repo, '.github/data/current_jobs.json');
-    } catch {
-      // Try new_jobs.json as fallback
-      try {
-        jobsData = await fetchGitHubFile(repo.owner, repo.repo, '.github/data/new_jobs.json');
-      } catch {
-        // Try root level current_jobs.json (SEO repos)
-        try {
-          jobsData = await fetchGitHubFile(repo.owner, repo.repo, 'current_jobs.json');
-        } catch {
-          // No jobs data
-        }
-      }
-    }
-
-    if (jobsData) {
-      const jobs = JSON.parse(jobsData);
-      metrics.jobs = Array.isArray(jobs) ? jobs.length : 0;
-    }
-
-    // Get workflow status
-    try {
-      const workflow = await fetchWorkflowStatus(repo.owner, repo.repo);
-      if (workflow) {
-        metrics.workflowStatus = {
-          id: workflow.id,
-          status: workflow.status,
-          conclusion: workflow.conclusion,
-          lastRun: workflow.updatedAt
-        };
-      }
-    } catch {
-      // Workflow status unavailable
-    }
-
-  } catch (error) {
-    metrics.error = error.message;
+    const res = await rawRequest(url);
+    if (res.status !== 200) return null;
+    const jobs = JSON.parse(res.body);
+    return Array.isArray(jobs) ? jobs.length : null;
+  } catch {
+    return null;
   }
-
-  return metrics;
 }
 
 /**
- * Main execution
+ * Get the timestamp of the last commit that touched a specific file path.
+ * Uses commits API with path filter — accurate even if other commits landed after.
  */
-async function main() {
-  console.log('🔍 Collecting Aggregator Metrics...');
-
-  // Ensure metrics directory exists
-  if (!fs.existsSync(METRICS_DIR)) {
-    fs.mkdirSync(METRICS_DIR, { recursive: true });
+async function getLastFileCommitTimestamp(owner, repo, filePath) {
+  const url = `https://api.github.com/repos/${owner}/${repo}/commits?path=${filePath}&per_page=1`;
+  try {
+    const res = await ghRequest(url);
+    if (res.status !== 200 || !Array.isArray(res.body) || res.body.length === 0) return null;
+    return res.body[0].commit?.committer?.date || res.body[0].commit?.author?.date || null;
+  } catch {
+    return null;
   }
-
-  const timestamp = new Date().toISOString();
-  const metrics = {
-    timestamp,
-    repos: {},
-    summary: {
-      totalJobs: 0,
-      operationalRepos: 0,
-      failedRepos: 0
-    }
-  };
-
-  // Collect metrics from all repos
-  for (const repo of REPOS) {
-    console.log(`  📊 ${repo.name}...`);
-    const repoMetrics = await getRepoMetrics(repo);
-    metrics.repos[repo.name] = repoMetrics;
-
-    // Update summary
-    metrics.summary.totalJobs += repoMetrics.jobs;
-    if (repoMetrics.workflowStatus?.conclusion === 'success') {
-      metrics.summary.operationalRepos++;
-    }
-    if (repoMetrics.workflowStatus?.conclusion === 'failure') {
-      metrics.summary.failedRepos++;
-    }
-  }
-
-  // Print summary
-  console.log('');
-  console.log('📈 Metrics Summary:');
-  console.log(`  Total Jobs: ${metrics.summary.totalJobs}`);
-  console.log(`  Operational: ${metrics.summary.operationalRepos}`);
-  console.log(`  Failed: ${metrics.summary.failedRepos}`);
-  console.log('');
-
-  // Write latest metrics
-  fs.writeFileSync(LATEST_FILE, JSON.stringify(metrics, null, 2), 'utf8');
-  console.log(`✅ Wrote metrics to: ${LATEST_FILE}`);
-
-  // Append to history
-  const historyEntry = JSON.stringify(metrics);
-  fs.appendFileSync(HISTORY_FILE, historyEntry + '\n', 'utf8');
-  console.log(`✅ Appended to history: ${HISTORY_FILE}`);
-
-  // Print repo breakdown
-  console.log('');
-  console.log('📊 Repo Breakdown:');
-  for (const [name, repo] of Object.entries(metrics.repos)) {
-    const status = repo.workflowStatus?.conclusion || 'unknown';
-    const statusEmoji = status === 'success' ? '✅' : status === 'failure' ? '❌' : '⚠️';
-    console.log(`  ${statusEmoji} ${name}: ${repo.jobs} jobs (${status})`);
-  }
-
-  console.log('');
-  console.log('✅ Metrics collection complete');
 }
 
-main().catch(error => {
-  console.error('❌ Error:', error.message);
+/**
+ * Get status of the last run of update-jobs.yml specifically.
+ * Avoids the bug in the old script which picked up any workflow run (pages, cleanup, etc.).
+ */
+async function getUpdateJobsWorkflowStatus(owner, repo) {
+  const url = `https://api.github.com/repos/${owner}/${repo}/actions/workflows/update-jobs.yml/runs?per_page=1`;
+  try {
+    const res = await ghRequest(url);
+    if (res.status !== 200 || !res.body?.workflow_runs?.length) return null;
+    const run = res.body.workflow_runs[0];
+    return {
+      status: run.status,
+      conclusion: run.conclusion,
+      lastRun: run.updated_at
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function getRepoMetrics(repo) {
+  const [jobCount, lastJobsUpdate, workflowData] = await Promise.all([
+    repo.hasJobsFile ? getJobCount(repo.owner, repo.repo) : Promise.resolve(null),
+    repo.hasJobsFile
+      ? getLastFileCommitTimestamp(repo.owner, repo.repo, '.github/data/current_jobs.json')
+      : Promise.resolve(null),
+    getUpdateJobsWorkflowStatus(repo.owner, repo.repo)
+  ]);
+
+  return {
+    name: repo.name,
+    // null means "not applicable by design" (New-Grad), not a failure
+    jobCount,
+    lastJobsUpdate,
+    workflowStatus: workflowData?.conclusion || null,
+    workflowLastRun: workflowData?.lastRun || null
+  };
+}
+
+/**
+ * Read pipeline-level data from local files (same repo, available at runtime).
+ * all_jobs.json is JSONL — line count = pipeline size.
+ */
+function getPipelineMetrics() {
+  try {
+    const metadataPath = path.join(DATA_DIR, 'jobs-metadata.json');
+    const allJobsPath = path.join(DATA_DIR, 'all_jobs.json');
+
+    if (!fs.existsSync(metadataPath)) {
+      console.warn('  ⚠️  jobs-metadata.json not found — pipeline metrics unavailable');
+      return null;
+    }
+
+    const metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
+
+    // JSONL line count for pipeline total
+    let pipelineTotal = null;
+    if (fs.existsSync(allJobsPath)) {
+      const content = fs.readFileSync(allJobsPath, 'utf8');
+      pipelineTotal = content.split('\n').filter(l => l.trim()).length;
+    }
+
+    return {
+      pipelineTotal,
+      bySource: metadata.by_source || null,
+      jsearchRequestsToday: metadata.jsearch_stats?.requests_today ?? null,
+      jsearchRemaining: metadata.jsearch_stats?.remaining_today ?? null,
+      jsearchFetchedTotal: metadata.jsearch_stats?.total_jobs_fetched ?? null,
+      tagStats: {
+        usTagged: metadata.tag_stats?.locations?.us ?? null,
+        entryLevel: metadata.tag_stats?.employment?.entry_level ?? null,
+        internship: metadata.tag_stats?.employment?.internship ?? null,
+        domains: metadata.tag_stats?.domains || null
+      },
+      duplicatesRemoved: metadata.duplicates_removed ?? null,
+      generatedAt: metadata.generated || null
+    };
+  } catch (err) {
+    console.warn('  ⚠️  Error reading pipeline metrics:', err.message);
+    return null;
+  }
+}
+
+async function main() {
+  console.log('🔍 Collecting metrics...');
+
+  if (!fs.existsSync(METRICS_DIR)) fs.mkdirSync(METRICS_DIR, { recursive: true });
+
+  const pipeline = getPipelineMetrics();
+  console.log(`  Pipeline: ${pipeline?.pipelineTotal ?? 'n/a'} jobs total`);
+
+  console.log('  Fetching per-repo data...');
+  const repoResults = await Promise.all(REPOS.map(getRepoMetrics));
+
+  const repos = {};
+  let operationalCount = 0, failedCount = 0;
+  for (const r of repoResults) {
+    repos[r.name] = r;
+    if (r.workflowStatus === 'success') operationalCount++;
+    if (r.workflowStatus === 'failure') failedCount++;
+    const jobStr = r.jobCount !== null ? `${r.jobCount} jobs` : 'n/a (by design)';
+    const wfStr = r.workflowStatus || 'unknown';
+    const emoji = r.workflowStatus === 'success' ? '✅' : r.workflowStatus === 'failure' ? '❌' : '⚠️';
+    console.log(`  ${emoji} ${r.name}: ${jobStr}, workflow=${wfStr}`);
+  }
+
+  const snapshot = {
+    timestamp: new Date().toISOString(),
+    pipeline,
+    repos,
+    summary: { operationalRepos: operationalCount, failedRepos: failedCount }
+  };
+
+  fs.writeFileSync(LATEST_FILE, JSON.stringify(snapshot, null, 2) + '\n');
+  fs.appendFileSync(HISTORY_FILE, JSON.stringify(snapshot) + '\n');
+
+  console.log(`\n✅ latest.json written, history.jsonl appended`);
+  if (failedCount > 0) console.log(`⚠️  ${failedCount} repo(s) reporting workflow failure`);
+}
+
+main().catch(err => {
+  console.error('❌ Fatal:', err.message);
   process.exit(1);
 });
