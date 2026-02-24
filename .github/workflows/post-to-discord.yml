@@ -2,7 +2,7 @@ name: Post Jobs to Discord
 
 on:
   schedule:
-    - cron: '12,27,42,57 * * * *'  # Every 15 minutes, 2 min after all consumers finish (staggered)
+    - cron: '*/15 * * * *'  # Every 15 minutes
   workflow_dispatch:
 
 jobs:
