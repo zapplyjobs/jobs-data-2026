@@ -259,23 +259,28 @@ function removeFromPostedJobs(deletedMessageIds) {
       return true;
     });
 
-    // Recalculate counters: subtract the number of deleted jobs per channel from current counter.
-    // We count how many deleted jobs had a channelJobNumber in each channel, then subtract.
-    // This is safe because posted_jobs.json only has a 7-day active window — scanning for max
-    // would give a falsely low number for channels with historically seeded counters.
-    const deletedCountPerChannel = {};
+    // Recalculate counters: set each channel's counter to the highest channelJobNumber
+    // still remaining in posted_jobs.json after deletions. Subtraction is wrong when
+    // counters have inflated gaps (e.g. counter=11993, 5 jobs deleted → 11988, not 2476).
+    const affectedChannels = new Set();
     for (const job of removedJobRecords) {
       if (!job.discordPosts) continue;
       for (const channelId of Object.keys(job.discordPosts)) {
-        deletedCountPerChannel[channelId] = (deletedCountPerChannel[channelId] || 0) + 1;
+        affectedChannels.add(channelId);
       }
     }
     const updatedCounters = {};
-    for (const [channelId, deletedCount] of Object.entries(deletedCountPerChannel)) {
+    for (const channelId of affectedChannels) {
       const current = data.metadata.channelJobNumbers[channelId] || 0;
-      const newVal = Math.max(0, current - deletedCount);
-      data.metadata.channelJobNumbers[channelId] = newVal;
-      updatedCounters[channelId] = { from: current, to: newVal };
+      let maxRemaining = 0;
+      for (const job of data.jobs) {
+        const num = job.discordPosts && job.discordPosts[channelId]
+          ? (job.discordPosts[channelId].channelJobNumber || 0)
+          : 0;
+        if (num > maxRemaining) maxRemaining = num;
+      }
+      data.metadata.channelJobNumbers[channelId] = maxRemaining;
+      updatedCounters[channelId] = { from: current, to: maxRemaining };
     }
 
     data.metadata.totalJobs = data.jobs.length;

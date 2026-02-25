@@ -443,7 +443,7 @@ async function main() {
           continue;
         }
 
-        // Get channel name and job number for footer
+        // Get channel name for footer (number assigned after successful post)
         let channelName = null;
         try {
           const channelObj = await discordClient.channels.fetch(channelInfo.channelId);
@@ -452,9 +452,13 @@ async function main() {
           // Channel name lookup failed, continue without it
         }
 
-        const channelJobNumber = postedJobsManager.getChannelJobNumber(channelInfo.channelId);
+        // Assign job number AFTER successful post to prevent counter inflation on failures
+        const channelJobNumber = postedJobsManager.peekNextChannelJobNumber(channelInfo.channelId);
 
         const message = await postJobToDiscord(job, channelInfo.channelId, discordClient, channelName, channelJobNumber);
+
+        // Post succeeded — now commit the counter increment
+        postedJobsManager.commitChannelJobNumber(channelInfo.channelId);
 
         // Track posting in local manager
         postedJobsManager.markAsPostedToChannel(
