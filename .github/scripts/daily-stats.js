@@ -4,9 +4,9 @@
  * Daily GitHub Stats to Discord
  *
  * Posts daily org stats to #github-updates channel:
- * - Section 1: Repository stars (with deltas from previous day)
- * - Section 2: Workflow health (today's runs)
- * - Section 3: Job pipeline stats (jobs per repo)
+ * - Section 1: Repository stars (all public repos, with deltas)
+ * - Section 2: Per-repo workflow health (last 24h, all 9 repos)
+ * - Section 3: Job pipeline stats
  *
  * Persists previous day's star counts in .github/data/daily-stats.json
  */
@@ -17,13 +17,29 @@ const https = require('https');
 const { Client, GatewayIntentBits } = require('discord.js');
 
 const STATS_FILE = path.join(process.cwd(), '.github', 'data', 'daily-stats.json');
-const ALL_JOBS_FILE = path.join(process.cwd(), '.github', 'data', 'all_jobs.json');
 
 const ORG = 'zapplyjobs';
 const CHANNEL_ID = process.env.DISCORD_DAILY_STATS_CHANNEL_ID;
 
-// Repos to track (in display order)
-const TRACKED_REPOS = [
+// All repos to track for stars (in display order — high-star first)
+const STAR_REPOS = [
+  'Research-Internships-for-Undergraduates',
+  'underclassmen-internships',
+  'New-Grad-Jobs-2026',
+  'Internships-2026',
+  'New-Grad-Software-Engineering-Jobs-2026',
+  'New-Grad-Data-Science-Jobs-2026',
+  'New-Grad-Hardware-Engineering-Jobs-2026',
+  'New-Grad-Nursing-Jobs-2026',
+  'resume-samples-2026',
+  'interview-handbook-2026',
+  'Remote-Jobs-2026',
+];
+
+// All 9 pipeline repos to check workflow health
+const PIPELINE_REPOS = [
+  'jobs-aggregator-private',
+  'jobs-data-2026',
   'New-Grad-Jobs-2026',
   'Internships-2026',
   'New-Grad-Software-Engineering-Jobs-2026',
@@ -32,19 +48,19 @@ const TRACKED_REPOS = [
   'New-Grad-Nursing-Jobs-2026',
 ];
 
-// Consumer repos with current_jobs.json
+// Consumer repos with current_jobs.json on GitHub
 const CONSUMER_REPOS = [
-  { repo: 'New-Grad-Jobs-2026', label: 'New-Grad-Jobs-2026' },
-  { repo: 'Internships-2026', label: 'Internships-2026' },
-  { repo: 'New-Grad-Software-Engineering-Jobs-2026', label: 'Software-Engineering' },
-  { repo: 'New-Grad-Data-Science-Jobs-2026', label: 'Data-Science' },
-  { repo: 'New-Grad-Hardware-Engineering-Jobs-2026', label: 'Hardware-Engineering' },
-  { repo: 'New-Grad-Nursing-Jobs-2026', label: 'Nursing' },
+  { repo: 'New-Grad-Jobs-2026',                      label: 'New-Grad' },
+  { repo: 'Internships-2026',                         label: 'Internships' },
+  { repo: 'New-Grad-Software-Engineering-Jobs-2026',  label: 'Software-Eng' },
+  { repo: 'New-Grad-Data-Science-Jobs-2026',          label: 'Data-Science' },
+  { repo: 'New-Grad-Hardware-Engineering-Jobs-2026',  label: 'Hardware-Eng' },
+  { repo: 'New-Grad-Nursing-Jobs-2026',               label: 'Nursing' },
 ];
 
-function githubGet(path) {
+function githubGet(urlPath) {
   return new Promise((resolve, reject) => {
-    https.get(`https://api.github.com${path}`, {
+    https.get(`https://api.github.com${urlPath}`, {
       headers: {
         'User-Agent': 'Zapply-Stats-Bot',
         'Authorization': `Bearer ${process.env.GITHUB_TOKEN}`,
@@ -78,6 +94,10 @@ function delta(current, previous) {
   return diff > 0 ? `(+${diff})` : `(${diff})`;
 }
 
+function fmtNum(n) {
+  return n.toLocaleString('en-US');
+}
+
 async function main() {
   if (!CHANNEL_ID) { console.error('DISCORD_DAILY_STATS_CHANNEL_ID not set'); process.exit(1); }
 
@@ -87,17 +107,18 @@ async function main() {
     try { prevStats = JSON.parse(fs.readFileSync(STATS_FILE, 'utf8')); } catch {}
   }
 
-  // --- Section 1: Stars ---
+  const today = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+  // --- Section 1: Stars (all tracked repos) ---
   const allRepos = await githubGet(`/orgs/${ORG}/repos?type=public&per_page=100`);
   const repoMap = {};
   for (const r of allRepos) repoMap[r.name] = r;
 
-  const today = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   let starsLines = '';
   let totalStars = 0;
   let totalDelta = 0;
 
-  for (const name of TRACKED_REPOS) {
+  for (const name of STAR_REPOS) {
     const r = repoMap[name];
     if (!r) continue;
     const stars = r.stargazers_count;
@@ -105,51 +126,42 @@ async function main() {
     const d = prev != null ? stars - prev : null;
     if (d != null) totalDelta += d;
     totalStars += stars;
-    const label = name.padEnd(42);
-    starsLines += `${label} ${stars} ${delta(stars, prev)}\n`;
+    const label = name.slice(0, 40).padEnd(40);
+    starsLines += `${label} ${fmtNum(stars).padStart(6)} ${delta(stars, prev)}\n`;
   }
 
   const deltaStr = totalDelta === 0 ? 'no change' : (totalDelta > 0 ? `+${totalDelta} today` : `${totalDelta} today`);
 
-  // --- Section 2: Workflow Health (today) ---
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
-
+  // --- Section 2: Per-repo workflow health (last 24h) ---
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
   let workflowLines = '';
-  try {
-    const runs = await githubGet(`/repos/${ORG}/jobs-data-2026/actions/runs?per_page=100&created=>=${todayStart.toISOString()}`);
-    const byWorkflow = {};
-    for (const run of (runs.workflow_runs || [])) {
-      const name = run.name || run.path;
-      if (!byWorkflow[name]) byWorkflow[name] = { runs: 0, success: 0, fail: 0, durations: [] };
-      byWorkflow[name].runs++;
-      if (run.conclusion === 'success') byWorkflow[name].success++;
-      if (run.conclusion === 'failure') byWorkflow[name].fail++;
-      if (run.run_started_at && run.updated_at) {
-        const dur = Math.round((new Date(run.updated_at) - new Date(run.run_started_at)) / 1000);
-        byWorkflow[name].durations.push(dur);
-      }
+
+  await Promise.all(PIPELINE_REPOS.map(async (repo) => {
+    try {
+      const runs = await githubGet(`/repos/${ORG}/${repo}/actions/runs?per_page=100&created=>=${since}`);
+      const list = runs.workflow_runs || [];
+      const total = list.length;
+      const success = list.filter(r => r.conclusion === 'success').length;
+      const fail = list.filter(r => r.conclusion === 'failure').length;
+      const inProgress = list.filter(r => r.status === 'in_progress').length;
+      const status = fail > 0 ? '⚠️' : (total === 0 ? '➖' : '✅');
+      const label = repo.slice(0, 38).padEnd(38);
+      workflowLines += `${status} ${label} ${success}✅ ${fail}❌ ${inProgress > 0 ? `${inProgress}🔄` : ''} (${total} runs)\n`;
+    } catch {
+      workflowLines += `➖ ${repo.slice(0, 38).padEnd(38)} (unavailable)\n`;
     }
-    for (const [name, w] of Object.entries(byWorkflow)) {
-      const avgDur = w.durations.length ? Math.round(w.durations.reduce((a, b) => a + b, 0) / w.durations.length) : 0;
-      const failPct = w.runs ? ((w.fail / w.runs) * 100).toFixed(1) : '0.0';
-      const warn = w.fail > 0 ? ' ⚠️' : '';
-      const label = name.slice(0, 35).padEnd(35);
-      workflowLines += `${label} | ${w.runs} runs | ${w.success}✅ ${w.fail}❌ | ~${avgDur}s | ${failPct}% fail${warn}\n`;
-    }
-  } catch (e) {
-    workflowLines = `(workflow data unavailable: ${e.message})\n`;
-  }
+  }));
 
   // --- Section 3: Job Pipeline ---
   let pipelineLines = '';
 
-  // all_jobs.json local
-  try {
-    const lines = fs.readFileSync(ALL_JOBS_FILE, 'utf8').split('\n').filter(l => l.trim());
-    pipelineLines += `${'jobs-data-2026 / all_jobs.json'.padEnd(42)} ${lines.length}\n`;
-  } catch {
-    pipelineLines += `${'jobs-data-2026 / all_jobs.json'.padEnd(42)} (unavailable)\n`;
+  // all_jobs.json — fetch from GitHub (always fresh, not local stale copy)
+  const allJobsRaw = await rawGet(`https://raw.githubusercontent.com/${ORG}/jobs-data-2026/main/.github/data/all_jobs.json`);
+  if (allJobsRaw) {
+    const count = allJobsRaw.split('\n').filter(l => l.trim()).length;
+    pipelineLines += `${'all_jobs.json (pipeline total)'.padEnd(36)} ${fmtNum(count)}\n`;
+  } else {
+    pipelineLines += `${'all_jobs.json (pipeline total)'.padEnd(36)} (unavailable)\n`;
   }
 
   // Consumer repos via raw URL
@@ -157,36 +169,33 @@ async function main() {
     const raw = await rawGet(`https://raw.githubusercontent.com/${ORG}/${repo}/main/.github/data/current_jobs.json`);
     let count = '?';
     if (raw) {
-      try { count = JSON.parse(raw).length; } catch {}
+      try { count = fmtNum(JSON.parse(raw).length); } catch {}
     }
-    pipelineLines += `${label.padEnd(42)} ${count}\n`;
+    pipelineLines += `${label.padEnd(36)} ${count}\n`;
   }
 
-  // Discord posted last 24h
+  // Discord posted last 24h — read from posted_jobs.json
   try {
     const postedFile = path.join(process.cwd(), '.github', 'data', 'posted_jobs.json');
     const posted = JSON.parse(fs.readFileSync(postedFile, 'utf8'));
+    const jobs = Array.isArray(posted.jobs) ? posted.jobs : [];
     const cutoff = Date.now() - 24 * 60 * 60 * 1000;
-    const recentCount = Object.values(posted).filter(entry => {
-      const ts = entry.postedAt || entry.timestamp || entry.lastSeen;
-      return ts && new Date(ts).getTime() > cutoff;
-    }).length;
-    pipelineLines += `${'Discord posted (last 24h)'.padEnd(42)} ${recentCount}\n`;
+    const recentCount = jobs.filter(j => j.postedToDiscord && new Date(j.postedToDiscord).getTime() > cutoff).length;
+    pipelineLines += `${'Discord posted (last 24h)'.padEnd(36)} ${recentCount}\n`;
   } catch {
-    pipelineLines += `${'Discord posted (last 24h)'.padEnd(42)} ?\n`;
+    pipelineLines += `${'Discord posted (last 24h)'.padEnd(36)} ?\n`;
   }
 
-  // --- Build message ---
-  const msg1 = `📊 zapplyjobs Org — ${today} — Daily\n\n⭐ STARS\n\`\`\`\n${starsLines}\nTotal: ${totalStars} stars (${deltaStr})\n\`\`\``;
-  const msg2 = `🤖 WORKFLOW HEALTH\n\`\`\`\n${workflowLines || '(no runs today)\n'}\`\`\``;
-  const msg3 = `📋 JOB PIPELINE\n\`\`\`\n${pipelineLines}\`\`\``;
+  // --- Build messages ---
+  const msg1 = `📊 **zapplyjobs — ${today} — Daily Report**\n\n⭐ **STARS**\n\`\`\`\n${starsLines}\nTotal: ${fmtNum(totalStars)} stars (${deltaStr})\n\`\`\``;
+  const msg2 = `🤖 **WORKFLOW HEALTH (last 24h)**\n\`\`\`\n${workflowLines || '(no data)\n'}\`\`\``;
+  const msg3 = `📋 **JOB PIPELINE**\n\`\`\`\n${pipelineLines}\`\`\``;
 
   // --- Post to Discord ---
   const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] });
   await client.login(process.env.DISCORD_TOKEN);
   await new Promise(r => client.once('ready', r));
 
-  // Force-fetch all guilds to populate channel cache, then fetch the target channel
   await Promise.all(client.guilds.cache.map(g => g.channels.fetch()));
   const channel = await client.channels.fetch(CHANNEL_ID);
   if (!channel || !channel.isTextBased()) throw new Error(`Channel ${CHANNEL_ID} not found or not a text channel`);
@@ -199,7 +208,7 @@ async function main() {
 
   // --- Persist today's star counts ---
   const newStats = { date: new Date().toISOString(), stars: {} };
-  for (const name of TRACKED_REPOS) {
+  for (const name of STAR_REPOS) {
     if (repoMap[name]) newStats.stars[name] = repoMap[name].stargazers_count;
   }
   fs.writeFileSync(STATS_FILE, JSON.stringify(newStats, null, 2), 'utf8');
