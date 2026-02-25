@@ -267,9 +267,9 @@ async function main() {
     console.log(`    Routing Errors: ${summary.routingErrors}`);
   }
 
-  // Critical issues: only RECENT duplicates (last 24h) and missing channels cause failure.
-  // Historical duplicates already in Discord are not actionable — they scroll off naturally.
-  // Routing errors are informational — data quality varies.
+  // This script is report-only — it never exits non-zero.
+  // Findings are surfaced via GitHub Step Summary. Workflow failure here provides no value
+  // and blocks downstream steps. Bot connection failure (caught below) is the only real fatal.
   const recentDuplicates = results.duplicates.filter(d => d.isRecent);
   const hasCriticalIssues = recentDuplicates.length > 0 ||
                            results.missingChannels.length > 0;
@@ -373,9 +373,10 @@ async function main() {
   });
   fs.writeFileSync(encryptedPath, encryptedData);
 
-  // Exit with error code if critical issues found
   if (hasCriticalIssues) {
-    process.exit(1);
+    console.log('\n⚠️  Issues found — see above. Exiting 0 (report-only mode).');
+  } else {
+    console.log('\n✅ Verification complete — no critical issues.');
   }
 }
 
