@@ -194,7 +194,7 @@ async function main() {
   const msg3 = `━━━ JOB PIPELINE (Current Snapshot) ━━━\n\`\`\`\n${pipelineLines}\`\`\``;
 
   // --- Post to Discord ---
-  const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+  const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] });
   await client.login(process.env.DISCORD_TOKEN);
   await new Promise(r => client.once('ready', r));
 
