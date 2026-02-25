@@ -198,7 +198,8 @@ async function main() {
   await client.login(process.env.DISCORD_TOKEN);
   await new Promise(r => client.once('ready', r));
 
-  const channel = await client.channels.fetch(CHANNEL_ID, { allowUnknownGuild: true });
+  await Promise.all(client.guilds.cache.map(g => g.channels.fetch()));
+  const channel = await client.channels.fetch(CHANNEL_ID);
   if (!channel || !channel.isTextBased()) throw new Error(`Channel ${CHANNEL_ID} not found or not a text channel`);
   await channel.send(msg1);
   await channel.send(msg2);
