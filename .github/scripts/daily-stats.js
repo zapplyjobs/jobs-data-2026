@@ -33,7 +33,6 @@ const STAR_REPOS = [
   'New-Grad-Nursing-Jobs-2026',
   'resume-samples-2026',
   'interview-handbook-2026',
-  'Remote-Jobs-2026',
 ];
 
 // All 9 pipeline repos to check workflow health
