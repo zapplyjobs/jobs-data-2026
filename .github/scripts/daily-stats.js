@@ -88,7 +88,7 @@ function rawGet(url) {
 }
 
 function delta(current, previous) {
-  if (previous == null) return '';
+  if (previous == null) return '(new)';
   const diff = current - previous;
   if (diff === 0) return '(=)';
   return diff > 0 ? `(+${diff})` : `(${diff})`;
@@ -136,21 +136,25 @@ async function main() {
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
   let workflowLines = '';
 
-  await Promise.all(PIPELINE_REPOS.map(async (repo) => {
+  // GitHub system workflows to exclude (not our code)
+  const SYSTEM_WORKFLOWS = ['pages build and deployment', 'pages-build-deployment', 'CodeQL'];
+
+  const workflowResults = await Promise.all(PIPELINE_REPOS.map(async (repo) => {
     try {
       const runs = await githubGet(`/repos/${ORG}/${repo}/actions/runs?per_page=100&created=>=${since}`);
-      const list = runs.workflow_runs || [];
+      const list = (runs.workflow_runs || []).filter(r => !SYSTEM_WORKFLOWS.includes(r.name));
       const total = list.length;
       const success = list.filter(r => r.conclusion === 'success').length;
       const fail = list.filter(r => r.conclusion === 'failure').length;
       const inProgress = list.filter(r => r.status === 'in_progress').length;
       const status = fail > 0 ? '⚠️' : (total === 0 ? '➖' : '✅');
       const label = repo.slice(0, 38).padEnd(38);
-      workflowLines += `${status} ${label} ${success}✅ ${fail}❌ ${inProgress > 0 ? `${inProgress}🔄` : ''} (${total} runs)\n`;
+      return `${status} ${label} ${success}✅ ${fail}❌ ${inProgress > 0 ? `${inProgress}🔄` : '  '} (${total} runs)\n`;
     } catch {
-      workflowLines += `➖ ${repo.slice(0, 38).padEnd(38)} (unavailable)\n`;
+      return `➖ ${repo.slice(0, 38).padEnd(38)} (unavailable)\n`;
     }
   }));
+  workflowLines = workflowResults.join('');
 
   // --- Section 3: Job Pipeline ---
   let pipelineLines = '';
