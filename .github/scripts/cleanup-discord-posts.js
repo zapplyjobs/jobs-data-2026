@@ -92,10 +92,11 @@ async function cleanChannel(channel, cutoffDate, newerThanDate, windowStart, win
     // OLDER_THAN_HOURS mode: delete messages older than cutoffDate
     let toDelete, toSkip;
     if (windowStart && windowEnd) {
-      toDelete = messages.filter(m => m.createdAt <= windowStart && m.createdAt >= windowEnd);
-      toSkip = messages.filter(m => m.createdAt > windowStart || m.createdAt < windowEnd);
-      // Stop scanning once all messages are older than our window
-      if (messages.every(m => m.createdAt < windowEnd)) break;
+      // windowStart = older boundary, windowEnd = newer boundary
+      toDelete = messages.filter(m => m.createdAt >= windowStart && m.createdAt <= windowEnd);
+      toSkip = messages.filter(m => m.createdAt < windowStart || m.createdAt > windowEnd);
+      // Stop scanning once all messages are older than our window start
+      if (messages.every(m => m.createdAt < windowStart)) break;
     } else if (newerThanDate) {
       toDelete = messages.filter(m => m.createdAt >= newerThanDate);
       toSkip = messages.filter(m => m.createdAt < newerThanDate);
@@ -152,14 +153,15 @@ async function main() {
   const now = Date.now();
   const newerThanDate = LAST_N_HOURS ? new Date(now - LAST_N_HOURS * 60 * 60 * 1000) : null;
   const cutoffDate = new Date(now - OLDER_THAN_HOURS * 60 * 60 * 1000);
-  // Window: windowStart = older boundary (further back), windowEnd = newer boundary (more recent)
-  const windowStart = WINDOW_MODE ? new Date(now - WINDOW_NEWER_THAN_HOURS * 60 * 60 * 1000) : null;
-  const windowEnd   = WINDOW_MODE ? new Date(now - WINDOW_OLDER_THAN_HOURS * 60 * 60 * 1000) : null;
+  // Window: windowStart = older boundary (further back in time), windowEnd = newer boundary (more recent)
+  // e.g. OLDER=5 NEWER=3 at 17:00 UTC → windowStart=12:00, windowEnd=14:00 → delete 12:00–14:00 posts
+  const windowStart = WINDOW_MODE ? new Date(now - WINDOW_OLDER_THAN_HOURS * 60 * 60 * 1000) : null;
+  const windowEnd   = WINDOW_MODE ? new Date(now - WINDOW_NEWER_THAN_HOURS * 60 * 60 * 1000) : null;
 
   console.log(`🧹 Discord Cleanup — ${DRY_RUN ? 'DRY RUN (no deletions)' : 'LIVE MODE'}`);
   if (WINDOW_MODE) {
     console.log(`   Mode: WINDOW — messages between ${WINDOW_OLDER_THAN_HOURS}h ago and ${WINDOW_NEWER_THAN_HOURS}h ago`);
-    console.log(`   Window: ${windowEnd.toISOString()} → ${windowStart.toISOString()}`);
+    console.log(`   Window: ${windowStart.toISOString()} → ${windowEnd.toISOString()}`);
   } else if (newerThanDate) {
     console.log(`   Mode: LAST_N_HOURS=${LAST_N_HOURS} (messages newer than ${newerThanDate.toISOString()})`);
   } else {
