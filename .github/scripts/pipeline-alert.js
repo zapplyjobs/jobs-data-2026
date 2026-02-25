@@ -154,11 +154,13 @@ async function postAlert(failures) {
     process.exit(1);
   }
 
-  const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+  const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] });
   await client.login(DISCORD_TOKEN);
   await new Promise(r => client.once('ready', r));
 
+  await Promise.all(client.guilds.cache.map(g => g.channels.fetch()));
   const channel = await client.channels.fetch(CHANNEL_ID);
+  if (!channel || !channel.isTextBased()) throw new Error(`Channel ${CHANNEL_ID} not found or not a text channel`);
 
   const embed = {
     title: '🚨 Pipeline Alert',
