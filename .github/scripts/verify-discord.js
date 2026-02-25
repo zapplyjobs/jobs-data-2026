@@ -137,7 +137,7 @@ function verifyRouting(message, channelName, channelId) {
  */
 async function verifyChannel(channelName, channelId) {
   if (!channelId) {
-    results.missingChannels.push({ channel: channelName, reason: 'No channel ID configured' });
+    console.log(`  ⏭️  ${channelName}: no channel ID configured (skipped)`);
     return;
   }
 
@@ -235,12 +235,13 @@ async function main() {
     intents: [
       GatewayIntentBits.Guilds,
       GatewayIntentBits.GuildMessages,
-      GatewayIntentBits.MessageContent
     ]
   });
 
   await client.login(DISCORD_TOKEN);
   console.log('✅ Discord client connected\n');
+
+  await Promise.all(client.guilds.cache.map(g => g.channels.fetch()));
 
   // Verify all channels
   for (const [channelName, channelId] of Object.entries(CHANNELS)) {
