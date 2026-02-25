@@ -70,4 +70,5 @@ jobs:
           git config user.name "Aggregator Bot"
           git add .github/data/posted_jobs.json .github/data/global-dedupe-store.json || exit 0
           git commit -m "chore: update dedupe database [skip ci]" || exit 0
+          git pull --rebase origin main || true
           git push

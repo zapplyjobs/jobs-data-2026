@@ -29,4 +29,5 @@ jobs:
           git config user.name "Metrics Bot"
           git add .github/data/metrics/ || exit 0
           git commit -m "chore: update metrics [skip ci]" || exit 0
+          git pull --rebase origin main || true
           git push
