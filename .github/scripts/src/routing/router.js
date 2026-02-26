@@ -235,6 +235,9 @@ function getJobChannelDetails(job, CHANNEL_CONFIG) {
   // ============================================================================
   const tagDomains = job.tags?.domains || [];
   if (tagDomains.length > 0 && !tagDomains.includes('general')) {
+    if (tagDomains.includes('ai') && CHANNEL_CONFIG.ai) {
+      return { channelId: CHANNEL_CONFIG.ai, category: 'ai', matchType: 'tag-domain', priority: 'HIGH', source: 'tags' };
+    }
     if (tagDomains.includes('data_science') && CHANNEL_CONFIG['data-science']) {
       return { channelId: CHANNEL_CONFIG['data-science'], category: 'data-science', matchType: 'tag-domain', priority: 'HIGH', source: 'tags' };
     }
