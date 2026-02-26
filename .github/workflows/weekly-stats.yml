@@ -26,7 +26,7 @@ jobs:
 
       - name: Post weekly summary to Discord
         env:
-          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TEAM_TOKEN }}
           DISCORD_WEEKLY_STATS_CHANNEL_ID: ${{ secrets.DISCORD_WEEKLY_STATS_CHANNEL_ID }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node .github/scripts/weekly-summary.js
