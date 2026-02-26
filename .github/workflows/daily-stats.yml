@@ -26,7 +26,7 @@ jobs:
 
       - name: Post daily stats to Discord
         env:
-          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TEAM_TOKEN }}
           DISCORD_DAILY_STATS_CHANNEL_ID: ${{ secrets.DISCORD_DAILY_STATS_CHANNEL_ID }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node .github/scripts/daily-stats.js

@@ -55,7 +55,7 @@ jobs:
 
       - name: Run Discord cleanup
         env:
-          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TEAM_TOKEN }}
           WINDOW_OLDER_THAN_HOURS: ${{ inputs.window_older_than_hours }}
           WINDOW_NEWER_THAN_HOURS: ${{ inputs.window_newer_than_hours }}
           LAST_N_HOURS: ${{ inputs.last_n_hours }}
