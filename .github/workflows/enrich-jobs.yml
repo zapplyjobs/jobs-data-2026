@@ -1,0 +1,40 @@
+name: Enrich Jobs
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+jobs:
+  enrich:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run enrichment
+        run: node .github/scripts/enrich-jobs.js
+
+      - name: Commit enriched_jobs.json
+        if: always()
+        run: |
+          git config user.email "bot@zapplyjobs.com"
+          git config user.name "Aggregator Bot"
+          git add .github/data/enriched_jobs.json || exit 0
+          git commit -m "chore: update enriched jobs [skip ci]" || exit 0
+          git pull --rebase origin main || true
+          git push
