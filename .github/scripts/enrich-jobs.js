@@ -51,7 +51,8 @@ function loadTaxonomy() {
 // ---------------------------------------------------------------------------
 function toPlainText(html) {
   if (!html) return '';
-  const decoded = he.decode(html);
+  // Double-decode: &amp;nbsp; → &nbsp; → (space). Handles double-encoded HTML from ATS sources.
+  const decoded = he.decode(he.decode(html));
   // Replace block-level tags with newline for section splitting
   const withNewlines = decoded.replace(/<\/(p|div|li|h[1-6]|br)>/gi, '\n');
   // Strip remaining tags
@@ -131,7 +132,7 @@ function splitSections(text) {
 
 // Terms that are too ambiguous on their own — require a tech context signal
 // within the same sentence/bullet to count as a match.
-const AMBIGUOUS_TERMS = new Set(['go', 'r', 'c', 'rest', 'restful', 'assembly', 'lean', 'chef']);
+const AMBIGUOUS_TERMS = new Set(['go', 'r', 'c', 'rest', 'restful', 'assembly', 'lean', 'chef', 'classification', 'move']);
 
 const TECH_CONTEXT_SIGNALS = [
   /\b(programming|language|developer|engineer|code|software|written in|experience with|proficien|framework|backend|api)\b/i,
@@ -260,7 +261,13 @@ function loadEnrichedIds() {
   return ids;
 }
 
+const TECH_DOMAINS = new Set(['software', 'data_science', 'hardware', 'ai']);
+
 function enrichJob(job, termMap) {
+  // Skip non-tech jobs — enrichment is only useful for tech roles
+  const domains = job.tags?.domains || [];
+  if (!domains.some(d => TECH_DOMAINS.has(d))) return null;
+
   const plainText = toPlainText(job.description || '');
   const { required, preferred } = splitSections(plainText);
 
@@ -314,7 +321,7 @@ function main() {
     return;
   }
 
-  const results = batch.map(job => enrichJob(job, termMap));
+  const results = batch.map(job => enrichJob(job, termMap)).filter(Boolean);
 
   // Append new results
   const newLines = results.map(r => JSON.stringify(r)).join('\n') + '\n';
