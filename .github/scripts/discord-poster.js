@@ -251,7 +251,7 @@ function generateMinimalJobFingerprint(job) {
 /**
  * Post single job to Discord channel
  */
-async function postJobToDiscord(job, channelId, discordClient, channelName, channelJobNumber) {
+async function postJobToDiscord(job, channelId, discordClient, channelName, channelJobNumber, enrichedMap = new Map()) {
   const channel = await discordClient.channels.fetch(channelId);
   if (!channel) {
     throw new Error(`Channel not found: ${channelId}`);
@@ -285,6 +285,16 @@ async function postJobToDiscord(job, channelId, discordClient, channelName, chan
       name: '🏷️ Tags',
       value: tags.map(tag => `#${tag}`).join(' '),
       inline: false
+    });
+  }
+
+  // UX-2: Visa sponsorship tag from enriched data (ATS application form detection)
+  const enriched = enrichedMap.get(job.id);
+  if (enriched && enriched.visa_question_present === true) {
+    embed.addFields({
+      name: '🌐 Visa',
+      value: 'Sponsors Visa',
+      inline: true
     });
   }
 
@@ -344,6 +354,27 @@ async function main() {
   });
 
   console.log(`✅ After batch deduplication: ${uniqueJobs.length} jobs`);
+
+  // UX-1: Sort newest-first so Discord channels show most recent jobs first
+  uniqueJobs.sort((a, b) => {
+    const aDate = a.job_posted_at_datetime_utc ? new Date(a.job_posted_at_datetime_utc).getTime() : 0;
+    const bDate = b.job_posted_at_datetime_utc ? new Date(b.job_posted_at_datetime_utc).getTime() : 0;
+    return bDate - aDate;
+  });
+
+  // UX-2: Load enriched data for visa tag lookup (id → visa_question_present)
+  const enrichedMap = new Map();
+  const enrichedPath = path.join(DATA_DIR, 'enriched_jobs.json');
+  if (fs.existsSync(enrichedPath)) {
+    const enrichedLines = fs.readFileSync(enrichedPath, 'utf8').trim().split('\n').filter(Boolean);
+    for (const line of enrichedLines) {
+      try {
+        const e = JSON.parse(line);
+        if (e.id) enrichedMap.set(e.id, e);
+      } catch (_) {}
+    }
+    console.log(`✅ Loaded ${enrichedMap.size} enriched records for visa tagging`);
+  }
 
   // Post jobs
   console.log('\n📤 Posting jobs to Discord...');
@@ -455,7 +486,7 @@ async function main() {
         // Assign job number AFTER successful post to prevent counter inflation on failures
         const channelJobNumber = postedJobsManager.peekNextChannelJobNumber(channelInfo.channelId);
 
-        const message = await postJobToDiscord(job, channelInfo.channelId, discordClient, channelName, channelJobNumber);
+        const message = await postJobToDiscord(job, channelInfo.channelId, discordClient, channelName, channelJobNumber, enrichedMap);
 
         // Post succeeded — now commit the counter increment
         postedJobsManager.commitChannelJobNumber(channelInfo.channelId);
