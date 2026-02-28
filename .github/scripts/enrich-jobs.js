@@ -109,6 +109,12 @@ const REQUIRED_HEADERS = [
   /must[ -]have[:\s]?$/i,
   /you (will need|should have)[:\s]?$/i,
   /skills? you.ll need[:\s]?/i,
+  /in practice this looks like[:\s]?$/i,
+  /you might thrive here if[:\s]?$/i,
+  /who you are[:\s]?$/i,
+  /what you.ll bring[:\s]?$/i,
+  /about you[:\s]?$/i,
+  /the ideal candidate[:\s]?$/i,
 ];
 
 const PREFERRED_HEADERS = [
@@ -240,6 +246,9 @@ const VISA_NEGATIVE = [
   /u\.?s\.? citizen(ship)? (or|and) (permanent resident|green card)/i,
   /legally authorized to work.{0,40}united states/i,
   /work authorization.{0,40}required/i,
+  /must be authorized to work in the (u\.?s\.?|united states)/i,
+  /applicant must be.{0,30}(u\.?s\.? citizen|permanent resident)/i,
+  /must be.{0,20}(citizen|permanent resident).{0,30}united states/i,
 ];
 
 // Positive signals → true
@@ -353,6 +362,10 @@ async function fetchApplicationVisaStatus(job) {
 // Main
 // ---------------------------------------------------------------------------
 function loadAllJobs() {
+  if (!fs.existsSync(ALL_JOBS_PATH)) {
+    console.log('all_jobs.json not found — nothing to enrich');
+    process.exit(0);
+  }
   const lines = fs.readFileSync(ALL_JOBS_PATH, 'utf8').trim().split('\n');
   return lines.map(l => JSON.parse(l));
 }
