@@ -26,6 +26,7 @@ const BATCH_SIZE = 40;
 const DATA_DIR = path.join(process.cwd(), '.github', 'data');
 const ALL_JOBS_PATH = path.join(DATA_DIR, 'all_jobs.json');
 const ENRICHED_PATH = path.join(DATA_DIR, 'enriched_jobs.json');
+const PROCESSED_PATH = path.join(DATA_DIR, 'processed_ids.json');
 const TAXONOMY_PATH = path.join(__dirname, 'enrich', 'skills-taxonomy.json');
 
 // ---------------------------------------------------------------------------
@@ -248,10 +249,20 @@ function loadAllJobs() {
   return lines.map(l => JSON.parse(l));
 }
 
+function loadProcessedIds() {
+  if (!fs.existsSync(PROCESSED_PATH)) return new Set();
+  try {
+    const arr = JSON.parse(fs.readFileSync(PROCESSED_PATH, 'utf8'));
+    return new Set(Array.isArray(arr) ? arr : []);
+  } catch (_) {
+    return new Set();
+  }
+}
+
 function loadEnrichedIds() {
-  if (!fs.existsSync(ENRICHED_PATH)) return new Set();
+  const ids = loadProcessedIds();
+  if (!fs.existsSync(ENRICHED_PATH)) return ids;
   const lines = fs.readFileSync(ENRICHED_PATH, 'utf8').trim().split('\n').filter(Boolean);
-  const ids = new Set();
   for (const line of lines) {
     try {
       const obj = JSON.parse(line);
@@ -322,37 +333,49 @@ function main() {
   }
 
   const results = batch.map(job => enrichJob(job, termMap)).filter(Boolean);
+  const skipped = batch.length - results.length;
 
-  // Append new results
-  const newLines = results.map(r => JSON.stringify(r)).join('\n') + '\n';
-  fs.appendFileSync(ENRICHED_PATH, newLines, 'utf8');
-  console.log(`[enrich-jobs] Enriched and appended ${results.length} jobs`);
+  // Append new enriched results
+  if (results.length > 0) {
+    const newLines = results.map(r => JSON.stringify(r)).join('\n') + '\n';
+    fs.appendFileSync(ENRICHED_PATH, newLines, 'utf8');
+  }
+  console.log(`[enrich-jobs] Enriched and appended ${results.length} jobs (${skipped} skipped — non-tech)`);
+
+  // Mark ALL batch IDs as processed (including non-tech skips) so they don't re-enter pending.
+  const liveIds = new Set(allJobs.map(j => j.id));
+  const updatedProcessed = new Set([...enrichedIds, ...batch.map(j => j.id)]);
+  // Prune processed_ids.json: remove IDs no longer in the live pool (aged out of 14-day window)
+  const prunedProcessed = Array.from(updatedProcessed).filter(id => liveIds.has(id));
+  fs.writeFileSync(PROCESSED_PATH, JSON.stringify(prunedProcessed), 'utf8');
+  console.log(`[enrich-jobs] processed_ids.json: ${prunedProcessed.length} total (pruned to live pool)`);
 
   // Prune enriched_jobs.json to only keep IDs still present in all_jobs.json.
   // all_jobs.json is a 14-day rolling window — jobs that age out are gone and
   // their enriched records are no longer useful.
-  const liveIds = new Set(allJobs.map(j => j.id));
-  const allEnrichedLines = fs.readFileSync(ENRICHED_PATH, 'utf8').trim().split('\n').filter(Boolean);
-  const prunedLines = allEnrichedLines.filter(line => {
-    try {
-      const obj = JSON.parse(line);
-      return liveIds.has(obj.id);
-    } catch (_) {
-      return false; // drop malformed lines
+  if (fs.existsSync(ENRICHED_PATH)) {
+    const allEnrichedLines = fs.readFileSync(ENRICHED_PATH, 'utf8').trim().split('\n').filter(Boolean);
+    const prunedLines = allEnrichedLines.filter(line => {
+      try {
+        const obj = JSON.parse(line);
+        return liveIds.has(obj.id);
+      } catch (_) {
+        return false; // drop malformed lines
+      }
+    });
+
+    if (prunedLines.length < allEnrichedLines.length) {
+      const pruned = allEnrichedLines.length - prunedLines.length;
+      fs.writeFileSync(ENRICHED_PATH, prunedLines.join('\n') + '\n', 'utf8');
+      console.log(`[enrich-jobs] Pruned ${pruned} expired records (no longer in all_jobs.json)`);
     }
-  });
 
-  if (prunedLines.length < allEnrichedLines.length) {
-    const pruned = allEnrichedLines.length - prunedLines.length;
-    fs.writeFileSync(ENRICHED_PATH, prunedLines.join('\n') + '\n', 'utf8');
-    console.log(`[enrich-jobs] Pruned ${pruned} expired records (no longer in all_jobs.json)`);
+    // Quick stats
+    const withRequired = results.filter(r => r.required_skills.length > 0).length;
+    const withVisa = results.filter(r => r.sponsors_visa !== null).length;
+    console.log(`[enrich-jobs] Stats: ${withRequired}/${results.length} had required skills, ${withVisa}/${results.length} had visa signal`);
+    console.log(`[enrich-jobs] Total enriched (post-prune): ${prunedLines.length}`);
   }
-
-  // Quick stats
-  const withRequired = results.filter(r => r.required_skills.length > 0).length;
-  const withVisa = results.filter(r => r.sponsors_visa !== null).length;
-  console.log(`[enrich-jobs] Stats: ${withRequired}/${results.length} had required skills, ${withVisa}/${results.length} had visa signal`);
-  console.log(`[enrich-jobs] Total enriched (post-prune): ${prunedLines.length}`);
 }
 
 main();

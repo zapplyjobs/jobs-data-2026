@@ -24,7 +24,7 @@ jobs:
           cache-dependency-path: package-lock.json
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Run enrichment
         run: node .github/scripts/enrich-jobs.js
@@ -34,7 +34,7 @@ jobs:
         run: |
           git config user.email "bot@zapplyjobs.com"
           git config user.name "Aggregator Bot"
-          git add .github/data/enriched_jobs.json || exit 0
+          git add .github/data/enriched_jobs.json .github/data/processed_ids.json || exit 0
           git commit -m "chore: update enriched jobs [skip ci]" || exit 0
           git pull --rebase origin main || true
           git push
