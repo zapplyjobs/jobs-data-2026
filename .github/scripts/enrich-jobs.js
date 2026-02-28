@@ -115,6 +115,8 @@ const REQUIRED_HEADERS = [
   /what you.ll bring[:\s]?$/i,
   /about you[:\s]?$/i,
   /the ideal candidate[:\s]?$/i,
+  /^experience[:\s]?$/i,
+  /successful candidates?.{0,50}(will|should|must)/i,
 ];
 
 const PREFERRED_HEADERS = [
@@ -336,7 +338,10 @@ async function fetchApplicationVisaStatus(job) {
       if (!result || result.status !== 200) return null;
       // window.__appData = {...}; — extract JSON, search field titles for visa/sponsor
       const m = result.body.match(/window\.__appData\s*=\s*(\{[\s\S]*?\});\s*\n/);
-      if (!m) return null;
+      if (!m) {
+        console.log(`[enrich] Ashby window.__appData not found for ${job.id} — visa check skipped`);
+        return null;
+      }
       const appData = JSON.parse(m[1]);
       const str = JSON.stringify(appData);
       return ASHBY_VISA_RE.test(str) ? true : false;
@@ -405,7 +410,11 @@ async function enrichJob(job, termMap) {
   const plainText = toPlainText(job.description || '');
   const { required, preferred } = splitSections(plainText);
 
-  const requiredSkills = matchSkills(required, termMap);
+  if (!required) {
+    console.log(`[enrich] no section found for ${job.id} — using full text`);
+  }
+  const text = required || plainText;
+  const requiredSkills = matchSkills(text, termMap);
   const niceToHaveSkills = matchSkills(preferred, termMap).filter(
     s => !requiredSkills.includes(s)
   );
@@ -417,6 +426,7 @@ async function enrichJob(job, termMap) {
 
   return {
     id: job.id,
+    enricher_version: 1,
     required_skills: requiredSkills,
     nice_to_have_skills: niceToHaveSkills,
     sponsors_visa: sponsorsVisa,
@@ -466,7 +476,7 @@ async function main() {
     const newLines = results.map(r => JSON.stringify(r)).join('\n') + '\n';
     fs.appendFileSync(ENRICHED_PATH, newLines, 'utf8');
   }
-  console.log(`[enrich-jobs] Enriched and appended ${results.length} jobs (${skipped} skipped — non-tech)`);
+  console.log(`[enrich-jobs] Enriched and appended ${results.length} jobs (${skipped} skipped — non-tech or non-US)`);
 
   // Mark ALL batch IDs as processed (including non-tech skips) so they don't re-enter pending.
   const liveIds = new Set(allJobs.map(j => j.id));
