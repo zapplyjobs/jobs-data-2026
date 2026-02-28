@@ -383,9 +383,11 @@ function loadEnrichedIds() {
 const TECH_DOMAINS = new Set(['software', 'data_science', 'hardware', 'ai']);
 
 async function enrichJob(job, termMap) {
-  // Skip non-tech jobs — enrichment is only useful for tech roles
+  // Skip non-tech and non-US jobs — enrichment targets US tech roles only
   const domains = job.tags?.domains || [];
+  const locations = job.tags?.locations || [];
   if (!domains.some(d => TECH_DOMAINS.has(d))) return null;
+  if (!locations.includes('us')) return null;
 
   const plainText = toPlainText(job.description || '');
   const { required, preferred } = splitSections(plainText);
