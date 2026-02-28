@@ -30,7 +30,7 @@ jobs:
         run: node .github/scripts/enrich-jobs.js
 
       - name: Commit enriched_jobs.json
-        if: always()
+        if: success()
         run: |
           git config user.email "bot@zapplyjobs.com"
           git config user.name "Aggregator Bot"
