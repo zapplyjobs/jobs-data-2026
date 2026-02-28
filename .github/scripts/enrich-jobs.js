@@ -378,10 +378,30 @@ function loadAllJobs() {
 function loadProcessedIds() {
   if (!fs.existsSync(PROCESSED_PATH)) return new Set();
   try {
-    const arr = JSON.parse(fs.readFileSync(PROCESSED_PATH, 'utf8'));
-    return new Set(Array.isArray(arr) ? arr : []);
+    const raw = JSON.parse(fs.readFileSync(PROCESSED_PATH, 'utf8'));
+    // Support both legacy flat array and current map format
+    if (Array.isArray(raw)) return new Set(raw);
+    if (raw && typeof raw === 'object') return new Set(Object.keys(raw));
+    return new Set();
   } catch (_) {
     return new Set();
+  }
+}
+
+function loadProcessedMap() {
+  if (!fs.existsSync(PROCESSED_PATH)) return {};
+  try {
+    const raw = JSON.parse(fs.readFileSync(PROCESSED_PATH, 'utf8'));
+    // Migrate legacy flat array to map format on first read
+    if (Array.isArray(raw)) {
+      const map = {};
+      for (const id of raw) map[id] = { status: 'enriched', processed_at: null };
+      return map;
+    }
+    if (raw && typeof raw === 'object') return raw;
+    return {};
+  } catch (_) {
+    return {};
   }
 }
 
@@ -404,8 +424,8 @@ async function enrichJob(job, termMap) {
   // Skip non-tech and non-US jobs — enrichment targets US tech roles only
   const domains = job.tags?.domains || [];
   const locations = job.tags?.locations || [];
-  if (!domains.some(d => TECH_DOMAINS.has(d))) return null;
-  if (!locations.includes('us')) return null;
+  if (!domains.some(d => TECH_DOMAINS.has(d))) return { skipped: true, reason: 'non-tech' };
+  if (!locations.includes('us')) return { skipped: true, reason: 'non-us' };
 
   const plainText = toPlainText(job.description || '');
   const { required, preferred } = splitSections(plainText);
@@ -468,23 +488,38 @@ async function main() {
   }
 
   const enriched = await Promise.all(batch.map(job => enrichJob(job, termMap)));
-  const results = enriched.filter(Boolean);
-  const skipped = batch.length - results.length;
+  const results = enriched.filter(r => r && !r.skipped);
+  const skippedResults = enriched.filter(r => r && r.skipped);
+  console.log(`[enrich-jobs] Enriched and appended ${results.length} jobs (${skippedResults.length} skipped — non-tech or non-US)`);
 
   // Append new enriched results
   if (results.length > 0) {
     const newLines = results.map(r => JSON.stringify(r)).join('\n') + '\n';
     fs.appendFileSync(ENRICHED_PATH, newLines, 'utf8');
   }
-  console.log(`[enrich-jobs] Enriched and appended ${results.length} jobs (${skipped} skipped — non-tech or non-US)`);
 
-  // Mark ALL batch IDs as processed (including non-tech skips) so they don't re-enter pending.
+  // Mark ALL batch IDs as processed (including non-tech/non-US skips) so they don't re-enter pending.
+  // Write map format: { [id]: { status, reason?, processed_at } }
   const liveIds = new Set(allJobs.map(j => j.id));
-  const updatedProcessed = new Set([...enrichedIds, ...batch.map(j => j.id)]);
-  // Prune processed_ids.json: remove IDs no longer in the live pool (aged out of 14-day window)
-  const prunedProcessed = Array.from(updatedProcessed).filter(id => liveIds.has(id));
-  fs.writeFileSync(PROCESSED_PATH, JSON.stringify(prunedProcessed), 'utf8');
-  console.log(`[enrich-jobs] processed_ids.json: ${prunedProcessed.length} total (pruned to live pool)`);
+  const processedMap = loadProcessedMap();
+  const now = new Date().toISOString();
+
+  for (let i = 0; i < batch.length; i++) {
+    const job = batch[i];
+    const outcome = enriched[i];
+    if (outcome && outcome.skipped) {
+      processedMap[job.id] = { status: 'skipped', reason: outcome.reason, processed_at: now };
+    } else {
+      processedMap[job.id] = { status: 'enriched', processed_at: now };
+    }
+  }
+
+  // Prune: remove IDs no longer in the live pool (aged out of 14-day window)
+  for (const id of Object.keys(processedMap)) {
+    if (!liveIds.has(id)) delete processedMap[id];
+  }
+  fs.writeFileSync(PROCESSED_PATH, JSON.stringify(processedMap), 'utf8');
+  console.log(`[enrich-jobs] processed_ids.json: ${Object.keys(processedMap).length} total (pruned to live pool)`);
 
   // Prune enriched_jobs.json to only keep IDs still present in all_jobs.json.
   // all_jobs.json is a 14-day rolling window — jobs that age out are gone and
