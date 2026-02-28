@@ -54,15 +54,37 @@ function loadTaxonomy() {
 }
 
 // ---------------------------------------------------------------------------
-// HTML → plain text
-// Descriptions are HTML-entity-encoded. Decode first, then strip tags.
+// HTML → plain text with structural section markers
+// Strategy:
+//   - <h1>–<h4>: always structural → emit ###SECTION:text###
+//   - <strong>/<b> inside a block that contains ONLY the strong tag → structural
+//   - All other <strong>/<b> → inline emphasis, stripped normally
+// Sampling (5 GH + 5 Ashby, 2026-02-28): GH uses <strong> for section headers
+// (Anduril, SpaceX, Lucid, Okta); <h2> seen only in Elastic. Ashby uses <h1>–<h3>
+// depending on company. No single tag is universal, so both paths needed.
 // ---------------------------------------------------------------------------
 function toPlainText(html) {
   if (!html) return '';
   // Double-decode: &amp;nbsp; → &nbsp; → (space). Handles double-encoded HTML from ATS sources.
   const decoded = he.decode(he.decode(html));
-  // Replace block-level tags with newline for section splitting
-  const withNewlines = decoded.replace(/<\/(p|div|li|h[1-6]|br)>/gi, '\n');
+
+  // Step 1: Replace <h1>–<h4> with structural markers before any other processing.
+  // Capture tag content, strip inner tags, emit ###SECTION:text###.
+  let marked = decoded.replace(/<h[1-4][^>]*>([\s\S]*?)<\/h[1-4]>/gi, (_, inner) => {
+    const text = inner.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+    return text ? `\n###SECTION:${text}###\n` : '\n';
+  });
+
+  // Step 2: Replace block-level <p> and <div> that contain ONLY a <strong> or <b>
+  // (possibly with whitespace/&nbsp;) with a structural marker.
+  // Pattern: <p> or <div> whose entire content is <strong>text</strong> or <b>text</b>
+  marked = marked.replace(/<(p|div)[^>]*>\s*<(?:strong|b)[^>]*>([\s\S]*?)<\/(?:strong|b)>\s*<\/\1>/gi, (_, _tag, inner) => {
+    const text = inner.replace(/<[^>]+>/g, '').replace(/&nbsp;/gi, ' ').replace(/\s+/g, ' ').trim();
+    return text ? `\n###SECTION:${text}###\n` : '\n';
+  });
+
+  // Step 3: Replace remaining block-level tags with newline for section splitting
+  const withNewlines = marked.replace(/<\/(p|div|li|h[1-6]|br)>/gi, '\n');
   // Strip remaining tags
   const stripped = withNewlines.replace(/<[^>]+>/g, ' ');
   // Normalize whitespace (but preserve newlines for section detection)
@@ -72,28 +94,32 @@ function toPlainText(html) {
 // ---------------------------------------------------------------------------
 // Section splitter
 // Returns { required: string, preferred: string }
+// Matches both ###SECTION:### markers (from HTML tags) and plain-text headers
+// (fallback for JSearch/Lever plain-text descriptions).
+// [:\s]? makes trailing colon/space optional — handles all-caps headers with no suffix.
 // ---------------------------------------------------------------------------
 const REQUIRED_HEADERS = [
-  /requirements?[:\s]/i,
-  /qualifications?[:\s]/i,
-  /what you (need|bring|must have)[:\s]/i,
-  /minimum qualifications?[:\s]/i,
-  /basic qualifications?[:\s]/i,
-  /required skills?[:\s]/i,
-  /must[ -]have[:\s]/i,
-  /you (will need|should have)[:\s]/i,
+  /requirements?[:\s]?$/i,
+  /(?<!preferred\s)(?<!desired\s)qualifications?[:\s]?$/i,
+  /what you (need|bring|must have)[:\s]?$/i,
+  /what we.re looking for[:\s]?$/i,
+  /minimum qualifications?[:\s]?$/i,
+  /basic qualifications?[:\s]?$/i,
+  /required (skills?|qualifications?)[:\s]?$/i,
+  /must[ -]have[:\s]?$/i,
+  /you (will need|should have)[:\s]?$/i,
+  /skills? you.ll need[:\s]?/i,
 ];
 
 const PREFERRED_HEADERS = [
-  /preferred qualifications?[:\s]/i,
-  /nice[ -]to[ -]have[:\s]/i,
-  /bonus (points?|if|qualifications?)?[:\s]/i,
-  /preferred skills?[:\s]/i,
-  /desired qualifications?[:\s]/i,
-  /plus (if|points?)?[:\s]/i,
-  /it['']?s? (a )?(bonus|plus|nice)[:\s]/i,
-  /while not required[:\s]/i,
-  /added (plus|bonus)[:\s]/i,
+  /preferred (qualifications?|skills?|experience)/i,
+  /nice[ -]to[ -]haves?[:\s]?$/i,
+  /bonus (points?|if|qualifications?)?[:\s]?$/i,
+  /desired qualifications?/i,
+  /plus (if|points?)?[:\s]?$/i,
+  /it'?s? (a )?(bonus|plus|nice)[:\s]?$/i,
+  /while not required/i,
+  /added (plus|bonus)/i,
 ];
 
 function splitSections(text) {
@@ -105,7 +131,11 @@ function splitSections(text) {
   const allBoundaries = []; // { idx, type }
 
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
+    // ###SECTION:text### markers (from <h1>–<h4> and block-level <strong>)
+    // Extract the section label and match against header patterns
+    const sectionMatch = lines[i].match(/^###SECTION:(.+?)###$/);
+    const line = sectionMatch ? sectionMatch[1].trim() : lines[i];
+
     if (REQUIRED_HEADERS.some(r => r.test(line))) {
       allBoundaries.push({ idx: i, type: 'required' });
       if (requiredStart === -1) requiredStart = i;
