@@ -5,17 +5,24 @@
  * appends results to enriched_jobs.json (JSONL).
  *
  * Enrichment extracts:
- *   - required_skills[]      (from requirements/qualifications sections)
- *   - nice_to_have_skills[]  (from preferred/bonus sections)
- *   - sponsors_visa          (true | false | null)
- *   - is_remote              (bool, from tags.locations includes 'remote')
- *   - experience_level       (from tags.employment)
+ *   - required_skills[]        (from requirements/qualifications sections)
+ *   - nice_to_have_skills[]    (from preferred/bonus sections)
+ *   - sponsors_visa            (true | false | null — text-based, kept as fallback)
+ *   - visa_question_present    (true | false | null — from ATS application form)
+ *   - is_remote                (bool, from tags.locations includes 'remote')
+ *   - experience_level         (from tags.employment)
  *   + denormalized display fields: title, company_name, job_city, job_state, url, posted_at
+ *
+ * visa_question_present detection (per ATS):
+ *   Greenhouse: GET /v1/boards/{slug}/jobs/{id}?questions=true → questions[].label
+ *   Ashby:      fetch apply_url page → window.__appData JSON → field.title
+ *   Lever:      fetch apply_url page → HTML-entity-encoded JSON → fields[].text
  */
 
 'use strict';
 
 const fs = require('fs');
+const https = require('https');
 const path = require('path');
 const he = require('he');
 
@@ -242,6 +249,77 @@ function detectVisa(text) {
 }
 
 // ---------------------------------------------------------------------------
+// ATS application form visa detection
+// Returns: true (question present) | false (not present) | null (fetch failed / source unsupported)
+// ---------------------------------------------------------------------------
+
+const GH_VISA_RE = /sponsor|visa/i;
+const ASHBY_VISA_RE = /sponsor/i;
+const LEVER_VISA_RE = /sponsor/i;
+const FETCH_TIMEOUT_MS = 8000;
+
+function httpsGet(url) {
+  return new Promise((resolve) => {
+    const req = https.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } }, (res) => {
+      // Follow redirects (max 2)
+      if ((res.statusCode === 301 || res.statusCode === 302) && res.headers.location) {
+        resolve(httpsGet(res.headers.location));
+        return;
+      }
+      let d = '';
+      res.on('data', c => d += c);
+      res.on('end', () => resolve({ status: res.statusCode, body: d }));
+    });
+    req.setTimeout(FETCH_TIMEOUT_MS, () => { req.destroy(); resolve(null); });
+    req.on('error', () => resolve(null));
+  });
+}
+
+async function fetchApplicationVisaStatus(job) {
+  try {
+    if (job.source === 'greenhouse') {
+      // Parse slug + numeric ID from job.id format: "greenhouse-{slug}-{numeric_id}"
+      const m = job.id.match(/^greenhouse-(.+)-(\d+)$/);
+      if (!m) return null;
+      const [, slug, jobId] = m;
+      const url = `https://boards-api.greenhouse.io/v1/boards/${slug}/jobs/${jobId}?questions=true`;
+      const result = await httpsGet(url);
+      if (!result || result.status !== 200) return null;
+      const data = JSON.parse(result.body);
+      const questions = data.questions || [];
+      return questions.some(q => GH_VISA_RE.test(q.label || '')) ? true : false;
+    }
+
+    if (job.source === 'ashby') {
+      const applyUrl = job.apply_url;
+      if (!applyUrl) return null;
+      const result = await httpsGet(applyUrl);
+      if (!result || result.status !== 200) return null;
+      // window.__appData = {...}; — extract JSON, search field titles for visa/sponsor
+      const m = result.body.match(/window\.__appData\s*=\s*(\{[\s\S]*?\});\s*\n/);
+      if (!m) return null;
+      const appData = JSON.parse(m[1]);
+      const str = JSON.stringify(appData);
+      return ASHBY_VISA_RE.test(str) ? true : false;
+    }
+
+    if (job.source === 'lever') {
+      const applyUrl = job.apply_url;
+      if (!applyUrl) return null;
+      const result = await httpsGet(applyUrl);
+      if (!result || result.status !== 200) return null;
+      // Visa question is HTML-entity-encoded JSON embedded in page
+      const decoded = he.decode(result.body);
+      return LEVER_VISA_RE.test(decoded) ? true : false;
+    }
+
+    return null; // JSearch or other sources — no application page
+  } catch (_) {
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
 function loadAllJobs() {
@@ -274,7 +352,7 @@ function loadEnrichedIds() {
 
 const TECH_DOMAINS = new Set(['software', 'data_science', 'hardware', 'ai']);
 
-function enrichJob(job, termMap) {
+async function enrichJob(job, termMap) {
   // Skip non-tech jobs — enrichment is only useful for tech roles
   const domains = job.tags?.domains || [];
   if (!domains.some(d => TECH_DOMAINS.has(d))) return null;
@@ -288,6 +366,7 @@ function enrichJob(job, termMap) {
   );
 
   const sponsorsVisa = detectVisa(plainText);
+  const visaQuestionPresent = await fetchApplicationVisaStatus(job);
   const isRemote = (job.tags?.locations || []).includes('remote');
   const experienceLevel = job.tags?.employment || null;
 
@@ -296,6 +375,7 @@ function enrichJob(job, termMap) {
     required_skills: requiredSkills,
     nice_to_have_skills: niceToHaveSkills,
     sponsors_visa: sponsorsVisa,
+    visa_question_present: visaQuestionPresent,
     is_remote: isRemote,
     experience_level: experienceLevel,
     enriched_at: new Date().toISOString(),
@@ -309,7 +389,7 @@ function enrichJob(job, termMap) {
   };
 }
 
-function main() {
+async function main() {
   console.log('[enrich-jobs] Starting enrichment run');
 
   const termMap = loadTaxonomy();
@@ -332,7 +412,8 @@ function main() {
     return;
   }
 
-  const results = batch.map(job => enrichJob(job, termMap)).filter(Boolean);
+  const enriched = await Promise.all(batch.map(job => enrichJob(job, termMap)));
+  const results = enriched.filter(Boolean);
   const skipped = batch.length - results.length;
 
   // Append new enriched results
@@ -373,9 +454,10 @@ function main() {
     // Quick stats
     const withRequired = results.filter(r => r.required_skills.length > 0).length;
     const withVisa = results.filter(r => r.sponsors_visa !== null).length;
-    console.log(`[enrich-jobs] Stats: ${withRequired}/${results.length} had required skills, ${withVisa}/${results.length} had visa signal`);
+    const withVisaForm = results.filter(r => r.visa_question_present !== null).length;
+    console.log(`[enrich-jobs] Stats: ${withRequired}/${results.length} had required skills, ${withVisa}/${results.length} had visa text signal, ${withVisaForm}/${results.length} had visa form signal`);
     console.log(`[enrich-jobs] Total enriched (post-prune): ${prunedLines.length}`);
   }
 }
 
-main();
+main().catch(err => { console.error('[enrich-jobs] Fatal:', err); process.exit(1); });
