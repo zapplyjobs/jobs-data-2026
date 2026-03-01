@@ -47,9 +47,8 @@ const PIPELINE_REPOS = [
   'New-Grad-Nursing-Jobs-2026',
 ];
 
-// Consumer repos with current_jobs.json on GitHub
+// Consumer repos that write current_jobs.json (New-Grad excluded — no data file by design)
 const CONSUMER_REPOS = [
-  { repo: 'New-Grad-Jobs-2026',                      label: 'New-Grad' },
   { repo: 'Internships-2026',                         label: 'Internships' },
   { repo: 'New-Grad-Software-Engineering-Jobs-2026',  label: 'Software-Eng' },
   { repo: 'New-Grad-Data-Science-Jobs-2026',          label: 'Data-Science' },
@@ -158,35 +157,69 @@ async function main() {
   // --- Section 3: Job Pipeline ---
   let pipelineLines = '';
 
-  // all_jobs.json — fetch from GitHub (always fresh, not local stale copy)
-  const allJobsRaw = await rawGet(`https://raw.githubusercontent.com/${ORG}/jobs-data-2026/main/.github/data/all_jobs.json`);
-  if (allJobsRaw) {
-    const count = allJobsRaw.split('\n').filter(l => l.trim()).length;
-    pipelineLines += `${'all_jobs.json (pipeline total)'.padEnd(36)} ${fmtNum(count)}\n`;
-  } else {
-    pipelineLines += `${'all_jobs.json (pipeline total)'.padEnd(36)} (unavailable)\n`;
+  // Pipeline total — read local all_jobs.json (lives in this repo, always current)
+  const allJobsPath = path.join(process.cwd(), '.github', 'data', 'all_jobs.json');
+  let pipelineTotal = null;
+  if (fs.existsSync(allJobsPath)) {
+    pipelineTotal = fs.readFileSync(allJobsPath, 'utf8').split('\n').filter(l => l.trim()).length;
   }
 
-  // Consumer repos via raw URL
-  for (const { repo, label } of CONSUMER_REPOS) {
-    const raw = await rawGet(`https://raw.githubusercontent.com/${ORG}/${repo}/main/.github/data/current_jobs.json`);
-    let count = '?';
-    if (raw) {
-      try { count = fmtNum(JSON.parse(raw).length); } catch {}
+  // Delta vs yesterday + anomaly check
+  const prevTotal = prevStats.pipelineTotal ?? null;
+  const history = Array.isArray(prevStats.history) ? prevStats.history : [];
+  let totalLine = pipelineTotal != null ? fmtNum(pipelineTotal) : '(unavailable)';
+  if (pipelineTotal != null && prevTotal != null) {
+    const d = pipelineTotal - prevTotal;
+    totalLine += d === 0 ? ' (=)' : (d > 0 ? ` (+${d})` : ` (${d})`);
+  }
+  let anomalyFlag = '';
+  if (pipelineTotal != null && history.length >= 3) {
+    const avg = history.reduce((s, v) => s + v, 0) / history.length;
+    if (pipelineTotal < avg * 0.85) anomalyFlag = ' ⚠️ COUNT DROP';
+  }
+  pipelineLines += `${'Pipeline total'.padEnd(28)} ${totalLine}${anomalyFlag}\n`;
+
+  // Per-source breakdown — from local jobs-metadata.json
+  try {
+    const meta = JSON.parse(fs.readFileSync(path.join(process.cwd(), '.github', 'data', 'jobs-metadata.json'), 'utf8'));
+    if (meta.by_source) {
+      const src = meta.by_source;
+      const parts = ['workday','greenhouse','jsearch','ashby','lever']
+        .filter(k => src[k] != null)
+        .map(k => `${k[0].toUpperCase()}${k.slice(1)}: ${fmtNum(src[k])}`);
+      pipelineLines += `${'By source'.padEnd(28)} ${parts.join(' | ')}\n`;
     }
-    pipelineLines += `${label.padEnd(36)} ${count}\n`;
-  }
+  } catch { /* metadata unavailable — skip */ }
 
-  // Discord posted last 24h — read from posted_jobs.json
+  // Consumer freshness — last commit to current_jobs.json per repo (via GH API)
+  // New-Grad doesn't write current_jobs.json — use all_jobs.json commit instead
+  pipelineLines += '\n';
+  const freshnessResults = await Promise.all(CONSUMER_REPOS.map(async ({ repo, label }) => {
+    const filePath = '.github/data/current_jobs.json';
+    try {
+      const data = await githubGet(`/repos/${ORG}/${repo}/commits?path=${encodeURIComponent(filePath)}&per_page=1`);
+      const ts = data[0]?.commit?.committer?.date || data[0]?.commit?.author?.date;
+      if (!ts) return `${'  ' + label.padEnd(26)} (no commits found)`;
+      const ageMin = Math.round((Date.now() - new Date(ts).getTime()) / 60000);
+      const ageStr = ageMin < 60 ? `${ageMin}m ago` : `${Math.round(ageMin / 60)}h ago`;
+      const flag = ageMin > 120 ? ' ⚠️' : '';
+      return `${'  ' + label.padEnd(26)} ${ageStr}${flag}`;
+    } catch {
+      return `${'  ' + label.padEnd(26)} (unavailable)`;
+    }
+  }));
+  pipelineLines += `${'Consumer freshness'.padEnd(28)}\n` + freshnessResults.join('\n') + '\n';
+
+  // Discord posted last 24h
   try {
     const postedFile = path.join(process.cwd(), '.github', 'data', 'posted_jobs.json');
     const posted = JSON.parse(fs.readFileSync(postedFile, 'utf8'));
     const jobs = Array.isArray(posted.jobs) ? posted.jobs : [];
     const cutoff = Date.now() - 24 * 60 * 60 * 1000;
     const recentCount = jobs.filter(j => j.postedToDiscord && new Date(j.postedToDiscord).getTime() > cutoff).length;
-    pipelineLines += `${'Discord posted (last 24h)'.padEnd(36)} ${recentCount}\n`;
+    pipelineLines += `${'Discord posted (last 24h)'.padEnd(28)} ${recentCount}\n`;
   } catch {
-    pipelineLines += `${'Discord posted (last 24h)'.padEnd(36)} ?\n`;
+    pipelineLines += `${'Discord posted (last 24h)'.padEnd(28)} ?\n`;
   }
 
   // --- Build messages ---
@@ -209,8 +242,11 @@ async function main() {
   console.log('✅ Daily stats posted to Discord');
   await client.destroy();
 
-  // --- Persist today's star counts ---
-  const newStats = { date: new Date().toISOString(), stars: {} };
+  // --- Persist today's stats (stars + pipeline total for delta/anomaly) ---
+  const newHistory = pipelineTotal != null
+    ? [...history, pipelineTotal].slice(-7)  // keep last 7 days
+    : history;
+  const newStats = { date: new Date().toISOString(), stars: {}, pipelineTotal, history: newHistory };
   for (const name of STAR_REPOS) {
     if (repoMap[name]) newStats.stars[name] = repoMap[name].stargazers_count;
   }
