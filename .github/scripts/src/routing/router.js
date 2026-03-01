@@ -63,7 +63,7 @@ function isTechRole(title) {
     { regex: /\b(web|mobile|ios|android|react|angular|vue)\b/, keyword: 'web/mobile dev' },
     { regex: /\b(cloud|aws|azure|gcp|kubernetes|docker)\b/, keyword: 'cloud' },
     { regex: /\b(security|cybersecurity|infosec|appsec)\b/, keyword: 'security',
-      validate: (title) => !/(security\s+sales|sales\s+security|sales\s+specialist|sales\s+engineer|security\s+account)/i.test(title) },
+      validate: (title) => !/(security\s+sales|sales\s+security|sales\s+specialist|sales\s+engineer|security\s+account|security\s+(officer|guard|patrol)|armed\s+security|unarmed\s+security|loss\s+prevention)/i.test(title) },
 
     // Programming languages (strong tech indicator)
     { regex: /\b(python|java|javascript|typescript|c\+\+|golang|rust|ruby)\b/, keyword: 'programming' }
