@@ -1,9 +1,7 @@
 name: Enrich Jobs
 
 on:
-  schedule:
-    - cron: '*/15 * * * *'
-  workflow_dispatch:
+  workflow_dispatch:  # Triggered by job-board-cron-worker (Cloudflare) every 15 min
 
 jobs:
   enrich:
