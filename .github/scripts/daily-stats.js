@@ -202,7 +202,7 @@ async function main() {
       if (!ts) return `${'  ' + label.padEnd(26)} (no commits found)`;
       const ageMin = Math.round((Date.now() - new Date(ts).getTime()) / 60000);
       const ageStr = ageMin < 60 ? `${ageMin}m ago` : `${Math.round(ageMin / 60)}h ago`;
-      const flag = ageMin > 120 ? ' ⚠️' : '';
+      const flag = ageMin > 360 ? ' ⚠️' : '';  // flag if >6h stale
       return `${'  ' + label.padEnd(26)} ${ageStr}${flag}`;
     } catch {
       return `${'  ' + label.padEnd(26)} (unavailable)`;
