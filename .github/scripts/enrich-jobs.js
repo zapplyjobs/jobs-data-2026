@@ -55,18 +55,36 @@ function loadTaxonomy() {
 }
 
 // ---------------------------------------------------------------------------
-// Load descriptions sidecar (descriptions.jsonl) → Map<id, description_text>
+// Load per-source description sidecars → Map<id, description_text>
+//
+// Reads all files matching descriptions-*.jsonl in DATA_DIR.
+// Handles both single-source files (descriptions-greenhouse.jsonl) and
+// chunked files (descriptions-greenhouse-1.jsonl, descriptions-greenhouse-2.jsonl).
+// Falls back to legacy descriptions.jsonl if per-source files are absent
+// (handles transition period between old and new aggregator).
 // ---------------------------------------------------------------------------
 function loadDescriptionsMap() {
   const map = new Map();
-  if (!fs.existsSync(DESCRIPTIONS_PATH)) return map;
-  const lines = fs.readFileSync(DESCRIPTIONS_PATH, 'utf8').trim().split('\n').filter(Boolean);
-  for (const line of lines) {
-    try {
-      const { id, description_text } = JSON.parse(line);
-      if (id) map.set(id, description_text || null);
-    } catch (_) { /* skip malformed */ }
+
+  const files = fs.readdirSync(DATA_DIR)
+    .filter(f => /^descriptions-.*\.jsonl$/.test(f))
+    .map(f => path.join(DATA_DIR, f));
+
+  // Fallback: legacy single-file sidecar
+  if (files.length === 0 && fs.existsSync(DESCRIPTIONS_PATH)) {
+    files.push(DESCRIPTIONS_PATH);
   }
+
+  for (const filePath of files) {
+    const lines = fs.readFileSync(filePath, 'utf8').trim().split('\n').filter(Boolean);
+    for (const line of lines) {
+      try {
+        const { id, description_text } = JSON.parse(line);
+        if (id) map.set(id, description_text || null);
+      } catch (_) { /* skip malformed */ }
+    }
+  }
+
   return map;
 }
 
