@@ -34,6 +34,7 @@ const DATA_DIR = path.join(process.cwd(), '.github', 'data');
 const ALL_JOBS_PATH = path.join(DATA_DIR, 'all_jobs.json');
 const ENRICHED_PATH = path.join(DATA_DIR, 'enriched_jobs.json');
 const PROCESSED_PATH = path.join(DATA_DIR, 'processed_ids.json');
+const DESCRIPTIONS_PATH = path.join(DATA_DIR, 'descriptions.jsonl');
 const TAXONOMY_PATH = path.join(__dirname, 'enrich', 'skills-taxonomy.json');
 
 // ---------------------------------------------------------------------------
@@ -51,6 +52,22 @@ function loadTaxonomy() {
     }
   }
   return termMap;
+}
+
+// ---------------------------------------------------------------------------
+// Load descriptions sidecar (descriptions.jsonl) → Map<id, description_text>
+// ---------------------------------------------------------------------------
+function loadDescriptionsMap() {
+  const map = new Map();
+  if (!fs.existsSync(DESCRIPTIONS_PATH)) return map;
+  const lines = fs.readFileSync(DESCRIPTIONS_PATH, 'utf8').trim().split('\n').filter(Boolean);
+  for (const line of lines) {
+    try {
+      const { id, description_text } = JSON.parse(line);
+      if (id) map.set(id, description_text || null);
+    } catch (_) { /* skip malformed */ }
+  }
+  return map;
 }
 
 // ---------------------------------------------------------------------------
@@ -420,14 +437,15 @@ function loadEnrichedIds() {
 
 const TECH_DOMAINS = new Set(['software', 'data_science', 'hardware', 'ai']);
 
-async function enrichJob(job, termMap) {
+async function enrichJob(job, termMap, descriptionsMap) {
   // Skip non-tech and non-US jobs — enrichment targets US tech roles only
   const domains = job.tags?.domains || [];
   const locations = job.tags?.locations || [];
   if (!domains.some(d => TECH_DOMAINS.has(d))) return { skipped: true, reason: 'non-tech' };
   if (!locations.includes('us')) return { skipped: true, reason: 'non-us' };
 
-  const plainText = toPlainText(job.description || '');
+  const rawDescription = descriptionsMap.get(job.id) || null;
+  const plainText = toPlainText(rawDescription || '');
   const { required, preferred } = splitSections(plainText);
 
   if (!required) {
@@ -470,6 +488,9 @@ async function main() {
   const termMap = loadTaxonomy();
   console.log(`[enrich-jobs] Taxonomy loaded: ${termMap.size} terms`);
 
+  const descriptionsMap = loadDescriptionsMap();
+  console.log(`[enrich-jobs] Descriptions loaded: ${descriptionsMap.size} entries`);
+
   const allJobs = loadAllJobs();
   console.log(`[enrich-jobs] Total jobs in pool: ${allJobs.length}`);
 
@@ -487,7 +508,7 @@ async function main() {
     return;
   }
 
-  const enriched = await Promise.all(batch.map(job => enrichJob(job, termMap)));
+  const enriched = await Promise.all(batch.map(job => enrichJob(job, termMap, descriptionsMap)));
   const results = enriched.filter(r => r && !r.skipped);
   const skippedResults = enriched.filter(r => r && r.skipped);
   console.log(`[enrich-jobs] Enriched and appended ${results.length} jobs (${skippedResults.length} skipped — non-tech or non-US)`);
