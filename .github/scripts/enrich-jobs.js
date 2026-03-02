@@ -464,6 +464,7 @@ async function enrichJob(job, termMap, descriptionsMap) {
 
   return {
     id: job.id,
+    source: job.source || null,
     enricher_version: 1,
     required_skills: requiredSkills,
     nice_to_have_skills: niceToHaveSkills,
