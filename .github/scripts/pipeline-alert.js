@@ -3,16 +3,18 @@
 /**
  * Pipeline Alert
  *
- * Checks 6 failure modes and posts a Discord alert if any fail.
+ * Checks 8 failure modes and posts a Discord alert if any fail.
  * Silent on all-green — only fires when something is actually wrong.
  *
  * Failure modes checked:
  *   1. fetch-jobs.yml stale (last run > 30 min ago or failed)
  *   2. post-to-discord.yml last run failed
  *   3. Any consumer update-jobs.yml failed
- *   4. all_jobs.json job count dropped >20% vs previous snapshot
- *   5. JSearch remaining_today = 0 (quota exhausted)
- *   6. us-tagged job count = 0 (location tagger broken)
+ *   4. total_jobs dropped >20% vs previous snapshot (compares same field)
+ *   5. Any individual source dropped >40% vs previous snapshot
+ *   6. Nursing domain >30% of US-tagged pool (composition drift)
+ *   7. us-tagged job count = 0 (location tagger broken)
+ *   8. JSearch total_fetched = 0 (fetcher completely silent)
  *
  * Not alerts (by design, not failures):
  *   - posted_jobs count = 0 per run (dedup saturation is normal)
@@ -111,37 +113,57 @@ async function runChecks() {
     failures.push(`**update-jobs.yml failed**: ${failedConsumers.join(', ')}`);
   }
 
-  // Checks 4–6: read from local jobs-metadata.json (available at runtime in jobs-data-2026)
+  // Checks 4–8: read from local jobs-metadata.json (available at runtime in jobs-data-2026)
   const metadataPath = path.join(DATA_DIR, 'jobs-metadata.json');
   if (!fs.existsSync(metadataPath)) {
     failures.push('**jobs-metadata.json**: File missing — pipeline may not be running');
   } else {
     const metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
+    const currTotal = metadata.total_jobs;
+    const currBySource = metadata.by_source || {};
+    const usTagged = metadata.tag_stats?.locations?.us ?? null;
+    const nursingCount = metadata.tag_stats?.domains?.nursing ?? null;
 
-    // Check 4: job count dropped >20% vs previous snapshot
     if (fs.existsSync(METRICS_LATEST)) {
       try {
         const prev = JSON.parse(fs.readFileSync(METRICS_LATEST, 'utf8'));
-        const prevTotal = prev?.pipeline?.pipelineTotal;
-        const currTotal = metadata.total_jobs;
+
+        // Check 4: total job count dropped >20% (compare total_jobs to total_jobs, not pipelineTotal)
+        const prevTotal = prev?.pipeline?.prevTotalJobs;
         if (prevTotal && currTotal && currTotal < prevTotal * 0.8) {
           failures.push(`**Job count drop**: ${currTotal} jobs (was ${prevTotal}, dropped ${Math.round((1 - currTotal/prevTotal)*100)}%)`);
         }
+
+        // Check 5: any individual source dropped >40% vs previous snapshot
+        const prevBySource = prev?.pipeline?.bySource || {};
+        for (const [source, currCount] of Object.entries(currBySource)) {
+          const prevCount = prevBySource[source];
+          if (prevCount && prevCount > 100 && currCount < prevCount * 0.6) {
+            failures.push(`**Source drop (${source})**: ${currCount} jobs (was ${prevCount}, dropped ${Math.round((1 - currCount/prevCount)*100)}%)`);
+          }
+        }
       } catch {
-        // Metrics file unreadable — skip this check
+        // Metrics file unreadable — skip snapshot-dependent checks
       }
     }
 
-    // Check 5: JSearch quota exhausted
-    const remaining = metadata.jsearch_stats?.remaining_today;
-    if (remaining === 0) {
-      failures.push('**JSearch quota**: remaining_today = 0, all JSearch fetching stopped');
+    // Check 6: nursing domain >30% of US-tagged pool (composition drift)
+    if (usTagged && nursingCount !== null && usTagged > 0) {
+      const nursingPct = nursingCount / usTagged;
+      if (nursingPct > 0.30) {
+        failures.push(`**Nursing composition drift**: ${nursingCount} nursing / ${usTagged} US-tagged = ${Math.round(nursingPct * 100)}% (threshold: 30%)`);
+      }
     }
 
-    // Check 6: us-tagged count = 0
-    const usTagged = metadata.tag_stats?.locations?.us;
+    // Check 7: us-tagged count = 0
     if (usTagged === 0) {
       failures.push('**US location tagger broken**: 0 jobs tagged `us` — check tagLocations() in tag-engine.js');
+    }
+
+    // Check 8: JSearch completely silent
+    const jsearchFetched = metadata.jsearch_stats?.total_fetched ?? null;
+    if (jsearchFetched === 0) {
+      failures.push('**JSearch silent**: total_fetched = 0 this run — fetcher may be broken');
     }
   }
 
