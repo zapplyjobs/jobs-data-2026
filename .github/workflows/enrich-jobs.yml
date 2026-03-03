@@ -3,6 +3,12 @@ name: Enrich Jobs
 on:
   workflow_dispatch:  # Triggered by job-board-cron-worker (Cloudflare) every 15 min
 
+# Prevent concurrent enrich runs — two runs picking the same pending batch would
+# produce duplicate entries in enriched_jobs.json.
+concurrency:
+  group: enrich-jobs
+  cancel-in-progress: false
+
 jobs:
   enrich:
     runs-on: ubuntu-latest
@@ -32,7 +38,7 @@ jobs:
         run: |
           git config user.email "bot@zapplyjobs.com"
           git config user.name "Aggregator Bot"
-          git add .github/data/enriched_jobs.json .github/data/processed_ids.json .github/data/descriptions-*.jsonl || exit 0
+          git add .github/data/enriched_jobs.json .github/data/processed_ids.json || exit 0
           git commit -m "chore: update enriched jobs [skip ci]" || exit 0
-          git pull --rebase origin main || true
+          git pull --rebase origin main
           git push
