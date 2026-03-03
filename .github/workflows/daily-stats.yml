@@ -28,6 +28,7 @@ jobs:
         env:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TEAM_TOKEN }}
           DISCORD_DAILY_STATS_CHANNEL_ID: ${{ secrets.DISCORD_DAILY_STATS_CHANNEL_ID }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         run: node .github/scripts/daily-stats.js
 
       - name: Commit updated stats file

@@ -28,7 +28,7 @@ jobs:
         env:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TEAM_TOKEN }}
           DISCORD_WEEKLY_STATS_CHANNEL_ID: ${{ secrets.DISCORD_WEEKLY_STATS_CHANNEL_ID }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         run: node .github/scripts/weekly-summary.js
 
       - name: Commit updated stats file
