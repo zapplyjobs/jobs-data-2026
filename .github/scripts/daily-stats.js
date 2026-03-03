@@ -47,8 +47,8 @@ const PIPELINE_REPOS = [
   'New-Grad-Nursing-Jobs-2026',
 ];
 
-// Consumer repos that write current_jobs.json (New-Grad excluded — no data file by design)
 const CONSUMER_REPOS = [
+  { repo: 'New-Grad-Jobs-2026',                       label: 'New-Grad' },
   { repo: 'Internships-2026',                         label: 'Internships' },
   { repo: 'New-Grad-Software-Engineering-Jobs-2026',  label: 'Software-Eng' },
   { repo: 'New-Grad-Data-Science-Jobs-2026',          label: 'Data-Science' },
@@ -179,17 +179,22 @@ async function main() {
   }
   pipelineLines += `${'Pipeline total'.padEnd(28)} ${totalLine}${anomalyFlag}\n`;
 
-  // Per-source breakdown — from local jobs-metadata.json
-  try {
-    const meta = JSON.parse(fs.readFileSync(path.join(process.cwd(), '.github', 'data', 'jobs-metadata.json'), 'utf8'));
-    if (meta.by_source) {
-      const src = meta.by_source;
-      const parts = ['workday','greenhouse','jsearch','ashby','lever']
-        .filter(k => src[k] != null)
-        .map(k => `${k[0].toUpperCase()}${k.slice(1)}: ${fmtNum(src[k])}`);
-      pipelineLines += `${'By source'.padEnd(28)} ${parts.join(' | ')}\n`;
-    }
-  } catch { /* metadata unavailable — skip */ }
+  // Per-source breakdown — count directly from all_jobs.json (pool-accurate)
+  // jobs-metadata.json by_source reflects only the current run's fetch counts, not pool totals
+  if (fs.existsSync(allJobsPath)) {
+    try {
+      const bySource = {};
+      const lines = fs.readFileSync(allJobsPath, 'utf8').split('\n').filter(l => l.trim());
+      for (const line of lines) {
+        const src = JSON.parse(line).source;
+        if (src) bySource[src] = (bySource[src] || 0) + 1;
+      }
+      const parts = ['workday','greenhouse','amazon','ashby','lever','jsearch']
+        .filter(k => bySource[k])
+        .map(k => `${k[0].toUpperCase()}${k.slice(1)}: ${fmtNum(bySource[k])}`);
+      if (parts.length) pipelineLines += `${'By source'.padEnd(28)} ${parts.join(' | ')}\n`;
+    } catch { /* skip */ }
+  }
 
   // enriched_jobs.json count (local JSONL — jobs-data-2026 layer, consumed by enrichment API users)
   const enrichedPath = path.join(process.cwd(), '.github', 'data', 'enriched_jobs.json');
