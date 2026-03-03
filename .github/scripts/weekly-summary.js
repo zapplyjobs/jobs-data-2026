@@ -175,12 +175,24 @@ async function main() {
   // --- Section 3: Pipeline snapshot ---
   let pipelineLines = '';
 
-  // Pipeline total
-  let pipelineTotal = 0;
+  // Pipeline total with week-over-week delta + anomaly detection
+  const prevTotal = prevStats.pipelineTotal ?? null;
+  const history = Array.isArray(prevStats.history) ? prevStats.history : [];
+  let pipelineTotal = null;
   if (fs.existsSync(ALL_JOBS_FILE)) {
     const rawLines = fs.readFileSync(ALL_JOBS_FILE, 'utf8').split('\n').filter(l => l.trim());
     pipelineTotal = rawLines.length;
-    pipelineLines += `${'Pipeline total'.padEnd(28)} ${fmtNum(pipelineTotal)}\n`;
+    let totalLine = fmtNum(pipelineTotal);
+    if (prevTotal != null) {
+      const d = pipelineTotal - prevTotal;
+      totalLine += d === 0 ? ' (=)' : (d > 0 ? ` (+${d})` : ` (${d})`);
+    }
+    let anomalyFlag = '';
+    if (history.length >= 3) {
+      const avg = history.reduce((s, v) => s + v, 0) / history.length;
+      if (pipelineTotal < avg * 0.85) anomalyFlag = ' ⚠️ COUNT DROP';
+    }
+    pipelineLines += `${'Total jobs (ZJP pool)'.padEnd(28)} ${totalLine}${anomalyFlag}\n`;
 
     // By-source breakdown — count from pool directly (metadata by_source = per-run fetch counts, not pool)
     try {
@@ -195,7 +207,7 @@ async function main() {
       if (parts.length) pipelineLines += `${'By source'.padEnd(28)} ${parts.join(' | ')}\n`;
     } catch { /* skip */ }
   } else {
-    pipelineLines += `${'Pipeline total'.padEnd(28)} (unavailable)\n`;
+    pipelineLines += `${'Total jobs (ZJP pool)'.padEnd(28)} (unavailable)\n`;
   }
 
   // Enriched jobs count
@@ -229,10 +241,22 @@ async function main() {
   }));
   pipelineLines += `${'Consumer jobs / freshness'.padEnd(28)}\n` + consumerResults.join('\n') + '\n';
 
+  // Discord posted last 7 days
+  try {
+    const postedFile = path.join(process.cwd(), '.github', 'data', 'posted_jobs.json');
+    const posted = JSON.parse(fs.readFileSync(postedFile, 'utf8'));
+    const jobs = Array.isArray(posted.jobs) ? posted.jobs : [];
+    const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const recentCount = jobs.filter(j => j.postedToDiscord && new Date(j.postedToDiscord).getTime() > cutoff).length;
+    pipelineLines += `${'Discord posted (last 7d)'.padEnd(28)} ${recentCount}\n`;
+  } catch {
+    pipelineLines += `${'Discord posted (last 7d)'.padEnd(28)} ?\n`;
+  }
+
   // --- Build messages ---
-  const msg1 = `📊 zapplyjobs Org — Weekly Summary\nWeek of ${weekRange()}\n\n━━━ REPOSITORY STATS ━━━\n\`\`\`\n${header}\n${divider}\n${repoLines}\`\`\`${totalsLine}`;
-  const msg2 = `━━━ WORKFLOW HEALTH (Last 7 Days) ━━━\n\`\`\`\n${workflowLines || '(no runs this week)\n'}\`\`\``;
-  const msg3 = `━━━ JOB PIPELINE ━━━\n\`\`\`\n${pipelineLines}\`\`\``;
+  const msg1 = `📊 **zapplyjobs Org — Weekly Summary**\nWeek of ${weekRange()}\n\n⭐ **REPOSITORY STATS**\n\`\`\`\n${header}\n${divider}\n${repoLines}\`\`\`${totalsLine}`;
+  const msg2 = `🤖 **WORKFLOW HEALTH (Last 7 Days)**\n\`\`\`\n${workflowLines || '(no runs this week)\n'}\`\`\``;
+  const msg3 = `📋 **JOB PIPELINE**\n\`\`\`\n${pipelineLines}\`\`\``;
 
   // --- Post to Discord ---
   const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] });
@@ -250,7 +274,10 @@ async function main() {
   await client.destroy();
 
   // --- Persist this week's stats ---
-  const newStats = { date: new Date().toISOString(), stars: {}, forks: {} };
+  const newHistory = pipelineTotal != null
+    ? [...history, pipelineTotal].slice(-4)  // keep last 4 weeks
+    : history;
+  const newStats = { date: new Date().toISOString(), stars: {}, forks: {}, pipelineTotal, history: newHistory };
   for (const name of TRACKED_REPOS) {
     if (repoMap[name]) {
       newStats.stars[name] = repoMap[name].stargazers_count;
