@@ -26,7 +26,7 @@ jobs:
 
       - name: Run pipeline checks
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
           DISCORD_TOKEN: ${{ secrets.DISCORD_TEAM_TOKEN }}
-          DISCORD_DAILY_STATS_CHANNEL_ID: ${{ secrets.DISCORD_DAILY_STATS_CHANNEL_ID }}
+          DISCORD_PIPELINE_ALERT_CHANNEL_ID: ${{ secrets.DISCORD_PIPELINE_ALERT_CHANNEL_ID }}
         run: node .github/scripts/pipeline-alert.js
