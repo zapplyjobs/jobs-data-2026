@@ -154,10 +154,9 @@ function getPipelineMetrics() {
 
     return {
       pipelineTotal,
+      prevTotalJobs: metadata.total_jobs ?? null,
       bySource: metadata.by_source || null,
-      jsearchRequestsToday: metadata.jsearch_stats?.requests_today ?? null,
-      jsearchRemaining: metadata.jsearch_stats?.remaining_today ?? null,
-      jsearchFetchedTotal: metadata.jsearch_stats?.total_jobs_fetched ?? null,
+      jsearchTotalFetched: metadata.jsearch_stats?.total_fetched ?? null,
       tagStats: {
         usTagged: metadata.tag_stats?.locations?.us ?? null,
         entryLevel: metadata.tag_stats?.employment?.entry_level ?? null,
