@@ -173,11 +173,18 @@ async function main() {
   // --- Section 3: Pipeline snapshot ---
   let pipelineLines = '';
 
-  // Pipeline total + by-source breakdown
+  // Pipeline total with month-over-month delta
+  const prevTotal = prevStats.pipelineTotal ?? null;
   if (fs.existsSync(ALL_JOBS_FILE)) {
     try {
       const rawLines = fs.readFileSync(ALL_JOBS_FILE, 'utf8').split('\n').filter(l => l.trim());
-      pipelineLines += `${'Pipeline total'.padEnd(28)} ${fmtNum(rawLines.length)}\n`;
+      const pipelineTotal = rawLines.length;
+      let totalLine = fmtNum(pipelineTotal);
+      if (prevTotal != null) {
+        const d = pipelineTotal - prevTotal;
+        totalLine += d === 0 ? ' (=)' : (d > 0 ? ` (+${d})` : ` (${d})`);
+      }
+      pipelineLines += `${'Total jobs (ZJP pool)'.padEnd(28)} ${totalLine}\n`;
 
       const bySource = {};
       for (const line of rawLines) {
@@ -189,10 +196,10 @@ async function main() {
         .map(k => `${k[0].toUpperCase()}${k.slice(1)}: ${fmtNum(bySource[k])}`);
       if (parts.length) pipelineLines += `${'By source'.padEnd(28)} ${parts.join(' | ')}\n`;
     } catch {
-      pipelineLines += `${'Pipeline total'.padEnd(28)} (unavailable)\n`;
+      pipelineLines += `${'Total jobs (ZJP pool)'.padEnd(28)} (unavailable)\n`;
     }
   } else {
-    pipelineLines += `${'Pipeline total'.padEnd(28)} (unavailable)\n`;
+    pipelineLines += `${'Total jobs (ZJP pool)'.padEnd(28)} (unavailable)\n`;
   }
 
   // Enriched jobs count
@@ -202,39 +209,50 @@ async function main() {
     pipelineLines += `${'Enriched jobs'.padEnd(28)} ${fmtNum(enrichedCount)}\n`;
   }
 
-  // Consumer counts
+  // Consumer counts + freshness
   pipelineLines += '\n';
   const consumerResults = await Promise.all(CONSUMER_REPOS.map(async ({ repo, label }) => {
-    const raw = await rawGet(`https://raw.githubusercontent.com/${ORG}/${repo}/main/.github/data/current_jobs.json?t=${Date.now()}`);
-    let count = '?';
-    if (raw) { try { count = fmtNum(JSON.parse(raw).length); } catch {} }
-    return `${'  ' + label.padEnd(20)} ${count.padStart(6)}`;
+    const filePath = '.github/data/current_jobs.json';
+    try {
+      const [commitData, raw] = await Promise.all([
+        githubGet(`/repos/${ORG}/${repo}/commits?path=${encodeURIComponent(filePath)}&per_page=1`),
+        rawGet(`https://raw.githubusercontent.com/${ORG}/${repo}/main/${filePath}?t=${Date.now()}`)
+      ]);
+      const ts = commitData[0]?.commit?.committer?.date || commitData[0]?.commit?.author?.date;
+      const ageStr = ts ? (() => {
+        const ageMin = Math.round((Date.now() - new Date(ts).getTime()) / 60000);
+        return (ageMin < 60 ? `${ageMin}m` : `${Math.round(ageMin / 60)}h`) + ' ago';
+      })() : '?';
+      const ageFlag = ts && Math.round((Date.now() - new Date(ts).getTime()) / 60000) > 360 ? ' ⚠️' : '';
+      let count = '?';
+      if (raw) { try { count = fmtNum(JSON.parse(raw).length); } catch {} }
+      return `${'  ' + label.padEnd(20)} ${count.padStart(6)}  ${ageStr}${ageFlag}`;
+    } catch {
+      return `${'  ' + label.padEnd(20)} ${'?'.padStart(6)}  (unavailable)`;
+    }
   }));
-  pipelineLines += `${'Consumer jobs'.padEnd(28)}\n` + consumerResults.join('\n') + '\n';
+  pipelineLines += `${'Consumer jobs / freshness'.padEnd(28)}\n` + consumerResults.join('\n') + '\n';
 
-  // Monthly Discord posts
+  // Monthly Discord posts — use top-level postedToDiscord field (v2 format)
   try {
     const posted = JSON.parse(fs.readFileSync(POSTED_JOBS_FILE, 'utf8'));
     const monthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const monthEnd = new Date(now.getFullYear(), now.getMonth(), 1);
-    let monthlyPostCount = 0;
-    for (const job of (posted.jobs || [])) {
-      for (const [, info] of Object.entries(job.discordPosts || {})) {
-        const ts = info.postedAt;
-        if (!ts) continue;
-        const d = new Date(ts);
-        if (d >= monthStart && d < monthEnd) monthlyPostCount++;
-      }
-    }
-    pipelineLines += `\n${'Discord posts (prev month)'.padEnd(28)} ${fmtNum(monthlyPostCount)}\n`;
+    const monthlyPostCount = (posted.jobs || []).filter(j => {
+      const ts = j.postedToDiscord;
+      if (!ts) return false;
+      const d = new Date(ts);
+      return d >= monthStart && d < monthEnd;
+    }).length;
+    pipelineLines += `${'Discord posted (prev month)'.padEnd(28)} ${fmtNum(monthlyPostCount)}\n`;
   } catch {
-    pipelineLines += `\n${'Discord posts (prev month)'.padEnd(28)} ?\n`;
+    pipelineLines += `${'Discord posted (prev month)'.padEnd(28)} ?\n`;
   }
 
   // --- Build messages ---
-  const msg1 = `📅 zapplyjobs Org — Monthly Summary\n${reportMonth}\n\n━━━ REPOSITORY STATS (Month-over-Month) ━━━\n\`\`\`\n${header}\n${divider}\n${repoLines}\`\`\`\n📊 Org Totals: ${totalStars} stars (${totalDeltaStr}) | ${totalForks} forks`;
-  const msg2 = `━━━ WORKFLOW HEALTH (Last 30 Days) ━━━\n\`\`\`\n${workflowLines || '(no runs)\n'}\`\`\``;
-  const msg3 = `━━━ JOB PIPELINE ━━━\n\`\`\`\n${pipelineLines}\`\`\``;
+  const msg1 = `📅 **zapplyjobs Org — Monthly Summary**\n${reportMonth}\n\n⭐ **REPOSITORY STATS (Month-over-Month)**\n\`\`\`\n${header}\n${divider}\n${repoLines}\`\`\`\n📊 Org Totals: ${totalStars} stars (${totalDeltaStr}) | ${totalForks} forks`;
+  const msg2 = `🤖 **WORKFLOW HEALTH (Last 30 Days)**\n\`\`\`\n${workflowLines || '(no runs)\n'}\`\`\``;
+  const msg3 = `📋 **JOB PIPELINE**\n\`\`\`\n${pipelineLines}\`\`\``;
 
   // --- Post to Discord ---
   const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] });
@@ -252,7 +270,10 @@ async function main() {
   await client.destroy();
 
   // --- Persist this month's stats ---
-  const newStats = { date: now.toISOString(), month: reportMonth, stars: {}, forks: {} };
+  const currentTotal = fs.existsSync(ALL_JOBS_FILE)
+    ? fs.readFileSync(ALL_JOBS_FILE, 'utf8').split('\n').filter(l => l.trim()).length
+    : null;
+  const newStats = { date: now.toISOString(), month: reportMonth, stars: {}, forks: {}, pipelineTotal: currentTotal };
   for (const name of TRACKED_REPOS) {
     if (repoMap[name]) {
       newStats.stars[name] = repoMap[name].stargazers_count;

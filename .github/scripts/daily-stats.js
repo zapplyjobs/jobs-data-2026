@@ -177,7 +177,7 @@ async function main() {
     const avg = history.reduce((s, v) => s + v, 0) / history.length;
     if (pipelineTotal < avg * 0.85) anomalyFlag = ' ⚠️ COUNT DROP';
   }
-  pipelineLines += `${'Pipeline total'.padEnd(28)} ${totalLine}${anomalyFlag}\n`;
+  pipelineLines += `${'Total jobs (ZJP pool)'.padEnd(28)} ${totalLine}${anomalyFlag}\n`;
 
   // Per-source breakdown — count directly from all_jobs.json (pool-accurate)
   // jobs-metadata.json by_source reflects only the current run's fetch counts, not pool totals
