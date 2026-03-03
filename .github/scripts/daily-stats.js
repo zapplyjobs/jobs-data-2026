@@ -191,24 +191,37 @@ async function main() {
     }
   } catch { /* metadata unavailable — skip */ }
 
-  // Consumer freshness — last commit to current_jobs.json per repo (via GH API)
-  // New-Grad doesn't write current_jobs.json — use all_jobs.json commit instead
+  // enriched_jobs.json count (local JSONL — jobs-data-2026 layer, consumed by enrichment API users)
+  const enrichedPath = path.join(process.cwd(), '.github', 'data', 'enriched_jobs.json');
+  if (fs.existsSync(enrichedPath)) {
+    const enrichedCount = fs.readFileSync(enrichedPath, 'utf8').split('\n').filter(l => l.trim()).length;
+    pipelineLines += `${'Enriched jobs'.padEnd(28)} ${fmtNum(enrichedCount)}\n`;
+  }
+
+  // Consumer counts + freshness — fetch current_jobs.json for count, commit API for age
+  // New-Grad has no current_jobs.json by design — show pipeline total instead
   pipelineLines += '\n';
   const freshnessResults = await Promise.all(CONSUMER_REPOS.map(async ({ repo, label }) => {
     const filePath = '.github/data/current_jobs.json';
     try {
-      const data = await githubGet(`/repos/${ORG}/${repo}/commits?path=${encodeURIComponent(filePath)}&per_page=1`);
-      const ts = data[0]?.commit?.committer?.date || data[0]?.commit?.author?.date;
-      if (!ts) return `${'  ' + label.padEnd(26)} (no commits found)`;
-      const ageMin = Math.round((Date.now() - new Date(ts).getTime()) / 60000);
-      const ageStr = ageMin < 60 ? `${ageMin}m ago` : `${Math.round(ageMin / 60)}h ago`;
-      const flag = ageMin > 360 ? ' ⚠️' : '';  // flag if >6h stale
-      return `${'  ' + label.padEnd(26)} ${ageStr}${flag}`;
+      const [commitData, raw] = await Promise.all([
+        githubGet(`/repos/${ORG}/${repo}/commits?path=${encodeURIComponent(filePath)}&per_page=1`),
+        rawGet(`https://raw.githubusercontent.com/${ORG}/${repo}/main/${filePath}?t=${Date.now()}`)
+      ]);
+      const ts = commitData[0]?.commit?.committer?.date || commitData[0]?.commit?.author?.date;
+      const ageStr = ts ? (() => {
+        const ageMin = Math.round((Date.now() - new Date(ts).getTime()) / 60000);
+        return (ageMin < 60 ? `${ageMin}m` : `${Math.round(ageMin / 60)}h`) + ' ago';
+      })() : '?';
+      const ageFlag = ts && Math.round((Date.now() - new Date(ts).getTime()) / 60000) > 360 ? ' ⚠️' : '';
+      let count = '?';
+      if (raw) { try { count = fmtNum(JSON.parse(raw).length); } catch {} }
+      return `${'  ' + label.padEnd(20)} ${count.padStart(6)}  ${ageStr}${ageFlag}`;
     } catch {
-      return `${'  ' + label.padEnd(26)} (unavailable)`;
+      return `${'  ' + label.padEnd(20)} ${'?'.padStart(6)}  (unavailable)`;
     }
   }));
-  pipelineLines += `${'Consumer freshness'.padEnd(28)}\n` + freshnessResults.join('\n') + '\n';
+  pipelineLines += `${'Consumer jobs / freshness'.padEnd(28)}\n` + freshnessResults.join('\n') + '\n';
 
   // Discord posted last 24h
   try {

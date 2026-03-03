@@ -29,7 +29,7 @@ const { Client, GatewayIntentBits } = require('discord.js');
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
-const CHANNEL_ID = process.env.DISCORD_DAILY_STATS_CHANNEL_ID;
+const CHANNEL_ID = process.env.DISCORD_PIPELINE_ALERT_CHANNEL_ID;
 const DATA_DIR = path.join(process.cwd(), '.github', 'data');
 const METRICS_LATEST = path.join(DATA_DIR, 'metrics', 'latest.json');
 
@@ -172,7 +172,7 @@ async function runChecks() {
 
 async function postAlert(failures) {
   if (!DISCORD_TOKEN || !CHANNEL_ID) {
-    console.error('DISCORD_TOKEN or DISCORD_DAILY_STATS_CHANNEL_ID not set');
+    console.error('DISCORD_TOKEN or DISCORD_PIPELINE_ALERT_CHANNEL_ID not set');
     process.exit(1);
   }
 
