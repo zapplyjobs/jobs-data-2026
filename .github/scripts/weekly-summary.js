@@ -5,8 +5,8 @@
  *
  * Posts weekly org summary to #github-updates channel:
  * - Repository stats table (stars, forks, issues with weekly deltas)
- * - Workflow health for last 7 days
- * - Job pipeline weekly averages
+ * - Workflow health for last 7 days (all 8 pipeline repos)
+ * - Job pipeline snapshot with by-source breakdown + consumer counts + freshness
  *
  * Persists previous week's stats in .github/data/weekly-stats.json
  */
@@ -31,18 +31,33 @@ const TRACKED_REPOS = [
   'New-Grad-Nursing-Jobs-2026',
 ];
 
-const CONSUMER_REPOS = [
-  { repo: 'New-Grad-Jobs-2026', label: 'New-Grad-Jobs-2026' },
-  { repo: 'Internships-2026', label: 'Internships-2026' },
-  { repo: 'New-Grad-Software-Engineering-Jobs-2026', label: 'Software-Engineering' },
-  { repo: 'New-Grad-Data-Science-Jobs-2026', label: 'Data-Science' },
-  { repo: 'New-Grad-Hardware-Engineering-Jobs-2026', label: 'Hardware-Engineering' },
-  { repo: 'New-Grad-Nursing-Jobs-2026', label: 'Nursing' },
+// All repos whose workflow health matters
+const PIPELINE_REPOS = [
+  'jobs-aggregator-private',
+  'jobs-data-2026',
+  'New-Grad-Jobs-2026',
+  'Internships-2026',
+  'New-Grad-Software-Engineering-Jobs-2026',
+  'New-Grad-Data-Science-Jobs-2026',
+  'New-Grad-Hardware-Engineering-Jobs-2026',
+  'New-Grad-Nursing-Jobs-2026',
 ];
 
-function githubGet(path) {
+const CONSUMER_REPOS = [
+  { repo: 'New-Grad-Jobs-2026',                       label: 'New-Grad' },
+  { repo: 'Internships-2026',                         label: 'Internships' },
+  { repo: 'New-Grad-Software-Engineering-Jobs-2026',  label: 'Software-Eng' },
+  { repo: 'New-Grad-Data-Science-Jobs-2026',          label: 'Data-Science' },
+  { repo: 'New-Grad-Hardware-Engineering-Jobs-2026',  label: 'Hardware-Eng' },
+  { repo: 'New-Grad-Nursing-Jobs-2026',               label: 'Nursing' },
+];
+
+// System workflows to exclude from health display
+const SYSTEM_WORKFLOWS = ['pages build and deployment', 'pages-build-deployment', 'CodeQL'];
+
+function githubGet(urlPath) {
   return new Promise((resolve, reject) => {
-    https.get(`https://api.github.com${path}`, {
+    https.get(`https://api.github.com${urlPath}`, {
       headers: {
         'User-Agent': 'Zapply-Stats-Bot',
         'Authorization': `Bearer ${process.env.GITHUB_TOKEN}`,
@@ -74,6 +89,10 @@ function delta(current, previous) {
   const diff = current - previous;
   if (diff === 0) return '(=)';
   return diff > 0 ? `(+${diff})` : `(${diff})`;
+}
+
+function fmtNum(n) {
+  return n.toLocaleString('en-US');
 }
 
 function weekRange() {
@@ -122,56 +141,98 @@ async function main() {
   const totalDeltaStr = totalStarsDelta === 0 ? '(=)' : (totalStarsDelta > 0 ? `(+${totalStarsDelta})` : `(${totalStarsDelta})`);
   const totalsLine = `\n📊 Org Totals: ${totalStars} stars ${totalDeltaStr} | ${totalForks} forks | ${totalIssues} issues`;
 
-  // --- Section 2: Workflow health (last 7 days) ---
+  // --- Section 2: Workflow health (last 7 days, all pipeline repos) ---
   const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-  let workflowLines = '';
-  try {
-    const runs = await githubGet(`/repos/${ORG}/jobs-data-2026/actions/runs?per_page=100&created=>=${weekAgo.toISOString()}`);
-    const byWorkflow = {};
-    for (const run of (runs.workflow_runs || [])) {
-      const name = run.name || run.path;
-      if (!byWorkflow[name]) byWorkflow[name] = { runs: 0, success: 0, fail: 0, durations: [] };
-      byWorkflow[name].runs++;
-      if (run.conclusion === 'success') byWorkflow[name].success++;
-      if (run.conclusion === 'failure') byWorkflow[name].fail++;
-      if (run.run_started_at && run.updated_at) {
-        const dur = Math.round((new Date(run.updated_at) - new Date(run.run_started_at)) / 1000);
-        byWorkflow[name].durations.push(dur);
+  const byWorkflow = {};
+
+  await Promise.all(PIPELINE_REPOS.map(async (repo) => {
+    try {
+      const runs = await githubGet(`/repos/${ORG}/${repo}/actions/runs?per_page=100&created=>=${weekAgo.toISOString()}`);
+      for (const run of (runs.workflow_runs || [])) {
+        if (SYSTEM_WORKFLOWS.includes(run.name)) continue;
+        const key = run.name || run.path;
+        if (!byWorkflow[key]) byWorkflow[key] = { runs: 0, success: 0, fail: 0, durations: [] };
+        byWorkflow[key].runs++;
+        if (run.conclusion === 'success') byWorkflow[key].success++;
+        if (run.conclusion === 'failure') byWorkflow[key].fail++;
+        if (run.run_started_at && run.updated_at) {
+          const dur = Math.round((new Date(run.updated_at) - new Date(run.run_started_at)) / 1000);
+          byWorkflow[key].durations.push(dur);
+        }
       }
-    }
-    for (const [name, w] of Object.entries(byWorkflow)) {
-      const avgDur = w.durations.length ? Math.round(w.durations.reduce((a, b) => a + b, 0) / w.durations.length) : 0;
-      const failPct = w.runs ? ((w.fail / w.runs) * 100).toFixed(1) : '0.0';
-      const warn = w.fail > 0 ? ' ⚠️' : '';
-      const label = name.slice(0, 35).padEnd(35);
-      workflowLines += `${label} | ${w.runs} runs | ${w.success}✅ ${w.fail}❌ | ~${avgDur}s | ${failPct}% fail${warn}\n`;
-    }
-  } catch (e) {
-    workflowLines = `(workflow data unavailable: ${e.message})\n`;
+    } catch { /* repo unavailable — skip */ }
+  }));
+
+  let workflowLines = '';
+  for (const [name, w] of Object.entries(byWorkflow)) {
+    const avgDur = w.durations.length ? Math.round(w.durations.reduce((a, b) => a + b, 0) / w.durations.length) : 0;
+    const failPct = w.runs ? ((w.fail / w.runs) * 100).toFixed(1) : '0.0';
+    const warn = w.fail > 0 ? ' ⚠️' : '';
+    const label = name.slice(0, 35).padEnd(35);
+    workflowLines += `${label} | ${w.runs} runs | ${w.success}✅ ${w.fail}❌ | ~${avgDur}s | ${failPct}% fail${warn}\n`;
   }
 
   // --- Section 3: Pipeline snapshot ---
   let pipelineLines = '';
-  try {
-    const lines = fs.readFileSync(ALL_JOBS_FILE, 'utf8').split('\n').filter(l => l.trim());
-    pipelineLines += `${'all_jobs.json (pipeline)'.padEnd(42)} ${lines.length}\n`;
-  } catch {
-    pipelineLines += `${'all_jobs.json (pipeline)'.padEnd(42)} (unavailable)\n`;
+
+  // Pipeline total
+  let pipelineTotal = 0;
+  if (fs.existsSync(ALL_JOBS_FILE)) {
+    const rawLines = fs.readFileSync(ALL_JOBS_FILE, 'utf8').split('\n').filter(l => l.trim());
+    pipelineTotal = rawLines.length;
+    pipelineLines += `${'Pipeline total'.padEnd(28)} ${fmtNum(pipelineTotal)}\n`;
+
+    // By-source breakdown — count from pool directly (metadata by_source = per-run fetch counts, not pool)
+    try {
+      const bySource = {};
+      for (const line of rawLines) {
+        const src = JSON.parse(line).source;
+        if (src) bySource[src] = (bySource[src] || 0) + 1;
+      }
+      const parts = ['workday','greenhouse','amazon','ashby','lever','jsearch']
+        .filter(k => bySource[k])
+        .map(k => `${k[0].toUpperCase()}${k.slice(1)}: ${fmtNum(bySource[k])}`);
+      if (parts.length) pipelineLines += `${'By source'.padEnd(28)} ${parts.join(' | ')}\n`;
+    } catch { /* skip */ }
+  } else {
+    pipelineLines += `${'Pipeline total'.padEnd(28)} (unavailable)\n`;
   }
 
-  for (const { repo, label } of CONSUMER_REPOS) {
-    const raw = await rawGet(`https://raw.githubusercontent.com/${ORG}/${repo}/main/.github/data/current_jobs.json`);
-    let count = '?';
-    if (raw) {
-      try { count = JSON.parse(raw).length; } catch {}
-    }
-    pipelineLines += `${label.padEnd(42)} ${count}\n`;
+  // Enriched jobs count
+  const enrichedPath = path.join(process.cwd(), '.github', 'data', 'enriched_jobs.json');
+  if (fs.existsSync(enrichedPath)) {
+    const enrichedCount = fs.readFileSync(enrichedPath, 'utf8').split('\n').filter(l => l.trim()).length;
+    pipelineLines += `${'Enriched jobs'.padEnd(28)} ${fmtNum(enrichedCount)}\n`;
   }
+
+  // Consumer counts + freshness
+  pipelineLines += '\n';
+  const consumerResults = await Promise.all(CONSUMER_REPOS.map(async ({ repo, label }) => {
+    const filePath = '.github/data/current_jobs.json';
+    try {
+      const [commitData, raw] = await Promise.all([
+        githubGet(`/repos/${ORG}/${repo}/commits?path=${encodeURIComponent(filePath)}&per_page=1`),
+        rawGet(`https://raw.githubusercontent.com/${ORG}/${repo}/main/${filePath}?t=${Date.now()}`)
+      ]);
+      const ts = commitData[0]?.commit?.committer?.date || commitData[0]?.commit?.author?.date;
+      const ageStr = ts ? (() => {
+        const ageMin = Math.round((Date.now() - new Date(ts).getTime()) / 60000);
+        return (ageMin < 60 ? `${ageMin}m` : `${Math.round(ageMin / 60)}h`) + ' ago';
+      })() : '?';
+      const ageFlag = ts && Math.round((Date.now() - new Date(ts).getTime()) / 60000) > 360 ? ' ⚠️' : '';
+      let count = '?';
+      if (raw) { try { count = fmtNum(JSON.parse(raw).length); } catch {} }
+      return `${'  ' + label.padEnd(20)} ${count.padStart(6)}  ${ageStr}${ageFlag}`;
+    } catch {
+      return `${'  ' + label.padEnd(20)} ${'?'.padStart(6)}  (unavailable)`;
+    }
+  }));
+  pipelineLines += `${'Consumer jobs / freshness'.padEnd(28)}\n` + consumerResults.join('\n') + '\n';
 
   // --- Build messages ---
   const msg1 = `📊 zapplyjobs Org — Weekly Summary\nWeek of ${weekRange()}\n\n━━━ REPOSITORY STATS ━━━\n\`\`\`\n${header}\n${divider}\n${repoLines}\`\`\`${totalsLine}`;
   const msg2 = `━━━ WORKFLOW HEALTH (Last 7 Days) ━━━\n\`\`\`\n${workflowLines || '(no runs this week)\n'}\`\`\``;
-  const msg3 = `━━━ JOB PIPELINE (Current Snapshot) ━━━\n\`\`\`\n${pipelineLines}\`\`\``;
+  const msg3 = `━━━ JOB PIPELINE ━━━\n\`\`\`\n${pipelineLines}\`\`\``;
 
   // --- Post to Discord ---
   const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] });
