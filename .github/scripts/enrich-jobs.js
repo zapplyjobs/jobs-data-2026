@@ -11,6 +11,10 @@
  *   - visa_question_present    (true | false | null — from ATS application form)
  *   - is_remote                (bool, from tags.locations includes 'remote')
  *   - experience_level         (from tags.employment)
+ *   - summary_line             (string | null — DATA-7: first non-boilerplate sentence)
+ *   - key_requirements         (string[] — DATA-7: top 6 required_skills, display alias)
+ *   - is_simple_apply          (bool | null — DATA-8: GH only, question_count <= 5)
+ *   - question_count           (int | null — DATA-8: GH only; Ashby/Lever pending schema verification)
  *   + denormalized display fields: title, company_name, job_city, job_state, url, posted_at
  *
  * visa_question_present detection (per ATS):
@@ -351,50 +355,61 @@ function httpsGet(url) {
   });
 }
 
+// DATA-8: Simple apply threshold — forms with <= this many fields are considered "simple"
+const SIMPLE_APPLY_THRESHOLD = 5;
+
+// fetchApplicationVisaStatus returns { visaPresent, questionCount }
+// visaPresent: true | false | null
+// questionCount: integer (GH only) | null (Ashby/Lever/other — schema unverified)
 async function fetchApplicationVisaStatus(job) {
   try {
     if (job.source === 'greenhouse') {
       // Parse slug + numeric ID from job.id format: "greenhouse-{slug}-{numeric_id}"
       const m = job.id.match(/^greenhouse-(.+)-(\d+)$/);
-      if (!m) return null;
+      if (!m) return { visaPresent: null, questionCount: null };
       const [, slug, jobId] = m;
       const url = `https://boards-api.greenhouse.io/v1/boards/${slug}/jobs/${jobId}?questions=true`;
       const result = await httpsGet(url);
-      if (!result || result.status !== 200) return null;
+      if (!result || result.status !== 200) return { visaPresent: null, questionCount: null };
       const data = JSON.parse(result.body);
       const questions = data.questions || [];
-      return questions.some(q => GH_VISA_RE.test(q.label || '')) ? true : false;
+      return {
+        visaPresent: questions.some(q => GH_VISA_RE.test(q.label || '')) ? true : false,
+        questionCount: questions.length,
+      };
     }
 
     if (job.source === 'ashby') {
       const applyUrl = job.apply_url;
-      if (!applyUrl) return null;
+      if (!applyUrl) return { visaPresent: null, questionCount: null };
       const result = await httpsGet(applyUrl);
-      if (!result || result.status !== 200) return null;
+      if (!result || result.status !== 200) return { visaPresent: null, questionCount: null };
       // window.__appData = {...}; — extract JSON, search field titles for visa/sponsor
       const m = result.body.match(/window\.__appData\s*=\s*(\{[\s\S]*?\});\s*\n/);
       if (!m) {
         console.log(`[enrich] Ashby window.__appData not found for ${job.id} — visa check skipped`);
-        return null;
+        return { visaPresent: null, questionCount: null };
       }
       const appData = JSON.parse(m[1]);
       const str = JSON.stringify(appData);
-      return ASHBY_VISA_RE.test(str) ? true : false;
+      // questionCount: Ashby appData field schema unverified — null until Auditor confirms structure
+      return { visaPresent: ASHBY_VISA_RE.test(str) ? true : false, questionCount: null };
     }
 
     if (job.source === 'lever') {
       const applyUrl = job.apply_url;
-      if (!applyUrl) return null;
+      if (!applyUrl) return { visaPresent: null, questionCount: null };
       const result = await httpsGet(applyUrl);
-      if (!result || result.status !== 200) return null;
+      if (!result || result.status !== 200) return { visaPresent: null, questionCount: null };
       // Visa question is HTML-entity-encoded JSON embedded in page
       const decoded = he.decode(result.body);
-      return LEVER_VISA_RE.test(decoded) ? true : false;
+      // questionCount: Lever HTML field schema unverified — null until Auditor confirms structure
+      return { visaPresent: LEVER_VISA_RE.test(decoded) ? true : false, questionCount: null };
     }
 
-    return null; // JSearch or other sources — no application page
+    return { visaPresent: null, questionCount: null }; // JSearch or other sources — no application page
   } catch (_) {
-    return null;
+    return { visaPresent: null, questionCount: null };
   }
 }
 
@@ -453,6 +468,34 @@ function loadEnrichedIds() {
   return ids;
 }
 
+// ---------------------------------------------------------------------------
+// DATA-7: Summary line extraction
+// Returns the first non-boilerplate sentence from plain text description.
+// Boilerplate openers (company mission, "at X we..." intros) are skipped.
+// Falls back to first sentence of full text if no non-boilerplate sentence found.
+// ---------------------------------------------------------------------------
+const BOILERPLATE_OPENERS = [
+  /^(at |about |join |we are |our mission|our company|we're |we believe|founded in)/i,
+  /^(the company|the team|company overview|about us|who we are)/i,
+];
+
+function extractSummaryLine(plainText) {
+  if (!plainText) return null;
+  // Split on sentence-ending punctuation followed by whitespace or end
+  const sentences = plainText.split(/(?<=[.!?])\s+/).map(s => s.trim()).filter(Boolean);
+  for (const sentence of sentences) {
+    // Skip very short sentences (< 30 chars) — likely headers or fragments
+    if (sentence.length < 30) continue;
+    // Skip boilerplate openers
+    if (BOILERPLATE_OPENERS.some(re => re.test(sentence))) continue;
+    // Skip sentences that are just ###SECTION:### markers
+    if (/^###SECTION:/.test(sentence)) continue;
+    return sentence.length > 200 ? sentence.slice(0, 200).trimEnd() + '…' : sentence;
+  }
+  // Fallback: return first sentence regardless
+  return sentences[0] ? sentences[0].slice(0, 200) : null;
+}
+
 const TECH_DOMAINS = new Set(['software', 'data_science', 'hardware', 'ai']);
 
 async function enrichJob(job, termMap, descriptionsMap) {
@@ -476,9 +519,17 @@ async function enrichJob(job, termMap, descriptionsMap) {
   );
 
   const sponsorsVisa = detectVisa(plainText);
-  const visaQuestionPresent = await fetchApplicationVisaStatus(job);
+  const { visaPresent: visaQuestionPresent, questionCount } = await fetchApplicationVisaStatus(job);
   const isRemote = (job.tags?.locations || []).includes('remote');
   const experienceLevel = job.tags?.employment || null;
+
+  // DATA-7: summary_line — first non-boilerplate sentence from description
+  const summaryLine = extractSummaryLine(plainText);
+  // DATA-7: key_requirements — alias for required_skills (already extracted, no new work)
+  const keyRequirements = requiredSkills.slice(0, 6);
+
+  // DATA-8: simple apply detection — GH only (question count exact); Ashby/Lever schema unverified
+  const isSimpleApply = questionCount !== null ? questionCount <= SIMPLE_APPLY_THRESHOLD : null;
 
   return {
     id: job.id,
@@ -490,6 +541,12 @@ async function enrichJob(job, termMap, descriptionsMap) {
     visa_question_present: visaQuestionPresent,
     is_remote: isRemote,
     experience_level: experienceLevel,
+    // DATA-7: job summary panel fields
+    summary_line: summaryLine,
+    key_requirements: keyRequirements,
+    // DATA-8: simple apply signal (GH: exact; Ashby/Lever: null pending schema verification)
+    is_simple_apply: isSimpleApply,
+    question_count: questionCount,
     enriched_at: new Date().toISOString(),
     // Denormalized display fields
     title: job.title || null,
