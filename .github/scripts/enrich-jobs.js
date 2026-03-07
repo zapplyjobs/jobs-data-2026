@@ -507,19 +507,35 @@ const BOILERPLATE_OPENERS = [
 
 function extractSummaryLine(plainText) {
   if (!plainText) return null;
-  // Split on sentence-ending punctuation followed by whitespace or end
-  const sentences = plainText.split(/(?<=[.!?])\s+/).map(s => s.trim()).filter(Boolean);
-  for (const sentence of sentences) {
-    // Skip very short sentences (< 30 chars) — likely headers or fragments
-    if (sentence.length < 30) continue;
-    // Skip boilerplate openers
-    if (BOILERPLATE_OPENERS.some(re => re.test(sentence))) continue;
-    // Skip sentences that are just ###SECTION:### markers
-    if (/^###SECTION:/.test(sentence)) continue;
-    return sentence.length > 200 ? sentence.slice(0, 200).trimEnd() + '…' : sentence;
+
+  // Pre-split on double newlines to isolate paragraphs.
+  // Plain-text section headers ("Opportunity Overview", "About the Role") have no trailing
+  // punctuation, so sentence splitting alone concatenates them with the next sentence.
+  // Discarding ≤4-word paragraphs removes headers without needing an exhaustive list.
+  const paragraphs = plainText.split(/\n\n+/).map(p => p.replace(/\n/g, ' ').trim()).filter(Boolean);
+  const substantiveParagraphs = paragraphs.filter(p => {
+    if (p.length < 30) return false;
+    if (/^###SECTION:/.test(p)) return false;
+    // Discard short paragraphs that are likely section headers (≤4 words)
+    const wordCount = p.split(/\s+/).filter(Boolean).length;
+    if (wordCount <= 4) return false;
+    return true;
+  });
+
+  // Sentence-split each substantive paragraph in order, return first non-boilerplate sentence
+  for (const para of substantiveParagraphs) {
+    const sentences = para.split(/(?<=[.!?])\s+/).map(s => s.trim()).filter(Boolean);
+    for (const sentence of sentences) {
+      if (sentence.length < 30) continue;
+      if (BOILERPLATE_OPENERS.some(re => re.test(sentence))) continue;
+      if (/^###SECTION:/.test(sentence)) continue;
+      return sentence.length > 200 ? sentence.slice(0, 200).trimEnd() + '…' : sentence;
+    }
   }
-  // Fallback: return first non-empty sentence, stripping any ###SECTION:### markers
-  const fallback = sentences.find(s => s.length >= 10);
+
+  // Fallback: first sentence of full text, stripped of ###SECTION:### markers
+  const allSentences = plainText.split(/(?<=[.!?])\s+/).map(s => s.trim()).filter(Boolean);
+  const fallback = allSentences.find(s => s.length >= 10);
   if (!fallback) return null;
   const stripped = fallback.replace(/###SECTION:[^#]*###\s*/g, '').trim();
   return stripped.slice(0, 200) || null;
