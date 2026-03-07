@@ -552,8 +552,8 @@ async function enrichJob(job, termMap, descriptionsMap) {
   const isRemote = (job.tags?.locations || []).includes('remote');
   const experienceLevel = job.tags?.employment || null;
 
-  // DATA-7: summary_line — first non-boilerplate sentence from description
-  const summaryLine = extractSummaryLine(plainText);
+  // DATA-7: summary_line — try required section first (role-specific), fall back to full text
+  const summaryLine = (required ? extractSummaryLine(required) : null) ?? extractSummaryLine(plainText);
   // DATA-7: key_requirements — alias for required_skills (already extracted, no new work)
   const keyRequirements = requiredSkills.slice(0, 6);
 
