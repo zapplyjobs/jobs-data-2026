@@ -40,5 +40,8 @@ jobs:
           git config user.name "Aggregator Bot"
           git add .github/data/enriched_jobs.json .github/data/processed_ids.json || exit 0
           git commit -m "chore: update enriched jobs [skip ci]" || exit 0
-          git pull --rebase origin main
-          git push
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push && break
+            echo "Push attempt $i failed, retrying in 5s..."
+            sleep 5
+          done
