@@ -360,7 +360,7 @@ const SIMPLE_APPLY_THRESHOLD = 5;
 
 // fetchApplicationVisaStatus returns { visaPresent, questionCount }
 // visaPresent: true | false | null
-// questionCount: integer (GH only) | null (Ashby/Lever/other — schema unverified)
+// questionCount: integer (GH/Ashby/Lever) | null (JSearch/Workday/Amazon — no form access)
 async function fetchApplicationVisaStatus(job) {
   try {
     if (job.source === 'greenhouse') {
@@ -392,8 +392,10 @@ async function fetchApplicationVisaStatus(job) {
       }
       const appData = JSON.parse(m[1]);
       const str = JSON.stringify(appData);
-      // questionCount: Ashby appData field schema unverified — null until Auditor confirms structure
-      return { visaPresent: ASHBY_VISA_RE.test(str) ? true : false, questionCount: null };
+      // applicationForm.fieldEntries = application fields only (excludes surveyForms — EEO/demographics)
+      const fieldEntries = appData.posting?.applicationForm?.fieldEntries;
+      const questionCount = Array.isArray(fieldEntries) ? fieldEntries.length : null;
+      return { visaPresent: ASHBY_VISA_RE.test(str) ? true : false, questionCount };
     }
 
     if (job.source === 'lever') {
@@ -403,8 +405,25 @@ async function fetchApplicationVisaStatus(job) {
       if (!result || result.status !== 200) return { visaPresent: null, questionCount: null };
       // Visa question is HTML-entity-encoded JSON embedded in page
       const decoded = he.decode(result.body);
-      // questionCount: Lever HTML field schema unverified — null until Auditor confirms structure
-      return { visaPresent: LEVER_VISA_RE.test(decoded) ? true : false, questionCount: null };
+      // fields[] = custom application questions only (standard name/email/resume handled separately by Lever UI)
+      // Bracket-depth counter required — greedy regex misses nested closing bracket
+      let questionCount = null;
+      const fieldsIdx = decoded.indexOf('"fields":[');
+      if (fieldsIdx >= 0) {
+        let depth = 0, end = null;
+        const snippet = decoded.slice(fieldsIdx + '"fields":'.length);
+        for (let i = 0; i < snippet.length; i++) {
+          if (snippet[i] === '[') depth++;
+          else if (snippet[i] === ']') { depth--; if (depth === 0) { end = i + 1; break; } }
+        }
+        if (end) {
+          try {
+            const fields = JSON.parse(snippet.slice(0, end));
+            questionCount = fields.length;
+          } catch (_) {}
+        }
+      }
+      return { visaPresent: LEVER_VISA_RE.test(decoded) ? true : false, questionCount };
     }
 
     return { visaPresent: null, questionCount: null }; // JSearch or other sources — no application page
