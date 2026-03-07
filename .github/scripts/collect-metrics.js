@@ -172,6 +172,55 @@ function getPipelineMetrics() {
   }
 }
 
+/**
+ * Compute week-over-week growth trends from history.jsonl.
+ * Finds the snapshot closest to 7 days ago and diffs against current pipeline metrics.
+ * Returns null if history is too short (<7 days).
+ */
+function computeGrowthTrends(currentPipeline) {
+  if (!fs.existsSync(HISTORY_FILE) || !currentPipeline) return null;
+
+  const lines = fs.readFileSync(HISTORY_FILE, 'utf8').trim().split('\n').filter(Boolean);
+  if (lines.length < 2) return null;
+
+  const now = Date.now();
+  const TARGET_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+
+  // Find snapshot closest to 7 days ago
+  let best = null;
+  let bestDiff = Infinity;
+  for (const line of lines) {
+    try {
+      const snap = JSON.parse(line);
+      const age = now - new Date(snap.timestamp).getTime();
+      const diff = Math.abs(age - TARGET_AGE_MS);
+      if (diff < bestDiff) { bestDiff = diff; best = snap; }
+    } catch { /* skip malformed */ }
+  }
+
+  if (!best || bestDiff > TARGET_AGE_MS) return null; // no snapshot within 7 days window
+
+  const prevTotal = best.pipeline?.pipelineTotal ?? null;
+  const currTotal = currentPipeline.pipelineTotal ?? null;
+  const prevBySource = best.pipeline?.bySource ?? {};
+  const currBySource = currentPipeline.bySource ?? {};
+
+  const totalDelta = (currTotal !== null && prevTotal !== null) ? currTotal - prevTotal : null;
+  const bySourceDelta = {};
+  for (const src of new Set([...Object.keys(prevBySource), ...Object.keys(currBySource)])) {
+    const prev = prevBySource[src] ?? 0;
+    const curr = currBySource[src] ?? 0;
+    bySourceDelta[src] = curr - prev;
+  }
+
+  return {
+    compared_to: best.timestamp,
+    total_delta: totalDelta,
+    total_delta_pct: (prevTotal && totalDelta !== null) ? Math.round((totalDelta / prevTotal) * 100) : null,
+    by_source_delta: bySourceDelta,
+  };
+}
+
 async function main() {
   console.log('🔍 Collecting metrics...');
 
@@ -195,11 +244,18 @@ async function main() {
     console.log(`  ${emoji} ${r.name}: ${jobStr}, workflow=${wfStr}`);
   }
 
+  const growth = computeGrowthTrends(pipeline);
+  if (growth) {
+    const sign = growth.total_delta >= 0 ? '+' : '';
+    console.log(`  Week-over-week: ${sign}${growth.total_delta} jobs (${sign}${growth.total_delta_pct}%) vs ${growth.compared_to}`);
+  }
+
   const snapshot = {
     timestamp: new Date().toISOString(),
     pipeline,
     repos,
-    summary: { operationalRepos: operationalCount, failedRepos: failedCount }
+    summary: { operationalRepos: operationalCount, failedRepos: failedCount },
+    growth,
   };
 
   fs.writeFileSync(LATEST_FILE, JSON.stringify(snapshot, null, 2) + '\n');
