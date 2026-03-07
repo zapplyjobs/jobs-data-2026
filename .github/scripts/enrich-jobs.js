@@ -356,7 +356,7 @@ function httpsGet(url) {
 }
 
 // DATA-8: Simple apply threshold — forms with <= this many fields are considered "simple"
-const SIMPLE_APPLY_THRESHOLD = 5;
+const SIMPLE_APPLY_THRESHOLD = 10;
 
 // fetchApplicationVisaStatus returns { visaPresent, questionCount }
 // visaPresent: true | false | null
