@@ -545,12 +545,13 @@ function extractSummaryLine(plainText) {
 
 const TECH_DOMAINS = new Set(['software', 'data_science', 'hardware', 'ai']);
 
-async function enrichJob(job, termMap, descriptionsMap) {
-  // Skip non-tech and non-US jobs — enrichment targets US tech roles only
+function isEnrichable(job) {
   const domains = job.tags?.domains || [];
   const locations = job.tags?.locations || [];
-  if (!domains.some(d => TECH_DOMAINS.has(d))) return { skipped: true, reason: 'non-tech' };
-  if (!locations.includes('us')) return { skipped: true, reason: 'non-us' };
+  return domains.some(d => TECH_DOMAINS.has(d)) && locations.includes('us');
+}
+
+async function enrichJob(job, termMap, descriptionsMap) {
 
   const rawDescription = descriptionsMap.get(job.id) || null;
   const plainText = toPlainText(rawDescription || '');
@@ -623,18 +624,46 @@ async function main() {
   const pending = allJobs.filter(j => !enrichedIds.has(j.id));
   console.log(`[enrich-jobs] Pending enrichment: ${pending.length}`);
 
-  const batch = pending.slice(0, BATCH_SIZE);
+  // PIPELINE-2: Bulk-mark non-enrichable jobs as processed so they exit the queue permanently.
+  // Previously these were marked one-at-a-time inside each batch, wasting ~83% of batch capacity
+  // on jobs that would be skipped. Now we mark them all upfront and only batch enrichable jobs.
+  const processedMap = loadProcessedMap();
+  const now = new Date().toISOString();
+  let bulkMarked = 0;
+  for (const job of pending) {
+    if (!isEnrichable(job) && !processedMap[job.id]) {
+      const domains = job.tags?.domains || [];
+      const locations = job.tags?.locations || [];
+      const reason = !domains.some(d => TECH_DOMAINS.has(d)) ? 'non-tech' : 'non-us';
+      processedMap[job.id] = { status: 'skipped', reason, processed_at: now };
+      bulkMarked++;
+    }
+  }
+  if (bulkMarked > 0) {
+    console.log(`[enrich-jobs] Bulk-marked ${bulkMarked} non-enrichable jobs as processed (non-tech or non-US)`);
+  }
+
+  const enrichablePending = pending.filter(j => isEnrichable(j));
+  console.log(`[enrich-jobs] Enrichable pending: ${enrichablePending.length}`);
+
+  const batch = enrichablePending.slice(0, BATCH_SIZE);
   console.log(`[enrich-jobs] Processing batch of ${batch.length}`);
 
   if (batch.length === 0) {
+    // Still need to persist the bulk-marked non-enrichable IDs and prune expired ones
+    const liveIds = new Set(allJobs.map(j => j.id));
+    for (const id of Object.keys(processedMap)) {
+      if (!liveIds.has(id)) delete processedMap[id];
+    }
+    fs.writeFileSync(PROCESSED_PATH, JSON.stringify(processedMap), 'utf8');
     console.log('[enrich-jobs] Nothing to enrich. Exiting.');
     return;
   }
 
   const enriched = await Promise.all(batch.map(job => enrichJob(job, termMap, descriptionsMap)));
+  // All batch jobs are enrichable (pre-filtered) — no skips expected here
   const results = enriched.filter(r => r && !r.skipped);
-  const skippedResults = enriched.filter(r => r && r.skipped);
-  console.log(`[enrich-jobs] Enriched and appended ${results.length} jobs (${skippedResults.length} skipped — non-tech or non-US)`);
+  console.log(`[enrich-jobs] Enriched and appended ${results.length} jobs`);
 
   // Append new enriched results
   if (results.length > 0) {
@@ -642,20 +671,11 @@ async function main() {
     fs.appendFileSync(ENRICHED_PATH, newLines, 'utf8');
   }
 
-  // Mark ALL batch IDs as processed (including non-tech/non-US skips) so they don't re-enter pending.
-  // Write map format: { [id]: { status, reason?, processed_at } }
+  // Mark enriched batch IDs as processed
   const liveIds = new Set(allJobs.map(j => j.id));
-  const processedMap = loadProcessedMap();
-  const now = new Date().toISOString();
 
-  for (let i = 0; i < batch.length; i++) {
-    const job = batch[i];
-    const outcome = enriched[i];
-    if (outcome && outcome.skipped) {
-      processedMap[job.id] = { status: 'skipped', reason: outcome.reason, processed_at: now };
-    } else {
-      processedMap[job.id] = { status: 'enriched', processed_at: now };
-    }
+  for (const job of batch) {
+    processedMap[job.id] = { status: 'enriched', processed_at: now };
   }
 
   // Prune: remove IDs no longer in the live pool (aged out of 14-day window)
