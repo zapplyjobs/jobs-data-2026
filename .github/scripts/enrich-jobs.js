@@ -474,9 +474,16 @@ function loadEnrichedIds() {
 // Boilerplate openers (company mission, "at X we..." intros) are skipped.
 // Falls back to first sentence of full text if no non-boilerplate sentence found.
 // ---------------------------------------------------------------------------
+// Boilerplate openers: company-about sentences, NOT role description sentences.
+// Deliberately excludes "we are looking for" / "we're hiring" — those describe the role.
+// Targets: "At [Company]...", "About us", "Our mission", "Founded in", company overview intros.
 const BOILERPLATE_OPENERS = [
-  /^(at |about |join |we are |our mission|our company|we're |we believe|founded in)/i,
-  /^(the company|the team|company overview|about us|who we are)/i,
+  /^at [a-z]/i,                                      // "At Acme, we..." — company intro
+  /^(about us|about the company|company overview)/i, // section headers that leak in
+  /^our (mission|vision|company|culture|values)/i,   // mission/culture openers
+  /^(founded in|incorporated in)/i,                  // founding year openers
+  /^(we are a |we're a )/i,                          // "We are a fast-growing..." — company description
+  /^join (us|our team|the team)/i,                   // "Join us at..."
 ];
 
 function extractSummaryLine(plainText) {
@@ -492,8 +499,11 @@ function extractSummaryLine(plainText) {
     if (/^###SECTION:/.test(sentence)) continue;
     return sentence.length > 200 ? sentence.slice(0, 200).trimEnd() + '…' : sentence;
   }
-  // Fallback: return first sentence regardless
-  return sentences[0] ? sentences[0].slice(0, 200) : null;
+  // Fallback: return first non-empty sentence, stripping any ###SECTION:### markers
+  const fallback = sentences.find(s => s.length >= 10);
+  if (!fallback) return null;
+  const stripped = fallback.replace(/###SECTION:[^#]*###\s*/g, '').trim();
+  return stripped.slice(0, 200) || null;
 }
 
 const TECH_DOMAINS = new Set(['software', 'data_science', 'hardware', 'ai']);
