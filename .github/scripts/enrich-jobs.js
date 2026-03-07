@@ -545,10 +545,19 @@ function extractSummaryLine(plainText) {
 
 const TECH_DOMAINS = new Set(['software', 'data_science', 'hardware', 'ai']);
 
-function isEnrichable(job) {
+function isEnrichable(job, descriptionsMap) {
   const domains = job.tags?.domains || [];
   const locations = job.tags?.locations || [];
-  return domains.some(d => TECH_DOMAINS.has(d)) && locations.includes('us');
+  if (!domains.some(d => TECH_DOMAINS.has(d))) return false;
+  if (!locations.includes('us')) return false;
+  // ENRICH-OBS-2: Workday jobs are only enrichable if a description is available.
+  // Without a description, enrichJob() produces null for skills/summary/visa — permanently
+  // blocking the slot and masking these fields as "enriched" when they're actually empty.
+  // Non-Workday sources always have descriptions (inline in API response).
+  if (job.source === 'workday') {
+    return !!descriptionsMap.get(job.id);
+  }
+  return true;
 }
 
 async function enrichJob(job, termMap, descriptionsMap) {
@@ -630,10 +639,17 @@ async function main() {
   const processedMap = loadProcessedMap();
   const now = new Date().toISOString();
   let bulkMarked = 0;
+  let workdayWaiting = 0;
   for (const job of pending) {
-    if (!isEnrichable(job) && !processedMap[job.id]) {
+    if (!isEnrichable(job, descriptionsMap) && !processedMap[job.id]) {
       const domains = job.tags?.domains || [];
       const locations = job.tags?.locations || [];
+      // ENRICH-OBS-2: Workday tech+US jobs with no description yet are NOT permanently skipped.
+      // They stay unprocessed so each run retries them as descriptions-workday.jsonl grows.
+      if (job.source === 'workday' && domains.some(d => TECH_DOMAINS.has(d)) && locations.includes('us')) {
+        workdayWaiting++;
+        continue;
+      }
       const reason = !domains.some(d => TECH_DOMAINS.has(d)) ? 'non-tech' : 'non-us';
       processedMap[job.id] = { status: 'skipped', reason, processed_at: now };
       bulkMarked++;
@@ -642,8 +658,11 @@ async function main() {
   if (bulkMarked > 0) {
     console.log(`[enrich-jobs] Bulk-marked ${bulkMarked} non-enrichable jobs as processed (non-tech or non-US)`);
   }
+  if (workdayWaiting > 0) {
+    console.log(`[enrich-jobs] Workday jobs waiting for description: ${workdayWaiting} (will retry each run)`);
+  }
 
-  const enrichablePending = pending.filter(j => isEnrichable(j));
+  const enrichablePending = pending.filter(j => isEnrichable(j, descriptionsMap));
   console.log(`[enrich-jobs] Enrichable pending: ${enrichablePending.length}`);
 
   const batch = enrichablePending.slice(0, BATCH_SIZE);
@@ -711,6 +730,57 @@ async function main() {
     const withVisaForm = results.filter(r => r.visa_question_present !== null).length;
     console.log(`[enrich-jobs] Stats: ${withRequired}/${results.length} had required skills, ${withVisa}/${results.length} had visa text signal, ${withVisaForm}/${results.length} had visa form signal`);
     console.log(`[enrich-jobs] Total enriched (post-prune): ${prunedLines.length}`);
+
+    // ENRICH-OBS-1: Write enrichment-stats.json for observability.
+    // Per-source: enrichable pool size, description coverage, enriched count, field fill rates.
+    const STATS_PATH = path.join(DATA_DIR, 'enrichment-stats.json');
+    const statsBySource = {};
+
+    // Build per-source counts from all_jobs.json pool
+    for (const job of allJobs) {
+      const src = job.source || 'unknown';
+      if (!statsBySource[src]) {
+        statsBySource[src] = { total: 0, tech_us: 0, has_desc: 0, enriched: 0,
+          summary_line: 0, required_skills: 0, sponsors_visa: 0, question_count: 0 };
+      }
+      statsBySource[src].total++;
+      const domains = job.tags?.domains || [];
+      const locs = job.tags?.locations || [];
+      if (domains.some(d => TECH_DOMAINS.has(d)) && locs.includes('us')) {
+        statsBySource[src].tech_us++;
+        if (descriptionsMap.get(job.id)) statsBySource[src].has_desc++;
+      }
+    }
+
+    // Field fill rates from enriched_jobs.json (post-prune)
+    for (const line of prunedLines) {
+      try {
+        const obj = JSON.parse(line);
+        const src = obj.source || 'unknown';
+        if (!statsBySource[src]) continue;
+        statsBySource[src].enriched++;
+        if (obj.summary_line) statsBySource[src].summary_line++;
+        if (obj.required_skills?.length > 0) statsBySource[src].required_skills++;
+        if (obj.sponsors_visa !== null) statsBySource[src].sponsors_visa++;
+        if (obj.question_count !== null) statsBySource[src].question_count++;
+      } catch (_) {}
+    }
+
+    const totalTechUs = Object.values(statsBySource).reduce((s, v) => s + v.tech_us, 0);
+    const totalEnriched = Object.values(statsBySource).reduce((s, v) => s + v.enriched, 0);
+    const totalHasDesc = Object.values(statsBySource).reduce((s, v) => s + v.has_desc, 0);
+
+    const enrichmentStats = {
+      generated: new Date().toISOString(),
+      total_tech_us: totalTechUs,
+      total_enriched: totalEnriched,
+      total_has_description: totalHasDesc,
+      workday_waiting_for_desc: workdayWaiting,
+      by_source: statsBySource,
+    };
+
+    fs.writeFileSync(STATS_PATH, JSON.stringify(enrichmentStats, null, 2), 'utf8');
+    console.log(`[enrich-jobs] enrichment-stats.json written (${totalEnriched}/${totalTechUs} enriched, ${totalHasDesc} have description)`);
   }
 }
 
