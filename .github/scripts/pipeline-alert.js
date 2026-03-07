@@ -15,6 +15,7 @@
  *   6. Nursing domain >30% of US-tagged pool (composition drift)
  *   7. us-tagged job count = 0 (location tagger broken)
  *   8. JSearch total_fetched = 0 (fetcher completely silent)
+ *   9. Any key domain (software/data_science/hardware/nursing) has 0 tagged jobs
  *
  * Not alerts (by design, not failures):
  *   - posted_jobs count = 0 per run (dedup saturation is normal)
@@ -164,6 +165,19 @@ async function runChecks() {
     const jsearchFetched = metadata.jsearch_stats?.total_fetched ?? null;
     if (jsearchFetched === 0) {
       failures.push('**JSearch silent**: total_fetched = 0 this run — fetcher may be broken');
+    }
+
+    // Check 9: per-domain US job counts — alert if any key consumer domain hits 0
+    // tag_stats.domains counts the full pool; we want US-tagged subset.
+    // jobs-metadata.json doesn't break down domain×location, so use tag_stats as proxy:
+    // if a domain count = 0, consumer boards for that domain show nothing.
+    const domains = metadata.tag_stats?.domains || {};
+    const KEY_DOMAINS = ['software', 'data_science', 'hardware', 'nursing'];
+    for (const domain of KEY_DOMAINS) {
+      const count = domains[domain] ?? null;
+      if (count === 0) {
+        failures.push(`**Domain empty (${domain})**: 0 jobs tagged — tag-engine or fetcher broken for this domain`);
+      }
     }
   }
 
