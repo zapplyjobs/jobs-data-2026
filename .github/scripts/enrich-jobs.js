@@ -13,7 +13,7 @@
  *   - experience_level         (from tags.employment)
  *   - summary_line             (string | null — DATA-7: first non-boilerplate sentence)
  *   - key_requirements         (string[] — DATA-7: top 6 required_skills, display alias)
- *   - is_simple_apply          (bool | null — DATA-8: GH only, question_count <= 5)
+ *   - is_simple_apply          (bool | null — DATA-8: GH only, question_count <= 13)
  *   - question_count           (int | null — DATA-8: GH only; Ashby/Lever pending schema verification)
  *   + denormalized display fields: title, company_name, job_city, job_state, url, posted_at
  *
@@ -356,7 +356,9 @@ function httpsGet(url) {
 }
 
 // DATA-8: Simple apply threshold — forms with <= this many fields are considered "simple"
-const SIMPLE_APPLY_THRESHOLD = 10;
+// GH embeds standard fields (name/email/phone/resume/location) as questions, so minimum is ~7.
+// Bottom quartile of GH distribution is ~13. Threshold calibrated to GH observed data (S137).
+const SIMPLE_APPLY_THRESHOLD = 13;
 
 // fetchApplicationVisaStatus returns { visaPresent, questionCount }
 // visaPresent: true | false | null
