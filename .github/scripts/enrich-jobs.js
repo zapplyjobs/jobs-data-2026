@@ -543,6 +543,70 @@ function extractSummaryLine(plainText) {
   return stripped.slice(0, 200) || null;
 }
 
+// ---------------------------------------------------------------------------
+// DATA-3: Education requirement extraction
+// Returns: 'bachelors' | 'masters' | 'phd' | 'none' | null
+//   null  = no education language found in description
+//   'none' = explicitly states no degree required / equivalent experience accepted
+//
+// Operates on the required section (or full text as fallback), same as skills.
+// Sampling (GH n=6542, Ashby n=1419, Lever n=1060):
+//   Degree mentions: GH=19%, Ashby=10%, Lever=2%
+//   "equivalent experience": GH/Ashby common, Lever rare
+//   No-degree explicit: ~5% of GH pool
+// ---------------------------------------------------------------------------
+const DEGREE_PHD = /\b(ph\.?d\.?|doctoral|doctorate)\b/i;
+const DEGREE_MASTERS = /\b(master'?s?)\s*(degree|of science|of arts|of engineering|in\s+\w|or higher|preferred|required|or phd|or doctoral)/i;
+const DEGREE_MASTERS_ABBREV = /\bm\.s\.(\s|,|$)/i;
+const DEGREE_MBA = /\bmba\b/i;
+const DEGREE_BACHELORS = /\b(bachelor'?s?)\s*(degree|of science|of arts|of engineering|in\s+\w|or higher|preferred|required|or master)/i;
+const DEGREE_BACHELORS_ABBREV = /\bb\.s\.(\s|,|$)|\bb\.e\.(\s|,|$)/i;
+const DEGREE_ASSOCIATE = /\b(associate'?s?)\s*(degree|in\s+\w)/i;
+const DEGREE_NONE = /\b(no (degree|college required)|equivalent experience|without (a )?degree|degree not required|equivalent combination|in lieu of degree|high school diploma|ged\b)/i;
+
+function extractMinDegree(text) {
+  if (!text) return null;
+  if (DEGREE_NONE.test(text)) return 'none';
+  // Detect all degree levels present, then return the minimum requirement.
+  // "Bachelor's or Master's or PhD" → bachelors (lowest mentioned = minimum).
+  const hasBachelors = DEGREE_BACHELORS.test(text) || DEGREE_BACHELORS_ABBREV.test(text);
+  const hasMasters = DEGREE_MASTERS.test(text) || DEGREE_MASTERS_ABBREV.test(text) || DEGREE_MBA.test(text);
+  const hasPhd = DEGREE_PHD.test(text);
+  const hasAssociate = DEGREE_ASSOCIATE.test(text);
+  if (hasAssociate) return 'associates';
+  if (hasBachelors) return 'bachelors';
+  if (hasMasters) return 'masters';
+  if (hasPhd) return 'phd';
+  return null;
+}
+
+// ---------------------------------------------------------------------------
+// DATA-4: Experience level extraction from description text
+// Returns: 'entry_level' | 'mid_level' | 'senior' | null
+//   null = no year-range language found
+//
+// Year ranges map to levels:
+//   0–2 years  → entry_level
+//   3–5 years  → mid_level
+//   6+ years   → senior
+// When a range spans levels (e.g. "2-4 years"), use the lower bound.
+//
+// Sampling: GH=31%, Ashby=26%, Lever=2% have explicit year patterns.
+// Patterns seen: "N+ years of experience", "N-M years of experience",
+//   "N years experience", "N to M years of experience"
+// ---------------------------------------------------------------------------
+const EXP_YEAR_RE = /(\d+)\+?\s*(?:[-–to]+\s*\d+\s*)?years?\s*(?:of\s*)?(?:relevant\s*|related\s*|professional\s*|work\s*)?(?:experience|exp\b)/i;
+
+function extractExperienceLevel(text) {
+  if (!text) return null;
+  const m = EXP_YEAR_RE.exec(text);
+  if (!m) return null;
+  const years = parseInt(m[1], 10); // use lower bound of range
+  if (years <= 2) return 'entry_level';
+  if (years <= 5) return 'mid_level';
+  return 'senior';
+}
+
 const TECH_DOMAINS = new Set(['software', 'data_science', 'hardware', 'ai']);
 
 function isEnrichable(job, descriptionsMap) {
@@ -588,16 +652,25 @@ async function enrichJob(job, termMap, descriptionsMap) {
   // DATA-8: simple apply detection — GH only (question count exact); Ashby/Lever schema unverified
   const isSimpleApply = questionCount !== null ? questionCount <= SIMPLE_APPLY_THRESHOLD : null;
 
+  // DATA-3: education requirement — extracted from required section (fallback: full text)
+  const minDegree = extractMinDegree(text);
+  // DATA-4: experience level from description — extracted from required section (fallback: full text)
+  const experienceLevelFromDesc = extractExperienceLevel(text);
+
   return {
     id: job.id,
     source: job.source || null,
-    enricher_version: 1,
+    enricher_version: 2,
     required_skills: requiredSkills,
     nice_to_have_skills: niceToHaveSkills,
     sponsors_visa: sponsorsVisa,
     visa_question_present: visaQuestionPresent,
     is_remote: isRemote,
     experience_level: experienceLevel,
+    // DATA-3: education requirement extracted from description text
+    min_degree: minDegree,
+    // DATA-4: experience level extracted from description text (distinct from tags.employment)
+    experience_level_from_desc: experienceLevelFromDesc,
     // DATA-7: job summary panel fields
     summary_line: summaryLine,
     key_requirements: keyRequirements,
