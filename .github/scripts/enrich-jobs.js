@@ -14,7 +14,9 @@
  *   - summary_line             (string | null — DATA-7: first non-boilerplate sentence)
  *   - key_requirements         (string[] — DATA-7: top 6 required_skills, display alias)
  *   - is_simple_apply          (bool | null — DATA-8: GH only, question_count <= 13)
- *   - question_count           (int | null — DATA-8: GH only; Ashby/Lever pending schema verification)
+ *   - question_count           (int | null — DATA-8: GH/Ashby/Lever)
+ *   - min_degree               ('bachelors'|'masters'|'phd'|'associates'|'none'|null — DATA-3)
+ *   - experience_level_from_desc ('entry_level'|'mid_level'|'senior'|null — DATA-4)
  *   + denormalized display fields: title, company_name, job_city, job_state, url, posted_at
  *
  * visa_question_present detection (per ATS):
@@ -505,6 +507,7 @@ const BOILERPLATE_OPENERS = [
   /^(founded in|incorporated in)/i,                  // founding year openers
   /^(we are a |we're a )/i,                          // "We are a fast-growing..." — company description
   /^join (us|our team|the team)/i,                   // "Join us at..."
+  /\bwith \d+\+?\s*years of experience\b/i,          // "[Company], with 25+ years of experience..." — company history
 ];
 
 function extractSummaryLine(plainText) {
@@ -599,7 +602,12 @@ const EXP_YEAR_RE = /(\d+)\+?\s*(?:[-–to]+\s*\d+\s*)?years?\s*(?:of\s*)?(?:rel
 
 function extractExperienceLevel(text) {
   if (!text) return null;
-  const m = EXP_YEAR_RE.exec(text);
+  // Strip boilerplate sentences before scanning to avoid false positives from
+  // company-history language ("OpenTable, with 25+ years of experience...").
+  const filteredText = text.split(/(?<=[.!?])\s+/)
+    .filter(s => !BOILERPLATE_OPENERS.some(re => re.test(s.trim())))
+    .join(' ');
+  const m = EXP_YEAR_RE.exec(filteredText);
   if (!m) return null;
   const years = parseInt(m[1], 10); // use lower bound of range
   if (years <= 2) return 'entry_level';
@@ -814,7 +822,8 @@ async function main() {
       const src = job.source || 'unknown';
       if (!statsBySource[src]) {
         statsBySource[src] = { total: 0, tech_us: 0, has_desc: 0, enriched: 0,
-          summary_line: 0, required_skills: 0, sponsors_visa: 0, question_count: 0 };
+          summary_line: 0, required_skills: 0, sponsors_visa: 0, question_count: 0,
+          min_degree: 0, experience_level_from_desc: 0 };
       }
       statsBySource[src].total++;
       const domains = job.tags?.domains || [];
@@ -836,6 +845,8 @@ async function main() {
         if (obj.required_skills?.length > 0) statsBySource[src].required_skills++;
         if (obj.sponsors_visa !== null) statsBySource[src].sponsors_visa++;
         if (obj.question_count !== null) statsBySource[src].question_count++;
+        if (obj.min_degree !== null && obj.min_degree !== undefined) statsBySource[src].min_degree++;
+        if (obj.experience_level_from_desc !== null && obj.experience_level_from_desc !== undefined) statsBySource[src].experience_level_from_desc++;
       } catch (_) {}
     }
 
