@@ -298,6 +298,8 @@ const VISA_NEGATIVE = [
 const VISA_POSITIVE = [
   /will (provide|offer|consider) (visa )?sponsorship/i,
   /visa sponsorship (is )?available/i,
+  /sponsorship available\.?$/im,          // "Sponsorship available." (Ashby bullet-list benefit format)
+  /^[-•]\s*visa sponsorship\s*$/im,       // "- Visa Sponsorship" (Ashby benefit line, standalone)
   /h[\s-]?1[\s-]?b sponsorship/i,
   /open to (visa )?sponsorship/i,
   /able to sponsor/i,
