@@ -8,6 +8,7 @@
  *   - required_skills[]        (from requirements/qualifications sections)
  *   - nice_to_have_skills[]    (from preferred/bonus sections)
  *   - sponsors_visa            (true | false | null — text-based, kept as fallback)
+ *   - possible_sponsor         (true | null — DOL LCA signal, only when sponsors_visa=null)
  *   - visa_question_present    (true | false | null — from ATS application form)
  *   - is_remote                (bool, from tags.locations includes 'remote')
  *   - experience_level         (from tags.employment)
@@ -42,6 +43,7 @@ const ENRICHED_PATH = path.join(DATA_DIR, 'enriched_jobs.json');
 const PROCESSED_PATH = path.join(DATA_DIR, 'processed_ids.json');
 const DESCRIPTIONS_PATH = path.join(DATA_DIR, 'descriptions.jsonl');
 const TAXONOMY_PATH = path.join(__dirname, 'enrich', 'skills-taxonomy.json');
+const LCA_SPONSORS_PATH = path.join(DATA_DIR, 'lca-sponsors.json');
 
 // ---------------------------------------------------------------------------
 // Load taxonomy — flatten all categories into a single Set for O(1) lookup,
@@ -61,6 +63,48 @@ function loadTaxonomy() {
 }
 
 // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// ENRICH-GAP-5: DOL LCA sponsor lookup
+//
+// Loads pre-built Set of normalized employer names from DOL OFLC certified
+// H-1B/H-1B1/E-3 LCA filings. Used to set possible_sponsor=true for jobs
+// where sponsors_visa=null (no text signal). Never emits false from absence.
+//
+// Normalization: lowercase, strip legal suffixes (inc/llc/corp/…), collapse
+// punctuation/whitespace. Matching: exact OR prefix (handles subsidiaries).
+// ---------------------------------------------------------------------------
+function loadLcaSponsors() {
+  if (!fs.existsSync(LCA_SPONSORS_PATH)) {
+    console.log('[enrich-jobs] lca-sponsors.json not found — possible_sponsor will be null for all jobs');
+    return new Set();
+  }
+  const data = JSON.parse(fs.readFileSync(LCA_SPONSORS_PATH, 'utf8'));
+  const set = new Set(data.employers || []);
+  console.log(`[enrich-jobs] LCA sponsors loaded: ${set.size} employers (${data._meta?.source || 'unknown source'})`);
+  return set;
+}
+
+function normalizeLcaName(name) {
+  if (!name) return '';
+  let n = name.toLowerCase().trim();
+  n = n.replace(/\b(inc|llc|ltd|corp|co|lp|llp|plc|gmbh|ag|sa|nv|bv|pte|pvt|limited|incorporated|corporation|company|group|holdings?|technologies?|solutions?|services?|systems?)\b\.?/g, '');
+  n = n.replace(/[^a-z0-9\s]/g, ' ');
+  n = n.replace(/\s+/g, ' ').trim();
+  return n;
+}
+
+function isPossibleSponsor(companyName, lcaSet) {
+  if (!lcaSet.size) return null;
+  const n = normalizeLcaName(companyName);
+  if (!n || n.length < 3) return null;
+  if (lcaSet.has(n)) return true;
+  // Prefix match: handles "Amazon Web Services" → matches "amazon" parent or subsidiaries
+  for (const entry of lcaSet) {
+    if (entry.startsWith(n + ' ') || n.startsWith(entry + ' ')) return true;
+  }
+  return null;
+}
+
 // Load per-source description sidecars → Map<id, description_text>
 //
 // Reads all files matching descriptions-*.jsonl in DATA_DIR.
@@ -634,7 +678,7 @@ function isEnrichable(job, descriptionsMap) {
   return true;
 }
 
-async function enrichJob(job, termMap, descriptionsMap) {
+async function enrichJob(job, termMap, descriptionsMap, lcaSet) {
 
   const rawDescription = descriptionsMap.get(job.id) || null;
   const plainText = toPlainText(rawDescription || '');
@@ -650,6 +694,8 @@ async function enrichJob(job, termMap, descriptionsMap) {
   );
 
   const sponsorsVisa = detectVisa(plainText);
+  // ENRICH-GAP-5: weak positive from DOL LCA filings — only set when sponsors_visa=null
+  const possibleSponsor = sponsorsVisa === null ? isPossibleSponsor(job.company_name, lcaSet) : null;
   const { visaPresent: visaQuestionPresent, questionCount } = await fetchApplicationVisaStatus(job);
   const isRemote = (job.tags?.locations || []).includes('remote');
   const experienceLevel = job.tags?.employment || null;
@@ -674,6 +720,7 @@ async function enrichJob(job, termMap, descriptionsMap) {
     required_skills: requiredSkills,
     nice_to_have_skills: niceToHaveSkills,
     sponsors_visa: sponsorsVisa,
+    possible_sponsor: possibleSponsor,
     visa_question_present: visaQuestionPresent,
     is_remote: isRemote,
     experience_level: experienceLevel,
@@ -703,6 +750,8 @@ async function main() {
 
   const termMap = loadTaxonomy();
   console.log(`[enrich-jobs] Taxonomy loaded: ${termMap.size} terms`);
+
+  const lcaSet = loadLcaSponsors();
 
   const descriptionsMap = loadDescriptionsMap();
   console.log(`[enrich-jobs] Descriptions loaded: ${descriptionsMap.size} entries`);
@@ -762,7 +811,7 @@ async function main() {
     return;
   }
 
-  const enriched = await Promise.all(batch.map(job => enrichJob(job, termMap, descriptionsMap)));
+  const enriched = await Promise.all(batch.map(job => enrichJob(job, termMap, descriptionsMap, lcaSet)));
   // All batch jobs are enrichable (pre-filtered) — no skips expected here
   const results = enriched.filter(r => r && !r.skipped);
   console.log(`[enrich-jobs] Enriched and appended ${results.length} jobs`);
