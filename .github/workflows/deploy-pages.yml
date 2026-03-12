@@ -1,0 +1,42 @@
+name: Deploy dashboard to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths: [index.html]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Inject dashboard password
+        run: |
+          grep -q '__DASHBOARD_PWD__' index.html || { echo "ERROR: placeholder not found in index.html"; exit 1; }
+          sed -i "s/__DASHBOARD_PWD__/${{ secrets.DASHBOARD_PWD }}/g" index.html
+          grep -q '__DASHBOARD_PWD__' index.html && { echo "ERROR: placeholder still present after sed"; exit 1; }
+          echo "Password injected successfully"
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
