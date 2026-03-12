@@ -68,9 +68,14 @@ const BOARD_CONFIGS = {
         description: 'Finance, accounting, quant'
       },
       {
-        key: 'nursing',
-        envVar: 'DISCORD_NURSING_CHANNEL_ID',
-        description: 'RN, LPN, CNA, NP, Travel Nurse roles'
+        key: 'healthcare',
+        envVar: 'DISCORD_HEALTHCARE_CHANNEL_ID',
+        description: 'RN, LPN, CNA, NP, Travel Nurse, PT, pharmacist, and all clinical roles'
+      },
+      {
+        key: 'business',
+        envVar: 'DISCORD_BUSINESS_CHANNEL_ID',
+        description: 'Sales, marketing, operations, legal, HR roles'
       },
       {
         key: 'other-industry',
@@ -141,14 +146,14 @@ const BOARD_CONFIGS = {
         description: 'Data science, analytics internships'
       },
       {
-        key: 'sales',
-        envVar: 'DISCORD_SALES_INT_CHANNEL_ID',
-        description: 'Sales internships'
+        key: 'healthcare',
+        envVar: 'DISCORD_HEALTHCARE_INT_CHANNEL_ID',
+        description: 'Healthcare internships (clinical roles)'
       },
       {
-        key: 'marketing',
-        envVar: 'DISCORD_MARKETING_INT_CHANNEL_ID',
-        description: 'Marketing internships'
+        key: 'business',
+        envVar: 'DISCORD_BUSINESS_INT_CHANNEL_ID',
+        description: 'Business-track internships (sales, marketing, ops, legal, HR)'
       },
       {
         key: 'other-industry',
