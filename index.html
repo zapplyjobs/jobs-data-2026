@@ -92,9 +92,55 @@
     .err { color: var(--red); }
     #error-msg { color: var(--red); padding: 40px; text-align: center; display: none; }
     footer { margin-top: 24px; color: var(--muted); font-size: 11px; text-align: center; }
+    #auth-overlay {
+      position: fixed; inset: 0;
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 999;
+    }
+    #auth-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 32px 40px;
+      width: 320px;
+      text-align: center;
+    }
+    #auth-box h2 { font-size: 15px; margin-bottom: 6px; }
+    #auth-box p { color: var(--muted); font-size: 12px; margin-bottom: 20px; }
+    #auth-input {
+      width: 100%; padding: 9px 12px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text); font-size: 14px;
+      outline: none; margin-bottom: 12px;
+    }
+    #auth-input:focus { border-color: var(--accent); }
+    #auth-btn {
+      width: 100%; padding: 9px;
+      background: var(--accent); border: none; border-radius: 6px;
+      color: #0d1117; font-size: 14px; font-weight: 600; cursor: pointer;
+    }
+    #auth-btn:hover { opacity: 0.85; }
+    #auth-error { color: var(--red); font-size: 12px; margin-top: 8px; min-height: 16px; }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20%,60%  { transform: translateX(-6px); }
+      40%,80%  { transform: translateX(6px); }
+    }
+    .shake { animation: shake 0.35s ease; }
   </style>
 </head>
 <body>
+
+<div id="auth-overlay">
+  <div id="auth-box">
+    <h2>ZJP Dashboard</h2>
+    <p>Internal access only</p>
+    <input id="auth-input" type="password" placeholder="Password" autocomplete="current-password" />
+    <button id="auth-btn">Unlock</button>
+    <div id="auth-error"></div>
+  </div>
+</div>
 
 <header>
   <h1>ZJP Dashboard</h1>
@@ -160,6 +206,39 @@
 </footer>
 
 <script>
+// Auth gate — sessionStorage token check
+(function () {
+  const DASHBOARD_PWD = 'zjp-gbGHsuShB8tZWENy';
+  const SESSION_KEY   = 'zjp_auth';
+  const overlay = document.getElementById('auth-overlay');
+
+  function unlock() { overlay.style.display = 'none'; }
+
+  if (sessionStorage.getItem(SESSION_KEY) === '1') { unlock(); return; }
+
+  const input = document.getElementById('auth-input');
+  const btn   = document.getElementById('auth-btn');
+  const err   = document.getElementById('auth-error');
+  const box   = document.getElementById('auth-box');
+
+  function attempt() {
+    if (input.value === DASHBOARD_PWD) {
+      sessionStorage.setItem(SESSION_KEY, '1');
+      unlock();
+    } else {
+      err.textContent = 'Incorrect password';
+      input.value = '';
+      box.classList.remove('shake');
+      void box.offsetWidth; // reflow to restart animation
+      box.classList.add('shake');
+    }
+  }
+
+  btn.addEventListener('click', attempt);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') attempt(); });
+  input.focus();
+})();
+
 const METRICS_URL = 'https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/metrics/latest.json?t=' + Date.now();
 
 function fmt(n) {
