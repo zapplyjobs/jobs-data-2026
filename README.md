@@ -16,4 +16,4 @@ Job data pipeline and Discord poster for [Zapply](https://zapply.jobs). Hosts th
 - [New-Grad-Software-Engineering-Jobs-2026](https://github.com/zapplyjobs/New-Grad-Software-Engineering-Jobs-2026)
 - [New-Grad-Data-Science-Jobs-2026](https://github.com/zapplyjobs/New-Grad-Data-Science-Jobs-2026)
 - [New-Grad-Hardware-Engineering-Jobs-2026](https://github.com/zapplyjobs/New-Grad-Hardware-Engineering-Jobs-2026)
-- [New-Grad-Nursing-Jobs-2026](https://github.com/zapplyjobs/New-Grad-Nursing-Jobs-2026)
+- [New-Grad-Healthcare-Jobs-2026](https://github.com/zapplyjobs/New-Grad-Healthcare-Jobs-2026)
