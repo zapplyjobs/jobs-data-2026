@@ -102,7 +102,7 @@
   <span id="last-updated"></span>
 </header>
 
-<div id="error-msg">⚠️ Failed to load metrics. Pipeline may be down or GitHub CDN is slow — try refreshing.</div>
+<div id="error-msg" style="display:none"></div>
 
 <div class="grid" id="grid" style="display:none">
 
@@ -154,8 +154,6 @@
 
 </div>
 
-<div id="error-msg"></div>
-
 <footer>
   Auto-refreshed from <a href="https://github.com/zapplyjobs/jobs-data-2026" style="color:var(--muted)">jobs-data-2026</a> · metrics collected every 6h ·
   <a href="https://github.com/zapplyjobs" style="color:var(--muted)">zapplyjobs</a>
@@ -203,7 +201,7 @@ function render(d) {
   const p = d.pipeline || {};
   const g = d.growth || {};
   const repos = d.repos || {};
-  const enrich = d.enrichment || {};
+  const enrich = d.enrichment || p.enrichment || {};
 
   // Staleness
   document.getElementById('staleness').innerHTML = stalenessHtml(d.timestamp);
