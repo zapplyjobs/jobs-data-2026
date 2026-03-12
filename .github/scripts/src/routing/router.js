@@ -210,31 +210,16 @@ function getJobChannelDetails(job, CHANNEL_CONFIG) {
   const description = (job.job_description || '').toLowerCase();
 
   // ============================================================================
-  // PRIORITY 0 (CRITICAL): Nursing Roles (credential-based — must check before tech)
-  // ============================================================================
-  if (CHANNEL_CONFIG.nursing) {
-    const nursingExact = ['registered nurse', 'nurse practitioner', 'nursing', 'travel nurse', 'lvn'];
-    const nursingCredentials = /\b(rn|lpn|cna|crna|np)\b/i;
-    if (nursingExact.some(kw => title.includes(kw)) || nursingCredentials.test(title)) {
-      return {
-        channelId: CHANNEL_CONFIG.nursing,
-        category: 'nursing',
-        matchedKeyword: 'nursing credential',
-        matchType: 'title-nursing',
-        priority: 'CRITICAL',
-        source: 'title'
-      };
-    }
-  }
-
-  // ============================================================================
-  // PRIORITY 0 (NEW): Use pre-computed tags.domains from tag-engine if non-general
+  // PRIORITY 0: Use pre-computed tags.domains from tag-engine if non-general
   // Falls through to title/description logic below for general-tagged jobs.
   // Note: Future improvement paths — Option B (LLM) or Option C (embeddings) —
   // would replace the title/description fallback logic below, not this block.
   // ============================================================================
   const tagDomains = job.tags?.domains || [];
   if (tagDomains.length > 0 && !tagDomains.includes('general')) {
+    if (tagDomains.includes('healthcare') && CHANNEL_CONFIG.healthcare) {
+      return { channelId: CHANNEL_CONFIG.healthcare, category: 'healthcare', matchType: 'tag-domain', priority: 'HIGH', source: 'tags' };
+    }
     if (tagDomains.includes('ai') && CHANNEL_CONFIG.ai) {
       return { channelId: CHANNEL_CONFIG.ai, category: 'ai', matchType: 'tag-domain', priority: 'HIGH', source: 'tags' };
     }
@@ -249,6 +234,21 @@ function getJobChannelDetails(job, CHANNEL_CONFIG) {
     }
     if (tagDomains.includes('product') && CHANNEL_CONFIG.tech) {
       return { channelId: CHANNEL_CONFIG.tech, category: 'tech', matchType: 'tag-domain', priority: 'HIGH', source: 'tags' };
+    }
+    if (tagDomains.includes('sales') && CHANNEL_CONFIG.business) {
+      return { channelId: CHANNEL_CONFIG.business, category: 'business', matchType: 'tag-domain', priority: 'HIGH', source: 'tags' };
+    }
+    if (tagDomains.includes('marketing') && CHANNEL_CONFIG.business) {
+      return { channelId: CHANNEL_CONFIG.business, category: 'business', matchType: 'tag-domain', priority: 'HIGH', source: 'tags' };
+    }
+    if (tagDomains.includes('operations') && CHANNEL_CONFIG.business) {
+      return { channelId: CHANNEL_CONFIG.business, category: 'business', matchType: 'tag-domain', priority: 'HIGH', source: 'tags' };
+    }
+    if (tagDomains.includes('legal') && CHANNEL_CONFIG.business) {
+      return { channelId: CHANNEL_CONFIG.business, category: 'business', matchType: 'tag-domain', priority: 'HIGH', source: 'tags' };
+    }
+    if (tagDomains.includes('hr') && CHANNEL_CONFIG.business) {
+      return { channelId: CHANNEL_CONFIG.business, category: 'business', matchType: 'tag-domain', priority: 'HIGH', source: 'tags' };
     }
   }
 
