@@ -27,7 +27,7 @@ const REPOS = [
   { owner: 'zapplyjobs', repo: 'New-Grad-Software-Engineering-Jobs-2026',  name: 'Software',      hasJobsFile: true  },
   { owner: 'zapplyjobs', repo: 'New-Grad-Data-Science-Jobs-2026',          name: 'Data-Science',  hasJobsFile: true  },
   { owner: 'zapplyjobs', repo: 'New-Grad-Hardware-Engineering-Jobs-2026',  name: 'Hardware',      hasJobsFile: true  },
-  { owner: 'zapplyjobs', repo: 'New-Grad-Nursing-Jobs-2026',               name: 'Nursing',       hasJobsFile: true  },
+  { owner: 'zapplyjobs', repo: 'New-Grad-Healthcare-Jobs-2026',            name: 'Healthcare',    hasJobsFile: true  },
 ];
 
 function ghRequest(url) {
@@ -173,6 +173,49 @@ function getPipelineMetrics() {
 }
 
 /**
+ * Read star counts from daily-stats.json (local file, updated by daily-stats.yml).
+ * Returns object keyed by consumer repo short name, or null if file missing.
+ */
+function getStarCounts() {
+  try {
+    const statsPath = path.join(DATA_DIR, 'daily-stats.json');
+    if (!fs.existsSync(statsPath)) return null;
+    const stats = JSON.parse(fs.readFileSync(statsPath, 'utf8'));
+    if (!stats.stars) return null;
+    // Map full repo names to the consumer short names used in REPOS
+    return {
+      'New-Grad':    stats.stars['New-Grad-Jobs-2026'] ?? null,
+      'Internships': stats.stars['Internships-2026'] ?? null,
+      'Software':    stats.stars['New-Grad-Software-Engineering-Jobs-2026'] ?? null,
+      'Data-Science':stats.stars['New-Grad-Data-Science-Jobs-2026'] ?? null,
+      'Hardware':    stats.stars['New-Grad-Hardware-Engineering-Jobs-2026'] ?? null,
+      'Healthcare':  stats.stars['New-Grad-Healthcare-Jobs-2026'] ?? stats.stars['New-Grad-Nursing-Jobs-2026'] ?? null,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Read enrichment summary from enrichment-stats.json (local file, updated each aggregator run).
+ * Returns { totalEnriched, totalHasDescription } or null if file missing.
+ */
+function getEnrichmentStats() {
+  try {
+    const enrichPath = path.join(DATA_DIR, 'enrichment-stats.json');
+    if (!fs.existsSync(enrichPath)) return null;
+    const stats = JSON.parse(fs.readFileSync(enrichPath, 'utf8'));
+    return {
+      totalEnriched: stats.total_enriched ?? null,
+      totalHasDescription: stats.total_has_description ?? null,
+      totalTechUs: stats.total_tech_us ?? null,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Compute week-over-week growth trends from history.jsonl.
  * Finds the snapshot closest to 7 days ago and diffs against current pipeline metrics.
  * Returns null if history is too short (<7 days).
@@ -229,6 +272,10 @@ async function main() {
   const pipeline = getPipelineMetrics();
   console.log(`  Pipeline: ${pipeline?.pipelineTotal ?? 'n/a'} jobs total`);
 
+  const stars = getStarCounts();
+  const enrichment = getEnrichmentStats();
+  if (enrichment) console.log(`  Enrichment: ${enrichment.totalEnriched} enriched / ${enrichment.totalHasDescription} have description`);
+
   console.log('  Fetching per-repo data...');
   const repoResults = await Promise.all(REPOS.map(getRepoMetrics));
 
@@ -250,10 +297,18 @@ async function main() {
     console.log(`  Week-over-week: ${sign}${growth.total_delta} jobs (${sign}${growth.total_delta_pct}%) vs ${growth.compared_to}`);
   }
 
+  // Merge star counts into repo entries
+  if (stars) {
+    for (const [name, count] of Object.entries(stars)) {
+      if (repos[name]) repos[name].stars = count;
+    }
+  }
+
   const snapshot = {
     timestamp: new Date().toISOString(),
     pipeline,
     repos,
+    enrichment,
     summary: { operationalRepos: operationalCount, failedRepos: failedCount },
     growth,
   };

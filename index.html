@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZJP Dashboard | Zapply Jobs Pipeline</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --green: #3fb950;
+      --yellow: #d29922;
+      --red: #f85149;
+      --accent: #58a6ff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', monospace;
+      font-size: 14px;
+      padding: 24px;
+      min-height: 100vh;
+    }
+    header {
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+    }
+    header h1 { font-size: 20px; font-weight: 600; }
+    #staleness { font-size: 13px; }
+    #last-updated { color: var(--muted); font-size: 12px; margin-left: auto; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .card h2 {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .big-number {
+      font-size: 36px;
+      font-weight: 700;
+      line-height: 1;
+      color: var(--text);
+    }
+    .delta {
+      font-size: 14px;
+      color: var(--green);
+      margin-top: 4px;
+    }
+    .delta.negative { color: var(--red); }
+    .sub { color: var(--muted); font-size: 12px; margin-top: 6px; }
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      text-align: left;
+      font-size: 11px;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 4px 8px 8px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 7px 8px 7px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+    tr:last-child td { border-bottom: none; }
+    .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .bar-label { width: 110px; font-size: 12px; color: var(--muted); text-align: right; flex-shrink: 0; }
+    .bar-track { flex: 1; background: var(--border); border-radius: 3px; height: 10px; }
+    .bar-fill { height: 10px; border-radius: 3px; background: var(--accent); }
+    .bar-value { font-size: 12px; width: 60px; text-align: right; }
+    .ok { color: var(--green); }
+    .warn { color: var(--yellow); }
+    .err { color: var(--red); }
+    #error-msg { color: var(--red); padding: 40px; text-align: center; display: none; }
+    footer { margin-top: 24px; color: var(--muted); font-size: 11px; text-align: center; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>ZJP Dashboard</h1>
+  <span id="staleness">Loading…</span>
+  <span id="last-updated"></span>
+</header>
+
+<div id="error-msg">⚠️ Failed to load metrics. Pipeline may be down or GitHub CDN is slow — try refreshing.</div>
+
+<div class="grid" id="grid" style="display:none">
+
+  <!-- Pool Total -->
+  <div class="card">
+    <h2>Pipeline Pool</h2>
+    <div class="big-number" id="pool-total">—</div>
+    <div class="delta" id="pool-wow">—</div>
+    <div class="sub" id="pool-sub">—</div>
+  </div>
+
+  <!-- Employment breakdown -->
+  <div class="card">
+    <h2>Employment Breakdown</h2>
+    <table id="employment-table">
+      <tr><th>Type</th><th style="text-align:right">Count</th></tr>
+    </table>
+  </div>
+
+  <!-- Domain distribution -->
+  <div class="card" style="grid-column: span 2">
+    <h2>Domain Distribution</h2>
+    <div id="domain-bars"></div>
+  </div>
+
+  <!-- Source breakdown -->
+  <div class="card">
+    <h2>By Source</h2>
+    <table id="source-table">
+      <tr><th>Source</th><th style="text-align:right">Jobs</th><th style="text-align:right">WoW</th></tr>
+    </table>
+  </div>
+
+  <!-- Consumer repos -->
+  <div class="card">
+    <h2>Consumer Repos</h2>
+    <table id="repo-table">
+      <tr><th>Repo</th><th style="text-align:right">Jobs</th><th>Status</th><th style="text-align:right">⭐</th></tr>
+    </table>
+  </div>
+
+  <!-- Enrichment -->
+  <div class="card">
+    <h2>Enrichment</h2>
+    <table id="enrich-table">
+      <tr><th>Metric</th><th style="text-align:right">Value</th></tr>
+    </table>
+  </div>
+
+</div>
+
+<div id="error-msg"></div>
+
+<footer>
+  Auto-refreshed from <a href="https://github.com/zapplyjobs/jobs-data-2026" style="color:var(--muted)">jobs-data-2026</a> · metrics collected every 6h ·
+  <a href="https://github.com/zapplyjobs" style="color:var(--muted)">zapplyjobs</a>
+</footer>
+
+<script>
+const METRICS_URL = 'https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/metrics/latest.json?t=' + Date.now();
+
+function fmt(n) {
+  if (n == null) return '—';
+  return Number(n).toLocaleString('en-US');
+}
+
+function fmtDelta(n) {
+  if (n == null) return '—';
+  return (n >= 0 ? '+' : '') + fmt(n);
+}
+
+function age(isoTs) {
+  const ms = Date.now() - new Date(isoTs).getTime();
+  const mins = Math.round(ms / 60000);
+  if (mins < 60) return `${mins}m ago`;
+  return `${Math.round(mins / 60)}h ago`;
+}
+
+function stalenessHtml(isoTs) {
+  const hours = (Date.now() - new Date(isoTs).getTime()) / 3600000;
+  if (hours < 0.5) return `<span class="ok">🟢 Live (${age(isoTs)})</span>`;
+  if (hours < 6)   return `<span class="warn">🟡 Updating (${age(isoTs)})</span>`;
+  return `<span class="err">🔴 Stale (${age(isoTs)}) — pipeline may be down</span>`;
+}
+
+function addRow(tableId, cells) {
+  const tr = document.createElement('tr');
+  cells.forEach((c, i) => {
+    const td = document.createElement('td');
+    td.innerHTML = c;
+    if (i > 0) td.style.textAlign = 'right';
+    tr.appendChild(td);
+  });
+  document.getElementById(tableId).appendChild(tr);
+}
+
+function render(d) {
+  const p = d.pipeline || {};
+  const g = d.growth || {};
+  const repos = d.repos || {};
+  const enrich = d.enrichment || {};
+
+  // Staleness
+  document.getElementById('staleness').innerHTML = stalenessHtml(d.timestamp);
+  document.getElementById('last-updated').textContent = 'Updated: ' + new Date(d.timestamp).toLocaleString();
+
+  // Pool total
+  document.getElementById('pool-total').textContent = fmt(p.pipelineTotal);
+  if (g.total_delta != null) {
+    const sign = g.total_delta >= 0 ? '' : 'negative';
+    document.getElementById('pool-wow').innerHTML = `<span class="${sign}">${fmtDelta(g.total_delta)} WoW (${g.total_delta_pct != null ? (g.total_delta_pct >= 0 ? '+' : '') + g.total_delta_pct + '%' : ''})</span>`;
+  }
+  const tagStats = p.tagStats || {};
+  document.getElementById('pool-sub').textContent =
+    `US: ${fmt(tagStats.usTagged)} · Entry-level: ${fmt(tagStats.entryLevel)} · Interns: ${fmt(tagStats.internship)}`;
+
+  // Employment table
+  [
+    ['Entry-level', tagStats.entryLevel],
+    ['Interns', tagStats.internship],
+  ].forEach(([k, v]) => addRow('employment-table', [k, fmt(v)]));
+
+  // Domain bars
+  const domains = tagStats.domains || {};
+  const maxDomain = Math.max(...Object.values(domains).filter(Boolean));
+  const domainOrder = Object.entries(domains).sort(([,a],[,b]) => b - a);
+  const barsEl = document.getElementById('domain-bars');
+  domainOrder.forEach(([k, v]) => {
+    const pct = maxDomain > 0 ? Math.round((v / maxDomain) * 100) : 0;
+    barsEl.innerHTML += `
+      <div class="bar-row">
+        <span class="bar-label">${k}</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+        <span class="bar-value">${fmt(v)}</span>
+      </div>`;
+  });
+
+  // Source table
+  const bySource = p.bySource || {};
+  const srcDelta = g.by_source_delta || {};
+  Object.entries(bySource)
+    .sort(([,a],[,b]) => b - a)
+    .forEach(([k, v]) => {
+      const d = srcDelta[k];
+      const dStr = d != null ? `<span class="${d >= 0 ? 'ok' : 'err'}">${fmtDelta(d)}</span>` : '—';
+      addRow('source-table', [k, fmt(v), dStr]);
+    });
+
+  // Repo table
+  Object.entries(repos).forEach(([name, r]) => {
+    const statusIcon = r.workflowStatus === 'success' ? '<span class="ok">✅</span>'
+                     : r.workflowStatus === 'failure' ? '<span class="err">❌</span>'
+                     : '<span class="warn">⚠️</span>';
+    addRow('repo-table', [
+      name,
+      r.jobCount != null ? fmt(r.jobCount) : '<span class="muted">n/a</span>',
+      statusIcon,
+      r.stars != null ? r.stars : '—',
+    ]);
+  });
+
+  // Enrichment table
+  [
+    ['Enriched jobs', fmt(enrich.totalEnriched)],
+    ['Has description', fmt(enrich.totalHasDescription)],
+    ['Tech US pool', fmt(enrich.totalTechUs)],
+  ].forEach(([k, v]) => addRow('enrich-table', [k, v]));
+
+  document.getElementById('grid').style.display = 'grid';
+}
+
+fetch(METRICS_URL)
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then(render)
+  .catch(err => {
+    document.getElementById('staleness').textContent = '⚠️ Load failed';
+    const el = document.getElementById('error-msg');
+    el.style.display = 'block';
+    el.textContent = `Failed to load metrics (${err.message}). Pipeline may be down or GitHub CDN is slow — try refreshing.`;
+  });
+</script>
+</body>
+</html>
