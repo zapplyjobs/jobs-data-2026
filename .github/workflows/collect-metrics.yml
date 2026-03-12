@@ -23,14 +23,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node .github/scripts/collect-metrics.js
 
-      - name: Generate ZJP snapshot + context
-        run: node .github/scripts/generate-snapshot.js
-
-      - name: Commit metrics and snapshot
+      - name: Commit metrics
         run: |
           git config user.email "bot@zapplyjobs.com"
           git config user.name "Metrics Bot"
-          git add .github/data/metrics/ .github/data/ZJP_SNAPSHOT.json .github/data/ZJP_CONTEXT.md .github/data/ZJP_OPEN_DECISIONS.md || exit 0
+          git add .github/data/metrics/ || exit 0
           git commit -m "chore: update metrics [skip ci]" || exit 0
           git pull --rebase origin main || true
           git push
