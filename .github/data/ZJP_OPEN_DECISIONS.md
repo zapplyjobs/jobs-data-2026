@@ -4,4 +4,3 @@
 # Update when decisions open or close (any role). Last updated: 2026-03-12 S158 Coder.
 
 GH_PAT expiry 2026-05-30 — rotate in all 8 repos + CF Worker by May 1.
-ZJP-INTEL C4: GitHub Pages not yet enabled on jobs-data-2026 — dashboard not live (Settings → Pages → branch: main, folder: /).

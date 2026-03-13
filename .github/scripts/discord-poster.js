@@ -384,6 +384,7 @@ async function main() {
   let filteredCount = 0;
   let nonUsCount = 0;
   let staleCount = 0;
+  let midLevelCount = 0;
 
   for (const job of uniqueJobs) {
     try {
@@ -407,6 +408,12 @@ async function main() {
       // Skip non-US jobs (settled rule: no us tag = don't post)
       if (!job.tags?.locations?.includes('us')) {
         nonUsCount++;
+        continue;
+      }
+
+      // Skip mid-level jobs — new-grad and internship boards only (DISCORD-MID-1)
+      if (job.tags?.employment === 'mid_level') {
+        midLevelCount++;
         continue;
       }
 
@@ -527,6 +534,7 @@ async function main() {
   console.log(`  ⏭️  Skipped (already posted): ${skippedCount} jobs`);
   console.log(`  🌍 Filtered (non-US): ${nonUsCount} jobs`);
   console.log(`  📅 Filtered (too old): ${staleCount} jobs`);
+  console.log(`  🔵 Filtered (mid-level): ${midLevelCount} jobs`);
   console.log(`  🚫 Filtered (no channel matched): ${filteredCount} jobs`);
 
   // Save databases
