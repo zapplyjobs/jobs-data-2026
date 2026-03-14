@@ -1,6 +1,6 @@
 # ZJP Dependency Graph
 
-Generated from submodule `172aeb2`. Entry points: `index.js`, `lib/aggregator/processors/tag-engine.js`.
+Generated from submodule `58e199e`. Entry points: `index.js`, `lib/aggregator/processors/tag-engine.js`.
 
 flowchart LR
 
