@@ -15,7 +15,7 @@ const Router = require('./src/routing/router');
 const Location = require('./src/routing/location');
 // Two-layer dedup — intentional TTL difference:
 //   PostedJobsManager (7-day): matches Discord scroll window — prevents re-posting jobs still visible
-//   GlobalDedupeManager (14-day): matches pipeline window — prevents re-posting jobs in all_jobs.json
+//   GlobalDedupeManager (7-day): matches staleness gate — prevents re-posting jobs within active window
 const PostedJobsManager = require('./src/data/posted-jobs-manager-v2');
 const GlobalDedupeManager = require('./src/data/global-dedupe-manager');
 const {
@@ -391,7 +391,7 @@ async function main() {
       // Generate fingerprint for this job
       const fingerprint = generateMinimalJobFingerprint(job);
 
-      // Check if already posted globally (across all runs, 14-day TTL)
+      // Check if already posted globally (across all runs, 7-day TTL)
       if (globalDedupeManager.hasBeenPosted(fingerprint)) {
         console.log(`  ⏭️  Skipping (already posted globally): ${job.job_title} @ ${job.employer_name}`);
         skippedCount++;
@@ -417,11 +417,13 @@ async function main() {
         continue;
       }
 
-      // Skip jobs older than 14 days (prevents stale ATS listings from posting)
+      // Skip jobs older than 7 days (prevents stale ATS listings from posting).
+      // Jobs with no posted_at date are treated as stale (age = Infinity) — a missing
+      // date is not evidence of freshness, and posting undated jobs causes noise.
       const jobAge = job.job_posted_at_datetime_utc
         ? (Date.now() - new Date(job.job_posted_at_datetime_utc).getTime()) / (1000 * 60 * 60 * 24)
-        : 0;
-      if (jobAge > 14) {
+        : Infinity;
+      if (jobAge > 7) {
         staleCount++;
         continue;
       }
