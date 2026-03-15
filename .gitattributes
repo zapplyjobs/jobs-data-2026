@@ -1,0 +1,14 @@
+# git-crypt: encrypt pipeline scripts (IP protection)
+# Workflow .yml files are NOT encrypted — they are entrypoints and must be readable.
+# Public data files (all_jobs.json, enriched_jobs.json, etc.) are NOT encrypted.
+.github/scripts/discord-poster.js filter=git-crypt diff=git-crypt
+.github/scripts/cleanup-discord-posts.js filter=git-crypt diff=git-crypt
+.github/scripts/collect-metrics.js filter=git-crypt diff=git-crypt
+.github/scripts/daily-stats.js filter=git-crypt diff=git-crypt
+.github/scripts/weekly-summary.js filter=git-crypt diff=git-crypt
+.github/scripts/monthly-summary.js filter=git-crypt diff=git-crypt
+.github/scripts/pipeline-alert.js filter=git-crypt diff=git-crypt
+.github/scripts/verify-discord.js filter=git-crypt diff=git-crypt
+.github/scripts/enrich-jobs.js filter=git-crypt diff=git-crypt
+.github/scripts/enrich/** filter=git-crypt diff=git-crypt
+.github/scripts/src/** filter=git-crypt diff=git-crypt
