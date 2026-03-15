@@ -199,6 +199,14 @@
     </table>
   </div>
 
+  <!-- Enrichment by Source -->
+  <div class="card">
+    <h2>Enrichment by Source</h2>
+    <table id="enrich-source-table">
+      <tr><th>Source</th><th style="text-align:right">Tech US</th><th style="text-align:right">Enriched</th><th style="text-align:right">Fill %</th><th style="text-align:right">Skills</th><th style="text-align:right">Visa</th></tr>
+    </table>
+  </div>
+
 </div>
 
 <footer>
@@ -376,6 +384,30 @@ function render(d, daily, enrichStats) {
     ['Tech US pool',     fmt(enrich.totalTechUs)],
     ['Visa sponsors',    visaTotal != null ? fmt(visaTotal) : '—'],
   ].forEach(([k, v]) => addRow('enrich-table', [k, v]));
+
+  // Enrichment by-source table
+  if (enrichStats && enrichStats.by_source) {
+    const ORDER = ['greenhouse', 'workday', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'netflix', 'eightfold'];
+    const sources = ORDER.filter(s => enrichStats.by_source[s]);
+    sources.forEach(src => {
+      const v = enrichStats.by_source[src];
+      const tech = v.tech_us || 0;
+      const enriched = v.enriched || 0;
+      const fill = tech > 0 ? Math.round(100 * enriched / tech) : 0;
+      const fillColor = fill >= 70 ? 'var(--green)' : fill >= 40 ? 'var(--yellow)' : 'var(--red)';
+      const tbl = document.getElementById('enrich-source-table');
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${src}</td>
+        <td style="text-align:right">${fmt(tech)}</td>
+        <td style="text-align:right">${fmt(enriched)}</td>
+        <td style="text-align:right;color:${fillColor}">${fill}%</td>
+        <td style="text-align:right">${fmt(v.required_skills || 0)}</td>
+        <td style="text-align:right">${fmt(v.sponsors_visa || 0)}</td>
+      `;
+      tbl.appendChild(tr);
+    });
+  }
 
   document.getElementById('grid').style.display = 'grid';
 }
