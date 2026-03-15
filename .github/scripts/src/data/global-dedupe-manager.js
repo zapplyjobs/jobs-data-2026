@@ -9,7 +9,7 @@ const path = require('path');
 
 const DATA_DIR = path.join(process.cwd(), '.github', 'data');
 const STORE_FILE = path.join(DATA_DIR, 'global-dedupe-store.json');
-const TTL_DAYS = 14; // Time-to-live for dedupe entries
+const TTL_DAYS = 7; // Time-to-live for dedupe entries (matches 7-day staleness gate)
 
 class GlobalDedupeManager {
   constructor() {
