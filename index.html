@@ -4,10 +4,29 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ZJP Dashboard | Zapply Jobs Pipeline</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
+      --bg: #ffffff;
+      --bg-card: #f6f8fa;
+      --bg-card-hover: #eef1f4;
+      --border: #d0d7de;
+      --text: #1f2328;
+      --muted: #636e7b;
+      --green: #1a7f37;
+      --yellow: #9a6700;
+      --red: #d1242f;
+      --accent: #58a6ff;
+      --accent-bg: rgba(88, 166, 255, 0.10);
+      --status-bar-bg: #f0fdf4;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    :root.dark {
       --bg: #0d1117;
-      --surface: #161b22;
+      --bg-card: #161b22;
+      --bg-card-hover: #1c2128;
       --border: #30363d;
       --text: #e6edf3;
       --muted: #8b949e;
@@ -15,58 +34,110 @@
       --yellow: #d29922;
       --red: #f85149;
       --accent: #58a6ff;
+      --accent-bg: rgba(88, 166, 255, 0.10);
+      --status-bar-bg: rgba(63, 185, 80, 0.08);
+      --shadow: 0 1px 3px rgba(0,0,0,0.3);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', monospace;
+      font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       font-size: 14px;
-      padding: 24px;
       min-height: 100vh;
     }
     header {
       display: flex;
-      align-items: baseline;
+      align-items: center;
       gap: 16px;
-      margin-bottom: 24px;
+      padding: 16px 24px;
       border-bottom: 1px solid var(--border);
-      padding-bottom: 16px;
+      background: var(--bg);
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
-    header h1 { font-size: 20px; font-weight: 600; }
-    #staleness { font-size: 13px; }
-    #last-updated { color: var(--muted); font-size: 12px; margin-left: auto; }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 16px;
-    }
-    .card {
-      background: var(--surface);
+    header h1 { font-size: 18px; font-weight: 700; flex: 1; }
+    #theme-toggle {
+      background: none;
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 16px;
+      border-radius: 6px;
+      padding: 5px 10px;
+      cursor: pointer;
+      color: var(--text);
+      font-size: 14px;
     }
-    .card h2 {
+    #theme-toggle:hover { background: var(--bg-card); }
+    #tab-bar {
+      display: flex;
+      gap: 4px;
+      padding: 12px 24px 0;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+    }
+    .tab {
+      padding: 8px 16px;
+      border: none;
+      background: none;
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 6px 6px 0 0;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+    }
+    .tab:hover { color: var(--text); background: var(--bg-card); }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    #status-bar {
+      padding: 8px 24px;
+      background: var(--status-bar-bg);
+      border-bottom: 1px solid var(--border);
       font-size: 12px;
-      text-transform: uppercase;
+    }
+    #status-bar.warn { background: rgba(210, 153, 34, 0.10); }
+    #status-bar.err  { background: rgba(248, 81, 73, 0.10); }
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
       letter-spacing: 0.08em;
       color: var(--muted);
       margin-bottom: 12px;
+      text-transform: uppercase;
     }
-    .big-number {
-      font-size: 36px;
-      font-weight: 700;
-      line-height: 1;
-      color: var(--text);
+    .grid   { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: var(--shadow);
     }
-    .delta {
-      font-size: 14px;
-      color: var(--green);
-      margin-top: 4px;
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: var(--shadow);
     }
-    .delta.negative { color: var(--red); }
-    .sub { color: var(--muted); font-size: 12px; margin-top: 6px; }
+    .stat-icon {
+      width: 36px; height: 36px;
+      background: var(--accent-bg);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      margin-bottom: 12px;
+    }
+    .stat-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+    .stat-value { font-size: 32px; font-weight: 700; line-height: 1.1; margin: 4px 0; }
+    .stat-trend { font-size: 13px; }
+    .stat-trend.up   { color: var(--green); }
+    .stat-trend.down { color: var(--red); }
+    .stat-trend.neutral { color: var(--muted); }
+    .stat-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
     table { width: 100%; border-collapse: collapse; }
     th {
       text-align: left;
@@ -90,8 +161,8 @@
     .ok { color: var(--green); }
     .warn { color: var(--yellow); }
     .err { color: var(--red); }
-    #error-msg { color: var(--red); padding: 40px; text-align: center; display: none; }
-    footer { margin-top: 24px; color: var(--muted); font-size: 11px; text-align: center; }
+    .muted { color: var(--muted); }
+    footer { margin-top: 24px; color: var(--muted); font-size: 11px; text-align: center; padding-bottom: 24px; }
     #auth-overlay {
       position: fixed; inset: 0;
       background: var(--bg);
@@ -99,7 +170,7 @@
       z-index: 999;
     }
     #auth-box {
-      background: var(--surface);
+      background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 10px;
       padding: 32px 40px;
@@ -144,70 +215,120 @@
 
 <header>
   <h1>ZJP Dashboard</h1>
-  <span id="staleness">Loading…</span>
-  <span id="last-updated"></span>
+  <button id="theme-toggle" title="Toggle theme">☀</button>
 </header>
 
-<div id="error-msg" style="display:none"></div>
+<nav id="tab-bar">
+  <button class="tab active" data-tab="ops">Ops</button>
+  <button class="tab" data-tab="overview">Overview</button>
+  <button class="tab" data-tab="pipeline">Pipeline</button>
+  <button class="tab" data-tab="quality">Quality</button>
+  <button class="tab" data-tab="distribution">Distribution</button>
+  <button class="tab" data-tab="supply">Supply</button>
+  <button class="tab" data-tab="status">Status</button>
+</nav>
 
-<div class="grid" id="grid" style="display:none">
-
-  <!-- Pool Total -->
-  <div class="card">
-    <h2>Pipeline Pool</h2>
-    <div class="big-number" id="pool-total">—</div>
-    <div class="delta" id="pool-wow">—</div>
-    <div class="sub" id="pool-sub">—</div>
-    <div class="sub" id="pool-trend"></div>
-  </div>
-
-  <!-- Employment breakdown -->
-  <div class="card">
-    <h2>Employment Breakdown</h2>
-    <table id="employment-table">
-      <tr><th>Type</th><th style="text-align:right">Count</th></tr>
-    </table>
-  </div>
-
-  <!-- Domain distribution -->
-  <div class="card" style="grid-column: span 2">
-    <h2>Domain Distribution</h2>
-    <div id="domain-bars"></div>
-  </div>
-
-  <!-- Source breakdown -->
-  <div class="card">
-    <h2>By Source</h2>
-    <table id="source-table">
-      <tr><th>Source</th><th style="text-align:right">Jobs</th><th style="text-align:right">WoW</th></tr>
-    </table>
-  </div>
-
-  <!-- Consumer repos -->
-  <div class="card">
-    <h2>Consumer Repos</h2>
-    <table id="repo-table">
-      <tr><th>Repo</th><th style="text-align:right">Jobs</th><th>Status</th><th style="text-align:right">⭐</th></tr>
-    </table>
-  </div>
-
-  <!-- Enrichment -->
-  <div class="card">
-    <h2>Enrichment</h2>
-    <table id="enrich-table">
-      <tr><th>Metric</th><th style="text-align:right">Value</th></tr>
-    </table>
-  </div>
-
-  <!-- Enrichment by Source -->
-  <div class="card">
-    <h2>Enrichment by Source</h2>
-    <table id="enrich-source-table">
-      <tr><th>Source</th><th style="text-align:right">Tech US</th><th style="text-align:right">Enriched</th><th style="text-align:right">Fill %</th><th style="text-align:right">Skills</th><th style="text-align:right">Visa</th></tr>
-    </table>
-  </div>
-
+<div id="status-bar">
+  <span id="status-indicator">Loading…</span>
 </div>
+
+<main id="content" style="padding: 24px; display:none">
+
+  <!-- OPS TAB -->
+  <section id="tab-ops" class="tab-panel">
+    <div class="section-label">Role Status</div>
+    <div class="grid-3" id="ops-roles"></div>
+    <div class="section-label" style="margin-top:24px">Pending Decisions</div>
+    <div id="ops-decisions"></div>
+    <div class="section-label" style="margin-top:24px">Pipeline Alert</div>
+    <div id="ops-alert" class="card"><span class="muted">No alerts.</span></div>
+  </section>
+
+  <!-- OVERVIEW TAB -->
+  <section id="tab-overview" class="tab-panel" style="display:none">
+    <div class="section-label">Pipeline Health</div>
+    <div class="grid" id="overview-health"></div>
+    <div class="section-label" style="margin-top:24px">Pool Breakdown</div>
+    <div class="grid" id="overview-breakdown"></div>
+    <div class="section-label" style="margin-top:24px">Domain Distribution</div>
+    <div class="card" id="domain-bars-wrap">
+      <div id="domain-bars"></div>
+    </div>
+  </section>
+
+  <!-- PIPELINE TAB -->
+  <section id="tab-pipeline" class="tab-panel" style="display:none">
+    <div class="section-label">Pool Trend</div>
+    <div class="card">
+      <p class="muted" style="text-align:center; padding:40px 0">Pool trend chart coming in ITER-2 (requires history.jsonl).</p>
+    </div>
+  </section>
+
+  <!-- QUALITY TAB -->
+  <section id="tab-quality" class="tab-panel" style="display:none">
+    <div class="section-label">Filter Performance</div>
+    <div class="grid" id="quality-filter"></div>
+    <div class="section-label" style="margin-top:24px">Enrichment</div>
+    <div class="grid" id="quality-enrich"></div>
+    <div class="section-label" style="margin-top:24px">Enrichment by Source</div>
+    <div class="card">
+      <table id="enrich-source-table">
+        <tr>
+          <th>Source</th>
+          <th style="text-align:right">Tech US</th>
+          <th style="text-align:right">Enriched</th>
+          <th style="text-align:right">Fill %</th>
+          <th style="text-align:right">Skills</th>
+          <th style="text-align:right">Visa</th>
+        </tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- DISTRIBUTION TAB -->
+  <section id="tab-distribution" class="tab-panel" style="display:none">
+    <div class="section-label">Consumer Repos</div>
+    <div class="card">
+      <table id="repo-table">
+        <tr>
+          <th>Repo</th>
+          <th style="text-align:right">Jobs</th>
+          <th>Status</th>
+          <th style="text-align:right">⭐</th>
+        </tr>
+      </table>
+    </div>
+    <div class="section-label" style="margin-top:24px">Discord</div>
+    <div class="card">
+      <p class="muted" style="text-align:center; padding:40px 0">Discord posting stats coming in ITER-5 (requires posted_jobs.json).</p>
+    </div>
+  </section>
+
+  <!-- SUPPLY TAB -->
+  <section id="tab-supply" class="tab-panel" style="display:none">
+    <div class="section-label">By Source</div>
+    <div class="card">
+      <table id="source-table">
+        <tr>
+          <th>Source</th>
+          <th style="text-align:right">Jobs</th>
+          <th style="text-align:right">WoW</th>
+        </tr>
+      </table>
+    </div>
+    <div class="section-label" style="margin-top:24px">Top Companies</div>
+    <div class="card">
+      <p class="muted" style="text-align:center; padding:40px 0">Top companies table coming in ITER-4 (requires jobs-metadata.top_companies).</p>
+    </div>
+  </section>
+
+  <!-- STATUS TAB -->
+  <section id="tab-status" class="tab-panel" style="display:none">
+    <div class="section-label">Services</div>
+    <div id="status-services"></div>
+  </section>
+
+</main>
 
 <footer>
   Auto-refreshed from <a href="https://github.com/zapplyjobs/jobs-data-2026" style="color:var(--muted)">jobs-data-2026</a> · metrics collected every 6h ·
@@ -217,18 +338,6 @@
 <script>
 // Dashboard proxy secret — injected at deploy time via deploy-pages.yml
 const DASHBOARD_SECRET = '__DASHBOARD_SECRET__';
-
-// Fetch ops state from private repo via CF Worker proxy
-async function fetchOpsState() {
-  try {
-    const res = await fetch(
-      'https://job-board-cron-worker.wild-queen-069e.workers.dev/proxy?file=zjp-ops-state.json',
-      { headers: { 'Authorization': `Bearer ${DASHBOARD_SECRET}` } }
-    );
-    if (!res.ok) return null;
-    return await res.json();
-  } catch { return null; }
-}
 
 // Auth gate — sessionStorage token check
 (function () {
@@ -253,7 +362,7 @@ async function fetchOpsState() {
       err.textContent = 'Incorrect password';
       input.value = '';
       box.classList.remove('shake');
-      void box.offsetWidth; // reflow to restart animation
+      void box.offsetWidth;
       box.classList.add('shake');
     }
   }
@@ -263,32 +372,63 @@ async function fetchOpsState() {
   input.focus();
 })();
 
-const METRICS_URL   = 'https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/metrics/latest.json?t=' + Date.now();
-const DAILY_URL     = 'https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/daily-stats.json?t=' + Date.now();
-const ENRICHMENT_URL = 'https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/enrichment-stats.json?t=' + Date.now();
+// Theme toggle
+(function () {
+  const btn = document.getElementById('theme-toggle');
+  const root = document.documentElement;
+  const saved = localStorage.getItem('zjp_theme');
+  if (saved === 'dark') { root.classList.add('dark'); btn.textContent = '🌙'; }
+  btn.addEventListener('click', () => {
+    const isDark = root.classList.toggle('dark');
+    btn.textContent = isDark ? '🌙' : '☀';
+    localStorage.setItem('zjp_theme', isDark ? 'dark' : 'light');
+  });
+})();
 
+// Tab switching
+(function () {
+  document.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).style.display = 'block';
+    });
+  });
+})();
+
+// Fetch ops state from private repo via CF Worker proxy
+async function fetchOpsState() {
+  try {
+    const res = await fetch(
+      'https://job-board-cron-worker.wild-queen-069e.workers.dev/proxy?file=zjp-ops-state.json',
+      { headers: { 'Authorization': `Bearer ${DASHBOARD_SECRET}` } }
+    );
+    if (!res.ok) return null;
+    return await res.json();
+  } catch { return null; }
+}
+
+// Data URLs
+const METRICS_URL    = 'https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/metrics/latest.json?t=' + Date.now();
+const DAILY_URL      = 'https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/daily-stats.json?t=' + Date.now();
+const ENRICHMENT_URL = 'https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/enrichment-stats.json?t=' + Date.now();
+const METADATA_URL   = 'https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/jobs-metadata.json?t=' + Date.now();
+
+// Helpers
 function fmt(n) {
   if (n == null) return '—';
   return Number(n).toLocaleString('en-US');
 }
-
 function fmtDelta(n) {
   if (n == null) return '—';
   return (n >= 0 ? '+' : '') + fmt(n);
 }
-
 function age(isoTs) {
   const ms = Date.now() - new Date(isoTs).getTime();
   const mins = Math.round(ms / 60000);
   if (mins < 60) return `${mins}m ago`;
   return `${Math.round(mins / 60)}h ago`;
-}
-
-function stalenessHtml(isoTs) {
-  const hours = (Date.now() - new Date(isoTs).getTime()) / 3600000;
-  if (hours < 0.5) return `<span class="ok">🟢 Live (${age(isoTs)})</span>`;
-  if (hours < 6)   return `<span class="warn">🟡 Updating (${age(isoTs)})</span>`;
-  return `<span class="err">🔴 Stale (${age(isoTs)}) — pipeline may be down</span>`;
 }
 
 function addRow(tableId, cells) {
@@ -302,47 +442,109 @@ function addRow(tableId, cells) {
   document.getElementById(tableId).appendChild(tr);
 }
 
-function render(d, daily, enrichStats) {
+function statCard({ icon, label, value, trend, trendDir, sub }) {
+  const trendClass = trendDir === 'up' ? 'up' : trendDir === 'down' ? 'down' : 'neutral';
+  return `
+    <div class="stat-card">
+      <div class="stat-icon">${icon || '📊'}</div>
+      <div class="stat-label">${label}</div>
+      <div class="stat-value">${value ?? '—'}</div>
+      ${trend ? `<div class="stat-trend ${trendClass}">${trend}</div>` : ''}
+      ${sub   ? `<div class="stat-sub">${sub}</div>` : ''}
+    </div>`;
+}
+
+// Status bar
+function renderStatusBar(isoTs) {
+  const bar = document.getElementById('status-bar');
+  const ind = document.getElementById('status-indicator');
+  const hours = (Date.now() - new Date(isoTs).getTime()) / 3600000;
+  if (hours < 0.5) {
+    bar.className = '';
+    ind.innerHTML = `🟢 LIVE &nbsp;·&nbsp; Last run ${age(isoTs)}`;
+  } else if (hours < 6) {
+    bar.className = 'warn';
+    ind.innerHTML = `🟡 DELAYED &nbsp;·&nbsp; Last run ${age(isoTs)} — may be slow`;
+  } else {
+    bar.className = 'err';
+    ind.innerHTML = `🔴 DOWN &nbsp;·&nbsp; Last run ${age(isoTs)} — pipeline may be down`;
+  }
+}
+
+// Ops tab
+function renderOps(ops) {
+  if (!ops) {
+    document.getElementById('ops-roles').innerHTML = '<p class="muted">Ops state unavailable — proxy may be unreachable.</p>';
+    return;
+  }
+
+  const roles = [
+    { key: 'coder',      label: 'Coder',      icon: '⚙️' },
+    { key: 'auditor',    label: 'Auditor',    icon: '🔍' },
+    { key: 'strategist', label: 'Strategist', icon: '🧭' },
+  ];
+  const statusColor = { active: 'var(--green)', idle: 'var(--muted)', blocked: 'var(--red)' };
+
+  document.getElementById('ops-roles').innerHTML = roles.map(({ key, label, icon }) => {
+    const r = ops[key] || {};
+    const color = statusColor[r.status] || 'var(--muted)';
+    const task = key === 'strategist' ? r.top_recommendation : r.current_task;
+    const lastLabel = key === 'auditor' ? r.last_verified : r.last_session;
+    return `
+      <div class="stat-card">
+        <div class="stat-icon">${icon}</div>
+        <div class="stat-label">${label}</div>
+        <div style="font-size:13px; font-weight:600; color:${color}; margin:4px 0; text-transform:uppercase">${r.status || '—'}</div>
+        <div class="stat-sub">${task || '—'}</div>
+        <div class="stat-sub" style="margin-top:4px">Last: ${lastLabel || '—'}</div>
+      </div>`;
+  }).join('');
+
+  const decisions = ops.operator_decisions_pending || [];
+  const decisionsEl = document.getElementById('ops-decisions');
+  if (decisions.length === 0) {
+    decisionsEl.innerHTML = '<div class="card"><span class="muted">No pending decisions.</span></div>';
+  } else {
+    decisionsEl.innerHTML = `<div class="card"><ul style="list-style:none; display:flex; flex-direction:column; gap:10px">` +
+      decisions.map(d => `<li style="display:flex;gap:8px;align-items:flex-start"><span style="color:var(--yellow)">⚠</span><span>${d}</span></li>`).join('') +
+      `</ul></div>`;
+  }
+
+  if (ops.pipeline_alert) {
+    document.getElementById('ops-alert').innerHTML = `<span class="err">🔴 ${ops.pipeline_alert}</span>`;
+  }
+}
+
+// Overview tab
+function renderOverview(d, daily) {
   const p = d.pipeline || {};
   const g = d.growth || {};
-  const repos = d.repos || {};
-  const enrich = d.enrichment || p.enrichment || {};
-
-  // Staleness
-  document.getElementById('staleness').innerHTML = stalenessHtml(d.timestamp);
-  document.getElementById('last-updated').textContent = 'Updated: ' + new Date(d.timestamp).toLocaleString();
-
-  // Pool total
-  document.getElementById('pool-total').textContent = fmt(p.pipelineTotal);
-  if (g.total_delta != null) {
-    const sign = g.total_delta >= 0 ? '' : 'negative';
-    document.getElementById('pool-wow').innerHTML = `<span class="${sign}">${fmtDelta(g.total_delta)} WoW (${g.total_delta_pct != null ? (g.total_delta_pct >= 0 ? '+' : '') + g.total_delta_pct + '%' : ''})</span>`;
-  }
   const tagStats = p.tagStats || {};
-  document.getElementById('pool-sub').textContent =
-    `US: ${fmt(tagStats.usTagged)} · Entry-level: ${fmt(tagStats.entryLevel)} · Interns: ${fmt(tagStats.internship)}`;
 
-  // Trend sparkline from daily-stats.json history
+  const wowDir = g.total_delta > 0 ? 'up' : g.total_delta < 0 ? 'down' : 'neutral';
+  document.getElementById('overview-health').innerHTML =
+    statCard({ icon: '🏗️', label: 'Pipeline Pool', value: fmt(p.pipelineTotal),
+               trend: g.total_delta != null ? fmtDelta(g.total_delta) + ' WoW' : null,
+               trendDir: wowDir }) +
+    statCard({ icon: '🇺🇸', label: 'US-Tagged', value: fmt(tagStats.usTagged),
+               sub: tagStats.usTagged && p.pipelineTotal ? `${Math.round(tagStats.usTagged / p.pipelineTotal * 100)}% of pool` : null }) +
+    statCard({ icon: '🎓', label: 'Entry-Level', value: fmt(tagStats.entryLevel) }) +
+    statCard({ icon: '🏢', label: 'Internships', value: fmt(tagStats.internship) });
+
   if (daily && Array.isArray(daily.history) && daily.history.length >= 2) {
     const h = daily.history;
-    const first = h[0], last = h[h.length - 1];
-    const arrow = last >= first ? '↑' : '↓';
-    document.getElementById('pool-trend').textContent =
-      `7d trend: ${fmt(first)} ${arrow} ${fmt(last)}`;
+    const arrow = h[h.length - 1] >= h[0] ? '↑' : '↓';
+    document.getElementById('overview-breakdown').innerHTML =
+      statCard({ icon: '📈', label: '7d Trend', value: fmt(h[h.length - 1]),
+                 trend: `${arrow} from ${fmt(h[0])} (7 days ago)`,
+                 trendDir: h[h.length - 1] >= h[0] ? 'up' : 'down' });
   }
 
-  // Employment table
-  [
-    ['Entry-level', tagStats.entryLevel],
-    ['Interns', tagStats.internship],
-  ].forEach(([k, v]) => addRow('employment-table', [k, fmt(v)]));
-
-  // Domain bars
   const domains = tagStats.domains || {};
   const maxDomain = Math.max(...Object.values(domains).filter(Boolean));
-  const domainOrder = Object.entries(domains).sort(([,a],[,b]) => b - a);
   const barsEl = document.getElementById('domain-bars');
-  domainOrder.forEach(([k, v]) => {
+  barsEl.innerHTML = '';
+  Object.entries(domains).sort(([, a], [, b]) => b - a).forEach(([k, v]) => {
     const pct = maxDomain > 0 ? Math.round((v / maxDomain) * 100) : 0;
     barsEl.innerHTML += `
       <div class="bar-row">
@@ -351,56 +553,36 @@ function render(d, daily, enrichStats) {
         <span class="bar-value">${fmt(v)}</span>
       </div>`;
   });
+}
 
-  // Source table
-  const bySource = p.bySource || {};
-  const srcDelta = g.by_source_delta || {};
-  Object.entries(bySource)
-    .sort(([,a],[,b]) => b - a)
-    .forEach(([k, v]) => {
-      const d = srcDelta[k];
-      const dStr = d != null ? `<span class="${d >= 0 ? 'ok' : 'err'}">${fmtDelta(d)}</span>` : '—';
-      addRow('source-table', [k, fmt(v), dStr]);
-    });
+// Quality tab
+function renderQuality(d, enrichStats, metadata) {
+  const p = d.pipeline || {};
+  const enrich = d.enrichment || p.enrichment || {};
 
-  // Repo table — star lookup map from daily-stats.json (full repo names)
-  const starMap = (daily && daily.stars) ? daily.stars : {};
-  const REPO_NAME_MAP = {
-    'New-Grad':     'New-Grad-Jobs-2026',
-    'Internships':  'Internships-2026',
-    'Software':     'New-Grad-Software-Engineering-Jobs-2026',
-    'Data-Science': 'New-Grad-Data-Science-Jobs-2026',
-    'Hardware':     'New-Grad-Hardware-Engineering-Jobs-2026',
-    'Healthcare':   'New-Grad-Healthcare-Jobs-2026',
-    'Nursing':      'New-Grad-Healthcare-Jobs-2026',  // transition key
-  };
-  Object.entries(repos).forEach(([name, r]) => {
-    const statusIcon = r.workflowStatus === 'success' ? '<span class="ok">✅</span>'
-                     : r.workflowStatus === 'failure' ? '<span class="err">❌</span>'
-                     : '<span class="warn">⚠️</span>';
-    const stars = r.stars != null ? r.stars : (starMap[REPO_NAME_MAP[name]] ?? '—');
-    addRow('repo-table', [
-      name,
-      r.jobCount != null ? fmt(r.jobCount) : '<span class="muted">n/a</span>',
-      statusIcon,
-      stars,
-    ]);
-  });
+  const sf = metadata && metadata.senior_filter_stats;
+  const filterRate = (sf && sf.total_input && sf.senior_jobs)
+    ? Math.round(sf.senior_jobs / sf.total_input * 100)
+    : null;
 
-  // Enrichment table
   let visaTotal = null;
   if (enrichStats && enrichStats.by_source) {
     visaTotal = Object.values(enrichStats.by_source)
       .reduce((s, v) => s + (v.sponsors_visa || 0), 0);
   }
-  [
-    ['Enriched jobs',    fmt(enrich.totalEnriched)],
-    ['Has description',  fmt(enrich.totalHasDescription)],
-    ['Tech US pool',     fmt(enrich.totalTechUs)],
-    ['Visa sponsors',    visaTotal != null ? fmt(visaTotal) : '—'],
-  ].forEach(([k, v]) => addRow('enrich-table', [k, v]));
 
-  // Enrichment by-source table
+  document.getElementById('quality-filter').innerHTML =
+    statCard({ icon: '🚫', label: 'Senior Filter Rate',
+               value: filterRate != null ? filterRate + '%' : '—',
+               sub: 'Target: 55–65%' }) +
+    statCard({ icon: '✅', label: 'Entry-Level Passed',
+               value: fmt(p.tagStats && p.tagStats.entryLevel) });
+
+  document.getElementById('quality-enrich').innerHTML =
+    statCard({ icon: '🔬', label: 'Enriched Jobs',  value: fmt(enrich.totalEnriched) }) +
+    statCard({ icon: '📄', label: 'Has Description', value: fmt(enrich.totalHasDescription) }) +
+    statCard({ icon: '🛂', label: 'Visa Sponsors',   value: visaTotal != null ? fmt(visaTotal) : '—' });
+
   if (enrichStats && enrichStats.by_source) {
     const ORDER = ['greenhouse', 'workday', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'netflix', 'eightfold'];
     const sources = ORDER.filter(s => enrichStats.by_source[s]);
@@ -423,25 +605,113 @@ function render(d, daily, enrichStats) {
       tbl.appendChild(tr);
     });
   }
-
-  document.getElementById('grid').style.display = 'grid';
 }
 
-// Primary fetch (required). Secondary fetches (daily-stats, enrichment-stats) are non-fatal.
+// Distribution tab — repo table
+function renderRepos(d, daily) {
+  const repos = d.repos || {};
+  const starMap = (daily && daily.stars) ? daily.stars : {};
+  const REPO_NAME_MAP = {
+    'New-Grad':     'New-Grad-Jobs-2026',
+    'Internships':  'Internships-2026',
+    'Software':     'New-Grad-Software-Engineering-Jobs-2026',
+    'Data-Science': 'New-Grad-Data-Science-Jobs-2026',
+    'Hardware':     'New-Grad-Hardware-Engineering-Jobs-2026',
+    'Healthcare':   'New-Grad-Healthcare-Jobs-2026',
+    'Nursing':      'New-Grad-Healthcare-Jobs-2026',
+  };
+  Object.entries(repos).forEach(([name, r]) => {
+    const statusIcon = r.workflowStatus === 'success' ? '<span class="ok">✅</span>'
+                     : r.workflowStatus === 'failure' ? '<span class="err">❌</span>'
+                     : '<span class="warn">⚠️</span>';
+    const stars = r.stars != null ? r.stars : (starMap[REPO_NAME_MAP[name]] ?? '—');
+    addRow('repo-table', [
+      name,
+      r.jobCount != null ? fmt(r.jobCount) : '<span class="muted">n/a</span>',
+      statusIcon,
+      stars,
+    ]);
+  });
+}
+
+// Supply tab — source table
+function renderSources(d) {
+  const p = d.pipeline || {};
+  const g = d.growth || {};
+  const bySource = p.bySource || {};
+  const srcDelta = g.by_source_delta || {};
+  Object.entries(bySource)
+    .sort(([, a], [, b]) => b - a)
+    .forEach(([k, v]) => {
+      const delta = srcDelta[k];
+      const dStr = delta != null ? `<span class="${delta >= 0 ? 'ok' : 'err'}">${fmtDelta(delta)}</span>` : '—';
+      addRow('source-table', [k, fmt(v), dStr]);
+    });
+}
+
+// Status tab
+function renderStatusTab(d) {
+  const p = d.pipeline || {};
+  const ts = d.timestamp;
+  const durationMin = p.duration_ms ? (p.duration_ms / 60000).toFixed(1) : null;
+
+  const services = [
+    { name: 'Aggregator', ok: ts && (Date.now() - new Date(ts).getTime()) < 6 * 3600000 },
+    { name: 'CF Worker cron', ok: true },
+  ];
+
+  document.getElementById('status-services').innerHTML = `<div class="card">` +
+    services.map(s => `
+      <div style="display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--border)">
+        <span class="${s.ok ? 'ok' : 'err'}">${s.ok ? '🟢' : '🔴'}</span>
+        <span style="flex:1">${s.name}</span>
+        <span class="muted" style="font-size:12px">${s.ok ? 'Online' : 'Down'}</span>
+      </div>`).join('') +
+    (durationMin ? `<div class="stat-sub" style="margin-top:12px">Last run: ${durationMin} min</div>` : '') +
+    `</div>`;
+}
+
+// Fetch orchestration
 const safeJson = url => fetch(url).then(r => r.ok ? r.json() : null).catch(() => null);
 
-fetch(METRICS_URL)
-  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
-  .then(metrics => Promise.all([
+async function loadAll() {
+  // Ops state via proxy (non-fatal — renders regardless)
+  const ops = await fetchOpsState();
+  renderOps(ops);
+
+  // Primary metrics (required)
+  let metrics;
+  try {
+    const r = await fetch(METRICS_URL);
+    if (!r.ok) throw new Error(r.status);
+    metrics = await r.json();
+  } catch (err) {
+    document.getElementById('status-indicator').innerHTML = `⚠️ Load failed (${err.message})`;
+    document.getElementById('status-bar').className = 'err';
+    document.getElementById('content').style.display = 'block';
+    document.getElementById('overview-health').innerHTML =
+      `<div class="card"><span class="err">Failed to load metrics. Pipeline may be down — try refreshing.</span></div>`;
+    return;
+  }
+
+  // Secondary fetches (non-fatal)
+  const [daily, enrichStats, metadata] = await Promise.all([
     safeJson(DAILY_URL),
     safeJson(ENRICHMENT_URL),
-  ]).then(([daily, enrichStats]) => render(metrics, daily, enrichStats)))
-  .catch(err => {
-    document.getElementById('staleness').textContent = '⚠️ Load failed';
-    const el = document.getElementById('error-msg');
-    el.style.display = 'block';
-    el.textContent = `Failed to load metrics (${err.message}). Pipeline may be down or GitHub CDN is slow — try refreshing.`;
-  });
+    safeJson(METADATA_URL),
+  ]);
+
+  renderStatusBar(metrics.timestamp);
+  renderOverview(metrics, daily);
+  renderQuality(metrics, enrichStats, metadata);
+  renderRepos(metrics, daily);
+  renderSources(metrics);
+  renderStatusTab(metrics);
+
+  document.getElementById('content').style.display = 'block';
+}
+
+loadAll();
 </script>
 </body>
 </html>
