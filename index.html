@@ -6,7 +6,7 @@
   <title>ZJP Dashboard | Zapply Jobs Pipeline</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #ffffff;
@@ -18,9 +18,9 @@
       --green: #1a7f37;
       --yellow: #9a6700;
       --red: #d1242f;
-      --accent: #58a6ff;
-      --accent-bg: rgba(88, 166, 255, 0.10);
-      --status-bar-bg: #f0fdf4;
+      --accent: #8B5CF6;
+      --accent-bg: rgba(139, 92, 246, 0.10);
+      --status-bar-bg: #f5f3ff;
       --shadow: 0 1px 3px rgba(0,0,0,0.08);
     }
     :root.dark {
@@ -33,16 +33,16 @@
       --green: #3fb950;
       --yellow: #d29922;
       --red: #f85149;
-      --accent: #58a6ff;
-      --accent-bg: rgba(88, 166, 255, 0.10);
-      --status-bar-bg: rgba(63, 185, 80, 0.08);
+      --accent: #8B5CF6;
+      --accent-bg: rgba(139, 92, 246, 0.10);
+      --status-bar-bg: rgba(139, 92, 246, 0.08);
       --shadow: 0 1px 3px rgba(0,0,0,0.3);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       font-size: 14px;
       min-height: 100vh;
     }
@@ -258,9 +258,9 @@
 
   <!-- PIPELINE TAB -->
   <section id="tab-pipeline" class="tab-panel" style="display:none">
-    <div class="section-label">Pool Trend</div>
-    <div class="card">
-      <p class="muted" style="text-align:center; padding:40px 0">Pool trend chart coming in ITER-2 (requires history.jsonl).</p>
+    <div class="section-label">Pool Trend (7 days)</div>
+    <div class="card" id="pool-trend-card">
+      <p class="muted" style="text-align:center; padding:40px 0">Loading…</p>
     </div>
   </section>
 
@@ -299,8 +299,8 @@
       </table>
     </div>
     <div class="section-label" style="margin-top:24px">Discord</div>
-    <div class="card">
-      <p class="muted" style="text-align:center; padding:40px 0">Discord posting stats coming in ITER-5 (requires posted_jobs.json).</p>
+    <div class="card" id="discord-stats-card">
+      <p class="muted" style="text-align:center; padding:40px 0">Loading…</p>
     </div>
   </section>
 
@@ -318,7 +318,7 @@
     </div>
     <div class="section-label" style="margin-top:24px">Top Companies</div>
     <div class="card">
-      <p class="muted" style="text-align:center; padding:40px 0">Top companies table coming in ITER-4 (requires jobs-metadata.top_companies).</p>
+      <p class="muted" style="text-align:center; padding:40px 0">Top companies table requires pipeline update to emit <code>top_companies</code> array.</p>
     </div>
   </section>
 
@@ -331,7 +331,7 @@
 </main>
 
 <footer>
-  Auto-refreshed from <a href="https://github.com/zapplyjobs/jobs-data-2026" style="color:var(--muted)">jobs-data-2026</a> · metrics collected every 6h ·
+  Auto-refreshed from <a href="https://github.com/zapplyjobs/jobs-data-2026" style="color:var(--muted)">jobs-data-2026</a> · pipeline runs every 15 min ·
   <a href="https://github.com/zapplyjobs" style="color:var(--muted)">zapplyjobs</a>
 </footer>
 
@@ -410,10 +410,11 @@ async function fetchOpsState() {
 }
 
 // Data URLs
-const METRICS_URL    = 'https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/metrics/latest.json?t=' + Date.now();
-const DAILY_URL      = 'https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/daily-stats.json?t=' + Date.now();
-const ENRICHMENT_URL = 'https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/enrichment-stats.json?t=' + Date.now();
-const METADATA_URL   = 'https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/jobs-metadata.json?t=' + Date.now();
+const METRICS_URL      = 'https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/metrics/latest.json?t=' + Date.now();
+const DAILY_URL        = 'https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/daily-stats.json?t=' + Date.now();
+const ENRICHMENT_URL   = 'https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/enrichment-stats.json?t=' + Date.now();
+const METADATA_URL     = 'https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/jobs-metadata.json?t=' + Date.now();
+const POSTED_JOBS_URL  = 'https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/posted_jobs.json?t=' + Date.now();
 
 // Helpers
 function fmt(n) {
@@ -516,18 +517,28 @@ function renderOps(ops) {
 }
 
 // Overview tab
-function renderOverview(d, daily) {
+function renderOverview(d, daily, metadata) {
   const p = d.pipeline || {};
   const g = d.growth || {};
-  const tagStats = p.tagStats || {};
+  // Use jobs-metadata.json for pool total (runs every pipeline run — always current)
+  // Fall back to metrics/latest.json if metadata unavailable
+  const poolTotal = (metadata && metadata.total_jobs) ? metadata.total_jobs : p.pipelineTotal;
+  const tagStats = (metadata && metadata.tag_stats)
+    ? {
+        usTagged:   metadata.tag_stats.locations && metadata.tag_stats.locations.us,
+        entryLevel: metadata.tag_stats.employment && metadata.tag_stats.employment.entry_level,
+        internship: metadata.tag_stats.employment && metadata.tag_stats.employment.internship,
+        domains:    metadata.tag_stats.domains || {},
+      }
+    : p.tagStats || {};
 
   const wowDir = g.total_delta > 0 ? 'up' : g.total_delta < 0 ? 'down' : 'neutral';
   document.getElementById('overview-health').innerHTML =
-    statCard({ icon: '🏗️', label: 'Pipeline Pool', value: fmt(p.pipelineTotal),
+    statCard({ icon: '🏗️', label: 'Pipeline Pool', value: fmt(poolTotal),
                trend: g.total_delta != null ? fmtDelta(g.total_delta) + ' WoW' : null,
                trendDir: wowDir }) +
     statCard({ icon: '🇺🇸', label: 'US-Tagged', value: fmt(tagStats.usTagged),
-               sub: tagStats.usTagged && p.pipelineTotal ? `${Math.round(tagStats.usTagged / p.pipelineTotal * 100)}% of pool` : null }) +
+               sub: tagStats.usTagged && poolTotal ? `${Math.round(tagStats.usTagged / poolTotal * 100)}% of pool` : null }) +
     statCard({ icon: '🎓', label: 'Entry-Level', value: fmt(tagStats.entryLevel) }) +
     statCard({ icon: '🏢', label: 'Internships', value: fmt(tagStats.internship) });
 
@@ -671,6 +682,61 @@ function renderStatusTab(d) {
     `</div>`;
 }
 
+// Pipeline tab — pool trend chart from daily-stats.json.history
+function renderPoolTrend(daily) {
+  const el = document.getElementById('pool-trend-card');
+  if (!el) return;
+  if (!daily || !Array.isArray(daily.history) || daily.history.length < 2) {
+    el.innerHTML = '<p class="muted" style="text-align:center; padding:40px 0">Pool trend unavailable — daily-stats.json not loaded.</p>';
+    return;
+  }
+  const h = daily.history;
+  const max = Math.max(...h);
+  const BAR_H = 80;
+  const bars = h.map((v, i) => {
+    const pct = max > 0 ? Math.round((v / max) * 100) : 0;
+    const isLast = i === h.length - 1;
+    const label = i === 0 ? '7d ago' : i === h.length - 1 ? 'today' : '';
+    return `
+      <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px">
+        <span style="font-size:11px; color:var(--muted)">${fmt(v)}</span>
+        <div style="width:100%; height:${BAR_H}px; display:flex; align-items:flex-end">
+          <div style="width:100%; height:${pct}%; background:${isLast ? 'var(--accent)' : 'var(--accent-bg)'}; border:1px solid var(--accent); border-radius:3px 3px 0 0; min-height:4px"></div>
+        </div>
+        <span style="font-size:11px; color:var(--muted)">${label}</span>
+      </div>`;
+  }).join('');
+  el.innerHTML = `<div style="display:flex; gap:8px; align-items:flex-end; padding:8px 0">${bars}</div>`;
+}
+
+// Distribution tab — Discord stats from posted_jobs.json
+function renderDiscordStats(posted) {
+  const el = document.getElementById('discord-stats-card');
+  if (!el) return;
+  if (!posted) {
+    el.innerHTML = '<p class="muted" style="text-align:center; padding:20px 0">Discord stats unavailable.</p>';
+    return;
+  }
+  const meta = posted.metadata || {};
+  const total = meta.totalJobs || (Array.isArray(posted.jobs) ? posted.jobs.length : null);
+  const lastUpdated = posted.lastUpdated ? age(posted.lastUpdated) : '—';
+  const channelNumbers = meta.channelJobNumbers || {};
+  const topChannels = Object.entries(channelNumbers)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 5);
+  el.innerHTML = `
+    <div style="display:flex; gap:24px; flex-wrap:wrap; margin-bottom:${topChannels.length ? '16px' : '0'}">
+      <div><span class="stat-label">Total Posted</span><div class="stat-value" style="font-size:18px">${fmt(total)}</div></div>
+      <div><span class="stat-label">Last Updated</span><div class="stat-value" style="font-size:18px">${lastUpdated}</div></div>
+    </div>
+    ${topChannels.length ? `
+      <div style="font-size:12px; color:var(--muted); margin-bottom:8px">Top channels by job count</div>
+      ${topChannels.map(([ch, n]) => `
+        <div style="display:flex; justify-content:space-between; padding:4px 0; border-top:1px solid var(--border); font-size:13px">
+          <span style="color:var(--muted)">${ch}</span><span>${fmt(n)}</span>
+        </div>`).join('')}` : ''}`;
+}
+
 // Fetch orchestration
 const safeJson = url => fetch(url).then(r => r.ok ? r.json() : null).catch(() => null);
 
@@ -679,7 +745,7 @@ async function loadAll() {
   const ops = await fetchOpsState();
   renderOps(ops);
 
-  // Primary metrics (required)
+  // Primary metrics (required for repo/growth data)
   let metrics;
   try {
     const r = await fetch(METRICS_URL);
@@ -694,18 +760,23 @@ async function loadAll() {
     return;
   }
 
-  // Secondary fetches (non-fatal)
-  const [daily, enrichStats, metadata] = await Promise.all([
+  // Secondary fetches (non-fatal) — metadata is primary source for pool total + tags
+  const [daily, enrichStats, metadata, postedJobs] = await Promise.all([
     safeJson(DAILY_URL),
     safeJson(ENRICHMENT_URL),
     safeJson(METADATA_URL),
+    safeJson(POSTED_JOBS_URL),
   ]);
 
-  renderStatusBar(metrics.timestamp);
-  renderOverview(metrics, daily);
+  // Use metadata timestamp for status bar (runs every pipeline run — most current)
+  const statusTs = (metadata && metadata.generated) ? metadata.generated : metrics.timestamp;
+  renderStatusBar(statusTs);
+  renderOverview(metrics, daily, metadata);
+  renderPoolTrend(daily);
   renderQuality(metrics, enrichStats, metadata);
   renderRepos(metrics, daily);
   renderSources(metrics);
+  renderDiscordStats(postedJobs);
   renderStatusTab(metrics);
 
   document.getElementById('content').style.display = 'block';
