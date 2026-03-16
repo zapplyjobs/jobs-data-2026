@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
   <style>
     :root {
       --bg: #ffffff;
@@ -254,6 +255,21 @@
     <div class="card" id="domain-bars-wrap">
       <div id="domain-bars"></div>
     </div>
+    <div class="section-label" style="margin-top:24px">Pipeline Architecture</div>
+    <div class="card" style="overflow-x:auto">
+      <div class="mermaid" id="arch-diagram" style="max-width:100%">
+graph LR
+  CFW["☁️ CF Worker<br/>(job-board-cron-worker)"] -->|"workflow_dispatch<br/>every 15 min"| AGG
+  AGG["⚙️ jobs-aggregator-private<br/>(Layer 1: fetch + process)"] -->|"all_jobs.json JSONL"| JD2
+  AGG --> |"uses"| JBS["🔒 job-board-scripts<br/>(private submodule)"]
+  JD2["📦 jobs-data-2026<br/>(Layer 2: host + Discord)"] -->|"read"| NGJ["📋 New-Grad-Jobs-2026"]
+  JD2 -->|"read"| INT["📋 Internships-2026"]
+  JD2 -->|"read"| SW["📋 Software-Engineering"]
+  JD2 -->|"read"| DS["📋 Data-Science"]
+  JD2 -->|"read"| HW["📋 Hardware-Engineering"]
+  JD2 -->|"read"| HC["📋 Healthcare"]
+      </div>
+    </div>
   </section>
 
   <!-- PIPELINE TAB -->
@@ -261,6 +277,10 @@
     <div class="section-label">Pool Trend (7 days)</div>
     <div class="card" id="pool-trend-card">
       <p class="muted" style="text-align:center; padding:40px 0">Loading…</p>
+    </div>
+    <div class="section-label" style="margin-top:24px">Senior Filter Funnel</div>
+    <div class="card" id="filter-funnel">
+      <p class="muted" style="text-align:center; padding:20px 0">Loading…</p>
     </div>
   </section>
 
@@ -270,7 +290,11 @@
     <div class="grid" id="quality-filter"></div>
     <div class="section-label" style="margin-top:24px">Enrichment</div>
     <div class="grid" id="quality-enrich"></div>
-    <div class="section-label" style="margin-top:24px">Enrichment by Source</div>
+    <div class="section-label" style="margin-top:24px">Description Fill Rate by Source</div>
+    <div class="card" id="enrich-bars-card">
+      <div id="enrich-bars"></div>
+    </div>
+    <div class="section-label" style="margin-top:24px">Enrichment Details</div>
     <div class="card">
       <table id="enrich-source-table">
         <tr>
@@ -307,6 +331,10 @@
   <!-- SUPPLY TAB -->
   <section id="tab-supply" class="tab-panel" style="display:none">
     <div class="section-label">By Source</div>
+    <div class="card" id="source-bars-card">
+      <div id="source-bars"></div>
+    </div>
+    <div class="section-label" style="margin-top:24px">Source Details</div>
     <div class="card">
       <table id="source-table">
         <tr>
@@ -682,6 +710,77 @@ function renderStatusTab(d) {
     `</div>`;
 }
 
+// Reusable horizontal bar renderer (uses existing .bar-row CSS)
+function renderHBars(containerId, items, { labelWidth = '110px', colorFn } = {}) {
+  const el = document.getElementById(containerId);
+  if (!el || !items.length) return;
+  const max = Math.max(...items.map(i => i.value));
+  el.innerHTML = items.map(({ label, value, sub }) => {
+    const pct = max > 0 ? Math.round((value / max) * 100) : 0;
+    const color = colorFn ? colorFn(value, max) : 'var(--accent)';
+    return `
+      <div class="bar-row">
+        <span class="bar-label" style="width:${labelWidth}">${label}</span>
+        <div class="bar-track" style="flex:1">
+          <div class="bar-fill" style="width:${pct}%;background:${color}"></div>
+        </div>
+        <span class="bar-value">${fmt(value)}${sub ? `<br><span class="muted" style="font-size:10px">${sub}</span>` : ''}</span>
+      </div>`;
+  }).join('');
+}
+
+// Supply tab — by-source bar chart
+function renderSourceBars(d, metadata) {
+  const bySource = (metadata && metadata.by_source) ? metadata.by_source : (d.pipeline || {}).bySource || {};
+  const items = Object.entries(bySource)
+    .sort(([, a], [, b]) => b - a)
+    .map(([k, v]) => ({ label: k, value: v }));
+  renderHBars('source-bars', items, { labelWidth: '130px' });
+}
+
+// Pipeline tab — senior filter funnel
+function renderFilterFunnel(metadata) {
+  const el = document.getElementById('filter-funnel');
+  if (!el) return;
+  const sf = metadata && metadata.senior_filter_stats;
+  if (!sf || !sf.total_input) {
+    el.innerHTML = '<p class="muted" style="text-align:center; padding:20px 0">Filter stats unavailable.</p>';
+    return;
+  }
+  const total = sf.total_input;
+  const senior = sf.senior_jobs || 0;
+  const entry = sf.entry_level_jobs || 0;
+  const rate = total > 0 ? Math.round(senior / total * 100) : 0;
+  const rateColor = rate >= 55 && rate <= 65 ? 'var(--green)' : rate > 65 ? 'var(--red)' : 'var(--yellow)';
+  renderHBars('filter-funnel', [
+    { label: 'Total input',   value: total,  sub: '100%' },
+    { label: 'Senior removed', value: senior, sub: `${rate}%` },
+    { label: 'Entry-level',   value: entry,  sub: `${100 - rate}%` },
+  ], {
+    labelWidth: '130px',
+    colorFn: (v, max) => v === senior ? rateColor : 'var(--accent)',
+  });
+}
+
+// Quality tab — enrichment fill rate bars by source
+function renderEnrichBars(enrichStats) {
+  if (!enrichStats || !enrichStats.by_source) return;
+  const ORDER = ['greenhouse', 'workday', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'netflix', 'eightfold'];
+  const items = ORDER
+    .filter(s => enrichStats.by_source[s])
+    .map(s => {
+      const v = enrichStats.by_source[s];
+      const tech = v.tech_us || 0;
+      const hasdesc = v.has_desc || 0;
+      const fill = tech > 0 ? Math.round(100 * hasdesc / tech) : 0;
+      return { label: s, value: fill, sub: `${fmt(hasdesc)}/${fmt(tech)}` };
+    });
+  renderHBars('enrich-bars', items, {
+    labelWidth: '130px',
+    colorFn: (v) => v >= 70 ? 'var(--green)' : v >= 40 ? 'var(--yellow)' : 'var(--red)',
+  });
+}
+
 // Pipeline tab — pool trend chart from daily-stats.json.history
 function renderPoolTrend(daily) {
   const el = document.getElementById('pool-trend-card');
@@ -773,8 +872,11 @@ async function loadAll() {
   renderStatusBar(statusTs);
   renderOverview(metrics, daily, metadata);
   renderPoolTrend(daily);
+  renderFilterFunnel(metadata);
   renderQuality(metrics, enrichStats, metadata);
+  renderEnrichBars(enrichStats);
   renderRepos(metrics, daily);
+  renderSourceBars(metrics, metadata);
   renderSources(metrics);
   renderDiscordStats(postedJobs);
   renderStatusTab(metrics);
@@ -783,6 +885,21 @@ async function loadAll() {
 }
 
 loadAll();
+
+// Mermaid — init after auth (renders lazily when tab is visible)
+mermaid.initialize({
+  startOnLoad: false,
+  theme: document.documentElement.classList.contains('dark') ? 'dark' : 'default',
+  securityLevel: 'loose',
+});
+// Render on Overview tab activation
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (btn.dataset.tab === 'overview') {
+      setTimeout(() => mermaid.run({ nodes: [document.getElementById('arch-diagram')] }), 50);
+    }
+  });
+});
 </script>
 </body>
 </html>
