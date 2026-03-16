@@ -32,6 +32,13 @@ jobs:
           grep -q '__DASHBOARD_PWD__' index.html && { echo "ERROR: placeholder still present after sed"; exit 1; }
           echo "Password injected successfully"
 
+      - name: Inject dashboard secret
+        run: |
+          grep -q '__DASHBOARD_SECRET__' index.html || { echo "ERROR: DASHBOARD_SECRET placeholder not found in index.html"; exit 1; }
+          sed -i "s/__DASHBOARD_SECRET__/${{ secrets.DASHBOARD_SECRET }}/g" index.html
+          grep -q '__DASHBOARD_SECRET__' index.html && { echo "ERROR: placeholder still present after sed"; exit 1; }
+          echo "Dashboard secret injected successfully"
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:

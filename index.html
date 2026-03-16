@@ -215,6 +215,21 @@
 </footer>
 
 <script>
+// Dashboard proxy secret — injected at deploy time via deploy-pages.yml
+const DASHBOARD_SECRET = '__DASHBOARD_SECRET__';
+
+// Fetch ops state from private repo via CF Worker proxy
+async function fetchOpsState() {
+  try {
+    const res = await fetch(
+      'https://job-board-cron-worker.wild-queen-069e.workers.dev/proxy?file=zjp-ops-state.json',
+      { headers: { 'Authorization': `Bearer ${DASHBOARD_SECRET}` } }
+    );
+    if (!res.ok) return null;
+    return await res.json();
+  } catch { return null; }
+}
+
 // Auth gate — sessionStorage token check
 (function () {
   const DASHBOARD_PWD = '__DASHBOARD_PWD__';
