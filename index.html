@@ -237,7 +237,9 @@
 
   <!-- OPS TAB -->
   <section id="tab-ops" class="tab-panel">
-    <div class="section-label">Role Status</div>
+    <div class="section-label">Pipeline Status</div>
+    <div class="grid" id="ops-pipeline-stats"></div>
+    <div class="section-label" style="margin-top:24px">Role Status</div>
     <div class="grid-3" id="ops-roles"></div>
     <div class="section-label" style="margin-top:24px">Pending Decisions</div>
     <div id="ops-decisions"></div>
@@ -258,29 +260,43 @@
     <div class="section-label" style="margin-top:24px">Pipeline Architecture</div>
     <div class="card" style="overflow-x:auto">
       <div class="mermaid" id="arch-diagram" style="max-width:100%">
-graph LR
-  CFW["☁️ CF Worker<br/>(job-board-cron-worker)"] -->|"workflow_dispatch<br/>every 15 min"| AGG
-  AGG["⚙️ jobs-aggregator-private<br/>(Layer 1: fetch + process)"] -->|"all_jobs.json JSONL"| JD2
-  AGG --> |"uses"| JBS["🔒 job-board-scripts<br/>(private submodule)"]
-  JD2["📦 jobs-data-2026<br/>(Layer 2: host + Discord)"] -->|"read"| NGJ["📋 New-Grad-Jobs-2026"]
-  JD2 -->|"read"| INT["📋 Internships-2026"]
-  JD2 -->|"read"| SW["📋 Software-Engineering"]
-  JD2 -->|"read"| DS["📋 Data-Science"]
-  JD2 -->|"read"| HW["📋 Hardware-Engineering"]
-  JD2 -->|"read"| HC["📋 Healthcare"]
+graph TB
+  CFW["☁️ CF Worker<br/>(triggers every 15 min)"] -->|"workflow_dispatch"| AGG
+  JBS["🔒 job-board-scripts<br/>(private submodule — pipeline logic)"] -.->|"used by"| AGG
+  AGG["⚙️ jobs-aggregator-private<br/>(Layer 1: fetch + tag + dedupe)"] -->|"all_jobs.json JSONL"| JD2
+  JD2["📦 jobs-data-2026<br/>(Layer 2: host + Discord poster)"] -->|"filter + render"| NGJ["📋 New-Grad-Jobs-2026"]
+  JD2 -->|"filter + render"| INT["📋 Internships-2026"]
+  JD2 -->|"filter + render"| SW["📋 Software-Engineering"]
+  JD2 -->|"filter + render"| DS["📋 Data-Science"]
+  JD2 -->|"filter + render"| HW["📋 Hardware-Engineering"]
+  JD2 -->|"filter + render"| HC["📋 Healthcare"]
       </div>
     </div>
   </section>
 
   <!-- PIPELINE TAB -->
   <section id="tab-pipeline" class="tab-panel" style="display:none">
-    <div class="section-label">Pool Trend (7 days)</div>
+    <div class="section-label">Last Run</div>
+    <div class="grid" id="pipeline-run-stats"></div>
+    <div class="section-label" style="margin-top:24px">Pool Trend (7 days)</div>
     <div class="card" id="pool-trend-card">
       <p class="muted" style="text-align:center; padding:40px 0">Loading…</p>
     </div>
     <div class="section-label" style="margin-top:24px">Senior Filter Funnel</div>
     <div class="card" id="filter-funnel">
       <p class="muted" style="text-align:center; padding:20px 0">Loading…</p>
+    </div>
+    <div class="section-label" style="margin-top:24px">Jobs by Source (current pool)</div>
+    <div class="card">
+      <table id="pipeline-source-table">
+        <tr>
+          <th>Source</th>
+          <th style="text-align:right">Total</th>
+          <th style="text-align:right">Tech US</th>
+          <th style="text-align:right">Has Desc</th>
+          <th style="text-align:right">Desc %</th>
+        </tr>
+      </table>
     </div>
   </section>
 
@@ -304,6 +320,7 @@ graph LR
           <th style="text-align:right">Fill %</th>
           <th style="text-align:right">Skills</th>
           <th style="text-align:right">Visa</th>
+          <th>Notes</th>
         </tr>
       </table>
     </div>
@@ -345,8 +362,8 @@ graph LR
       </table>
     </div>
     <div class="section-label" style="margin-top:24px">Top Companies</div>
-    <div class="card">
-      <p class="muted" style="text-align:center; padding:40px 0">Top companies table requires pipeline update to emit <code>top_companies</code> array.</p>
+    <div class="card" id="top-companies-card">
+      <p class="muted" style="text-align:center; padding:40px 0">Top companies data pending pipeline emit — tracked as DASHBOARD-FIX-5b.</p>
     </div>
   </section>
 
@@ -500,10 +517,40 @@ function renderStatusBar(isoTs) {
   }
 }
 
-// Ops tab
+// Ops tab — pipeline stats section (always populated from metrics/metadata)
+function renderOpsPipelineStats(metrics, metadata, enrichStats) {
+  const el = document.getElementById('ops-pipeline-stats');
+  if (!el) return;
+  const p = (metrics && metrics.pipeline) || {};
+  const poolTotal = (metadata && metadata.total_jobs) ? metadata.total_jobs : p.pipelineTotal;
+  const durationMin = p.duration_ms ? (p.duration_ms / 60000).toFixed(1) : null;
+  const statusTs = (metadata && metadata.generated) ? metadata.generated : (metrics && metrics.timestamp);
+  const hours = statusTs ? (Date.now() - new Date(statusTs).getTime()) / 3600000 : null;
+  const pipelineStatus = hours == null ? '—' : hours < 0.5 ? 'LIVE' : hours < 6 ? 'DELAYED' : 'DOWN';
+  const statusIcon = hours == null ? '⚪' : hours < 0.5 ? '🟢' : hours < 6 ? '🟡' : '🔴';
+  const sf = metadata && metadata.senior_filter_stats;
+  const entryCount = sf ? sf.entry_level_jobs : null;
+  const usTechJobs = enrichStats ? enrichStats.total_tech_us : null;
+
+  el.innerHTML =
+    statCard({ icon: statusIcon, label: 'Pipeline Status', value: pipelineStatus,
+               sub: statusTs ? `Last run: ${age(statusTs)}` : null }) +
+    statCard({ icon: '🏗️', label: 'Pool Size', value: fmt(poolTotal),
+               sub: entryCount ? `${fmt(entryCount)} entry-level` : null }) +
+    statCard({ icon: '⏱️', label: 'Last Run Duration', value: durationMin ? `${durationMin} min` : '—',
+               sub: 'Target: ≤25 min' }) +
+    statCard({ icon: '💻', label: 'US Tech Jobs', value: fmt(usTechJobs),
+               sub: 'SW + DS + HW + AI, US-tagged' });
+}
+
+// Ops tab — role status + decisions (from proxy, may be null)
 function renderOps(ops) {
+  const rolesEl = document.getElementById('ops-roles');
+  const decisionsEl = document.getElementById('ops-decisions');
+
   if (!ops) {
-    document.getElementById('ops-roles').innerHTML = '<p class="muted">Ops state unavailable — proxy may be unreachable.</p>';
+    rolesEl.innerHTML = '<div class="card" style="grid-column:1/-1"><span class="muted">Role status unavailable — ops proxy unreachable. Pipeline stats above are from live data.</span></div>';
+    decisionsEl.innerHTML = '<div class="card"><span class="muted">—</span></div>';
     return;
   }
 
@@ -514,7 +561,7 @@ function renderOps(ops) {
   ];
   const statusColor = { active: 'var(--green)', idle: 'var(--muted)', blocked: 'var(--red)' };
 
-  document.getElementById('ops-roles').innerHTML = roles.map(({ key, label, icon }) => {
+  rolesEl.innerHTML = roles.map(({ key, label, icon }) => {
     const r = ops[key] || {};
     const color = statusColor[r.status] || 'var(--muted)';
     const task = key === 'strategist' ? r.top_recommendation : r.current_task;
@@ -530,7 +577,6 @@ function renderOps(ops) {
   }).join('');
 
   const decisions = ops.operator_decisions_pending || [];
-  const decisionsEl = document.getElementById('ops-decisions');
   if (decisions.length === 0) {
     decisionsEl.innerHTML = '<div class="card"><span class="muted">No pending decisions.</span></div>';
   } else {
@@ -615,7 +661,8 @@ function renderQuality(d, enrichStats, metadata) {
                value: filterRate != null ? filterRate + '%' : '—',
                sub: 'Target: 55–65%' }) +
     statCard({ icon: '✅', label: 'Entry-Level Passed',
-               value: fmt(p.tagStats && p.tagStats.entryLevel) });
+               value: fmt(sf ? sf.entry_level_jobs : null),
+               sub: sf ? `of ${fmt(sf.total_input)} fetched` : null });
 
   document.getElementById('quality-enrich').innerHTML =
     statCard({ icon: '🔬', label: 'Enriched Jobs',  value: fmt(enrich.totalEnriched) }) +
@@ -624,6 +671,13 @@ function renderQuality(d, enrichStats, metadata) {
 
   if (enrichStats && enrichStats.by_source) {
     const ORDER = ['greenhouse', 'workday', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'netflix', 'eightfold'];
+    const SOURCE_NOTES = {
+      workday:        'Backfill in progress (MAX_PER_RUN=200/run)',
+      smartrecruiters:'Skills/visa extraction not yet implemented',
+      amazon:         'Visa detection not yet implemented',
+      netflix:        'Skills/visa extraction not yet implemented',
+      eightfold:      'No description fetcher — not implemented',
+    };
     const sources = ORDER.filter(s => enrichStats.by_source[s]);
     sources.forEach(src => {
       const v = enrichStats.by_source[src];
@@ -631,6 +685,7 @@ function renderQuality(d, enrichStats, metadata) {
       const enriched = v.enriched || 0;
       const fill = tech > 0 ? Math.round(100 * enriched / tech) : 0;
       const fillColor = fill >= 70 ? 'var(--green)' : fill >= 40 ? 'var(--yellow)' : 'var(--red)';
+      const note = SOURCE_NOTES[src] || '';
       const tbl = document.getElementById('enrich-source-table');
       const tr = document.createElement('tr');
       tr.innerHTML = `
@@ -640,6 +695,7 @@ function renderQuality(d, enrichStats, metadata) {
         <td style="text-align:right;color:${fillColor}">${fill}%</td>
         <td style="text-align:right">${fmt(v.required_skills || 0)}</td>
         <td style="text-align:right">${fmt(v.sponsors_visa || 0)}</td>
+        <td style="font-size:11px;color:var(--muted)">${note}</td>
       `;
       tbl.appendChild(tr);
     });
@@ -689,9 +745,10 @@ function renderSources(d, metadata) {
 }
 
 // Status tab
-function renderStatusTab(d) {
+function renderStatusTab(d, metadata) {
   const p = d.pipeline || {};
-  const ts = d.timestamp;
+  // Use metadata.generated (updated every pipeline run) as the authoritative freshness signal
+  const ts = (metadata && metadata.generated) ? metadata.generated : d.timestamp;
   const durationMin = p.duration_ms ? (p.duration_ms / 60000).toFixed(1) : null;
 
   const services = [
@@ -781,6 +838,53 @@ function renderEnrichBars(enrichStats) {
   });
 }
 
+// Pipeline tab — last run stat cards
+function renderPipelineRunStats(metrics, metadata) {
+  const el = document.getElementById('pipeline-run-stats');
+  if (!el) return;
+  const p = (metrics && metrics.pipeline) || {};
+  const statusTs = (metadata && metadata.generated) ? metadata.generated : (metrics && metrics.timestamp);
+  const durationMin = p.duration_ms ? (p.duration_ms / 60000).toFixed(1) : null;
+  const sf = metadata && metadata.senior_filter_stats;
+  const totalInput = sf ? sf.total_input : null;
+  const bySource = (metadata && metadata.by_source) || {};
+  const sourceCount = Object.keys(bySource).length;
+
+  el.innerHTML =
+    statCard({ icon: '⏱️', label: 'Run Duration', value: durationMin ? `${durationMin} min` : '—', sub: 'Target: ≤25 min' }) +
+    statCard({ icon: '📥', label: 'Total Fetched', value: fmt(totalInput), sub: 'before senior filter' }) +
+    statCard({ icon: '🔌', label: 'Active Sources', value: sourceCount || '—', sub: 'GH, Lever, Ashby, WD, SR, Amazon, JSearch, Netflix, EF' }) +
+    statCard({ icon: '🕐', label: 'Last Run', value: statusTs ? age(statusTs) : '—', sub: statusTs ? new Date(statusTs).toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' }) : null });
+}
+
+// Pipeline tab — source breakdown table
+function renderPipelineSourceTable(metadata, enrichStats) {
+  const tbl = document.getElementById('pipeline-source-table');
+  if (!tbl) return;
+  const bySource = (metadata && metadata.by_source) || {};
+  const enrichBySource = (enrichStats && enrichStats.by_source) || {};
+  const ORDER = ['workday', 'greenhouse', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'netflix', 'eightfold'];
+  const sources = ORDER.filter(s => bySource[s]);
+  if (!sources.length) return;
+  sources.forEach(src => {
+    const total = bySource[src] || 0;
+    const ev = enrichBySource[src] || {};
+    const techUs = ev.tech_us || 0;
+    const hasDesc = ev.has_desc || 0;
+    const descPct = techUs > 0 ? Math.round(100 * hasDesc / techUs) : 0;
+    const descColor = descPct >= 70 ? 'var(--green)' : descPct >= 40 ? 'var(--yellow)' : techUs > 0 ? 'var(--red)' : 'var(--muted)';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${src}</td>
+      <td style="text-align:right">${fmt(total)}</td>
+      <td style="text-align:right">${techUs ? fmt(techUs) : '<span class="muted">—</span>'}</td>
+      <td style="text-align:right">${hasDesc ? fmt(hasDesc) : '<span class="muted">—</span>'}</td>
+      <td style="text-align:right;color:${descColor}">${techUs > 0 ? descPct + '%' : '—'}</td>
+    `;
+    tbl.appendChild(tr);
+  });
+}
+
 // Pipeline tab — pool trend chart from daily-stats.json.history
 function renderPoolTrend(daily) {
   const el = document.getElementById('pool-trend-card');
@@ -808,8 +912,36 @@ function renderPoolTrend(daily) {
   el.innerHTML = `<div style="display:flex; gap:8px; align-items:flex-end; padding:8px 0">${bars}</div>`;
 }
 
+// Channel ID → name map (source of truth: Channel_IDs_Discord.txt)
+const CHANNEL_NAMES = {
+  '1462988605306834987': 'tech-jobs',
+  '1462988662168879217': 'ai-jobs',
+  '1462988721828794531': 'data-science-jobs',
+  '1462988755156734023': 'finance-jobs',
+  '1475178968452825199': 'healthcare-jobs',
+  '1481411578040680468': 'business-jobs',
+  '1475184546101202964': 'other-industry-jobs',
+  '1462989305181114450': 'remote-usa',
+  '1462988811263934464': 'bay-area',
+  '1462988831530680422': 'new-york',
+  '1462989279817891900': 'pacific-northwest',
+  '1462989324071997504': 'other-usa',
+  '1464303178286760059': 'tech-internships',
+  '1464303204178067620': 'ai-internships',
+  '1464303266866135232': 'data-science-internships',
+  '1481411741035401362': 'business-internships',
+  '1481412298861056220': 'healthcare-internships',
+  '1464303419794784347': 'other-industry-internships',
+  '1464303522177614001': 'remote-usa-internships',
+  '1464303497242742875': 'bay-area-internships',
+  '1464303539101634634': 'new-york-internships',
+  '1464304146072207390': 'pacific-northwest-internships',
+  '1464304161230295131': 'socal-internships',
+  '1464304182923362324': 'other-usa-internships',
+};
+
 // Distribution tab — Discord stats from posted_jobs.json
-function renderDiscordStats(posted) {
+function renderDiscordStats(posted, metadata) {
   const el = document.getElementById('discord-stats-card');
   if (!el) return;
   if (!posted) {
@@ -818,22 +950,42 @@ function renderDiscordStats(posted) {
   }
   const meta = posted.metadata || {};
   const total = meta.totalJobs || (Array.isArray(posted.jobs) ? posted.jobs.length : null);
-  const lastUpdated = posted.lastUpdated ? age(posted.lastUpdated) : '—';
+  // Use metadata generated timestamp (pipeline) not posted_jobs.json lastUpdated (Discord poster runs separately)
+  const lastUpdatedTs = (metadata && metadata.generated) ? metadata.generated : posted.lastUpdated;
+  const lastUpdated = lastUpdatedTs ? age(lastUpdatedTs) : '—';
   const channelNumbers = meta.channelJobNumbers || {};
-  const topChannels = Object.entries(channelNumbers)
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 5);
+
+  // Build all channels list with names, sorted by count desc
+  const allChannels = Object.entries(channelNumbers)
+    .map(([id, count]) => ({ id, name: CHANNEL_NAMES[id] || id, count }))
+    .sort((a, b) => b.count - a.count);
+
+  // Status badge: Never = 0 posts. Active = has posts.
+  // Note: per-channel last-post date not in posted_jobs.json v2 — SILENT detection requires DISCORD-HEALTH-1 impl.
+  function channelStatus(ch) {
+    if (ch.count === 0) return '<span style="background:var(--red);color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;font-weight:600">NEVER</span>';
+    return '<span style="background:var(--green);color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;font-weight:600">ACTIVE</span>';
+  }
+
   el.innerHTML = `
-    <div style="display:flex; gap:24px; flex-wrap:wrap; margin-bottom:${topChannels.length ? '16px' : '0'}">
-      <div><span class="stat-label">Total Posted</span><div class="stat-value" style="font-size:18px">${fmt(total)}</div></div>
-      <div><span class="stat-label">Last Updated</span><div class="stat-value" style="font-size:18px">${lastUpdated}</div></div>
+    <div style="display:flex; gap:24px; flex-wrap:wrap; margin-bottom:16px">
+      <div><span class="stat-label">Total Posted (all time)</span><div class="stat-value" style="font-size:18px">${fmt(total)}</div></div>
+      <div><span class="stat-label">Data as of</span><div class="stat-value" style="font-size:18px">${lastUpdated}</div></div>
+      <div><span class="stat-label">Channels Tracked</span><div class="stat-value" style="font-size:18px">${allChannels.length}</div></div>
     </div>
-    ${topChannels.length ? `
-      <div style="font-size:12px; color:var(--muted); margin-bottom:8px">Top channels by job count</div>
-      ${topChannels.map(([ch, n]) => `
-        <div style="display:flex; justify-content:space-between; padding:4px 0; border-top:1px solid var(--border); font-size:13px">
-          <span style="color:var(--muted)">${ch}</span><span>${fmt(n)}</span>
-        </div>`).join('')}` : ''}`;
+    <table style="width:100%; border-collapse:collapse">
+      <tr>
+        <th style="text-align:left;font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 8px 8px 0;border-bottom:1px solid var(--border)">Channel</th>
+        <th style="text-align:right;font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 0 8px;border-bottom:1px solid var(--border)">All-Time Posts</th>
+        <th style="text-align:right;font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 0 8px;border-bottom:1px solid var(--border)">Status</th>
+      </tr>
+      ${allChannels.map(ch => `
+        <tr>
+          <td style="padding:6px 8px 6px 0;border-bottom:1px solid var(--border);font-size:13px">${ch.name}</td>
+          <td style="text-align:right;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;${ch.count === 0 ? 'color:var(--red)' : ''}">${fmt(ch.count)}</td>
+          <td style="text-align:right;padding:6px 0;border-bottom:1px solid var(--border)">${channelStatus(ch)}</td>
+        </tr>`).join('')}
+    </table>`;
 }
 
 // Fetch orchestration
@@ -842,7 +994,6 @@ const safeJson = url => fetch(url).then(r => r.ok ? r.json() : null).catch(() =>
 async function loadAll() {
   // Ops state via proxy (non-fatal — renders regardless)
   const ops = await fetchOpsState();
-  renderOps(ops);
 
   // Primary metrics (required for repo/growth data)
   let metrics;
@@ -870,16 +1021,20 @@ async function loadAll() {
   // Use metadata timestamp for status bar (runs every pipeline run — most current)
   const statusTs = (metadata && metadata.generated) ? metadata.generated : metrics.timestamp;
   renderStatusBar(statusTs);
+  renderOpsPipelineStats(metrics, metadata, enrichStats);
+  renderOps(ops);
   renderOverview(metrics, daily, metadata);
   renderPoolTrend(daily);
+  renderPipelineRunStats(metrics, metadata);
+  renderPipelineSourceTable(metadata, enrichStats);
   renderFilterFunnel(metadata);
   renderQuality(metrics, enrichStats, metadata);
   renderEnrichBars(enrichStats);
   renderRepos(metrics, daily);
   renderSourceBars(metrics, metadata);
   renderSources(metrics, metadata);
-  renderDiscordStats(postedJobs);
-  renderStatusTab(metrics);
+  renderDiscordStats(postedJobs, metadata);
+  renderStatusTab(metrics, metadata);
 
   document.getElementById('content').style.display = 'block';
 }
