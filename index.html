@@ -674,10 +674,10 @@ function renderRepos(d, daily) {
 }
 
 // Supply tab — source table
-function renderSources(d) {
+function renderSources(d, metadata) {
   const p = d.pipeline || {};
   const g = d.growth || {};
-  const bySource = p.bySource || {};
+  const bySource = (metadata && metadata.by_source) ? metadata.by_source : p.bySource || {};
   const srcDelta = g.by_source_delta || {};
   Object.entries(bySource)
     .sort(([, a], [, b]) => b - a)
@@ -877,7 +877,7 @@ async function loadAll() {
   renderEnrichBars(enrichStats);
   renderRepos(metrics, daily);
   renderSourceBars(metrics, metadata);
-  renderSources(metrics);
+  renderSources(metrics, metadata);
   renderDiscordStats(postedJobs);
   renderStatusTab(metrics);
 
