@@ -216,6 +216,8 @@
 
 <header>
   <h1>ZJP Dashboard</h1>
+  <button id="refresh-btn" title="Refresh now" style="background:none;border:1px solid var(--border);border-radius:6px;padding:5px 10px;cursor:pointer;color:var(--text);font-size:14px">↻</button>
+  <span id="refresh-countdown" style="font-size:12px;color:var(--muted)"></span>
   <button id="theme-toggle" title="Toggle theme">☀</button>
 </header>
 
@@ -454,12 +456,17 @@ async function fetchOpsState() {
   } catch { return null; }
 }
 
-// Data URLs
-const METRICS_URL      = 'https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/metrics/latest.json?t=' + Date.now();
-const DAILY_URL        = 'https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/daily-stats.json?t=' + Date.now();
-const ENRICHMENT_URL   = 'https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/enrichment-stats.json?t=' + Date.now();
-const METADATA_URL     = 'https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/jobs-metadata.json?t=' + Date.now();
-const POSTED_JOBS_URL  = 'https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/posted_jobs.json?t=' + Date.now();
+// Data URLs — function so each loadAll() call gets a fresh cache-busting timestamp (invariant D-2)
+function dataUrls() {
+  const t = Date.now();
+  return {
+    metrics:    `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/metrics/latest.json?t=${t}`,
+    daily:      `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/daily-stats.json?t=${t}`,
+    enrichment: `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/enrichment-stats.json?t=${t}`,
+    metadata:   `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/jobs-metadata.json?t=${t}`,
+    postedJobs: `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/posted_jobs.json?t=${t}`,
+  };
+}
 
 // Helpers
 function fmt(n) {
@@ -992,13 +999,15 @@ function renderDiscordStats(posted, metadata) {
 const safeJson = url => fetch(url).then(r => r.ok ? r.json() : null).catch(() => null);
 
 async function loadAll() {
+  const urls = dataUrls();
+
   // Ops state via proxy (non-fatal — renders regardless)
   const ops = await fetchOpsState();
 
   // Primary metrics (required for repo/growth data)
   let metrics;
   try {
-    const r = await fetch(METRICS_URL);
+    const r = await fetch(urls.metrics);
     if (!r.ok) throw new Error(r.status);
     metrics = await r.json();
   } catch (err) {
@@ -1012,10 +1021,10 @@ async function loadAll() {
 
   // Secondary fetches (non-fatal) — metadata is primary source for pool total + tags
   const [daily, enrichStats, metadata, postedJobs] = await Promise.all([
-    safeJson(DAILY_URL),
-    safeJson(ENRICHMENT_URL),
-    safeJson(METADATA_URL),
-    safeJson(POSTED_JOBS_URL),
+    safeJson(urls.daily),
+    safeJson(urls.enrichment),
+    safeJson(urls.metadata),
+    safeJson(urls.postedJobs),
   ]);
 
   // Use metadata timestamp for status bar (runs every pipeline run — most current)
@@ -1040,6 +1049,39 @@ async function loadAll() {
 }
 
 loadAll();
+
+// Auto-refresh every 15 min + manual ↻ button with live countdown
+(function () {
+  const INTERVAL_MS = 15 * 60 * 1000;
+  let nextRefresh = Date.now() + INTERVAL_MS;
+  let timer;
+
+  function startCountdown() {
+    clearInterval(timer);
+    nextRefresh = Date.now() + INTERVAL_MS;
+    timer = setInterval(() => {
+      const remaining = Math.max(0, Math.round((nextRefresh - Date.now()) / 1000));
+      const m = Math.floor(remaining / 60);
+      const s = remaining % 60;
+      const el = document.getElementById('refresh-countdown');
+      if (el) el.textContent = `refresh in ${m}:${String(s).padStart(2, '0')}`;
+      if (remaining === 0) { doRefresh(); }
+    }, 1000);
+  }
+
+  function doRefresh() {
+    // Clear table rows so re-renders don't duplicate (tables append rows)
+    ['pipeline-source-table','enrich-source-table','source-table','repo-table'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { while (el.rows.length > 1) el.deleteRow(1); }
+    });
+    loadAll();
+    startCountdown();
+  }
+
+  document.getElementById('refresh-btn').addEventListener('click', doRefresh);
+  startCountdown();
+})();
 
 // Mermaid — init after auth (renders lazily when tab is visible)
 mermaid.initialize({
