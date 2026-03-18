@@ -253,7 +253,7 @@
   <section id="tab-pipeline" class="tab-panel" style="display:none">
     <div class="section-label">Last Run</div>
     <div class="grid" id="pipeline-run-stats"></div>
-    <div class="section-label" style="margin-top:24px">Pool Trend (7 days)</div>
+    <div class="section-label" style="margin-top:24px">Pool Trend (30 days)</div>
     <div class="card" id="pool-trend-card">
       <p class="muted" style="text-align:center; padding:40px 0">Loading…</p>
     </div>
@@ -459,6 +459,7 @@ function dataUrls() {
   return {
     metrics:    `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/metrics/latest.json?t=${t}`,
     daily:      `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/daily-stats.json?t=${t}`,
+    history:    `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/history.jsonl?t=${t}`,
     enrichment: `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/enrichment-stats.json?t=${t}`,
     metadata:   `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/jobs-metadata.json?t=${t}`,
     postedJobs: `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/posted_jobs.json?t=${t}`,
@@ -922,31 +923,53 @@ function renderPipelineSourceTable(metrics, metadata, enrichStats) {
   });
 }
 
-// Pipeline tab — pool trend chart from daily-stats.json.history
-function renderPoolTrend(daily) {
+// Pipeline tab — pool trend chart (30d from history.jsonl, fallback 7d from daily-stats.json.history)
+function renderPoolTrend(daily, historyEntries) {
   const el = document.getElementById('pool-trend-card');
   if (!el) return;
-  if (!daily || !Array.isArray(daily.history) || daily.history.length < 2) {
-    el.innerHTML = '<p class="muted" style="text-align:center; padding:40px 0">Pool trend unavailable — daily-stats.json not loaded.</p>';
+
+  // Prefer history.jsonl (30d) — fall back to daily-stats.json.history (7d)
+  let entries = null;
+  let labelSpan = '30 days';
+  if (historyEntries && historyEntries.length >= 2) {
+    entries = historyEntries.map(e => ({ v: e.total, label: e.date }));
+  } else if (daily && Array.isArray(daily.history) && daily.history.length >= 2) {
+    entries = daily.history.map((v, i) => ({ v, label: '' }));
+    labelSpan = '7 days';
+  }
+
+  if (!entries) {
+    el.innerHTML = '<p class="muted" style="text-align:center; padding:40px 0">Pool trend unavailable.</p>';
     return;
   }
-  const h = daily.history;
-  const max = Math.max(...h);
+
+  const vals = entries.map(e => e.v);
+  const max = Math.max(...vals);
   const BAR_H = 80;
-  const bars = h.map((v, i) => {
-    const pct = max > 0 ? Math.round((v / max) * 100) : 0;
-    const isLast = i === h.length - 1;
-    const label = i === 0 ? '7d ago' : i === h.length - 1 ? 'today' : '';
+
+  // Determine axis label density — show date labels for first, last, and every ~5th entry
+  const n = entries.length;
+  const bars = entries.map((e, i) => {
+    const pct = max > 0 ? Math.round((e.v / max) * 100) : 0;
+    const isLast = i === n - 1;
+    // Show date label: first, last, every 5th (spaced for readability)
+    let dateLabel = '';
+    if (i === 0) dateLabel = e.label ? e.label.slice(5) : `${n - 1}d ago`; // MM-DD
+    else if (isLast) dateLabel = e.label ? e.label.slice(5) : 'today';
+    else if (n > 10 && i % 5 === 0) dateLabel = e.label ? e.label.slice(5) : '';
     return `
-      <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px">
-        <span style="font-size:11px; color:var(--muted)">${fmt(v)}</span>
+      <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; min-width:0">
+        ${i === n - 1 ? `<span style="font-size:11px; color:var(--muted); white-space:nowrap">${fmt(e.v)}</span>` : '<span style="font-size:11px">&nbsp;</span>'}
         <div style="width:100%; height:${BAR_H}px; display:flex; align-items:flex-end">
           <div style="width:100%; height:${pct}%; background:${isLast ? 'var(--accent)' : 'var(--accent-bg)'}; border:1px solid var(--accent); border-radius:3px 3px 0 0; min-height:4px"></div>
         </div>
-        <span style="font-size:11px; color:var(--muted)">${label}</span>
+        <span style="font-size:10px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%">${dateLabel}</span>
       </div>`;
   }).join('');
-  el.innerHTML = `<div style="display:flex; gap:8px; align-items:flex-end; padding:8px 0">${bars}</div>`;
+
+  el.innerHTML = `
+    <div style="font-size:11px; color:var(--muted); margin-bottom:4px">${labelSpan} — ${n} data points</div>
+    <div style="display:flex; gap:4px; align-items:flex-end; padding:4px 0">${bars}</div>`;
 }
 
 // Channel ID → name map (source of truth: Channel_IDs_Discord.txt)
@@ -1079,12 +1102,17 @@ async function loadAll() {
   }
 
   // Secondary fetches (non-fatal) — metadata is primary source for pool total + tags
-  const [daily, enrichStats, metadata, postedJobs] = await Promise.all([
+  const [daily, historyRaw, enrichStats, metadata, postedJobs] = await Promise.all([
     safeJson(urls.daily),
+    fetch(urls.history).then(r => r.ok ? r.text() : null).catch(() => null),
     safeJson(urls.enrichment),
     safeJson(urls.metadata),
     safeJson(urls.postedJobs),
   ]);
+  // Parse history.jsonl into array of {date, total} objects
+  const historyEntries = historyRaw
+    ? historyRaw.split('\n').filter(l => l.trim()).map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean)
+    : null;
 
   // Use metadata timestamp for status bar (runs every pipeline run — most current)
   const statusTs = (metadata && metadata.generated) ? metadata.generated : metrics.timestamp;
@@ -1092,7 +1120,7 @@ async function loadAll() {
   renderOpsServices(metadata);
   renderOpsPipelineStats(metrics, metadata, enrichStats);
   renderOps(ops);
-  renderPoolTrend(daily);
+  renderPoolTrend(daily, historyEntries);
   renderDurationTrend(metrics, daily);
   renderPipelineRunStats(metrics, metadata);
   renderPipelineSourceTable(metrics, metadata, enrichStats);
