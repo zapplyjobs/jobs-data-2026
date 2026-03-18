@@ -695,11 +695,8 @@ function renderQuality(d, enrichStats, metadata) {
   if (enrichStats && enrichStats.by_source) {
     const ORDER = ['greenhouse', 'workday', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'netflix', 'eightfold'];
     const SOURCE_NOTES = {
-      workday:        'Backfill in progress (MAX_PER_RUN=200/run)',
-      smartrecruiters:'Skills/visa extraction not yet implemented',
-      amazon:         'Visa detection not yet implemented',
-      netflix:        'Skills/visa extraction not yet implemented',
-      eightfold:      'No description fetcher — not implemented',
+      workday:   'Desc backfill in progress',
+      eightfold: 'No description fetcher',
     };
     const sources = ORDER.filter(s => enrichStats.by_source[s]);
     sources.forEach(src => {
