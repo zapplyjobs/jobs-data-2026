@@ -987,21 +987,48 @@ function renderDiscordStats(posted, metadata) {
   }
   const meta = posted.metadata || {};
   const total = meta.totalJobs || (Array.isArray(posted.jobs) ? posted.jobs.length : null);
-  // Use metadata generated timestamp (pipeline) not posted_jobs.json lastUpdated (Discord poster runs separately)
   const lastUpdatedTs = (metadata && metadata.generated) ? metadata.generated : posted.lastUpdated;
   const lastUpdated = lastUpdatedTs ? age(lastUpdatedTs) : '—';
   const channelNumbers = meta.channelJobNumbers || {};
 
+  // Build last-post-per-channel from jobs[].discordPosts[channelId].postedAt
+  const lastPostByChannel = {};
+  if (Array.isArray(posted.jobs)) {
+    for (const job of posted.jobs) {
+      for (const [chId, post] of Object.entries(job.discordPosts || {})) {
+        const ts = post.postedAt;
+        if (ts && (!lastPostByChannel[chId] || ts > lastPostByChannel[chId])) {
+          lastPostByChannel[chId] = ts;
+        }
+      }
+    }
+  }
+
+  const now = Date.now();
+  const SILENT_DAYS = 7;
+
   // Build all channels list with names, sorted by count desc
   const allChannels = Object.entries(channelNumbers)
-    .map(([id, count]) => ({ id, name: CHANNEL_NAMES[id] || id, count }))
+    .map(([id, count]) => ({ id, name: CHANNEL_NAMES[id] || id, count, lastPost: lastPostByChannel[id] || null }))
     .sort((a, b) => b.count - a.count);
 
-  // Status badge: Never = 0 posts. Active = has posts.
-  // Note: per-channel last-post date not in posted_jobs.json v2 — SILENT detection requires DISCORD-HEALTH-1 impl.
   function channelStatus(ch) {
     if (ch.count === 0) return '<span style="background:var(--red);color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;font-weight:600">NEVER</span>';
+    if (ch.lastPost) {
+      const ageDays = Math.floor((now - new Date(ch.lastPost).getTime()) / 86400000);
+      if (ageDays >= SILENT_DAYS) {
+        const since = ch.lastPost.slice(0, 10);
+        return `<span style="background:var(--yellow);color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;font-weight:600" title="Silent since ${since}">SILENT ${ageDays}d</span>`;
+      }
+    }
     return '<span style="background:var(--green);color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;font-weight:600">ACTIVE</span>';
+  }
+
+  function lastPostCell(ch) {
+    if (!ch.lastPost) return '<span class="muted">—</span>';
+    const ageDays = Math.floor((now - new Date(ch.lastPost).getTime()) / 86400000);
+    const label = ageDays === 0 ? 'today' : ageDays === 1 ? '1d ago' : `${ageDays}d ago`;
+    return `<span style="font-size:12px;color:var(--muted)">${label}</span>`;
   }
 
   el.innerHTML = `
@@ -1013,13 +1040,15 @@ function renderDiscordStats(posted, metadata) {
     <table style="width:100%; border-collapse:collapse">
       <tr>
         <th style="text-align:left;font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 8px 8px 0;border-bottom:1px solid var(--border)">Channel</th>
-        <th style="text-align:right;font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 0 8px;border-bottom:1px solid var(--border)">All-Time Posts</th>
+        <th style="text-align:right;font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 0 8px;border-bottom:1px solid var(--border)">All-Time</th>
+        <th style="text-align:right;font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 0 8px 8px;border-bottom:1px solid var(--border)">Last Post</th>
         <th style="text-align:right;font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 0 8px;border-bottom:1px solid var(--border)">Status</th>
       </tr>
       ${allChannels.map(ch => `
         <tr>
           <td style="padding:6px 8px 6px 0;border-bottom:1px solid var(--border);font-size:13px">${ch.name}</td>
           <td style="text-align:right;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;${ch.count === 0 ? 'color:var(--red)' : ''}">${fmt(ch.count)}</td>
+          <td style="text-align:right;padding:6px 0 6px 8px;border-bottom:1px solid var(--border)">${lastPostCell(ch)}</td>
           <td style="text-align:right;padding:6px 0;border-bottom:1px solid var(--border)">${channelStatus(ch)}</td>
         </tr>`).join('')}
     </table>`;
