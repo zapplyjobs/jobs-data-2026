@@ -15,9 +15,11 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Decrypt repository secrets
-        uses: sliteteam/github-action-git-crypt-unlock@1.2.0
-        env:
-          GIT_CRYPT_KEY: ${{ secrets.GIT_CRYPT_KEY }}
+        run: |
+          echo "${{ secrets.GIT_CRYPT_KEY }}" | base64 -d > /tmp/git-crypt-key
+          sudo apt-get install -y git-crypt -q
+          git-crypt unlock /tmp/git-crypt-key
+          rm /tmp/git-crypt-key
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
