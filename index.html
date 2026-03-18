@@ -347,7 +347,13 @@
     </div>
     <div class="section-label" style="margin-top:24px">Top Companies</div>
     <div class="card" id="top-companies-card">
-      <p class="muted" style="text-align:center; padding:40px 0">Top companies data pending pipeline emit — tracked as DASHBOARD-FIX-5b.</p>
+      <table id="top-companies-table">
+        <tr>
+          <th>#</th>
+          <th>Company</th>
+          <th style="text-align:right">Jobs</th>
+        </tr>
+      </table>
     </div>
     <div class="section-label" style="margin-top:24px">Pipeline Architecture</div>
     <div class="card" style="overflow-x:auto">
@@ -624,6 +630,25 @@ function renderDomainBars(metadata) {
         <span class="bar-value">${fmt(v)}</span>
       </div>`;
   }).join('');
+}
+
+// Supply tab — top companies table
+function renderTopCompanies(metadata) {
+  const card = document.getElementById('top-companies-card');
+  if (!card) return;
+  const companies = metadata && Array.isArray(metadata.top_companies) ? metadata.top_companies : [];
+  if (!companies.length) {
+    card.innerHTML = '<p class="muted" style="text-align:center;padding:20px 0">Top companies data unavailable.</p>';
+    return;
+  }
+  card.innerHTML = `<table id="top-companies-table">
+    <tr><th>#</th><th>Company</th><th style="text-align:right">Jobs</th></tr>
+    ${companies.map((c, i) => `<tr>
+      <td style="color:var(--muted);width:32px">${i + 1}</td>
+      <td>${c.company}</td>
+      <td style="text-align:right">${fmt(c.count)}</td>
+    </tr>`).join('')}
+  </table>`;
 }
 
 // Quality tab
@@ -1048,6 +1073,7 @@ async function loadAll() {
   renderRepos(metrics, daily);
   renderSourceBars(metrics, metadata);
   renderDomainBars(metadata);
+  renderTopCompanies(metadata);
   renderSources(metrics, metadata);
   renderDiscordStats(postedJobs, metadata);
 
