@@ -40,7 +40,7 @@ jobs:
         run: |
           git config user.email "bot@zapplyjobs.com"
           git config user.name "Aggregator Bot"
-          git add .github/data/daily-stats.json || exit 0
+          git add .github/data/daily-stats.json .github/data/history.jsonl 2>/dev/null || exit 0
           git commit -m "chore: update daily-stats.json [skip ci]" || exit 0
           git pull --rebase origin main || true
           git push
