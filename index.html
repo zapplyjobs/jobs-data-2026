@@ -223,12 +223,10 @@
 
 <nav id="tab-bar">
   <button class="tab active" data-tab="ops">Ops</button>
-  <button class="tab" data-tab="overview">Overview</button>
   <button class="tab" data-tab="pipeline">Pipeline</button>
   <button class="tab" data-tab="quality">Quality</button>
   <button class="tab" data-tab="distribution">Distribution</button>
   <button class="tab" data-tab="supply">Supply</button>
-  <button class="tab" data-tab="status">Status</button>
 </nav>
 
 <div id="status-bar">
@@ -239,41 +237,16 @@
 
   <!-- OPS TAB -->
   <section id="tab-ops" class="tab-panel">
-    <div class="section-label">Pipeline Status</div>
+    <div class="section-label">Services</div>
+    <div class="grid-3" id="ops-services"></div>
+    <div class="section-label" style="margin-top:24px">Pipeline Status</div>
     <div class="grid" id="ops-pipeline-stats"></div>
-    <div class="section-label" style="margin-top:24px">Role Status</div>
-    <div class="grid-3" id="ops-roles"></div>
     <div class="section-label" style="margin-top:24px">Pending Decisions</div>
     <div id="ops-decisions"></div>
     <div class="section-label" style="margin-top:24px">Pipeline Alert</div>
     <div id="ops-alert" class="card"><span class="muted">No alerts.</span></div>
-  </section>
-
-  <!-- OVERVIEW TAB -->
-  <section id="tab-overview" class="tab-panel" style="display:none">
-    <div class="section-label">Pipeline Health</div>
-    <div class="grid" id="overview-health"></div>
-    <div class="section-label" style="margin-top:24px">Pool Breakdown</div>
-    <div class="grid" id="overview-breakdown"></div>
-    <div class="section-label" style="margin-top:24px">Domain Distribution</div>
-    <div class="card" id="domain-bars-wrap">
-      <div id="domain-bars"></div>
-    </div>
-    <div class="section-label" style="margin-top:24px">Pipeline Architecture</div>
-    <div class="card" style="overflow-x:auto">
-      <div class="mermaid" id="arch-diagram" style="max-width:100%">
-graph TB
-  CFW["☁️ CF Worker<br/>(triggers every 15 min)"] -->|"workflow_dispatch"| AGG
-  JBS["🔒 job-board-scripts<br/>(private submodule — pipeline logic)"] -.->|"used by"| AGG
-  AGG["⚙️ jobs-aggregator-private<br/>(Layer 1: fetch + tag + dedupe)"] -->|"all_jobs.json JSONL"| JD2
-  JD2["📦 jobs-data-2026<br/>(Layer 2: host + Discord poster)"] -->|"filter + render"| NGJ["📋 New-Grad-Jobs-2026"]
-  JD2 -->|"filter + render"| INT["📋 Internships-2026"]
-  JD2 -->|"filter + render"| SW["📋 Software-Engineering"]
-  JD2 -->|"filter + render"| DS["📋 Data-Science"]
-  JD2 -->|"filter + render"| HW["📋 Hardware-Engineering"]
-  JD2 -->|"filter + render"| HC["📋 Healthcare"]
-      </div>
-    </div>
+    <div class="section-label" style="margin-top:24px">Role Status</div>
+    <div class="grid-3" id="ops-roles"></div>
   </section>
 
   <!-- PIPELINE TAB -->
@@ -283,6 +256,10 @@ graph TB
     <div class="section-label" style="margin-top:24px">Pool Trend (7 days)</div>
     <div class="card" id="pool-trend-card">
       <p class="muted" style="text-align:center; padding:40px 0">Loading…</p>
+    </div>
+    <div class="section-label" style="margin-top:24px">Run Duration (last 5 runs)</div>
+    <div class="card" id="duration-trend-card">
+      <p class="muted" style="text-align:center; padding:20px 0">Loading…</p>
     </div>
     <div class="section-label" style="margin-top:24px">Senior Filter Funnel</div>
     <div class="card" id="filter-funnel">
@@ -294,6 +271,7 @@ graph TB
         <tr>
           <th>Source</th>
           <th style="text-align:right">Total</th>
+          <th style="text-align:right">WoW</th>
           <th style="text-align:right">Tech US</th>
           <th style="text-align:right">Has Desc</th>
           <th style="text-align:right">Desc %</th>
@@ -363,16 +341,29 @@ graph TB
         </tr>
       </table>
     </div>
+    <div class="section-label" style="margin-top:24px">Domain Distribution</div>
+    <div class="card" id="domain-bars-wrap">
+      <div id="domain-bars"></div>
+    </div>
     <div class="section-label" style="margin-top:24px">Top Companies</div>
     <div class="card" id="top-companies-card">
       <p class="muted" style="text-align:center; padding:40px 0">Top companies data pending pipeline emit — tracked as DASHBOARD-FIX-5b.</p>
     </div>
-  </section>
-
-  <!-- STATUS TAB -->
-  <section id="tab-status" class="tab-panel" style="display:none">
-    <div class="section-label">Services</div>
-    <div id="status-services"></div>
+    <div class="section-label" style="margin-top:24px">Pipeline Architecture</div>
+    <div class="card" style="overflow-x:auto">
+      <div class="mermaid" id="arch-diagram" style="max-width:100%">
+graph TB
+  CFW["☁️ CF Worker<br/>(triggers every 15 min)"] -->|"workflow_dispatch"| AGG
+  JBS["🔒 job-board-scripts<br/>(private submodule — pipeline logic)"] -.->|"used by"| AGG
+  AGG["⚙️ jobs-aggregator-private<br/>(Layer 1: fetch + tag + dedupe)"] -->|"all_jobs.json JSONL"| JD2
+  JD2["📦 jobs-data-2026<br/>(Layer 2: host + Discord poster)"] -->|"filter + render"| NGJ["📋 New-Grad-Jobs-2026"]
+  JD2 -->|"filter + render"| INT["📋 Internships-2026"]
+  JD2 -->|"filter + render"| SW["📋 Software-Engineering"]
+  JD2 -->|"filter + render"| DS["📋 Data-Science"]
+  JD2 -->|"filter + render"| HW["📋 Hardware-Engineering"]
+  JD2 -->|"filter + render"| HC["📋 Healthcare"]
+      </div>
+    </div>
   </section>
 
 </main>
@@ -550,6 +541,25 @@ function renderOpsPipelineStats(metrics, metadata, enrichStats) {
                sub: 'SW + DS + HW + AI, US-tagged' });
 }
 
+// Ops tab — service health cards (Aggregator + CF Worker)
+function renderOpsServices(metadata) {
+  const el = document.getElementById('ops-services');
+  if (!el) return;
+  const ts = metadata && metadata.generated;
+  const aggOk = ts && (Date.now() - new Date(ts).getTime()) < 6 * 3600000;
+  const services = [
+    { name: 'Aggregator', ok: aggOk, detail: ts ? age(ts) : 'unknown' },
+    { name: 'CF Worker cron', ok: true, detail: 'every 15 min' },
+  ];
+  el.innerHTML = services.map(s => `
+    <div class="stat-card">
+      <div class="stat-icon">${s.ok ? '🟢' : '🔴'}</div>
+      <div class="stat-label">${s.name}</div>
+      <div style="font-size:13px;font-weight:600;color:${s.ok ? 'var(--green)' : 'var(--red)'};margin:4px 0">${s.ok ? 'Online' : 'Down'}</div>
+      <div class="stat-sub">${s.detail}</div>
+    </div>`).join('');
+}
+
 // Ops tab — role status + decisions (from proxy, may be null)
 function renderOps(ops) {
   const rolesEl = document.getElementById('ops-roles');
@@ -597,54 +607,23 @@ function renderOps(ops) {
   }
 }
 
-// Overview tab
-function renderOverview(d, daily, metadata) {
-  const p = d.pipeline || {};
-  const g = d.growth || {};
-  // Use jobs-metadata.json for pool total (runs every pipeline run — always current)
-  // Fall back to metrics/latest.json if metadata unavailable
-  const poolTotal = (metadata && metadata.total_jobs) ? metadata.total_jobs : p.pipelineTotal;
-  const tagStats = (metadata && metadata.tag_stats)
-    ? {
-        usTagged:   metadata.tag_stats.locations && metadata.tag_stats.locations.us,
-        entryLevel: metadata.tag_stats.employment && metadata.tag_stats.employment.entry_level,
-        internship: metadata.tag_stats.employment && metadata.tag_stats.employment.internship,
-        domains:    metadata.tag_stats.domains || {},
-      }
-    : p.tagStats || {};
-
-  const wowDir = g.total_delta > 0 ? 'up' : g.total_delta < 0 ? 'down' : 'neutral';
-  document.getElementById('overview-health').innerHTML =
-    statCard({ icon: '🏗️', label: 'Pipeline Pool', value: fmt(poolTotal),
-               trend: g.total_delta != null ? fmtDelta(g.total_delta) + ' WoW' : null,
-               trendDir: wowDir }) +
-    statCard({ icon: '🇺🇸', label: 'US-Tagged', value: fmt(tagStats.usTagged),
-               sub: tagStats.usTagged && poolTotal ? `${Math.round(tagStats.usTagged / poolTotal * 100)}% of pool` : null }) +
-    statCard({ icon: '🎓', label: 'Entry-Level', value: fmt(tagStats.entryLevel) }) +
-    statCard({ icon: '🏢', label: 'Internships', value: fmt(tagStats.internship) });
-
-  if (daily && Array.isArray(daily.history) && daily.history.length >= 2) {
-    const h = daily.history;
-    const arrow = h[h.length - 1] >= h[0] ? '↑' : '↓';
-    document.getElementById('overview-breakdown').innerHTML =
-      statCard({ icon: '📈', label: '7d Trend', value: fmt(h[h.length - 1]),
-                 trend: `${arrow} from ${fmt(h[0])} (7 days ago)`,
-                 trendDir: h[h.length - 1] >= h[0] ? 'up' : 'down' });
-  }
-
-  const domains = tagStats.domains || {};
-  const maxDomain = Math.max(...Object.values(domains).filter(Boolean));
+// Supply tab — domain distribution bars (moved from Overview)
+function renderDomainBars(metadata) {
   const barsEl = document.getElementById('domain-bars');
-  barsEl.innerHTML = '';
-  Object.entries(domains).sort(([, a], [, b]) => b - a).forEach(([k, v]) => {
-    const pct = maxDomain > 0 ? Math.round((v / maxDomain) * 100) : 0;
-    barsEl.innerHTML += `
+  if (!barsEl) return;
+  const domains = (metadata && metadata.tag_stats && metadata.tag_stats.domains) || {};
+  const entries = Object.entries(domains).filter(([, v]) => v > 0).sort(([, a], [, b]) => b - a);
+  if (!entries.length) { barsEl.innerHTML = '<span class="muted">No domain data available.</span>'; return; }
+  const max = entries[0][1];
+  barsEl.innerHTML = entries.map(([k, v]) => {
+    const pct = max > 0 ? Math.round((v / max) * 100) : 0;
+    return `
       <div class="bar-row">
         <span class="bar-label">${k}</span>
         <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
         <span class="bar-value">${fmt(v)}</span>
       </div>`;
-  });
+  }).join('');
 }
 
 // Quality tab
@@ -751,27 +730,49 @@ function renderSources(d, metadata) {
     });
 }
 
-// Status tab
-function renderStatusTab(d, metadata) {
-  const p = d.pipeline || {};
-  // Use metadata.generated (updated every pipeline run) as the authoritative freshness signal
-  const ts = (metadata && metadata.generated) ? metadata.generated : d.timestamp;
-  const durationMin = p.duration_ms ? (p.duration_ms / 60000).toFixed(1) : null;
+// Pipeline tab — run duration trend (last 5 from daily-stats.json.history + current run)
+function renderDurationTrend(metrics, daily) {
+  const el = document.getElementById('duration-trend-card');
+  if (!el) return;
+  const p = (metrics && metrics.pipeline) || {};
+  const currentMin = p.duration_ms ? parseFloat((p.duration_ms / 60000).toFixed(1)) : null;
 
-  const services = [
-    { name: 'Aggregator', ok: ts && (Date.now() - new Date(ts).getTime()) < 6 * 3600000 },
-    { name: 'CF Worker cron', ok: true },
-  ];
+  // Build last-5 list: use daily history duration_ms if present, else fall back to current only
+  let entries = [];
+  if (daily && Array.isArray(daily.history)) {
+    entries = daily.history
+      .filter(h => h.duration_ms != null)
+      .slice(-5)
+      .map((h, i, arr) => ({ label: i === arr.length - 1 ? 'latest' : `${arr.length - i - 1}d ago`, value: parseFloat((h.duration_ms / 60000).toFixed(1)) }));
+  }
+  // If history has no duration_ms (older format), show single current stat
+  if (!entries.length && currentMin != null) {
+    el.innerHTML = `<div style="display:flex;align-items:center;gap:16px;padding:8px 0">
+      <span style="font-size:24px;font-weight:700">${currentMin} min</span>
+      <span class="muted" style="font-size:12px">last run · target ≤25 min</span>
+    </div>`;
+    return;
+  }
+  if (!entries.length) { el.innerHTML = '<p class="muted" style="text-align:center;padding:20px 0">Duration history unavailable.</p>'; return; }
 
-  document.getElementById('status-services').innerHTML = `<div class="card">` +
-    services.map(s => `
-      <div style="display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--border)">
-        <span class="${s.ok ? 'ok' : 'err'}">${s.ok ? '🟢' : '🔴'}</span>
-        <span style="flex:1">${s.name}</span>
-        <span class="muted" style="font-size:12px">${s.ok ? 'Online' : 'Down'}</span>
-      </div>`).join('') +
-    (durationMin ? `<div class="stat-sub" style="margin-top:12px">Last run: ${durationMin} min</div>` : '') +
-    `</div>`;
+  const max = Math.max(...entries.map(e => e.value), 25);
+  const TARGET = 25;
+  const BAR_H = 60;
+  const bars = entries.map(e => {
+    const pct = Math.round((e.value / max) * 100);
+    const color = e.value <= TARGET ? 'var(--green)' : 'var(--red)';
+    return `
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+        <span style="font-size:11px;color:var(--muted)">${e.value}m</span>
+        <div style="width:100%;height:${BAR_H}px;display:flex;align-items:flex-end">
+          <div style="width:100%;height:${pct}%;background:${color};border-radius:3px 3px 0 0;min-height:4px"></div>
+        </div>
+        <span style="font-size:11px;color:var(--muted)">${e.label}</span>
+      </div>`;
+  }).join('');
+  el.innerHTML = `
+    <div style="display:flex;gap:8px;align-items:flex-end;padding:8px 0">${bars}</div>
+    <div style="margin-top:8px;font-size:11px;color:var(--muted)">Target: ≤25 min &nbsp;·&nbsp; <span style="color:var(--green)">■</span> on target &nbsp;·&nbsp; <span style="color:var(--red)">■</span> over target</div>`;
 }
 
 // Reusable horizontal bar renderer (uses existing .bar-row CSS)
@@ -864,17 +865,20 @@ function renderPipelineRunStats(metrics, metadata) {
     statCard({ icon: '🕐', label: 'Last Run', value: statusTs ? age(statusTs) : '—', sub: statusTs ? new Date(statusTs).toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' }) : null });
 }
 
-// Pipeline tab — source breakdown table
-function renderPipelineSourceTable(metadata, enrichStats) {
+// Pipeline tab — source breakdown table (Total, WoW, Tech US, Has Desc, Desc%)
+function renderPipelineSourceTable(metrics, metadata, enrichStats) {
   const tbl = document.getElementById('pipeline-source-table');
   if (!tbl) return;
   const bySource = (metadata && metadata.by_source) || {};
   const enrichBySource = (enrichStats && enrichStats.by_source) || {};
+  const srcDelta = ((metrics && metrics.growth) || {}).by_source_delta || {};
   const ORDER = ['workday', 'greenhouse', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'netflix', 'eightfold'];
   const sources = ORDER.filter(s => bySource[s]);
   if (!sources.length) return;
   sources.forEach(src => {
     const total = bySource[src] || 0;
+    const delta = srcDelta[src];
+    const deltaStr = delta != null ? `<span class="${delta >= 0 ? 'ok' : 'err'}">${fmtDelta(delta)}</span>` : '<span class="muted">—</span>';
     const ev = enrichBySource[src] || {};
     const techUs = ev.tech_us || 0;
     const hasDesc = ev.has_desc || 0;
@@ -884,6 +888,7 @@ function renderPipelineSourceTable(metadata, enrichStats) {
     tr.innerHTML = `
       <td>${src}</td>
       <td style="text-align:right">${fmt(total)}</td>
+      <td style="text-align:right">${deltaStr}</td>
       <td style="text-align:right">${techUs ? fmt(techUs) : '<span class="muted">—</span>'}</td>
       <td style="text-align:right">${hasDesc ? fmt(hasDesc) : '<span class="muted">—</span>'}</td>
       <td style="text-align:right;color:${descColor}">${techUs > 0 ? descPct + '%' : '—'}</td>
@@ -1014,8 +1019,8 @@ async function loadAll() {
     document.getElementById('status-indicator').innerHTML = `⚠️ Load failed (${err.message})`;
     document.getElementById('status-bar').className = 'err';
     document.getElementById('content').style.display = 'block';
-    document.getElementById('overview-health').innerHTML =
-      `<div class="card"><span class="err">Failed to load metrics. Pipeline may be down — try refreshing.</span></div>`;
+    document.getElementById('ops-pipeline-stats').innerHTML =
+      `<div class="card" style="grid-column:1/-1"><span class="err">Failed to load metrics. Pipeline may be down — try refreshing.</span></div>`;
     return;
   }
 
@@ -1030,20 +1035,21 @@ async function loadAll() {
   // Use metadata timestamp for status bar (runs every pipeline run — most current)
   const statusTs = (metadata && metadata.generated) ? metadata.generated : metrics.timestamp;
   renderStatusBar(statusTs);
+  renderOpsServices(metadata);
   renderOpsPipelineStats(metrics, metadata, enrichStats);
   renderOps(ops);
-  renderOverview(metrics, daily, metadata);
   renderPoolTrend(daily);
+  renderDurationTrend(metrics, daily);
   renderPipelineRunStats(metrics, metadata);
-  renderPipelineSourceTable(metadata, enrichStats);
+  renderPipelineSourceTable(metrics, metadata, enrichStats);
   renderFilterFunnel(metadata);
   renderQuality(metrics, enrichStats, metadata);
   renderEnrichBars(enrichStats);
   renderRepos(metrics, daily);
   renderSourceBars(metrics, metadata);
+  renderDomainBars(metadata);
   renderSources(metrics, metadata);
   renderDiscordStats(postedJobs, metadata);
-  renderStatusTab(metrics, metadata);
 
   document.getElementById('content').style.display = 'block';
 }
@@ -1089,10 +1095,10 @@ mermaid.initialize({
   theme: document.documentElement.classList.contains('dark') ? 'dark' : 'default',
   securityLevel: 'loose',
 });
-// Render on Overview tab activation
+// Render on Supply tab activation (diagram lives in Supply tab)
 document.querySelectorAll('.tab').forEach(btn => {
   btn.addEventListener('click', () => {
-    if (btn.dataset.tab === 'overview') {
+    if (btn.dataset.tab === 'supply') {
       setTimeout(() => mermaid.run({ nodes: [document.getElementById('arch-diagram')] }), 50);
     }
   });
