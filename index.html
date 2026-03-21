@@ -336,6 +336,14 @@
     <div class="grid" id="quality-filter"></div>
     <div class="section-label" style="margin-top:24px">Enrichment</div>
     <div class="grid" id="quality-enrich"></div>
+    <div class="section-label" style="margin-top:24px">Enrichment Trend</div>
+    <div class="card" id="enrich-trend-card">
+      <p class="muted" style="text-align:center; padding:40px 0">Loading…</p>
+    </div>
+    <div class="section-label" style="margin-top:24px">Skills Fill Rate by Source</div>
+    <div class="card" id="skills-bars-card">
+      <div id="skills-bars"></div>
+    </div>
     <div class="section-label" style="margin-top:24px">Description Fill Rate by Source</div>
     <div class="card" id="enrich-bars-card">
       <div id="enrich-bars"></div>
@@ -351,6 +359,19 @@
           <th style="text-align:right">Skills</th>
           <th style="text-align:right">Visa</th>
           <th>Notes</th>
+        </tr>
+      </table>
+    </div>
+    <div class="section-label" style="margin-top:24px">Top Companies — Enrichment Quality</div>
+    <div class="card">
+      <table id="company-quality-table">
+        <tr>
+          <th>Company</th>
+          <th>Source</th>
+          <th style="text-align:right">Enriched</th>
+          <th style="text-align:right">Skills %</th>
+          <th style="text-align:right">Summary %</th>
+          <th style="text-align:right">Visa %</th>
         </tr>
       </table>
     </div>
@@ -520,6 +541,7 @@ function dataUrls() {
     daily:      `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/daily-stats.json?t=${t}`,
     history:    `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/history.jsonl?t=${t}`,
     enrichment: `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/enrichment-stats.json?t=${t}`,
+    enrichHistory: `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/enrichment-history.jsonl?t=${t}`,
     metadata:   `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/jobs-metadata.json?t=${t}`,
     postedJobs: `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/posted_jobs.json?t=${t}`,
   };
@@ -928,6 +950,80 @@ function renderEnrichBars(enrichStats) {
   });
 }
 
+// ENRICH-QUALITY-2: Enrichment trend chart (from enrichment-history.jsonl)
+function renderEnrichTrend(enrichHistory) {
+  const el = document.getElementById('enrich-trend-card');
+  if (!el) return;
+  if (!enrichHistory || enrichHistory.length < 2) {
+    el.innerHTML = '<p class="muted" style="text-align:center; padding:40px 0">Enrichment trend unavailable — data accumulates daily.</p>';
+    return;
+  }
+  const entries = enrichHistory.slice(-30); // last 30 days
+  const BAR_H = 80;
+  const n = entries.length;
+  const vals = entries.map(e => e.total_enriched || 0);
+  const max = Math.max(...vals);
+  const bars = entries.map((e, i) => {
+    const pct = max > 0 ? Math.round((e.total_enriched / max) * 100) : 0;
+    const isLast = i === n - 1;
+    let dateLabel = '';
+    if (i === 0) dateLabel = e.date ? e.date.slice(5) : '';
+    else if (isLast) dateLabel = e.date ? e.date.slice(5) : 'today';
+    else if (n > 10 && i % 5 === 0) dateLabel = e.date ? e.date.slice(5) : '';
+    const skillsPct = e.skills_pct || 0;
+    const barColor = skillsPct >= 70 ? 'var(--green)' : skillsPct >= 40 ? 'var(--accent)' : 'var(--red)';
+    return `
+      <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; min-width:0" title="${e.date}: ${fmt(e.total_enriched)} enriched, ${skillsPct}% skills">
+        ${isLast ? `<span style="font-size:11px; color:var(--muted); white-space:nowrap">${fmt(e.total_enriched)}</span>` : '<span style="font-size:11px">&nbsp;</span>'}
+        <div style="width:100%; height:${BAR_H}px; display:flex; align-items:flex-end">
+          <div style="width:100%; height:${pct}%; background:${barColor}; border-radius:3px 3px 0 0; min-height:4px"></div>
+        </div>
+        <span style="font-size:10px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%">${dateLabel}</span>
+      </div>`;
+  }).join('');
+  el.innerHTML = `
+    <div style="font-size:11px; color:var(--muted); margin-bottom:4px">${n} days — bar color = skills fill rate (green ≥70%, orange ≥40%, red <40%)</div>
+    <div style="display:flex; gap:4px; align-items:flex-end; padding:4px 0">${bars}</div>`;
+}
+
+// ENRICH-QUALITY-2: Skills fill rate bars by source
+function renderSkillsBars(enrichStats) {
+  if (!enrichStats || !enrichStats.by_source) return;
+  const ORDER = ['greenhouse', 'workday', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'netflix', 'eightfold'];
+  const items = ORDER
+    .filter(s => enrichStats.by_source[s] && enrichStats.by_source[s].enriched > 0)
+    .map(s => {
+      const v = enrichStats.by_source[s];
+      const enriched = v.enriched || 0;
+      const skills = v.required_skills || 0;
+      const pct = enriched > 0 ? Math.round(100 * skills / enriched) : 0;
+      return { label: s, value: pct, sub: `${fmt(skills)}/${fmt(enriched)}` };
+    });
+  renderHBars('skills-bars', items, {
+    labelWidth: '130px',
+    colorFn: (v) => v >= 70 ? 'var(--green)' : v >= 40 ? 'var(--yellow)' : 'var(--red)',
+  });
+}
+
+// ENRICH-QUALITY-2: Per-company enrichment quality table
+function renderCompanyQuality(enrichStats) {
+  const tbl = document.getElementById('company-quality-table');
+  if (!tbl || !enrichStats || !enrichStats.by_company) return;
+  const colorPct = (v) => v >= 70 ? 'var(--green)' : v >= 40 ? 'var(--yellow)' : 'var(--red)';
+  enrichStats.by_company.forEach(c => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${c.company}</td>
+      <td style="font-size:11px;color:var(--muted)">${c.source}</td>
+      <td style="text-align:right">${fmt(c.enriched)}</td>
+      <td style="text-align:right;color:${colorPct(c.skills_pct)}">${c.skills_pct}%</td>
+      <td style="text-align:right;color:${colorPct(c.summary_pct)}">${c.summary_pct}%</td>
+      <td style="text-align:right;color:${colorPct(c.visa_pct)}">${c.visa_pct}%</td>
+    `;
+    tbl.appendChild(tr);
+  });
+}
+
 // Pipeline tab — last run stat cards
 function renderPipelineRunStats(metrics, metadata) {
   const el = document.getElementById('pipeline-run-stats');
@@ -1158,16 +1254,21 @@ async function loadAll() {
   }
 
   // Secondary fetches (non-fatal) — metadata is primary source for pool total + tags
-  const [daily, historyRaw, enrichStats, metadata, postedJobs] = await Promise.all([
+  const [daily, historyRaw, enrichStats, enrichHistoryRaw, metadata, postedJobs] = await Promise.all([
     safeJson(urls.daily),
     fetch(urls.history).then(r => r.ok ? r.text() : null).catch(() => null),
     safeJson(urls.enrichment),
+    fetch(urls.enrichHistory).then(r => r.ok ? r.text() : null).catch(() => null),
     safeJson(urls.metadata),
     safeJson(urls.postedJobs),
   ]);
   // Parse history.jsonl into array of {date, total} objects
   const historyEntries = historyRaw
     ? historyRaw.split('\n').filter(l => l.trim()).map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean)
+    : null;
+  // Parse enrichment-history.jsonl
+  const enrichHistory = enrichHistoryRaw
+    ? enrichHistoryRaw.split('\n').filter(l => l.trim()).map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean)
     : null;
 
   // Use metadata timestamp for status bar (runs every pipeline run — most current)
@@ -1182,7 +1283,10 @@ async function loadAll() {
   renderPipelineSourceTable(metrics, metadata, enrichStats);
   renderFilterFunnel(metadata);
   renderQuality(metrics, enrichStats, metadata);
+  renderEnrichTrend(enrichHistory);
+  renderSkillsBars(enrichStats);
   renderEnrichBars(enrichStats);
+  renderCompanyQuality(enrichStats);
   renderRepos(metrics, daily);
   renderSourceBars(metrics, metadata);
   renderDomainBars(metadata);
