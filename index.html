@@ -69,16 +69,36 @@
       font-size: 14px;
     }
     #theme-toggle:hover { background: var(--bg-card); }
-    #tab-bar {
+    /* Layout: sidebar + content wrapper */
+    #app-body {
       display: flex;
-      gap: 4px;
-      padding: 12px 24px 0;
-      background: var(--bg);
-      border-bottom: 1px solid var(--border);
-      overflow-x: auto;
+      min-height: calc(100vh - 57px); /* subtract header height */
+    }
+    #sidebar {
+      width: 240px;
+      flex-shrink: 0;
+      background: var(--bg-card);
+      border-right: 1px solid var(--border);
+      padding: 16px 12px;
+      position: sticky;
+      top: 57px;
+      height: calc(100vh - 57px);
+      overflow-y: auto;
+    }
+    #sidebar-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 0 8px;
+      margin-bottom: 8px;
     }
     .tab {
-      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      width: 100%;
+      padding: 8px 12px;
       border: none;
       background: none;
       color: var(--muted);
@@ -86,12 +106,35 @@
       font-size: 13px;
       font-weight: 500;
       cursor: pointer;
-      border-radius: 6px 6px 0 0;
-      border-bottom: 2px solid transparent;
+      border-radius: 8px;
+      text-align: left;
       white-space: nowrap;
+      margin-bottom: 2px;
     }
-    .tab:hover { color: var(--text); background: var(--bg-card); }
-    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tab:hover { color: var(--text); background: var(--bg-card-hover); }
+    .tab.active { color: var(--accent); background: var(--accent-bg); font-weight: 600; }
+    /* Mobile: sidebar collapses to bottom bar */
+    @media (max-width: 639px) {
+      #app-body { flex-direction: column; }
+      #sidebar {
+        width: 100%;
+        height: auto;
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        top: auto;
+        border-right: none;
+        border-top: 1px solid var(--border);
+        padding: 8px 12px;
+        display: flex;
+        flex-direction: row;
+        gap: 4px;
+        overflow-x: auto;
+        z-index: 10;
+      }
+      #sidebar-label { display: none; }
+      .tab { white-space: nowrap; margin-bottom: 0; }
+      #content-wrap { padding-bottom: 72px; }
+    }
     #status-bar {
       padding: 8px 24px;
       background: var(--status-bar-bg);
@@ -225,18 +268,21 @@
   <button id="theme-toggle" title="Toggle theme">☀</button>
 </header>
 
-<nav id="tab-bar">
-  <button class="tab active" data-tab="ops">Ops</button>
-  <button class="tab" data-tab="pipeline">Pipeline</button>
-  <button class="tab" data-tab="quality">Quality</button>
-  <button class="tab" data-tab="distribution">Distribution</button>
-  <button class="tab" data-tab="supply">Supply</button>
-</nav>
-
 <div id="status-bar">
   <span id="status-indicator">Loading…</span>
 </div>
 
+<div id="app-body">
+<aside id="sidebar">
+  <div id="sidebar-label">Navigation</div>
+  <button class="tab active" data-tab="ops">📊 Ops</button>
+  <button class="tab" data-tab="pipeline">⚙️ Pipeline</button>
+  <button class="tab" data-tab="quality">✅ Quality</button>
+  <button class="tab" data-tab="distribution">📡 Distribution</button>
+  <button class="tab" data-tab="supply">🏭 Supply</button>
+</aside>
+
+<div id="content-wrap" style="flex:1;min-width:0">
 <main id="content" style="padding: 24px; display:none">
 
   <!-- OPS TAB -->
@@ -377,6 +423,8 @@ graph TB
   </section>
 
 </main>
+</div><!-- #content-wrap -->
+</div><!-- #app-body -->
 
 <footer>
   Auto-refreshed from <a href="https://github.com/zapplyjobs/jobs-data-2026" style="color:var(--muted)">jobs-data-2026</a> · pipeline runs every 15 min ·
