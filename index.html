@@ -548,6 +548,7 @@ function dataUrls() {
 }
 
 // Helpers
+function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
 function fmt(n) {
   if (n == null) return '—';
   return Number(n).toLocaleString('en-US');
@@ -727,7 +728,7 @@ function renderTopCompanies(metadata) {
     <tr><th>#</th><th>Company</th><th style="text-align:right">Jobs</th></tr>
     ${companies.map((c, i) => `<tr>
       <td style="color:var(--muted);width:32px">${i + 1}</td>
-      <td>${c.company}</td>
+      <td>${esc(c.company)}</td>
       <td style="text-align:right">${fmt(c.count)}</td>
     </tr>`).join('')}
   </table>`;
@@ -1013,7 +1014,7 @@ function renderCompanyQuality(enrichStats) {
   enrichStats.by_company.forEach(c => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${c.company}</td>
+      <td>${esc(c.company)}</td>
       <td style="font-size:11px;color:var(--muted)">${c.source}</td>
       <td style="text-align:right">${fmt(c.enriched)}</td>
       <td style="text-align:right;color:${colorPct(c.skills_pct)}">${c.skills_pct}%</td>
