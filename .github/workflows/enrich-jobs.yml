@@ -48,6 +48,7 @@ jobs:
           git add .github/data/enriched_jobs.json .github/data/processed_ids.json .github/data/enrichment-stats.json || exit 0
           [ -f .github/data/enrichment-history.jsonl ] && git add .github/data/enrichment-history.jsonl
           [ -f .github/data/descriptions-enriched.jsonl ] && git add .github/data/descriptions-enriched.jsonl
+          [ -f .github/data/desc-fetch-failures.json ] && git add .github/data/desc-fetch-failures.json
           git commit -m "chore: update enriched jobs [skip ci]" || exit 0
           for i in 1 2 3; do
             git pull --rebase origin main && git push && break
