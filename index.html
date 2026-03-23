@@ -430,15 +430,15 @@
     <div class="card" style="overflow-x:auto">
       <div class="mermaid" id="arch-diagram" style="max-width:100%">
 graph TB
-  CFW["☁️ CF Worker<br/>(triggers every 15 min)"] -->|"workflow_dispatch"| AGG
-  JBS["🔒 job-board-scripts<br/>(private submodule — pipeline logic)"] -.->|"used by"| AGG
-  AGG["⚙️ jobs-aggregator-private<br/>(Layer 1: fetch + tag + dedupe)"] -->|"all_jobs.json JSONL"| JD2
-  JD2["📦 jobs-data-2026<br/>(Layer 2: host + Discord poster)"] -->|"filter + render"| NGJ["📋 New-Grad-Jobs-2026"]
-  JD2 -->|"filter + render"| INT["📋 Internships-2026"]
-  JD2 -->|"filter + render"| SW["📋 Software-Engineering"]
-  JD2 -->|"filter + render"| DS["📋 Data-Science"]
-  JD2 -->|"filter + render"| HW["📋 Hardware-Engineering"]
-  JD2 -->|"filter + render"| HC["📋 Healthcare"]
+  CFW["☁️ CF Worker<br/>(every 15 min)"] -->|"dispatch"| AGG
+  CFW -->|"dispatch"| ENR
+  CFW -->|"dispatch"| DSC
+  JBS["🔒 job-board-shared<br/>(private submodule)"] -.->|"used by"| AGG
+  AGG["⚙️ Aggregator<br/>(fetch + tag + dedupe)"] -->|"all_jobs.json"| JD2
+  AGG -->|"GH/Ashby/Lever sidecars"| JD2
+  ENR["🔬 Enrichment<br/>(skills + visa + WD/SR desc)"] -->|"enriched_jobs.json"| JD2
+  DSC["📡 Discord Poster<br/>(26 channels)"] -.->|"reads"| JD2
+  JD2["📦 jobs-data-2026"] -->|"filter"| CONS["📋 6 Consumer Repos"]
       </div>
     </div>
   </section>
