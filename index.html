@@ -421,41 +421,41 @@
     <div class="section-label" style="margin-top:24px">Pipeline Architecture</div>
     <div class="card" style="overflow-x:auto">
       <div class="mermaid" id="arch-diagram" style="max-width:100%">
-graph LR
-  subgraph Sources
-    GH[Greenhouse]
-    WD[Workday]
-    ASH[Ashby]
-    LEV[Lever]
-    SR[SmartRecruiters]
-    AMZ[Amazon]
-    JS[JSearch]
-    NF[Netflix]
-    EF[Eightfold]
+graph TB
+  subgraph Trigger
+    CFW["☁️ CF Worker<br/>job-board-cron-worker<br/>(every 15 min)"]
   end
   subgraph Pipeline
-    JBS[job-board-shared]:::private -.->|logic| AGG
-    AGG[jobs-aggregator-private]
+    JBS["🔒 job-board-shared<br/>(private submodule)"] -.->|"logic"| AGG
+    AGG["⚙️ jobs-aggregator-private<br/>fetch 9 ATS → tag → dedupe"]
   end
-  subgraph Data
-    JD2[jobs-data-2026]
-    ENR[enrich-jobs]
-    DSC[discord-poster]
+  subgraph Data Layer
+    JD2["📦 jobs-data-2026<br/>all_jobs.json + sidecars"]
+    ENR["🔬 enrich-jobs.js<br/>skills + visa + WD/SR desc"]
+    DSC["📡 discord-poster.js<br/>26 channels"]
+    DASH["📊 Dashboard<br/>index.html (this page)"]
   end
-  subgraph Consumers
-    NGJ[New-Grad-Jobs]
-    INT[Internships]
-    SWE[Software-Eng]
-    DSR[Data-Science]
-    HWR[Hardware-Eng]
-    HCR[Healthcare]
+  subgraph Consumer Repos
+    NGJ["📋 New-Grad-Jobs-2026"]
+    INT["📋 Internships-2026"]
+    SWE["📋 Software-Engineering"]
+    DS["📋 Data-Science"]
+    HW["📋 Hardware-Engineering"]
+    HC["📋 Healthcare"]
   end
-  GH & WD & ASH & LEV & SR & AMZ & JS & NF & EF --> AGG
-  AGG -->|all_jobs| JD2
-  JD2 --> ENR
-  JD2 --> DSC
-  JD2 -->|update-jobs| NGJ & INT & SWE & DSR & HWR & HCR
-  classDef private stroke-dasharray:5 5
+  CFW -->|"dispatch"| AGG
+  CFW -->|"dispatch"| ENR
+  CFW -->|"dispatch"| DSC
+  AGG -->|"all_jobs.json"| JD2
+  ENR -->|"enriched_jobs.json"| JD2
+  DSC -.->|"reads"| JD2
+  DASH -.->|"reads"| JD2
+  JD2 -->|"update-jobs.yml"| NGJ
+  JD2 -->|"update-jobs.yml"| INT
+  JD2 -->|"update-jobs.yml"| SWE
+  JD2 -->|"update-jobs.yml"| DS
+  JD2 -->|"update-jobs.yml"| HW
+  JD2 -->|"update-jobs.yml"| HC
       </div>
     </div>
   </section>
