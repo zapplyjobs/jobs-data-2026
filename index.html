@@ -932,15 +932,25 @@ function renderSourceBars(d, metadata) {
 }
 
 // DASH-4d: Per-source trend chart (multi-line SVG from history.jsonl by_source)
+// Per-source trend with 7D / 30D / All pill toggles
+let _sourceTrendAllEntries = null; // stash for re-render on toggle
 function renderSourceTrend(historyEntries) {
   const el = document.getElementById('source-trend-card');
   if (!el) return;
-  // Filter entries that have by_source data
-  const entries = (historyEntries || []).filter(e => e.by_source);
-  if (entries.length < 2) {
+  const allEntries = (historyEntries || []).filter(e => e.by_source);
+  _sourceTrendAllEntries = allEntries;
+  renderSourceTrendChart(allEntries, 30); // default 30D
+}
+
+function renderSourceTrendChart(allEntries, days) {
+  const el = document.getElementById('source-trend-card');
+  if (!el) return;
+  if (allEntries.length < 2) {
     el.innerHTML = '<p class="muted" style="text-align:center; padding:20px 0">Per-source trend data accumulating — available after next daily stats run.</p>';
     return;
   }
+  const entries = days ? allEntries.slice(-days) : allEntries;
+  if (entries.length < 2) { renderSourceTrendChart(allEntries, null); return; } // fallback to All if window too small
 
   const SOURCES = ['workday', 'greenhouse', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'netflix', 'eightfold'];
   const COLORS = { workday: '#e67e22', greenhouse: '#27ae60', ashby: '#3498db', lever: '#9b59b6', smartrecruiters: '#e74c3c', amazon: '#f39c12', jsearch: '#1abc9c', netflix: '#c0392b', eightfold: '#7f8c8d' };
@@ -953,7 +963,7 @@ function renderSourceTrend(historyEntries) {
   const allVals = entries.flatMap(e => activeSources.map(s => e.by_source[s] || 0));
   const maxVal = Math.max(...allVals) * 1.1 || 1;
 
-  const toX = i => PAD.left + (i / (n - 1)) * plotW;
+  const toX = i => PAD.left + (i / Math.max(n - 1, 1)) * plotW;
   const toY = v => PAD.top + plotH - (v / maxVal) * plotH;
 
   const lines = activeSources.map(src => {
@@ -961,7 +971,7 @@ function renderSourceTrend(historyEntries) {
     return `<polyline points="${pts}" fill="none" stroke="${COLORS[src] || '#888'}" stroke-width="1.5" />`;
   }).join('\n');
 
-  const dateLabels = [0, Math.floor(n / 2), n - 1].map(i => {
+  const dateLabels = [0, Math.floor(n / 2), n - 1].filter((v, i, a) => a.indexOf(v) === i).map(i => {
     const d = entries[i].date || '';
     return `<text x="${toX(i)}" y="${H - 2}" text-anchor="middle" fill="var(--muted)" font-size="10">${d.slice(5)}</text>`;
   }).join('');
@@ -975,8 +985,19 @@ function renderSourceTrend(historyEntries) {
     return `<span style="margin-right:10px"><span style="color:${COLORS[s] || '#888'}">■</span> ${s} (${fmt(last)})</span>`;
   }).join('');
 
+  // Pill toggle buttons
+  const pillStyle = d => `display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border);margin-right:4px;` +
+    (d === days ? 'background:var(--accent);color:#fff;border-color:var(--accent)' : 'background:var(--bg-card);color:var(--muted)');
+  const pills = [7, 30, null].map(d => {
+    const label = d === 7 ? '7D' : d === 30 ? '30D' : 'All';
+    return `<span style="${pillStyle(d)}" onclick="renderSourceTrendChart(_sourceTrendAllEntries,${d})">${label}</span>`;
+  }).join('');
+
   el.innerHTML = `
-    <div style="font-size:11px; color:var(--muted); margin-bottom:4px; line-height:1.6">${legend}</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div style="font-size:11px; color:var(--muted); line-height:1.6">${legend}</div>
+      <div>${pills}</div>
+    </div>
     <svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px">
       ${lines}
       ${yLabels}
@@ -1118,22 +1139,23 @@ function renderCompanyQuality(enrichStats) {
 }
 
 // Pipeline tab — last run stat cards
-function renderPipelineRunStats(metrics, metadata) {
+// Pipeline stat cards per design spec: Total Fetched, Active Sources, Entry-Level Passed, US Tech Jobs
+// Duration and Last Run time are on Ops tab — not duplicated here
+function renderPipelineRunStats(metrics, metadata, enrichStats) {
   const el = document.getElementById('pipeline-run-stats');
   if (!el) return;
-  const p = (metrics && metrics.pipeline) || {};
-  const statusTs = (metadata && metadata.generated) ? metadata.generated : (metrics && metrics.timestamp);
-  const durationMin = p.duration_ms ? (p.duration_ms / 60000).toFixed(1) : null;
   const sf = metadata && metadata.senior_filter_stats;
   const totalInput = sf ? sf.total_input : null;
+  const entryLevel = sf ? sf.entry_level_jobs : null;
   const bySource = (metadata && metadata.by_source) || {};
   const sourceCount = Object.keys(bySource).length;
+  const usTechJobs = enrichStats ? enrichStats.total_tech_us : null;
 
   el.innerHTML =
-    statCard({ icon: '⏱️', label: 'Run Duration', value: durationMin ? `${durationMin} min` : '—', sub: 'Target: ≤25 min' }) +
     statCard({ icon: '📥', label: 'Total Fetched', value: fmt(totalInput), sub: 'before senior filter' }) +
-    statCard({ icon: '🔌', label: 'Active Sources', value: sourceCount || '—', sub: 'GH, Lever, Ashby, WD, SR, Amazon, JSearch, Netflix, EF' }) +
-    statCard({ icon: '🕐', label: 'Last Run', value: statusTs ? age(statusTs) : '—', sub: statusTs ? new Date(statusTs).toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' }) : null });
+    statCard({ icon: '🔌', label: 'Active Sources', value: sourceCount || '—', sub: `${sourceCount} ATS connected` }) +
+    statCard({ icon: '✅', label: 'Entry-Level Passed', value: fmt(entryLevel), sub: sf ? `${Math.round(100 * entryLevel / totalInput)}% pass rate` : null }) +
+    statCard({ icon: '💻', label: 'US Tech Jobs', value: fmt(usTechJobs), sub: 'SW + DS + HW + AI, US-tagged' });
 }
 
 // Pipeline tab — source breakdown table (Total, WoW, Tech US only)
@@ -1373,7 +1395,7 @@ async function loadAll() {
   renderOps(ops, pipelineAlert);
   renderPoolTrend(daily, historyEntries);
   renderDurationTrend(metrics, daily, historyEntries);
-  renderPipelineRunStats(metrics, metadata);
+  renderPipelineRunStats(metrics, metadata, enrichStats);
   renderPipelineSourceTable(metrics, metadata, enrichStats);
   renderFilterFunnel(metadata);
   renderQuality(metrics, enrichStats, metadata);
