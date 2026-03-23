@@ -423,39 +423,39 @@
       <div class="mermaid" id="arch-diagram" style="max-width:100%">
 graph TB
   subgraph Trigger
-    CFW["☁️ CF Worker<br/>job-board-cron-worker<br/>(every 15 min)"]
+    CFW["CF Worker\njob-board-cron-worker\n(every 15 min)"]
   end
   subgraph Pipeline
-    JBS["🔒 job-board-shared<br/>(private submodule)"] -.->|"logic"| AGG
-    AGG["⚙️ jobs-aggregator-private<br/>fetch 9 ATS → tag → dedupe"]
+    JBS["job-board-shared\n(private submodule)"] -.->|logic| AGG
+    AGG["jobs-aggregator-private\nfetch 9 ATS, tag, dedupe"]
   end
-  subgraph Data Layer
-    JD2["📦 jobs-data-2026<br/>all_jobs.json + sidecars"]
-    ENR["🔬 enrich-jobs.js<br/>skills + visa + WD/SR desc"]
-    DSC["📡 discord-poster.js<br/>26 channels"]
-    DASH["📊 Dashboard<br/>index.html (this page)"]
+  subgraph Data["Data Layer"]
+    JD2["jobs-data-2026\nall_jobs.json + sidecars"]
+    ENR["enrich-jobs.js\nskills + visa + desc"]
+    DSC["discord-poster.js\n26 channels"]
+    DASH["Dashboard\nindex.html"]
   end
-  subgraph Consumer Repos
-    NGJ["📋 New-Grad-Jobs-2026"]
-    INT["📋 Internships-2026"]
-    SWE["📋 Software-Engineering"]
-    DS["📋 Data-Science"]
-    HW["📋 Hardware-Engineering"]
-    HC["📋 Healthcare"]
+  subgraph Consumers["Consumer Repos"]
+    NGJ["New-Grad-Jobs-2026"]
+    INT["Internships-2026"]
+    SWE["Software-Engineering"]
+    DSN["Data-Science"]
+    HW["Hardware-Engineering"]
+    HC["Healthcare"]
   end
-  CFW -->|"dispatch"| AGG
-  CFW -->|"dispatch"| ENR
-  CFW -->|"dispatch"| DSC
-  AGG -->|"all_jobs.json"| JD2
-  ENR -->|"enriched_jobs.json"| JD2
-  DSC -.->|"reads"| JD2
-  DASH -.->|"reads"| JD2
-  JD2 -->|"update-jobs.yml"| NGJ
-  JD2 -->|"update-jobs.yml"| INT
-  JD2 -->|"update-jobs.yml"| SWE
-  JD2 -->|"update-jobs.yml"| DS
-  JD2 -->|"update-jobs.yml"| HW
-  JD2 -->|"update-jobs.yml"| HC
+  CFW -->|dispatch| AGG
+  CFW -->|dispatch| ENR
+  CFW -->|dispatch| DSC
+  AGG -->|all_jobs.json| JD2
+  ENR -->|enriched_jobs.json| JD2
+  DSC -.->|reads| JD2
+  DASH -.->|reads| JD2
+  JD2 -->|update-jobs.yml| NGJ
+  JD2 -->|update-jobs.yml| INT
+  JD2 -->|update-jobs.yml| SWE
+  JD2 -->|update-jobs.yml| DSN
+  JD2 -->|update-jobs.yml| HW
+  JD2 -->|update-jobs.yml| HC
       </div>
     </div>
   </section>
