@@ -323,8 +323,6 @@
           <th style="text-align:right">Total</th>
           <th style="text-align:right">WoW</th>
           <th style="text-align:right">Tech US</th>
-          <th style="text-align:right">Has Desc</th>
-          <th style="text-align:right">Desc %</th>
         </tr>
       </table>
     </div>
@@ -402,16 +400,6 @@
     <div class="card" id="source-bars-card">
       <div id="source-bars"></div>
     </div>
-    <div class="section-label" style="margin-top:24px">Source Details</div>
-    <div class="card">
-      <table id="source-table">
-        <tr>
-          <th>Source</th>
-          <th style="text-align:right">Jobs</th>
-          <th style="text-align:right">WoW</th>
-        </tr>
-      </table>
-    </div>
     <div class="section-label" style="margin-top:24px">Domain Distribution</div>
     <div class="card" id="domain-bars-wrap">
       <div id="domain-bars"></div>
@@ -429,41 +417,41 @@
     <div class="section-label" style="margin-top:24px">Pipeline Architecture</div>
     <div class="card" style="overflow-x:auto">
       <div class="mermaid" id="arch-diagram" style="max-width:100%">
-graph TB
-  subgraph Trigger
-    CFW["☁️ CF Worker<br/>job-board-cron-worker<br/>(every 15 min)"]
+graph LR
+  subgraph Sources
+    GH[Greenhouse]
+    WD[Workday]
+    ASH[Ashby]
+    LEV[Lever]
+    SR[SmartRecruiters]
+    AMZ[Amazon]
+    JS[JSearch]
+    NF[Netflix]
+    EF[Eightfold]
   end
   subgraph Pipeline
-    JBS["🔒 job-board-shared<br/>(private submodule)"] -.->|"logic"| AGG
-    AGG["⚙️ jobs-aggregator-private<br/>fetch 9 ATS → tag → dedupe"]
+    JBS[job-board-shared]:::private -.->|logic| AGG
+    AGG[jobs-aggregator-private]
   end
-  subgraph Data Layer
-    JD2["📦 jobs-data-2026<br/>all_jobs.json + sidecars"]
-    ENR["🔬 enrich-jobs.js<br/>skills + visa + WD/SR desc"]
-    DSC["📡 discord-poster.js<br/>26 channels"]
-    DASH["📊 Dashboard<br/>index.html (this page)"]
+  subgraph Data
+    JD2[jobs-data-2026]
+    ENR[enrich-jobs]
+    DSC[discord-poster]
   end
-  subgraph Consumer Repos
-    NGJ["📋 New-Grad-Jobs-2026"]
-    INT["📋 Internships-2026"]
-    SWE["📋 Software-Engineering"]
-    DS["📋 Data-Science"]
-    HW["📋 Hardware-Engineering"]
-    HC["📋 Healthcare"]
+  subgraph Consumers
+    NGJ[New-Grad-Jobs]
+    INT[Internships]
+    SWE[Software-Eng]
+    DSR[Data-Science]
+    HWR[Hardware-Eng]
+    HCR[Healthcare]
   end
-  CFW -->|"dispatch"| AGG
-  CFW -->|"dispatch"| ENR
-  CFW -->|"dispatch"| DSC
-  AGG -->|"all_jobs.json"| JD2
-  ENR -->|"enriched_jobs.json"| JD2
-  DSC -.->|"reads"| JD2
-  DASH -.->|"reads"| JD2
-  JD2 -->|"update-jobs.yml"| NGJ
-  JD2 -->|"update-jobs.yml"| INT
-  JD2 -->|"update-jobs.yml"| SWE
-  JD2 -->|"update-jobs.yml"| DS
-  JD2 -->|"update-jobs.yml"| HW
-  JD2 -->|"update-jobs.yml"| HC
+  GH & WD & ASH & LEV & SR & AMZ & JS & NF & EF --> AGG
+  AGG -->|all_jobs| JD2
+  JD2 --> ENR
+  JD2 --> DSC
+  JD2 -->|update-jobs| NGJ & INT & SWE & DSR & HWR & HCR
+  classDef private stroke-dasharray:5 5
       </div>
     </div>
   </section>
@@ -567,8 +555,9 @@ function dataUrls() {
     history:    `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/history.jsonl?t=${t}`,
     enrichment: `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/enrichment-stats.json?t=${t}`,
     enrichHistory: `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/enrichment-history.jsonl?t=${t}`,
-    metadata:   `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/jobs-metadata.json?t=${t}`,
-    postedJobs: `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/posted_jobs.json?t=${t}`,
+    metadata:      `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/jobs-metadata.json?t=${t}`,
+    postedJobs:    `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/posted_jobs.json?t=${t}`,
+    pipelineAlert: `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/pipeline-alert.json?t=${t}`,
   };
 }
 
@@ -635,7 +624,7 @@ function renderOpsPipelineStats(metrics, metadata, enrichStats) {
   if (!el) return;
   const p = (metrics && metrics.pipeline) || {};
   const poolTotal = (metadata && metadata.total_jobs) ? metadata.total_jobs : p.pipelineTotal;
-  const durationMin = p.duration_ms ? (p.duration_ms / 60000).toFixed(1) : null;
+  const durationMin = (metadata && metadata.duration_ms) ? (metadata.duration_ms / 60000).toFixed(1) : null;
   const statusTs = (metadata && metadata.generated) ? metadata.generated : (metrics && metrics.timestamp);
   const hours = statusTs ? (Date.now() - new Date(statusTs).getTime()) / 3600000 : null;
   const pipelineStatus = hours == null ? '—' : hours < 0.5 ? 'LIVE' : hours < 6 ? 'DELAYED' : 'DOWN';
@@ -674,50 +663,54 @@ function renderOpsServices(metadata) {
     </div>`).join('');
 }
 
-// Ops tab — role status + decisions (from proxy, may be null)
-function renderOps(ops) {
+// Ops tab — role status + decisions (from proxy, may be null) + pipeline alert (from public file)
+function renderOps(ops, pipelineAlert) {
   const rolesEl = document.getElementById('ops-roles');
   const decisionsEl = document.getElementById('ops-decisions');
 
   if (!ops) {
     rolesEl.innerHTML = '<div class="card" style="grid-column:1/-1"><span class="muted">Role status unavailable — ops proxy unreachable. Pipeline stats above are from live data.</span></div>';
-    decisionsEl.innerHTML = '<div class="card"><span class="muted">—</span></div>';
-    return;
-  }
-
-  const roles = [
-    { key: 'coder',      label: 'Coder',      icon: '⚙️' },
-    { key: 'auditor',    label: 'Auditor',    icon: '🔍' },
-    { key: 'strategist', label: 'Strategist', icon: '🧭' },
-  ];
-  const statusColor = { active: 'var(--green)', idle: 'var(--muted)', blocked: 'var(--red)' };
-
-  rolesEl.innerHTML = roles.map(({ key, label, icon }) => {
-    const r = ops[key] || {};
-    const color = statusColor[r.status] || 'var(--muted)';
-    const task = key === 'strategist' ? r.top_recommendation : r.current_task;
-    const lastLabel = key === 'auditor' ? r.last_verified : r.last_session;
-    return `
-      <div class="stat-card">
-        <div class="stat-icon">${icon}</div>
-        <div class="stat-label">${label}</div>
-        <div style="font-size:13px; font-weight:600; color:${color}; margin:4px 0; text-transform:uppercase">${r.status || '—'}</div>
-        <div class="stat-sub">${task || '—'}</div>
-        <div class="stat-sub" style="margin-top:4px">Last: ${lastLabel || '—'}</div>
-      </div>`;
-  }).join('');
-
-  const decisions = ops.operator_decisions_pending || [];
-  if (decisions.length === 0) {
     decisionsEl.innerHTML = '<div class="card"><span class="muted">No pending decisions.</span></div>';
   } else {
-    decisionsEl.innerHTML = `<div class="card"><ul style="list-style:none; display:flex; flex-direction:column; gap:10px">` +
-      decisions.map(d => `<li style="display:flex;gap:8px;align-items:flex-start"><span style="color:var(--yellow)">⚠</span><span>${d}</span></li>`).join('') +
-      `</ul></div>`;
+    const roles = [
+      { key: 'coder',      label: 'Coder',      icon: '⚙️' },
+      { key: 'auditor',    label: 'Auditor',    icon: '🔍' },
+      { key: 'strategist', label: 'Strategist', icon: '🧭' },
+    ];
+    const statusColor = { active: 'var(--green)', idle: 'var(--muted)', blocked: 'var(--red)' };
+
+    rolesEl.innerHTML = roles.map(({ key, label, icon }) => {
+      const r = ops[key] || {};
+      const color = statusColor[r.status] || 'var(--muted)';
+      const task = key === 'strategist' ? r.top_recommendation : r.current_task;
+      const lastLabel = key === 'auditor' ? r.last_verified : r.last_session;
+      return `
+        <div class="stat-card">
+          <div class="stat-icon">${icon}</div>
+          <div class="stat-label">${label}</div>
+          <div style="font-size:13px; font-weight:600; color:${color}; margin:4px 0; text-transform:uppercase">${r.status || '—'}</div>
+          <div class="stat-sub">${esc(task || '—')}</div>
+          <div class="stat-sub" style="margin-top:4px">Last: ${esc(lastLabel || '—')}</div>
+        </div>`;
+    }).join('');
+
+    const decisions = ops.operator_decisions_pending || [];
+    if (decisions.length === 0) {
+      decisionsEl.innerHTML = '<div class="card"><span class="muted">No pending decisions.</span></div>';
+    } else {
+      decisionsEl.innerHTML = `<div class="card"><ul style="list-style:none; display:flex; flex-direction:column; gap:10px">` +
+        decisions.map(d => `<li style="display:flex;gap:8px;align-items:flex-start"><span style="color:var(--yellow)">⚠</span><span>${esc(d)}</span></li>`).join('') +
+        `</ul></div>`;
+    }
   }
 
-  if (ops.pipeline_alert) {
-    document.getElementById('ops-alert').innerHTML = `<span class="err">🔴 ${ops.pipeline_alert}</span>`;
+  // Pipeline alert — sourced from public pipeline-alert.json (auto-written by pipeline-alert.js)
+  // Falls back to ops state alert field if public file unavailable
+  const alertText = (pipelineAlert && pipelineAlert.active && pipelineAlert.message)
+    ? pipelineAlert.message
+    : (ops && ops.pipeline_alert) || null;
+  if (alertText) {
+    document.getElementById('ops-alert').innerHTML = `<span class="err">🔴 ${esc(alertText)}</span>`;
   }
 }
 
@@ -776,12 +769,15 @@ function renderQuality(d, enrichStats, metadata) {
   }
 
   document.getElementById('quality-filter').innerHTML =
+    statCard({ icon: '📥', label: 'Total Fetched',
+               value: fmt(sf ? sf.total_input : null),
+               sub: 'before senior filter' }) +
     statCard({ icon: '🚫', label: 'Senior Filter Rate',
                value: filterRate != null ? filterRate + '%' : '—',
                sub: 'Target: 55–65%' }) +
     statCard({ icon: '✅', label: 'Entry-Level Passed',
                value: fmt(sf ? sf.entry_level_jobs : null),
-               sub: sf ? `of ${fmt(sf.total_input)} fetched` : null });
+               sub: sf ? `${Math.round(100 - (filterRate || 0))}% of total` : null });
 
   document.getElementById('quality-enrich').innerHTML =
     statCard({ icon: '🔬', label: 'Enriched Jobs',  value: fmt(enrich.totalEnriched) }) +
@@ -838,7 +834,7 @@ function renderRepos(d, daily) {
     const stars = r.stars != null ? r.stars : (starMap[REPO_NAME_MAP[name]] ?? '—');
     addRow('repo-table', [
       name,
-      r.jobCount != null ? fmt(r.jobCount) : '<span class="muted">n/a</span>',
+      r.jobCount != null ? fmt(r.jobCount) : '<span class="muted" title="Full pool — no per-filter current_jobs.json">full pool</span>',
       statusIcon,
       stars,
     ]);
@@ -846,19 +842,7 @@ function renderRepos(d, daily) {
 }
 
 // Supply tab — source table
-function renderSources(d, metadata) {
-  const p = d.pipeline || {};
-  const g = d.growth || {};
-  const bySource = (metadata && metadata.by_source) ? metadata.by_source : p.bySource || {};
-  const srcDelta = g.by_source_delta || {};
-  Object.entries(bySource)
-    .sort(([, a], [, b]) => b - a)
-    .forEach(([k, v]) => {
-      const delta = srcDelta[k];
-      const dStr = delta != null ? `<span class="${delta >= 0 ? 'ok' : 'err'}">${fmtDelta(delta)}</span>` : '—';
-      addRow('source-table', [k, fmt(v), dStr]);
-    });
-}
+// DASH-2b: renderSources (Supply detail table) removed — bar chart is sufficient
 
 // Pipeline tab — run duration trend (last 5 from daily-stats.json.history + current run)
 function renderDurationTrend(metrics, daily) {
@@ -977,6 +961,7 @@ function renderEnrichBars(enrichStats) {
 }
 
 // ENRICH-QUALITY-2: Enrichment trend chart (from enrichment-history.jsonl)
+// DASH-3b: Enrichment Trend — SVG line chart (2 lines: total_enriched + skills_pct)
 function renderEnrichTrend(enrichHistory) {
   const el = document.getElementById('enrich-trend-card');
   if (!el) return;
@@ -984,32 +969,47 @@ function renderEnrichTrend(enrichHistory) {
     el.innerHTML = '<p class="muted" style="text-align:center; padding:40px 0">Enrichment trend unavailable — data accumulates daily.</p>';
     return;
   }
-  const entries = enrichHistory.slice(-30); // last 30 days
-  const BAR_H = 80;
+  const entries = enrichHistory.slice(-30);
   const n = entries.length;
-  const vals = entries.map(e => e.total_enriched || 0);
-  const max = Math.max(...vals);
-  const bars = entries.map((e, i) => {
-    const pct = max > 0 ? Math.round((e.total_enriched / max) * 100) : 0;
-    const isLast = i === n - 1;
-    let dateLabel = '';
-    if (i === 0) dateLabel = e.date ? e.date.slice(5) : '';
-    else if (isLast) dateLabel = e.date ? e.date.slice(5) : 'today';
-    else if (n > 10 && i % 5 === 0) dateLabel = e.date ? e.date.slice(5) : '';
-    const skillsPct = e.skills_pct || 0;
-    const barColor = skillsPct >= 70 ? 'var(--green)' : skillsPct >= 40 ? 'var(--accent)' : 'var(--red)';
-    return `
-      <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; min-width:0" title="${e.date}: ${fmt(e.total_enriched)} enriched, ${skillsPct}% skills">
-        ${isLast ? `<span style="font-size:11px; color:var(--muted); white-space:nowrap">${fmt(e.total_enriched)}</span>` : '<span style="font-size:11px">&nbsp;</span>'}
-        <div style="width:100%; height:${BAR_H}px; display:flex; align-items:flex-end">
-          <div style="width:100%; height:${pct}%; background:${barColor}; border-radius:3px 3px 0 0; min-height:4px"></div>
-        </div>
-        <span style="font-size:10px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%">${dateLabel}</span>
-      </div>`;
+  const W = 520, H = 120, PAD = { top: 15, right: 45, bottom: 22, left: 45 };
+  const plotW = W - PAD.left - PAD.right;
+  const plotH = H - PAD.top - PAD.bottom;
+
+  const enrichVals = entries.map(e => e.total_enriched || 0);
+  const skillsVals = entries.map(e => e.skills_pct || 0);
+  const enrichMax = Math.max(...enrichVals) * 1.1 || 1;
+  const skillsMax = 100;
+
+  const toX = i => PAD.left + (i / (n - 1)) * plotW;
+  const toYEnrich = v => PAD.top + plotH - (v / enrichMax) * plotH;
+  const toYSkills = v => PAD.top + plotH - (v / skillsMax) * plotH;
+
+  const enrichPts = entries.map((e, i) => `${toX(i).toFixed(1)},${toYEnrich(enrichVals[i]).toFixed(1)}`).join(' ');
+  const skillsPts = entries.map((e, i) => `${toX(i).toFixed(1)},${toYSkills(skillsVals[i]).toFixed(1)}`).join(' ');
+
+  // X-axis date labels: first, middle, last
+  const dateLabels = [0, Math.floor(n / 2), n - 1].map(i => {
+    const d = entries[i].date || '';
+    return `<text x="${toX(i)}" y="${H - 2}" text-anchor="middle" fill="var(--muted)" font-size="10">${d.slice(5)}</text>`;
   }).join('');
+
+  // Y-axis labels
+  const lastEnrich = enrichVals[n - 1];
+  const lastSkills = skillsVals[n - 1];
+
   el.innerHTML = `
-    <div style="font-size:11px; color:var(--muted); margin-bottom:4px">${n} days — bar color = skills fill rate (green ≥70%, orange ≥40%, red <40%)</div>
-    <div style="display:flex; gap:4px; align-items:flex-end; padding:4px 0">${bars}</div>`;
+    <div style="font-size:11px; color:var(--muted); margin-bottom:4px">
+      ${n} days — <span style="color:var(--accent)">■</span> Enriched (${fmt(lastEnrich)}) · <span style="color:#888">■</span> Skills% (${lastSkills}%)
+    </div>
+    <svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px">
+      <polyline points="${enrichPts}" fill="none" stroke="var(--accent)" stroke-width="2" />
+      <polyline points="${skillsPts}" fill="none" stroke="#888" stroke-width="1.5" stroke-dasharray="4,3" />
+      <text x="${PAD.left - 4}" y="${toYEnrich(enrichMax / 1.1)}" text-anchor="end" fill="var(--muted)" font-size="9">${fmt(Math.round(enrichMax / 1.1))}</text>
+      <text x="${PAD.left - 4}" y="${toYEnrich(0) + 1}" text-anchor="end" fill="var(--muted)" font-size="9">0</text>
+      <text x="${W - PAD.right + 4}" y="${toYSkills(100)}" text-anchor="start" fill="#888" font-size="9">100%</text>
+      <text x="${W - PAD.right + 4}" y="${toYSkills(0) + 1}" text-anchor="start" fill="#888" font-size="9">0%</text>
+      ${dateLabels}
+    </svg>`;
 }
 
 // ENRICH-QUALITY-2: Skills fill rate bars by source
@@ -1069,7 +1069,8 @@ function renderPipelineRunStats(metrics, metadata) {
     statCard({ icon: '🕐', label: 'Last Run', value: statusTs ? age(statusTs) : '—', sub: statusTs ? new Date(statusTs).toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' }) : null });
 }
 
-// Pipeline tab — source breakdown table (Total, WoW, Tech US, Has Desc, Desc%)
+// Pipeline tab — source breakdown table (Total, WoW, Tech US only)
+// DASH-2a: Has Desc / Desc% removed — those are quality metrics, not pipeline run metrics
 function renderPipelineSourceTable(metrics, metadata, enrichStats) {
   const tbl = document.getElementById('pipeline-source-table');
   if (!tbl) return;
@@ -1085,17 +1086,12 @@ function renderPipelineSourceTable(metrics, metadata, enrichStats) {
     const deltaStr = delta != null ? `<span class="${delta >= 0 ? 'ok' : 'err'}">${fmtDelta(delta)}</span>` : '<span class="muted">—</span>';
     const ev = enrichBySource[src] || {};
     const techUs = ev.tech_us || 0;
-    const hasDesc = ev.has_desc || 0;
-    const descPct = techUs > 0 ? Math.round(100 * hasDesc / techUs) : 0;
-    const descColor = descPct >= 70 ? 'var(--green)' : descPct >= 40 ? 'var(--yellow)' : techUs > 0 ? 'var(--red)' : 'var(--muted)';
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${src}</td>
       <td style="text-align:right">${fmt(total)}</td>
       <td style="text-align:right">${deltaStr}</td>
       <td style="text-align:right">${techUs ? fmt(techUs) : '<span class="muted">—</span>'}</td>
-      <td style="text-align:right">${hasDesc ? fmt(hasDesc) : '<span class="muted">—</span>'}</td>
-      <td style="text-align:right;color:${descColor}">${techUs > 0 ? descPct + '%' : '—'}</td>
     `;
     tbl.appendChild(tr);
   });
@@ -1139,7 +1135,7 @@ function renderPoolTrend(daily, historyEntries) {
       <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; min-width:0">
         ${i === n - 1 ? `<span style="font-size:11px; color:var(--muted); white-space:nowrap">${fmt(e.v)}</span>` : '<span style="font-size:11px">&nbsp;</span>'}
         <div style="width:100%; height:${BAR_H}px; display:flex; align-items:flex-end">
-          <div style="width:100%; height:${pct}%; background:${isLast ? 'var(--accent)' : 'var(--accent-bg)'}; border:1px solid var(--accent); border-radius:3px 3px 0 0; min-height:4px"></div>
+          <div style="width:100%; height:${pct}%; background:var(--accent); opacity:${isLast ? '1' : '0.6'}; border-radius:3px 3px 0 0; min-height:4px"></div>
         </div>
         <span style="font-size:10px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%">${dateLabel}</span>
       </div>`;
@@ -1284,13 +1280,14 @@ async function loadAll() {
   }
 
   // Secondary fetches (non-fatal) — metadata is primary source for pool total + tags
-  const [daily, historyRaw, enrichStats, enrichHistoryRaw, metadata, postedJobs] = await Promise.all([
+  const [daily, historyRaw, enrichStats, enrichHistoryRaw, metadata, postedJobs, pipelineAlert] = await Promise.all([
     safeJson(urls.daily),
     fetch(urls.history).then(r => r.ok ? r.text() : null).catch(() => null),
     safeJson(urls.enrichment),
     fetch(urls.enrichHistory).then(r => r.ok ? r.text() : null).catch(() => null),
     safeJson(urls.metadata),
     safeJson(urls.postedJobs),
+    safeJson(urls.pipelineAlert),
   ]);
   // Parse history.jsonl into array of {date, total} objects
   const historyEntries = historyRaw
@@ -1306,7 +1303,7 @@ async function loadAll() {
   renderStatusBar(statusTs);
   renderOpsServices(metadata);
   renderOpsPipelineStats(metrics, metadata, enrichStats);
-  renderOps(ops);
+  renderOps(ops, pipelineAlert);
   renderPoolTrend(daily, historyEntries);
   renderDurationTrend(metrics, daily);
   renderPipelineRunStats(metrics, metadata);
@@ -1321,7 +1318,6 @@ async function loadAll() {
   renderSourceBars(metrics, metadata);
   renderDomainBars(metadata);
   renderTopCompanies(metadata);
-  renderSources(metrics, metadata);
   renderDiscordStats(postedJobs, metadata);
 
   document.getElementById('content').style.display = 'block';
@@ -1350,7 +1346,7 @@ loadAll();
 
   function doRefresh() {
     // Clear table rows so re-renders don't duplicate (tables append rows)
-    ['pipeline-source-table','enrich-source-table','source-table','repo-table'].forEach(id => {
+    ['pipeline-source-table','enrich-source-table','repo-table'].forEach(id => {
       const el = document.getElementById(id);
       if (el) { while (el.rows.length > 1) el.deleteRow(1); }
     });
