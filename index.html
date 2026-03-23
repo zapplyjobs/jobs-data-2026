@@ -414,6 +414,10 @@
         </tr>
       </table>
     </div>
+    <div class="section-label" style="margin-top:24px">Per-Source Trend</div>
+    <div class="card" id="source-trend-card">
+      <p class="muted" style="text-align:center; padding:20px 0">Loading…</p>
+    </div>
     <div class="section-label" style="margin-top:24px">Pipeline Architecture</div>
     <div class="card" style="overflow-x:auto">
       <div class="mermaid" id="arch-diagram" style="max-width:100%">
@@ -742,11 +746,14 @@ function renderTopCompanies(metadata) {
     card.innerHTML = '<p class="muted" style="text-align:center;padding:20px 0">Top companies data unavailable.</p>';
     return;
   }
+  // DASH-4b: show domain column if data includes it
+  const hasDomain = companies.some(c => c.domain);
   card.innerHTML = `<table id="top-companies-table">
-    <tr><th>#</th><th>Company</th><th style="text-align:right">Jobs</th></tr>
+    <tr><th>#</th><th>Company</th>${hasDomain ? '<th>Domain</th>' : ''}<th style="text-align:right">Jobs</th></tr>
     ${companies.map((c, i) => `<tr>
       <td style="color:var(--muted);width:32px">${i + 1}</td>
       <td>${esc(c.company)}</td>
+      ${hasDomain ? `<td style="color:var(--muted)">${esc(c.domain || 'general')}</td>` : ''}
       <td style="text-align:right">${fmt(c.count)}</td>
     </tr>`).join('')}
   </table>`;
@@ -844,16 +851,23 @@ function renderRepos(d, daily) {
 // Supply tab — source table
 // DASH-2b: renderSources (Supply detail table) removed — bar chart is sufficient
 
-// Pipeline tab — run duration trend (last 5 from daily-stats.json.history + current run)
-function renderDurationTrend(metrics, daily) {
+// Pipeline tab — run duration trend (last 5 from history.jsonl or daily-stats.json)
+// DASH-4a: prefers history.jsonl entries with duration_ms (added by daily-stats.js)
+function renderDurationTrend(metrics, daily, historyEntries) {
   const el = document.getElementById('duration-trend-card');
   if (!el) return;
   const p = (metrics && metrics.pipeline) || {};
   const currentMin = p.duration_ms ? parseFloat((p.duration_ms / 60000).toFixed(1)) : null;
 
-  // Build last-5 list: use daily history duration_ms if present, else fall back to current only
+  // Build last-5 list: prefer history.jsonl (has duration_ms after DASH-4a), fall back to daily-stats
   let entries = [];
-  if (daily && Array.isArray(daily.history)) {
+  if (historyEntries) {
+    entries = historyEntries
+      .filter(h => h.duration_ms != null)
+      .slice(-5)
+      .map((h, i, arr) => ({ label: h.date ? h.date.slice(5) : `${arr.length - i - 1}d`, value: parseFloat((h.duration_ms / 60000).toFixed(1)) }));
+  }
+  if (!entries.length && daily && Array.isArray(daily.history)) {
     entries = daily.history
       .filter(h => h.duration_ms != null)
       .slice(-5)
@@ -915,6 +929,59 @@ function renderSourceBars(d, metadata) {
     .sort(([, a], [, b]) => b - a)
     .map(([k, v]) => ({ label: k, value: v }));
   renderHBars('source-bars', items, { labelWidth: '130px' });
+}
+
+// DASH-4d: Per-source trend chart (multi-line SVG from history.jsonl by_source)
+function renderSourceTrend(historyEntries) {
+  const el = document.getElementById('source-trend-card');
+  if (!el) return;
+  // Filter entries that have by_source data
+  const entries = (historyEntries || []).filter(e => e.by_source);
+  if (entries.length < 2) {
+    el.innerHTML = '<p class="muted" style="text-align:center; padding:20px 0">Per-source trend data accumulating — available after next daily stats run.</p>';
+    return;
+  }
+
+  const SOURCES = ['workday', 'greenhouse', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'netflix', 'eightfold'];
+  const COLORS = { workday: '#e67e22', greenhouse: '#27ae60', ashby: '#3498db', lever: '#9b59b6', smartrecruiters: '#e74c3c', amazon: '#f39c12', jsearch: '#1abc9c', netflix: '#c0392b', eightfold: '#7f8c8d' };
+  const activeSources = SOURCES.filter(s => entries.some(e => (e.by_source[s] || 0) > 0));
+
+  const W = 520, H = 140, PAD = { top: 10, right: 10, bottom: 22, left: 50 };
+  const plotW = W - PAD.left - PAD.right;
+  const plotH = H - PAD.top - PAD.bottom;
+  const n = entries.length;
+  const allVals = entries.flatMap(e => activeSources.map(s => e.by_source[s] || 0));
+  const maxVal = Math.max(...allVals) * 1.1 || 1;
+
+  const toX = i => PAD.left + (i / (n - 1)) * plotW;
+  const toY = v => PAD.top + plotH - (v / maxVal) * plotH;
+
+  const lines = activeSources.map(src => {
+    const pts = entries.map((e, i) => `${toX(i).toFixed(1)},${toY(e.by_source[src] || 0).toFixed(1)}`).join(' ');
+    return `<polyline points="${pts}" fill="none" stroke="${COLORS[src] || '#888'}" stroke-width="1.5" />`;
+  }).join('\n');
+
+  const dateLabels = [0, Math.floor(n / 2), n - 1].map(i => {
+    const d = entries[i].date || '';
+    return `<text x="${toX(i)}" y="${H - 2}" text-anchor="middle" fill="var(--muted)" font-size="10">${d.slice(5)}</text>`;
+  }).join('');
+
+  const yLabels = `
+    <text x="${PAD.left - 4}" y="${toY(maxVal / 1.1)}" text-anchor="end" fill="var(--muted)" font-size="9">${fmt(Math.round(maxVal / 1.1))}</text>
+    <text x="${PAD.left - 4}" y="${toY(0) + 1}" text-anchor="end" fill="var(--muted)" font-size="9">0</text>`;
+
+  const legend = activeSources.map(s => {
+    const last = entries[n - 1].by_source[s] || 0;
+    return `<span style="margin-right:10px"><span style="color:${COLORS[s] || '#888'}">■</span> ${s} (${fmt(last)})</span>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div style="font-size:11px; color:var(--muted); margin-bottom:4px; line-height:1.6">${legend}</div>
+    <svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px">
+      ${lines}
+      ${yLabels}
+      ${dateLabels}
+    </svg>`;
 }
 
 // Pipeline tab — senior filter funnel
@@ -1305,7 +1372,7 @@ async function loadAll() {
   renderOpsPipelineStats(metrics, metadata, enrichStats);
   renderOps(ops, pipelineAlert);
   renderPoolTrend(daily, historyEntries);
-  renderDurationTrend(metrics, daily);
+  renderDurationTrend(metrics, daily, historyEntries);
   renderPipelineRunStats(metrics, metadata);
   renderPipelineSourceTable(metrics, metadata, enrichStats);
   renderFilterFunnel(metadata);
@@ -1318,6 +1385,7 @@ async function loadAll() {
   renderSourceBars(metrics, metadata);
   renderDomainBars(metadata);
   renderTopCompanies(metadata);
+  renderSourceTrend(historyEntries);
   renderDiscordStats(postedJobs, metadata);
 
   document.getElementById('content').style.display = 'block';
