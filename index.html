@@ -298,7 +298,10 @@
   <section id="tab-pipeline" class="tab-panel" style="display:none">
     <div class="section-label">Last Run</div>
     <div class="grid" id="pipeline-run-stats"></div>
-    <div class="section-label" style="margin-top:24px">Pool Trend</div>
+    <div class="section-label" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center">
+      <span>Pool Trend</span>
+      <span id="pool-trend-pills"></span>
+    </div>
     <div class="card" id="pool-trend-card" style="position:relative;height:220px">
       <canvas id="pool-trend-canvas"></canvas>
     </div>
@@ -1103,18 +1106,39 @@ function makeChart(canvasId, config) {
 }
 
 // Pool Trend — Chart.js line chart with proper tooltips and zoomed axis
+// Pool Trend — Chart.js with 7D / 30D / All pill toggles
+let _poolTrendAllEntries = null;
 function renderPoolTrend(daily, historyEntries) {
-  let entries = null;
+  let all = null;
   if (historyEntries && historyEntries.length >= 2) {
-    entries = historyEntries.map(e => ({ v: e.total, label: e.date }));
+    all = historyEntries.map(e => ({ v: e.total, label: e.date }));
   } else if (daily && Array.isArray(daily.history) && daily.history.length >= 2) {
-    entries = daily.history.map((v, i) => ({ v, label: `Day ${i+1}` }));
+    all = daily.history.map((v, i) => ({ v, label: `Day ${i+1}` }));
   }
-  if (!entries || entries.length < 2) {
+  _poolTrendAllEntries = all;
+  renderPoolTrendChart(all, 30);
+}
+
+function renderPoolTrendChart(all, days) {
+  if (!all || all.length < 2) {
     const el = document.getElementById('pool-trend-card');
     if (el) el.innerHTML = '<p class="muted" style="text-align:center;padding:60px 0">Pool trend unavailable.</p>';
     return;
   }
+  const entries = days ? all.slice(-days) : all;
+  if (entries.length < 2 && days) { renderPoolTrendChart(all, null); return; }
+
+  // Render pills
+  const pillsEl = document.getElementById('pool-trend-pills');
+  if (pillsEl) {
+    const pillStyle = d => `display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--border);margin-left:4px;` +
+      (d === days ? 'background:var(--accent);color:#fff;border-color:var(--accent)' : 'background:transparent;color:var(--muted)');
+    pillsEl.innerHTML = [7, 30, null].map(d => {
+      const label = d === 7 ? '7D' : d === 30 ? '30D' : 'All';
+      return `<span style="${pillStyle(d)}" onclick="renderPoolTrendChart(_poolTrendAllEntries,${d})">${label}</span>`;
+    }).join('');
+  }
+
   const vals = entries.map(e => e.v);
   const minVal = Math.min(...vals);
   const range = Math.max(...vals) - minVal || 1;
