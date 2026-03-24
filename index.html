@@ -327,6 +327,14 @@
         </tr>
       </table>
     </div>
+    <div class="section-label" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center">
+      <span>Job Breakdown Trend</span>
+      <span id="breakdown-pills"></span>
+    </div>
+    <div class="card" id="breakdown-card" style="position:relative;height:250px">
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px" id="breakdown-filters"></div>
+      <canvas id="breakdown-canvas"></canvas>
+    </div>
   </section>
 
   <!-- QUALITY TAB — Glance→Scan→Commit order, filter stats removed (lives in Pipeline funnel) -->
@@ -386,6 +394,13 @@
           <th style="text-align:right">⭐</th>
         </tr>
       </table>
+    </div>
+    <div class="section-label" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center">
+      <span>Stars Trend</span>
+      <span id="stars-trend-pills"></span>
+    </div>
+    <div class="card" id="stars-trend-card" style="position:relative;height:200px">
+      <canvas id="stars-trend-canvas"></canvas>
     </div>
     <div class="section-label" style="margin-top:24px">Discord</div>
     <div class="card" id="discord-stats-card">
@@ -959,6 +974,96 @@ function renderSourceTrendChart(allEntries, days) {
 }
 
 // Pipeline tab — senior filter funnel
+// Job Breakdown Trend — filterable multi-line chart showing daily counts by category
+// Data source: history.jsonl entries with by_domain, by_location, filter fields
+let _breakdownAllEntries = null;
+let _breakdownActiveSeries = new Set(['total', 'entry', 'us']);
+const BREAKDOWN_SERIES = {
+  // Filter stats
+  total: { label: 'Total (pre-filter)', color: '#8b949e', field: e => e.filter ? e.filter.total : e.total },
+  entry: { label: 'Entry-level', color: CHART_COLORS.accent, field: e => e.filter ? e.filter.entry : null },
+  senior: { label: 'Senior (removed)', color: CHART_COLORS.red, field: e => e.filter ? e.filter.senior : null },
+  // Locations
+  us: { label: 'US-tagged', color: '#3498db', field: e => e.by_location ? e.by_location.us : null },
+  remote: { label: 'Remote', color: '#9b59b6', field: e => e.by_location ? e.by_location.remote : null },
+  // Domains
+  software: { label: 'Software', color: '#27ae60', field: e => e.by_domain ? e.by_domain.software : null },
+  data_science: { label: 'Data Science', color: '#2ecc71', field: e => e.by_domain ? e.by_domain.data_science : null },
+  hardware: { label: 'Hardware', color: '#e67e22', field: e => e.by_domain ? e.by_domain.hardware : null },
+  healthcare: { label: 'Healthcare', color: '#e74c3c', field: e => e.by_domain ? e.by_domain.healthcare : null },
+  ai: { label: 'AI', color: '#f39c12', field: e => e.by_domain ? e.by_domain.ai : null },
+  finance: { label: 'Finance', color: '#1abc9c', field: e => e.by_domain ? e.by_domain.finance : null },
+  sales: { label: 'Sales', color: '#d35400', field: e => e.by_domain ? e.by_domain.sales : null },
+  general: { label: 'General', color: '#7f8c8d', field: e => e.by_domain ? e.by_domain.general : null },
+};
+
+function renderBreakdownTrend(historyEntries) {
+  _breakdownAllEntries = (historyEntries || []).filter(e => e.by_domain || e.filter);
+  renderBreakdownChart(_breakdownAllEntries, 30);
+}
+
+function toggleBreakdownSeries(key) {
+  if (_breakdownActiveSeries.has(key)) _breakdownActiveSeries.delete(key);
+  else _breakdownActiveSeries.add(key);
+  renderBreakdownChart(_breakdownAllEntries, window._breakdownDays || 30);
+}
+
+function renderBreakdownChart(all, days) {
+  window._breakdownDays = days;
+  const filtersEl = document.getElementById('breakdown-filters');
+  const pillsEl = document.getElementById('breakdown-pills');
+
+  if (!all || all.length < 1) {
+    const el = document.getElementById('breakdown-card');
+    if (el) el.innerHTML = '<p class="muted" style="text-align:center;padding:60px 0">Breakdown data accumulating — requires history entries with domain/filter data.</p>';
+    return;
+  }
+  const entries = days ? all.slice(-days) : all;
+
+  // Render filter toggles
+  if (filtersEl) {
+    filtersEl.innerHTML = Object.entries(BREAKDOWN_SERIES).map(([key, s]) => {
+      const active = _breakdownActiveSeries.has(key);
+      return `<span onclick="toggleBreakdownSeries('${key}')" style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:600;cursor:pointer;border:1px solid ${active ? s.color : 'var(--border)'};color:${active ? '#fff' : 'var(--muted)'};background:${active ? s.color : 'transparent'}">${s.label}</span>`;
+    }).join('');
+  }
+
+  // Render time pills
+  if (pillsEl) {
+    const pillStyle = d => `display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--border);margin-left:4px;` +
+      (d === days ? 'background:var(--accent);color:#fff;border-color:var(--accent)' : 'background:transparent;color:var(--muted)');
+    pillsEl.innerHTML = [7, 14, 30, null].map(d => {
+      const label = d === 7 ? '7D' : d === 14 ? '14D' : d === 30 ? '30D' : 'All';
+      return `<span style="${pillStyle(d)}" onclick="renderBreakdownChart(_breakdownAllEntries,${d})">${label}</span>`;
+    }).join('');
+  }
+
+  // Build datasets for active series
+  const datasets = [];
+  for (const [key, s] of Object.entries(BREAKDOWN_SERIES)) {
+    if (!_breakdownActiveSeries.has(key)) continue;
+    const data = entries.map(e => s.field(e));
+    if (data.every(v => v == null)) continue; // skip if no data for this series
+    datasets.push({
+      label: s.label, data, borderColor: s.color,
+      tension: 0.3, pointRadius: 2, pointHoverRadius: 5, borderWidth: 2, fill: false,
+    });
+  }
+
+  makeChart('breakdown-canvas', {
+    type: 'line',
+    data: { labels: entries.map(e => (e.date || '').slice(5)), datasets },
+    options: {
+      ...CHART_DEFAULTS,
+      scales: {
+        x: CHART_DEFAULTS.scales.x,
+        y: { ...CHART_DEFAULTS.scales.y, beginAtZero: true, ticks: { ...CHART_DEFAULTS.scales.y.ticks, callback: v => fmt(v) } }
+      },
+      plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } }
+    }
+  });
+}
+
 function renderFilterFunnel(metadata) {
   const el = document.getElementById('filter-funnel');
   if (!el) return;
@@ -1259,6 +1364,43 @@ const CHANNEL_NAMES = {
 };
 
 // Distribution tab — Discord stats from posted_jobs.json
+// Stars Trend — multi-line chart from history.jsonl stars field
+function renderStarsTrend(historyEntries) {
+  const entries = (historyEntries || []).filter(e => e.stars);
+  if (entries.length < 2) {
+    const el = document.getElementById('stars-trend-card');
+    if (el) el.innerHTML = '<p class="muted" style="text-align:center;padding:60px 0">Stars trend accumulating — data appears after daily stats runs.</p>';
+    return;
+  }
+  const REPOS = ['New-Grad-Jobs-2026','Internships-2026','New-Grad-Software-Engineering-Jobs-2026',
+    'New-Grad-Data-Science-Jobs-2026','New-Grad-Hardware-Engineering-Jobs-2026','New-Grad-Healthcare-Jobs-2026'];
+  const SHORT = { 'New-Grad-Jobs-2026':'NGJ', 'Internships-2026':'Intern', 'New-Grad-Software-Engineering-Jobs-2026':'SWE',
+    'New-Grad-Data-Science-Jobs-2026':'DS', 'New-Grad-Hardware-Engineering-Jobs-2026':'HW', 'New-Grad-Healthcare-Jobs-2026':'HC' };
+  const COLORS = ['#ff5e3c','#3498db','#27ae60','#9b59b6','#e67e22','#e74c3c'];
+  const active = REPOS.filter(r => entries.some(e => (e.stars[r] || 0) > 0));
+
+  makeChart('stars-trend-canvas', {
+    type: 'line',
+    data: {
+      labels: entries.map(e => (e.date || '').slice(5)),
+      datasets: active.map((repo, i) => ({
+        label: SHORT[repo] || repo,
+        data: entries.map(e => e.stars[repo] || 0),
+        borderColor: COLORS[i % COLORS.length],
+        tension: 0.3, pointRadius: 2, pointHoverRadius: 5, borderWidth: 2, fill: false,
+      }))
+    },
+    options: {
+      ...CHART_DEFAULTS,
+      plugins: { legend: { display: true, position: 'top', labels: { color: '#8b949e', font: { size: 9 }, boxWidth: 10, padding: 8 } } },
+      scales: {
+        x: CHART_DEFAULTS.scales.x,
+        y: { ...CHART_DEFAULTS.scales.y, beginAtZero: false, ticks: { ...CHART_DEFAULTS.scales.y.ticks } }
+      }
+    }
+  });
+}
+
 function renderDiscordStats(posted, metadata) {
   const el = document.getElementById('discord-stats-card');
   if (!el) return;
@@ -1396,6 +1538,7 @@ async function loadAll() {
   renderDurationTrend(metrics, daily, historyEntries, metadata);
   renderPipelineRunStats(metrics, metadata);
   renderPipelineSourceTable(metrics, metadata, enrichStats);
+  renderBreakdownTrend(historyEntries);
   renderFilterFunnel(metadata);
   renderQuality(metrics, enrichStats, metadata);
   renderEnrichTrend(enrichHistory);
@@ -1408,6 +1551,7 @@ async function loadAll() {
   renderDomainBars(metadata);
   renderTopCompanies(metadata);
   renderSourceTrend(historyEntries);
+  renderStarsTrend(historyEntries);
   renderDiscordStats(postedJobs, metadata);
 
   document.getElementById('content').style.display = 'block';
