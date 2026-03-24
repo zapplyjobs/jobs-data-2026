@@ -978,15 +978,13 @@ function renderSourceTrendChart(allEntries, days) {
 // Data source: history.jsonl entries with by_domain, by_location, filter fields
 let _breakdownAllEntries = null;
 let _breakdownActiveSeries = new Set(['total', 'entry', 'us']);
+// BREAKDOWN_SERIES uses inline colors (not CHART_COLORS) to avoid forward reference
 const BREAKDOWN_SERIES = {
-  // Filter stats
   total: { label: 'Total (pre-filter)', color: '#8b949e', field: e => e.filter ? e.filter.total : e.total },
-  entry: { label: 'Entry-level', color: CHART_COLORS.accent, field: e => e.filter ? e.filter.entry : null },
-  senior: { label: 'Senior (removed)', color: CHART_COLORS.red, field: e => e.filter ? e.filter.senior : null },
-  // Locations
+  entry: { label: 'Entry-level', color: '#ff5e3c', field: e => e.filter ? e.filter.entry : null },
+  senior: { label: 'Senior (removed)', color: '#f85149', field: e => e.filter ? e.filter.senior : null },
   us: { label: 'US-tagged', color: '#3498db', field: e => e.by_location ? e.by_location.us : null },
   remote: { label: 'Remote', color: '#9b59b6', field: e => e.by_location ? e.by_location.remote : null },
-  // Domains
   software: { label: 'Software', color: '#27ae60', field: e => e.by_domain ? e.by_domain.software : null },
   data_science: { label: 'Data Science', color: '#2ecc71', field: e => e.by_domain ? e.by_domain.data_science : null },
   hardware: { label: 'Hardware', color: '#e67e22', field: e => e.by_domain ? e.by_domain.hardware : null },
