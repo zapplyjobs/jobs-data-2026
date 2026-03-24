@@ -42,7 +42,7 @@ jobs:
         run: |
           git config user.email "bot@zapplyjobs.com"
           git config user.name "Aggregator Bot"
-          git add .github/data/daily-stats.json .github/data/history.jsonl .github/data/traffic-history.jsonl 2>/dev/null || true
+          git add .github/data/daily-stats.json .github/data/history.jsonl .github/data/history-archive.jsonl .github/data/traffic-history.jsonl 2>/dev/null || true
           git diff --cached --quiet && echo "Nothing to commit" && exit 0
           git commit -m "chore: update daily-stats.json [skip ci]"
           for i in 1 2 3; do
