@@ -72,7 +72,8 @@
     /* Layout: sidebar + content wrapper */
     #app-body {
       display: flex;
-      min-height: calc(100vh - 57px); /* subtract header height */
+      height: calc(100vh - 57px); /* fill below header */
+      overflow: hidden; /* prevent app-body from scrolling — content-wrap scrolls instead */
     }
     #sidebar {
       width: 240px;
@@ -80,9 +81,6 @@
       background: var(--bg-card);
       border-right: 1px solid var(--border);
       padding: 16px 12px;
-      position: sticky;
-      top: 57px;
-      height: calc(100vh - 57px);
       overflow-y: auto;
     }
     #sidebar-label {
@@ -282,7 +280,7 @@
   <button class="tab" data-tab="supply">🏭 Supply</button>
 </aside>
 
-<div id="content-wrap" style="flex:1;min-width:0">
+<div id="content-wrap" style="flex:1;min-width:0;overflow-y:auto">
 <main id="content" style="padding: 24px; display:none">
 
   <!-- OPS TAB — Role Status and Pending Decisions removed (duplicates LCC, goes stale) -->
@@ -303,7 +301,7 @@
     <div class="card" id="pool-trend-card">
       <p class="muted" style="text-align:center; padding:40px 0">Loading…</p>
     </div>
-    <div class="section-label" style="margin-top:24px">Run Duration (last 5 runs)</div>
+    <div class="section-label" style="margin-top:24px">Run Duration</div>
     <div class="card" id="duration-trend-card">
       <p class="muted" style="text-align:center; padding:20px 0">Loading…</p>
     </div>
