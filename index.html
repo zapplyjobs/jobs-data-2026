@@ -546,6 +546,7 @@ function dataUrls() {
     metadata:      `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/jobs-metadata.json?t=${t}`,
     postedJobs:    `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/posted_jobs.json?t=${t}`,
     pipelineAlert: `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/pipeline-alert.json?t=${t}`,
+    historyArchive: `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/history-archive.jsonl?t=${t}`,
   };
 }
 
@@ -760,7 +761,6 @@ function renderRepos(d, daily) {
     'Data-Science': 'New-Grad-Data-Science-Jobs-2026',
     'Hardware':     'New-Grad-Hardware-Engineering-Jobs-2026',
     'Healthcare':   'New-Grad-Healthcare-Jobs-2026',
-    'Nursing':      'New-Grad-Healthcare-Jobs-2026',
   };
   Object.entries(repos).forEach(([name, r]) => {
     const statusIcon = r.workflowStatus === 'success' ? '<span class="ok">✅</span>'
@@ -769,7 +769,7 @@ function renderRepos(d, daily) {
     const stars = r.stars != null ? r.stars : (starMap[REPO_NAME_MAP[name]] ?? '—');
     addRow('repo-table', [
       name,
-      r.jobCount != null ? fmt(r.jobCount) : '<span class="muted" title="Full pool — no per-filter current_jobs.json">full pool</span>',
+      r.jobCount != null ? fmt(r.jobCount) : fmt(window._poolTotal),
       statusIcon,
       stars,
     ]);
@@ -791,13 +791,21 @@ function renderDurationTrend(metrics, daily, historyEntries, metadata) {
     entries = historyEntries.filter(h => h.duration_ms != null)
       .map(h => ({ label: h.date ? h.date.slice(5) : '?', value: parseFloat((h.duration_ms / 60000).toFixed(1)) }));
   }
-  // If no history data, use current run as single entry
+  // If only current run available, show as stat display (not a single ugly bar)
   if (!entries.length && currentMin != null) {
-    entries = [{ label: 'current', value: currentMin }];
+    const el = document.getElementById('duration-trend-card');
+    const color = currentMin <= 25 ? CHART_COLORS.green : CHART_COLORS.red;
+    if (el) el.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;gap:16px">
+      <span style="font-size:36px;font-weight:700;color:${color}">${currentMin}<span style="font-size:16px;font-weight:400"> min</span></span>
+      <div style="font-size:12px;color:var(--muted);line-height:1.6">Last run<br>Target: ≤25 min<br>
+        <span style="color:${color}">${currentMin <= 25 ? '✓ On target' : '⚠ Over target'}</span>
+      </div>
+    </div>`;
+    return;
   }
   if (!entries.length) {
     const el = document.getElementById('duration-trend-card');
-    if (el) el.innerHTML = '<p class="muted" style="text-align:center;padding:40px 0">Duration data unavailable — accumulates after daily stats run.</p>';
+    if (el) el.innerHTML = '<p class="muted" style="text-align:center;padding:40px 0">Duration data accumulating — available after daily stats run.</p>';
     return;
   }
   const TARGET = 25;
@@ -964,7 +972,8 @@ function renderEnrichBars(enrichStats) {
 }
 
 // ENRICH-QUALITY-2: Enrichment trend chart (from enrichment-history.jsonl)
-// Enrichment Trend — Chart.js dual-axis line chart (enriched count + skills%)
+// Enrichment Trend — Chart.js multi-dataset (counts on left axis, percentages on right)
+// Click legend items to toggle datasets on/off
 function renderEnrichTrend(enrichHistory) {
   if (!enrichHistory || enrichHistory.length < 2) {
     const el = document.getElementById('enrich-trend-card');
@@ -980,14 +989,20 @@ function renderEnrichTrend(enrichHistory) {
         { label: 'Enriched', data: entries.map(e => e.total_enriched || 0),
           borderColor: CHART_COLORS.accent, backgroundColor: 'rgba(255,94,60,0.08)', fill: true,
           tension: 0.3, pointRadius: 2, pointHoverRadius: 5, borderWidth: 2, yAxisID: 'y' },
+        { label: 'Tech US Pool', data: entries.map(e => e.total_tech_us || 0),
+          borderColor: '#3498db', borderDash: [8, 4],
+          tension: 0.3, pointRadius: 1, pointHoverRadius: 4, borderWidth: 1.5, yAxisID: 'y' },
         { label: 'Skills %', data: entries.map(e => e.skills_pct || 0),
-          borderColor: CHART_COLORS.muted, borderDash: [5, 3],
+          borderColor: CHART_COLORS.green,
+          tension: 0.3, pointRadius: 2, pointHoverRadius: 4, borderWidth: 2, yAxisID: 'y1' },
+        { label: 'Summary %', data: entries.map(e => e.summary_pct || 0),
+          borderColor: CHART_COLORS.yellow, borderDash: [4, 3],
           tension: 0.3, pointRadius: 1, pointHoverRadius: 4, borderWidth: 1.5, yAxisID: 'y1' },
       ]
     },
     options: {
       ...CHART_DEFAULTS,
-      plugins: { legend: { display: true, position: 'top', labels: { color: '#8b949e', font: { size: 10 }, boxWidth: 12, padding: 12 } } },
+      plugins: { legend: { display: true, position: 'top', labels: { color: '#8b949e', font: { size: 10 }, boxWidth: 12, padding: 8 } } },
       scales: {
         x: CHART_DEFAULTS.scales.x,
         y: { ...CHART_DEFAULTS.scales.y, position: 'left', ticks: { ...CHART_DEFAULTS.scales.y.ticks, callback: v => fmt(v) } },
@@ -1108,24 +1123,32 @@ function makeChart(canvasId, config) {
 // Pool Trend — Chart.js line chart with proper tooltips and zoomed axis
 // Pool Trend — Chart.js with 7D / 30D / All pill toggles
 let _poolTrendAllEntries = null;
-function renderPoolTrend(daily, historyEntries) {
-  let all = null;
+let _poolTrendArchiveEntries = null;
+function renderPoolTrend(daily, historyEntries, archiveEntries) {
+  // 30-day data from history.jsonl
+  let recent = null;
   if (historyEntries && historyEntries.length >= 2) {
-    all = historyEntries.map(e => ({ v: e.total, label: e.date }));
+    recent = historyEntries.map(e => ({ v: e.total, label: e.date }));
   } else if (daily && Array.isArray(daily.history) && daily.history.length >= 2) {
-    all = daily.history.map((v, i) => ({ v, label: `Day ${i+1}` }));
+    recent = daily.history.map((v, i) => ({ v, label: `Day ${i+1}` }));
   }
-  _poolTrendAllEntries = all;
-  renderPoolTrendChart(all, 30);
+  _poolTrendAllEntries = recent;
+  // Long-term archive for "All" toggle
+  if (archiveEntries && archiveEntries.length >= 2) {
+    _poolTrendArchiveEntries = archiveEntries.map(e => ({ v: e.total, label: e.date }));
+  }
+  renderPoolTrendChart(recent, 30);
 }
 
 function renderPoolTrendChart(all, days) {
-  if (!all || all.length < 2) {
+  // "All" uses archive if available, otherwise all recent data
+  const source = (days === null && _poolTrendArchiveEntries) ? _poolTrendArchiveEntries : all;
+  if (!source || source.length < 2) {
     const el = document.getElementById('pool-trend-card');
     if (el) el.innerHTML = '<p class="muted" style="text-align:center;padding:60px 0">Pool trend unavailable.</p>';
     return;
   }
-  const entries = days ? all.slice(-days) : all;
+  const entries = days ? source.slice(-days) : source;
   if (entries.length < 2 && days) { renderPoolTrendChart(all, null); return; }
 
   // Render pills
@@ -1305,7 +1328,7 @@ async function loadAll() {
   }
 
   // Secondary fetches (non-fatal) — metadata is primary source for pool total + tags
-  const [daily, historyRaw, enrichStats, enrichHistoryRaw, metadata, postedJobs, pipelineAlert] = await Promise.all([
+  const [daily, historyRaw, enrichStats, enrichHistoryRaw, metadata, postedJobs, pipelineAlert, archiveRaw] = await Promise.all([
     safeJson(urls.daily),
     fetch(urls.history).then(r => r.ok ? r.text() : null).catch(() => null),
     safeJson(urls.enrichment),
@@ -1313,6 +1336,7 @@ async function loadAll() {
     safeJson(urls.metadata),
     safeJson(urls.postedJobs),
     safeJson(urls.pipelineAlert),
+    fetch(urls.historyArchive).then(r => r.ok ? r.text() : null).catch(() => null),
   ]);
   // Parse history.jsonl into array of {date, total} objects
   const historyEntries = historyRaw
@@ -1329,7 +1353,11 @@ async function loadAll() {
   renderOpsServices(metadata);
   renderOpsPipelineStats(metrics, metadata, enrichStats);
   renderAlert(pipelineAlert);
-  renderPoolTrend(daily, historyEntries);
+  // Parse long-term archive for "All" toggle on Pool Trend
+  const archiveEntries = archiveRaw
+    ? archiveRaw.split('\n').filter(l => l.trim()).map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean)
+    : null;
+  renderPoolTrend(daily, historyEntries, archiveEntries);
   renderDurationTrend(metrics, daily, historyEntries, metadata);
   renderPipelineRunStats(metrics, metadata);
   renderPipelineSourceTable(metrics, metadata, enrichStats);
@@ -1339,6 +1367,7 @@ async function loadAll() {
   renderSkillsBars(enrichStats);
   renderEnrichBars(enrichStats);
   renderCompanyQuality(enrichStats);
+  window._poolTotal = metadata ? metadata.total_jobs : null;
   renderRepos(metrics, daily);
   renderSourceBars(metrics, metadata);
   renderDomainBars(metadata);
