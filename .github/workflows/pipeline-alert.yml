@@ -37,3 +37,11 @@ jobs:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TEAM_TOKEN }}
           DISCORD_PIPELINE_ALERT_CHANNEL_ID: ${{ secrets.DISCORD_PIPELINE_ALERT_CHANNEL_ID }}
         run: node .github/scripts/pipeline-alert.js
+
+      - name: Commit alert status
+        run: |
+          git config user.name "z-apply"
+          git config user.email "admin@zapply.jobs"
+          git add .github/data/pipeline-alert.json 2>/dev/null || true
+          git diff --cached --quiet || git commit -m "chore: update pipeline alert status [skip ci]"
+          git pull --rebase origin main -q && git push origin main -q || true
