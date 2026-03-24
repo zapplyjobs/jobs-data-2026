@@ -305,8 +305,11 @@
     <div class="card" id="pool-trend-card" style="position:relative;height:220px">
       <canvas id="pool-trend-canvas"></canvas>
     </div>
-    <div class="section-label" style="margin-top:24px">Run Duration</div>
-    <div class="card" id="duration-trend-card" style="position:relative;height:180px">
+    <div class="section-label" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center">
+      <span>Run Duration</span>
+      <span id="duration-trend-pills"></span>
+    </div>
+    <div class="card" id="duration-trend-card" style="position:relative;height:200px">
       <canvas id="duration-trend-canvas"></canvas>
     </div>
     <div class="section-label" style="margin-top:24px">Senior Filter Funnel</div>
@@ -780,19 +783,21 @@ function renderRepos(d, daily) {
 // DASH-2b: renderSources (Supply detail table) removed — bar chart is sufficient
 
 // Pipeline tab — run duration trend (last 5 from history.jsonl or daily-stats.json)
-// DASH-4a: prefers history.jsonl entries with duration_ms (added by daily-stats.js)
-// Duration Trend — Chart.js bar chart with target line, reads from history + metadata
+// Duration Trend — line chart with target line + pill toggles (same pattern as Pool Trend)
+let _durationAllEntries = null;
 function renderDurationTrend(metrics, daily, historyEntries, metadata) {
   const rawDur = (metadata && metadata.duration_ms) || ((metrics && metrics.pipeline) || {}).duration_ms;
   const currentMin = rawDur ? parseFloat((rawDur / 60000).toFixed(1)) : null;
 
-  let entries = [];
+  let all = [];
   if (historyEntries) {
-    entries = historyEntries.filter(h => h.duration_ms != null)
-      .map(h => ({ label: h.date ? h.date.slice(5) : '?', value: parseFloat((h.duration_ms / 60000).toFixed(1)) }));
+    all = historyEntries.filter(h => h.duration_ms != null)
+      .map(h => ({ label: h.date || '?', value: parseFloat((h.duration_ms / 60000).toFixed(1)) }));
   }
-  // If only current run available, show as stat display (not a single ugly bar)
-  if (!entries.length && currentMin != null) {
+  _durationAllEntries = all;
+
+  // If no trend data yet, show stat display for current run
+  if (!all.length && currentMin != null) {
     const el = document.getElementById('duration-trend-card');
     const color = currentMin <= 25 ? CHART_COLORS.green : CHART_COLORS.red;
     if (el) el.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;gap:16px">
@@ -803,21 +808,46 @@ function renderDurationTrend(metrics, daily, historyEntries, metadata) {
     </div>`;
     return;
   }
-  if (!entries.length) {
+  if (!all.length) {
     const el = document.getElementById('duration-trend-card');
     if (el) el.innerHTML = '<p class="muted" style="text-align:center;padding:40px 0">Duration data accumulating — available after daily stats run.</p>';
     return;
   }
+  renderDurationTrendChart(all, 30);
+}
+
+function renderDurationTrendChart(all, days) {
+  if (!all || !all.length) return;
+  const entries = days ? all.slice(-days) : all;
+  if (entries.length < 1) { renderDurationTrendChart(all, null); return; }
+
+  // Render pills
+  const pillsEl = document.getElementById('duration-trend-pills');
+  if (pillsEl) {
+    const pillStyle = d => `display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--border);margin-left:4px;` +
+      (d === days ? 'background:var(--accent);color:#fff;border-color:var(--accent)' : 'background:transparent;color:var(--muted)');
+    pillsEl.innerHTML = [7, 14, 30, null].map(d => {
+      const label = d === 7 ? '7D' : d === 14 ? '14D' : d === 30 ? '30D' : 'All';
+      return `<span style="${pillStyle(d)}" onclick="renderDurationTrendChart(_durationAllEntries,${d})">${label}</span>`;
+    }).join('');
+  }
+
   const TARGET = 25;
   makeChart('duration-trend-canvas', {
-    type: 'bar',
+    type: 'line',
     data: {
-      labels: entries.map(e => e.label),
+      labels: entries.map(e => e.label.slice(5)),
       datasets: [{
+        label: 'Duration (min)',
         data: entries.map(e => e.value),
-        backgroundColor: entries.map(e => e.value <= TARGET ? CHART_COLORS.green : CHART_COLORS.red),
-        borderRadius: 4,
-        barPercentage: 0.6,
+        borderColor: CHART_COLORS.accent,
+        backgroundColor: 'rgba(255,94,60,0.08)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 3,
+        pointHoverRadius: 6,
+        borderWidth: 2,
+        pointBackgroundColor: entries.map(e => e.value <= TARGET ? CHART_COLORS.green : CHART_COLORS.red),
       }]
     },
     options: {
@@ -828,26 +858,26 @@ function renderDurationTrend(metrics, daily, historyEntries, metadata) {
              ticks: { ...CHART_DEFAULTS.scales.y.ticks, callback: v => v + 'm' } }
       },
       plugins: { ...CHART_DEFAULTS.plugins,
-        tooltip: { callbacks: { label: ctx => `${ctx.raw} min (target: ≤${TARGET})` } },
-        annotation: undefined // target line handled below
+        tooltip: { callbacks: { label: ctx => `${ctx.raw} min (target: ≤${TARGET})` } }
       }
     },
     plugins: [{
       id: 'targetLine',
       afterDraw(chart) {
-        const y = chart.scales.y.getPixelForValue(TARGET);
+        const yPixel = chart.scales.y.getPixelForValue(TARGET);
+        if (yPixel == null) return;
         const ctx = chart.ctx;
         ctx.save();
         ctx.strokeStyle = CHART_COLORS.yellow;
         ctx.lineWidth = 1.5;
         ctx.setLineDash([6, 4]);
         ctx.beginPath();
-        ctx.moveTo(chart.chartArea.left, y);
-        ctx.lineTo(chart.chartArea.right, y);
+        ctx.moveTo(chart.chartArea.left, yPixel);
+        ctx.lineTo(chart.chartArea.right, yPixel);
         ctx.stroke();
         ctx.fillStyle = CHART_COLORS.yellow;
         ctx.font = '10px Montserrat';
-        ctx.fillText('target', chart.chartArea.right - 35, y - 4);
+        ctx.fillText('25m target', chart.chartArea.right - 55, yPixel - 4);
         ctx.restore();
       }
     }]
@@ -1160,8 +1190,8 @@ function renderPoolTrendChart(all, days) {
       const label = d === 7 ? '7D' : d === 14 ? '14D' : d === 30 ? '30D' : d === 90 ? '90D' : 'All';
       return `<span style="${pillStyle(d)}" onclick="renderPoolTrendChart(_poolTrendAllEntries,${d})">${label}</span>`;
     }).join('') +
-    `<input type="number" id="pool-custom-days" placeholder="days" min="1" max="365" style="width:50px;margin-left:6px;padding:2px 4px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:10px;text-align:center"
-     onchange="renderPoolTrendChart(_poolTrendAllEntries, parseInt(this.value) || 30)" />`;
+    `<input type="text" inputmode="numeric" placeholder="days" style="width:36px;margin-left:6px;padding:2px 4px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:10px;text-align:center"
+     onkeydown="if(event.key==='Enter')renderPoolTrendChart(_poolTrendAllEntries,parseInt(this.value)||30)" />`;
   }
 
   const vals = entries.map(e => e.v);
