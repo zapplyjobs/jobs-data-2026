@@ -328,11 +328,9 @@
     </div>
   </section>
 
-  <!-- QUALITY TAB -->
+  <!-- QUALITY TAB — Glance→Scan→Commit order, filter stats removed (lives in Pipeline funnel) -->
   <section id="tab-quality" class="tab-panel" style="display:none">
-    <div class="section-label">Filter Performance</div>
-    <div class="grid" id="quality-filter"></div>
-    <div class="section-label" style="margin-top:24px">Enrichment</div>
+    <div class="section-label">Enrichment Health</div>
     <div class="grid" id="quality-enrich"></div>
     <div class="section-label" style="margin-top:24px">Enrichment Trend</div>
     <div class="card" id="enrich-trend-card">
@@ -423,25 +421,25 @@
       <div class="mermaid" id="arch-diagram" style="max-width:100%">
 graph TB
   subgraph Trigger
-    CFW["CF Worker\njob-board-cron-worker\n(every 15 min)"]
+    CFW["#9925;#65039; CF Worker\njob-board-cron-worker\n15 min cycle"]
   end
   subgraph Pipeline
-    JBS["job-board-shared\n(private submodule)"] -.->|logic| AGG
-    AGG["jobs-aggregator-private\nfetch 9 ATS, tag, dedupe"]
+    JBS["#128274; job-board-shared\nprivate submodule"] -.->|logic| AGG
+    AGG["#9881;#65039; jobs-aggregator-private\nfetch 9 ATS, tag, dedupe"]
   end
   subgraph Data["Data Layer"]
-    JD2["jobs-data-2026\nall_jobs.json + sidecars"]
-    ENR["enrich-jobs.js\nskills + visa + desc"]
-    DSC["discord-poster.js\n26 channels"]
-    DASH["Dashboard\nindex.html"]
+    JD2["#128230; jobs-data-2026\nall_jobs.json + sidecars"]
+    ENR["#128300; enrich-jobs.js\nskills + visa + desc"]
+    DSC["#128225; discord-poster.js\n26 channels"]
+    DASH["#128202; Dashboard\nindex.html"]
   end
   subgraph Consumers["Consumer Repos"]
-    NGJ["New-Grad-Jobs-2026"]
-    INT["Internships-2026"]
-    SWE["Software-Engineering"]
-    DSN["Data-Science"]
-    HW["Hardware-Engineering"]
-    HC["Healthcare"]
+    NGJ["#128203; New-Grad-Jobs"]
+    INT["#128203; Internships"]
+    SWE["#128203; Software-Eng"]
+    DSN["#128203; Data-Science"]
+    HW["#128203; Hardware-Eng"]
+    HC["#128203; Healthcare"]
   end
   CFW -->|dispatch| AGG
   CFW -->|dispatch| ENR
@@ -764,28 +762,13 @@ function renderQuality(d, enrichStats, metadata) {
   const p = d.pipeline || {};
   const enrich = d.enrichment || p.enrichment || {};
 
-  const sf = metadata && metadata.senior_filter_stats;
-  const filterRate = (sf && sf.total_input && sf.senior_jobs)
-    ? Math.round(sf.senior_jobs / sf.total_input * 100)
-    : null;
-
   let visaTotal = null;
   if (enrichStats && enrichStats.by_source) {
     visaTotal = Object.values(enrichStats.by_source)
       .reduce((s, v) => s + (v.sponsors_visa || 0), 0);
   }
 
-  document.getElementById('quality-filter').innerHTML =
-    statCard({ icon: '📥', label: 'Total Fetched',
-               value: fmt(sf ? sf.total_input : null),
-               sub: 'before senior filter' }) +
-    statCard({ icon: '🚫', label: 'Senior Filter Rate',
-               value: filterRate != null ? filterRate + '%' : '—',
-               sub: 'Target: 55–65%' }) +
-    statCard({ icon: '✅', label: 'Entry-Level Passed',
-               value: fmt(sf ? sf.entry_level_jobs : null),
-               sub: sf ? `${Math.round(100 - (filterRate || 0))}% of total` : null });
-
+  // Filter Performance removed — lives in Pipeline tab Senior Filter Funnel (single-home rule)
   document.getElementById('quality-enrich').innerHTML =
     statCard({ icon: '🔬', label: 'Enriched Jobs',  value: fmt(enrich.totalEnriched) }) +
     statCard({ icon: '📄', label: 'Has Description', value: fmt(enrich.totalHasDescription) }) +
@@ -1139,23 +1122,19 @@ function renderCompanyQuality(enrichStats) {
 }
 
 // Pipeline tab — last run stat cards
-// Pipeline stat cards per design spec: Total Fetched, Active Sources, Entry-Level Passed, US Tech Jobs
-// Duration and Last Run time are on Ops tab — not duplicated here
-function renderPipelineRunStats(metrics, metadata, enrichStats) {
+// Pipeline stat cards: Pool Size + Active Sources only
+// Filter breakdown lives in the Senior Filter Funnel below (single-home rule)
+// Duration + US Tech Jobs live on Ops tab (no cross-tab duplication)
+function renderPipelineRunStats(metrics, metadata) {
   const el = document.getElementById('pipeline-run-stats');
   if (!el) return;
-  const sf = metadata && metadata.senior_filter_stats;
-  const totalInput = sf ? sf.total_input : null;
-  const entryLevel = sf ? sf.entry_level_jobs : null;
+  const poolTotal = (metadata && metadata.total_jobs) ? metadata.total_jobs : ((metrics && metrics.pipeline) || {}).pipelineTotal;
   const bySource = (metadata && metadata.by_source) || {};
   const sourceCount = Object.keys(bySource).length;
-  const usTechJobs = enrichStats ? enrichStats.total_tech_us : null;
 
   el.innerHTML =
-    statCard({ icon: '📥', label: 'Total Fetched', value: fmt(totalInput), sub: 'before senior filter' }) +
-    statCard({ icon: '🔌', label: 'Active Sources', value: sourceCount || '—', sub: `${sourceCount} ATS connected` }) +
-    statCard({ icon: '✅', label: 'Entry-Level Passed', value: fmt(entryLevel), sub: sf ? `${Math.round(100 * entryLevel / totalInput)}% pass rate` : null }) +
-    statCard({ icon: '💻', label: 'US Tech Jobs', value: fmt(usTechJobs), sub: 'SW + DS + HW + AI, US-tagged' });
+    statCard({ icon: '🏗️', label: 'Pool Size', value: fmt(poolTotal), sub: 'total jobs in pipeline' }) +
+    statCard({ icon: '🔌', label: 'Active Sources', value: sourceCount || '—', sub: `${sourceCount} ATS connected` });
 }
 
 // Pipeline tab — source breakdown table (Total, WoW, Tech US only)
@@ -1395,7 +1374,7 @@ async function loadAll() {
   renderOps(ops, pipelineAlert);
   renderPoolTrend(daily, historyEntries);
   renderDurationTrend(metrics, daily, historyEntries);
-  renderPipelineRunStats(metrics, metadata, enrichStats);
+  renderPipelineRunStats(metrics, metadata);
   renderPipelineSourceTable(metrics, metadata, enrichStats);
   renderFilterFunnel(metadata);
   renderQuality(metrics, enrichStats, metadata);
