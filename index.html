@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
   <style>
     :root {
@@ -297,13 +298,13 @@
   <section id="tab-pipeline" class="tab-panel" style="display:none">
     <div class="section-label">Last Run</div>
     <div class="grid" id="pipeline-run-stats"></div>
-    <div class="section-label" style="margin-top:24px">Pool Trend (30 days)</div>
-    <div class="card" id="pool-trend-card">
-      <p class="muted" style="text-align:center; padding:40px 0">Loading…</p>
+    <div class="section-label" style="margin-top:24px">Pool Trend</div>
+    <div class="card" id="pool-trend-card" style="position:relative;height:220px">
+      <canvas id="pool-trend-canvas"></canvas>
     </div>
     <div class="section-label" style="margin-top:24px">Run Duration</div>
-    <div class="card" id="duration-trend-card">
-      <p class="muted" style="text-align:center; padding:20px 0">Loading…</p>
+    <div class="card" id="duration-trend-card" style="position:relative;height:180px">
+      <canvas id="duration-trend-canvas"></canvas>
     </div>
     <div class="section-label" style="margin-top:24px">Senior Filter Funnel</div>
     <div class="card" id="filter-funnel">
@@ -327,8 +328,8 @@
     <div class="section-label">Enrichment Health</div>
     <div class="grid" id="quality-enrich"></div>
     <div class="section-label" style="margin-top:24px">Enrichment Trend</div>
-    <div class="card" id="enrich-trend-card">
-      <p class="muted" style="text-align:center; padding:40px 0">Loading…</p>
+    <div class="card" id="enrich-trend-card" style="position:relative;height:220px">
+      <canvas id="enrich-trend-canvas"></canvas>
     </div>
     <div class="section-label" style="margin-top:24px">Skills Fill Rate by Source</div>
     <div class="card" id="skills-bars-card">
@@ -407,8 +408,8 @@
       </table>
     </div>
     <div class="section-label" style="margin-top:24px">Per-Source Trend</div>
-    <div class="card" id="source-trend-card">
-      <p class="muted" style="text-align:center; padding:20px 0">Loading…</p>
+    <div class="card" id="source-trend-card" style="position:relative;height:220px">
+      <canvas id="source-trend-canvas"></canvas>
     </div>
     <div class="section-label" style="margin-top:24px">Pipeline Architecture</div>
     <div class="card" style="overflow-x:auto">
@@ -777,56 +778,69 @@ function renderRepos(d, daily) {
 
 // Pipeline tab — run duration trend (last 5 from history.jsonl or daily-stats.json)
 // DASH-4a: prefers history.jsonl entries with duration_ms (added by daily-stats.js)
+// Duration Trend — Chart.js bar chart with target line, reads from history + metadata
 function renderDurationTrend(metrics, daily, historyEntries, metadata) {
-  const el = document.getElementById('duration-trend-card');
-  if (!el) return;
-  const p = (metrics && metrics.pipeline) || {};
-  // Try metadata first (authoritative), fall back to metrics
-  const rawDur = (metadata && metadata.duration_ms) || p.duration_ms;
+  const rawDur = (metadata && metadata.duration_ms) || ((metrics && metrics.pipeline) || {}).duration_ms;
   const currentMin = rawDur ? parseFloat((rawDur / 60000).toFixed(1)) : null;
 
-  // Build last-5 list: prefer history.jsonl (has duration_ms after DASH-4a), fall back to daily-stats
   let entries = [];
   if (historyEntries) {
-    entries = historyEntries
-      .filter(h => h.duration_ms != null)
-      .slice(-5)
-      .map((h, i, arr) => ({ label: h.date ? h.date.slice(5) : `${arr.length - i - 1}d`, value: parseFloat((h.duration_ms / 60000).toFixed(1)) }));
+    entries = historyEntries.filter(h => h.duration_ms != null)
+      .map(h => ({ label: h.date ? h.date.slice(5) : '?', value: parseFloat((h.duration_ms / 60000).toFixed(1)) }));
   }
-  if (!entries.length && daily && Array.isArray(daily.history)) {
-    entries = daily.history
-      .filter(h => h.duration_ms != null)
-      .slice(-5)
-      .map((h, i, arr) => ({ label: i === arr.length - 1 ? 'latest' : `${arr.length - i - 1}d ago`, value: parseFloat((h.duration_ms / 60000).toFixed(1)) }));
-  }
-  // If history has no duration_ms (older format), show single current stat
+  // If no history data, use current run as single entry
   if (!entries.length && currentMin != null) {
-    el.innerHTML = `<div style="display:flex;align-items:center;gap:16px;padding:8px 0">
-      <span style="font-size:24px;font-weight:700">${currentMin} min</span>
-      <span class="muted" style="font-size:12px">last run · target ≤25 min</span>
-    </div>`;
+    entries = [{ label: 'current', value: currentMin }];
+  }
+  if (!entries.length) {
+    const el = document.getElementById('duration-trend-card');
+    if (el) el.innerHTML = '<p class="muted" style="text-align:center;padding:40px 0">Duration data unavailable — accumulates after daily stats run.</p>';
     return;
   }
-  if (!entries.length) { el.innerHTML = '<p class="muted" style="text-align:center;padding:20px 0">Duration history unavailable.</p>'; return; }
-
-  const max = Math.max(...entries.map(e => e.value), 25);
   const TARGET = 25;
-  const BAR_H = 60;
-  const bars = entries.map(e => {
-    const pct = Math.round((e.value / max) * 100);
-    const color = e.value <= TARGET ? 'var(--green)' : 'var(--red)';
-    return `
-      <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
-        <span style="font-size:11px;color:var(--muted)">${e.value}m</span>
-        <div style="width:100%;height:${BAR_H}px;display:flex;align-items:flex-end">
-          <div style="width:100%;height:${pct}%;background:${color};border-radius:3px 3px 0 0;min-height:4px"></div>
-        </div>
-        <span style="font-size:11px;color:var(--muted)">${e.label}</span>
-      </div>`;
-  }).join('');
-  el.innerHTML = `
-    <div style="display:flex;gap:8px;align-items:flex-end;padding:8px 0">${bars}</div>
-    <div style="margin-top:8px;font-size:11px;color:var(--muted)">Target: ≤25 min &nbsp;·&nbsp; <span style="color:var(--green)">■</span> on target &nbsp;·&nbsp; <span style="color:var(--red)">■</span> over target</div>`;
+  makeChart('duration-trend-canvas', {
+    type: 'bar',
+    data: {
+      labels: entries.map(e => e.label),
+      datasets: [{
+        data: entries.map(e => e.value),
+        backgroundColor: entries.map(e => e.value <= TARGET ? CHART_COLORS.green : CHART_COLORS.red),
+        borderRadius: 4,
+        barPercentage: 0.6,
+      }]
+    },
+    options: {
+      ...CHART_DEFAULTS,
+      scales: {
+        ...CHART_DEFAULTS.scales,
+        y: { ...CHART_DEFAULTS.scales.y, beginAtZero: true,
+             ticks: { ...CHART_DEFAULTS.scales.y.ticks, callback: v => v + 'm' } }
+      },
+      plugins: { ...CHART_DEFAULTS.plugins,
+        tooltip: { callbacks: { label: ctx => `${ctx.raw} min (target: ≤${TARGET})` } },
+        annotation: undefined // target line handled below
+      }
+    },
+    plugins: [{
+      id: 'targetLine',
+      afterDraw(chart) {
+        const y = chart.scales.y.getPixelForValue(TARGET);
+        const ctx = chart.ctx;
+        ctx.save();
+        ctx.strokeStyle = CHART_COLORS.yellow;
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([6, 4]);
+        ctx.beginPath();
+        ctx.moveTo(chart.chartArea.left, y);
+        ctx.lineTo(chart.chartArea.right, y);
+        ctx.stroke();
+        ctx.fillStyle = CHART_COLORS.yellow;
+        ctx.font = '10px Montserrat';
+        ctx.fillText('target', chart.chartArea.right - 35, y - 4);
+        ctx.restore();
+      }
+    }]
+  });
 }
 
 // Reusable horizontal bar renderer (uses existing .bar-row CSS)
@@ -857,78 +871,50 @@ function renderSourceBars(d, metadata) {
   renderHBars('source-bars', items, { labelWidth: '130px' });
 }
 
-// DASH-4d: Per-source trend chart (multi-line SVG from history.jsonl by_source)
-// Per-source trend with 7D / 30D / All pill toggles
-let _sourceTrendAllEntries = null; // stash for re-render on toggle
+// Per-Source Trend — Chart.js multi-line chart
+let _sourceTrendAllEntries = null;
 function renderSourceTrend(historyEntries) {
-  const el = document.getElementById('source-trend-card');
-  if (!el) return;
   const allEntries = (historyEntries || []).filter(e => e.by_source);
   _sourceTrendAllEntries = allEntries;
-  renderSourceTrendChart(allEntries, 30); // default 30D
+  renderSourceTrendChart(allEntries, 30);
 }
 
 function renderSourceTrendChart(allEntries, days) {
-  const el = document.getElementById('source-trend-card');
-  if (!el) return;
-  if (allEntries.length < 2) {
-    el.innerHTML = '<p class="muted" style="text-align:center; padding:20px 0">Per-source trend data accumulating — available after next daily stats run.</p>';
+  if (!allEntries || allEntries.length < 2) {
+    const el = document.getElementById('source-trend-card');
+    if (el) el.innerHTML = '<p class="muted" style="text-align:center;padding:60px 0">Per-source trend — data accumulates after daily stats run.</p>';
     return;
   }
   const entries = days ? allEntries.slice(-days) : allEntries;
-  if (entries.length < 2) { renderSourceTrendChart(allEntries, null); return; } // fallback to All if window too small
+  if (entries.length < 2) { renderSourceTrendChart(allEntries, null); return; }
 
   const SOURCES = ['workday', 'greenhouse', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'netflix', 'eightfold'];
-  const COLORS = { workday: '#e67e22', greenhouse: '#27ae60', ashby: '#3498db', lever: '#9b59b6', smartrecruiters: '#e74c3c', amazon: '#f39c12', jsearch: '#1abc9c', netflix: '#c0392b', eightfold: '#7f8c8d' };
-  const activeSources = SOURCES.filter(s => entries.some(e => (e.by_source[s] || 0) > 0));
+  const active = SOURCES.filter(s => entries.some(e => (e.by_source[s] || 0) > 0));
 
-  const W = 520, H = 140, PAD = { top: 10, right: 10, bottom: 22, left: 50 };
-  const plotW = W - PAD.left - PAD.right;
-  const plotH = H - PAD.top - PAD.bottom;
-  const n = entries.length;
-  const allVals = entries.flatMap(e => activeSources.map(s => e.by_source[s] || 0));
-  const maxVal = Math.max(...allVals) * 1.1 || 1;
-
-  const toX = i => PAD.left + (i / Math.max(n - 1, 1)) * plotW;
-  const toY = v => PAD.top + plotH - (v / maxVal) * plotH;
-
-  const lines = activeSources.map(src => {
-    const pts = entries.map((e, i) => `${toX(i).toFixed(1)},${toY(e.by_source[src] || 0).toFixed(1)}`).join(' ');
-    return `<polyline points="${pts}" fill="none" stroke="${COLORS[src] || '#888'}" stroke-width="1.5" />`;
-  }).join('\n');
-
-  const dateLabels = [0, Math.floor(n / 2), n - 1].filter((v, i, a) => a.indexOf(v) === i).map(i => {
-    const d = entries[i].date || '';
-    return `<text x="${toX(i)}" y="${H - 2}" text-anchor="middle" fill="var(--muted)" font-size="10">${d.slice(5)}</text>`;
-  }).join('');
-
-  const yLabels = `
-    <text x="${PAD.left - 4}" y="${toY(maxVal / 1.1)}" text-anchor="end" fill="var(--muted)" font-size="9">${fmt(Math.round(maxVal / 1.1))}</text>
-    <text x="${PAD.left - 4}" y="${toY(0) + 1}" text-anchor="end" fill="var(--muted)" font-size="9">0</text>`;
-
-  const legend = activeSources.map(s => {
-    const last = entries[n - 1].by_source[s] || 0;
-    return `<span style="margin-right:10px"><span style="color:${COLORS[s] || '#888'}">■</span> ${s} (${fmt(last)})</span>`;
-  }).join('');
-
-  // Pill toggle buttons
-  const pillStyle = d => `display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border);margin-right:4px;` +
-    (d === days ? 'background:var(--accent);color:#fff;border-color:var(--accent)' : 'background:var(--bg-card);color:var(--muted)');
-  const pills = [7, 30, null].map(d => {
-    const label = d === 7 ? '7D' : d === 30 ? '30D' : 'All';
-    return `<span style="${pillStyle(d)}" onclick="renderSourceTrendChart(_sourceTrendAllEntries,${d})">${label}</span>`;
-  }).join('');
-
-  el.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <div style="font-size:11px; color:var(--muted); line-height:1.6">${legend}</div>
-      <div>${pills}</div>
-    </div>
-    <svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px">
-      ${lines}
-      ${yLabels}
-      ${dateLabels}
-    </svg>`;
+  makeChart('source-trend-canvas', {
+    type: 'line',
+    data: {
+      labels: entries.map(e => (e.date || '').slice(5)),
+      datasets: active.map(src => ({
+        label: src,
+        data: entries.map(e => e.by_source[src] || 0),
+        borderColor: CHART_COLORS.sources[src] || '#888',
+        tension: 0.3,
+        pointRadius: 1,
+        pointHoverRadius: 4,
+        borderWidth: 1.5,
+        fill: false,
+      }))
+    },
+    options: {
+      ...CHART_DEFAULTS,
+      plugins: { legend: { display: true, position: 'top', labels: { color: '#8b949e', font: { size: 9 }, boxWidth: 10, padding: 8 } } },
+      scales: {
+        x: CHART_DEFAULTS.scales.x,
+        y: { ...CHART_DEFAULTS.scales.y, beginAtZero: true, ticks: { ...CHART_DEFAULTS.scales.y.ticks, callback: v => fmt(v) } }
+      }
+    }
+  });
 }
 
 // Pipeline tab — senior filter funnel
@@ -975,55 +961,39 @@ function renderEnrichBars(enrichStats) {
 }
 
 // ENRICH-QUALITY-2: Enrichment trend chart (from enrichment-history.jsonl)
-// DASH-3b: Enrichment Trend — SVG line chart (2 lines: total_enriched + skills_pct)
+// Enrichment Trend — Chart.js dual-axis line chart (enriched count + skills%)
 function renderEnrichTrend(enrichHistory) {
-  const el = document.getElementById('enrich-trend-card');
-  if (!el) return;
   if (!enrichHistory || enrichHistory.length < 2) {
-    el.innerHTML = '<p class="muted" style="text-align:center; padding:40px 0">Enrichment trend unavailable — data accumulates daily.</p>';
+    const el = document.getElementById('enrich-trend-card');
+    if (el) el.innerHTML = '<p class="muted" style="text-align:center;padding:60px 0">Enrichment trend — data accumulates daily.</p>';
     return;
   }
   const entries = enrichHistory.slice(-30);
-  const n = entries.length;
-  const W = 520, H = 120, PAD = { top: 15, right: 45, bottom: 22, left: 45 };
-  const plotW = W - PAD.left - PAD.right;
-  const plotH = H - PAD.top - PAD.bottom;
-
-  const enrichVals = entries.map(e => e.total_enriched || 0);
-  const skillsVals = entries.map(e => e.skills_pct || 0);
-  const enrichMax = Math.max(...enrichVals) * 1.1 || 1;
-  const skillsMax = 100;
-
-  const toX = i => PAD.left + (i / (n - 1)) * plotW;
-  const toYEnrich = v => PAD.top + plotH - (v / enrichMax) * plotH;
-  const toYSkills = v => PAD.top + plotH - (v / skillsMax) * plotH;
-
-  const enrichPts = entries.map((e, i) => `${toX(i).toFixed(1)},${toYEnrich(enrichVals[i]).toFixed(1)}`).join(' ');
-  const skillsPts = entries.map((e, i) => `${toX(i).toFixed(1)},${toYSkills(skillsVals[i]).toFixed(1)}`).join(' ');
-
-  // X-axis date labels: first, middle, last
-  const dateLabels = [0, Math.floor(n / 2), n - 1].map(i => {
-    const d = entries[i].date || '';
-    return `<text x="${toX(i)}" y="${H - 2}" text-anchor="middle" fill="var(--muted)" font-size="10">${d.slice(5)}</text>`;
-  }).join('');
-
-  // Y-axis labels
-  const lastEnrich = enrichVals[n - 1];
-  const lastSkills = skillsVals[n - 1];
-
-  el.innerHTML = `
-    <div style="font-size:11px; color:var(--muted); margin-bottom:4px">
-      ${n} days — <span style="color:var(--accent)">■</span> Enriched (${fmt(lastEnrich)}) · <span style="color:#888">■</span> Skills% (${lastSkills}%)
-    </div>
-    <svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px">
-      <polyline points="${enrichPts}" fill="none" stroke="var(--accent)" stroke-width="2" />
-      <polyline points="${skillsPts}" fill="none" stroke="#888" stroke-width="1.5" stroke-dasharray="4,3" />
-      <text x="${PAD.left - 4}" y="${toYEnrich(enrichMax / 1.1)}" text-anchor="end" fill="var(--muted)" font-size="9">${fmt(Math.round(enrichMax / 1.1))}</text>
-      <text x="${PAD.left - 4}" y="${toYEnrich(0) + 1}" text-anchor="end" fill="var(--muted)" font-size="9">0</text>
-      <text x="${W - PAD.right + 4}" y="${toYSkills(100)}" text-anchor="start" fill="#888" font-size="9">100%</text>
-      <text x="${W - PAD.right + 4}" y="${toYSkills(0) + 1}" text-anchor="start" fill="#888" font-size="9">0%</text>
-      ${dateLabels}
-    </svg>`;
+  makeChart('enrich-trend-canvas', {
+    type: 'line',
+    data: {
+      labels: entries.map(e => (e.date || '').slice(5)),
+      datasets: [
+        { label: 'Enriched', data: entries.map(e => e.total_enriched || 0),
+          borderColor: CHART_COLORS.accent, backgroundColor: 'rgba(255,94,60,0.08)', fill: true,
+          tension: 0.3, pointRadius: 2, pointHoverRadius: 5, borderWidth: 2, yAxisID: 'y' },
+        { label: 'Skills %', data: entries.map(e => e.skills_pct || 0),
+          borderColor: CHART_COLORS.muted, borderDash: [5, 3],
+          tension: 0.3, pointRadius: 1, pointHoverRadius: 4, borderWidth: 1.5, yAxisID: 'y1' },
+      ]
+    },
+    options: {
+      ...CHART_DEFAULTS,
+      plugins: { legend: { display: true, position: 'top', labels: { color: '#8b949e', font: { size: 10 }, boxWidth: 12, padding: 12 } } },
+      scales: {
+        x: CHART_DEFAULTS.scales.x,
+        y: { ...CHART_DEFAULTS.scales.y, position: 'left', ticks: { ...CHART_DEFAULTS.scales.y.ticks, callback: v => fmt(v) } },
+        y1: { ...CHART_DEFAULTS.scales.y, position: 'right', min: 0, max: 100,
+              grid: { drawOnChartArea: false },
+              ticks: { ...CHART_DEFAULTS.scales.y.ticks, callback: v => v + '%' } }
+      }
+    }
+  });
 }
 
 // ENRICH-QUALITY-2: Skills fill rate bars by source
@@ -1109,72 +1079,72 @@ function renderPipelineSourceTable(metrics, metadata, enrichStats) {
 }
 
 // Pipeline tab — pool trend chart (30d from history.jsonl, fallback 7d from daily-stats.json.history)
-// Pool Trend — SVG line chart with zoomed Y-axis (shows variation, not absolute scale)
-function renderPoolTrend(daily, historyEntries) {
-  const el = document.getElementById('pool-trend-card');
-  if (!el) return;
+// Chart.js shared config
+const CHART_COLORS = {
+  accent: '#ff5e3c', green: '#3fb950', red: '#f85149', yellow: '#d29922', muted: '#8b949e',
+  sources: { workday: '#e67e22', greenhouse: '#27ae60', ashby: '#3498db', lever: '#9b59b6',
+             smartrecruiters: '#e74c3c', amazon: '#f39c12', jsearch: '#1abc9c', netflix: '#c0392b', eightfold: '#7f8c8d' }
+};
+const CHART_DEFAULTS = {
+  responsive: true, maintainAspectRatio: false,
+  plugins: { legend: { display: false } },
+  scales: {
+    x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#8b949e', font: { size: 10 } } },
+    y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#8b949e', font: { size: 10 } } }
+  }
+};
+const _charts = {}; // store chart instances for cleanup
+function makeChart(canvasId, config) {
+  if (_charts[canvasId]) _charts[canvasId].destroy();
+  const ctx = document.getElementById(canvasId);
+  if (!ctx) return null;
+  _charts[canvasId] = new Chart(ctx, config);
+  return _charts[canvasId];
+}
 
+// Pool Trend — Chart.js line chart with proper tooltips and zoomed axis
+function renderPoolTrend(daily, historyEntries) {
   let entries = null;
   if (historyEntries && historyEntries.length >= 2) {
     entries = historyEntries.map(e => ({ v: e.total, label: e.date }));
   } else if (daily && Array.isArray(daily.history) && daily.history.length >= 2) {
-    entries = daily.history.map((v, i) => ({ v, label: '' }));
+    entries = daily.history.map((v, i) => ({ v, label: `Day ${i+1}` }));
   }
-
-  if (!entries) {
-    el.innerHTML = '<p class="muted" style="text-align:center; padding:40px 0">Pool trend unavailable.</p>';
+  if (!entries || entries.length < 2) {
+    const el = document.getElementById('pool-trend-card');
+    if (el) el.innerHTML = '<p class="muted" style="text-align:center;padding:60px 0">Pool trend unavailable.</p>';
     return;
   }
-
-  const n = entries.length;
   const vals = entries.map(e => e.v);
-  const rawMin = Math.min(...vals);
-  const rawMax = Math.max(...vals);
-  // Zoom Y-axis: pad 10% below min and above max so variation is visible
-  const range = rawMax - rawMin || 1;
-  const yMin = Math.max(0, rawMin - range * 0.3);
-  const yMax = rawMax + range * 0.1;
-
-  const W = 520, H = 130, PAD = { top: 20, right: 10, bottom: 22, left: 55 };
-  const plotW = W - PAD.left - PAD.right;
-  const plotH = H - PAD.top - PAD.bottom;
-
-  const toX = i => PAD.left + (i / Math.max(n - 1, 1)) * plotW;
-  const toY = v => PAD.top + plotH - ((v - yMin) / (yMax - yMin)) * plotH;
-
-  // Line + filled area
-  const pts = entries.map((e, i) => `${toX(i).toFixed(1)},${toY(e.v).toFixed(1)}`).join(' ');
-  const areaPts = pts + ` ${toX(n-1).toFixed(1)},${(PAD.top + plotH).toFixed(1)} ${toX(0).toFixed(1)},${(PAD.top + plotH).toFixed(1)}`;
-
-  // Date labels
-  const dateIdxs = [0, Math.floor(n / 2), n - 1].filter((v, i, a) => a.indexOf(v) === i);
-  const dateLabels = dateIdxs.map(i => {
-    const d = entries[i].label || '';
-    return `<text x="${toX(i)}" y="${H - 2}" text-anchor="middle" fill="var(--muted)" font-size="10">${d.slice(5) || (i === n-1 ? 'today' : '')}</text>`;
-  }).join('');
-
-  // Y-axis labels + current value
-  const lastVal = vals[n - 1];
-  const delta = n >= 2 ? lastVal - vals[n - 2] : 0;
-  const deltaStr = delta > 0 ? `+${fmt(delta)}` : delta < 0 ? fmt(delta) : '±0';
-  const deltaColor = delta >= 0 ? 'var(--green)' : 'var(--red)';
-
-  // Dot on last point
-  const lastDot = `<circle cx="${toX(n-1)}" cy="${toY(lastVal)}" r="4" fill="var(--accent)" />`;
-
-  el.innerHTML = `
-    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px">
-      <span style="font-size:11px; color:var(--muted)">${n} days</span>
-      <span style="font-size:13px; font-weight:600">${fmt(lastVal)} <span style="font-size:11px; color:${deltaColor}">${deltaStr}</span></span>
-    </div>
-    <svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px">
-      <polygon points="${areaPts}" fill="var(--accent)" opacity="0.1" />
-      <polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2" />
-      ${lastDot}
-      <text x="${PAD.left - 4}" y="${toY(yMax) + 4}" text-anchor="end" fill="var(--muted)" font-size="9">${fmt(Math.round(yMax))}</text>
-      <text x="${PAD.left - 4}" y="${toY(yMin) + 1}" text-anchor="end" fill="var(--muted)" font-size="9">${fmt(Math.round(yMin))}</text>
-      ${dateLabels}
-    </svg>`;
+  const minVal = Math.min(...vals);
+  const range = Math.max(...vals) - minVal || 1;
+  makeChart('pool-trend-canvas', {
+    type: 'line',
+    data: {
+      labels: entries.map(e => e.label ? e.label.slice(5) : ''),
+      datasets: [{
+        data: vals,
+        borderColor: CHART_COLORS.accent,
+        backgroundColor: 'rgba(255,94,60,0.1)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 2,
+        pointHoverRadius: 5,
+        borderWidth: 2,
+      }]
+    },
+    options: {
+      ...CHART_DEFAULTS,
+      scales: {
+        ...CHART_DEFAULTS.scales,
+        y: { ...CHART_DEFAULTS.scales.y, min: Math.max(0, minVal - range * 0.2),
+             ticks: { ...CHART_DEFAULTS.scales.y.ticks, callback: v => fmt(v) } }
+      },
+      plugins: { ...CHART_DEFAULTS.plugins,
+        tooltip: { callbacks: { label: ctx => `Pool: ${fmt(ctx.raw)}` } }
+      }
+    }
+  });
 }
 
 // Channel ID → name map (source of truth: Channel_IDs_Discord.txt)
