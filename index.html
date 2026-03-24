@@ -1156,10 +1156,12 @@ function renderPoolTrendChart(all, days) {
   if (pillsEl) {
     const pillStyle = d => `display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--border);margin-left:4px;` +
       (d === days ? 'background:var(--accent);color:#fff;border-color:var(--accent)' : 'background:transparent;color:var(--muted)');
-    pillsEl.innerHTML = [7, 30, null].map(d => {
-      const label = d === 7 ? '7D' : d === 30 ? '30D' : 'All';
+    pillsEl.innerHTML = [7, 14, 30, 90, null].map(d => {
+      const label = d === 7 ? '7D' : d === 14 ? '14D' : d === 30 ? '30D' : d === 90 ? '90D' : 'All';
       return `<span style="${pillStyle(d)}" onclick="renderPoolTrendChart(_poolTrendAllEntries,${d})">${label}</span>`;
-    }).join('');
+    }).join('') +
+    `<input type="number" id="pool-custom-days" placeholder="days" min="1" max="365" style="width:50px;margin-left:6px;padding:2px 4px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:10px;text-align:center"
+     onchange="renderPoolTrendChart(_poolTrendAllEntries, parseInt(this.value) || 30)" />`;
   }
 
   const vals = entries.map(e => e.v);
@@ -1235,10 +1237,12 @@ function renderDiscordStats(posted, metadata) {
     return;
   }
   const meta = posted.metadata || {};
-  const total = meta.totalJobs || (Array.isArray(posted.jobs) ? posted.jobs.length : null);
+  // Total posts across all channels (not unique jobs — a job posted to 5 channels = 5 posts)
+  const channelNumbers = meta.channelJobNumbers || {};
+  const totalPosts = Object.values(channelNumbers).reduce((s, v) => s + v, 0) || null;
+  const uniqueJobs = meta.totalJobs || (Array.isArray(posted.jobs) ? posted.jobs.length : null);
   const lastUpdatedTs = (metadata && metadata.generated) ? metadata.generated : posted.lastUpdated;
   const lastUpdated = lastUpdatedTs ? age(lastUpdatedTs) : '—';
-  const channelNumbers = meta.channelJobNumbers || {};
 
   // Build last-post-per-channel from jobs[].discordPosts[channelId].postedAt
   const lastPostByChannel = {};
@@ -1282,9 +1286,10 @@ function renderDiscordStats(posted, metadata) {
 
   el.innerHTML = `
     <div style="display:flex; gap:24px; flex-wrap:wrap; margin-bottom:16px">
-      <div><span class="stat-label">Total Posted (all time)</span><div class="stat-value" style="font-size:18px">${fmt(total)}</div></div>
+      <div><span class="stat-label">Total Posts (all time)</span><div class="stat-value" style="font-size:18px">${fmt(totalPosts)}</div></div>
+      <div><span class="stat-label">Unique Jobs Posted</span><div class="stat-value" style="font-size:18px">${fmt(uniqueJobs)}</div></div>
+      <div><span class="stat-label">Channels</span><div class="stat-value" style="font-size:18px">${allChannels.length}</div></div>
       <div><span class="stat-label">Data as of</span><div class="stat-value" style="font-size:18px">${lastUpdated}</div></div>
-      <div><span class="stat-label">Channels Tracked</span><div class="stat-value" style="font-size:18px">${allChannels.length}</div></div>
     </div>
     <table style="width:100%; border-collapse:collapse">
       <tr>
