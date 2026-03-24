@@ -285,18 +285,14 @@
 <div id="content-wrap" style="flex:1;min-width:0">
 <main id="content" style="padding: 24px; display:none">
 
-  <!-- OPS TAB -->
+  <!-- OPS TAB — Role Status and Pending Decisions removed (duplicates LCC, goes stale) -->
   <section id="tab-ops" class="tab-panel">
     <div class="section-label">Services</div>
     <div class="grid-3" id="ops-services"></div>
     <div class="section-label" style="margin-top:24px">Pipeline Status</div>
     <div class="grid" id="ops-pipeline-stats"></div>
-    <div class="section-label" style="margin-top:24px">Pending Decisions</div>
-    <div id="ops-decisions"></div>
     <div class="section-label" style="margin-top:24px">Pipeline Alert</div>
     <div id="ops-alert" class="card"><span class="muted">No alerts.</span></div>
-    <div class="section-label" style="margin-top:24px">Role Status</div>
-    <div class="grid-3" id="ops-roles"></div>
   </section>
 
   <!-- PIPELINE TAB -->
@@ -536,18 +532,6 @@ const DASHBOARD_SECRET = '__DASHBOARD_SECRET__';
   });
 })();
 
-// Fetch ops state from private repo via CF Worker proxy
-async function fetchOpsState() {
-  try {
-    const res = await fetch(
-      'https://job-board-cron-worker.wild-queen-069e.workers.dev/proxy?file=zjp-ops-state.json',
-      { headers: { 'Authorization': `Bearer ${DASHBOARD_SECRET}` } }
-    );
-    if (!res.ok) return null;
-    return await res.json();
-  } catch { return null; }
-}
-
 // Data URLs — function so each loadAll() call gets a fresh cache-busting timestamp (invariant D-2)
 function dataUrls() {
   const t = Date.now();
@@ -665,52 +649,11 @@ function renderOpsServices(metadata) {
     </div>`).join('');
 }
 
-// Ops tab — role status + decisions (from proxy, may be null) + pipeline alert (from public file)
-function renderOps(ops, pipelineAlert) {
-  const rolesEl = document.getElementById('ops-roles');
-  const decisionsEl = document.getElementById('ops-decisions');
-
-  if (!ops) {
-    rolesEl.innerHTML = '<div class="card" style="grid-column:1/-1"><span class="muted">Role status unavailable — ops proxy unreachable. Pipeline stats above are from live data.</span></div>';
-    decisionsEl.innerHTML = '<div class="card"><span class="muted">No pending decisions.</span></div>';
-  } else {
-    const roles = [
-      { key: 'coder',      label: 'Coder',      icon: '⚙️' },
-      { key: 'auditor',    label: 'Auditor',    icon: '🔍' },
-      { key: 'strategist', label: 'Strategist', icon: '🧭' },
-    ];
-    const statusColor = { active: 'var(--green)', idle: 'var(--muted)', blocked: 'var(--red)' };
-
-    rolesEl.innerHTML = roles.map(({ key, label, icon }) => {
-      const r = ops[key] || {};
-      const color = statusColor[r.status] || 'var(--muted)';
-      const task = key === 'strategist' ? r.top_recommendation : r.current_task;
-      const lastLabel = key === 'auditor' ? r.last_verified : r.last_session;
-      return `
-        <div class="stat-card">
-          <div class="stat-icon">${icon}</div>
-          <div class="stat-label">${label}</div>
-          <div style="font-size:13px; font-weight:600; color:${color}; margin:4px 0; text-transform:uppercase">${r.status || '—'}</div>
-          <div class="stat-sub">${esc(task || '—')}</div>
-          <div class="stat-sub" style="margin-top:4px">Last: ${esc(lastLabel || '—')}</div>
-        </div>`;
-    }).join('');
-
-    const decisions = ops.operator_decisions_pending || [];
-    if (decisions.length === 0) {
-      decisionsEl.innerHTML = '<div class="card"><span class="muted">No pending decisions.</span></div>';
-    } else {
-      decisionsEl.innerHTML = `<div class="card"><ul style="list-style:none; display:flex; flex-direction:column; gap:10px">` +
-        decisions.map(d => `<li style="display:flex;gap:8px;align-items:flex-start"><span style="color:var(--yellow)">⚠</span><span>${esc(d)}</span></li>`).join('') +
-        `</ul></div>`;
-    }
-  }
-
-  // Pipeline alert — sourced from public pipeline-alert.json (auto-written by pipeline-alert.js)
-  // Falls back to ops state alert field if public file unavailable
+// Ops tab — pipeline alert only (role status + decisions removed — duplicates LCC, goes stale)
+function renderAlert(pipelineAlert) {
   const alertText = (pipelineAlert && pipelineAlert.active && pipelineAlert.message)
     ? pipelineAlert.message
-    : (ops && ops.pipeline_alert) || null;
+    : null;
   if (alertText) {
     document.getElementById('ops-alert').innerHTML = `<span class="err">🔴 ${esc(alertText)}</span>`;
   }
@@ -836,11 +779,13 @@ function renderRepos(d, daily) {
 
 // Pipeline tab — run duration trend (last 5 from history.jsonl or daily-stats.json)
 // DASH-4a: prefers history.jsonl entries with duration_ms (added by daily-stats.js)
-function renderDurationTrend(metrics, daily, historyEntries) {
+function renderDurationTrend(metrics, daily, historyEntries, metadata) {
   const el = document.getElementById('duration-trend-card');
   if (!el) return;
   const p = (metrics && metrics.pipeline) || {};
-  const currentMin = p.duration_ms ? parseFloat((p.duration_ms / 60000).toFixed(1)) : null;
+  // Try metadata first (authoritative), fall back to metrics
+  const rawDur = (metadata && metadata.duration_ms) || p.duration_ms;
+  const currentMin = rawDur ? parseFloat((rawDur / 60000).toFixed(1)) : null;
 
   // Build last-5 list: prefer history.jsonl (has duration_ms after DASH-4a), fall back to daily-stats
   let entries = [];
@@ -1166,18 +1111,16 @@ function renderPipelineSourceTable(metrics, metadata, enrichStats) {
 }
 
 // Pipeline tab — pool trend chart (30d from history.jsonl, fallback 7d from daily-stats.json.history)
+// Pool Trend — SVG line chart with zoomed Y-axis (shows variation, not absolute scale)
 function renderPoolTrend(daily, historyEntries) {
   const el = document.getElementById('pool-trend-card');
   if (!el) return;
 
-  // Prefer history.jsonl (30d) — fall back to daily-stats.json.history (7d)
   let entries = null;
-  let labelSpan = '30 days';
   if (historyEntries && historyEntries.length >= 2) {
     entries = historyEntries.map(e => ({ v: e.total, label: e.date }));
   } else if (daily && Array.isArray(daily.history) && daily.history.length >= 2) {
     entries = daily.history.map((v, i) => ({ v, label: '' }));
-    labelSpan = '7 days';
   }
 
   if (!entries) {
@@ -1185,33 +1128,55 @@ function renderPoolTrend(daily, historyEntries) {
     return;
   }
 
-  const vals = entries.map(e => e.v);
-  const max = Math.max(...vals);
-  const BAR_H = 80;
-
-  // Determine axis label density — show date labels for first, last, and every ~5th entry
   const n = entries.length;
-  const bars = entries.map((e, i) => {
-    const pct = max > 0 ? Math.round((e.v / max) * 100) : 0;
-    const isLast = i === n - 1;
-    // Show date label: first, last, every 5th (spaced for readability)
-    let dateLabel = '';
-    if (i === 0) dateLabel = e.label ? e.label.slice(5) : `${n - 1}d ago`; // MM-DD
-    else if (isLast) dateLabel = e.label ? e.label.slice(5) : 'today';
-    else if (n > 10 && i % 5 === 0) dateLabel = e.label ? e.label.slice(5) : '';
-    return `
-      <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; min-width:0">
-        ${i === n - 1 ? `<span style="font-size:11px; color:var(--muted); white-space:nowrap">${fmt(e.v)}</span>` : '<span style="font-size:11px">&nbsp;</span>'}
-        <div style="width:100%; height:${BAR_H}px; display:flex; align-items:flex-end">
-          <div style="width:100%; height:${pct}%; background:var(--accent); opacity:${isLast ? '1' : '0.6'}; border-radius:3px 3px 0 0; min-height:4px"></div>
-        </div>
-        <span style="font-size:10px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%">${dateLabel}</span>
-      </div>`;
+  const vals = entries.map(e => e.v);
+  const rawMin = Math.min(...vals);
+  const rawMax = Math.max(...vals);
+  // Zoom Y-axis: pad 10% below min and above max so variation is visible
+  const range = rawMax - rawMin || 1;
+  const yMin = Math.max(0, rawMin - range * 0.3);
+  const yMax = rawMax + range * 0.1;
+
+  const W = 520, H = 130, PAD = { top: 20, right: 10, bottom: 22, left: 55 };
+  const plotW = W - PAD.left - PAD.right;
+  const plotH = H - PAD.top - PAD.bottom;
+
+  const toX = i => PAD.left + (i / Math.max(n - 1, 1)) * plotW;
+  const toY = v => PAD.top + plotH - ((v - yMin) / (yMax - yMin)) * plotH;
+
+  // Line + filled area
+  const pts = entries.map((e, i) => `${toX(i).toFixed(1)},${toY(e.v).toFixed(1)}`).join(' ');
+  const areaPts = pts + ` ${toX(n-1).toFixed(1)},${(PAD.top + plotH).toFixed(1)} ${toX(0).toFixed(1)},${(PAD.top + plotH).toFixed(1)}`;
+
+  // Date labels
+  const dateIdxs = [0, Math.floor(n / 2), n - 1].filter((v, i, a) => a.indexOf(v) === i);
+  const dateLabels = dateIdxs.map(i => {
+    const d = entries[i].label || '';
+    return `<text x="${toX(i)}" y="${H - 2}" text-anchor="middle" fill="var(--muted)" font-size="10">${d.slice(5) || (i === n-1 ? 'today' : '')}</text>`;
   }).join('');
 
+  // Y-axis labels + current value
+  const lastVal = vals[n - 1];
+  const delta = n >= 2 ? lastVal - vals[n - 2] : 0;
+  const deltaStr = delta > 0 ? `+${fmt(delta)}` : delta < 0 ? fmt(delta) : '±0';
+  const deltaColor = delta >= 0 ? 'var(--green)' : 'var(--red)';
+
+  // Dot on last point
+  const lastDot = `<circle cx="${toX(n-1)}" cy="${toY(lastVal)}" r="4" fill="var(--accent)" />`;
+
   el.innerHTML = `
-    <div style="font-size:11px; color:var(--muted); margin-bottom:4px">${labelSpan} — ${n} data points</div>
-    <div style="display:flex; gap:4px; align-items:flex-end; padding:4px 0">${bars}</div>`;
+    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px">
+      <span style="font-size:11px; color:var(--muted)">${n} days</span>
+      <span style="font-size:13px; font-weight:600">${fmt(lastVal)} <span style="font-size:11px; color:${deltaColor}">${deltaStr}</span></span>
+    </div>
+    <svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px">
+      <polygon points="${areaPts}" fill="var(--accent)" opacity="0.1" />
+      <polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2" />
+      ${lastDot}
+      <text x="${PAD.left - 4}" y="${toY(yMax) + 4}" text-anchor="end" fill="var(--muted)" font-size="9">${fmt(Math.round(yMax))}</text>
+      <text x="${PAD.left - 4}" y="${toY(yMin) + 1}" text-anchor="end" fill="var(--muted)" font-size="9">${fmt(Math.round(yMin))}</text>
+      ${dateLabels}
+    </svg>`;
 }
 
 // Channel ID → name map (source of truth: Channel_IDs_Discord.txt)
@@ -1330,7 +1295,7 @@ async function loadAll() {
   const urls = dataUrls();
 
   // Ops state via proxy (non-fatal — renders regardless)
-  const ops = await fetchOpsState();
+  // Ops state proxy removed — role status + decisions now in LCC only
 
   // Primary metrics (required for repo/growth data)
   let metrics;
@@ -1371,9 +1336,9 @@ async function loadAll() {
   renderStatusBar(statusTs);
   renderOpsServices(metadata);
   renderOpsPipelineStats(metrics, metadata, enrichStats);
-  renderOps(ops, pipelineAlert);
+  renderAlert(pipelineAlert);
   renderPoolTrend(daily, historyEntries);
-  renderDurationTrend(metrics, daily, historyEntries);
+  renderDurationTrend(metrics, daily, historyEntries, metadata);
   renderPipelineRunStats(metrics, metadata);
   renderPipelineSourceTable(metrics, metadata, enrichStats);
   renderFilterFunnel(metadata);
