@@ -1,0 +1,47 @@
+name: Cleanup Closed Jobs
+
+on:
+  schedule:
+    - cron: '30 6,18 * * *'  # Twice daily: 6:30 AM and 6:30 PM UTC
+  workflow_dispatch:  # Manual trigger for testing
+
+concurrency:
+  group: cleanup-closed
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run closed-job cleanup
+        run: node .github/scripts/cleanup-closed-jobs.js
+
+      - name: Commit and push if changed
+        run: |
+          if [ -n "$(git status --porcelain .github/data/all_jobs.json)" ]; then
+            git config user.email "bot@zapplyjobs.com"
+            git config user.name "Data Bot"
+            git add .github/data/all_jobs.json
+            REMOVED=$(git diff --cached --stat | grep -o '[0-9]* deletion' | grep -o '[0-9]*' || echo "0")
+            git commit -m "chore: remove closed jobs [skip ci]"
+            for i in 1 2 3; do
+              git pull --rebase origin main && git push origin main && break
+              echo "Push attempt $i failed, retrying in 5s..."
+              sleep 5
+            done
+            echo "✅ Closed jobs removed and pushed"
+          else
+            echo "ℹ️ No changes — pool unchanged"
+          fi
