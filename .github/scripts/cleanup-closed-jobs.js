@@ -117,6 +117,13 @@ async function main() {
 
   console.log(`\n📊 Results: ${open} open, ${closed} closed, ${errors} errors`);
 
+  // Safety: if >50% of checked jobs return 404, likely an API outage — abort
+  const checked = open + closed;
+  if (checked > 0 && closed / checked > 0.5) {
+    console.log(`🛑 Aborting: ${closed}/${checked} (${Math.round(closed/checked*100)}%) returned 404 — likely API outage, not mass closure`);
+    process.exit(0);
+  }
+
   if (closed === 0) {
     console.log('✅ No closed jobs found — pool unchanged');
     process.exit(0);
