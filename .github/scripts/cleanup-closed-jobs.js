@@ -129,6 +129,22 @@ async function main() {
     process.exit(0);
   }
 
+  // Archive closed jobs before removing them (non-destructive)
+  const ARCHIVE_DIR = path.join(DATA_DIR, 'archive');
+  if (!fs.existsSync(ARCHIVE_DIR)) fs.mkdirSync(ARCHIVE_DIR, { recursive: true });
+  const closedJobs = lines
+    .map(line => { try { return JSON.parse(line); } catch { return null; } })
+    .filter(job => job && closedIds.has(job.id))
+    .map(job => ({ ...job, closed_at: new Date().toISOString(), closed_by: 'cleanup-closed-jobs' }));
+
+  if (closedJobs.length > 0) {
+    const d = new Date();
+    const weekNum = Math.ceil(((d - new Date(d.getFullYear(), 0, 1)) / 86400000 + 1) / 7);
+    const archiveFile = path.join(ARCHIVE_DIR, `closed-${d.getFullYear()}-W${String(weekNum).padStart(2, '0')}.jsonl`);
+    fs.appendFileSync(archiveFile, closedJobs.map(j => JSON.stringify(j)).join('\n') + '\n', 'utf8');
+    console.log(`📦 Archived ${closedJobs.length} closed jobs → ${path.basename(archiveFile)}`);
+  }
+
   // Rewrite all_jobs.json without closed jobs
   const remaining = lines.filter(line => {
     try {
