@@ -101,6 +101,20 @@ function main() {
     }
   }
 
+  // 6b. WD >7d in consumer (Q4: do WD evergreen jobs reach users after TTL change?)
+  if (fs.existsSync(consumerPath)) {
+    const consumerJobs = JSON.parse(fs.readFileSync(consumerPath, 'utf8'));
+    const cJobs = Array.isArray(consumerJobs) ? consumerJobs : [];
+    let wdStale = 0, wdTotal = 0;
+    for (const j of cJobs) {
+      if ((j._original_source || j._source || '').includes('workday') || (j.job_apply_link || '').includes('myworkdayjobs')) {
+        wdTotal++;
+        if (j.job_posted_at_datetime_utc && (now - new Date(j.job_posted_at_datetime_utc).getTime()) > 7 * DAY) wdStale++;
+      }
+    }
+    if (wdTotal > 0) results.push(check('WD >7d in consumer', wdStale, 50, 'lt'));
+  }
+
   // 7. AGG-14 archive
   const archiveDir = path.join(DATA_DIR, 'archive');
   const closedArchives = fs.existsSync(archiveDir)
