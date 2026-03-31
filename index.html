@@ -437,25 +437,25 @@
       <div class="mermaid" id="arch-diagram" style="max-width:100%">
 graph TB
   subgraph Trigger
-    CFW["#9925;#65039; CF Worker\njob-board-cron-worker\n15 min cycle"]
+    CFW["CF Worker<br/>job-board-cron-worker<br/>15 min cycle"]
   end
   subgraph Pipeline
-    JBS["#128274; job-board-shared\nprivate submodule"] -.->|logic| AGG
-    AGG["#9881;#65039; jobs-aggregator-private\nfetch 9 ATS, tag, dedupe"]
+    JBS["job-board-shared<br/>private submodule"] -.->|logic| AGG
+    AGG["jobs-aggregator-private<br/>fetch 9 ATS, tag, dedupe"]
   end
   subgraph Data["Data Layer"]
-    JD2["#128230; jobs-data-2026\nall_jobs.json + sidecars"]
-    ENR["#128300; enrich-jobs.js\nskills + visa + desc"]
-    DSC["#128225; discord-poster.js\n26 channels"]
-    DASH["#128202; Dashboard\nindex.html"]
+    JD2["jobs-data-2026<br/>all_jobs.json + sidecars"]
+    ENR["enrich-jobs.js<br/>skills + visa + desc"]
+    DSC["discord-poster.js<br/>26 channels"]
+    DASH["Dashboard<br/>index.html"]
   end
   subgraph Consumers["Consumer Repos"]
-    NGJ["#128203; New-Grad-Jobs"]
-    INT["#128203; Internships"]
-    SWE["#128203; Software-Eng"]
-    DSN["#128203; Data-Science"]
-    HW["#128203; Hardware-Eng"]
-    HC["#128203; Healthcare"]
+    NGJ["New-Grad-Jobs"]
+    INT["Internships"]
+    SWE["Software-Eng"]
+    DSN["Data-Science"]
+    HW["Hardware-Eng"]
+    HC["Healthcare"]
   end
   CFW -->|dispatch| AGG
   CFW -->|dispatch| ENR
