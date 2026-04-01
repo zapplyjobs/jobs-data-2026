@@ -274,29 +274,70 @@
 <div id="app-body">
 <aside id="sidebar">
   <div id="sidebar-label">Navigation</div>
-  <button class="tab active" data-tab="ops">📊 Ops</button>
-  <button class="tab" data-tab="pipeline">⚙️ Pipeline</button>
-  <button class="tab" data-tab="quality">✅ Quality</button>
-  <button class="tab" data-tab="distribution">📡 Distribution</button>
-  <button class="tab" data-tab="supply">🏭 Supply</button>
+  <button class="tab active" data-tab="inf">🔧 INF</button>
+  <button class="tab" data-tab="agg">⚙️ AGG</button>
+  <button class="tab" data-tab="sup">🏭 SUP</button>
+  <button class="tab" data-tab="tag">🏷️ TAG</button>
+  <button class="tab" data-tab="enr">✅ ENR</button>
+  <button class="tab" data-tab="out">📡 OUT</button>
 </aside>
 
 <div id="content-wrap" style="flex:1;min-width:0;overflow-y:auto">
 <main id="content" style="padding: 24px; display:none">
 
-  <!-- OPS TAB — Role Status and Pending Decisions removed (duplicates LCC, goes stale) -->
-  <section id="tab-ops" class="tab-panel">
+  <!-- INF TAB — Infrastructure: services, alerts, architecture -->
+  <section id="tab-inf" class="tab-panel">
     <div class="section-label">Services</div>
     <div class="grid-3" id="ops-services"></div>
-    <div class="section-label" style="margin-top:24px">Pipeline Status</div>
-    <div class="grid" id="ops-pipeline-stats"></div>
     <div class="section-label" style="margin-top:24px">Pipeline Alert</div>
     <div id="ops-alert" class="card"><span class="muted">No alerts.</span></div>
+    <div class="section-label" style="margin-top:24px">Pipeline Architecture</div>
+    <div class="card" style="overflow-x:auto">
+      <div class="mermaid" id="arch-diagram" style="max-width:100%">
+graph TB
+  subgraph Trigger
+    CFW["CF Worker<br/>job-board-cron-worker<br/>15 min cycle"]
+  end
+  subgraph Pipeline
+    JBS["job-board-shared<br/>private submodule"] -.->|logic| AGG
+    AGG["jobs-aggregator-private<br/>fetch 9 ATS, tag, dedupe"]
+  end
+  subgraph Data["Data Layer"]
+    JD2["jobs-data-2026<br/>all_jobs.json + sidecars"]
+    ENR["enrich-jobs.js<br/>skills + visa + desc"]
+    DSC["discord-poster.js<br/>26 channels"]
+    DASH["Dashboard<br/>index.html"]
+  end
+  subgraph Consumers["Consumer Repos"]
+    NGJ["New-Grad-Jobs"]
+    INT["Internships"]
+    SWE["Software-Eng"]
+    DSN["Data-Science"]
+    HW["Hardware-Eng"]
+    HC["Healthcare"]
+  end
+  CFW -->|dispatch| AGG
+  CFW -->|dispatch| ENR
+  CFW -->|dispatch| DSC
+  AGG -->|all_jobs.json| JD2
+  ENR -->|enriched_jobs.json| JD2
+  DSC -.->|reads| JD2
+  DASH -.->|reads| JD2
+  JD2 -->|update-jobs.yml| NGJ
+  JD2 -->|update-jobs.yml| INT
+  JD2 -->|update-jobs.yml| SWE
+  JD2 -->|update-jobs.yml| DSN
+  JD2 -->|update-jobs.yml| HW
+  JD2 -->|update-jobs.yml| HC
+      </div>
+    </div>
   </section>
 
-  <!-- PIPELINE TAB -->
-  <section id="tab-pipeline" class="tab-panel" style="display:none">
-    <div class="section-label">Last Run</div>
+  <!-- AGG TAB — Aggregation: pipeline runs, pool, duration, senior filter -->
+  <section id="tab-agg" class="tab-panel" style="display:none">
+    <div class="section-label">Pipeline Status</div>
+    <div class="grid" id="ops-pipeline-stats"></div>
+    <div class="section-label" style="margin-top:24px">Last Run</div>
     <div class="grid" id="pipeline-run-stats"></div>
     <div class="section-label" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center">
       <span>Pool Trend</span>
@@ -316,6 +357,22 @@
     <div class="card" id="filter-funnel">
       <p class="muted" style="text-align:center; padding:20px 0">Loading…</p>
     </div>
+    <div class="section-label" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center">
+      <span>Job Breakdown Trend</span>
+      <span id="breakdown-pills"></span>
+    </div>
+    <div class="card" id="breakdown-card" style="position:relative;height:250px">
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px" id="breakdown-filters"></div>
+      <canvas id="breakdown-canvas"></canvas>
+    </div>
+  </section>
+
+  <!-- SUP TAB — Supply: sources, companies, source trends -->
+  <section id="tab-sup" class="tab-panel" style="display:none">
+    <div class="section-label">By Source</div>
+    <div class="card" id="source-bars-card">
+      <div id="source-bars"></div>
+    </div>
     <div class="section-label" style="margin-top:24px">Jobs by Source (current pool)</div>
     <div class="card">
       <table id="pipeline-source-table">
@@ -327,18 +384,54 @@
         </tr>
       </table>
     </div>
-    <div class="section-label" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center">
-      <span>Job Breakdown Trend</span>
-      <span id="breakdown-pills"></span>
+    <div class="section-label" style="margin-top:24px">Top Companies</div>
+    <div class="card" id="top-companies-card">
+      <table id="top-companies-table">
+        <tr>
+          <th>#</th>
+          <th>Company</th>
+          <th style="text-align:right">Jobs</th>
+        </tr>
+      </table>
     </div>
-    <div class="card" id="breakdown-card" style="position:relative;height:250px">
-      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px" id="breakdown-filters"></div>
-      <canvas id="breakdown-canvas"></canvas>
+    <div class="section-label" style="margin-top:24px">Per-Source Trend</div>
+    <div class="card" id="source-trend-card" style="position:relative;height:220px">
+      <canvas id="source-trend-canvas"></canvas>
     </div>
   </section>
 
-  <!-- QUALITY TAB — Glance→Scan→Commit order, filter stats removed (lives in Pipeline funnel) -->
-  <section id="tab-quality" class="tab-panel" style="display:none">
+  <!-- TAG TAB — Classification: domain distribution, general pool review -->
+  <section id="tab-tag" class="tab-panel" style="display:none">
+    <div class="section-label">Domain Distribution</div>
+    <div class="card" id="domain-bars-wrap">
+      <div id="domain-bars"></div>
+    </div>
+    <div class="section-label" style="margin-top:24px">General Pool Overview</div>
+    <div class="grid" id="class-summary"></div>
+    <div class="section-label" style="margin-top:24px">Top Companies by Unclassified Jobs</div>
+    <div class="card" id="class-companies-card">
+      <table id="class-companies-table">
+        <tr><th>#</th><th>Company</th><th style="text-align:right">General</th><th style="text-align:right">Classified</th><th>Top Domain</th><th style="text-align:right">Desc%</th></tr>
+      </table>
+    </div>
+    <div class="section-label" style="margin-top:24px">General Rate by ATS</div>
+    <div class="card" id="class-ats-card">
+      <div id="class-ats-bars"></div>
+    </div>
+    <div class="section-label" style="margin-top:24px">Recurring Title Patterns</div>
+    <div class="card" id="class-patterns-card">
+      <table id="class-patterns-table">
+        <tr><th>Title Pattern</th><th style="text-align:right">Count</th><th style="text-align:right">Companies</th></tr>
+      </table>
+    </div>
+    <div class="section-label" style="margin-top:24px">Tenant Default Candidates</div>
+    <div class="card" id="class-tenants-card">
+      <p class="muted" style="text-align:center; padding:20px 0">Loading...</p>
+    </div>
+  </section>
+
+  <!-- ENR TAB — Enrichment: coverage, skills, descriptions, company quality -->
+  <section id="tab-enr" class="tab-panel" style="display:none">
     <div class="section-label">Enrichment Health</div>
     <div class="grid" id="quality-enrich"></div>
     <div class="section-label" style="margin-top:24px">Enrichment Trend</div>
@@ -382,8 +475,8 @@
     </div>
   </section>
 
-  <!-- DISTRIBUTION TAB -->
-  <section id="tab-distribution" class="tab-panel" style="display:none">
+  <!-- OUT TAB — Output: consumer repos, stars, Discord -->
+  <section id="tab-out" class="tab-panel" style="display:none">
     <div class="section-label">Consumer Repos</div>
     <div class="card">
       <table id="repo-table">
@@ -405,72 +498,6 @@
     <div class="section-label" style="margin-top:24px">Discord</div>
     <div class="card" id="discord-stats-card">
       <p class="muted" style="text-align:center; padding:40px 0">Loading…</p>
-    </div>
-  </section>
-
-  <!-- SUPPLY TAB -->
-  <section id="tab-supply" class="tab-panel" style="display:none">
-    <div class="section-label">By Source</div>
-    <div class="card" id="source-bars-card">
-      <div id="source-bars"></div>
-    </div>
-    <div class="section-label" style="margin-top:24px">Domain Distribution</div>
-    <div class="card" id="domain-bars-wrap">
-      <div id="domain-bars"></div>
-    </div>
-    <div class="section-label" style="margin-top:24px">Top Companies</div>
-    <div class="card" id="top-companies-card">
-      <table id="top-companies-table">
-        <tr>
-          <th>#</th>
-          <th>Company</th>
-          <th style="text-align:right">Jobs</th>
-        </tr>
-      </table>
-    </div>
-    <div class="section-label" style="margin-top:24px">Per-Source Trend</div>
-    <div class="card" id="source-trend-card" style="position:relative;height:220px">
-      <canvas id="source-trend-canvas"></canvas>
-    </div>
-    <div class="section-label" style="margin-top:24px">Pipeline Architecture</div>
-    <div class="card" style="overflow-x:auto">
-      <div class="mermaid" id="arch-diagram" style="max-width:100%">
-graph TB
-  subgraph Trigger
-    CFW["CF Worker<br/>job-board-cron-worker<br/>15 min cycle"]
-  end
-  subgraph Pipeline
-    JBS["job-board-shared<br/>private submodule"] -.->|logic| AGG
-    AGG["jobs-aggregator-private<br/>fetch 9 ATS, tag, dedupe"]
-  end
-  subgraph Data["Data Layer"]
-    JD2["jobs-data-2026<br/>all_jobs.json + sidecars"]
-    ENR["enrich-jobs.js<br/>skills + visa + desc"]
-    DSC["discord-poster.js<br/>26 channels"]
-    DASH["Dashboard<br/>index.html"]
-  end
-  subgraph Consumers["Consumer Repos"]
-    NGJ["New-Grad-Jobs"]
-    INT["Internships"]
-    SWE["Software-Eng"]
-    DSN["Data-Science"]
-    HW["Hardware-Eng"]
-    HC["Healthcare"]
-  end
-  CFW -->|dispatch| AGG
-  CFW -->|dispatch| ENR
-  CFW -->|dispatch| DSC
-  AGG -->|all_jobs.json| JD2
-  ENR -->|enriched_jobs.json| JD2
-  DSC -.->|reads| JD2
-  DASH -.->|reads| JD2
-  JD2 -->|update-jobs.yml| NGJ
-  JD2 -->|update-jobs.yml| INT
-  JD2 -->|update-jobs.yml| SWE
-  JD2 -->|update-jobs.yml| DSN
-  JD2 -->|update-jobs.yml| HW
-  JD2 -->|update-jobs.yml| HC
-      </div>
     </div>
   </section>
 
@@ -565,6 +592,7 @@ function dataUrls() {
     postedJobs:    `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/posted_jobs.json?t=${t}`,
     pipelineAlert: `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/pipeline-alert.json?t=${t}`,
     historyArchive: `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/history-archive.jsonl?t=${t}`,
+    generalReview: `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/general-review.json?t=${t}`,
   };
 }
 
@@ -1478,6 +1506,84 @@ function renderDiscordStats(posted, metadata) {
     </table>`;
 }
 
+// Classification tab (general-review.json)
+function renderClassification(data) {
+  const summaryEl = document.getElementById('class-summary');
+  const companiesTable = document.getElementById('class-companies-table');
+  const atsBarsEl = document.getElementById('class-ats-bars');
+  const patternsTable = document.getElementById('class-patterns-table');
+  const tenantsEl = document.getElementById('class-tenants-card');
+
+  if (!data || !data.summary) {
+    summaryEl.innerHTML = '<div class="card" style="grid-column:1/-1"><span class="muted">Classification review data not yet available. Run prepare-general-review.js --json to generate.</span></div>';
+    atsBarsEl.innerHTML = '';
+    tenantsEl.innerHTML = '<p class="muted" style="text-align:center; padding:20px 0">No data.</p>';
+    return;
+  }
+
+  const s = data.summary;
+  const classifiedRate = (100 - s.us_general_rate).toFixed(1);
+
+  // Summary cards
+  summaryEl.innerHTML = `
+    <div class="card"><div class="stat-label">US General Rate</div><div class="stat-val ${s.us_general_rate > 10 ? 'yellow' : 'green'}">${s.us_general_rate}%</div></div>
+    <div class="card"><div class="stat-label">US General Jobs</div><div class="stat-val">${fmt(s.us_general)}</div></div>
+    <div class="card"><div class="stat-label">US Classified Rate</div><div class="stat-val green">${classifiedRate}%</div></div>
+    <div class="card"><div class="stat-label">Companies w/ Generals</div><div class="stat-val">${data.by_company ? data.by_company.length : '—'}</div></div>
+    <div class="card"><div class="stat-label">Desc Coverage</div><div class="stat-val">${data.descriptions ? Math.round(data.descriptions.withDesc / s.us_general * 100) : '—'}%</div></div>
+    <div class="card"><div class="stat-label">Review Date</div><div class="stat-val" style="font-size:14px">${s.generated ? s.generated.slice(0, 10) : '—'}</div></div>
+  `;
+
+  // Top companies table
+  if (data.by_company && data.by_company.length > 0) {
+    for (const co of data.by_company.slice(0, 25)) {
+      const tr = document.createElement('tr');
+      const idx = data.by_company.indexOf(co) + 1;
+      const topDomain = co.domain_dist ? co.domain_dist.split(',')[0].trim() : '—';
+      tr.innerHTML = `<td>${idx}</td><td>${esc(co.name)}</td><td style="text-align:right">${co.general}</td><td style="text-align:right">${co.classified}</td><td style="color:var(--muted);font-size:12px">${esc(topDomain)}</td><td style="text-align:right">${co.has_desc_pct}%</td>`;
+      companiesTable.appendChild(tr);
+    }
+  }
+
+  // ATS bars
+  if (data.by_ats && data.by_ats.length > 0) {
+    const max = Math.max(...data.by_ats.map(a => a.general));
+    atsBarsEl.innerHTML = data.by_ats.map(a => {
+      const pct = max > 0 ? Math.round((a.general / max) * 100) : 0;
+      return `
+        <div class="bar-row">
+          <span class="bar-label">${esc(a.source)}</span>
+          <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+          <span class="bar-value">${a.general} <span class="muted">(${a.general_pct}%)</span></span>
+        </div>`;
+    }).join('');
+  }
+
+  // Title patterns
+  if (data.title_patterns && data.title_patterns.length > 0) {
+    for (const p of data.title_patterns.slice(0, 20)) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td style="font-family:monospace;font-size:12px">${esc(p.title)}</td><td style="text-align:right">${p.count}</td><td style="text-align:right">${p.companies}</td>`;
+      patternsTable.appendChild(tr);
+    }
+  } else {
+    patternsTable.parentElement.innerHTML = '<p class="muted" style="text-align:center; padding:20px 0">No recurring patterns (3+ occurrences).</p>';
+  }
+
+  // Tenant candidates
+  if (data.tenant_candidates && data.tenant_candidates.length > 0) {
+    let html = '<table style="width:100%"><tr><th>Company</th><th style="text-align:right">General</th><th style="text-align:right">Classified</th><th>Top Domain</th></tr>';
+    for (const tc of data.tenant_candidates.slice(0, 15)) {
+      const topDomain = tc.domain_dist ? tc.domain_dist.split(',')[0].trim() : '—';
+      html += `<tr><td>${esc(tc.name)}</td><td style="text-align:right">${tc.general}</td><td style="text-align:right">${tc.classified}</td><td style="color:var(--muted);font-size:12px">${esc(topDomain)}</td></tr>`;
+    }
+    html += '</table>';
+    tenantsEl.innerHTML = html;
+  } else {
+    tenantsEl.innerHTML = '<p class="muted" style="text-align:center; padding:20px 0">No tenant default candidates found.</p>';
+  }
+}
+
 // Fetch orchestration
 const safeJson = url => fetch(url).then(r => r.ok ? r.json() : null).catch(() => null);
 
@@ -1503,7 +1609,7 @@ async function loadAll() {
   }
 
   // Secondary fetches (non-fatal) — metadata is primary source for pool total + tags
-  const [daily, historyRaw, enrichStats, enrichHistoryRaw, metadata, postedJobs, pipelineAlert, archiveRaw] = await Promise.all([
+  const [daily, historyRaw, enrichStats, enrichHistoryRaw, metadata, postedJobs, pipelineAlert, archiveRaw, generalReview] = await Promise.all([
     safeJson(urls.daily),
     fetch(urls.history).then(r => r.ok ? r.text() : null).catch(() => null),
     safeJson(urls.enrichment),
@@ -1512,6 +1618,7 @@ async function loadAll() {
     safeJson(urls.postedJobs),
     safeJson(urls.pipelineAlert),
     fetch(urls.historyArchive).then(r => r.ok ? r.text() : null).catch(() => null),
+    safeJson(urls.generalReview),
   ]);
   // Parse history.jsonl into array of {date, total} objects
   const historyEntries = historyRaw
@@ -1551,6 +1658,7 @@ async function loadAll() {
   renderSourceTrend(historyEntries);
   renderStarsTrend(historyEntries);
   renderDiscordStats(postedJobs, metadata);
+  renderClassification(generalReview);
 
   document.getElementById('content').style.display = 'block';
 }
