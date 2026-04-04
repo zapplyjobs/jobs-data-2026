@@ -50,11 +50,12 @@ jobs:
           git add .github/data/descriptions-enriched-*.jsonl 2>/dev/null || true
           [ -f .github/data/desc-fetch-failures.json ] && git add .github/data/desc-fetch-failures.json
           git commit -m "chore: update enriched jobs [skip ci]" || exit 0
-          # Reset git-crypt encrypted scripts to index state (encrypted form).
-          # git-crypt unlock decrypts them at checkout, leaving them as "modified"
-          # relative to their encrypted blobs — this blocks git pull --rebase.
-          # The scripts have already run; resetting to encrypted form is safe.
-          git checkout -- .github/scripts/ 2>/dev/null || true
+          # Reset ALL tracked files to index state before rebasing.
+          # git-crypt unlock decrypts .github/scripts/** at checkout, and npm ci
+          # may modify package-lock.json — both appear "modified" relative to the
+          # index and block git pull --rebase. Data files were committed above;
+          # resetting everything else is safe.
+          git checkout -- . 2>/dev/null || true
           for i in 1 2 3; do
             git pull --rebase origin main && git push && break
             echo "Push attempt $i failed, retrying in 5s..."
