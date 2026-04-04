@@ -50,13 +50,12 @@ jobs:
           git add .github/data/descriptions-enriched-*.jsonl 2>/dev/null || true
           [ -f .github/data/desc-fetch-failures.json ] && git add .github/data/desc-fetch-failures.json
           git commit -m "chore: update enriched jobs [skip ci]" || exit 0
-          # git-crypt decrypts .github/scripts/** via smudge filter, and npm ci
-          # modifies package-lock.json. Both appear "modified" relative to the
-          # encrypted index and block git pull --rebase. Stash saves them cleanly
-          # (no pop needed — job ends after push).
-          git stash --include-untracked 2>/dev/null || true
+          # git-crypt's smudge filter re-runs on every index operation, causing
+          # decrypted .github/scripts/** to appear "modified" even after stash/checkout.
+          # Bypass the filter entirely during pull --rebase by overriding it with cat,
+          # and mark git-crypt as non-required so it doesn't abort.
           for i in 1 2 3; do
-            git pull --rebase origin main && git push && break
+            git -c filter.git-crypt.smudge=cat -c filter.git-crypt.clean=cat -c filter.git-crypt.required=false pull --rebase origin main && git push && break
             echo "Push attempt $i failed, retrying in 5s..."
             sleep 5
           done
