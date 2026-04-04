@@ -148,12 +148,29 @@ function loadDescriptionsMap() {
 // Reconstructs API URLs from job.url — no _raw fields needed.
 // Only fetches for tech+US jobs missing from sidecar (targeted, no waste).
 // ---------------------------------------------------------------------------
+// myworkdaysite.com: path-based tenant (no subdomain). tenant differs from the URL path slug.
+// Only Snap uses this domain — tenant is 'snapchat', site is 'snap' (from the URL path).
+const MYWORKDAYSITE_TENANTS = {
+  snap: 'snapchat',
+};
+
 function buildWdDescUrl(jobUrl) {
-  // job.url: https://{tenant}.wd{N}.myworkdayjobs.com/{site}/job/{path}
-  // API:    https://{tenant}.wd{N}.myworkdayjobs.com/wday/cxs/{tenant}/{site}/job/{path}
+  // Standard: https://{tenant}.wd{N}.myworkdayjobs.com/{site}/job/{path}
+  // API:      https://{tenant}.wd{N}.myworkdayjobs.com/wday/cxs/{tenant}/{site}/job/{path}
   const m = jobUrl.match(/^(https:\/\/([^.]+)\.wd\d+\.myworkdayjobs\.com)\/([^/]+)(\/.*)/);
-  if (!m) return null;
-  return `${m[1]}/wday/cxs/${m[2]}/${m[3]}${m[4]}`;
+  if (m) return `${m[1]}/wday/cxs/${m[2]}/${m[3]}${m[4]}`;
+
+  // myworkdaysite.com: https://wd{N}.myworkdaysite.com/{site}/job/{path}
+  // API:               https://wd{N}.myworkdaysite.com/wday/cxs/{tenant}/{site}/job/{path}
+  const m2 = jobUrl.match(/^(https:\/\/wd\d+\.myworkdaysite\.com)\/([^/]+)(\/.*)/);
+  if (m2) {
+    const site = m2[2];
+    const tenant = MYWORKDAYSITE_TENANTS[site];
+    if (!tenant) return null; // unknown tenant — skip rather than guess
+    return `${m2[1]}/wday/cxs/${tenant}/${site}${m2[3]}`;
+  }
+
+  return null;
 }
 
 function buildSrDescUrl(jobId, companySlug) {
