@@ -36,7 +36,7 @@ const he = require('he');
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
-const ENRICHER_VERSION = 10;  // S252: LCA alias map for Bosch/Raytheon/Vanguard/HPE/Amazon Kuiper
+const ENRICHER_VERSION = 11;  // S253: LCA alias map +2 (Lucid Motors, Together AI) + F5 length guard fix
 const SLOW_BATCH_SIZE = 40;   // GH, Ashby, Lever — HTTP calls per job
 const FAST_BATCH_SIZE = 500;  // WD, SR, JSearch, Amazon, Netflix, EF — CPU only
 const FAST_SOURCES = new Set(['workday', 'smartrecruiters', 'jsearch', 'amazon', 'netflix', 'eightfold']);
@@ -107,12 +107,16 @@ function normalizeLcaName(name) {
 //   Vanguard → "the vanguard" (LCA entry). Prefix match fails: "vanguard" ≠ "the vanguard *".
 //   HPE → "hewlett packard enterprise" (LCA entry → norm: "hewlett packard"). norm("HPE")="hpe".
 //   Amazon Kuiper Manufacturing Enterprises LLC → parent "amazon com" (LCA). No prefix match.
+//   Lucid Motors → "lucid usa" (LCA entry). norm("Lucid Motors")="lucid motors" ≠ "lucid usa". (S253)
+//   Together AI → "together computer" (LCA entry). norm("Together AI")="together ai" ≠ "together computer". (S253)
 const LCA_COMPANY_ALIASES = {
   'Bosch Group': 'Robert Bosch',
   'Raytheon Technologies': 'RTX',
   'Vanguard': 'The Vanguard',
   'HPE': 'Hewlett Packard Enterprise',
   'Amazon Kuiper Manufacturing Enterprises LLC': 'Amazon',
+  'Lucid Motors': 'Lucid USA',
+  'Together AI': 'Together Computer',
 };
 
 function isPossibleSponsor(companyName, lcaSet) {
@@ -120,7 +124,7 @@ function isPossibleSponsor(companyName, lcaSet) {
   // LCA-ALIAS-1: resolve known company name mismatches before normalization
   const resolvedName = LCA_COMPANY_ALIASES[companyName] || companyName;
   const n = normalizeLcaName(resolvedName);
-  if (!n || n.length < 3) return null;
+  if (!n || n.length < 2) return null;  // 2-char floor: allows 'f5' (F5 Inc). No 1-char LCA entries exist.
   if (lcaSet.has(n)) return true;
   // Prefix match: handles "Amazon Web Services" → matches "amazon" parent or subsidiaries
   for (const entry of lcaSet) {
