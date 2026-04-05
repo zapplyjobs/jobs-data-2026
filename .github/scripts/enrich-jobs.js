@@ -36,7 +36,7 @@ const he = require('he');
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
-const ENRICHER_VERSION = 9;   // S244: fix Bonus: section header pattern miss (nice_to_have_skills)
+const ENRICHER_VERSION = 10;  // S252: LCA alias map for Bosch/Raytheon/Vanguard/HPE/Amazon Kuiper
 const SLOW_BATCH_SIZE = 40;   // GH, Ashby, Lever — HTTP calls per job
 const FAST_BATCH_SIZE = 500;  // WD, SR, JSearch, Amazon, Netflix, EF — CPU only
 const FAST_SOURCES = new Set(['workday', 'smartrecruiters', 'jsearch', 'amazon', 'netflix', 'eightfold']);
@@ -98,9 +98,28 @@ function normalizeLcaName(name) {
   return n;
 }
 
+// LCA-ALIAS-1: Companies whose pipeline name doesn't match their DOL H-1B filing name.
+// Maps pipeline company_name → canonical LCA filing name (before normalization).
+// Verified against lca-sponsors.json FY2025 Q1 (17,648 entries).
+// Evidence per alias:
+//   Bosch Group → "robert bosch" (LCA entry). norm("Bosch Group")="bosch" ≠ "robert bosch".
+//   Raytheon Technologies → "rtx" (LCA entry, rebranded 2023). norm("Raytheon Technologies")="raytheon".
+//   Vanguard → "the vanguard" (LCA entry). Prefix match fails: "vanguard" ≠ "the vanguard *".
+//   HPE → "hewlett packard enterprise" (LCA entry → norm: "hewlett packard"). norm("HPE")="hpe".
+//   Amazon Kuiper Manufacturing Enterprises LLC → parent "amazon com" (LCA). No prefix match.
+const LCA_COMPANY_ALIASES = {
+  'Bosch Group': 'Robert Bosch',
+  'Raytheon Technologies': 'RTX',
+  'Vanguard': 'The Vanguard',
+  'HPE': 'Hewlett Packard Enterprise',
+  'Amazon Kuiper Manufacturing Enterprises LLC': 'Amazon',
+};
+
 function isPossibleSponsor(companyName, lcaSet) {
   if (!lcaSet.size) return null;
-  const n = normalizeLcaName(companyName);
+  // LCA-ALIAS-1: resolve known company name mismatches before normalization
+  const resolvedName = LCA_COMPANY_ALIASES[companyName] || companyName;
+  const n = normalizeLcaName(resolvedName);
   if (!n || n.length < 3) return null;
   if (lcaSet.has(n)) return true;
   // Prefix match: handles "Amazon Web Services" → matches "amazon" parent or subsidiaries
