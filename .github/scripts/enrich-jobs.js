@@ -36,7 +36,7 @@ const he = require('he');
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
-const ENRICHER_VERSION = 11;  // S253: LCA alias map +2 (Lucid Motors, Together AI) + F5 length guard fix
+const ENRICHER_VERSION = 12;  // ENR-6: taxonomy expansion (+6 terms: hydraulics, electrolysis, electrolyzer, biosensor, proton exchange membrane, computational materials)
 const SLOW_BATCH_SIZE = 40;   // GH, Ashby, Lever — HTTP calls per job
 const FAST_BATCH_SIZE = 500;  // WD, SR, JSearch, Amazon, Netflix, EF — CPU only
 const FAST_SOURCES = new Set(['workday', 'smartrecruiters', 'jsearch', 'amazon', 'netflix', 'eightfold']);
