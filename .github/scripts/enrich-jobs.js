@@ -36,7 +36,7 @@ const he = require('he');
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
-const ENRICHER_VERSION = 12;  // ENR-6: taxonomy expansion (+6 terms: hydraulics, electrolysis, electrolyzer, biosensor, proton exchange membrane, computational materials)
+const ENRICHER_VERSION = 13;  // ENR-9: plural suffix matching (oscilloscopes → oscilloscope, LLMs → LLM, data pipelines → data pipeline, etc.)
 const SLOW_BATCH_SIZE = 40;   // GH, Ashby, Lever — HTTP calls per job
 const FAST_BATCH_SIZE = 500;  // WD, SR, JSearch, Amazon, Netflix, EF — CPU only
 const FAST_SOURCES = new Set(['workday', 'smartrecruiters', 'jsearch', 'amazon', 'netflix', 'eightfold']);
@@ -467,6 +467,11 @@ function splitSections(text) {
 // within the same sentence/bullet to count as a match.
 const AMBIGUOUS_TERMS = new Set(['go', 'r', 'c', 'rest', 'restful', 'assembly', 'lean', 'chef', 'classification', 'move']);
 
+// ENR-9: Terms excluded from plural matching because term+s is a different word or
+// produces known false positives. http → https:// (9,700+ URL occurrences), canva → canvas
+// (HTML canvas / metaphor, not the Canva design tool), arm/cam/ray → body/hardware/light terms.
+const PLURAL_EXCLUDE = new Set(['http', 'canva', 'arm', 'cam', 'ray']);
+
 const TECH_CONTEXT_SIGNALS = [
   /\b(programming|language|developer|engineer|code|software|written in|experience with|proficien|framework|backend|api)\b/i,
 ];
@@ -501,6 +506,20 @@ function matchSkills(text, termMap) {
         }
         found.add(termCanonical);
         break; // found at least once at word boundary — no need to check more occurrences
+      }
+
+      // ENR-9: Plural match — accept term+s when followed by a non-alphanumeric character.
+      // Handles: oscilloscopes, multimeters, LLMs, APIs, data pipelines, FPGAs, etc.
+      // Skips PLURAL_EXCLUDE terms where +s produces a different word (http→https, canva→canvas).
+      if (!wordBefore && !PLURAL_EXCLUDE.has(termLower) && after === 's') {
+        const afterS = idx + termLower.length + 1 >= lower.length ? ' ' : lower[idx + termLower.length + 1];
+        if (!/[a-z0-9]/.test(afterS)) {
+          if (AMBIGUOUS_TERMS.has(termLower) && !hasTechContext(lower, idx)) {
+            continue;
+          }
+          found.add(termCanonical);
+          break;
+        }
       }
     }
   }
