@@ -458,6 +458,7 @@ graph TB
           <th style="text-align:center">Summary</th>
           <th style="text-align:center">Degree</th>
           <th style="text-align:center">Experience</th>
+          <th style="text-align:center">Visa (any)</th>
           <th style="text-align:center">Questions</th>
         </tr>
       </table>
@@ -496,6 +497,7 @@ graph TB
           <th class="sortable">Company</th>
           <th class="sortable">Source</th>
           <th class="sortable" style="text-align:right">Enriched</th>
+          <th class="sortable" style="text-align:right">T3%</th>
           <th class="sortable" style="text-align:right">Skills %</th>
           <th class="sortable" style="text-align:right">Summary %</th>
           <th class="sortable" style="text-align:right">Visa %</th>
@@ -1384,11 +1386,12 @@ function renderFieldCoverage(enrichStats) {
       summary: Math.round(100 * (v.summary_line || 0) / e),
       degree: Math.round(100 * (v.min_degree || 0) / e),
       experience: Math.round(100 * (v.experience_level_from_desc || 0) / e),
+      any_visa: Math.round(100 * (v.any_visa_signal || 0) / e),
       question_count: Math.round(100 * (v.question_count || 0) / e),
     };
     const tr = document.createElement('tr');
     tr.innerHTML = `<td>${src}</td>` +
-      ['skills', 'summary', 'degree', 'experience', 'question_count'].map(f => {
+      ['skills', 'summary', 'degree', 'experience', 'any_visa', 'question_count'].map(f => {
         const pct = fields[f];
         const style = cellColor(pct, src, f);
         const label = (STRUCTURAL[src] || []).includes(f) ? `${pct}% ⊘` : `${pct}%`;
@@ -1404,11 +1407,14 @@ function renderCompanyQuality(enrichStats) {
   if (!tbl || !enrichStats || !enrichStats.by_company) return;
   const colorPct = (v) => v >= 70 ? 'var(--green)' : v >= 40 ? 'var(--yellow)' : 'var(--red)';
   enrichStats.by_company.forEach(c => {
+    const t3 = c.t3_pct != null ? c.t3_pct : '—';
+    const t3color = t3 !== '—' ? colorPct(t3) : 'var(--muted)';
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${esc(c.company)}</td>
       <td style="font-size:11px;color:var(--muted)">${c.source}</td>
       <td style="text-align:right">${fmt(c.enriched)}</td>
+      <td style="text-align:right;color:${t3color}">${t3 === '—' ? '—' : t3 + '%'}</td>
       <td style="text-align:right;color:${colorPct(c.skills_pct)}">${c.skills_pct}%</td>
       <td style="text-align:right;color:${colorPct(c.summary_pct)}">${c.summary_pct}%</td>
       <td style="text-align:right;color:${colorPct(c.visa_pct)}">${c.visa_pct}%</td>

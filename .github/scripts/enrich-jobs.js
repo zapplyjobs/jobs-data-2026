@@ -1224,7 +1224,8 @@ async function main() {
       const src = job.source || 'unknown';
       if (!statsBySource[src]) {
         statsBySource[src] = { total: 0, tech_us: 0, has_desc: 0, enriched: 0,
-          summary_line: 0, required_skills: 0, sponsors_visa: 0, question_count: 0,
+          summary_line: 0, required_skills: 0, sponsors_visa: 0, possible_sponsor: 0,
+          any_visa_signal: 0, question_count: 0,
           min_degree: 0, experience_level_from_desc: 0 };
       }
       statsBySource[src].total++;
@@ -1258,6 +1259,9 @@ async function main() {
         if (obj.summary_line) statsBySource[src].summary_line++;
         if (obj.required_skills?.length > 0) statsBySource[src].required_skills++;
         if (obj.sponsors_visa !== null) statsBySource[src].sponsors_visa++;
+        if (obj.possible_sponsor !== null && obj.possible_sponsor !== undefined) statsBySource[src].possible_sponsor++;
+        const hasAnyVisa = obj.sponsors_visa !== null || (obj.possible_sponsor !== null && obj.possible_sponsor !== undefined) || obj.visa_question_present !== null;
+        if (hasAnyVisa) statsBySource[src].any_visa_signal++;
         if (obj.question_count !== null) statsBySource[src].question_count++;
         if (obj.min_degree !== null && obj.min_degree !== undefined) statsBySource[src].min_degree++;
         if (obj.experience_level_from_desc !== null && obj.experience_level_from_desc !== undefined) statsBySource[src].experience_level_from_desc++;
@@ -1267,13 +1271,15 @@ async function main() {
         const tier = obj.enrichment_tier !== undefined ? obj.enrichment_tier : computeEnrichmentTier(obj);
         tiersBySource[src][`t${tier}`]++;
 
-        // Per-company tracking
+        // Per-company tracking (with tier)
         const co = obj.company_name || 'Unknown';
-        if (!companyMap[co]) companyMap[co] = { source: src, enriched: 0, has_skills: 0, has_summary: 0, has_visa: 0 };
+        if (!companyMap[co]) companyMap[co] = { source: src, enriched: 0, has_skills: 0, has_summary: 0, has_visa: 0, t0: 0, t1: 0, t2: 0, t3: 0 };
         companyMap[co].enriched++;
         if (obj.required_skills?.length > 0) companyMap[co].has_skills++;
         if (obj.summary_line) companyMap[co].has_summary++;
         if (obj.sponsors_visa !== null) companyMap[co].has_visa++;
+        const coTier = obj.enrichment_tier !== undefined ? obj.enrichment_tier : computeEnrichmentTier(obj);
+        companyMap[co][`t${coTier}`]++;
       } catch (_) {}
     }
 
@@ -1286,6 +1292,8 @@ async function main() {
         skills_pct: Math.round(100 * s.has_skills / s.enriched),
         summary_pct: Math.round(100 * s.has_summary / s.enriched),
         visa_pct: Math.round(100 * s.has_visa / s.enriched),
+        t3_pct: Math.round(100 * s.t3 / s.enriched),
+        tiers: { t0: s.t0, t1: s.t1, t2: s.t2, t3: s.t3 },
       }));
 
     const totalTechUs = Object.values(statsBySource).reduce((s, v) => s + v.tech_us, 0);
