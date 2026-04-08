@@ -36,7 +36,7 @@ const he = require('he');
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
-const ENRICHER_VERSION = 15;  // ENR-12: tiered enrichment scoring (T0-T3) + ENR-14 smart-quote fix
+const ENRICHER_VERSION = 16;  // ENR-16: broader degree/experience extraction (Phase 1A+1B) + ENR-12 tiers + ENR-14 smart-quote
 const SLOW_BATCH_SIZE = 40;   // GH, Ashby, Lever — HTTP calls per job
 const FAST_BATCH_SIZE = 500;  // WD, SR, JSearch, Amazon, Netflix, EF — CPU only
 const FAST_SOURCES = new Set(['workday', 'smartrecruiters', 'jsearch', 'amazon', 'netflix', 'eightfold']);
@@ -854,20 +854,29 @@ const DEGREE_BACHELORS = /\b(bachelor['\u2019]?s?)\s*(degree|of science|of arts|
 const DEGREE_BACHELORS_ABBREV = /\bb\.s\.(\s|,|$)|\bb\.e\.(\s|,|$)/i;
 const DEGREE_ASSOCIATE = /\b(associate['\u2019]?s?)\s*(degree|in\s+\w)/i;
 const DEGREE_NONE = /\b(no (degree|college required)|equivalent experience|without (a )?degree|degree not required|equivalent combination|in lieu of degree|high school diploma|ged\b)/i;
+// ENR-16 Phase 1A: Broader degree patterns for descriptions that don't use "Bachelor's/Master's"
+const DEGREE_BS_MS_STANDALONE = /\b(ba\/bs|bs\/ms|bs\/ba|ba\/ms)\b|\b(ba|bs)\s+degree/i; // "BA/BS", "BS/MS", "BS degree", "BA degree" (no standalone "BS in")
+const DEGREE_GENERIC_BACHELORS = /\b(college|university|undergraduate|4[ -]year|four[ -]year)\s+(degree|education)/i; // "college degree", "4-year degree"
+const DEGREE_GENERIC_MASTERS = /\b(advanced|graduate)\s+degree/i; // "advanced degree", "graduate degree"
+const DEGREE_UNSPECIFIED = /\bdegree\s+in\s+\w/i; // "Degree in Computer Science" (no level → infer bachelors)
 
 function extractMinDegree(text) {
   if (!text) return null;
   if (DEGREE_NONE.test(text)) return 'none';
   // Detect all degree levels present, then return the minimum requirement.
   // "Bachelor's or Master's or PhD" → bachelors (lowest mentioned = minimum).
-  const hasBachelors = DEGREE_BACHELORS.test(text) || DEGREE_BACHELORS_ABBREV.test(text);
-  const hasMasters = DEGREE_MASTERS.test(text) || DEGREE_MASTERS_ABBREV.test(text) || DEGREE_MBA.test(text);
+  const hasBachelors = DEGREE_BACHELORS.test(text) || DEGREE_BACHELORS_ABBREV.test(text)
+    || DEGREE_BS_MS_STANDALONE.test(text) || DEGREE_GENERIC_BACHELORS.test(text);
+  const hasMasters = DEGREE_MASTERS.test(text) || DEGREE_MASTERS_ABBREV.test(text) || DEGREE_MBA.test(text)
+    || DEGREE_GENERIC_MASTERS.test(text);
   const hasPhd = DEGREE_PHD.test(text);
   const hasAssociate = DEGREE_ASSOCIATE.test(text);
   if (hasAssociate) return 'associates';
   if (hasBachelors) return 'bachelors';
   if (hasMasters) return 'masters';
   if (hasPhd) return 'phd';
+  // ENR-16 Phase 1A: "Degree in [field]" without specifying level → bachelors (industry default)
+  if (DEGREE_UNSPECIFIED.test(text)) return 'bachelors';
   return null;
 }
 
@@ -886,7 +895,14 @@ function extractMinDegree(text) {
 // Patterns seen: "N+ years of experience", "N-M years of experience",
 //   "N years experience", "N to M years of experience"
 // ---------------------------------------------------------------------------
-const EXP_YEAR_RE = /(\d+)\+?\s*(?:[-–to]+\s*\d+\s*)?years?\s*(?:of\s*)?(?:relevant\s*|related\s*|professional\s*|work\s*)?(?:experience|exp\b)/i;
+const EXP_YEAR_RE = /(\d+)\+?\s*(?:[-–to]+\s*\d+\s*)?years?\s*(?:of\s*)?(?:(?:relevant|related|professional|work|direct|hands-on|practical|prior|industry)\s*)*(?:experience|exp\b)/i;
+// ENR-16 Phase 1B: Broader experience pattern — "N+ years of [anything]" or "N+ years in [field]"
+// Catches "5+ years of facilities management experience", "3 years in software engineering"
+// The existing regex requires specific adjectives (relevant/related/professional/work) before "experience".
+// This broader pattern accepts any content between "years of/in/with" and captures the year count.
+const EXP_BROAD_RE = /(\d+)\+?\s*(?:[-–to]+\s*\d+\s*)?years?\s+(?:of|in|with)\s+/i;
+// ENR-16 Phase 1B: Seniority language fallback (no year count needed)
+const EXP_ENTRY_LEVEL_RE = /\b(entry[\s-]?level|early[\s-]?career|new\s+grad(?:uate)?s?|recent\s+grad(?:uate)?s?)\b/i;
 // ENR-14: Written-number variant ("Two years of experience", "Three years of relevant experience")
 const WRITTEN_NUMBERS = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10 };
 const EXP_WRITTEN_RE = /\b(one|two|three|four|five|six|seven|eight|nine|ten)\s+(?:to\s+\w+\s+)?years?\s*(?:of\s*)?(?:relevant\s*|related\s*|professional\s*|work\s*)?(?:experience|exp\b)/i;
@@ -898,15 +914,27 @@ function extractExperienceLevel(text) {
   const filteredText = text.split(/(?<=[.!?])\s+/)
     .filter(s => !BOILERPLATE_OPENERS.some(re => re.test(s.trim())))
     .join(' ');
+  // Try patterns in order of specificity: exact → broad → written → seniority language
   const m = EXP_YEAR_RE.exec(filteredText);
   let years;
   if (m) {
     years = parseInt(m[1], 10);
   } else {
-    // ENR-14: fallback to written-number pattern
-    const mw = EXP_WRITTEN_RE.exec(filteredText);
-    if (!mw) return null;
-    years = WRITTEN_NUMBERS[mw[1].toLowerCase()];
+    // ENR-16 Phase 1B: broader "N years of/in/with [anything]"
+    const mb = EXP_BROAD_RE.exec(filteredText);
+    if (mb) {
+      years = parseInt(mb[1], 10);
+    } else {
+      // ENR-14: written-number pattern
+      const mw = EXP_WRITTEN_RE.exec(filteredText);
+      if (mw) {
+        years = WRITTEN_NUMBERS[mw[1].toLowerCase()];
+      } else {
+        // ENR-16 Phase 1B: seniority language fallback (no year count)
+        if (EXP_ENTRY_LEVEL_RE.test(filteredText)) return 'entry_level';
+        return null;
+      }
+    }
   }
   if (years <= 2) return 'entry_level';
   if (years <= 5) return 'mid_level';
