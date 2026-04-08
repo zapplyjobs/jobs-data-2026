@@ -201,6 +201,11 @@
     .bar-track { flex: 1; background: var(--border); border-radius: 3px; height: 10px; }
     .bar-fill { height: 10px; border-radius: 3px; background: var(--accent); }
     .bar-value { font-size: 12px; width: 60px; text-align: right; }
+    .sortable { cursor: pointer; user-select: none; }
+    .sortable:hover { color: var(--accent); }
+    .sortable::after { content: ' ⇅'; font-size: 10px; opacity: 0.4; }
+    .sortable.sort-asc::after { content: ' ↑'; opacity: 0.8; }
+    .sortable.sort-desc::after { content: ' ↓'; opacity: 0.8; }
     .ok { color: var(--green); }
     .warn { color: var(--yellow); }
     .err { color: var(--red); }
@@ -465,16 +470,16 @@ graph TB
     <div class="card">
       <table id="enrich-source-table">
         <tr>
-          <th>Source</th>
-          <th style="text-align:right">Tech US</th>
-          <th style="text-align:right">Processed</th>
-          <th style="text-align:right">T3 (Full)</th>
-          <th style="text-align:right">T3%</th>
-          <th style="text-align:right">T2</th>
-          <th style="text-align:right">T1</th>
-          <th style="text-align:right">T0</th>
-          <th style="text-align:right">Skills</th>
-          <th style="text-align:right">Visa</th>
+          <th class="sortable">Source</th>
+          <th class="sortable" style="text-align:right">Tech US</th>
+          <th class="sortable" style="text-align:right">Processed</th>
+          <th class="sortable" style="text-align:right">T3 (Full)</th>
+          <th class="sortable" style="text-align:right">T3%</th>
+          <th class="sortable" style="text-align:right">T2</th>
+          <th class="sortable" style="text-align:right">T1</th>
+          <th class="sortable" style="text-align:right">T0</th>
+          <th class="sortable" style="text-align:right">Skills</th>
+          <th class="sortable" style="text-align:right">Visa</th>
         </tr>
       </table>
     </div>
@@ -482,12 +487,12 @@ graph TB
     <div class="card">
       <table id="company-quality-table">
         <tr>
-          <th>Company</th>
-          <th>Source</th>
-          <th style="text-align:right">Enriched</th>
-          <th style="text-align:right">Skills %</th>
-          <th style="text-align:right">Summary %</th>
-          <th style="text-align:right">Visa %</th>
+          <th class="sortable">Company</th>
+          <th class="sortable">Source</th>
+          <th class="sortable" style="text-align:right">Enriched</th>
+          <th class="sortable" style="text-align:right">Skills %</th>
+          <th class="sortable" style="text-align:right">Summary %</th>
+          <th class="sortable" style="text-align:right">Visa %</th>
         </tr>
       </table>
     </div>
@@ -1305,6 +1310,33 @@ function renderTierSourceChart(enrichStats) {
   });
 }
 
+// Sortable tables — click any .sortable header to sort rows
+function makeSortable(tableId) {
+  const table = document.getElementById(tableId);
+  if (!table) return;
+  const headers = table.querySelectorAll('th.sortable');
+  headers.forEach((th, colIdx) => {
+    th.addEventListener('click', () => {
+      const rows = Array.from(table.querySelectorAll('tr')).slice(1); // skip header
+      if (!rows.length) return;
+      const isAsc = th.classList.contains('sort-asc');
+      // Clear all sort indicators
+      headers.forEach(h => h.classList.remove('sort-asc', 'sort-desc'));
+      th.classList.add(isAsc ? 'sort-desc' : 'sort-asc');
+      const dir = isAsc ? -1 : 1;
+      rows.sort((a, b) => {
+        const aText = a.cells[colIdx]?.textContent.trim() || '';
+        const bText = b.cells[colIdx]?.textContent.trim() || '';
+        const aNum = parseFloat(aText.replace(/[,%⊘]/g, ''));
+        const bNum = parseFloat(bText.replace(/[,%⊘]/g, ''));
+        if (!isNaN(aNum) && !isNaN(bNum)) return (aNum - bNum) * dir;
+        return aText.localeCompare(bText) * dir;
+      });
+      rows.forEach(r => table.appendChild(r));
+    });
+  });
+}
+
 // ENR-12 S262: Field coverage heatmap — answers "WHAT is broken?" per source
 function renderFieldCoverage(enrichStats) {
   const tbl = document.getElementById('field-coverage-table');
@@ -1800,6 +1832,9 @@ async function loadAll() {
   renderTierSourceChart(enrichStats);
   renderFieldCoverage(enrichStats);
   renderSkillsBars(enrichStats);
+  // Enable sorting after tables are populated
+  makeSortable('enrich-source-table');
+  makeSortable('company-quality-table');
   renderEnrichBars(enrichStats);
   renderCompanyQuality(enrichStats);
   window._poolTotal = metadata ? metadata.total_jobs : null;
