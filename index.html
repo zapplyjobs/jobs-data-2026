@@ -1230,6 +1230,11 @@ function renderTierSourceChart(enrichStats) {
   const ORDER = ['workday', 'greenhouse', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'netflix', 'eightfold'];
   const tbs = enrichStats.tiers_by_source;
   const sources = ORDER.filter(s => tbs[s]);
+  // Include pool size in labels so operator sees scale alongside proportions
+  const labels = sources.map(s => {
+    const t = tbs[s];
+    return `${s} (${fmt(t.t0 + t.t1 + t.t2 + t.t3)})`;
+  });
   // Percentage stacking: convert counts to percentages so all bars are 0-100%.
   // This makes small segments (T0, T1) visible even when they're <1% of a large source.
   // Absolute counts shown in tooltips for context.
@@ -1239,7 +1244,7 @@ function renderTierSourceChart(enrichStats) {
     return tot > 0 ? Math.round(1000 * t[tier] / tot) / 10 : 0; // one decimal
   };
   const data = {
-    labels: sources,
+    labels: labels,
     datasets: [
       { label: 'T3 — Full (all fields)',       data: sources.map(s => pct(s, 't3')), backgroundColor: '#3fb950' },
       { label: 'T2 — Skills + Summary',         data: sources.map(s => pct(s, 't2')), backgroundColor: '#3498db' },
