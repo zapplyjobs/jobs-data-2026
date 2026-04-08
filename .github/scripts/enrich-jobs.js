@@ -36,7 +36,7 @@ const he = require('he');
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
-const ENRICHER_VERSION = 14;  // ENR-14: smart-quote fix (U+2019 curly apostrophe in degree/section headers) + written-number experience
+const ENRICHER_VERSION = 15;  // ENR-12: tiered enrichment scoring (T0-T3) + ENR-14 smart-quote fix
 const SLOW_BATCH_SIZE = 40;   // GH, Ashby, Lever — HTTP calls per job
 const FAST_BATCH_SIZE = 500;  // WD, SR, JSearch, Amazon, Netflix, EF — CPU only
 const FAST_SOURCES = new Set(['workday', 'smartrecruiters', 'jsearch', 'amazon', 'netflix', 'eightfold']);
@@ -930,6 +930,32 @@ function isEnrichable(job, descriptionsMap) {
   return true;
 }
 
+// ---------------------------------------------------------------------------
+// ENR-12: Tiered enrichment scoring (S262 operator directive)
+// Tier 0 = nothing useful, Tier 1 = summary, Tier 2 = skills+summary,
+// Tier 3 = all source-possible fields filled.
+// Sources with form access (GH/Ashby/Lever) require question_count for T3.
+// Sources without form access require only desc-extractable fields for T3.
+// ---------------------------------------------------------------------------
+const FORM_SOURCES = new Set(['greenhouse', 'ashby', 'lever']);
+
+function computeEnrichmentTier(record) {
+  const hasSummary = !!record.summary_line;
+  const hasSkills = record.required_skills?.length > 0;
+  if (!hasSummary) return 0;
+  if (!hasSkills) return 1;
+  // Tier 2 baseline: has skills + summary. Check Tier 3 requirements.
+  const hasDegree = record.min_degree !== null && record.min_degree !== undefined;
+  const hasExp = record.experience_level_from_desc !== null && record.experience_level_from_desc !== undefined;
+  if (FORM_SOURCES.has(record.source)) {
+    // Form sources: also require question_count
+    const hasForm = record.question_count !== null;
+    return (hasDegree && hasExp && hasForm) ? 3 : 2;
+  }
+  // Non-form sources: degree + experience is sufficient for T3
+  return (hasDegree && hasExp) ? 3 : 2;
+}
+
 async function enrichJob(job, termMap, descriptionsMap, lcaSet) {
 
   const rawDescription = descriptionsMap.get(job.id) || null;
@@ -981,7 +1007,7 @@ async function enrichJob(job, termMap, descriptionsMap, lcaSet) {
   // DATA-4: experience level from description — extracted from required section (fallback: full text)
   const experienceLevelFromDesc = extractExperienceLevel(text);
 
-  return {
+  const record = {
     id: job.id,
     source: job.source || null,
     enricher_version: ENRICHER_VERSION,
@@ -1002,6 +1028,8 @@ async function enrichJob(job, termMap, descriptionsMap, lcaSet) {
     // DATA-8: simple apply signal (GH: exact; Ashby/Lever: null pending schema verification)
     is_simple_apply: isSimpleApply,
     question_count: questionCount,
+    // ENR-12: tiered enrichment quality score (0=nothing, 1=summary, 2=skills+summary, 3=full)
+    enrichment_tier: 0, // placeholder — computed below
     enriched_at: new Date().toISOString(),
     // Denormalized display fields
     title: job.title || null,
@@ -1011,6 +1039,8 @@ async function enrichJob(job, termMap, descriptionsMap, lcaSet) {
     url: job.url || null,
     posted_at: job.posted_at || null,
   };
+  record.enrichment_tier = computeEnrichmentTier(record);
+  return record;
 }
 
 async function main() {
@@ -1184,8 +1214,10 @@ async function main() {
       .filter(j => (j.tags?.domains || []).some(d => TECH_DOMAINS.has(d)) && (j.tags?.locations || []).includes('us'))
       .map(j => j.id));
 
-    // ENRICH-QUALITY-2: Also build per-company stats for dashboard
+    // ENRICH-QUALITY-2: Also build per-company stats and tier distribution for dashboard
     const companyMap = {}; // company_name → { source, enriched, has_skills, has_summary, has_visa }
+    // ENR-12: Per-source tier distribution
+    const tiersBySource = {}; // source → { t0, t1, t2, t3 }
     for (const line of finalLines) {
       try {
         const obj = JSON.parse(line);
@@ -1199,6 +1231,11 @@ async function main() {
         if (obj.question_count !== null) statsBySource[src].question_count++;
         if (obj.min_degree !== null && obj.min_degree !== undefined) statsBySource[src].min_degree++;
         if (obj.experience_level_from_desc !== null && obj.experience_level_from_desc !== undefined) statsBySource[src].experience_level_from_desc++;
+
+        // ENR-12: Tier tracking — use stored tier if present (v15+), else compute from fields
+        if (!tiersBySource[src]) tiersBySource[src] = { t0: 0, t1: 0, t2: 0, t3: 0 };
+        const tier = obj.enrichment_tier !== undefined ? obj.enrichment_tier : computeEnrichmentTier(obj);
+        tiersBySource[src][`t${tier}`]++;
 
         // Per-company tracking
         const co = obj.company_name || 'Unknown';
@@ -1227,12 +1264,22 @@ async function main() {
     const totalSkills = Object.values(statsBySource).reduce((s, v) => s + v.required_skills, 0);
     const totalSummary = Object.values(statsBySource).reduce((s, v) => s + v.summary_line, 0);
 
+    // ENR-12: Aggregate tier totals
+    const totalTiers = { t0: 0, t1: 0, t2: 0, t3: 0 };
+    for (const t of Object.values(tiersBySource)) {
+      totalTiers.t0 += t.t0; totalTiers.t1 += t.t1;
+      totalTiers.t2 += t.t2; totalTiers.t3 += t.t3;
+    }
+
     const enrichmentStats = {
       generated: new Date().toISOString(),
       total_tech_us: totalTechUs,
       total_enriched: totalEnriched,
       total_has_description: totalHasDesc,
       desc_waiting: descWaiting,
+      // ENR-12: tier distribution (total + per-source)
+      tiers: totalTiers,
+      tiers_by_source: tiersBySource,
       by_source: statsBySource,
       by_company: byCompany,
     };
