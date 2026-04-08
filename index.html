@@ -417,7 +417,7 @@ graph TB
         </tr>
       </table>
     </div>
-    <div class="section-label" style="margin-top:24px">Per-Source Trend</div>
+    <div class="section-label" style="margin-top:24px">Per-Source Trend <span id="source-trend-pills"></span></div>
     <div class="card" id="source-trend-card" style="position:relative;height:220px">
       <canvas id="source-trend-canvas"></canvas>
     </div>
@@ -1040,6 +1040,15 @@ function renderSourceTrendChart(allEntries, days) {
   }
   const entries = days ? allEntries.slice(-days) : allEntries;
   if (entries.length < 2) { renderSourceTrendChart(allEntries, null); return; }
+  const pillsEl = document.getElementById('source-trend-pills');
+  if (pillsEl) {
+    const ps = d => `display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--border);margin-left:4px;` +
+      (d === days ? 'background:var(--accent);color:#fff;border-color:var(--accent)' : 'background:transparent;color:var(--muted)');
+    pillsEl.innerHTML = [7, 14, 30, null].map(d => {
+      const label = d === 7 ? '7D' : d === 14 ? '14D' : d === 30 ? '30D' : 'All';
+      return `<span style="${ps(d)}" onclick="renderSourceTrendChart(_sourceTrendAllEntries,${d})">${label}</span>`;
+    }).join('');
+  }
 
   const SOURCES = ['workday', 'greenhouse', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'netflix', 'eightfold'];
   const active = SOURCES.filter(s => entries.some(e => (e.by_source[s] || 0) > 0));
@@ -1613,12 +1622,27 @@ const CHANNEL_NAMES = {
 
 // Distribution tab — Discord stats from posted_jobs.json
 // Stars Trend — multi-line chart from history.jsonl stars field
+let _starsTrendAll = null;
 function renderStarsTrend(historyEntries) {
-  const entries = (historyEntries || []).filter(e => e.stars);
-  if (entries.length < 2) {
+  _starsTrendAll = (historyEntries || []).filter(e => e.stars);
+  renderStarsTrendChart(_starsTrendAll, 30);
+}
+function renderStarsTrendChart(allEntries, days) {
+  if (!allEntries || allEntries.length < 2) {
     const el = document.getElementById('stars-trend-card');
     if (el) el.innerHTML = '<p class="muted" style="text-align:center;padding:60px 0">Stars trend accumulating — data appears after daily stats runs.</p>';
     return;
+  }
+  const entries = days ? allEntries.slice(-days) : allEntries;
+  if (entries.length < 2) { renderStarsTrendChart(allEntries, null); return; }
+  const pillsEl = document.getElementById('stars-trend-pills');
+  if (pillsEl) {
+    const ps = d => `display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--border);margin-left:4px;` +
+      (d === days ? 'background:var(--accent);color:#fff;border-color:var(--accent)' : 'background:transparent;color:var(--muted)');
+    pillsEl.innerHTML = [7, 14, 30, null].map(d => {
+      const label = d === 7 ? '7D' : d === 14 ? '14D' : d === 30 ? '30D' : 'All';
+      return `<span style="${ps(d)}" onclick="renderStarsTrendChart(_starsTrendAll,${d})">${label}</span>`;
+    }).join('');
   }
   const REPOS = ['New-Grad-Jobs-2026','Internships-2026','New-Grad-Software-Engineering-Jobs-2026',
     'New-Grad-Data-Science-Jobs-2026','New-Grad-Hardware-Engineering-Jobs-2026','New-Grad-Healthcare-Jobs-2026'];
