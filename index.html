@@ -447,7 +447,6 @@ graph TB
           <th style="text-align:center">Summary</th>
           <th style="text-align:center">Degree</th>
           <th style="text-align:center">Experience</th>
-          <th style="text-align:center">Visa</th>
           <th style="text-align:center">Questions</th>
         </tr>
       </table>
@@ -797,11 +796,12 @@ function renderQuality(d, enrichStats, metadata) {
   }
   const techUs = enrichStats ? enrichStats.total_tech_us : null;
   const enriched = enrichStats ? enrichStats.total_enriched : null;
+  const hasDesc = enrichStats ? enrichStats.total_has_description : null;
   const queueGap = (techUs != null && enriched != null) ? techUs - enriched : null;
   document.getElementById('quality-enrich').innerHTML =
     statCard({ icon: '🏆', label: 'Tier 3 Rate',     value: t3rate, sub: t3sub }) +
     statCard({ icon: '🔬', label: 'Processed',  value: fmt(enriched), sub: `of ${fmt(techUs)} tech+US` }) +
-    statCard({ icon: '📄', label: 'Has Description', value: fmt(enrich.totalHasDescription) }) +
+    statCard({ icon: '📄', label: 'Has Description', value: fmt(hasDesc), sub: hasDesc != null && techUs != null ? Math.round(100 * hasDesc / techUs) + '% of pool' : '' }) +
     statCard({ icon: '⏳', label: 'In Queue',  value: queueGap != null ? fmt(queueGap) : '—', sub: 'awaiting enrichment' });
 
   if (enrichStats && enrichStats.by_source) {
@@ -1330,12 +1330,11 @@ function renderFieldCoverage(enrichStats) {
       summary: Math.round(100 * (v.summary_line || 0) / e),
       degree: Math.round(100 * (v.min_degree || 0) / e),
       experience: Math.round(100 * (v.experience_level_from_desc || 0) / e),
-      visa: Math.round(100 * (v.sponsors_visa || 0) / e),
       question_count: Math.round(100 * (v.question_count || 0) / e),
     };
     const tr = document.createElement('tr');
     tr.innerHTML = `<td>${src}</td>` +
-      ['skills', 'summary', 'degree', 'experience', 'visa', 'question_count'].map(f => {
+      ['skills', 'summary', 'degree', 'experience', 'question_count'].map(f => {
         const pct = fields[f];
         const style = cellColor(pct, src, f);
         const label = (STRUCTURAL[src] || []).includes(f) ? `${pct}% ⊘` : `${pct}%`;
