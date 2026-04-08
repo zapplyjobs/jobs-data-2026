@@ -434,6 +434,12 @@ graph TB
   <section id="tab-enr" class="tab-panel" style="display:none">
     <div class="section-label">Enrichment Health</div>
     <div class="grid" id="quality-enrich"></div>
+    <div class="section-label" style="margin-top:24px">Tier Distribution</div>
+    <div class="grid" id="tier-summary"></div>
+    <div class="section-label" style="margin-top:24px">Tier Distribution by Source</div>
+    <div class="card" id="tier-bars-card">
+      <div id="tier-bars"></div>
+    </div>
     <div class="section-label" style="margin-top:24px">Enrichment Trend</div>
     <div class="card" id="enrich-trend-card" style="position:relative;height:220px">
       <canvas id="enrich-trend-canvas"></canvas>
@@ -761,7 +767,11 @@ function renderQuality(d, enrichStats, metadata) {
   }
 
   // Filter Performance removed — lives in Pipeline tab Senior Filter Funnel (single-home rule)
+  const t3rate = enrichStats && enrichStats.tiers
+    ? Math.round(100 * enrichStats.tiers.t3 / (enrichStats.tiers.t0 + enrichStats.tiers.t1 + enrichStats.tiers.t2 + enrichStats.tiers.t3)) + '%'
+    : '—';
   document.getElementById('quality-enrich').innerHTML =
+    statCard({ icon: '🏆', label: 'Tier 3 Rate',     value: t3rate }) +
     statCard({ icon: '🔬', label: 'Enriched Jobs',  value: fmt(enrich.totalEnriched) }) +
     statCard({ icon: '📄', label: 'Has Description', value: fmt(enrich.totalHasDescription) }) +
     statCard({ icon: '🛂', label: 'Visa Sponsors',   value: visaTotal != null ? fmt(visaTotal) : '—' });
@@ -1192,6 +1202,63 @@ function renderSkillsBars(enrichStats) {
     labelWidth: '130px',
     colorFn: (v) => v >= 70 ? 'var(--green)' : v >= 40 ? 'var(--yellow)' : 'var(--red)',
   });
+}
+
+// ENR-12: Tier distribution summary cards + per-source stacked bars
+function renderTierSummary(enrichStats) {
+  const el = document.getElementById('tier-summary');
+  if (!el || !enrichStats || !enrichStats.tiers) {
+    if (el) el.innerHTML = '<div class="card" style="padding:16px;color:var(--muted)">Tier data not yet available — requires ENRICHER_VERSION 15+</div>';
+    return;
+  }
+  const t = enrichStats.tiers;
+  const total = t.t0 + t.t1 + t.t2 + t.t3;
+  const t3pct = total > 0 ? Math.round(100 * t.t3 / total) : 0;
+  const t2pct = total > 0 ? Math.round(100 * t.t2 / total) : 0;
+  const t1pct = total > 0 ? Math.round(100 * t.t1 / total) : 0;
+  const t0pct = total > 0 ? Math.round(100 * t.t0 / total) : 0;
+  const t3color = t3pct >= 80 ? 'var(--green)' : t3pct >= 40 ? 'var(--yellow)' : 'var(--red)';
+  el.innerHTML =
+    statCard({ icon: '🏆', label: 'Tier 3 (Full)', value: `${t3pct}%`, sub: `${fmt(t.t3)} jobs` }) +
+    statCard({ icon: '✅', label: 'Tier 2 (Skills+Summary)', value: `${t2pct}%`, sub: `${fmt(t.t2)} jobs` }) +
+    statCard({ icon: '📝', label: 'Tier 1 (Summary Only)', value: `${t1pct}%`, sub: `${fmt(t.t1)} jobs` }) +
+    statCard({ icon: '⚠️', label: 'Tier 0 (Nothing)', value: `${t0pct}%`, sub: `${fmt(t.t0)} jobs` });
+}
+
+function renderTierBars(enrichStats) {
+  const el = document.getElementById('tier-bars');
+  if (!el || !enrichStats || !enrichStats.tiers_by_source) {
+    if (el) el.innerHTML = '<p class="muted" style="text-align:center;padding:24px">Tier data not yet available</p>';
+    return;
+  }
+  const ORDER = ['workday', 'greenhouse', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'netflix', 'eightfold'];
+  const tbs = enrichStats.tiers_by_source;
+  const rows = ORDER.filter(s => tbs[s]).map(src => {
+    const t = tbs[src];
+    const total = t.t0 + t.t1 + t.t2 + t.t3;
+    if (total === 0) return '';
+    const p3 = Math.round(100 * t.t3 / total);
+    const p2 = Math.round(100 * t.t2 / total);
+    const p1 = Math.round(100 * t.t1 / total);
+    const p0 = Math.round(100 * t.t0 / total);
+    return `
+      <div class="bar-row" style="margin-bottom:6px">
+        <span class="bar-label" style="width:130px">${src}</span>
+        <div class="bar-track" style="flex:1;display:flex;height:22px;border-radius:4px;overflow:hidden;background:var(--border)">
+          <div style="width:${p3}%;background:var(--green)" title="T3: ${t.t3} (${p3}%)"></div>
+          <div style="width:${p2}%;background:var(--accent)" title="T2: ${t.t2} (${p2}%)"></div>
+          <div style="width:${p1}%;background:var(--yellow)" title="T1: ${t.t1} (${p1}%)"></div>
+          <div style="width:${p0}%;background:var(--red)" title="T0: ${t.t0} (${p0}%)"></div>
+        </div>
+        <span class="bar-value" style="min-width:50px;text-align:right">${p3}%<br><span class="muted" style="font-size:10px">T3</span></span>
+      </div>`;
+  });
+  el.innerHTML = rows.join('') +
+    '<div style="margin-top:8px;font-size:11px;color:var(--muted)">' +
+    '<span style="display:inline-block;width:10px;height:10px;background:var(--green);border-radius:2px;margin-right:4px"></span>T3 Full ' +
+    '<span style="display:inline-block;width:10px;height:10px;background:var(--accent);border-radius:2px;margin:0 4px 0 12px"></span>T2 Skills+Summary ' +
+    '<span style="display:inline-block;width:10px;height:10px;background:var(--yellow);border-radius:2px;margin:0 4px 0 12px"></span>T1 Summary ' +
+    '<span style="display:inline-block;width:10px;height:10px;background:var(--red);border-radius:2px;margin:0 4px 0 12px"></span>T0 Nothing</div>';
 }
 
 // ENRICH-QUALITY-2: Per-company enrichment quality table
@@ -1647,6 +1714,8 @@ async function loadAll() {
   renderFilterFunnel(metadata);
   renderQuality(metrics, enrichStats, metadata);
   renderEnrichTrend(enrichHistory);
+  renderTierSummary(enrichStats);
+  renderTierBars(enrichStats);
   renderSkillsBars(enrichStats);
   renderEnrichBars(enrichStats);
   renderCompanyQuality(enrichStats);
