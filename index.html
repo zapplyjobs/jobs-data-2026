@@ -203,9 +203,15 @@
     .bar-value { font-size: 12px; width: 60px; text-align: right; }
     .sortable { cursor: pointer; user-select: none; }
     .sortable:hover { color: var(--accent); }
-    .sortable::after { content: ' ⇅'; font-size: 10px; opacity: 0.4; }
-    .sortable.sort-asc::after { content: ' ↑'; opacity: 0.8; }
-    .sortable.sort-desc::after { content: ' ↓'; opacity: 0.8; }
+    .sortable::after { content: ' ⇅'; font-size: 11px; opacity: 0.5; }
+    .sortable.sort-asc::after { content: ' ↑'; opacity: 1; color: var(--accent); }
+    .sortable.sort-desc::after { content: ' ↓'; opacity: 1; color: var(--accent); }
+    #field-coverage-table tr:nth-child(even),
+    #enrich-source-table tr:nth-child(even),
+    #company-quality-table tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+    #field-coverage-table tr:hover,
+    #enrich-source-table tr:hover,
+    #company-quality-table tr:hover { background: rgba(255,255,255,0.05); }
     .ok { color: var(--green); }
     .warn { color: var(--yellow); }
     .err { color: var(--red); }
