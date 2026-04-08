@@ -1348,6 +1348,8 @@ async function main() {
           postedToday[src] = (postedToday[src] || 0) + 1;
         }
       }
+      // ENR-12: Add tier percentages to daily snapshot for trend tracking
+      const tierTotal = totalTiers.t0 + totalTiers.t1 + totalTiers.t2 + totalTiers.t3;
       const snapshot = {
         date: today,
         total_enriched: totalEnriched,
@@ -1355,6 +1357,8 @@ async function main() {
         pool_total: allJobs.length,
         skills_pct: totalEnriched > 0 ? Math.round(100 * totalSkills / totalEnriched) : 0,
         summary_pct: totalEnriched > 0 ? Math.round(100 * totalSummary / totalEnriched) : 0,
+        t3_pct: tierTotal > 0 ? Math.round(100 * totalTiers.t3 / tierTotal) : 0,
+        tiers: totalTiers,
         posted_today: postedToday,
         by_source: srcSummary,
       };

@@ -459,10 +459,13 @@ graph TB
           <th>Source</th>
           <th style="text-align:right">Tech US</th>
           <th style="text-align:right">Enriched</th>
-          <th style="text-align:right">Fill %</th>
+          <th style="text-align:right">T3</th>
+          <th style="text-align:right">T3%</th>
+          <th style="text-align:right">T2</th>
+          <th style="text-align:right">T1</th>
+          <th style="text-align:right">T0</th>
           <th style="text-align:right">Skills</th>
           <th style="text-align:right">Visa</th>
-          <th>Notes</th>
         </tr>
       </table>
     </div>
@@ -787,19 +790,25 @@ function renderQuality(d, enrichStats, metadata) {
       const v = enrichStats.by_source[src];
       const tech = v.tech_us || 0;
       const enriched = v.enriched || 0;
-      const fill = tech > 0 ? Math.round(100 * enriched / tech) : 0;
-      const fillColor = fill >= 70 ? 'var(--green)' : fill >= 40 ? 'var(--yellow)' : 'var(--red)';
-      const note = SOURCE_NOTES[src] || '';
+      // ENR-12: Tier data for detail table
+      const tbs = enrichStats.tiers_by_source || {};
+      const tier = tbs[src] || { t0: 0, t1: 0, t2: 0, t3: 0 };
+      const tierTotal = tier.t0 + tier.t1 + tier.t2 + tier.t3;
+      const t3pct = tierTotal > 0 ? Math.round(100 * tier.t3 / tierTotal) : 0;
+      const t3color = t3pct >= 80 ? 'var(--green)' : t3pct >= 40 ? 'var(--yellow)' : 'var(--red)';
       const tbl = document.getElementById('enrich-source-table');
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>${src}</td>
         <td style="text-align:right">${fmt(tech)}</td>
         <td style="text-align:right">${fmt(enriched)}</td>
-        <td style="text-align:right;color:${fillColor}">${fill}%</td>
+        <td style="text-align:right">${fmt(tier.t3)}</td>
+        <td style="text-align:right;color:${t3color}">${t3pct}%</td>
+        <td style="text-align:right">${fmt(tier.t2)}</td>
+        <td style="text-align:right">${fmt(tier.t1)}</td>
+        <td style="text-align:right">${fmt(tier.t0)}</td>
         <td style="text-align:right">${fmt(v.required_skills || 0)}</td>
         <td style="text-align:right">${fmt(v.sponsors_visa || 0)}</td>
-        <td style="font-size:11px;color:var(--muted)">${note}</td>
       `;
       tbl.appendChild(tr);
     });
@@ -1169,6 +1178,9 @@ function renderEnrichTrend(enrichHistory) {
         { label: 'Summary %', data: entries.map(e => e.summary_pct || 0),
           borderColor: CHART_COLORS.yellow, borderDash: [4, 3],
           tension: 0.3, pointRadius: 1, pointHoverRadius: 4, borderWidth: 1.5, yAxisID: 'y1' },
+        { label: 'Tier 3 %', data: entries.map(e => e.t3_pct || 0),
+          borderColor: '#a855f7', borderWidth: 2.5,
+          tension: 0.3, pointRadius: 3, pointHoverRadius: 6, yAxisID: 'y1' },
       ]
     },
     options: {
