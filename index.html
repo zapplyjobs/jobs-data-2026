@@ -1919,14 +1919,16 @@ mermaid.initialize({
   theme: document.documentElement.classList.contains('dark') ? 'dark' : 'default',
   securityLevel: 'loose',
 });
-// Render on Supply tab activation (diagram lives in Supply tab)
+// Render on INF tab activation (architecture diagram lives in INF tab)
 document.querySelectorAll('.tab').forEach(btn => {
   btn.addEventListener('click', () => {
-    if (btn.dataset.tab === 'supply') {
+    if (btn.dataset.tab === 'inf') {
       setTimeout(() => mermaid.run({ nodes: [document.getElementById('arch-diagram')] }), 50);
     }
   });
 });
+// Also render on first load since INF is the default tab
+setTimeout(() => mermaid.run({ nodes: [document.getElementById('arch-diagram')] }), 200);
 </script>
 </body>
 </html>
