@@ -442,21 +442,13 @@ graph TB
     <div class="card" id="enrich-trend-card" style="position:relative;height:220px">
       <canvas id="enrich-trend-canvas"></canvas>
     </div>
-    <div class="section-label" style="margin-top:24px">Skills Fill Rate by Source</div>
-    <div class="card" id="skills-bars-card">
-      <div id="skills-bars"></div>
-    </div>
-    <div class="section-label" style="margin-top:24px">Description Fill Rate by Source</div>
-    <div class="card" id="enrich-bars-card">
-      <div id="enrich-bars"></div>
-    </div>
     <div class="section-label" style="margin-top:24px">Enrichment Details</div>
     <div class="card">
       <table id="enrich-source-table">
         <tr>
           <th>Source</th>
           <th style="text-align:right">Tech US</th>
-          <th style="text-align:right">Enriched</th>
+          <th style="text-align:right">Processed</th>
           <th style="text-align:right">T3 (Full)</th>
           <th style="text-align:right">T3%</th>
           <th style="text-align:right">T2</th>
@@ -479,6 +471,14 @@ graph TB
           <th style="text-align:right">Visa %</th>
         </tr>
       </table>
+    </div>
+    <div class="section-label" style="margin-top:24px">Skills Fill Rate by Source</div>
+    <div class="card" id="skills-bars-card">
+      <div id="skills-bars"></div>
+    </div>
+    <div class="section-label" style="margin-top:24px">Description Fill Rate by Source</div>
+    <div class="card" id="enrich-bars-card">
+      <div id="enrich-bars"></div>
     </div>
   </section>
 
@@ -777,7 +777,7 @@ function renderQuality(d, enrichStats, metadata) {
   }
   document.getElementById('quality-enrich').innerHTML =
     statCard({ icon: '🏆', label: 'Tier 3 Rate',     value: t3rate, sub: t3sub }) +
-    statCard({ icon: '🔬', label: 'Enriched Jobs',  value: fmt(enrich.totalEnriched) }) +
+    statCard({ icon: '🔬', label: 'Processed',  value: fmt(enrich.totalEnriched), sub: 'through enricher' }) +
     statCard({ icon: '📄', label: 'Has Description', value: fmt(enrich.totalHasDescription) }) +
     statCard({ icon: '🛂', label: 'Visa Sponsors',   value: visaTotal != null ? fmt(visaTotal) : '—' });
 
@@ -1180,8 +1180,8 @@ function renderEnrichTrend(enrichHistory) {
         { label: 'Summary %', data: entries.map(e => e.summary_pct || 0),
           borderColor: CHART_COLORS.yellow, borderDash: [4, 3],
           tension: 0.3, pointRadius: 1, pointHoverRadius: 4, borderWidth: 1.5, yAxisID: 'y1' },
-        { label: 'Tier 3 %', data: entries.map(e => e.t3_pct || 0),
-          borderColor: '#a855f7', borderWidth: 2.5,
+        { label: 'Tier 3 %', data: entries.map(e => e.t3_pct != null ? e.t3_pct : null),
+          borderColor: '#a855f7', borderWidth: 2.5, spanGaps: false,
           tension: 0.3, pointRadius: 3, pointHoverRadius: 6, yAxisID: 'y1' },
       ]
     },
