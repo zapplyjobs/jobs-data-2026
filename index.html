@@ -208,10 +208,18 @@
     .sortable.sort-desc::after { content: ' ↓'; opacity: 1; color: var(--accent); }
     #field-coverage-table tr:nth-child(even),
     #enrich-source-table tr:nth-child(even),
-    #company-quality-table tr:nth-child(even) { background: rgba(128,128,128,0.08); }
+    #company-quality-table tr:nth-child(even),
+    #pipeline-source-table tr:nth-child(even),
+    #class-companies-table tr:nth-child(even),
+    #class-patterns-table tr:nth-child(even),
+    #repo-table tr:nth-child(even) { background: rgba(128,128,128,0.08); }
     #field-coverage-table tr:hover,
     #enrich-source-table tr:hover,
-    #company-quality-table tr:hover { background: rgba(128,128,128,0.15); }
+    #company-quality-table tr:hover,
+    #pipeline-source-table tr:hover,
+    #class-companies-table tr:hover,
+    #class-patterns-table tr:hover,
+    #repo-table tr:hover { background: rgba(128,128,128,0.15); }
     .ok { color: var(--green); }
     .warn { color: var(--yellow); }
     .err { color: var(--red); }
@@ -386,10 +394,10 @@
     <div class="card">
       <table id="pipeline-source-table">
         <tr>
-          <th>Source</th>
-          <th style="text-align:right">Total</th>
-          <th style="text-align:right">WoW</th>
-          <th style="text-align:right">Tech US</th>
+          <th class="sortable">Source</th>
+          <th class="sortable" style="text-align:right">Total</th>
+          <th class="sortable" style="text-align:right">WoW</th>
+          <th class="sortable" style="text-align:right">Tech US</th>
         </tr>
       </table>
     </div>
@@ -420,7 +428,7 @@
     <div class="section-label" style="margin-top:24px">Top Companies by Unclassified Jobs</div>
     <div class="card" id="class-companies-card">
       <table id="class-companies-table">
-        <tr><th>#</th><th>Company</th><th style="text-align:right">General</th><th style="text-align:right">Classified</th><th>Top Domain</th><th style="text-align:right">Desc%</th></tr>
+        <tr><th>#</th><th class="sortable">Company</th><th class="sortable" style="text-align:right">General</th><th class="sortable" style="text-align:right">Classified</th><th class="sortable">Top Domain</th><th class="sortable" style="text-align:right">Desc%</th></tr>
       </table>
     </div>
     <div class="section-label" style="margin-top:24px">General Rate by ATS</div>
@@ -430,7 +438,7 @@
     <div class="section-label" style="margin-top:24px">Recurring Title Patterns</div>
     <div class="card" id="class-patterns-card">
       <table id="class-patterns-table">
-        <tr><th>Title Pattern</th><th style="text-align:right">Count</th><th style="text-align:right">Companies</th></tr>
+        <tr><th class="sortable">Title Pattern</th><th class="sortable" style="text-align:right">Count</th><th class="sortable" style="text-align:right">Companies</th></tr>
       </table>
     </div>
     <div class="section-label" style="margin-top:24px">Tenant Default Candidates</div>
@@ -518,10 +526,10 @@
     <div class="card">
       <table id="repo-table">
         <tr>
-          <th>Repo</th>
-          <th style="text-align:right">Jobs</th>
+          <th class="sortable">Repo</th>
+          <th class="sortable" style="text-align:right">Jobs</th>
           <th>Status</th>
-          <th style="text-align:right">⭐</th>
+          <th class="sortable" style="text-align:right">⭐</th>
         </tr>
       </table>
     </div>
@@ -1861,6 +1869,10 @@ async function loadAll() {
   // Enable sorting after tables are populated
   makeSortable('enrich-source-table');
   makeSortable('company-quality-table');
+  makeSortable('pipeline-source-table');
+  makeSortable('class-companies-table');
+  makeSortable('class-patterns-table');
+  makeSortable('repo-table');
   renderEnrichBars(enrichStats);
   renderCompanyQuality(enrichStats);
   window._poolTotal = metadata ? metadata.total_jobs : null;
