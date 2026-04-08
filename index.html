@@ -795,11 +795,14 @@ function renderQuality(d, enrichStats, metadata) {
     t3rate = total > 0 ? Math.round(100 * t.t3 / total) + '%' : '0%';
     t3sub = `${fmt(t.t3)} of ${fmt(total)} jobs`;
   }
+  const techUs = enrichStats ? enrichStats.total_tech_us : null;
+  const enriched = enrichStats ? enrichStats.total_enriched : null;
+  const queueGap = (techUs != null && enriched != null) ? techUs - enriched : null;
   document.getElementById('quality-enrich').innerHTML =
     statCard({ icon: '🏆', label: 'Tier 3 Rate',     value: t3rate, sub: t3sub }) +
-    statCard({ icon: '🔬', label: 'Processed',  value: fmt(enrich.totalEnriched), sub: 'through enricher' }) +
+    statCard({ icon: '🔬', label: 'Processed',  value: fmt(enriched), sub: `of ${fmt(techUs)} tech+US` }) +
     statCard({ icon: '📄', label: 'Has Description', value: fmt(enrich.totalHasDescription) }) +
-    statCard({ icon: '🛂', label: 'Visa Sponsors',   value: visaTotal != null ? fmt(visaTotal) : '—' });
+    statCard({ icon: '⏳', label: 'In Queue',  value: queueGap != null ? fmt(queueGap) : '—', sub: 'awaiting enrichment' });
 
   if (enrichStats && enrichStats.by_source) {
     const ORDER = ['greenhouse', 'workday', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'netflix', 'eightfold'];
