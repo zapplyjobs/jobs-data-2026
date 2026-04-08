@@ -651,7 +651,8 @@ async function fetchApplicationVisaStatus(job) {
     }
 
     if (job.source === 'ashby') {
-      const applyUrl = job.apply_url;
+      // ENR-16 Phase 2: Ashby job page itself contains __appData — use url as fallback
+      const applyUrl = job.apply_url || job.url;
       if (!applyUrl) return { visaPresent: null, questionCount: null };
       const result = await httpsGet(applyUrl);
       if (!result || result.status !== 200) return { visaPresent: null, questionCount: null };
@@ -670,7 +671,8 @@ async function fetchApplicationVisaStatus(job) {
     }
 
     if (job.source === 'lever') {
-      const applyUrl = job.apply_url;
+      // ENR-16 Phase 2: Lever apply page is url + '/apply' — use as fallback when apply_url missing
+      const applyUrl = job.apply_url || (job.url ? job.url + '/apply' : null);
       if (!applyUrl) return { visaPresent: null, questionCount: null };
       const result = await httpsGet(applyUrl);
       if (!result || result.status !== 200) return { visaPresent: null, questionCount: null };
