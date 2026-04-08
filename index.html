@@ -462,7 +462,7 @@ graph TB
         <span style="color:#8b949e">gray (structural — source can't provide)</span>
       </div>
     </div>
-    <div class="section-label" style="margin-top:24px">Enrichment Trend</div>
+    <div class="section-label" style="margin-top:24px">Enrichment Trend <span id="enrich-trend-pills" style="margin-left:8px"></span></div>
     <div class="card" id="enrich-trend-card" style="position:relative;height:220px">
       <canvas id="enrich-trend-canvas"></canvas>
     </div>
@@ -1183,14 +1183,30 @@ function renderEnrichBars(enrichStats) {
 
 // ENRICH-QUALITY-2: Enrichment trend chart (from enrichment-history.jsonl)
 // Enrichment Trend — Chart.js multi-dataset (counts on left axis, percentages on right)
-// Click legend items to toggle datasets on/off
+// Click legend items to toggle datasets on/off. Pill toggles for time range.
+let _enrichTrendAll = null;
 function renderEnrichTrend(enrichHistory) {
   if (!enrichHistory || enrichHistory.length < 2) {
     const el = document.getElementById('enrich-trend-card');
     if (el) el.innerHTML = '<p class="muted" style="text-align:center;padding:60px 0">Enrichment trend — data accumulates daily.</p>';
     return;
   }
-  const entries = enrichHistory.slice(-30);
+  _enrichTrendAll = enrichHistory;
+  renderEnrichTrendChart(enrichHistory, 30);
+}
+function renderEnrichTrendChart(all, days) {
+  if (!all || all.length < 2) return;
+  const entries = days ? all.slice(-days) : all;
+  // Render pills
+  const pillsEl = document.getElementById('enrich-trend-pills');
+  if (pillsEl) {
+    const ps = d => `display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--border);margin-left:4px;` +
+      (d === days ? 'background:var(--accent);color:#fff;border-color:var(--accent)' : 'background:transparent;color:var(--muted)');
+    pillsEl.innerHTML = [7, 14, 30, null].map(d => {
+      const label = d === 7 ? '7D' : d === 14 ? '14D' : d === 30 ? '30D' : 'All';
+      return `<span style="${ps(d)}" onclick="renderEnrichTrendChart(_enrichTrendAll,${d})">${label}</span>`;
+    }).join('');
+  }
   makeChart('enrich-trend-canvas', {
     type: 'line',
     data: {
