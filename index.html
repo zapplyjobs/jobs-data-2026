@@ -1230,13 +1230,21 @@ function renderTierSourceChart(enrichStats) {
   const ORDER = ['workday', 'greenhouse', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'netflix', 'eightfold'];
   const tbs = enrichStats.tiers_by_source;
   const sources = ORDER.filter(s => tbs[s]);
+  // Percentage stacking: convert counts to percentages so all bars are 0-100%.
+  // This makes small segments (T0, T1) visible even when they're <1% of a large source.
+  // Absolute counts shown in tooltips for context.
+  const pct = (src, tier) => {
+    const t = tbs[src];
+    const tot = t.t0 + t.t1 + t.t2 + t.t3;
+    return tot > 0 ? Math.round(1000 * t[tier] / tot) / 10 : 0; // one decimal
+  };
   const data = {
     labels: sources,
     datasets: [
-      { label: 'T3 — Full (all fields)',       data: sources.map(s => tbs[s].t3), backgroundColor: '#3fb950' },
-      { label: 'T2 — Skills + Summary',         data: sources.map(s => tbs[s].t2), backgroundColor: '#3498db' },
-      { label: 'T1 — Summary only',             data: sources.map(s => tbs[s].t1), backgroundColor: '#d29922' },
-      { label: 'T0 — Nothing extracted',         data: sources.map(s => tbs[s].t0), backgroundColor: '#f85149' },
+      { label: 'T3 — Full (all fields)',       data: sources.map(s => pct(s, 't3')), backgroundColor: '#3fb950' },
+      { label: 'T2 — Skills + Summary',         data: sources.map(s => pct(s, 't2')), backgroundColor: '#3498db' },
+      { label: 'T1 — Summary only',             data: sources.map(s => pct(s, 't1')), backgroundColor: '#d29922' },
+      { label: 'T0 — Nothing extracted',         data: sources.map(s => pct(s, 't0')), backgroundColor: '#f85149' },
     ]
   };
   makeChart('tier-source-canvas', {
@@ -1251,18 +1259,18 @@ function renderTierSourceChart(enrichStats) {
         tooltip: {
           callbacks: {
             label: function(ctx) {
-              const total = ctx.dataset.data.reduce ? null : 0;
               const src = sources[ctx.dataIndex];
               const t = tbs[src];
-              const tot = t.t0 + t.t1 + t.t2 + t.t3;
-              const pct = tot > 0 ? Math.round(100 * ctx.raw / tot) : 0;
-              return `${ctx.dataset.label}: ${ctx.raw} (${pct}%)`;
+              // Show both percentage and absolute count
+              const tierKey = ['t3', 't2', 't1', 't0'][ctx.datasetIndex];
+              const count = t[tierKey];
+              return `${ctx.dataset.label}: ${ctx.raw}% (${count} jobs)`;
             }
           }
         }
       },
       scales: {
-        x: { stacked: true, ...CHART_DEFAULTS.scales.x, ticks: { ...CHART_DEFAULTS.scales.x.ticks, callback: v => fmt(v) } },
+        x: { stacked: true, max: 100, ...CHART_DEFAULTS.scales.x, ticks: { ...CHART_DEFAULTS.scales.x.ticks, callback: v => v + '%' } },
         y: { stacked: true, ...CHART_DEFAULTS.scales.y, ticks: { color: '#8b949e', font: { size: 11 } } }
       }
     }
