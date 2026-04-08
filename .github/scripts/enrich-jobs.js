@@ -36,7 +36,7 @@ const he = require('he');
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
-const ENRICHER_VERSION = 16;  // ENR-16: broader degree/experience extraction (Phase 1A+1B) + ENR-12 tiers + ENR-14 smart-quote
+const ENRICHER_VERSION = 17;  // ENR-10: industrial taxonomy +20 terms + ENR-16 broader extraction + ENR-12 tiers + ENR-14 smart-quote
 const SLOW_BATCH_SIZE = 40;   // GH, Ashby, Lever — HTTP calls per job
 const FAST_BATCH_SIZE = 500;  // WD, SR, JSearch, Amazon, Netflix, EF — CPU only
 const FAST_SOURCES = new Set(['workday', 'smartrecruiters', 'jsearch', 'amazon', 'netflix', 'eightfold']);
