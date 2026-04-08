@@ -36,7 +36,7 @@ const he = require('he');
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
-const ENRICHER_VERSION = 13;  // ENR-9: plural suffix matching (oscilloscopes → oscilloscope, LLMs → LLM, data pipelines → data pipeline, etc.)
+const ENRICHER_VERSION = 14;  // ENR-14: smart-quote fix (U+2019 curly apostrophe in degree/section headers) + written-number experience
 const SLOW_BATCH_SIZE = 40;   // GH, Ashby, Lever — HTTP calls per job
 const FAST_BATCH_SIZE = 500;  // WD, SR, JSearch, Amazon, Netflix, EF — CPU only
 const FAST_SOURCES = new Set(['workday', 'smartrecruiters', 'jsearch', 'amazon', 'netflix', 'eightfold']);
@@ -387,7 +387,7 @@ const REQUIRED_HEADERS = [
   /(?<!preferred\s)(?<!desired\s)qualifications?[:\s]?$/i,
   /what you (need|bring|must have)[:\s]?$/i,
   /what you need to succeed[:\s]?$/i,
-  /what we('?re| are) looking for[:\s]?$/i,
+  /what we(['\u2019]?re| are) looking for[:\s]?$/i,
   /education (and|&).{0,10}experience[:\s]?$/i,
   /minimum qualifications?[:\s]?$/i,
   /basic qualifications?[:\s]?$/i,
@@ -412,7 +412,7 @@ const PREFERRED_HEADERS = [
   /^[-•*]?\s*bonus:/i,              // S244: "- Bonus: side projects..." bullet pattern (Modal, Whatnot, Sentra)
   /desired qualifications?/i,
   /plus (if|points?)?[:\s]?$/i,
-  /it'?s? (a )?(bonus|plus|nice)[:\s]?$/i,
+  /it['\u2019]?s? (a )?(bonus|plus|nice)[:\s]?$/i,
   /while not required/i,
   /added (plus|bonus)/i,
 ];
@@ -847,12 +847,12 @@ function extractSummaryLine(plainText) {
 //   No-degree explicit: ~5% of GH pool
 // ---------------------------------------------------------------------------
 const DEGREE_PHD = /\b(ph\.?d\.?|doctoral|doctorate)\b/i;
-const DEGREE_MASTERS = /\b(master'?s?)\s*(degree|of science|of arts|of engineering|in\s+\w|or higher|preferred|required|or phd|or doctoral)/i;
+const DEGREE_MASTERS = /\b(master['\u2019]?s?)\s*(degree|of science|of arts|of engineering|in\s+\w|or higher|preferred|required|or phd|or doctoral)/i;
 const DEGREE_MASTERS_ABBREV = /\bm\.s\.(\s|,|$)/i;
 const DEGREE_MBA = /\bmba\b/i;
-const DEGREE_BACHELORS = /\b(bachelor'?s?)\s*(degree|of science|of arts|of engineering|in\s+\w|or higher|preferred|required|or master)/i;
+const DEGREE_BACHELORS = /\b(bachelor['\u2019]?s?)\s*(degree|of science|of arts|of engineering|in\s+\w|or higher|preferred|required|or master)/i;
 const DEGREE_BACHELORS_ABBREV = /\bb\.s\.(\s|,|$)|\bb\.e\.(\s|,|$)/i;
-const DEGREE_ASSOCIATE = /\b(associate'?s?)\s*(degree|in\s+\w)/i;
+const DEGREE_ASSOCIATE = /\b(associate['\u2019]?s?)\s*(degree|in\s+\w)/i;
 const DEGREE_NONE = /\b(no (degree|college required)|equivalent experience|without (a )?degree|degree not required|equivalent combination|in lieu of degree|high school diploma|ged\b)/i;
 
 function extractMinDegree(text) {
@@ -887,6 +887,9 @@ function extractMinDegree(text) {
 //   "N years experience", "N to M years of experience"
 // ---------------------------------------------------------------------------
 const EXP_YEAR_RE = /(\d+)\+?\s*(?:[-–to]+\s*\d+\s*)?years?\s*(?:of\s*)?(?:relevant\s*|related\s*|professional\s*|work\s*)?(?:experience|exp\b)/i;
+// ENR-14: Written-number variant ("Two years of experience", "Three years of relevant experience")
+const WRITTEN_NUMBERS = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10 };
+const EXP_WRITTEN_RE = /\b(one|two|three|four|five|six|seven|eight|nine|ten)\s+(?:to\s+\w+\s+)?years?\s*(?:of\s*)?(?:relevant\s*|related\s*|professional\s*|work\s*)?(?:experience|exp\b)/i;
 
 function extractExperienceLevel(text) {
   if (!text) return null;
@@ -896,8 +899,15 @@ function extractExperienceLevel(text) {
     .filter(s => !BOILERPLATE_OPENERS.some(re => re.test(s.trim())))
     .join(' ');
   const m = EXP_YEAR_RE.exec(filteredText);
-  if (!m) return null;
-  const years = parseInt(m[1], 10); // use lower bound of range
+  let years;
+  if (m) {
+    years = parseInt(m[1], 10);
+  } else {
+    // ENR-14: fallback to written-number pattern
+    const mw = EXP_WRITTEN_RE.exec(filteredText);
+    if (!mw) return null;
+    years = WRITTEN_NUMBERS[mw[1].toLowerCase()];
+  }
   if (years <= 2) return 'entry_level';
   if (years <= 5) return 'mid_level';
   return 'senior';
