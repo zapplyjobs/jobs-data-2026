@@ -312,41 +312,47 @@
     <div id="ops-alert" class="card"><span class="muted">No alerts.</span></div>
     <div class="section-label" style="margin-top:24px">Pipeline Architecture</div>
     <div class="card" style="overflow-x:auto">
-      <pre class="mermaid" id="arch-diagram" style="max-width:100%;background:transparent;border:none;font-size:14px">graph TB
-  subgraph Trigger
-    CFW["CF Worker — 15 min cycle"]
-  end
-  subgraph Pipeline
-    JBS["job-board-shared"] -.->|logic| AGG
-    AGG["jobs-aggregator-private"]
-  end
-  subgraph DataLayer["Data Layer"]
-    JD2["jobs-data-2026"]
-    ENRJ["enrich-jobs.js"]
-    DSC["discord-poster.js"]
-    DASHB["Dashboard"]
-  end
-  subgraph Consumers
-    NGJ["New-Grad-Jobs"]
-    INTJ["Internships"]
-    SWE["Software-Eng"]
-    DSN["Data-Science"]
-    HWJ["Hardware-Eng"]
-    HCJ["Healthcare"]
-  end
+      <pre class="mermaid" id="arch-diagram" style="max-width:100%;background:transparent;border:none">
+graph TB
+  CFW(["⏱️ CF Worker<br/>15 min cycle"])
+  JBS["🔒 job-board-shared<br/>private submodule"] -.->|logic| AGG
+  AGG["⚙️ jobs-aggregator<br/>fetch + tag + dedupe"]
+  JD2[("💾 jobs-data-2026<br/>all_jobs.json")]
+  ARC[("🗄️ jobs-archive-private<br/>weekly expired JSONL")]
+  ENR["🔬 enrich-jobs<br/>skills + visa"]
+  DSC["💬 discord-poster<br/>26 channels"]
+  NGJ["📋 New-Grad"]
+  INT["📋 Internships"]
+  SWE["📋 Software"]
+  DSN["📋 Data-Sci"]
+  HW["📋 Hardware"]
+  HC["📋 Healthcare"]
   CFW -->|dispatch| AGG
-  CFW -->|dispatch| ENRJ
+  CFW -->|dispatch| ENR
   CFW -->|dispatch| DSC
-  AGG -->|all_jobs.json| JD2
-  ENRJ -->|enriched_jobs.json| JD2
+  AGG -->|all_jobs| JD2
+  AGG -.->|expired jobs| ARC
+  ENR -->|enriched| JD2
   DSC -.->|reads| JD2
-  DASHB -.->|reads| JD2
-  JD2 -->|update-jobs.yml| NGJ
-  JD2 -->|update-jobs.yml| INTJ
-  JD2 -->|update-jobs.yml| SWE
-  JD2 -->|update-jobs.yml| DSN
-  JD2 -->|update-jobs.yml| HWJ
-  JD2 -->|update-jobs.yml| HCJ</pre>
+  JD2 -->|update| NGJ
+  JD2 -->|update| INT
+  JD2 -->|update| SWE
+  JD2 -->|update| DSN
+  JD2 -->|update| HW
+  JD2 -->|update| HC
+  style CFW fill:transparent,stroke:#f97316,stroke-width:2px,color:#fdba74
+  style AGG fill:transparent,stroke:#4a9eff,stroke-width:2px,color:#88bbff
+  style JD2 fill:transparent,stroke:#4aff7e,stroke-width:2px,color:#88ffaa
+  style ARC fill:transparent,stroke:#f59e0b,stroke-dasharray:4,color:#fbbf24
+  style ENR fill:transparent,stroke:#4a9eff,color:#88bbff
+  style DSC fill:transparent,stroke:#9b7eff,color:#bb99ff
+  style JBS fill:transparent,stroke:#f59e0b,color:#fbbf24
+  style NGJ fill:transparent,stroke:#9b7eff,color:#bb99ff
+  style INT fill:transparent,stroke:#9b7eff,color:#bb99ff
+  style SWE fill:transparent,stroke:#9b7eff,color:#bb99ff
+  style DSN fill:transparent,stroke:#9b7eff,color:#bb99ff
+  style HW fill:transparent,stroke:#9b7eff,color:#bb99ff
+  style HC fill:transparent,stroke:#9b7eff,color:#bb99ff</pre>
     </div>
   </section>
 
@@ -1886,6 +1892,9 @@ async function loadAll() {
   renderClassification(generalReview);
 
   document.getElementById('content').style.display = 'block';
+
+  // Render mermaid diagram after all data is loaded and DOM is ready
+  setTimeout(() => { try { mermaid.run(); } catch(e) { console.warn('mermaid render:', e); } }, 300);
 }
 
 loadAll();
@@ -1929,10 +1938,7 @@ mermaid.initialize({
   theme: document.documentElement.classList.contains('dark') ? 'dark' : 'default',
   securityLevel: 'loose',
 });
-// Render mermaid after page fully loads (auth overlay dismissed, data loaded)
-window.addEventListener('load', () => {
-  setTimeout(() => { try { mermaid.run(); } catch(e) { console.warn('mermaid:', e); } }, 500);
-});
+// Mermaid render is triggered at end of loadAll() — no separate handler needed
 </script>
 </body>
 </html>
