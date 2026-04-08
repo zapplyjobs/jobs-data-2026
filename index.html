@@ -304,43 +304,41 @@
     <div id="ops-alert" class="card"><span class="muted">No alerts.</span></div>
     <div class="section-label" style="margin-top:24px">Pipeline Architecture</div>
     <div class="card" style="overflow-x:auto">
-      <div class="mermaid" id="arch-diagram" style="max-width:100%">
-graph TB
+      <pre class="mermaid" id="arch-diagram" style="max-width:100%;background:transparent;border:none;font-size:14px">graph TB
   subgraph Trigger
-    CFW["CF Worker<br/>job-board-cron-worker<br/>15 min cycle"]
+    CFW["CF Worker — 15 min cycle"]
   end
   subgraph Pipeline
-    JBS["job-board-shared<br/>private submodule"] -.->|logic| AGG
-    AGG["jobs-aggregator-private<br/>fetch 9 ATS, tag, dedupe"]
+    JBS["job-board-shared"] -.->|logic| AGG
+    AGG["jobs-aggregator-private"]
   end
-  subgraph Data["Data Layer"]
-    JD2["jobs-data-2026<br/>all_jobs.json + sidecars"]
-    ENR["enrich-jobs.js<br/>skills + visa + desc"]
-    DSC["discord-poster.js<br/>26 channels"]
-    DASH["Dashboard<br/>index.html"]
+  subgraph DataLayer["Data Layer"]
+    JD2["jobs-data-2026"]
+    ENRJ["enrich-jobs.js"]
+    DSC["discord-poster.js"]
+    DASHB["Dashboard"]
   end
-  subgraph Consumers["Consumer Repos"]
+  subgraph Consumers
     NGJ["New-Grad-Jobs"]
-    INT["Internships"]
+    INTJ["Internships"]
     SWE["Software-Eng"]
     DSN["Data-Science"]
-    HW["Hardware-Eng"]
-    HC["Healthcare"]
+    HWJ["Hardware-Eng"]
+    HCJ["Healthcare"]
   end
   CFW -->|dispatch| AGG
-  CFW -->|dispatch| ENR
+  CFW -->|dispatch| ENRJ
   CFW -->|dispatch| DSC
   AGG -->|all_jobs.json| JD2
-  ENR -->|enriched_jobs.json| JD2
+  ENRJ -->|enriched_jobs.json| JD2
   DSC -.->|reads| JD2
-  DASH -.->|reads| JD2
+  DASHB -.->|reads| JD2
   JD2 -->|update-jobs.yml| NGJ
-  JD2 -->|update-jobs.yml| INT
+  JD2 -->|update-jobs.yml| INTJ
   JD2 -->|update-jobs.yml| SWE
   JD2 -->|update-jobs.yml| DSN
-  JD2 -->|update-jobs.yml| HW
-  JD2 -->|update-jobs.yml| HC
-      </div>
+  JD2 -->|update-jobs.yml| HWJ
+  JD2 -->|update-jobs.yml| HCJ</pre>
     </div>
   </section>
 
@@ -1919,16 +1917,10 @@ mermaid.initialize({
   theme: document.documentElement.classList.contains('dark') ? 'dark' : 'default',
   securityLevel: 'loose',
 });
-// Render on INF tab activation (architecture diagram lives in INF tab)
-document.querySelectorAll('.tab').forEach(btn => {
-  btn.addEventListener('click', () => {
-    if (btn.dataset.tab === 'inf') {
-      setTimeout(() => mermaid.run({ nodes: [document.getElementById('arch-diagram')] }), 50);
-    }
-  });
+// Render mermaid after page fully loads (auth overlay dismissed, data loaded)
+window.addEventListener('load', () => {
+  setTimeout(() => { try { mermaid.run(); } catch(e) { console.warn('mermaid:', e); } }, 500);
 });
-// Also render on first load since INF is the default tab
-setTimeout(() => mermaid.run({ nodes: [document.getElementById('arch-diagram')] }), 200);
 </script>
 </body>
 </html>
