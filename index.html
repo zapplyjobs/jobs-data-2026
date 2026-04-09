@@ -411,7 +411,7 @@ graph TB
         </tr>
       </table>
     </div>
-    <div class="section-label" style="margin-top:24px">Top Companies</div>
+    <div class="section-label" style="margin-top:24px">Companies by Total Job Count</div>
     <div class="card" id="top-companies-card">
       <table id="top-companies-table">
         <tr>
@@ -919,13 +919,19 @@ function renderTopCompanies(metadata, enrichStats, generalReview) {
       const gen = genMap[c.company];
       const t3 = enr?.t3_pct;
       const genCount = gen?.general;
+      // T3% with gradient: dark green >80, green 50-80, yellow 20-50, red <20
+      const t3Color = t3 == null ? '' : t3 >= 80 ? 'color:#2d8a4e' : t3 >= 50 ? 'color:var(--green)' : t3 >= 20 ? 'color:var(--yellow)' : 'color:var(--red)';
+      const t3Display = t3 != null ? `<span style="${t3Color}">${t3}%</span>` : '<span class="muted" title="Not in tech+US enrichment pool">N/A</span>';
+      // General with gradient: red >20, yellow 1-20, muted 0
+      const genColor = genCount == null ? '' : genCount > 20 ? 'color:var(--red)' : genCount > 0 ? 'color:var(--yellow)' : '';
+      const genDisplay = genCount != null ? `<span style="${genColor}">${genCount}</span>` : '<span class="muted">—</span>';
       return `<tr>
       <td style="color:var(--muted);width:32px">${i + 1}</td>
       <td>${esc(c.company)}</td>
       ${hasDomain ? `<td style="color:var(--muted)">${esc(c.domain || 'general')}</td>` : ''}
       <td style="text-align:right">${fmt(c.count)}</td>
-      <td style="text-align:right;${pctColor(t3)}">${t3 != null ? t3 + '%' : '<span class="muted">—</span>'}</td>
-      <td style="text-align:right;${genCount > 10 ? 'color:var(--red)' : genCount > 0 ? 'color:var(--yellow)' : ''}">${genCount != null ? genCount : '<span class="muted">—</span>'}</td>
+      <td style="text-align:right">${t3Display}</td>
+      <td style="text-align:right">${genDisplay}</td>
     </tr>`;
     }).join('')}
   </table>`;
@@ -1799,25 +1805,32 @@ function renderPipelineSourceTable(metrics, metadata, enrichStats) {
   sources.forEach(src => {
     const total = bySource[src] || 0;
     const delta = srcDelta[src];
-    // Show WoW with significance-based coloring (ignore noise, highlight anomalies)
+    // WoW with gradient coloring: dark green (>10% growth) → light green (5-10%) → muted (<5%) → yellow (5-15% drop) → red (>15% drop)
     let deltaStr = '<span class="muted">—</span>';
     if (delta != null) {
       const prev = total - delta;
       const pctChange = prev > 0 ? Math.round(100 * delta / prev) : 0;
-      const isSignificant = Math.abs(pctChange) >= 15; // >15% change is noteworthy
-      const color = !isSignificant ? 'var(--muted)' : delta >= 0 ? 'var(--green)' : 'var(--red)';
+      const absPct = Math.abs(pctChange);
+      let color;
+      if (pctChange > 10) color = '#2d8a4e';        // dark green — strong growth
+      else if (pctChange > 5) color = 'var(--green)'; // light green — mild growth
+      else if (pctChange >= -5) color = 'var(--muted)'; // muted — normal fluctuation
+      else if (pctChange >= -15) color = 'var(--yellow)'; // yellow — mild decline
+      else color = 'var(--red)';                      // red — significant decline
       const sign = delta >= 0 ? '+' : '';
       deltaStr = `<span style="color:${color}">${fmtDelta(delta)} (${sign}${pctChange}%)</span>`;
     }
     const ev = enrichBySource[src] || {};
     const techUs = ev.tech_us || 0;
     const techPct = total > 0 ? Math.round(100 * techUs / total) : 0;
+    // Tech US % gradient: dark green (>80%) → green (50-80%) → yellow (20-50%) → red (<20%)
+    const techColor = techPct >= 80 ? '#2d8a4e' : techPct >= 50 ? 'var(--green)' : techPct >= 20 ? 'var(--yellow)' : 'var(--red)';
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${src}</td>
       <td style="text-align:right">${fmt(total)}</td>
       <td style="text-align:right">${deltaStr}</td>
-      <td style="text-align:right">${techUs ? `${fmt(techUs)} <span class="muted">(${techPct}%)</span>` : '<span class="muted">—</span>'}</td>
+      <td style="text-align:right">${techUs ? `${fmt(techUs)} <span style="color:${techColor}">(${techPct}%)</span>` : '<span class="muted">—</span>'}</td>
     `;
     tbl.appendChild(tr);
   });
