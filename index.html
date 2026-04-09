@@ -570,6 +570,8 @@ graph TB
     <div class="card" id="stars-trend-card" style="position:relative;height:200px">
       <canvas id="stars-trend-canvas"></canvas>
     </div>
+    <div class="section-label" style="margin-top:24px">Traffic</div>
+    <div class="grid" id="traffic-stats"></div>
     <div class="section-label" style="margin-top:24px">Discord Verification</div>
     <div class="grid" id="discord-verification"></div>
     <div class="section-label" style="margin-top:24px">Discord</div>
@@ -671,6 +673,7 @@ function dataUrls() {
     historyArchive: `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/history-archive.jsonl?t=${t}`,
     generalReview: `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/general-review.json?t=${t}`,
     discordVerification: `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/discord-verification.json?t=${t}`,
+    trafficHistory: `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/traffic-history.jsonl?t=${t}`,
   };
 }
 
@@ -2058,6 +2061,35 @@ function renderStarsTrendChart(allEntries, days) {
   });
 }
 
+// OUT tab — Traffic stats from traffic-history.jsonl
+function renderTrafficStats(trafficRaw) {
+  const el = document.getElementById('traffic-stats');
+  if (!el) return;
+  if (!trafficRaw) {
+    el.innerHTML = statCard({ icon: '📊', label: 'Traffic', value: '—', sub: 'No traffic data yet' });
+    return;
+  }
+  const entries = trafficRaw.split('\n').filter(l => l.trim()).map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
+  if (!entries.length) { el.innerHTML = statCard({ icon: '📊', label: 'Traffic', value: '—' }); return; }
+  const latest = entries[entries.length - 1];
+  const repos = latest.repos || {};
+  const totalViews = Object.values(repos).reduce((s, r) => s + (r.views || 0), 0);
+  const totalUniques = Object.values(repos).reduce((s, r) => s + (r.uniques || 0), 0);
+  // Top referrers across all repos
+  const refMap = {};
+  for (const r of Object.values(repos)) {
+    for (const ref of (r.referrers || [])) {
+      refMap[ref.referrer] = (refMap[ref.referrer] || 0) + ref.count;
+    }
+  }
+  const topRefs = Object.entries(refMap).sort((a, b) => b[1] - a[1]).slice(0, 4);
+  const refSub = topRefs.map(([name, count]) => `${name}: ${count}`).join(' · ');
+  el.innerHTML =
+    statCard({ icon: '👁️', label: 'Views (14d)', value: fmt(totalViews), sub: `${fmt(totalUniques)} unique visitors` }) +
+    statCard({ icon: '🔗', label: 'Top Referrers', value: topRefs[0] ? topRefs[0][0] : '—', sub: refSub }) +
+    statCard({ icon: '📅', label: 'Data as of', value: latest.date || '—', sub: `${entries.length} daily snapshots` });
+}
+
 // OUT tab — Discord verification status from discord-verification.json
 function renderDiscordVerification(data) {
   const el = document.getElementById('discord-verification');
@@ -2263,7 +2295,7 @@ async function loadAll() {
   }
 
   // Secondary fetches (non-fatal) — metadata is primary source for pool total + tags
-  const [daily, historyRaw, enrichStats, enrichHistoryRaw, metadata, postedJobs, pipelineAlert, archiveRaw, generalReview, discordVerification] = await Promise.all([
+  const [daily, historyRaw, enrichStats, enrichHistoryRaw, metadata, postedJobs, pipelineAlert, archiveRaw, generalReview, discordVerification, trafficRaw] = await Promise.all([
     safeJson(urls.daily),
     fetch(urls.history).then(r => r.ok ? r.text() : null).catch(() => null),
     safeJson(urls.enrichment),
@@ -2274,6 +2306,7 @@ async function loadAll() {
     fetch(urls.historyArchive).then(r => r.ok ? r.text() : null).catch(() => null),
     safeJson(urls.generalReview),
     safeJson(urls.discordVerification),
+    fetch(urls.trafficHistory).then(r => r.ok ? r.text() : null).catch(() => null),
   ]);
   // Parse history.jsonl into array of {date, total} objects
   const historyEntries = historyRaw
@@ -2327,6 +2360,7 @@ async function loadAll() {
   renderSourceTrend(allHistoryMerged);
   renderStarsTrend(allHistoryMerged);
   renderGeneralTrend(allHistoryMerged);
+  renderTrafficStats(trafficRaw);
   renderDiscordVerification(discordVerification);
   renderDiscordStats(postedJobs, metadata);
   renderClassification(generalReview);
