@@ -1500,6 +1500,63 @@ function renderTierSourceChart(enrichStats) {
   });
 }
 
+// Column toggle — gear icon shows checkboxes to show/hide columns
+// Usage: addColumnToggle('table-id', {exclude: [0]}) — exclude col 0 (name) from being hideable
+function addColumnToggle(tableId, { exclude = [0] } = {}) {
+  const table = document.getElementById(tableId);
+  if (!table) return;
+  const headers = table.querySelectorAll('tr:first-child th');
+  if (headers.length <= 5) return; // not worth it for small tables
+
+  const storageKey = `col-toggle-${tableId}`;
+  const saved = JSON.parse(localStorage.getItem(storageKey) || '{}');
+
+  // Create gear button
+  const gear = document.createElement('span');
+  gear.innerHTML = ' ⚙';
+  gear.style.cssText = 'cursor:pointer;font-size:13px;opacity:0.5;position:relative;';
+  gear.title = 'Show/hide columns';
+  const headerRow = table.querySelector('tr');
+  const lastTh = headerRow.lastElementChild;
+  lastTh.appendChild(gear);
+
+  // Create dropdown
+  const dropdown = document.createElement('div');
+  dropdown.style.cssText = 'display:none;position:absolute;right:0;top:20px;background:var(--bg-card);border:1px solid var(--border);border-radius:6px;padding:8px;z-index:100;min-width:140px;box-shadow:0 4px 12px rgba(0,0,0,0.3);';
+  gear.style.position = 'relative';
+  gear.appendChild(dropdown);
+
+  headers.forEach((th, i) => {
+    if (exclude.includes(i)) return;
+    const label = th.textContent.replace(/[⇅↑↓⚙]/g, '').trim();
+    const checked = saved[i] !== false; // default visible
+    const row = document.createElement('label');
+    row.style.cssText = 'display:block;font-size:11px;color:var(--muted);cursor:pointer;padding:2px 0;font-weight:normal;';
+    row.innerHTML = `<input type="checkbox" ${checked ? 'checked' : ''} style="margin-right:6px;accent-color:var(--accent)"> ${label}`;
+    row.querySelector('input').addEventListener('change', (e) => {
+      const visible = e.target.checked;
+      saved[i] = visible;
+      localStorage.setItem(storageKey, JSON.stringify(saved));
+      toggleCol(i, visible);
+    });
+    dropdown.appendChild(row);
+    if (!checked) toggleCol(i, false);
+  });
+
+  function toggleCol(colIdx, visible) {
+    table.querySelectorAll('tr').forEach(tr => {
+      const cell = tr.cells[colIdx];
+      if (cell) cell.style.display = visible ? '' : 'none';
+    });
+  }
+
+  gear.addEventListener('click', (e) => {
+    e.stopPropagation();
+    dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+  });
+  document.addEventListener('click', () => { dropdown.style.display = 'none'; });
+}
+
 // Pagination for long tables — shows N rows per page with prev/next buttons
 function paginateTable(tableId, rowsPerPage = 10) {
   const table = document.getElementById(tableId);
@@ -1648,12 +1705,15 @@ function renderPipelineSourceTable(metrics, metadata, enrichStats) {
   sources.forEach(src => {
     const total = bySource[src] || 0;
     const delta = srcDelta[src];
-    // Show WoW as both absolute and percentage change
+    // Show WoW with significance-based coloring (ignore noise, highlight anomalies)
     let deltaStr = '<span class="muted">—</span>';
     if (delta != null) {
-      const pctChange = total > 0 ? Math.round(100 * delta / (total - delta)) : 0;
-      const color = delta >= 0 ? 'var(--green)' : 'var(--red)';
-      deltaStr = `<span style="color:${color}">${fmtDelta(delta)} (${delta >= 0 ? '+' : ''}${pctChange}%)</span>`;
+      const prev = total - delta;
+      const pctChange = prev > 0 ? Math.round(100 * delta / prev) : 0;
+      const isSignificant = Math.abs(pctChange) >= 15; // >15% change is noteworthy
+      const color = !isSignificant ? 'var(--muted)' : delta >= 0 ? 'var(--green)' : 'var(--red)';
+      const sign = delta >= 0 ? '+' : '';
+      deltaStr = `<span style="color:${color}">${fmtDelta(delta)} (${sign}${pctChange}%)</span>`;
     }
     const ev = enrichBySource[src] || {};
     const techUs = ev.tech_us || 0;
@@ -2120,6 +2180,8 @@ async function loadAll() {
   paginateTable('class-companies-table', 10);
   paginateTable('company-quality-table', 10);
   paginateTable('class-patterns-table', 10);
+  // Column toggles for wide tables
+  addColumnToggle('enrich-source-table', { exclude: [0] }); // Source column always visible
   renderEnrichBars(enrichStats);
   renderCompanyQuality(enrichStats);
   window._poolTotal = metadata ? metadata.total_jobs : null;
