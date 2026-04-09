@@ -1539,13 +1539,14 @@ let _companyDataSources = {};
 function initCompanyExpander(enrichStats, metadata, generalReview) {
   _companyDataSources = { enrichStats, metadata, generalReview };
   // Make company name cells clickable in all company tables
-  ['company-quality-table', 'class-companies-table'].forEach(tableId => {
+  ['company-quality-table', 'class-companies-table', 'top-companies-table'].forEach(tableId => {
     const table = document.getElementById(tableId);
     if (!table) return;
     table.querySelectorAll('tr').forEach((tr, i) => {
       if (i === 0) return; // skip header
       // Find the company name cell (first text cell, skip # column)
-      const nameCell = tableId === 'class-companies-table' ? tr.cells[1] : tr.cells[0];
+      const hasNumberCol = tableId === 'class-companies-table' || tableId === 'top-companies-table';
+      const nameCell = hasNumberCol ? tr.cells[1] : tr.cells[0];
       if (!nameCell) return;
       const name = nameCell.textContent.trim();
       nameCell.style.cursor = 'pointer';
