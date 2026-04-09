@@ -2075,7 +2075,7 @@ loadAll();
 
   function doRefresh() {
     // Clear table rows so re-renders don't duplicate (tables append rows)
-    ['pipeline-source-table','enrich-source-table','repo-table'].forEach(id => {
+    ['pipeline-source-table','enrich-source-table','repo-table','field-coverage-table','company-quality-table','class-companies-table','class-patterns-table'].forEach(id => {
       const el = document.getElementById(id);
       if (el) { while (el.rows.length > 1) el.deleteRow(1); }
     });
