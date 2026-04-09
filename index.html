@@ -540,10 +540,11 @@ graph TB
     <div class="card">
       <table id="repo-table">
         <tr>
+          <th>Health</th>
           <th class="sortable">Repo</th>
+          <th class="sortable">Type</th>
           <th class="sortable" style="text-align:right">Jobs</th>
-          <th>Status</th>
-          <th class="sortable">Last Updated</th>
+          <th class="sortable">Updated</th>
           <th class="sortable" style="text-align:right">⭐</th>
         </tr>
       </table>
@@ -1019,25 +1020,35 @@ function renderRepos(d, daily) {
     'Healthcare':   'New-Grad-Healthcare-Jobs-2026',
   };
   Object.entries(repos).forEach(([name, r]) => {
-    const statusIcon = r.workflowStatus === 'success' ? '<span class="ok">✅</span>'
-                     : r.workflowStatus === 'failure' ? '<span class="err">❌</span>'
-                     : '<span class="warn">⚠️</span>';
     const stars = r.stars != null ? r.stars : (starMap[REPO_NAME_MAP[name]] ?? '—');
-    // S262: Consumer freshness — show how recently the README was updated
-    const updateTs = r.lastJobsUpdate || r.workflowLastRun; // fallback to workflow run time
-    let freshness = '—';
-    if (updateTs) {
-      const hoursAgo = (Date.now() - new Date(updateTs).getTime()) / 3600000;
-      freshness = hoursAgo < 1 ? '<span style="color:var(--green)">just now</span>'
-                : hoursAgo < 24 ? `<span style="color:var(--green)">${Math.round(hoursAgo)}h ago</span>`
-                : hoursAgo < 72 ? `<span style="color:var(--yellow)">${Math.round(hoursAgo/24)}d ago</span>`
-                : `<span style="color:var(--red)">${Math.round(hoursAgo/24)}d ago</span>`;
+    const updateTs = r.lastJobsUpdate || r.workflowLastRun;
+    const hoursAgo = updateTs ? (Date.now() - new Date(updateTs).getTime()) / 3600000 : null;
+
+    // Health = composite of workflow + freshness
+    const wfOk = r.workflowStatus === 'success';
+    const fresh = hoursAgo != null && hoursAgo < 6;
+    const health = !wfOk ? '<span style="color:var(--red)">🔴 Down</span>'
+                 : !fresh && hoursAgo != null ? '<span style="color:var(--yellow)">🟡 Stale</span>'
+                 : wfOk ? '<span style="color:var(--green)">🟢 OK</span>'
+                 : '<span class="muted">—</span>';
+
+    // Freshness label
+    let freshLabel = '—';
+    if (hoursAgo != null) {
+      freshLabel = hoursAgo < 1 ? 'just now'
+                 : hoursAgo < 24 ? `${Math.round(hoursAgo)}h ago`
+                 : `${Math.round(hoursAgo/24)}d ago`;
     }
+
+    // Type: Internship or New Grad
+    const type = name === 'Internships' ? 'Internship' : 'New Grad';
+
     addRow('repo-table', [
+      health,
       name,
+      `<span style="font-size:11px;color:var(--muted)">${type}</span>`,
       r.jobCount != null ? fmt(r.jobCount) : fmt(window._poolTotal),
-      statusIcon,
-      freshness,
+      freshLabel,
       stars,
     ]);
   });
@@ -2188,8 +2199,10 @@ async function loadAll() {
   paginateTable('company-quality-table', 10);
   paginateTable('class-patterns-table', 10);
   // Column toggles for wide tables
-  addColumnToggle('enrich-source-table', { exclude: [0] }); // Source column always visible
-  addColumnToggle('class-companies-table', { exclude: [0, 1] }); // # and Company always visible
+  addColumnToggle('enrich-source-table', { exclude: [0] });
+  addColumnToggle('class-companies-table', { exclude: [0, 1] });
+  addColumnToggle('company-quality-table', { exclude: [0, 1] });
+  addColumnToggle('repo-table', { exclude: [0, 1] }); // Health and Repo always visible
   renderEnrichBars(enrichStats);
   renderCompanyQuality(enrichStats);
   window._poolTotal = metadata ? metadata.total_jobs : null;
