@@ -524,7 +524,14 @@ graph TB
         </tr>
       </table>
     </div>
-    <!-- Skills/Description fill bars removed S262 — redundant with Field Coverage table above -->
+    <div class="section-label" style="margin-top:24px">Skills Fill Rate by Source</div>
+    <div class="card" id="skills-bars-card">
+      <div id="skills-bars"></div>
+    </div>
+    <div class="section-label" style="margin-top:24px">Description Fill Rate by Source</div>
+    <div class="card" id="enrich-bars-card">
+      <div id="enrich-bars"></div>
+    </div>
   </section>
 
   <!-- OUT TAB — Output: consumer repos, stars, Discord -->
@@ -1511,10 +1518,10 @@ function addColumnToggle(tableId, { exclude = [0] } = {}) {
   const storageKey = `col-toggle-${tableId}`;
   const saved = JSON.parse(localStorage.getItem(storageKey) || '{}');
 
-  // Create gear button
+  // Create columns button (visible label, not just an icon)
   const gear = document.createElement('span');
-  gear.innerHTML = ' ⚙';
-  gear.style.cssText = 'cursor:pointer;font-size:13px;opacity:0.5;position:relative;';
+  gear.innerHTML = ' ⚙ Columns';
+  gear.style.cssText = 'cursor:pointer;font-size:10px;opacity:0.6;position:relative;margin-left:8px;padding:2px 6px;border:1px solid var(--border);border-radius:4px;';
   gear.title = 'Show/hide columns';
   const headerRow = table.querySelector('tr');
   const lastTh = headerRow.lastElementChild;
