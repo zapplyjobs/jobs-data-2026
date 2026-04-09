@@ -306,10 +306,14 @@
 
   <!-- INF TAB — Infrastructure: services, alerts, architecture -->
   <section id="tab-inf" class="tab-panel">
-    <div class="section-label">Services</div>
+    <div class="section-label">System Health</div>
+    <div class="grid" id="inf-health-summary"></div>
+    <div class="section-label" style="margin-top:24px">Services</div>
     <div class="grid-3" id="ops-services"></div>
     <div class="section-label" style="margin-top:24px">Pipeline Alert</div>
     <div id="ops-alert" class="card"><span class="muted">No alerts.</span></div>
+    <div class="section-label" style="margin-top:24px">Secrets & Deadlines</div>
+    <div class="grid" id="inf-deadlines"></div>
     <div class="section-label" style="margin-top:24px">Pipeline Architecture</div>
     <div class="card" style="overflow-x:auto">
       <pre class="mermaid" id="arch-diagram" style="max-width:100%;background:transparent;border:none">
@@ -765,6 +769,54 @@ function renderAlert(pipelineAlert) {
   }
 }
 
+// INF tab — cross-module health summary (answers "is everything OK?" in one glance)
+function renderInfHealthSummary(metrics, enrichStats, metadata, generalReview) {
+  const el = document.getElementById('inf-health-summary');
+  if (!el) return;
+  // Pipeline status
+  const statusTs = (metadata && metadata.generated) ? metadata.generated : (metrics && metrics.timestamp);
+  const hours = statusTs ? (Date.now() - new Date(statusTs).getTime()) / 3600000 : null;
+  const pipelineOk = hours != null && hours < 0.5;
+  // Pool size
+  const poolTotal = (metadata && metadata.total_jobs) ? metadata.total_jobs : null;
+  // T3 rate
+  let t3pct = null;
+  if (enrichStats && enrichStats.tiers) {
+    const t = enrichStats.tiers;
+    const total = t.t0 + t.t1 + t.t2 + t.t3;
+    t3pct = total > 0 ? Math.round(100 * t.t3 / total) : 0;
+  }
+  // G1 rate
+  const g1 = generalReview && generalReview.summary ? generalReview.summary.us_general_rate : null;
+  el.innerHTML =
+    statCard({ icon: pipelineOk ? '🟢' : '🔴', label: 'Pipeline', value: pipelineOk ? 'LIVE' : (hours != null ? 'DELAYED' : '—'), sub: statusTs ? `Last: ${age(statusTs)}` : '' }) +
+    statCard({ icon: '🏗️', label: 'Pool Size', value: fmt(poolTotal) }) +
+    statCard({ icon: '🏆', label: 'ENR T3 Rate', value: t3pct != null ? t3pct + '%' : '—', sub: t3pct != null && t3pct < 50 ? 'needs work' : '' }) +
+    statCard({ icon: '🏷️', label: 'TAG General', value: g1 != null ? g1 + '%' : '—', sub: g1 != null && g1 > 10 ? 'above target' : '' });
+}
+
+// INF tab — secrets and deadlines (hardcoded known dates — update when rotated)
+function renderDeadlines() {
+  const el = document.getElementById('inf-deadlines');
+  if (!el) return;
+  const DEADLINES = [
+    { label: 'GH_PAT Expiry', date: '2026-05-30', action: 'Rotate by May 1 (INF-17)' },
+    { label: 'GIT_CRYPT_KEY', date: '2026-07-04', action: 'Rotate by Jul 4 (INF-20)' },
+  ];
+  const now = Date.now();
+  el.innerHTML = DEADLINES.map(d => {
+    const daysLeft = Math.ceil((new Date(d.date).getTime() - now) / 86400000);
+    const urgency = daysLeft <= 7 ? 'var(--red)' : daysLeft <= 30 ? 'var(--yellow)' : 'var(--green)';
+    const icon = daysLeft <= 7 ? '🔴' : daysLeft <= 30 ? '🟡' : '🟢';
+    return statCard({
+      icon,
+      label: d.label,
+      value: `${daysLeft}d`,
+      sub: `${d.date} — ${d.action}`,
+    });
+  }).join('');
+}
+
 // Supply tab — domain distribution bars (moved from Overview)
 function renderDomainBars(metadata) {
   const barsEl = document.getElementById('domain-bars');
@@ -807,7 +859,7 @@ function renderTopCompanies(metadata) {
 }
 
 // Quality tab
-function renderQuality(d, enrichStats, metadata) {
+function renderQuality(d, enrichStats, metadata, enrichHistory) {
   const p = d.pipeline || {};
   const enrich = d.enrichment || p.enrichment || {};
 
@@ -817,13 +869,39 @@ function renderQuality(d, enrichStats, metadata) {
       .reduce((s, v) => s + (v.sponsors_visa || 0), 0);
   }
 
+  // Compute deltas from yesterday's enrichment history snapshot
+  let prevSnapshot = null;
+  if (enrichHistory && enrichHistory.length >= 2) {
+    prevSnapshot = enrichHistory[enrichHistory.length - 2]; // yesterday
+  }
+  function delta(current, prevKey) {
+    if (!prevSnapshot || current == null) return '';
+    const prev = prevSnapshot[prevKey];
+    if (prev == null) return '';
+    const diff = current - prev;
+    if (diff === 0) return '';
+    const sign = diff > 0 ? '+' : '';
+    const color = diff > 0 ? 'var(--green)' : 'var(--red)';
+    return ` <span style="font-size:11px;color:${color}">${sign}${diff}</span>`;
+  }
+
   // Filter Performance removed — lives in Pipeline tab Senior Filter Funnel (single-home rule)
-  let t3rate = '—', t3sub = '';
+  let t3rate = '—', t3sub = '', t3trend = '';
   if (enrichStats && enrichStats.tiers) {
     const t = enrichStats.tiers;
     const total = t.t0 + t.t1 + t.t2 + t.t3;
-    t3rate = total > 0 ? Math.round(100 * t.t3 / total) + '%' : '0%';
+    const t3pct = total > 0 ? Math.round(100 * t.t3 / total) : 0;
+    t3rate = t3pct + '%';
     t3sub = `${fmt(t.t3)} of ${fmt(total)} jobs`;
+    if (prevSnapshot && prevSnapshot.t3_pct != null) {
+      const diff = t3pct - prevSnapshot.t3_pct;
+      if (diff !== 0) {
+        const sign = diff > 0 ? '+' : '';
+        const color = diff > 0 ? 'var(--green)' : 'var(--red)';
+        t3trend = `${sign}${diff}pp`;
+        t3sub += ` <span style="color:${color};font-weight:600">${t3trend}</span>`;
+      }
+    }
   }
   const techUs = enrichStats ? enrichStats.total_tech_us : null;
   const enriched = enrichStats ? enrichStats.total_enriched : null;
@@ -831,7 +909,7 @@ function renderQuality(d, enrichStats, metadata) {
   const queueGap = (techUs != null && enriched != null) ? techUs - enriched : null;
   document.getElementById('quality-enrich').innerHTML =
     statCard({ icon: '🏆', label: 'Tier 3 Rate',     value: t3rate, sub: t3sub }) +
-    statCard({ icon: '🔬', label: 'Processed',  value: fmt(enriched), sub: `of ${fmt(techUs)} tech+US` }) +
+    statCard({ icon: '🔬', label: 'Processed',  value: fmt(enriched) + delta(enriched, 'total_enriched'), sub: `of ${fmt(techUs)} tech+US` }) +
     statCard({ icon: '📄', label: 'Has Description', value: fmt(hasDesc), sub: hasDesc != null && techUs != null ? Math.round(100 * hasDesc / techUs) + '% of pool' : '' }) +
     statCard({ icon: '⏳', label: 'In Queue',  value: queueGap != null ? fmt(queueGap) : '—', sub: 'awaiting enrichment' });
 
@@ -1906,7 +1984,9 @@ async function loadAll() {
   renderPipelineSourceTable(metrics, metadata, enrichStats);
   renderBreakdownTrend(historyEntries);
   renderFilterFunnel(metadata);
-  renderQuality(metrics, enrichStats, metadata);
+  renderInfHealthSummary(metrics, enrichStats, metadata, generalReview);
+  renderDeadlines();
+  renderQuality(metrics, enrichStats, metadata, enrichHistory);
   renderEnrichTrend(enrichHistory);
   renderTierSourceChart(enrichStats);
   renderFieldCoverage(enrichStats);
