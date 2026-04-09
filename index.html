@@ -1787,7 +1787,7 @@ function renderDiscordVerification(data) {
   el.innerHTML =
     statCard({ icon: statusIcon, label: 'Verification', value: statusValue, sub: `Checked ${checkedAt}` }) +
     statCard({ icon: '🧭', label: 'Routing Errors', value: c.routingErrors || 0, sub: c.routingErrors > 0 ? 'jobs in wrong channel' : '' }) +
-    statCard({ icon: '📍', label: 'Location Errors', value: c.locationErrors || 0 }) +
+    statCard({ icon: '📡', label: 'Missing Channels', value: c.missingChannels || 0, sub: c.missingChannels > 0 ? 'not accessible' : '' }) +
     statCard({ icon: '📋', label: 'Duplicates', value: c.recentDuplicates || 0, sub: c.historicalDuplicates ? `${c.historicalDuplicates} historical` : '' });
 }
 
