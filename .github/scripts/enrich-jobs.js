@@ -1286,7 +1286,7 @@ async function main() {
     // Top 30 companies by enriched count
     const byCompany = Object.entries(companyMap)
       .sort((a, b) => b[1].enriched - a[1].enriched)
-      .slice(0, 30)
+      .slice(0, 100)  // S262: expanded from 30 to 100 for company explorer
       .map(([co, s]) => ({
         company: co, source: s.source, enriched: s.enriched,
         skills_pct: Math.round(100 * s.has_skills / s.enriched),
