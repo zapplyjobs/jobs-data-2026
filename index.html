@@ -1776,7 +1776,7 @@ function renderClassification(data) {
     <div class="card"><div class="stat-label">US General Jobs</div><div class="stat-val">${fmt(s.us_general)}</div></div>
     <div class="card"><div class="stat-label">US Classified Rate</div><div class="stat-val green">${classifiedRate}%</div></div>
     <div class="card"><div class="stat-label">Companies w/ Generals</div><div class="stat-val">${data.by_company ? data.by_company.length : '—'}</div></div>
-    <div class="card"><div class="stat-label">Desc Coverage</div><div class="stat-val">${data.descriptions ? Math.round(data.descriptions.withDesc / s.us_general * 100) : '—'}%</div></div>
+    <div class="card"><div class="stat-label">Desc Coverage</div><div class="stat-val">${data.descriptions && s.us_general > 0 ? Math.round(data.descriptions.withDesc / s.us_general * 100) : '—'}%</div></div>
     <div class="card"><div class="stat-label">Review Date</div><div class="stat-val" style="font-size:14px">${s.generated ? s.generated.slice(0, 10) : '—'}</div></div>
   `;
 
