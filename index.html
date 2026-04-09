@@ -895,7 +895,7 @@ function renderDomainBars(metadata) {
 }
 
 // Supply tab — top companies table
-function renderTopCompanies(metadata) {
+function renderTopCompanies(metadata, enrichStats, generalReview) {
   const card = document.getElementById('top-companies-card');
   if (!card) return;
   const companies = metadata && Array.isArray(metadata.top_companies) ? metadata.top_companies : [];
@@ -903,16 +903,31 @@ function renderTopCompanies(metadata) {
     card.innerHTML = '<p class="muted" style="text-align:center;padding:20px 0">Top companies data unavailable.</p>';
     return;
   }
-  // DASH-4b: show domain column if data includes it
+  // Cross-source lookup maps
+  const enrMap = {};
+  (enrichStats?.by_company || []).forEach(c => { enrMap[c.company] = c; });
+  const genMap = {};
+  (generalReview?.by_company || []).forEach(c => { genMap[c.name] = c; });
+
   const hasDomain = companies.some(c => c.domain);
+  const pctColor = v => v == null ? '' : v >= 80 ? 'color:var(--green)' : v >= 40 ? 'color:var(--yellow)' : 'color:var(--red)';
+
   card.innerHTML = `<table id="top-companies-table">
-    <tr><th>#</th><th>Company</th>${hasDomain ? '<th>Domain</th>' : ''}<th style="text-align:right">Jobs</th></tr>
-    ${companies.map((c, i) => `<tr>
+    <tr><th>#</th><th>Company</th>${hasDomain ? '<th>Domain</th>' : ''}<th style="text-align:right">Jobs</th><th style="text-align:right">T3%</th><th style="text-align:right">General</th></tr>
+    ${companies.map((c, i) => {
+      const enr = enrMap[c.company];
+      const gen = genMap[c.company];
+      const t3 = enr?.t3_pct;
+      const genCount = gen?.general;
+      return `<tr>
       <td style="color:var(--muted);width:32px">${i + 1}</td>
       <td>${esc(c.company)}</td>
       ${hasDomain ? `<td style="color:var(--muted)">${esc(c.domain || 'general')}</td>` : ''}
       <td style="text-align:right">${fmt(c.count)}</td>
-    </tr>`).join('')}
+      <td style="text-align:right;${pctColor(t3)}">${t3 != null ? t3 + '%' : '<span class="muted">—</span>'}</td>
+      <td style="text-align:right;${genCount > 10 ? 'color:var(--red)' : genCount > 0 ? 'color:var(--yellow)' : ''}">${genCount != null ? genCount : '<span class="muted">—</span>'}</td>
+    </tr>`;
+    }).join('')}
   </table>`;
 }
 
@@ -2255,7 +2270,7 @@ async function loadAll() {
   renderRepos(metrics, daily);
   renderSourceBars(metrics, metadata);
   renderDomainBars(metadata);
-  renderTopCompanies(metadata);
+  renderTopCompanies(metadata, enrichStats, generalReview);
   renderSourceTrend(allHistoryMerged);
   renderStarsTrend(allHistoryMerged);
   renderGeneralTrend(allHistoryMerged);
@@ -2281,6 +2296,8 @@ async function loadAll() {
   addColumnToggle('repo-table', { exclude: [0, 1] });
   // Company detail expander (click company name for cross-source data)
   initCompanyExpander(enrichStats, metadata, generalReview);
+  paginateTable('top-companies-table', 10);
+  addColumnToggle('top-companies-table', { exclude: [0, 1] });
 
   // Render mermaid diagram after all data is loaded and DOM is ready
   setTimeout(() => { try { mermaid.run(); } catch(e) { console.warn('mermaid render:', e); } }, 300);
