@@ -751,11 +751,17 @@ function renderOpsServices(metadata) {
 
 // Ops tab — pipeline alert only (role status + decisions removed — duplicates LCC, goes stale)
 function renderAlert(pipelineAlert) {
-  const alertText = (pipelineAlert && pipelineAlert.active && pipelineAlert.message)
-    ? pipelineAlert.message
-    : null;
-  if (alertText) {
-    document.getElementById('ops-alert').innerHTML = `<span class="err">🔴 ${esc(alertText)}</span>`;
+  const el = document.getElementById('ops-alert');
+  if (!el || !pipelineAlert) return;
+  const checkedAt = pipelineAlert.checked_at ? age(pipelineAlert.checked_at) : null;
+  if (pipelineAlert.active && pipelineAlert.message) {
+    const failures = pipelineAlert.failures || [];
+    el.innerHTML = `<span class="err">🔴 ${failures.length} check(s) failing</span>` +
+      failures.map(f => `<div style="margin:4px 0 0 20px;font-size:12px;color:var(--red)">• ${esc(f)}</div>`).join('') +
+      (checkedAt ? `<div style="margin-top:8px;font-size:11px;color:var(--muted)">Last checked: ${checkedAt}</div>` : '');
+  } else {
+    el.innerHTML = `<span class="ok">✅ All checks passing</span>` +
+      (checkedAt ? `<span style="margin-left:12px;font-size:11px;color:var(--muted)">Checked ${checkedAt}</span>` : '');
   }
 }
 
@@ -1733,6 +1739,7 @@ function renderDiscordStats(posted, metadata) {
       <div><span class="stat-label">Total Posts (all time)</span><div class="stat-value" style="font-size:18px">${fmt(totalPosts)}</div></div>
       <div><span class="stat-label">Unique Jobs Posted</span><div class="stat-value" style="font-size:18px">${fmt(uniqueJobs)}</div></div>
       <div><span class="stat-label">Channels</span><div class="stat-value" style="font-size:18px">${allChannels.length}</div></div>
+      <div><span class="stat-label">Silent (&gt;7d)</span><div class="stat-value" style="font-size:18px;color:${allChannels.filter(ch => ch.lastPost && (now - new Date(ch.lastPost).getTime()) / 86400000 >= SILENT_DAYS).length > 0 ? 'var(--yellow)' : 'var(--green)'}">${allChannels.filter(ch => ch.lastPost && (now - new Date(ch.lastPost).getTime()) / 86400000 >= SILENT_DAYS).length}</div></div>
       <div><span class="stat-label">Data as of</span><div class="stat-value" style="font-size:18px">${lastUpdated}</div></div>
     </div>
     <table style="width:100%; border-collapse:collapse">
