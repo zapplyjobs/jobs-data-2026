@@ -90,6 +90,15 @@ jobs:
             echo '```' >> $GITHUB_STEP_SUMMARY
           fi
 
+      - name: Commit verification results
+        run: |
+          git config user.name "z-apply"
+          git config user.email "admin@zapply.jobs"
+          git -c filter.git-crypt.smudge=cat -c filter.git-crypt.clean=cat -c filter.git-crypt.required=false pull --rebase origin main -q || true
+          git add .github/data/discord-verification.json 2>/dev/null || true
+          git diff --cached --quiet || git commit -m "chore: update discord verification [skip ci]"
+          git push origin main -q || true
+
       - name: Delete temporary files
         if: always()
         run: |
