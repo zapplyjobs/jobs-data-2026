@@ -2187,22 +2187,8 @@ async function loadAll() {
   renderTierSourceChart(enrichStats);
   renderFieldCoverage(enrichStats);
   renderSkillsBars(enrichStats);
-  // Enable sorting after tables are populated
-  makeSortable('enrich-source-table');
-  makeSortable('company-quality-table');
-  makeSortable('pipeline-source-table');
-  makeSortable('class-companies-table');
-  makeSortable('class-patterns-table');
-  makeSortable('repo-table');
-  // Paginate long tables
-  paginateTable('class-companies-table', 10);
-  paginateTable('company-quality-table', 10);
-  paginateTable('class-patterns-table', 10);
-  // Column toggles for wide tables
-  addColumnToggle('enrich-source-table', { exclude: [0] });
-  addColumnToggle('class-companies-table', { exclude: [0, 1] });
-  addColumnToggle('company-quality-table', { exclude: [0, 1] });
-  addColumnToggle('repo-table', { exclude: [0, 1] }); // Health and Repo always visible
+  // NOTE: Sorting, pagination, and column toggles are at end of loadAll()
+  // (must run after ALL tables are populated including async renders)
   renderEnrichBars(enrichStats);
   renderCompanyQuality(enrichStats);
   window._poolTotal = metadata ? metadata.total_jobs : null;
@@ -2218,6 +2204,21 @@ async function loadAll() {
   renderClassification(generalReview);
 
   document.getElementById('content').style.display = 'block';
+
+  // Interactive features — MUST run after all tables are populated
+  makeSortable('enrich-source-table');
+  makeSortable('company-quality-table');
+  makeSortable('pipeline-source-table');
+  makeSortable('class-companies-table');
+  makeSortable('class-patterns-table');
+  makeSortable('repo-table');
+  paginateTable('class-companies-table', 10);
+  paginateTable('company-quality-table', 10);
+  paginateTable('class-patterns-table', 10);
+  addColumnToggle('enrich-source-table', { exclude: [0] });
+  addColumnToggle('class-companies-table', { exclude: [0, 1] });
+  addColumnToggle('company-quality-table', { exclude: [0, 1] });
+  addColumnToggle('repo-table', { exclude: [0, 1] });
 
   // Render mermaid diagram after all data is loaded and DOM is ready
   setTimeout(() => { try { mermaid.run(); } catch(e) { console.warn('mermaid render:', e); } }, 300);
