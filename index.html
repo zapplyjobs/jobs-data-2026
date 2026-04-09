@@ -1518,6 +1518,66 @@ function renderTierSourceChart(enrichStats) {
   });
 }
 
+// Company detail expander — click company name to see cross-source data
+// Stores loaded data references for lookup
+let _companyDataSources = {};
+function initCompanyExpander(enrichStats, metadata, generalReview) {
+  _companyDataSources = { enrichStats, metadata, generalReview };
+  // Make company name cells clickable in all company tables
+  ['company-quality-table', 'class-companies-table'].forEach(tableId => {
+    const table = document.getElementById(tableId);
+    if (!table) return;
+    table.querySelectorAll('tr').forEach((tr, i) => {
+      if (i === 0) return; // skip header
+      // Find the company name cell (first text cell, skip # column)
+      const nameCell = tableId === 'class-companies-table' ? tr.cells[1] : tr.cells[0];
+      if (!nameCell) return;
+      const name = nameCell.textContent.trim();
+      nameCell.style.cursor = 'pointer';
+      nameCell.style.textDecoration = 'underline';
+      nameCell.style.textDecorationStyle = 'dotted';
+      nameCell.title = 'Click to expand company details';
+      nameCell.addEventListener('click', () => toggleCompanyDetail(tr, name, tableId));
+    });
+  });
+}
+
+function toggleCompanyDetail(tr, companyName, tableId) {
+  // Check if detail row already exists
+  const existingDetail = tr.nextElementSibling;
+  if (existingDetail && existingDetail.classList.contains('company-detail-row')) {
+    existingDetail.remove();
+    return;
+  }
+  const d = _companyDataSources;
+  // Look up company across all sources
+  const enrData = (d.enrichStats?.by_company || []).find(c => c.company === companyName);
+  const metaData = (d.metadata?.top_companies || []).find(c => c.company === companyName);
+  const genData = (d.generalReview?.by_company || []).find(c => c.name === companyName);
+
+  const val = (v, suffix = '') => v != null ? v + suffix : '<span class="muted">—</span>';
+  const pctColor = (v) => v == null ? '' : v >= 80 ? 'color:var(--green)' : v >= 40 ? 'color:var(--yellow)' : 'color:var(--red)';
+
+  const detailRow = document.createElement('tr');
+  detailRow.classList.add('company-detail-row');
+  const cols = tr.cells.length;
+  detailRow.innerHTML = `<td colspan="${cols}" style="background:rgba(128,128,128,0.06);padding:12px 16px;font-size:12px">
+    <div style="display:flex;gap:24px;flex-wrap:wrap">
+      <div><b>Source:</b> ${val(enrData?.source || genData?.source)}</div>
+      <div><b>Domain:</b> ${val(metaData?.domain || (genData?.domain_dist?.split(',')[0]))}</div>
+      <div><b>Total Jobs:</b> ${val(metaData?.count ? fmt(metaData.count) : null)}</div>
+      <div><b>Enriched:</b> ${val(enrData?.enriched ? fmt(enrData.enriched) : null)}</div>
+      <div><b>T3%:</b> <span style="${pctColor(enrData?.t3_pct)}">${val(enrData?.t3_pct, '%')}</span></div>
+      <div><b>Skills%:</b> <span style="${pctColor(enrData?.skills_pct)}">${val(enrData?.skills_pct, '%')}</span></div>
+      <div><b>Summary%:</b> <span style="${pctColor(enrData?.summary_pct)}">${val(enrData?.summary_pct, '%')}</span></div>
+      <div><b>General:</b> ${val(genData?.general)}</div>
+      <div><b>Classified:</b> ${val(genData?.classified)}</div>
+      <div><b>Desc%:</b> ${val(genData?.has_desc_pct, '%')}</div>
+    </div>
+  </td>`;
+  tr.after(detailRow);
+}
+
 // Column toggle — gear icon shows checkboxes to show/hide columns
 // Usage: addColumnToggle('table-id', {exclude: [0]}) — exclude col 0 (name) from being hideable
 function addColumnToggle(tableId, { exclude = [0] } = {}) {
@@ -2219,6 +2279,8 @@ async function loadAll() {
   addColumnToggle('class-companies-table', { exclude: [0, 1] });
   addColumnToggle('company-quality-table', { exclude: [0, 1] });
   addColumnToggle('repo-table', { exclude: [0, 1] });
+  // Company detail expander (click company name for cross-source data)
+  initCompanyExpander(enrichStats, metadata, generalReview);
 
   // Render mermaid diagram after all data is loaded and DOM is ready
   setTimeout(() => { try { mermaid.run(); } catch(e) { console.warn('mermaid render:', e); } }, 300);
