@@ -539,6 +539,7 @@ graph TB
           <th class="sortable">Repo</th>
           <th class="sortable" style="text-align:right">Jobs</th>
           <th>Status</th>
+          <th class="sortable">Last Updated</th>
           <th class="sortable" style="text-align:right">⭐</th>
         </tr>
       </table>
@@ -969,10 +970,20 @@ function renderRepos(d, daily) {
                      : r.workflowStatus === 'failure' ? '<span class="err">❌</span>'
                      : '<span class="warn">⚠️</span>';
     const stars = r.stars != null ? r.stars : (starMap[REPO_NAME_MAP[name]] ?? '—');
+    // S262: Consumer freshness — show how recently the README was updated
+    let freshness = '—';
+    if (r.lastJobsUpdate) {
+      const hoursAgo = (Date.now() - new Date(r.lastJobsUpdate).getTime()) / 3600000;
+      freshness = hoursAgo < 1 ? '<span style="color:var(--green)">just now</span>'
+                : hoursAgo < 24 ? `<span style="color:var(--green)">${Math.round(hoursAgo)}h ago</span>`
+                : hoursAgo < 72 ? `<span style="color:var(--yellow)">${Math.round(hoursAgo/24)}d ago</span>`
+                : `<span style="color:var(--red)">${Math.round(hoursAgo/24)}d ago</span>`;
+    }
     addRow('repo-table', [
       name,
       r.jobCount != null ? fmt(r.jobCount) : fmt(window._poolTotal),
       statusIcon,
+      freshness,
       stars,
     ]);
   });
