@@ -2182,6 +2182,7 @@ async function loadAll() {
   paginateTable('class-patterns-table', 10);
   // Column toggles for wide tables
   addColumnToggle('enrich-source-table', { exclude: [0] }); // Source column always visible
+  addColumnToggle('class-companies-table', { exclude: [0, 1] }); // # and Company always visible
   renderEnrichBars(enrichStats);
   renderCompanyQuality(enrichStats);
   window._poolTotal = metadata ? metadata.total_jobs : null;
