@@ -463,7 +463,21 @@ graph TB
 
   <!-- ENR TAB — Enrichment: tier-based quality view (redesigned S262 Phase 2) -->
   <section id="tab-enr" class="tab-panel" style="display:none">
-    <div class="section-label">Enrichment Health</div>
+    <div class="section-label" style="display:flex;justify-content:space-between;align-items:center">
+      <span>Enrichment Health</span>
+      <select id="enr-source-filter" style="font-size:11px;padding:3px 8px;border:1px solid var(--border);border-radius:4px;background:transparent;color:var(--muted);cursor:pointer">
+        <option value="all">All Sources</option>
+        <option value="workday">workday</option>
+        <option value="greenhouse">greenhouse</option>
+        <option value="ashby">ashby</option>
+        <option value="lever">lever</option>
+        <option value="smartrecruiters">smartrecruiters</option>
+        <option value="amazon">amazon</option>
+        <option value="jsearch">jsearch</option>
+        <option value="netflix">netflix</option>
+        <option value="eightfold">eightfold</option>
+      </select>
+    </div>
     <div class="grid" id="quality-enrich"></div>
     <div class="section-label" style="margin-top:24px">Tier Distribution by Source</div>
     <div class="card" id="tier-source-card" style="position:relative;height:380px">
@@ -846,9 +860,15 @@ function renderInfHealthSummary(metrics, enrichStats, metadata, generalReview) {
   }
   // G1 rate
   const g1 = generalReview && generalReview.summary ? generalReview.summary.us_general_rate : null;
+  // DASH-5: Employment type split
+  const emp = enrichStats?.by_employment || {};
+  const internCount = emp.internship || 0;
+  const newGradCount = (emp.new_grad || 0) + (emp.entry_level || 0);
+  const empSub = internCount || newGradCount ? `${fmt(newGradCount)} new-grad · ${fmt(internCount)} intern` : '';
+
   el.innerHTML =
     statCard({ icon: pipelineOk ? '🟢' : '🔴', label: 'Pipeline', value: pipelineOk ? 'LIVE' : (hours != null ? 'DELAYED' : '—'), sub: statusTs ? `Last: ${age(statusTs)}` : '' }) +
-    statCard({ icon: '🏗️', label: 'Pool Size', value: fmt(poolTotal) }) +
+    statCard({ icon: '🏗️', label: 'Pool Size', value: fmt(poolTotal), sub: empSub }) +
     statCard({ icon: '🏆', label: 'ENR T3 Rate', value: t3pct != null ? t3pct + '%' : '—', sub: t3pct != null && t3pct < 50 ? 'needs work' : '' }) +
     statCard({ icon: '🏷️', label: 'TAG General', value: g1 != null ? g1 + '%' : '—', sub: g1 != null && g1 > 10 ? 'above target' : '' });
 }
@@ -1600,6 +1620,23 @@ function toggleCompanyDetail(tr, companyName, tableId) {
   tr.after(detailRow);
 }
 
+// ENR source filter — filters Field Coverage + Enrichment Details tables by source
+function initSourceFilter() {
+  const select = document.getElementById('enr-source-filter');
+  if (!select) return;
+  select.addEventListener('change', () => {
+    const val = select.value;
+    ['field-coverage-table', 'enrich-source-table'].forEach(tableId => {
+      const table = document.getElementById(tableId);
+      if (!table) return;
+      Array.from(table.querySelectorAll('tr')).slice(1).forEach(tr => {
+        const source = tr.cells[0]?.textContent.trim().toLowerCase();
+        tr.style.display = (val === 'all' || source === val) ? '' : 'none';
+      });
+    });
+  });
+}
+
 // Column toggle — gear icon shows checkboxes to show/hide columns
 // Usage: addColumnToggle('table-id', {exclude: [0]}) — exclude col 0 (name) from being hideable
 function addColumnToggle(tableId, { exclude = [0] } = {}) {
@@ -2056,9 +2093,11 @@ function renderDiscordStats(posted, metadata) {
   const lastUpdatedTs = (metadata && metadata.generated) ? metadata.generated : posted.lastUpdated;
   const lastUpdated = lastUpdatedTs ? age(lastUpdatedTs) : '—';
 
-  // Build last-post-per-channel from jobs[].discordPosts[channelId].postedAt
-  const lastPostByChannel = {};
-  if (Array.isArray(posted.jobs)) {
+  // DASH-6: Use pre-computed channelLastPosted from metadata (avoids iterating 11K+ jobs)
+  // Falls back to job iteration if pre-computed data not available yet
+  let lastPostByChannel = meta.channelLastPosted || {};
+  if (!meta.channelLastPosted && Array.isArray(posted.jobs)) {
+    lastPostByChannel = {};
     for (const job of posted.jobs) {
       for (const [chId, post] of Object.entries(job.discordPosts || {})) {
         const ts = post.postedAt;
@@ -2310,6 +2349,8 @@ async function loadAll() {
   addColumnToggle('repo-table', { exclude: [0, 1] });
   // Company detail expander (click company name for cross-source data)
   initCompanyExpander(enrichStats, metadata, generalReview);
+  // Source filter on ENR tab
+  initSourceFilter();
   paginateTable('top-companies-table', 10);
   addColumnToggle('top-companies-table', { exclude: [0, 1] });
 

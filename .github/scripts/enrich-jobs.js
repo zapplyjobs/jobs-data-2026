@@ -1237,6 +1237,17 @@ async function main() {
       }
     }
 
+    // DASH-5: Count tech+US jobs by employment type (internship vs new_grad vs other)
+    const byEmployment = {};
+    for (const job of allJobs) {
+      const domains = job.tags?.domains || [];
+      const locs = job.tags?.locations || [];
+      if (domains.some(d => TECH_DOMAINS.has(d)) && locs.includes('us')) {
+        const emp = job.tags?.employment || 'unknown';
+        byEmployment[emp] = (byEmployment[emp] || 0) + 1;
+      }
+    }
+
     // Field fill rates from enriched_jobs.json (post-prune)
     // Only count enriched records for jobs CURRENTLY in the tech+US pool.
     // Without this filter, jobs that lost their tech domain tag (e.g., TAG-1 software-title-only)
@@ -1318,6 +1329,8 @@ async function main() {
       // ENR-12: tier distribution (total + per-source)
       tiers: totalTiers,
       tiers_by_source: tiersBySource,
+      // DASH-5: employment type breakdown for tech+US pool
+      by_employment: byEmployment,
       by_source: statsBySource,
       by_company: byCompany,
     };
