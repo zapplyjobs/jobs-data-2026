@@ -1885,6 +1885,14 @@ async function loadAll() {
   const archiveEntries = archiveRaw
     ? archiveRaw.split('\n').filter(l => l.trim()).map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean)
     : null;
+  // Merge history + archive (deduped by date) for full timeline in all trend charts
+  const allHistoryMerged = (() => {
+    const byDate = {};
+    (archiveEntries || []).forEach(e => { if (e.date) byDate[e.date] = e; });
+    (historyEntries || []).forEach(e => { if (e.date) byDate[e.date] = e; }); // history overwrites archive for same date
+    return Object.values(byDate).sort((a, b) => a.date.localeCompare(b.date));
+  })();
+
   renderPoolTrend(daily, historyEntries, archiveEntries);
   renderDurationTrend(metrics, daily, historyEntries, metadata);
   renderPipelineRunStats(metrics, metadata);
@@ -1910,8 +1918,8 @@ async function loadAll() {
   renderSourceBars(metrics, metadata);
   renderDomainBars(metadata);
   renderTopCompanies(metadata);
-  renderSourceTrend(historyEntries);
-  renderStarsTrend(historyEntries);
+  renderSourceTrend(allHistoryMerged);
+  renderStarsTrend(allHistoryMerged);
   renderDiscordStats(postedJobs, metadata);
   renderClassification(generalReview);
 
