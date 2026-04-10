@@ -1717,9 +1717,14 @@ function paginateTable(tableId, rowsPerPage = 10) {
   let page = 0;
   const totalPages = Math.ceil(rows.length / rowsPerPage);
 
+  // Remove any existing pagination controls (prevents duplicates on refresh)
+  const existing = table.parentElement.querySelectorAll('[data-pagination="' + tableId + '"]');
+  existing.forEach(el => el.remove());
+
   // Create pagination controls
   const controls = document.createElement('div');
   controls.style.cssText = 'display:flex;justify-content:center;gap:8px;margin-top:8px;font-size:12px;';
+  controls.setAttribute('data-pagination', tableId);
   table.parentElement.appendChild(controls);
 
   function render() {
