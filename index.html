@@ -473,7 +473,7 @@
           <th class="sortable">Source</th>
           <th class="sortable" style="text-align:right">Tech US</th>
           <th class="sortable" style="text-align:right">Processed</th>
-          <th class="sortable" style="text-align:right">T3 (Full)</th>
+          <th class="sortable" style="text-align:right">T3 (Degree+Visa)</th>
           <th class="sortable" style="text-align:right">T3%</th>
           <th class="sortable" style="text-align:right">T2</th>
           <th class="sortable" style="text-align:right">T1</th>
@@ -1548,10 +1548,10 @@ function renderTierSourceChart(enrichStats) {
   const data = {
     labels: labels,
     datasets: [
-      { label: 'T3 — Full (all fields)',       data: sources.map(s => pct(s, 't3')), backgroundColor: '#3fb950' },
-      { label: 'T2 — Skills + Summary',         data: sources.map(s => pct(s, 't2')), backgroundColor: '#3498db' },
-      { label: 'T1 — Summary only',             data: sources.map(s => pct(s, 't1')), backgroundColor: '#d29922' },
-      { label: 'T0 — Nothing extracted',         data: sources.map(s => pct(s, 't0')), backgroundColor: '#f85149' },
+      { label: 'T3 — Degree + Visa',             data: sources.map(s => pct(s, 't3')), backgroundColor: '#3fb950' },
+      { label: 'T2 — Skills',                    data: sources.map(s => pct(s, 't2')), backgroundColor: '#3498db' },
+      { label: 'T1 — Description',               data: sources.map(s => pct(s, 't1')), backgroundColor: '#d29922' },
+      { label: 'T0 — No description',             data: sources.map(s => pct(s, 't0')), backgroundColor: '#f85149' },
     ]
   };
   makeChart('tier-source-canvas', {
