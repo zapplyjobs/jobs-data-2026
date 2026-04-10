@@ -244,13 +244,12 @@ async function fetchMissingDescriptions(allJobs, descriptionsMap, activeChunkPat
       console.log(`[enrich-jobs] DESC-MIGRATE-1: time limit reached after ${fetched} fetches`);
       break;
     }
-    let url, rawHtml;
+    let url, rawHtml, additionalLocations = null;
     if (job.source === 'workday') {
       url = buildWdDescUrl(job.url);
       if (!url) continue;
       const result = await quickGet(url);
       if (!result || result.status !== 200) { failCache[job.id] = Date.now(); continue; }
-      let additionalLocations = null;
       try {
         const data = JSON.parse(result.body);
         rawHtml = data?.jobPostingInfo?.jobDescription || null;
