@@ -1,0 +1,20 @@
+name: Debug enrich-jobs
+on: workflow_dispatch
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Decrypt
+        run: |
+          echo "${{ secrets.GIT_CRYPT_KEY }}" | base64 -d > /tmp/key
+          sudo apt-get install -y git-crypt -q
+          git-crypt unlock /tmp/key
+          rm /tmp/key
+      - name: Show crash area
+        run: |
+          echo "=== Lines 240-300 of enrich-jobs.js ==="
+          sed -n '240,300p' .github/scripts/enrich-jobs.js
+          echo ""
+          echo "=== Line 281 specifically ==="
+          sed -n '281p' .github/scripts/enrich-jobs.js
