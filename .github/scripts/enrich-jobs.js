@@ -306,7 +306,10 @@ async function fetchMissingDescriptions(allJobs, descriptionsMap, activeChunkPat
       if (!result || result.status !== 200) { failCache[job.id] = Date.now(); continue; }
       try {
         const data = JSON.parse(result.body);
-        rawHtml = data?.jobAd?.sections?.jobDescription?.text || null;
+        // ENR-19: Also read qualifications section (contains degree requirements)
+        const descHtml = data?.jobAd?.sections?.jobDescription?.text || '';
+        const qualHtml = data?.jobAd?.sections?.qualifications?.text || '';
+        rawHtml = [descHtml, qualHtml].filter(Boolean).join('\n') || null;
       } catch (_) { failCache[job.id] = Date.now(); continue; }
     }
 
