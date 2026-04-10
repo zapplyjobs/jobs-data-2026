@@ -36,7 +36,7 @@ const he = require('he');
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
-const ENRICHER_VERSION = 19;  // S266: ENR-18 Amazon qualifications + ENR-19 SR qualifications
+const ENRICHER_VERSION = 20;  // S266: LCA-ALIAS-3 — 8 new visa aliases
 const SLOW_BATCH_SIZE = 40;   // GH, Ashby, Lever — HTTP calls per job
 const FAST_BATCH_SIZE = 500;  // WD, SR, JSearch, Amazon, Netflix, EF — CPU only
 const FAST_SOURCES = new Set(['workday', 'smartrecruiters', 'jsearch', 'amazon', 'netflix', 'eightfold']);
@@ -117,6 +117,15 @@ const LCA_COMPANY_ALIASES = {
   'Amazon Kuiper Manufacturing Enterprises LLC': 'Amazon',
   'Lucid Motors': 'Lucid USA',
   'Together AI': 'Together Computer',
+  // S266 LCA-ALIAS-3: 8 new aliases verified against lca-sponsors.json
+  'CACI': 'CACI Federal',                              // norm→"caci" ≠ "caci federal" (191 jobs)
+  'Boeing': 'The Boeing',                               // norm→"boeing" ≠ "the boeing" (148 jobs)
+  'Oshkosh Corporation': 'Oshkosh Defense',             // norm→"oshkosh" ≠ "oshkosh defense" (85 jobs)
+  'Motorola Solutions': 'Motorola',                     // norm→"motorola solutions" ≠ "motorola" (52 jobs)
+  'Intuitive': 'Intuitive Surgical',                    // norm→"intuitive" ≠ "intuitive surgical" (52 jobs)
+  'KBR': 'KBR Wyle',                                   // norm→"kbr" ≠ "kbr wyle" (51 jobs)
+  'GlobalFoundries': 'GlobalFoundries U S',             // norm→"globalfoundries" ≠ "globalfoundries u s" (46 jobs)
+  'SEL': 'Schweitzer Engineering Laboratories',         // norm→"sel" ≠ "schweitzer engineering laboratories" (75 jobs)
 };
 
 function isPossibleSponsor(companyName, lcaSet) {
