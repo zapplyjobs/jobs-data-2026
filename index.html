@@ -2370,7 +2370,7 @@ async function loadAll() {
 
   renderPoolTrend(daily, historyEntries, archiveEntries);
   renderDurationTrend(metrics, daily, historyEntries, metadata);
-  renderPipelineRunStats(metrics, metadata);
+  // renderPipelineRunStats removed — Last Run section removed (redundant with stat cards)
   renderPipelineSourceTable(metrics, metadata, enrichStats);
   renderBreakdownTrend(historyEntries);
   renderFilterFunnel(metadata);
@@ -2380,10 +2380,10 @@ async function loadAll() {
   renderEnrichTrend(enrichHistory);
   renderTierSourceChart(enrichStats);
   renderFieldCoverage(enrichStats);
-  renderSkillsBars(enrichStats);
+  // renderSkillsBars removed — redundant with Field Coverage table
   // NOTE: Sorting, pagination, and column toggles are at end of loadAll()
   // (must run after ALL tables are populated including async renders)
-  renderEnrichBars(enrichStats);
+  // renderEnrichBars removed — redundant with Field Coverage table
   renderCompanyQuality(enrichStats);
   window._poolTotal = metadata ? metadata.total_jobs : null;
   renderRepos(metrics, daily);
