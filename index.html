@@ -293,19 +293,19 @@
 <div id="app-body">
 <aside id="sidebar">
   <div id="sidebar-label">Navigation</div>
-  <button class="tab active" data-tab="inf">🔧 INF</button>
-  <button class="tab" data-tab="agg">⚙️ AGG</button>
-  <button class="tab" data-tab="sup">🏭 SUP</button>
+  <button class="tab active" data-tab="agg">⚙️ AGG</button>
   <button class="tab" data-tab="tag">🏷️ TAG</button>
-  <button class="tab" data-tab="enr">✅ ENR</button>
+  <button class="tab" data-tab="enr">🔬 ENR</button>
+  <button class="tab" data-tab="sup">🏭 SUP</button>
   <button class="tab" data-tab="out">📡 OUT</button>
+  <button class="tab" data-tab="inf">🔧 INF</button>
 </aside>
 
 <div id="content-wrap" style="flex:1;min-width:0;overflow-y:auto">
 <main id="content" style="padding: 24px; display:none">
 
   <!-- INF TAB — Infrastructure: services, alerts, architecture -->
-  <section id="tab-inf" class="tab-panel">
+  <section id="tab-inf" class="tab-panel" style="display:none">
     <div class="section-label">System Health</div>
     <div class="grid" id="inf-health-summary"></div>
     <div class="section-label" style="margin-top:24px">Services</div>
@@ -361,7 +361,7 @@ graph TB
   </section>
 
   <!-- AGG TAB — Aggregation: pipeline runs, pool, duration, senior filter -->
-  <section id="tab-agg" class="tab-panel" style="display:none">
+  <section id="tab-agg" class="tab-panel">
     <div class="section-label">Pipeline Status</div>
     <div class="grid" id="ops-pipeline-stats"></div>
     <div class="section-label" style="margin-top:24px">Last Run</div>
@@ -427,14 +427,14 @@ graph TB
     </div>
   </section>
 
-  <!-- TAG TAB — Classification: domain distribution, general pool review -->
+  <!-- TAG TAB — Classification: G1 KPIs first, then domain detail -->
   <section id="tab-tag" class="tab-panel" style="display:none">
-    <div class="section-label">Domain Distribution</div>
+    <div class="section-label">General Pool Overview</div>
+    <div class="grid" id="class-summary"></div>
+    <div class="section-label" style="margin-top:24px">Domain Distribution</div>
     <div class="card" id="domain-bars-wrap">
       <div id="domain-bars"></div>
     </div>
-    <div class="section-label" style="margin-top:24px">General Pool Overview</div>
-    <div class="grid" id="class-summary"></div>
     <div class="section-label" style="margin-top:24px">Top Companies by Unclassified Jobs</div>
     <div class="card" id="class-companies-card">
       <table id="class-companies-table">
@@ -581,13 +581,12 @@ graph TB
   </section>
 
 </main>
-</div><!-- #content-wrap -->
-</div><!-- #app-body -->
-
 <footer>
   Auto-refreshed from <a href="https://github.com/zapplyjobs/jobs-data-2026" style="color:var(--muted)">jobs-data-2026</a> · pipeline runs every 15 min ·
   <a href="https://github.com/zapplyjobs" style="color:var(--muted)">zapplyjobs</a>
 </footer>
+</div><!-- #content-wrap -->
+</div><!-- #app-body -->
 
 <script>
 // Dashboard proxy secret — injected at deploy time via deploy-pages.yml
