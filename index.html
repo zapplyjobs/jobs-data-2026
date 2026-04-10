@@ -395,8 +395,7 @@ graph TB
 
   <!-- SUP TAB — Supply: sources, companies, source trends -->
   <section id="tab-sup" class="tab-panel" style="display:none">
-    <div class="grid-3" id="sup-summary"></div>
-    <div class="section-label" style="margin-top:16px">By Source</div>
+    <div class="section-label">By Source</div>
     <div class="card" id="source-bars-card">
       <div id="source-bars"></div>
     </div>
@@ -550,8 +549,7 @@ graph TB
 
   <!-- OUT TAB — Output: consumer repos, stars, Discord -->
   <section id="tab-out" class="tab-panel" style="display:none">
-    <div class="grid-3" id="out-summary"></div>
-    <div class="section-label" style="margin-top:16px">Consumer Repos</div>
+    <div class="section-label">Consumer Repos</div>
     <div class="card">
       <table id="repo-table">
         <tr>
@@ -1062,33 +1060,7 @@ function renderQuality(d, enrichStats, metadata, enrichHistory) {
 
 // Distribution tab — repo table
 // OUT tab — summary stat cards (glance level)
-function renderOutSummary(metrics, daily, posted, metadata) {
-  const el = document.getElementById('out-summary');
-  if (!el) return;
-  // Total stars across all repos
-  const repos = (metrics && metrics.repos) || {};
-  const starMap = (daily && daily.stars) ? daily.stars : {};
-  let totalStars = 0;
-  for (const [, r] of Object.entries(repos)) {
-    if (r.stars != null) totalStars += r.stars;
-  }
-  // If no stars from repos, try from daily.stars
-  if (totalStars === 0 && starMap) {
-    for (const [, s] of Object.entries(starMap)) {
-      if (typeof s === 'number') totalStars += s;
-    }
-  }
-  // Consumer repo count
-  const repoCount = Object.keys(repos).length || 6;
-  // Discord total
-  const discordTotal = posted && Array.isArray(posted) ? posted.length : null;
-  const channelCount = metadata && metadata.channelLastPosted ? Object.keys(metadata.channelLastPosted).length : null;
-
-  el.innerHTML =
-    statCard({ icon: '⭐', label: 'Total Stars', value: fmt(totalStars), sub: `across ${repoCount} repos` }) +
-    statCard({ icon: '📡', label: 'Consumer Repos', value: repoCount, sub: 'GitHub repos serving users' }) +
-    statCard({ icon: '💬', label: 'Discord Posts', value: discordTotal != null ? fmt(discordTotal) : '—', sub: channelCount ? `${channelCount} channels` : 'all-time total' });
-}
+// renderOutSummary removed S266 — stat cards failed actionability test (stars/repo count/discord total don't prompt decisions)
 
 function renderRepos(d, daily) {
   const repos = d.repos || {};
@@ -1260,26 +1232,7 @@ function renderHBars(containerId, items, { labelWidth = '110px', colorFn } = {})
   }).join('');
 }
 
-// Supply tab — by-source bar chart
-// SUP tab — summary stat cards (glance level)
-function renderSupSummary(metadata) {
-  const el = document.getElementById('sup-summary');
-  if (!el) return;
-  const bySource = (metadata && metadata.by_source) || {};
-  const sourceCount = Object.keys(bySource).length;
-  const totalJobs = (metadata && metadata.total_jobs) || 0;
-  // Find top source
-  let topSource = '—', topCount = 0;
-  for (const [src, count] of Object.entries(bySource)) {
-    if (count > topCount) { topSource = src; topCount = count; }
-  }
-  const topPct = totalJobs > 0 ? Math.round(100 * topCount / totalJobs) : 0;
-
-  el.innerHTML =
-    statCard({ icon: '🔌', label: 'Active Sources', value: sourceCount, sub: 'ATS platforms connected' }) +
-    statCard({ icon: '📊', label: 'Total Pool', value: fmt(totalJobs), sub: 'all jobs across all sources' }) +
-    statCard({ icon: '🏆', label: 'Top Source', value: topSource, sub: `${fmt(topCount)} jobs (${topPct}%)` });
-}
+// renderSupSummary removed S266 — stat cards failed actionability test (source count/pool/top source don't prompt decisions)
 
 function renderSourceBars(d, metadata) {
   const bySource = (metadata && metadata.by_source) ? metadata.by_source : (d.pipeline || {}).bySource || {};
@@ -2411,9 +2364,7 @@ async function loadAll() {
   renderEnrichBars(enrichStats);
   renderCompanyQuality(enrichStats);
   window._poolTotal = metadata ? metadata.total_jobs : null;
-  renderOutSummary(metrics, daily, postedJobs, metadata);
   renderRepos(metrics, daily);
-  renderSupSummary(metadata);
   renderSourceBars(metrics, metadata);
   renderDomainBars(metadata);
   renderTopCompanies(metadata, enrichStats, generalReview);
