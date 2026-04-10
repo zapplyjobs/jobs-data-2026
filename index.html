@@ -497,14 +497,9 @@
         </tr>
       </table>
     </div>
-    <div class="section-label" style="margin-top:24px">Skills Fill Rate by Source</div>
-    <div class="card" id="skills-bars-card">
-      <div id="skills-bars"></div>
-    </div>
-    <div class="section-label" style="margin-top:24px">Description Fill Rate by Source</div>
-    <div class="card" id="enrich-bars-card">
-      <div id="enrich-bars"></div>
-    </div>
+    <!-- Skills Fill Rate bars and Description Fill Rate bars removed S266 -->
+    <!-- Redundant with Field Coverage table (same data: per-source fill rates, already color-coded) -->
+    <!-- Few's mistake #4 (indirect expression) + #6 (meaningless variety): same data in bars AND table columns -->
   </section>
 
   <!-- OUT TAB — Output: consumer repos, stars, Discord -->
@@ -2114,7 +2109,13 @@ function renderTrafficStats(trafficRaw) {
   el.innerHTML =
     statCard({ icon: '👁️', label: 'Views (14d)', value: fmt(totalViews), sub: `${fmt(totalUniques)} unique visitors` }) +
     statCard({ icon: '🔗', label: 'Top Referrers', value: topRefs[0] ? topRefs[0][0] : '—', sub: refSub }) +
-    statCard({ icon: '📅', label: 'Data as of', value: latest.date || '—', sub: `${entries.length} daily snapshots` });
+    (() => {
+      const dataDate = latest.date;
+      const daysOld = dataDate ? Math.round((Date.now() - new Date(dataDate + 'T00:00:00').getTime()) / 86400000) : null;
+      const staleColor = daysOld != null && daysOld > 3 ? 'color:var(--red)' : daysOld != null && daysOld > 1 ? 'color:var(--yellow)' : '';
+      const staleSub = daysOld != null && daysOld > 3 ? `⚠ ${daysOld}d stale` : `${entries.length} daily snapshots`;
+      return statCard({ icon: '📅', label: 'Data as of', value: `<span style="${staleColor}">${dataDate || '—'}</span>`, sub: staleSub });
+    })();
 }
 
 // OUT tab — Discord verification status from discord-verification.json
