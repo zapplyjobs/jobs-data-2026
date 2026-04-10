@@ -36,7 +36,7 @@ const he = require('he');
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
-const ENRICHER_VERSION = 8;   // S241: taxonomy additions — sdk, api, microwave
+const ENRICHER_VERSION = 17;  // ENR-10: industrial taxonomy +20 terms + ENR-16 broader extraction + ENR-12 tiers + ENR-14 smart-quote
 const SLOW_BATCH_SIZE = 40;   // GH, Ashby, Lever — HTTP calls per job
 const FAST_BATCH_SIZE = 500;  // WD, SR, JSearch, Amazon, Netflix, EF — CPU only
 const FAST_SOURCES = new Set(['workday', 'smartrecruiters', 'jsearch', 'amazon', 'netflix', 'eightfold']);
@@ -98,10 +98,33 @@ function normalizeLcaName(name) {
   return n;
 }
 
+// LCA-ALIAS-1: Companies whose pipeline name doesn't match their DOL H-1B filing name.
+// Maps pipeline company_name → canonical LCA filing name (before normalization).
+// Verified against lca-sponsors.json FY2025 Q1 (17,648 entries).
+// Evidence per alias:
+//   Bosch Group → "robert bosch" (LCA entry). norm("Bosch Group")="bosch" ≠ "robert bosch".
+//   Raytheon Technologies → "rtx" (LCA entry, rebranded 2023). norm("Raytheon Technologies")="raytheon".
+//   Vanguard → "the vanguard" (LCA entry). Prefix match fails: "vanguard" ≠ "the vanguard *".
+//   HPE → "hewlett packard enterprise" (LCA entry → norm: "hewlett packard"). norm("HPE")="hpe".
+//   Amazon Kuiper Manufacturing Enterprises LLC → parent "amazon com" (LCA). No prefix match.
+//   Lucid Motors → "lucid usa" (LCA entry). norm("Lucid Motors")="lucid motors" ≠ "lucid usa". (S253)
+//   Together AI → "together computer" (LCA entry). norm("Together AI")="together ai" ≠ "together computer". (S253)
+const LCA_COMPANY_ALIASES = {
+  'Bosch Group': 'Robert Bosch',
+  'Raytheon Technologies': 'RTX',
+  'Vanguard': 'The Vanguard',
+  'HPE': 'Hewlett Packard Enterprise',
+  'Amazon Kuiper Manufacturing Enterprises LLC': 'Amazon',
+  'Lucid Motors': 'Lucid USA',
+  'Together AI': 'Together Computer',
+};
+
 function isPossibleSponsor(companyName, lcaSet) {
   if (!lcaSet.size) return null;
-  const n = normalizeLcaName(companyName);
-  if (!n || n.length < 3) return null;
+  // LCA-ALIAS-1: resolve known company name mismatches before normalization
+  const resolvedName = LCA_COMPANY_ALIASES[companyName] || companyName;
+  const n = normalizeLcaName(resolvedName);
+  if (!n || n.length < 2) return null;  // 2-char floor: allows 'f5' (F5 Inc). No 1-char LCA entries exist.
   if (lcaSet.has(n)) return true;
   // Prefix match: handles "Amazon Web Services" → matches "amazon" parent or subsidiaries
   for (const entry of lcaSet) {
@@ -148,12 +171,29 @@ function loadDescriptionsMap() {
 // Reconstructs API URLs from job.url — no _raw fields needed.
 // Only fetches for tech+US jobs missing from sidecar (targeted, no waste).
 // ---------------------------------------------------------------------------
+// myworkdaysite.com: path-based tenant (no subdomain). tenant differs from the URL path slug.
+// Only Snap uses this domain — tenant is 'snapchat', site is 'snap' (from the URL path).
+const MYWORKDAYSITE_TENANTS = {
+  snap: 'snapchat',
+};
+
 function buildWdDescUrl(jobUrl) {
-  // job.url: https://{tenant}.wd{N}.myworkdayjobs.com/{site}/job/{path}
-  // API:    https://{tenant}.wd{N}.myworkdayjobs.com/wday/cxs/{tenant}/{site}/job/{path}
+  // Standard: https://{tenant}.wd{N}.myworkdayjobs.com/{site}/job/{path}
+  // API:      https://{tenant}.wd{N}.myworkdayjobs.com/wday/cxs/{tenant}/{site}/job/{path}
   const m = jobUrl.match(/^(https:\/\/([^.]+)\.wd\d+\.myworkdayjobs\.com)\/([^/]+)(\/.*)/);
-  if (!m) return null;
-  return `${m[1]}/wday/cxs/${m[2]}/${m[3]}${m[4]}`;
+  if (m) return `${m[1]}/wday/cxs/${m[2]}/${m[3]}${m[4]}`;
+
+  // myworkdaysite.com: https://wd{N}.myworkdaysite.com/{site}/job/{path}
+  // API:               https://wd{N}.myworkdaysite.com/wday/cxs/{tenant}/{site}/job/{path}
+  const m2 = jobUrl.match(/^(https:\/\/wd\d+\.myworkdaysite\.com)\/([^/]+)(\/.*)/);
+  if (m2) {
+    const site = m2[2];
+    const tenant = MYWORKDAYSITE_TENANTS[site];
+    if (!tenant) return null; // unknown tenant — skip rather than guess
+    return `${m2[1]}/wday/cxs/${tenant}/${site}${m2[3]}`;
+  }
+
+  return null;
 }
 
 function buildSrDescUrl(jobId, companySlug) {
@@ -355,7 +395,7 @@ const REQUIRED_HEADERS = [
   /(?<!preferred\s)(?<!desired\s)qualifications?[:\s]?$/i,
   /what you (need|bring|must have)[:\s]?$/i,
   /what you need to succeed[:\s]?$/i,
-  /what we('?re| are) looking for[:\s]?$/i,
+  /what we(['\u2019]?re| are) looking for[:\s]?$/i,
   /education (and|&).{0,10}experience[:\s]?$/i,
   /minimum qualifications?[:\s]?$/i,
   /basic qualifications?[:\s]?$/i,
@@ -377,9 +417,10 @@ const PREFERRED_HEADERS = [
   /preferred (qualifications?|skills?|experience)/i,
   /nice[ -]to[ -]haves?[:\s]?$/i,
   /bonus (points?|if|qualifications?)?[:\s]?$/i,
+  /^[-•*]?\s*bonus:/i,              // S244: "- Bonus: side projects..." bullet pattern (Modal, Whatnot, Sentra)
   /desired qualifications?/i,
   /plus (if|points?)?[:\s]?$/i,
-  /it'?s? (a )?(bonus|plus|nice)[:\s]?$/i,
+  /it['\u2019]?s? (a )?(bonus|plus|nice)[:\s]?$/i,
   /while not required/i,
   /added (plus|bonus)/i,
 ];
@@ -434,6 +475,11 @@ function splitSections(text) {
 // within the same sentence/bullet to count as a match.
 const AMBIGUOUS_TERMS = new Set(['go', 'r', 'c', 'rest', 'restful', 'assembly', 'lean', 'chef', 'classification', 'move']);
 
+// ENR-9: Terms excluded from plural matching because term+s is a different word or
+// produces known false positives. http → https:// (9,700+ URL occurrences), canva → canvas
+// (HTML canvas / metaphor, not the Canva design tool), arm/cam/ray → body/hardware/light terms.
+const PLURAL_EXCLUDE = new Set(['http', 'canva', 'arm', 'cam', 'ray']);
+
 const TECH_CONTEXT_SIGNALS = [
   /\b(programming|language|developer|engineer|code|software|written in|experience with|proficien|framework|backend|api)\b/i,
 ];
@@ -468,6 +514,20 @@ function matchSkills(text, termMap) {
         }
         found.add(termCanonical);
         break; // found at least once at word boundary — no need to check more occurrences
+      }
+
+      // ENR-9: Plural match — accept term+s when followed by a non-alphanumeric character.
+      // Handles: oscilloscopes, multimeters, LLMs, APIs, data pipelines, FPGAs, etc.
+      // Skips PLURAL_EXCLUDE terms where +s produces a different word (http→https, canva→canvas).
+      if (!wordBefore && !PLURAL_EXCLUDE.has(termLower) && after === 's') {
+        const afterS = idx + termLower.length + 1 >= lower.length ? ' ' : lower[idx + termLower.length + 1];
+        if (!/[a-z0-9]/.test(afterS)) {
+          if (AMBIGUOUS_TERMS.has(termLower) && !hasTechContext(lower, idx)) {
+            continue;
+          }
+          found.add(termCanonical);
+          break;
+        }
       }
     }
   }
@@ -599,7 +659,8 @@ async function fetchApplicationVisaStatus(job) {
     }
 
     if (job.source === 'ashby') {
-      const applyUrl = job.apply_url;
+      // ENR-16 Phase 2: Ashby job page itself contains __appData — use url as fallback
+      const applyUrl = job.apply_url || job.url;
       if (!applyUrl) return { visaPresent: null, questionCount: null };
       const result = await httpsGet(applyUrl);
       if (!result || result.status !== 200) return { visaPresent: null, questionCount: null };
@@ -618,7 +679,8 @@ async function fetchApplicationVisaStatus(job) {
     }
 
     if (job.source === 'lever') {
-      const applyUrl = job.apply_url;
+      // ENR-16 Phase 2: Lever apply page is url + '/apply' — use as fallback when apply_url missing
+      const applyUrl = job.apply_url || (job.url ? job.url + '/apply' : null);
       if (!applyUrl) return { visaPresent: null, questionCount: null };
       const result = await httpsGet(applyUrl);
       if (!result || result.status !== 200) return { visaPresent: null, questionCount: null };
@@ -795,27 +857,36 @@ function extractSummaryLine(plainText) {
 //   No-degree explicit: ~5% of GH pool
 // ---------------------------------------------------------------------------
 const DEGREE_PHD = /\b(ph\.?d\.?|doctoral|doctorate)\b/i;
-const DEGREE_MASTERS = /\b(master'?s?)\s*(degree|of science|of arts|of engineering|in\s+\w|or higher|preferred|required|or phd|or doctoral)/i;
+const DEGREE_MASTERS = /\b(master['\u2019]?s?)\s*(degree|of science|of arts|of engineering|in\s+\w|or higher|preferred|required|or phd|or doctoral)/i;
 const DEGREE_MASTERS_ABBREV = /\bm\.s\.(\s|,|$)/i;
 const DEGREE_MBA = /\bmba\b/i;
-const DEGREE_BACHELORS = /\b(bachelor'?s?)\s*(degree|of science|of arts|of engineering|in\s+\w|or higher|preferred|required|or master)/i;
+const DEGREE_BACHELORS = /\b(bachelor['\u2019]?s?)\s*(degree|of science|of arts|of engineering|in\s+\w|or higher|preferred|required|or master)/i;
 const DEGREE_BACHELORS_ABBREV = /\bb\.s\.(\s|,|$)|\bb\.e\.(\s|,|$)/i;
-const DEGREE_ASSOCIATE = /\b(associate'?s?)\s*(degree|in\s+\w)/i;
+const DEGREE_ASSOCIATE = /\b(associate['\u2019]?s?)\s*(degree|in\s+\w)/i;
 const DEGREE_NONE = /\b(no (degree|college required)|equivalent experience|without (a )?degree|degree not required|equivalent combination|in lieu of degree|high school diploma|ged\b)/i;
+// ENR-16 Phase 1A: Broader degree patterns for descriptions that don't use "Bachelor's/Master's"
+const DEGREE_BS_MS_STANDALONE = /\b(ba\/bs|bs\/ms|bs\/ba|ba\/ms)\b|\b(ba|bs)\s+degree/i; // "BA/BS", "BS/MS", "BS degree", "BA degree" (no standalone "BS in")
+const DEGREE_GENERIC_BACHELORS = /\b(college|university|undergraduate|4[ -]year|four[ -]year)\s+(degree|education)/i; // "college degree", "4-year degree"
+const DEGREE_GENERIC_MASTERS = /\b(advanced|graduate)\s+degree/i; // "advanced degree", "graduate degree"
+const DEGREE_UNSPECIFIED = /\bdegree\s+in\s+\w/i; // "Degree in Computer Science" (no level → infer bachelors)
 
 function extractMinDegree(text) {
   if (!text) return null;
   if (DEGREE_NONE.test(text)) return 'none';
   // Detect all degree levels present, then return the minimum requirement.
   // "Bachelor's or Master's or PhD" → bachelors (lowest mentioned = minimum).
-  const hasBachelors = DEGREE_BACHELORS.test(text) || DEGREE_BACHELORS_ABBREV.test(text);
-  const hasMasters = DEGREE_MASTERS.test(text) || DEGREE_MASTERS_ABBREV.test(text) || DEGREE_MBA.test(text);
+  const hasBachelors = DEGREE_BACHELORS.test(text) || DEGREE_BACHELORS_ABBREV.test(text)
+    || DEGREE_BS_MS_STANDALONE.test(text) || DEGREE_GENERIC_BACHELORS.test(text);
+  const hasMasters = DEGREE_MASTERS.test(text) || DEGREE_MASTERS_ABBREV.test(text) || DEGREE_MBA.test(text)
+    || DEGREE_GENERIC_MASTERS.test(text);
   const hasPhd = DEGREE_PHD.test(text);
   const hasAssociate = DEGREE_ASSOCIATE.test(text);
   if (hasAssociate) return 'associates';
   if (hasBachelors) return 'bachelors';
   if (hasMasters) return 'masters';
   if (hasPhd) return 'phd';
+  // ENR-16 Phase 1A: "Degree in [field]" without specifying level → bachelors (industry default)
+  if (DEGREE_UNSPECIFIED.test(text)) return 'bachelors';
   return null;
 }
 
@@ -834,7 +905,17 @@ function extractMinDegree(text) {
 // Patterns seen: "N+ years of experience", "N-M years of experience",
 //   "N years experience", "N to M years of experience"
 // ---------------------------------------------------------------------------
-const EXP_YEAR_RE = /(\d+)\+?\s*(?:[-–to]+\s*\d+\s*)?years?\s*(?:of\s*)?(?:relevant\s*|related\s*|professional\s*|work\s*)?(?:experience|exp\b)/i;
+const EXP_YEAR_RE = /(\d+)\+?\s*(?:[-–to]+\s*\d+\s*)?years?\s*(?:of\s*)?(?:(?:relevant|related|professional|work|direct|hands-on|practical|prior|industry)\s*)*(?:experience|exp\b)/i;
+// ENR-16 Phase 1B: Broader experience pattern — "N+ years of [anything]" or "N+ years in [field]"
+// Catches "5+ years of facilities management experience", "3 years in software engineering"
+// The existing regex requires specific adjectives (relevant/related/professional/work) before "experience".
+// This broader pattern accepts any content between "years of/in/with" and captures the year count.
+const EXP_BROAD_RE = /(\d+)\+?\s*(?:[-–to]+\s*\d+\s*)?years?\s+(?:of|in|with)\s+/i;
+// ENR-16 Phase 1B: Seniority language fallback (no year count needed)
+const EXP_ENTRY_LEVEL_RE = /\b(entry[\s-]?level|early[\s-]?career|new\s+grad(?:uate)?s?|recent\s+grad(?:uate)?s?)\b/i;
+// ENR-14: Written-number variant ("Two years of experience", "Three years of relevant experience")
+const WRITTEN_NUMBERS = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10 };
+const EXP_WRITTEN_RE = /\b(one|two|three|four|five|six|seven|eight|nine|ten)\s+(?:to\s+\w+\s+)?years?\s*(?:of\s*)?(?:relevant\s*|related\s*|professional\s*|work\s*)?(?:experience|exp\b)/i;
 
 function extractExperienceLevel(text) {
   if (!text) return null;
@@ -843,9 +924,28 @@ function extractExperienceLevel(text) {
   const filteredText = text.split(/(?<=[.!?])\s+/)
     .filter(s => !BOILERPLATE_OPENERS.some(re => re.test(s.trim())))
     .join(' ');
+  // Try patterns in order of specificity: exact → broad → written → seniority language
   const m = EXP_YEAR_RE.exec(filteredText);
-  if (!m) return null;
-  const years = parseInt(m[1], 10); // use lower bound of range
+  let years;
+  if (m) {
+    years = parseInt(m[1], 10);
+  } else {
+    // ENR-16 Phase 1B: broader "N years of/in/with [anything]"
+    const mb = EXP_BROAD_RE.exec(filteredText);
+    if (mb) {
+      years = parseInt(mb[1], 10);
+    } else {
+      // ENR-14: written-number pattern
+      const mw = EXP_WRITTEN_RE.exec(filteredText);
+      if (mw) {
+        years = WRITTEN_NUMBERS[mw[1].toLowerCase()];
+      } else {
+        // ENR-16 Phase 1B: seniority language fallback (no year count)
+        if (EXP_ENTRY_LEVEL_RE.test(filteredText)) return 'entry_level';
+        return null;
+      }
+    }
+  }
   if (years <= 2) return 'entry_level';
   if (years <= 5) return 'mid_level';
   return 'senior';
@@ -866,6 +966,32 @@ function isEnrichable(job, descriptionsMap) {
     return !!descriptionsMap.get(job.id);
   }
   return true;
+}
+
+// ---------------------------------------------------------------------------
+// ENR-12: Tiered enrichment scoring (S262 operator directive)
+// Tier 0 = nothing useful, Tier 1 = summary, Tier 2 = skills+summary,
+// Tier 3 = all source-possible fields filled.
+// Sources with form access (GH/Ashby/Lever) require question_count for T3.
+// Sources without form access require only desc-extractable fields for T3.
+// ---------------------------------------------------------------------------
+const FORM_SOURCES = new Set(['greenhouse', 'ashby', 'lever']);
+
+function computeEnrichmentTier(record) {
+  const hasSummary = !!record.summary_line;
+  const hasSkills = record.required_skills?.length > 0;
+  if (!hasSummary) return 0;
+  if (!hasSkills) return 1;
+  // Tier 2 baseline: has skills + summary. Check Tier 3 requirements.
+  const hasDegree = record.min_degree !== null && record.min_degree !== undefined;
+  const hasExp = record.experience_level_from_desc !== null && record.experience_level_from_desc !== undefined;
+  if (FORM_SOURCES.has(record.source)) {
+    // Form sources: also require question_count
+    const hasForm = record.question_count !== null;
+    return (hasDegree && hasExp && hasForm) ? 3 : 2;
+  }
+  // Non-form sources: degree + experience is sufficient for T3
+  return (hasDegree && hasExp) ? 3 : 2;
 }
 
 async function enrichJob(job, termMap, descriptionsMap, lcaSet) {
@@ -919,7 +1045,7 @@ async function enrichJob(job, termMap, descriptionsMap, lcaSet) {
   // DATA-4: experience level from description — extracted from required section (fallback: full text)
   const experienceLevelFromDesc = extractExperienceLevel(text);
 
-  return {
+  const record = {
     id: job.id,
     source: job.source || null,
     enricher_version: ENRICHER_VERSION,
@@ -940,6 +1066,8 @@ async function enrichJob(job, termMap, descriptionsMap, lcaSet) {
     // DATA-8: simple apply signal (GH: exact; Ashby/Lever: null pending schema verification)
     is_simple_apply: isSimpleApply,
     question_count: questionCount,
+    // ENR-12: tiered enrichment quality score (0=nothing, 1=summary, 2=skills+summary, 3=full)
+    enrichment_tier: 0, // placeholder — computed below
     enriched_at: new Date().toISOString(),
     // Denormalized display fields
     title: job.title || null,
@@ -949,6 +1077,8 @@ async function enrichJob(job, termMap, descriptionsMap, lcaSet) {
     url: job.url || null,
     posted_at: job.posted_at || null,
   };
+  record.enrichment_tier = computeEnrichmentTier(record);
+  return record;
 }
 
 async function main() {
@@ -1102,7 +1232,8 @@ async function main() {
       const src = job.source || 'unknown';
       if (!statsBySource[src]) {
         statsBySource[src] = { total: 0, us_jobs: 0, us_has_desc: 0, tech_us: 0, has_desc: 0, enriched: 0,
-          summary_line: 0, required_skills: 0, sponsors_visa: 0, question_count: 0,
+          summary_line: 0, required_skills: 0, sponsors_visa: 0, possible_sponsor: 0,
+          any_visa_signal: 0, question_count: 0,
           min_degree: 0, experience_level_from_desc: 0 };
       }
       statsBySource[src].total++;
@@ -1118,6 +1249,17 @@ async function main() {
       }
     }
 
+    // DASH-5: Count tech+US jobs by employment type (internship vs new_grad vs other)
+    const byEmployment = {};
+    for (const job of allJobs) {
+      const domains = job.tags?.domains || [];
+      const locs = job.tags?.locations || [];
+      if (domains.some(d => TECH_DOMAINS.has(d)) && locs.includes('us')) {
+        const emp = job.tags?.employment || 'unknown';
+        byEmployment[emp] = (byEmployment[emp] || 0) + 1;
+      }
+    }
+
     // Field fill rates from enriched_jobs.json (post-prune)
     // Only count enriched records for jobs CURRENTLY in the tech+US pool.
     // Without this filter, jobs that lost their tech domain tag (e.g., TAG-1 software-title-only)
@@ -1126,8 +1268,10 @@ async function main() {
       .filter(j => (j.tags?.domains || []).some(d => TECH_DOMAINS.has(d)) && (j.tags?.locations || []).includes('us'))
       .map(j => j.id));
 
-    // ENRICH-QUALITY-2: Also build per-company stats for dashboard
+    // ENRICH-QUALITY-2: Also build per-company stats and tier distribution for dashboard
     const companyMap = {}; // company_name → { source, enriched, has_skills, has_summary, has_visa }
+    // ENR-12: Per-source tier distribution
+    const tiersBySource = {}; // source → { t0, t1, t2, t3 }
     for (const line of finalLines) {
       try {
         const obj = JSON.parse(line);
@@ -1138,29 +1282,41 @@ async function main() {
         if (obj.summary_line) statsBySource[src].summary_line++;
         if (obj.required_skills?.length > 0) statsBySource[src].required_skills++;
         if (obj.sponsors_visa !== null) statsBySource[src].sponsors_visa++;
+        if (obj.possible_sponsor !== null && obj.possible_sponsor !== undefined) statsBySource[src].possible_sponsor++;
+        const hasAnyVisa = obj.sponsors_visa !== null || (obj.possible_sponsor !== null && obj.possible_sponsor !== undefined) || obj.visa_question_present !== null;
+        if (hasAnyVisa) statsBySource[src].any_visa_signal++;
         if (obj.question_count !== null) statsBySource[src].question_count++;
         if (obj.min_degree !== null && obj.min_degree !== undefined) statsBySource[src].min_degree++;
         if (obj.experience_level_from_desc !== null && obj.experience_level_from_desc !== undefined) statsBySource[src].experience_level_from_desc++;
 
-        // Per-company tracking
+        // ENR-12: Tier tracking — use stored tier if present (v15+), else compute from fields
+        if (!tiersBySource[src]) tiersBySource[src] = { t0: 0, t1: 0, t2: 0, t3: 0 };
+        const tier = obj.enrichment_tier !== undefined ? obj.enrichment_tier : computeEnrichmentTier(obj);
+        tiersBySource[src][`t${tier}`]++;
+
+        // Per-company tracking (with tier)
         const co = obj.company_name || 'Unknown';
-        if (!companyMap[co]) companyMap[co] = { source: src, enriched: 0, has_skills: 0, has_summary: 0, has_visa: 0 };
+        if (!companyMap[co]) companyMap[co] = { source: src, enriched: 0, has_skills: 0, has_summary: 0, has_visa: 0, t0: 0, t1: 0, t2: 0, t3: 0 };
         companyMap[co].enriched++;
         if (obj.required_skills?.length > 0) companyMap[co].has_skills++;
         if (obj.summary_line) companyMap[co].has_summary++;
         if (obj.sponsors_visa !== null) companyMap[co].has_visa++;
+        const coTier = obj.enrichment_tier !== undefined ? obj.enrichment_tier : computeEnrichmentTier(obj);
+        companyMap[co][`t${coTier}`]++;
       } catch (_) {}
     }
 
     // Top 30 companies by enriched count
     const byCompany = Object.entries(companyMap)
       .sort((a, b) => b[1].enriched - a[1].enriched)
-      .slice(0, 30)
+      .slice(0, 100)  // S262: expanded from 30 to 100 for company explorer
       .map(([co, s]) => ({
         company: co, source: s.source, enriched: s.enriched,
         skills_pct: Math.round(100 * s.has_skills / s.enriched),
         summary_pct: Math.round(100 * s.has_summary / s.enriched),
         visa_pct: Math.round(100 * s.has_visa / s.enriched),
+        t3_pct: Math.round(100 * s.t3 / s.enriched),
+        tiers: { t0: s.t0, t1: s.t1, t2: s.t2, t3: s.t3 },
       }));
 
     const totalTechUs = Object.values(statsBySource).reduce((s, v) => s + v.tech_us, 0);
@@ -1171,6 +1327,13 @@ async function main() {
     const totalSkills = Object.values(statsBySource).reduce((s, v) => s + v.required_skills, 0);
     const totalSummary = Object.values(statsBySource).reduce((s, v) => s + v.summary_line, 0);
 
+    // ENR-12: Aggregate tier totals
+    const totalTiers = { t0: 0, t1: 0, t2: 0, t3: 0 };
+    for (const t of Object.values(tiersBySource)) {
+      totalTiers.t0 += t.t0; totalTiers.t1 += t.t1;
+      totalTiers.t2 += t.t2; totalTiers.t3 += t.t3;
+    }
+
     const enrichmentStats = {
       generated: new Date().toISOString(),
       total_tech_us: totalTechUs,
@@ -1179,6 +1342,11 @@ async function main() {
       total_us_jobs: totalUsJobs,
       total_us_has_description: totalUsHasDesc,
       desc_waiting: descWaiting,
+      // ENR-12: tier distribution (total + per-source)
+      tiers: totalTiers,
+      tiers_by_source: tiersBySource,
+      // DASH-5: employment type breakdown for tech+US pool
+      by_employment: byEmployment,
       by_source: statsBySource,
       by_company: byCompany,
     };
@@ -1217,6 +1385,8 @@ async function main() {
           postedToday[src] = (postedToday[src] || 0) + 1;
         }
       }
+      // ENR-12: Add tier percentages to daily snapshot for trend tracking
+      const tierTotal = totalTiers.t0 + totalTiers.t1 + totalTiers.t2 + totalTiers.t3;
       const snapshot = {
         date: today,
         total_enriched: totalEnriched,
@@ -1224,6 +1394,8 @@ async function main() {
         pool_total: allJobs.length,
         skills_pct: totalEnriched > 0 ? Math.round(100 * totalSkills / totalEnriched) : 0,
         summary_pct: totalEnriched > 0 ? Math.round(100 * totalSummary / totalEnriched) : 0,
+        t3_pct: tierTotal > 0 ? Math.round(100 * totalTiers.t3 / tierTotal) : 0,
+        tiers: totalTiers,
         posted_today: postedToday,
         by_source: srcSummary,
       };
