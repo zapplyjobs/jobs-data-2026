@@ -36,7 +36,7 @@ const he = require('he');
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
-const ENRICHER_VERSION = 21;  // S266: tier redefinition — T3=degree+exp+visa, qcount removed from gate
+const ENRICHER_VERSION = 22;  // S266: DASH-7 expanded history snapshots + LCA-ALIAS-4 JSearch
 const SLOW_BATCH_SIZE = 40;   // GH, Ashby, Lever — HTTP calls per job
 const FAST_BATCH_SIZE = 500;  // WD, SR, JSearch, Amazon, Netflix, EF — CPU only
 const FAST_SOURCES = new Set(['workday', 'smartrecruiters', 'jsearch', 'amazon', 'netflix', 'eightfold']);
@@ -126,6 +126,13 @@ const LCA_COMPANY_ALIASES = {
   'KBR': 'KBR Wyle',                                   // norm→"kbr" ≠ "kbr wyle" (51 jobs)
   'GlobalFoundries': 'GlobalFoundries U S',             // norm→"globalfoundries" ≠ "globalfoundries u s" (46 jobs)
   'SEL': 'Schweitzer Engineering Laboratories',         // norm→"sel" ≠ "schweitzer engineering laboratories" (75 jobs)
+  // S266 LCA-ALIAS-4: 6 JSearch aliases (batch with DASH-7 snapshot expansion)
+  'CACI International': 'CACI Federal',                 // JSearch variant of CACI
+  'The Boeing Company': 'The Boeing',                   // JSearch variant of Boeing
+  'Nokia': 'Nokia of America',                          // norm→"nokia" ≠ "nokia of america" (1 job)
+  'Dassault Systèmes': 'Dassault Systemes Americas',    // norm→"dassault systmes" ≠ "dassault systemes americas" (1 job)
+  'Deutsche Bank': 'Deutsche Bank Securities',          // norm→"deutsche bank" ≠ "deutsche bank securities" (1 job)
+  'Axcelis Technologies, Inc.': 'Axcelis',              // norm→"axcelis technologies" ≠ "axcelis" (1 job)
 };
 
 function isPossibleSponsor(companyName, lcaSet) {
@@ -1383,10 +1390,17 @@ async function main() {
     if (shouldAppend) {
       const srcSummary = {};
       for (const [src, v] of Object.entries(statsBySource)) {
+        // DASH-7: expanded per-source snapshot for trend tracking
+        const tSrc = tiersBySource[src] || { t0: 0, t1: 0, t2: 0, t3: 0 };
+        const tSrcTotal = tSrc.t0 + tSrc.t1 + tSrc.t2 + tSrc.t3;
         srcSummary[src] = {
           enriched: v.enriched,
           skills_pct: v.enriched > 0 ? Math.round(100 * v.required_skills / v.enriched) : 0,
           summary_pct: v.enriched > 0 ? Math.round(100 * v.summary_line / v.enriched) : 0,
+          t3_pct: tSrcTotal > 0 ? Math.round(100 * tSrc.t3 / tSrcTotal) : 0,
+          degree_pct: v.enriched > 0 ? Math.round(100 * v.min_degree / v.enriched) : 0,
+          exp_pct: v.enriched > 0 ? Math.round(100 * v.experience_level_from_desc / v.enriched) : 0,
+          visa_pct: v.enriched > 0 ? Math.round(100 * (v.any_visa_signal || 0) / v.enriched) : 0,
         };
       }
       // POSTING-HISTORY-1: Count jobs posted today by source
