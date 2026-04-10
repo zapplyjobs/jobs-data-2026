@@ -978,6 +978,10 @@ function isEnrichable(job, descriptionsMap) {
 const FORM_SOURCES = new Set(['greenhouse', 'ashby', 'lever']);
 
 function computeEnrichmentTier(record) {
+  // No description = T0. Backward-compatible: old records lack has_description field,
+  // infer from summary_line (summary requires description to extract).
+  const hasDesc = record.has_description !== undefined ? record.has_description : !!record.summary_line;
+  if (!hasDesc) return 0;
   const hasSummary = !!record.summary_line;
   const hasSkills = record.required_skills?.length > 0;
   if (!hasSummary) return 0;
@@ -1055,6 +1059,7 @@ async function enrichJob(job, termMap, descriptionsMap, lcaSet) {
     possible_sponsor: possibleSponsor,
     visa_question_present: visaQuestionPresent,
     is_remote: isRemote,
+    has_description: !!rawDescription,
     experience_level: experienceLevel,
     // DATA-3: education requirement extracted from description text
     min_degree: minDegree,
