@@ -984,7 +984,7 @@ function computeEnrichmentTier(record) {
   if (!hasSkills) return 1;
   // Tier 2 baseline: has skills + summary. Check Tier 3 requirements.
   const hasDegree = record.min_degree !== null && record.min_degree !== undefined;
-  const hasExp = record.experience_level_from_desc !== null && record.experience_level_from_desc !== undefined;
+  const hasExp = (record.experience_level_from_desc != null) || (record.experience_level != null);
   if (FORM_SOURCES.has(record.source)) {
     // Form sources: also require question_count
     const hasForm = record.question_count !== null;
