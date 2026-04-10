@@ -355,6 +355,7 @@
 
   <!-- SUP TAB — Supply: sources, companies, source trends -->
   <section id="tab-sup" class="tab-panel" style="display:none">
+    <div id="sup-freshness" style="font-size:11px;color:var(--muted);margin-bottom:8px"></div>
     <div class="section-label">By Source</div>
     <div class="card" id="source-bars-card">
       <div id="source-bars"></div>
@@ -882,11 +883,16 @@ function renderInfHealthSummary(metrics, enrichStats, metadata, generalReview) {
   const newGradCount = (emp.new_grad || 0) + (emp.entry_level || 0);
   const empSub = internCount || newGradCount ? `${fmt(newGradCount)} new-grad · ${fmt(internCount)} intern` : '';
 
+  // Health cards are clickable — navigate to the relevant detail tab
   el.innerHTML =
-    statCard({ icon: pipelineOk ? '🟢' : '🔴', label: 'Pipeline', value: pipelineOk ? 'LIVE' : (hours != null ? 'DELAYED' : '—'), sub: statusTs ? `Last: ${age(statusTs)}` : '' }) +
-    statCard({ icon: '🏗️', label: 'Pool Size', value: fmt(poolTotal), sub: empSub }) +
-    statCard({ icon: '🏆', label: 'ENR T3 Rate', value: t3pct != null ? t3pct + '%' : '—', sub: t3pct != null && t3pct < 50 ? 'needs work' : '' }) +
-    statCard({ icon: '🏷️', label: 'TAG General', value: g1 != null ? g1 + '%' : '—', sub: g1 != null && g1 > 10 ? 'above target' : '' });
+    `<div style="cursor:pointer" onclick="document.querySelector('[data-tab=agg]').click()" title="Go to AGG tab">` +
+    statCard({ icon: pipelineOk ? '🟢' : '🔴', label: 'Pipeline', value: pipelineOk ? 'LIVE' : (hours != null ? 'DELAYED' : '—'), sub: statusTs ? `Last: ${age(statusTs)}` : '' }) + `</div>` +
+    `<div style="cursor:pointer" onclick="document.querySelector('[data-tab=agg]').click()" title="Go to AGG tab">` +
+    statCard({ icon: '🏗️', label: 'Pool Size', value: fmt(poolTotal), sub: empSub }) + `</div>` +
+    `<div style="cursor:pointer" onclick="document.querySelector('[data-tab=enr]').click()" title="Go to ENR tab">` +
+    statCard({ icon: '🏆', label: 'ENR T3 Rate', value: t3pct != null ? t3pct + '%' : '—', sub: 'Target: &gt;80%' }) + `</div>` +
+    `<div style="cursor:pointer" onclick="document.querySelector('[data-tab=tag]').click()" title="Go to TAG tab">` +
+    statCard({ icon: '🏷️', label: 'TAG General', value: g1 != null ? g1 + '%' : '—', sub: 'Target: &lt;40%' }) + `</div>`;
 }
 
 // INF tab — secrets and deadlines (hardcoded known dates — update when rotated)
@@ -2248,15 +2254,14 @@ function renderClassification(data) {
   const s = data.summary;
   const classifiedRate = (100 - s.us_general_rate).toFixed(1);
 
-  // Summary cards
-  summaryEl.innerHTML = `
-    <div class="card"><div class="stat-label">US General Rate</div><div class="stat-val ${s.us_general_rate > 10 ? 'yellow' : 'green'}">${s.us_general_rate}%</div><div class="stat-sub">Target: &lt;40%</div></div>
-    <div class="card"><div class="stat-label">US General Jobs</div><div class="stat-val">${fmt(s.us_general)}</div></div>
-    <div class="card"><div class="stat-label">US Classified Rate</div><div class="stat-val green">${classifiedRate}%</div></div>
-    <div class="card"><div class="stat-label">Companies w/ Generals</div><div class="stat-val">${data.by_company ? data.by_company.length : '—'}</div></div>
-    <div class="card"><div class="stat-label">Desc Coverage</div><div class="stat-val">${data.descriptions && s.us_general > 0 ? Math.round(data.descriptions.withDesc / s.us_general * 100) : '—'}%</div></div>
-    <div class="card"><div class="stat-label">Review Date</div><div class="stat-val" style="font-size:14px">${s.generated ? s.generated.slice(0, 10) : '—'}</div></div>
-  `;
+  // Summary cards — using statCard() for visual consistency with other tabs
+  // Reduced from 6 to 4: removed Desc Coverage (low actionability) and Review Date (meta, not operational)
+  const descPct = data.descriptions && s.us_general > 0 ? Math.round(data.descriptions.withDesc / s.us_general * 100) : null;
+  summaryEl.innerHTML =
+    statCard({ icon: '🏷️', label: 'US General Rate', value: `<span style="color:${s.us_general_rate > 10 ? 'var(--yellow)' : 'var(--green)'}">${s.us_general_rate}%</span>`, sub: `Target: <40% · ${fmt(s.us_general)} jobs` }) +
+    statCard({ icon: '✅', label: 'US Classified Rate', value: `<span style="color:var(--green)">${classifiedRate}%</span>`, sub: `${fmt(s.us_total - s.us_general)} classified` }) +
+    statCard({ icon: '🏢', label: 'Companies w/ Generals', value: data.by_company ? data.by_company.length : '—', sub: 'companies to review' }) +
+    statCard({ icon: '📄', label: 'Desc Coverage', value: descPct != null ? descPct + '%' : '—', sub: `${s.generated ? 'As of ' + s.generated.slice(0, 10) : ''}` });
 
   // Top companies table
   if (data.by_company && data.by_company.length > 0) {
@@ -2392,6 +2397,11 @@ async function loadAll() {
   renderCompanyQuality(enrichStats);
   window._poolTotal = metadata ? metadata.total_jobs : null;
   renderRepos(metrics, daily);
+  // SUP freshness indicator
+  const supFresh = document.getElementById('sup-freshness');
+  if (supFresh && metadata && metadata.generated) {
+    supFresh.textContent = `Data as of ${age(metadata.generated)} · ${Object.keys(metadata.by_source || {}).length} sources · ${fmt(metadata.total_jobs)} total jobs`;
+  }
   renderSourceBars(metrics, metadata);
   renderDomainBars(metadata);
   renderTopCompanies(metadata, enrichStats, generalReview);
