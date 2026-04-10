@@ -449,14 +449,14 @@ graph TB
     <div class="card" id="general-trend-card" style="position:relative;height:200px">
       <canvas id="general-trend-canvas"></canvas>
     </div>
-    <div class="section-label" style="margin-top:24px">Recurring Title Patterns</div>
-    <div class="card" id="class-patterns-card">
+    <div class="section-label" style="margin-top:24px;cursor:pointer;user-select:none" onclick="const w=this.nextElementSibling;w.style.display=w.style.display==='none'?'':'none';this.querySelector('.caret').style.transform=w.style.display==='none'?'':'rotate(90deg)'"><span class="caret" style="display:inline-block;transition:transform 0.15s;font-size:0.7em;margin-right:6px">▶</span>Recurring Title Patterns</div>
+    <div class="card" id="class-patterns-card" style="display:none">
       <table id="class-patterns-table">
         <tr><th class="sortable">Title Pattern</th><th class="sortable" style="text-align:right">Count</th><th class="sortable" style="text-align:right">Companies</th></tr>
       </table>
     </div>
-    <div class="section-label" style="margin-top:24px">Tenant Default Candidates</div>
-    <div class="card" id="class-tenants-card">
+    <div class="section-label" style="margin-top:24px;cursor:pointer;user-select:none" onclick="const w=this.nextElementSibling;w.style.display=w.style.display==='none'?'':'none';this.querySelector('.caret').style.transform=w.style.display==='none'?'':'rotate(90deg)'"><span class="caret" style="display:inline-block;transition:transform 0.15s;font-size:0.7em;margin-right:6px">▶</span>Tenant Default Candidates</div>
+    <div class="card" id="class-tenants-card" style="display:none">
       <p class="muted" style="text-align:center; padding:20px 0">Loading...</p>
     </div>
   </section>
@@ -1019,10 +1019,10 @@ function renderQuality(d, enrichStats, metadata, enrichHistory) {
   const hasDesc = enrichStats ? enrichStats.total_has_description : null;
   const queueGap = (techUs != null && enriched != null) ? techUs - enriched : null;
   document.getElementById('quality-enrich').innerHTML =
-    statCard({ icon: '🏆', label: 'Tier 3 Rate',     value: t3rate, sub: t3sub }) +
-    statCard({ icon: '🔬', label: 'Processed',  value: fmt(enriched) + delta(enriched, 'total_enriched'), sub: `of ${fmt(techUs)} tech+US` }) +
-    statCard({ icon: '📄', label: 'Has Description', value: fmt(hasDesc), sub: hasDesc != null && techUs != null ? Math.round(100 * hasDesc / techUs) + '% of pool' : '' }) +
-    statCard({ icon: '⏳', label: 'In Queue',  value: queueGap != null ? fmt(queueGap) : '—', sub: 'awaiting enrichment' });
+    statCard({ icon: '🏆', label: 'Tier 3 Rate',     value: t3rate, sub: t3sub, trend: t3trend || null, trendDir: t3trend && t3trend.startsWith('+') ? 'up' : t3trend ? 'down' : null }) +
+    statCard({ icon: '🔬', label: 'Processed',  value: fmt(enriched) + delta(enriched, 'total_enriched'), sub: `of ${fmt(techUs)} tech+US · Target: 100%` }) +
+    statCard({ icon: '📄', label: 'Has Description', value: fmt(hasDesc), sub: (hasDesc != null && techUs != null ? Math.round(100 * hasDesc / techUs) + '% of pool · ' : '') + 'Target: 100%' }) +
+    statCard({ icon: '⏳', label: 'In Queue',  value: queueGap != null ? fmt(queueGap) : '—', sub: queueGap != null && queueGap === 0 ? 'All caught up' : 'awaiting enrichment · Target: 0' });
 
   if (enrichStats && enrichStats.by_source) {
     const ORDER = ['greenhouse', 'workday', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'netflix', 'eightfold'];
