@@ -364,8 +364,7 @@ graph TB
   <section id="tab-agg" class="tab-panel">
     <div class="section-label">Pipeline Status</div>
     <div class="grid" id="ops-pipeline-stats"></div>
-    <div class="section-label" style="margin-top:24px">Last Run</div>
-    <div class="grid" id="pipeline-run-stats"></div>
+    <!-- Last Run section removed S266 — Pool Size + Active Sources duplicate stat cards above -->
     <div class="section-label" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center">
       <span>Pool Trend</span>
       <span id="pool-trend-pills"></span>
@@ -734,7 +733,7 @@ function renderStatusBar(isoTs) {
 }
 
 // Ops tab — pipeline stats section (always populated from metrics/metadata)
-function renderOpsPipelineStats(metrics, metadata, enrichStats) {
+function renderOpsPipelineStats(metrics, metadata, enrichStats, daily) {
   const el = document.getElementById('ops-pipeline-stats');
   if (!el) return;
   const p = (metrics && metrics.pipeline) || {};
@@ -747,12 +746,21 @@ function renderOpsPipelineStats(metrics, metadata, enrichStats) {
   const sf = metadata && metadata.senior_filter_stats;
   const entryCount = sf ? sf.entry_level_jobs : null;
   const usTechJobs = enrichStats ? enrichStats.total_tech_us : null;
+  // Pool WoW delta from daily stats history array (7 daily pool totals)
+  let poolSub = entryCount ? `${fmt(entryCount)} entry-level` : null;
+  if (daily && Array.isArray(daily.history) && daily.history.length >= 7 && poolTotal != null) {
+    const pool7dAgo = daily.history[0]; // oldest entry = 7 days ago
+    const delta = poolTotal - pool7dAgo;
+    const pct = pool7dAgo > 0 ? ((delta / pool7dAgo) * 100).toFixed(1) : 0;
+    const color = delta >= 0 ? 'var(--green)' : 'var(--red)';
+    poolSub = `${entryCount ? fmt(entryCount) + ' entry-level · ' : ''}<span style="color:${color}">${delta >= 0 ? '+' : ''}${fmt(delta)} WoW (${delta >= 0 ? '+' : ''}${pct}%)</span>`;
+  }
 
   el.innerHTML =
     statCard({ icon: statusIcon, label: 'Pipeline Status', value: pipelineStatus,
                sub: statusTs ? `Last run: ${age(statusTs)}` : null }) +
     statCard({ icon: '🏗️', label: 'Pool Size', value: fmt(poolTotal),
-               sub: entryCount ? `${fmt(entryCount)} entry-level` : null }) +
+               sub: poolSub }) +
     statCard({ icon: '⏱️', label: 'Last Run Duration', value: durationMin ? `${durationMin} min` : '—',
                sub: 'Target: ≤25 min' }) +
     statCard({ icon: '💻', label: 'US Tech Jobs', value: fmt(usTechJobs),
@@ -767,7 +775,7 @@ function renderOpsServices(metadata) {
   const aggOk = ts && (Date.now() - new Date(ts).getTime()) < 6 * 3600000;
   const services = [
     { name: 'Aggregator', ok: aggOk, detail: ts ? age(ts) : 'unknown' },
-    { name: 'CF Worker cron', ok: true, detail: 'every 15 min' },
+    // CF Worker card removed S266 — always shows "Online" (hardcoded ok: true). Zero information value.
   ];
   el.innerHTML = services.map(s => `
     <div class="stat-card">
@@ -2211,7 +2219,7 @@ function renderClassification(data) {
 
   // Summary cards
   summaryEl.innerHTML = `
-    <div class="card"><div class="stat-label">US General Rate</div><div class="stat-val ${s.us_general_rate > 10 ? 'yellow' : 'green'}">${s.us_general_rate}%</div></div>
+    <div class="card"><div class="stat-label">US General Rate</div><div class="stat-val ${s.us_general_rate > 10 ? 'yellow' : 'green'}">${s.us_general_rate}%</div><div class="stat-sub">Target: &lt;40%</div></div>
     <div class="card"><div class="stat-label">US General Jobs</div><div class="stat-val">${fmt(s.us_general)}</div></div>
     <div class="card"><div class="stat-label">US Classified Rate</div><div class="stat-val green">${classifiedRate}%</div></div>
     <div class="card"><div class="stat-label">Companies w/ Generals</div><div class="stat-val">${data.by_company ? data.by_company.length : '—'}</div></div>
@@ -2320,7 +2328,7 @@ async function loadAll() {
   const statusTs = (metadata && metadata.generated) ? metadata.generated : metrics.timestamp;
   renderStatusBar(statusTs);
   renderOpsServices(metadata);
-  renderOpsPipelineStats(metrics, metadata, enrichStats);
+  renderOpsPipelineStats(metrics, metadata, enrichStats, daily);
   renderAlert(pipelineAlert);
   // Parse long-term archive for "All" toggle on Pool Trend
   const archiveEntries = archiveRaw
