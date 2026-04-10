@@ -36,7 +36,7 @@ const he = require('he');
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
-const ENRICHER_VERSION = 20;  // S266: LCA-ALIAS-3 — 8 new visa aliases
+const ENRICHER_VERSION = 21;  // S266: tier redefinition — T3=degree+exp+visa, qcount removed from gate
 const SLOW_BATCH_SIZE = 40;   // GH, Ashby, Lever — HTTP calls per job
 const FAST_BATCH_SIZE = 500;  // WD, SR, JSearch, Amazon, Netflix, EF — CPU only
 const FAST_SOURCES = new Set(['workday', 'smartrecruiters', 'jsearch', 'amazon', 'netflix', 'eightfold']);
@@ -990,24 +990,20 @@ function isEnrichable(job, descriptionsMap) {
 const FORM_SOURCES = new Set(['greenhouse', 'ashby', 'lever']);
 
 function computeEnrichmentTier(record) {
-  // No description = T0. Backward-compatible: old records lack has_description field,
-  // infer from summary_line (summary requires description to extract).
+  // S266 tier redefinition:
+  // T0 = no description (can't enrich without source text)
+  // T1 = description available (raw text exists, user can read it)
+  // T2 = skills extracted (structured data from description)
+  // T3 = degree + experience + visa (full job knowledge for the user)
+  // Question count removed from T3 gate — application-process metadata, not job content.
   const hasDesc = record.has_description !== undefined ? record.has_description : !!record.summary_line;
   if (!hasDesc) return 0;
-  const hasSummary = !!record.summary_line;
   const hasSkills = record.required_skills?.length > 0;
-  if (!hasSummary) return 0;
   if (!hasSkills) return 1;
-  // Tier 2 baseline: has skills + summary. Check Tier 3 requirements.
   const hasDegree = record.min_degree !== null && record.min_degree !== undefined;
   const hasExp = (record.experience_level_from_desc != null) || (record.experience_level != null);
-  if (FORM_SOURCES.has(record.source)) {
-    // Form sources: also require question_count
-    const hasForm = record.question_count !== null;
-    return (hasDegree && hasExp && hasForm) ? 3 : 2;
-  }
-  // Non-form sources: degree + experience is sufficient for T3
-  return (hasDegree && hasExp) ? 3 : 2;
+  const hasVisa = (record.sponsors_visa != null) || (record.possible_sponsor != null) || (record.visa_question_present != null);
+  return (hasDegree && hasExp && hasVisa) ? 3 : 2;
 }
 
 async function enrichJob(job, termMap, descriptionsMap, lcaSet) {
