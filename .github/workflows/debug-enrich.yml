@@ -11,13 +11,5 @@ jobs:
           sudo apt-get install -y git-crypt -q
           git-crypt unlock /tmp/key
           rm /tmp/key
-      - name: Show file
-        run: |
-          wc -l .github/scripts/pipeline-alert.js
-          echo "=== Lines 250-280 ==="
-          sed -n '250,280p' .github/scripts/pipeline-alert.js
-          echo "=== Full syntax check ==="
-          node -c .github/scripts/pipeline-alert.js 2>&1 || true
-          echo "=== Brace count ==="
-          grep -c '{' .github/scripts/pipeline-alert.js
-          grep -c '}' .github/scripts/pipeline-alert.js
+      - name: Dump full file
+        run: cat -n .github/scripts/pipeline-alert.js
