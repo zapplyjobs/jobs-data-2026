@@ -1101,13 +1101,17 @@ async function main() {
     for (const job of allJobs) {
       const src = job.source || 'unknown';
       if (!statsBySource[src]) {
-        statsBySource[src] = { total: 0, tech_us: 0, has_desc: 0, enriched: 0,
+        statsBySource[src] = { total: 0, us_jobs: 0, us_has_desc: 0, tech_us: 0, has_desc: 0, enriched: 0,
           summary_line: 0, required_skills: 0, sponsors_visa: 0, question_count: 0,
           min_degree: 0, experience_level_from_desc: 0 };
       }
       statsBySource[src].total++;
       const domains = job.tags?.domains || [];
       const locs = job.tags?.locations || [];
+      if (locs.includes('us')) {
+        statsBySource[src].us_jobs++;
+        if (descriptionsMap.get(job.id)) statsBySource[src].us_has_desc++;
+      }
       if (domains.some(d => TECH_DOMAINS.has(d)) && locs.includes('us')) {
         statsBySource[src].tech_us++;
         if (descriptionsMap.get(job.id)) statsBySource[src].has_desc++;
@@ -1162,6 +1166,8 @@ async function main() {
     const totalTechUs = Object.values(statsBySource).reduce((s, v) => s + v.tech_us, 0);
     const totalEnriched = Object.values(statsBySource).reduce((s, v) => s + v.enriched, 0);
     const totalHasDesc = Object.values(statsBySource).reduce((s, v) => s + v.has_desc, 0);
+    const totalUsJobs = Object.values(statsBySource).reduce((s, v) => s + v.us_jobs, 0);
+    const totalUsHasDesc = Object.values(statsBySource).reduce((s, v) => s + v.us_has_desc, 0);
     const totalSkills = Object.values(statsBySource).reduce((s, v) => s + v.required_skills, 0);
     const totalSummary = Object.values(statsBySource).reduce((s, v) => s + v.summary_line, 0);
 
@@ -1170,13 +1176,15 @@ async function main() {
       total_tech_us: totalTechUs,
       total_enriched: totalEnriched,
       total_has_description: totalHasDesc,
+      total_us_jobs: totalUsJobs,
+      total_us_has_description: totalUsHasDesc,
       desc_waiting: descWaiting,
       by_source: statsBySource,
       by_company: byCompany,
     };
 
     fs.writeFileSync(STATS_PATH, JSON.stringify(enrichmentStats, null, 2), 'utf8');
-    console.log(`[enrich-jobs] enrichment-stats.json written (${totalEnriched}/${totalTechUs} enriched, ${totalHasDesc} have description)`);
+    console.log(`[enrich-jobs] enrichment-stats.json written (${totalEnriched}/${totalTechUs} enriched, ${totalHasDesc}/${totalTechUs} tech_us desc, ${totalUsHasDesc}/${totalUsJobs} all-US desc)`);
 
     // ENRICH-QUALITY-2: Append daily snapshot to enrichment-history.jsonl (1 entry/day)
     const HISTORY_PATH = path.join(DATA_DIR, 'enrichment-history.jsonl');
