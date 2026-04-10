@@ -3,6 +3,8 @@ on: workflow_dispatch
 jobs:
   debug:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - name: Decrypt
@@ -11,10 +13,37 @@ jobs:
           sudo apt-get install -y git-crypt -q
           git-crypt unlock /tmp/key
           rm /tmp/key
-      - name: Show crash area
+      - name: Apply fix and verify
         run: |
-          echo "=== Lines 240-300 of enrich-jobs.js ==="
-          sed -n '240,300p' .github/scripts/enrich-jobs.js
-          echo ""
-          echo "=== Line 281 specifically ==="
-          sed -n '281p' .github/scripts/enrich-jobs.js
+          FILE=".github/scripts/enrich-jobs.js"
+          echo "=== BEFORE fix ==="
+          sed -n '247p' "$FILE"
+          sed -n '256p' "$FILE"
+          
+          # Fix: Add additionalLocations to outer scope (line 247)
+          sed -i '247s/let url, rawHtml;/let url, rawHtml, additionalLocations = null;/' "$FILE"
+          
+          # Remove redundant inner declaration (was line 256, now blank)
+          sed -i '256s/^      let additionalLocations = null;$//' "$FILE"
+          
+          echo "=== AFTER fix ==="
+          sed -n '245,260p' "$FILE"
+          
+          # Verify syntax
+          node -c "$FILE" && echo "SYNTAX OK" || { echo "SYNTAX ERROR"; exit 1; }
+      - name: Commit and push
+        run: |
+          git config user.email "bot@zapplyjobs.com"
+          git config user.name "Aggregator Bot"
+          git add .github/scripts/enrich-jobs.js
+          # Also remove the fix workflow file (cleanup)
+          git rm .github/workflows/fix-enrich.yml 2>/dev/null || true
+          git commit -m "fix: move additionalLocations to outer scope (OUT-14 crash)
+
+ReferenceError at line 281: additionalLocations declared inside workday
+branch but referenced in shared rawHtml block. SmartRecruiters path
+never declared it. Pipeline down since 19:45Z Apr 9.
+
+Fix: declare alongside url and rawHtml at outer scope."
+          git -c filter.git-crypt.smudge=cat -c filter.git-crypt.clean=cat -c filter.git-crypt.required=false pull --rebase origin main
+          git push origin main
