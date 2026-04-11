@@ -36,7 +36,7 @@ const he = require('he');
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
-const ENRICHER_VERSION = 22;  // S266: DASH-7 expanded history snapshots + LCA-ALIAS-4 JSearch
+const ENRICHER_VERSION = 23;  // S268: ENR-19 SR description re-fetch (qualifications section)
 const SLOW_BATCH_SIZE = 40;   // GH, Ashby, Lever — HTTP calls per job
 const FAST_BATCH_SIZE = 500;  // WD, SR, JSearch, Amazon, Netflix, EF — CPU only
 const FAST_SOURCES = new Set(['workday', 'smartrecruiters', 'jsearch', 'amazon', 'netflix', 'eightfold']);
@@ -275,7 +275,11 @@ async function fetchMissingDescriptions(allJobs, descriptionsMap, activeChunkPat
   // Previous: tech+US only (DESC-MIGRATE-1). Expanded to ALL US for TAG-7.
   const pending = allJobs.filter(j => {
     if (j.source !== 'workday' && j.source !== 'smartrecruiters') return false;
-    if (descriptionsMap.has(j.id)) return false;
+    // ENR-19: Re-fetch SR descriptions to include qualifications section (degree data).
+    // Prior cached descriptions only had jobDescription — missing qualifications.text.
+    // WD descriptions are unaffected (fetched via different API path).
+    // Remove this bypass after SR degree rate exceeds 40% in enrichment-stats.json.
+    if (j.source !== 'smartrecruiters' && descriptionsMap.has(j.id)) return false;
     if (failCache[j.id]) return false; // skip known-failed URLs for 24h
     const locs = j.tags?.locations || [];
     return locs.includes('us');
