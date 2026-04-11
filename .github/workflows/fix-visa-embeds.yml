@@ -17,85 +17,67 @@ jobs:
           git-crypt unlock /tmp/key
           rm /tmp/key
 
-      - name: Fix visa status logic in discord-poster.js
+      - name: Fix visa status logic
         run: |
-          FILE=".github/scripts/discord-poster.js"
-          
-          echo "=== BEFORE ==="
-          grep -n "visa_question_present\|Sponsors Visa\|possible_sponsor\|Confirmed" "$FILE" || echo "No visa references found"
-          
-          python3 << 'PYEOF'
-          with open('.github/scripts/discord-poster.js', 'r') as f:
+          python3 -c "
+          with open('.github/scripts/discord-poster.js') as f:
               code = f.read()
-          
-          # Find and replace the visa block
-          # S262 code checks: enriched.visa_question_present === true → 'Sponsors Visa'
-          # We need: possible_sponsor OR visa_question_present → 'Confirmed Sponsor', else 'Unconfirmed'
-          
-          # Strategy: find "Sponsors Visa" and replace the surrounding block
+          if 'Confirmed Sponsor' in code:
+              print('Already updated — skipping')
+              exit(0)
           if 'Sponsors Visa' not in code:
-              print("WARNING: 'Sponsors Visa' not found — visa logic may already be updated")
-              # Check if already updated
-              if 'Confirmed Sponsor' in code:
-                  print("SKIP: Already has 'Confirmed Sponsor' — no changes needed")
-                  exit(0)
-              else:
-                  print("ERROR: Neither old nor new visa logic found")
-                  exit(1)
-          
-          # Replace the specific visa value and add possible_sponsor check
-          # Old: if (enriched && enriched.visa_question_present === true) { ... 'Sponsors Visa' ... }
-          # New: if (enriched) { if (possible_sponsor || visa_question_present) → Confirmed, else Unconfirmed }
-          
-          import re
-          
-          # Match the visa block pattern — flexible enough to handle S262 formatting
-          visa_pattern = r"([ \t]*//.*?[Vv]isa.*?\n)?([ \t]*)if\s*\(enriched\s*&&\s*enriched\.visa_question_present\s*===\s*true\)\s*\{[^}]*?'Sponsors Visa'[^}]*?\}"
-          
-          replacement = r"""\2// Visa sponsorship from enriched data (LCA match OR ATS form detection)
-\2if (enriched) {
-\2  if (enriched.possible_sponsor === true || enriched.visa_question_present === true) {
-\2    embed.addFields({ name: '\U0001f310 Visa', value: 'Confirmed Sponsor', inline: true });
-\2  } else {
-\2    embed.addFields({ name: '\U0001f310 Visa', value: 'Unconfirmed', inline: true });
-\2  }
-\2}"""
-          
-          new_code, count = re.subn(visa_pattern, replacement, code, flags=re.DOTALL)
-          
-          if count == 0:
-              print("ERROR: Visa pattern not matched by regex")
-              # Show context around Sponsors Visa for debugging
-              lines = code.split('\n')
-              for i, line in enumerate(lines):
-                  if 'Sponsors Visa' in line or 'visa_question_present' in line:
-                      start = max(0, i-3)
-                      end = min(len(lines), i+4)
-                      for j in range(start, end):
-                          print(f"  {j+1}: {lines[j]}")
-                      print("  ---")
+              print('ERROR: Cannot find Sponsors Visa in code')
               exit(1)
-          
+          lines = code.split('\n')
+          out = []
+          i = 0
+          while i < len(lines):
+              line = lines[i]
+              # Find the visa block start
+              if 'visa_question_present === true' in line and 'if' in line:
+                  # Find the indent
+                  indent = line[:len(line) - len(line.lstrip())]
+                  # Skip until we find the closing brace of this if block
+                  brace_count = 0
+                  j = i
+                  while j < len(lines):
+                      brace_count += lines[j].count('{') - lines[j].count('}')
+                      if brace_count <= 0:
+                          break
+                      j += 1
+                  # Also skip the comment line above if it mentions visa/UX-2
+                  if i > 0 and ('visa' in lines[i-1].lower() or 'UX-2' in lines[i-1]):
+                      out.pop()  # remove the comment we already added
+                  # Write replacement
+                  out.append(indent + '// Visa sponsorship (LCA match OR ATS form detection)')
+                  out.append(indent + 'if (enriched) {')
+                  out.append(indent + '  if (enriched.possible_sponsor === true || enriched.visa_question_present === true) {')
+                  out.append(indent + \"    embed.addFields({ name: '\\U0001f310 Visa', value: 'Confirmed Sponsor', inline: true });\")
+                  out.append(indent + '  } else {')
+                  out.append(indent + \"    embed.addFields({ name: '\\U0001f310 Visa', value: 'Unconfirmed', inline: true });\")
+                  out.append(indent + '  }')
+                  out.append(indent + '}')
+                  i = j + 1
+                  continue
+              out.append(line)
+              i += 1
           with open('.github/scripts/discord-poster.js', 'w') as f:
-              f.write(new_code)
-          
-          print(f"SUCCESS: Replaced {count} visa block(s)")
-          PYEOF
-          
-          echo "=== AFTER ==="
-          grep -n "Confirmed Sponsor\|Unconfirmed\|possible_sponsor" "$FILE" | head -10
+              f.write('\n'.join(out))
+          print('Visa block replaced successfully')
+          "
+          echo "=== Verify ==="
+          grep -n "Confirmed Sponsor\|Unconfirmed\|possible_sponsor" .github/scripts/discord-poster.js | head -5
 
-      - name: Commit through git-crypt filters
+      - name: Commit through git-crypt
         run: |
           git config user.email "bot@zapplyjobs.com"
           git config user.name "Aggregator Bot"
           git add .github/scripts/discord-poster.js
-          git diff --cached --quiet && { echo "No changes needed"; exit 0; }
+          git diff --cached --quiet && { echo "No changes"; exit 0; }
           git commit -m "feat(out-10): visa status — Confirmed Sponsor / Unconfirmed in Discord embeds"
           for i in 1 2 3; do
             git -c filter.git-crypt.smudge=cat -c filter.git-crypt.clean=cat -c filter.git-crypt.required=false pull --rebase origin main && git push && break
-            echo "Retry $i..."
-            sleep 5
+            echo "Retry $i..."; sleep 5
           done
 
       - name: Self-cleanup
