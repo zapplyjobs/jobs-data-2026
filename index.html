@@ -467,6 +467,10 @@
     <div class="card" id="enrich-trend-card" style="position:relative;height:220px">
       <canvas id="enrich-trend-canvas"></canvas>
     </div>
+    <div class="section-label" style="margin-top:24px">T3 by Source <span id="source-t3-pills" style="margin-left:8px"></span></div>
+    <div class="card" id="source-t3-card" style="position:relative;height:260px">
+      <canvas id="source-t3-canvas"></canvas>
+    </div>
     <div class="section-label" style="margin-top:24px">Enrichment Details</div>
     <div class="card">
       <table id="enrich-source-table">
@@ -1502,6 +1506,63 @@ function renderEnrichTrendChart(all, days) {
   });
 }
 
+// DASH-7: Per-source T3% trend chart (from enrichment-history.jsonl expanded format)
+// Shows how each source's T3 rate changes over time — helps operator decide where to invest.
+// Only renders entries that have per-source t3_pct (v22+ snapshots).
+let _sourceT3All = null;
+function renderSourceT3Trend(enrichHistory) {
+  if (!enrichHistory) return;
+  // Filter to entries with per-source T3 data
+  const entries = enrichHistory.filter(e => {
+    const bs = e.by_source || {};
+    const first = Object.values(bs)[0];
+    return first && first.t3_pct !== undefined;
+  });
+  if (entries.length === 0) {
+    const el = document.getElementById('source-t3-card');
+    if (el) el.innerHTML = '<p class="muted" style="text-align:center;padding:80px 0">Per-source T3 trend — data accumulates daily (requires v22+ snapshots).</p>';
+    return;
+  }
+  _sourceT3All = entries;
+  renderSourceT3Chart(entries, 30);
+}
+function renderSourceT3Chart(all, days) {
+  if (!all || all.length === 0) return;
+  const entries = days ? all.slice(-days) : all;
+  const pillsEl = document.getElementById('source-t3-pills');
+  if (pillsEl) {
+    const ps = d => `display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--border);margin-left:4px;` +
+      (d === days ? 'background:var(--accent);color:#fff;border-color:var(--accent)' : 'background:transparent;color:var(--muted)');
+    pillsEl.innerHTML = [7, 14, 30, null].map(d => {
+      const label = d === 7 ? '7D' : d === 14 ? '14D' : d === 30 ? '30D' : 'All';
+      return `<span style="${ps(d)}" onclick="renderSourceT3Chart(_sourceT3All,${d})">${label}</span>`;
+    }).join('');
+  }
+  const ORDER = ['workday', 'greenhouse', 'amazon', 'ashby', 'lever', 'smartrecruiters', 'jsearch', 'netflix'];
+  const datasets = ORDER.map(src => ({
+    label: src,
+    data: entries.map(e => {
+      const s = (e.by_source || {})[src];
+      return s && s.t3_pct !== undefined ? s.t3_pct : null;
+    }),
+    borderColor: CHART_COLORS.sources[src] || '#8b949e',
+    tension: 0.3, pointRadius: 3, pointHoverRadius: 6, borderWidth: 2, spanGaps: true,
+  }));
+  makeChart('source-t3-canvas', {
+    type: 'line',
+    data: { labels: entries.map(e => (e.date || '').slice(5)), datasets },
+    options: {
+      ...CHART_DEFAULTS,
+      plugins: { legend: { display: true, position: 'top', labels: { color: '#8b949e', font: { size: 10 }, boxWidth: 12, padding: 8 } } },
+      scales: {
+        x: CHART_DEFAULTS.scales.x,
+        y: { ...CHART_DEFAULTS.scales.y, min: 0, max: 100,
+             ticks: { ...CHART_DEFAULTS.scales.y.ticks, callback: v => v + '%' } }
+      }
+    }
+  });
+}
+
 // ENRICH-QUALITY-2: Skills fill rate bars by source
 function renderSkillsBars(enrichStats) {
   if (!enrichStats || !enrichStats.by_source) return;
@@ -2388,6 +2449,7 @@ async function loadAll() {
   renderDeadlines();
   renderQuality(metrics, enrichStats, metadata, enrichHistory);
   renderEnrichTrend(enrichHistory);
+  renderSourceT3Trend(enrichHistory);
   renderTierSourceChart(enrichStats);
   renderFieldCoverage(enrichStats);
   // renderSkillsBars removed — redundant with Field Coverage table
