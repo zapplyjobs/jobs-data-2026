@@ -1,1 +1,103 @@
+name: Fix discord-poster.js — add enrichment to embeds
 
+on:
+  workflow_dispatch:
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Decrypt
+        run: |
+          echo "${{ secrets.GIT_CRYPT_KEY }}" | base64 -d > /tmp/key
+          sudo apt-get install -y git-crypt -q
+          git-crypt unlock /tmp/key
+          rm /tmp/key
+
+      - name: Apply OUT-10 enrichment embed changes
+        run: |
+          python3 << 'PYEOF'
+          import re
+
+          with open('.github/scripts/discord-poster.js', 'r') as f:
+              code = f.read()
+
+          old_tags = "  // Add tags field with hashtag formatting\n  if (tags.length > 0) {\n    embed.addFields({\n      name: '\U0001f3f7\ufe0f Tags',\n      value: tags.map(tag => `#${tag}`).join(' '),\n      inline: false\n    });\n  }"
+
+          new_tags = """  // Prefer enriched skills over title-based tags when available
+  const enriched = enrichedMap.get(job.id);
+  const enrichedSkills = enriched?.required_skills || [];
+  if (enrichedSkills.length >= 3) {
+    embed.addFields({
+      name: '\U0001f9e0 Skills',
+      value: enrichedSkills.slice(0, 10).join(' \u2022 '),
+      inline: false
+    });
+  } else if (tags.length > 0) {
+    embed.addFields({
+      name: '\U0001f3f7\ufe0f Tags',
+      value: tags.map(tag => `#${tag}`).join(' '),
+      inline: false
+    });
+  }
+
+  // Summary line from enrichment
+  if (enriched?.summary_line && enriched.summary_line.length > 10) {
+    embed.addFields({
+      name: '\U0001f4cb Summary',
+      value: enriched.summary_line.length > 200
+        ? enriched.summary_line.slice(0, 197) + '...'
+        : enriched.summary_line,
+      inline: false
+    });
+  }"""
+
+          old_visa = "  // UX-2: Visa sponsorship tag from enriched data (ATS application form detection)\n  const enriched = enrichedMap.get(job.id);\n  if (enriched && enriched.visa_question_present === true) {\n    embed.addFields({\n      name: '\U0001f310 Visa',\n      value: 'Sponsors Visa',\n      inline: true\n    });\n  }"
+
+          new_visa = """  // Visa sponsorship from enriched data (LCA match OR ATS form detection)
+  if (enriched) {
+    if (enriched.possible_sponsor === true || enriched.visa_question_present === true) {
+      embed.addFields({ name: '\U0001f310 Visa', value: 'Confirmed Sponsor', inline: true });
+    } else {
+      embed.addFields({ name: '\U0001f310 Visa', value: 'Unconfirmed', inline: true });
+    }
+  }"""
+
+          assert old_tags in code, f"ERROR: tags block not found. Looking for: {repr(old_tags[:80])}"
+          assert old_visa in code, f"ERROR: visa block not found. Looking for: {repr(old_visa[:80])}"
+
+          code = code.replace(old_tags, new_tags)
+          code = code.replace(old_visa, new_visa)
+
+          with open('.github/scripts/discord-poster.js', 'w') as f:
+              f.write(code)
+
+          print("Changes applied successfully")
+          PYEOF
+
+          echo "=== Verify changes ==="
+          grep -n "enrichedSkills\|Summary\|Confirmed Sponsor\|Unconfirmed" .github/scripts/discord-poster.js | head -10
+
+      - name: Commit through git-crypt filters
+        run: |
+          git config user.email "bot@zapplyjobs.com"
+          git config user.name "Aggregator Bot"
+          git add .github/scripts/discord-poster.js
+          git diff --cached --quiet && { echo "No changes"; exit 0; }
+          git commit -m "feat(out-10): surface enrichment in Discord embeds — skills, summary, visa status"
+          for i in 1 2 3; do
+            git -c filter.git-crypt.smudge=cat -c filter.git-crypt.clean=cat -c filter.git-crypt.required=false pull --rebase origin main && git push && break
+            echo "Retry $i..."
+            sleep 5
+          done
+
+      - name: Self-cleanup
+        run: |
+          git rm .github/workflows/fix-discord-poster.yml
+          git commit -m "chore: remove temp fix-discord-poster workflow [skip ci]"
+          for i in 1 2 3; do
+            git -c filter.git-crypt.smudge=cat -c filter.git-crypt.clean=cat -c filter.git-crypt.required=false pull --rebase origin main && git push && break
+            sleep 5
+          done
