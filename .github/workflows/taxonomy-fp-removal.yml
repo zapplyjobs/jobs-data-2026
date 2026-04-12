@@ -1,0 +1,77 @@
+name: Taxonomy FP Removal (S268B)
+
+on:
+  repository_dispatch:
+    types: [taxonomy-fp-removal]
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Install git-crypt
+        run: sudo apt-get install -y git-crypt
+
+      - name: Unlock repo
+        env:
+          GIT_CRYPT_KEY_B64: ${{ secrets.GIT_CRYPT_KEY }}
+        run: |
+          echo "$GIT_CRYPT_KEY_B64" | base64 -d > /tmp/git-crypt-key
+          git-crypt unlock /tmp/git-crypt-key
+          rm /tmp/git-crypt-key
+
+      - name: Remove FP taxonomy terms
+        run: |
+          python3 <<'PYEOF'
+          import json
+          path = '.github/scripts/enrich/skills-taxonomy.json'
+          with open(path, 'r') as f:
+              data = json.load(f)
+
+          removed = []
+          targets = {'move', 'https', 'less'}
+          for cat, terms in list(data.items()):
+              if cat == '_meta':
+                  continue
+              new_terms = [t for t in terms if t.lower() not in targets]
+              dropped = set(t for t in terms if t.lower() in targets)
+              if dropped:
+                  data[cat] = new_terms
+                  for d in dropped:
+                      removed.append((d, cat))
+
+          with open(path, 'w') as f:
+              json.dump(data, f, indent=2)
+
+          for term, cat in removed:
+              print(f'Removed "{term}" from {cat}')
+          print(f'Total removed: {len(removed)}')
+          PYEOF
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/scripts/enrich/skills-taxonomy.json
+          git diff --cached --stat
+          git commit -m "chore(taxonomy): remove false-positive terms move/https/less (S268B)
+
+- move: 100% FP (blockchain lang, 0 pipeline companies use it) — 112 records
+- https: ~99% FP (matches URLs) — 1,403 records
+- less: high FP (common English word) — 512 records
+
+Effects apply to new enrichments only. No version bump.
+Existing records retain these skills until next re-enrichment."
+          git push origin main
+
+      - name: Self-delete workflow
+        run: |
+          git rm .github/workflows/taxonomy-fp-removal.yml
+          git commit -m "chore: remove temp taxonomy-fp-removal workflow"
+          git push origin main
