@@ -1,0 +1,52 @@
+name: Re-encrypt via git-crypt status -f
+
+on:
+  repository_dispatch:
+    types: [reencrypt-v2]
+
+jobs:
+  reencrypt:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup git-crypt and unlock
+        run: |
+          echo "${{ secrets.GIT_CRYPT_KEY }}" | base64 -d > /tmp/key
+          sudo apt-get install -y git-crypt -q
+          git-crypt unlock /tmp/key
+          rm /tmp/key
+
+      - name: Run git-crypt status -f (force re-staging)
+        run: |
+          # git-crypt status -f re-stages any encrypted files that are currently decrypted in the index
+          # This fixes files that were pushed as plaintext via API
+          git-crypt status -f
+          echo "After git-crypt status -f:"
+          git status --short
+
+      - name: Verify and commit
+        run: |
+          git config user.email "bot@zapplyjobs.com"
+          git config user.name "Aggregator Bot"
+          if [ -n "$(git status --porcelain)" ]; then
+            git add -A
+            git commit -m "fix(inf-22): re-encrypt plaintext files via git-crypt status -f"
+            for i in 1 2 3; do
+              git -c filter.git-crypt.smudge=cat -c filter.git-crypt.clean=cat -c filter.git-crypt.required=false pull --rebase origin main && git push && break
+              sleep 5
+            done
+          else
+            echo "No changes — files already encrypted on remote"
+          fi
+
+      - name: Self-cleanup
+        run: |
+          git rm .github/workflows/reencrypt-v2.yml
+          git commit -m "chore: remove temp reencrypt-v2 workflow [skip ci]"
+          for i in 1 2 3; do
+            git -c filter.git-crypt.smudge=cat -c filter.git-crypt.clean=cat -c filter.git-crypt.required=false pull --rebase origin main && git push && break
+            sleep 5
+          done
