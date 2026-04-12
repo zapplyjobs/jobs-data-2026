@@ -1,0 +1,59 @@
+name: Fix Discord dedup by jobId
+
+on:
+  repository_dispatch:
+    types: [fix-discord-dedup]
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Decrypt
+        run: |
+          echo "${{ secrets.GIT_CRYPT_KEY }}" | base64 -d > /tmp/key
+          sudo apt-get install -y git-crypt -q
+          git-crypt unlock /tmp/key
+          rm /tmp/key
+
+      - name: Patch manager
+        run: |
+          echo "bWdyX3BhdGggPSAnLmdpdGh1Yi9zY3JpcHRzL3NyYy9kYXRhL2dsb2JhbC1kZWR1cGUtbWFuYWdlci5qcycKd2l0aCBvcGVuKG1ncl9wYXRoKSBhcyBmOgogICAgY29kZSA9IGYucmVhZCgpCgppZiAnaGFzSm9iSWRCZWVuUG9zdGVkJyBpbiBjb2RlOgogICAgcHJpbnQoJ0FscmVhZHkgaGFzIGhhc0pvYklkQmVlblBvc3RlZCDigJQgc2tpcHBpbmcnKQogICAgZXhpdCgwKQoKbWFya2VyID0gJyAgLyoqXG4gICAqIE1hcmsgam9iIGFzIHBvc3RlZCcKbmV3X21ldGhvZCA9ICcnJyAgLyoqCiAgICogQ2hlY2sgaWYgYSBqb2JJZCBoYXMgYmVlbiBwb3N0ZWQgKGR1YWwtY2hlY2sg4oCUIGpvYklkIGlzIG1vcmUgc3RhYmxlIHRoYW4KICAgKiBVUkwrdGl0bGUrY29tcGFueSBmaW5nZXJwcmludC4gV0QgbXVsdGktbG9jYXRpb24gam9icyByZXR1cm4gc2FtZSBqb2JJZCBidXQKICAgKiB2YXJ5aW5nIHRpdGxlL3VybCBhY3Jvc3MgcnVucywgY2F1c2luZyB0aGUgb2xkIGZpbmdlcnByaW50IGNoZWNrIHRvIG1pc3MKICAgKiByZS1wb3N0cy4gMTM3IGR1cGxpY2F0ZXMgb2JzZXJ2ZWQgaW4gNy1kYXkgd2luZG93IFMyNjguKQogICAqLwogIGhhc0pvYklkQmVlblBvc3RlZChqb2JJZCkgewogICAgaWYgKCFqb2JJZCkgcmV0dXJuIGZhbHNlOwogICAgZm9yIChjb25zdCBmcCBpbiB0aGlzLnN0b3JlLmZpbmdlcnByaW50cykgewogICAgICBjb25zdCBlbnRyeSA9IHRoaXMuc3RvcmUuZmluZ2VycHJpbnRzW2ZwXTsKICAgICAgaWYgKGVudHJ5LmpvYklkICE9PSBqb2JJZCkgY29udGludWU7CiAgICAgIGNvbnN0IHBvc3RlZERhdGUgPSBuZXcgRGF0ZShlbnRyeS5wb3N0ZWRBdCk7CiAgICAgIGNvbnN0IGRheXNTaW5jZVBvc3RlZCA9IChuZXcgRGF0ZSgpIC0gcG9zdGVkRGF0ZSkgLyAoMTAwMCAqIDYwICogNjAgKiAyNCk7CiAgICAgIGlmIChkYXlzU2luY2VQb3N0ZWQgPiA3KSB7CiAgICAgICAgZGVsZXRlIHRoaXMuc3RvcmUuZmluZ2VycHJpbnRzW2ZwXTsKICAgICAgICBjb250aW51ZTsKICAgICAgfQogICAgICByZXR1cm4gdHJ1ZTsKICAgIH0KICAgIHJldHVybiBmYWxzZTsKICB9CgonJycKCmlmIG1hcmtlciBub3QgaW4gY29kZToKICAgIHByaW50KCdFUlJPUjogbWFya2VyIG5vdCBmb3VuZCcpCiAgICBleGl0KDEpCmNvZGUgPSBjb2RlLnJlcGxhY2UobWFya2VyLCBuZXdfbWV0aG9kICsgbWFya2VyKQp3aXRoIG9wZW4obWdyX3BhdGgsICd3JykgYXMgZjoKICAgIGYud3JpdGUoY29kZSkKcHJpbnQoJ0FkZGVkIGhhc0pvYklkQmVlblBvc3RlZCB0byBtYW5hZ2VyJykK" | base64 -d > /tmp/patch_mgr.py
+          python3 /tmp/patch_mgr.py
+
+      - name: Patch poster
+        run: |
+          echo "cG9zdGVyX3BhdGggPSAnLmdpdGh1Yi9zY3JpcHRzL2Rpc2NvcmQtcG9zdGVyLmpzJwp3aXRoIG9wZW4ocG9zdGVyX3BhdGgpIGFzIGY6CiAgICBjb2RlID0gZi5yZWFkKCkKCmlmICdoYXNKb2JJZEJlZW5Qb3N0ZWQnIGluIGNvZGU6CiAgICBwcmludCgnQWxyZWFkeSBoYXMgam9iSWQgY2hlY2sg4oCUIHNraXBwaW5nJykKICAgIGV4aXQoMCkKCm9sZCA9ICIiIiAgICAgIC8vIEdlbmVyYXRlIGZpbmdlcnByaW50IGZvciB0aGlzIGpvYgogICAgICBjb25zdCBmaW5nZXJwcmludCA9IGdlbmVyYXRlTWluaW1hbEpvYkZpbmdlcnByaW50KGpvYik7CgogICAgICAvLyBDaGVjayBpZiBhbHJlYWR5IHBvc3RlZCBnbG9iYWxseSAoYWNyb3NzIGFsbCBydW5zLCA3LWRheSBUVEwpCiAgICAgIGlmIChnbG9iYWxEZWR1cGVNYW5hZ2VyLmhhc0JlZW5Qb3N0ZWQoZmluZ2VycHJpbnQpKSB7IiIiCgpuZXcgPSAiIiIgICAgICAvLyBDaGVjayBqb2JJZCBmaXJzdCDigJQgc3RhYmxlIGlkZW50aWZpZXIgdGhhdCBkb2Vzbid0IGNoYW5nZSBhY3Jvc3MgcGlwZWxpbmUgcnVucy4KICAgICAgLy8gV0QgbXVsdGktbG9jYXRpb24gam9icyB2YXJ5IHRpdGxlL3VybCBiZXR3ZWVuIHJ1bnMgY2F1c2luZyBmaW5nZXJwcmludCB0byBjaGFuZ2UuCiAgICAgIC8vIGpvYklkIGZyb20gQVRTIGlzIGRldGVybWluaXN0aWMgcGVyIGpvYi4gKE9VVC0yNywgUzI2NykKICAgICAgY29uc3Qgam9iSWQgPSBqb2IuaWQgfHwgam9iLmpvYklkIHx8IGpvYi5qb2JfaWQ7CiAgICAgIGlmIChqb2JJZCAmJiBnbG9iYWxEZWR1cGVNYW5hZ2VyLmhhc0pvYklkQmVlblBvc3RlZChqb2JJZCkpIHsKICAgICAgICBjb25zb2xlLmxvZyhgICBza2lwcGluZyAoam9iSWQgcG9zdGVkKTogJHtqb2Iuam9iX3RpdGxlfSBAICR7am9iLmVtcGxveWVyX25hbWV9YCk7CiAgICAgICAgc2tpcHBlZENvdW50Kys7CiAgICAgICAgY29udGludWU7CiAgICAgIH0KCiAgICAgIC8vIEdlbmVyYXRlIGZpbmdlcnByaW50IGZvciB0aGlzIGpvYiAoYmFja3dhcmQgY29tcGF0IGZvciBwcmUtZml4IGVudHJpZXMpCiAgICAgIGNvbnN0IGZpbmdlcnByaW50ID0gZ2VuZXJhdGVNaW5pbWFsSm9iRmluZ2VycHJpbnQoam9iKTsKCiAgICAgIC8vIENoZWNrIGlmIGFscmVhZHkgcG9zdGVkIGdsb2JhbGx5IChhY3Jvc3MgYWxsIHJ1bnMsIDctZGF5IFRUTCkKICAgICAgaWYgKGdsb2JhbERlZHVwZU1hbmFnZXIuaGFzQmVlblBvc3RlZChmaW5nZXJwcmludCkpIHsiIiIKCmlmIG9sZCBub3QgaW4gY29kZToKICAgIHByaW50KCdFUlJPUjogbWFya2VyIG5vdCBmb3VuZCBpbiBkaXNjb3JkLXBvc3RlcicpCiAgICBleGl0KDEpCmNvZGUgPSBjb2RlLnJlcGxhY2Uob2xkLCBuZXcpCndpdGggb3Blbihwb3N0ZXJfcGF0aCwgJ3cnKSBhcyBmOgogICAgZi53cml0ZShjb2RlKQpwcmludCgnQWRkZWQgam9iSWQgY2hlY2sgdG8gZGlzY29yZC1wb3N0ZXInKQo=" | base64 -d > /tmp/patch_poster.py
+          python3 /tmp/patch_poster.py
+
+      - name: Syntax check
+        run: |
+          node -c .github/scripts/src/data/global-dedupe-manager.js && echo "Manager syntax OK"
+          node -c .github/scripts/discord-poster.js && echo "Poster syntax OK"
+
+      - name: Verify changes
+        run: |
+          grep -n "hasJobIdBeenPosted" .github/scripts/src/data/global-dedupe-manager.js | head -3
+          grep -n "hasJobIdBeenPosted\|jobId first" .github/scripts/discord-poster.js | head -3
+
+      - name: Commit through git-crypt
+        run: |
+          git config user.email "bot@zapplyjobs.com"
+          git config user.name "Aggregator Bot"
+          git add .github/scripts/src/data/global-dedupe-manager.js .github/scripts/discord-poster.js
+          git diff --cached --quiet && { echo "No changes"; exit 0; }
+          git commit -m "fix(out-27): dedup by jobId — prevents WD multi-location duplicates"
+          for i in 1 2 3; do
+            git -c filter.git-crypt.smudge=cat -c filter.git-crypt.clean=cat -c filter.git-crypt.required=false pull --rebase origin main && git push && break
+            sleep 5
+          done
+
+      - name: Self-cleanup
+        run: |
+          git rm .github/workflows/fix-discord-dedup.yml
+          git commit -m "chore: remove temp fix-discord-dedup workflow [skip ci]"
+          for i in 1 2 3; do
+            git -c filter.git-crypt.smudge=cat -c filter.git-crypt.clean=cat -c filter.git-crypt.required=false pull --rebase origin main && git push && break
+            sleep 5
+          done
