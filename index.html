@@ -385,6 +385,10 @@
     <div class="card" id="source-trend-card" style="position:relative;height:220px">
       <canvas id="source-trend-canvas"></canvas>
     </div>
+    <div class="section-label" style="margin-top:24px">Zero-Yield Companies — Sources Returning 0 Jobs</div>
+    <div class="card" id="zero-yield-card">
+      <p class="muted" style="text-align:center;padding:20px 0">Loading...</p>
+    </div>
   </section>
 
   <!-- TAG TAB — Classification: G1 KPIs first, then domain detail -->
@@ -1221,6 +1225,32 @@ function renderHBars(containerId, items, { labelWidth = '110px', colorFn } = {})
 }
 
 // renderSupSummary removed S266 — stat cards failed actionability test (source count/pool/top source don't prompt decisions)
+
+// S268A: Zero-yield companies — sources configured but returning 0 jobs
+function renderZeroYield(metadata) {
+  const el = document.getElementById('zero-yield-card');
+  if (!el) return;
+  const zyc = metadata && metadata.zero_yield_companies;
+  if (!zyc || !Array.isArray(zyc)) {
+    el.innerHTML = '<p class="muted" style="text-align:center;padding:20px 0">Zero-yield data not yet available (requires aggregator update)</p>';
+    return;
+  }
+  if (zyc.length === 0) {
+    el.innerHTML = '<div style="display:flex;align-items:center;gap:8px;padding:12px"><span style="font-size:20px">✅</span><span style="color:var(--green);font-weight:600">All configured companies returning jobs</span></div>';
+    return;
+  }
+  el.innerHTML = `
+    <div style="padding:12px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <span style="font-size:20px">⚠️</span>
+        <span style="font-weight:600;color:var(--yellow)">${zyc.length} company${zyc.length > 1 ? 'ies' : 'y'} returning 0 jobs</span>
+        <span style="color:var(--muted);font-size:11px">— check ATS slug, board status, or API changes</span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        ${zyc.map(c => `<span style="background:rgba(210,153,34,0.12);color:var(--yellow);padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600">${esc(c)}</span>`).join('')}
+      </div>
+    </div>`;
+}
 
 function renderSourceBars(d, metadata) {
   const bySource = (metadata && metadata.by_source) ? metadata.by_source : (d.pipeline || {}).bySource || {};
@@ -2488,6 +2518,7 @@ async function loadAll() {
   renderDomainBars(metadata);
   renderTopCompanies(metadata, enrichStats, generalReview);
   renderSourceTrend(allHistoryMerged);
+  renderZeroYield(metadata);
   renderStarsTrend(allHistoryMerged);
   renderGeneralTrend(allHistoryMerged);
   renderTrafficStats(trafficRaw);
