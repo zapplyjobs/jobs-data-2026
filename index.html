@@ -439,7 +439,10 @@
       </select>
     </div>
     <div class="grid" id="quality-enrich"></div>
-    <div class="section-label" style="margin-top:24px">Tier Distribution by Source</div>
+    <div class="section-label" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center">
+      <span>Tier Distribution by Source</span>
+      <span id="tier-filter-pills"></span>
+    </div>
     <div class="card" id="tier-source-card" style="position:relative;height:380px">
       <canvas id="tier-source-canvas"></canvas>
     </div>
@@ -448,6 +451,8 @@
       <table id="field-coverage-table">
         <tr>
           <th>Source</th>
+          <th style="text-align:right">Enriched</th>
+          <th style="text-align:right">T3%</th>
           <th style="text-align:center">Skills</th>
           <th style="text-align:center">Summary</th>
           <th style="text-align:center">Degree</th>
@@ -467,27 +472,7 @@
     <div class="card" id="enrich-trend-card" style="position:relative;height:220px">
       <canvas id="enrich-trend-canvas"></canvas>
     </div>
-    <div class="section-label" style="margin-top:24px">T3 by Source <span id="source-t3-pills" style="margin-left:8px"></span></div>
-    <div class="card" id="source-t3-card" style="position:relative;height:260px">
-      <canvas id="source-t3-canvas"></canvas>
-    </div>
-    <div class="section-label" style="margin-top:24px">Enrichment Details</div>
-    <div class="card">
-      <table id="enrich-source-table">
-        <tr>
-          <th class="sortable">Source</th>
-          <th class="sortable" style="text-align:right">Tech US</th>
-          <th class="sortable" style="text-align:right">Processed</th>
-          <th class="sortable" style="text-align:right">T3 (Degree+Visa)</th>
-          <th class="sortable" style="text-align:right">T3%</th>
-          <th class="sortable" style="text-align:right">T2</th>
-          <th class="sortable" style="text-align:right">T1</th>
-          <th class="sortable" style="text-align:right">T0</th>
-          <th class="sortable" style="text-align:right">Skills</th>
-          <th class="sortable" style="text-align:right">Visa</th>
-        </tr>
-      </table>
-    </div>
+    <!-- S268A: Enrichment Details table removed — data merged into Field Coverage (Enriched + T3% columns) -->
     <div class="section-label" style="margin-top:24px">Top Companies — Enrichment Quality</div>
     <div class="card">
       <table id="company-quality-table">
@@ -1055,21 +1040,8 @@ function renderQuality(d, enrichStats, metadata, enrichHistory) {
       const tierTotal = tier.t0 + tier.t1 + tier.t2 + tier.t3;
       const t3pct = tierTotal > 0 ? Math.round(100 * tier.t3 / tierTotal) : 0;
       const t3color = t3pct >= 80 ? 'var(--green)' : t3pct >= 40 ? 'var(--yellow)' : 'var(--red)';
-      const tbl = document.getElementById('enrich-source-table');
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${src}</td>
-        <td style="text-align:right">${fmt(tech)}</td>
-        <td style="text-align:right">${fmt(enriched)}</td>
-        <td style="text-align:right">${fmt(tier.t3)}</td>
-        <td style="text-align:right;color:${t3color}">${t3pct}%</td>
-        <td style="text-align:right">${fmt(tier.t2)}</td>
-        <td style="text-align:right">${fmt(tier.t1)}</td>
-        <td style="text-align:right">${fmt(tier.t0)}</td>
-        <td style="text-align:right">${fmt(v.required_skills || 0)}</td>
-        <td style="text-align:right">${fmt(v.sponsors_visa || 0)}</td>
-      `;
-      tbl.appendChild(tr);
+      // S268A: Enrichment Details table removed — data merged into Field Coverage
+      // Tier counts visible in Tier Distribution chart tooltips
     });
   }
 }
@@ -1584,63 +1556,103 @@ function renderSkillsBars(enrichStats) {
 
 // ENR-12: Tier distribution — Chart.js horizontal stacked bar (S262 Phase 2 redesign)
 // Color semantics: green=T3(good), blue=T2(neutral/partial), yellow=T1(warning), red=T0(bad)
-function renderTierSourceChart(enrichStats) {
+// S268A: Tier Distribution with filter pills — replaces separate T3-by-Source chart.
+// "All" shows stacked percentage bars (original). Single tier shows that tier's % as simple bars.
+let _tierEnrichStats = null;
+function renderTierSourceChart(enrichStats, filterTier) {
+  _tierEnrichStats = enrichStats;
   const canvas = document.getElementById('tier-source-canvas');
   if (!canvas || !enrichStats || !enrichStats.tiers_by_source) {
     const card = document.getElementById('tier-source-card');
     if (card) card.innerHTML = '<p class="muted" style="text-align:center;padding:80px 0">Tier data not yet available — requires ENRICHER_VERSION 15+</p>';
     return;
   }
+  const activeTier = filterTier || 'all';
+
+  // Render filter pills
+  const pillsEl = document.getElementById('tier-filter-pills');
+  if (pillsEl) {
+    const tiers = [
+      { key: 'all', label: 'All' },
+      { key: 't3', label: 'T3 Degree+Visa', color: '#3fb950' },
+      { key: 't2', label: 'T2 Skills', color: '#3498db' },
+      { key: 't1', label: 'T1 Desc', color: '#d29922' },
+      { key: 't0', label: 'T0 None', color: '#f85149' },
+    ];
+    pillsEl.innerHTML = tiers.map(t => {
+      const active = t.key === activeTier;
+      const bg = active ? (t.color || 'var(--accent)') : 'transparent';
+      const fg = active ? '#fff' : 'var(--muted)';
+      const border = active ? (t.color || 'var(--accent)') : 'var(--border)';
+      return `<span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid ${border};margin-left:4px;background:${bg};color:${fg}" onclick="renderTierSourceChart(_tierEnrichStats,'${t.key}')">${t.label}</span>`;
+    }).join('');
+  }
+
   const ORDER = ['workday', 'greenhouse', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'netflix', 'eightfold'];
   const tbs = enrichStats.tiers_by_source;
   const sources = ORDER.filter(s => tbs[s]);
-  // Include pool size in labels so operator sees scale alongside proportions
   const labels = sources.map(s => {
     const t = tbs[s];
     return `${s} (${fmt(t.t0 + t.t1 + t.t2 + t.t3)})`;
   });
-  // Percentage stacking: convert counts to percentages so all bars are 0-100%.
-  // This makes small segments (T0, T1) visible even when they're <1% of a large source.
-  // Absolute counts shown in tooltips for context.
   const pct = (src, tier) => {
     const t = tbs[src];
     const tot = t.t0 + t.t1 + t.t2 + t.t3;
-    return tot > 0 ? Math.round(1000 * t[tier] / tot) / 10 : 0; // one decimal
+    return tot > 0 ? Math.round(1000 * t[tier] / tot) / 10 : 0;
   };
-  const data = {
-    labels: labels,
-    datasets: [
-      { label: 'T3 — Degree + Visa',             data: sources.map(s => pct(s, 't3')), backgroundColor: '#3fb950' },
-      { label: 'T2 — Skills',                    data: sources.map(s => pct(s, 't2')), backgroundColor: '#3498db' },
-      { label: 'T1 — Description',               data: sources.map(s => pct(s, 't1')), backgroundColor: '#d29922' },
-      { label: 'T0 — No description',             data: sources.map(s => pct(s, 't0')), backgroundColor: '#f85149' },
-    ]
-  };
+
+  const TIER_COLORS = { t3: '#3fb950', t2: '#3498db', t1: '#d29922', t0: '#f85149' };
+  const TIER_LABELS = { t3: 'T3 — Degree + Visa', t2: 'T2 — Skills', t1: 'T1 — Description', t0: 'T0 — No description' };
+
+  let datasets, stacked;
+  if (activeTier === 'all') {
+    datasets = [
+      { label: TIER_LABELS.t3, data: sources.map(s => pct(s, 't3')), backgroundColor: TIER_COLORS.t3 },
+      { label: TIER_LABELS.t2, data: sources.map(s => pct(s, 't2')), backgroundColor: TIER_COLORS.t2 },
+      { label: TIER_LABELS.t1, data: sources.map(s => pct(s, 't1')), backgroundColor: TIER_COLORS.t1 },
+      { label: TIER_LABELS.t0, data: sources.map(s => pct(s, 't0')), backgroundColor: TIER_COLORS.t0 },
+    ];
+    stacked = true;
+  } else {
+    // Single tier view — simple bar chart, color-coded by threshold
+    const tierKey = activeTier;
+    datasets = [{
+      label: TIER_LABELS[tierKey],
+      data: sources.map(s => pct(s, tierKey)),
+      backgroundColor: sources.map(s => {
+        const v = pct(s, tierKey);
+        return v >= 70 ? '#3fb950' : v >= 40 ? '#d29922' : '#f85149';
+      }),
+    }];
+    stacked = false;
+  }
+
   makeChart('tier-source-canvas', {
     type: 'bar',
-    data,
+    data: { labels, datasets },
     options: {
       indexAxis: 'y',
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: { display: true, position: 'bottom', labels: { color: '#8b949e', font: { size: 11 }, boxWidth: 14, padding: 10 } },
+        legend: { display: activeTier === 'all', position: 'bottom', labels: { color: '#8b949e', font: { size: 11 }, boxWidth: 14, padding: 10 } },
         tooltip: {
           callbacks: {
             label: function(ctx) {
               const src = sources[ctx.dataIndex];
               const t = tbs[src];
-              // Show both percentage and absolute count
-              const tierKey = ['t3', 't2', 't1', 't0'][ctx.datasetIndex];
-              const count = t[tierKey];
-              return `${ctx.dataset.label}: ${ctx.raw}% (${count} jobs)`;
+              if (activeTier === 'all') {
+                const tierKey = ['t3', 't2', 't1', 't0'][ctx.datasetIndex];
+                return `${ctx.dataset.label}: ${ctx.raw}% (${t[tierKey]} jobs)`;
+              }
+              return `${ctx.dataset.label}: ${ctx.raw}% (${t[activeTier]} jobs)`;
             }
           }
         }
       },
       scales: {
-        x: { stacked: true, max: 100, ...CHART_DEFAULTS.scales.x, ticks: { ...CHART_DEFAULTS.scales.x.ticks, callback: v => v + '%' } },
-        y: { stacked: true, ...CHART_DEFAULTS.scales.y, ticks: { color: '#8b949e', font: { size: 11 } } }
+        x: { stacked, max: 100, ...CHART_DEFAULTS.scales.x, ticks: { ...CHART_DEFAULTS.scales.x.ticks, callback: v => v + '%' } },
+        y: { stacked, ...CHART_DEFAULTS.scales.y, ticks: { color: '#8b949e', font: { size: 11 } } }
       }
     }
   });
@@ -1859,9 +1871,15 @@ function renderFieldCoverage(enrichStats) {
     if (pct >= 40) return 'color:#d29922';  // yellow
     return 'color:#f85149';                  // red
   };
+  // S268A: Added Enriched count and T3% columns (merged from Enrichment Details table)
+  const tbs = enrichStats.tiers_by_source || {};
   ORDER.filter(s => enrichStats.by_source[s]).forEach(src => {
     const v = enrichStats.by_source[src];
     const e = v.enriched || 1;
+    const t = tbs[src] || {};
+    const tot = (t.t0 || 0) + (t.t1 || 0) + (t.t2 || 0) + (t.t3 || 0);
+    const t3pct = tot > 0 ? Math.round(1000 * (t.t3 || 0) / tot) / 10 : 0;
+    const t3color = t3pct >= 70 ? 'color:#3fb950' : t3pct >= 40 ? 'color:#d29922' : 'color:#f85149';
     const fields = {
       skills: Math.round(100 * (v.required_skills || 0) / e),
       summary: Math.round(100 * (v.summary_line || 0) / e),
@@ -1872,6 +1890,8 @@ function renderFieldCoverage(enrichStats) {
     };
     const tr = document.createElement('tr');
     tr.innerHTML = `<td>${src}</td>` +
+      `<td style="text-align:right;color:var(--muted)">${fmt(e)}</td>` +
+      `<td style="text-align:right;font-weight:600;${t3color}">${t3pct}%</td>` +
       ['skills', 'summary', 'degree', 'experience', 'any_visa', 'question_count'].map(f => {
         const pct = fields[f];
         const style = cellColor(pct, src, f);
@@ -2449,7 +2469,7 @@ async function loadAll() {
   renderDeadlines();
   renderQuality(metrics, enrichStats, metadata, enrichHistory);
   renderEnrichTrend(enrichHistory);
-  renderSourceT3Trend(enrichHistory);
+  // S268A: T3-by-Source chart removed — merged as filter pills on Tier Distribution
   renderTierSourceChart(enrichStats);
   renderFieldCoverage(enrichStats);
   // renderSkillsBars removed — redundant with Field Coverage table
@@ -2478,7 +2498,7 @@ async function loadAll() {
   document.getElementById('content').style.display = 'block';
 
   // Interactive features — MUST run after all tables are populated
-  makeSortable('enrich-source-table');
+  // S268A: enrich-source-table removed
   makeSortable('company-quality-table');
   makeSortable('pipeline-source-table');
   makeSortable('class-companies-table');
@@ -2487,7 +2507,7 @@ async function loadAll() {
   paginateTable('class-companies-table', 10);
   paginateTable('company-quality-table', 10);
   paginateTable('class-patterns-table', 10);
-  addColumnToggle('enrich-source-table', { exclude: [0] });
+  // S268A: enrich-source-table removed
   addColumnToggle('class-companies-table', { exclude: [0, 1] });
   addColumnToggle('company-quality-table', { exclude: [0, 1] });
   addColumnToggle('repo-table', { exclude: [0, 1] });
