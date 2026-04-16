@@ -454,15 +454,15 @@
     <div class="card">
       <table id="field-coverage-table">
         <tr>
-          <th>Source</th>
-          <th style="text-align:right">Enriched</th>
-          <th style="text-align:right">T3%</th>
-          <th style="text-align:center">Skills</th>
-          <th style="text-align:center">Summary</th>
-          <th style="text-align:center">Degree</th>
-          <th style="text-align:center" title="Experience level extracted from description text (e.g., '3-5 years', 'senior-level'). Tag-based classification (entry_level/internship/etc.) covers 100% — this shows the subset where specific years/level were found. Low % does NOT mean missing — most jobs don't state years explicitly.">Exp (desc)</th>
-          <th style="text-align:center">Visa (any)</th>
-          <th style="text-align:center">Questions</th>
+          <th class="sortable">Source</th>
+          <th class="sortable" style="text-align:right">Enriched</th>
+          <th class="sortable" style="text-align:right">T3%</th>
+          <th class="sortable" style="text-align:center">Skills</th>
+          <th class="sortable" style="text-align:center">Summary</th>
+          <th class="sortable" style="text-align:center">Degree</th>
+          <th class="sortable" style="text-align:center" title="Experience level extracted from description text (e.g., '3-5 years', 'senior-level'). Tag-based classification (entry_level/internship/etc.) covers 100% — this shows the subset where specific years/level were found. Low % does NOT mean missing — most jobs don't state years explicitly.">Exp (desc)</th>
+          <th class="sortable" style="text-align:center">Visa (any)</th>
+          <th class="sortable" style="text-align:center">Questions</th>
         </tr>
       </table>
       <div style="margin-top:8px;font-size:11px;color:var(--muted)">
@@ -1783,7 +1783,7 @@ function initSourceFilter() {
   if (!select) return;
   select.addEventListener('change', () => {
     const val = select.value;
-    ['field-coverage-table', 'enrich-source-table'].forEach(tableId => {
+    ['field-coverage-table', 'enrich-source-table', 'company-quality-table', 'visa-intelligence-table'].forEach(tableId => {
       const table = document.getElementById(tableId);
       if (!table) return;
       Array.from(table.querySelectorAll('tr')).slice(1).forEach(tr => {
@@ -2620,6 +2620,7 @@ async function loadAll() {
 
   // Interactive features — MUST run after all tables are populated
   // S268A: enrich-source-table removed
+  makeSortable('field-coverage-table');
   makeSortable('company-quality-table');
   makeSortable('pipeline-source-table');
   makeSortable('class-companies-table');
