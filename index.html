@@ -1767,8 +1767,10 @@ function toggleCompanyDetail(tr, companyName, tableId) {
       <div><b>Total Jobs:</b> ${val(metaData?.count ? fmt(metaData.count) : null)}</div>
       <div><b>Enriched:</b> ${val(enrData?.enriched ? fmt(enrData.enriched) : null)}</div>
       <div><b>T3%:</b> <span style="${pctColor(enrData?.t3_pct)}">${val(enrData?.t3_pct, '%')}</span></div>
+      <div><b>Tiers:</b> T0=${enrData?.tiers?.t0 ?? '\u2014'} \u00b7 T1=${enrData?.tiers?.t1 ?? '\u2014'} \u00b7 T2=${enrData?.tiers?.t2 ?? '\u2014'} \u00b7 T3=${enrData?.tiers?.t3 ?? '\u2014'}</div>
       <div><b>Skills%:</b> <span style="${pctColor(enrData?.skills_pct)}">${val(enrData?.skills_pct, '%')}</span></div>
       <div><b>Summary%:</b> <span style="${pctColor(enrData?.summary_pct)}">${val(enrData?.summary_pct, '%')}</span></div>
+      <div><b>Hard Visa%:</b> <span style="${pctColor(enrData?.visa_pct)}">${val(enrData?.visa_pct, '%')}</span> <span style="font-size:10px;color:var(--muted)">(text-extracted only)</span></div>
       <div><b>General:</b> ${val(genData?.general)}</div>
       <div><b>Classified:</b> ${val(genData?.classified)}</div>
       <div><b>Desc%:</b> ${val(genData?.has_desc_pct, '%')}</div>
