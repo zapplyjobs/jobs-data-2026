@@ -491,7 +491,31 @@
         </tr>
       </table>
     </div>
-    <!-- Skills Fill Rate bars and Description Fill Rate bars removed S266 -->
+    <div class="section-label" style="margin-top:24px">Visa Signal Intelligence</div>
+    <div class="card">
+      <div id="visa-signal-overview" style="margin-bottom:12px"></div>
+      <table id="visa-intelligence-table">
+        <tr>
+          <th>Source</th>
+          <th style="text-align:right">Enriched</th>
+          <th style="text-align:center">✅ Hard Text</th>
+          <th style="text-align:center">🏢 LCA Match</th>
+          <th style="text-align:center">📋 ATS Form</th>
+          <th style="text-align:center">No Signal</th>
+          <th style="text-align:center">Any Visa %</th>
+        </tr>
+      </table>
+      <div style="margin-top:8px;font-size:11px;color:var(--muted)">
+        Signal types: <span style="color:#3fb950">✅ Hard Text</span> = job says "we sponsor" ·
+        <span style="color:#58a6ff">🏢 LCA Match</span> = employer in DOL LCA database (possible_sponsor) ·
+        <span style="color:#d29922">📋 ATS Form</span> = application asks visa question ·
+        <span style="color:#8b949e">Blank</span> = no evidence found ·
+        Counts are not mutually exclusive — a job can have multiple signals. "Any Visa %" is the union.
+      </div>
+      <div id="visa-signal-legend" style="font-size:11px;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--border)"></div>
+    </div>
+
+        <!-- Skills Fill Rate bars and Description Fill Rate bars removed S266 -->
     <!-- Redundant with Field Coverage table (same data: per-source fill rates, already color-coded) -->
     <!-- Few's mistake #4 (indirect expression) + #6 (meaningless variety): same data in bars AND table columns -->
   </section>
@@ -1972,6 +1996,68 @@ function renderPipelineRunStats(metrics, metadata) {
 
 // Pipeline tab — source breakdown table (Total, WoW, Tech US only)
 // DASH-2a: Has Desc / Desc% removed — those are quality metrics, not pipeline run metrics
+
+// S274: Visa signal intelligence — per-source breakdown of signal types
+function renderVisaIntelligence(enrichStats) {
+  const tbl = document.getElementById('visa-intelligence-table');
+  const overview = document.getElementById('visa-signal-overview');
+  const legend = document.getElementById('visa-signal-legend');
+  if (!tbl || !enrichStats || !enrichStats.by_source) return;
+
+  const ORDER = ['workday', 'greenhouse', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'netflix', 'eightfold'];
+  const sources = ORDER.filter(s => enrichStats.by_source[s]);
+
+  let totalEnriched = 0, totalHard = 0, totalLca = 0, totalForm = 0, totalNone = 0;
+
+  sources.forEach(src => {
+    const v = enrichStats.by_source[src];
+    const e = v.enriched || 0;
+    const hard = v.sponsors_visa || 0;
+    const lca = v.possible_sponsor || 0;
+    const form = v.visa_question_present || 0;
+    const any = v.any_visa_signal || 0;
+    const none = Math.max(0, e - any);
+
+    totalEnriched += e;
+    totalHard += hard;
+    totalLca += lca;
+    totalForm += form;
+    totalNone += none;
+
+    const pct = (n) => e > 0 ? Math.round(100 * n / e) + '%' : '—';
+    const pctColor = (n) => {
+      const r = e > 0 ? n / e : 0;
+      if (r >= 80) return 'color:#3fb950';
+      if (r >= 40) return 'color:#d29922';
+      if (r >= 10) return 'color:#f85149';
+      return 'color:#8b949e';
+    };
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${src}</td>` +
+      `<td style="text-align:right;color:var(--muted)">${fmt(e)}</td>` +
+      `<td style="text-align:center;font-weight:600;${pctColor(hard)}">${pct(hard)}</td>` +
+      `<td style="text-align:center;font-weight:600;${pctColor(lca)}">${pct(lca)}</td>` +
+      `<td style="text-align:center;font-weight:600;${pctColor(form)}">${pct(form)}</td>` +
+      `<td style="text-align:center;font-weight:600;${pctColor(none)}">${pct(none)}</td>` +
+      `<td style="text-align:center;font-weight:600;${pctColor(any)}">${pct(any)}</td>`;
+    tbl.appendChild(tr);
+  });
+
+  // Overview stat cards
+  if (overview && totalEnriched > 0) {
+    const anyPct = Math.round(100 * (totalEnriched - totalNone) / totalEnriched);
+    overview.innerHTML =
+      statCard({ icon: '🌍', label: 'Any Visa Signal', value: anyPct + '%', sub: `${fmt(totalEnriched - totalNone)} of ${fmt(totalEnriched)} jobs` }) +
+      statCard({ icon: '✅', label: 'Hard Text', value: fmt(totalHard), sub: Math.round(100 * totalHard / totalEnriched) + '% — strongest signal' }) +
+      statCard({ icon: '🏢', label: 'LCA Match Only', value: fmt(totalLca), sub: Math.round(100 * totalLca / totalEnriched) + '% — company-level evidence' });
+  }
+
+  if (legend) {
+    legend.innerHTML = `<strong>Why this matters:</strong> "Any Visa %" in the Field Coverage table combines all three signals into one number. This panel shows <em>which</em> signal type drives that number per source. A source with high "LCA Match" and low "Hard Text" means most visa labels come from database matching, not job text — lower confidence. Sources with high "Hard Text" have the strongest signal.<br><br><strong>Note:</strong> Column counts are not mutually exclusive — a job can have multiple signal types. "Any Visa %" is the union of all three.`;
+  }
+}
+
 function renderPipelineSourceTable(metrics, metadata, enrichStats) {
   const tbl = document.getElementById('pipeline-source-table');
   if (!tbl) return;
@@ -2507,6 +2593,7 @@ async function loadAll() {
   // (must run after ALL tables are populated including async renders)
   // renderEnrichBars removed — redundant with Field Coverage table
   renderCompanyQuality(enrichStats);
+  renderVisaIntelligence(enrichStats);
   window._poolTotal = metadata ? metadata.total_jobs : null;
   renderRepos(metrics, daily);
   // SUP freshness indicator
