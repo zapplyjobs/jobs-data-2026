@@ -500,7 +500,6 @@
           <th style="text-align:right">Enriched</th>
           <th style="text-align:center">✅ Hard Text</th>
           <th style="text-align:center">🏢 LCA Match</th>
-          <th style="text-align:center">📋 ATS Form</th>
           <th style="text-align:center">No Signal</th>
           <th style="text-align:center">Any Visa %</th>
         </tr>
@@ -508,7 +507,6 @@
       <div style="margin-top:8px;font-size:11px;color:var(--muted)">
         Signal types: <span style="color:#3fb950">✅ Hard Text</span> = job says "we sponsor" ·
         <span style="color:#58a6ff">🏢 LCA Match</span> = employer in DOL LCA database (possible_sponsor) ·
-        <span style="color:#d29922">📋 ATS Form</span> = application asks visa question ·
         <span style="color:#8b949e">Blank</span> = no evidence found ·
         Counts are not mutually exclusive — a job can have multiple signals. "Any Visa %" is the union.
       </div>
@@ -2014,15 +2012,13 @@ function renderVisaIntelligence(enrichStats) {
     const e = v.enriched || 0;
     const hard = v.sponsors_visa || 0;
     const lca = v.possible_sponsor || 0;
-    const form = v.visa_question_present || 0;
-    const any = v.any_visa_signal || 0;
+        const any = v.any_visa_signal || 0;
     const none = Math.max(0, e - any);
 
     totalEnriched += e;
     totalHard += hard;
     totalLca += lca;
-    totalForm += form;
-    totalNone += none;
+        totalNone += none;
 
     const pct = (n) => e > 0 ? Math.round(100 * n / e) + '%' : '—';
     const pctColor = (n) => {
@@ -2038,7 +2034,8 @@ function renderVisaIntelligence(enrichStats) {
       `<td style="text-align:right;color:var(--muted)">${fmt(e)}</td>` +
       `<td style="text-align:center;font-weight:600;${pctColor(hard)}">${pct(hard)}</td>` +
       `<td style="text-align:center;font-weight:600;${pctColor(lca)}">${pct(lca)}</td>` +
-      `<td style="text-align:center;font-weight:600;${pctColor(form)}">${pct(form)}</td>` +
+      
+
       `<td style="text-align:center;font-weight:600;${pctColor(none)}">${pct(none)}</td>` +
       `<td style="text-align:center;font-weight:600;${pctColor(any)}">${pct(any)}</td>`;
     tbl.appendChild(tr);
