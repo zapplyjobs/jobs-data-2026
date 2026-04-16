@@ -460,7 +460,7 @@
           <th style="text-align:center">Skills</th>
           <th style="text-align:center">Summary</th>
           <th style="text-align:center">Degree</th>
-          <th style="text-align:center" title="From description text only. Tag-based experience (entry_level/internship/etc.) covers 100% of jobs — this column shows the subset extracted from description language.">Exp (desc)</th>
+          <th style="text-align:center" title="Experience level extracted from description text (e.g., '3-5 years', 'senior-level'). Tag-based classification (entry_level/internship/etc.) covers 100% — this shows the subset where specific years/level were found. Low % does NOT mean missing — most jobs don't state years explicitly.">Exp (desc)</th>
           <th style="text-align:center">Visa (any)</th>
           <th style="text-align:center">Questions</th>
         </tr>
@@ -469,7 +469,10 @@
         Cell color: <span style="color:#3fb950">green (&gt;80%)</span> ·
         <span style="color:#d29922">yellow (40-80%)</span> ·
         <span style="color:#f85149">red (&lt;40%)</span> ·
-        <span style="color:#8b949e">gray (structural — source can't provide)</span>
+<span style="color:#8b949e">gray ⊘ = structural (ATS doesn't expose this data — not an extraction failure)</span>
+      </div>
+      <div style="margin-top:4px;font-size:11px;color:var(--muted)">
+        <strong>Questions:</strong> Only Greenhouse, Ashby, and Lever expose application form questions via API. Other ATS platforms don't provide this data — ⊘ is expected, not a bug.
       </div>
     </div>
     <div class="section-label" style="margin-top:24px">Enrichment Trend <span id="enrich-trend-pills" style="margin-left:8px"></span></div>
@@ -487,9 +490,12 @@
           <th class="sortable" style="text-align:right">T3%</th>
           <th class="sortable" style="text-align:right">Skills %</th>
           <th class="sortable" style="text-align:right">Summary %</th>
-          <th class="sortable" style="text-align:right">Visa %</th>
+          <th class="sortable" style="text-align:right" title="Jobs where the description text explicitly mentions visa sponsorship (sponsors_visa=true). LCA database matches (possible_sponsor) are NOT included here — see Visa Intelligence panel below.">Hard Visa %</th>
         </tr>
       </table>
+      <div style="margin-top:8px;font-size:11px;color:var(--muted)">
+        <strong>Hard Visa %</strong> = jobs with explicit visa language in description (e.g., "we sponsor H-1B"). Companies like Amazon, Boeing, Intel show 0% because their job postings don't mention visa status — but many match the DOL LCA database as known sponsors. See <em>Visa Signal Intelligence</em> panel below for full LCA vs hard-text breakdown.
+      </div>
     </div>
     <div class="section-label" style="margin-top:24px">Visa Signal Intelligence</div>
     <div class="card">
