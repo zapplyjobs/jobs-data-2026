@@ -355,6 +355,8 @@
 
   <!-- SUP TAB — Supply: sources, companies, source trends -->
   <section id="tab-sup" class="tab-panel" style="display:none">
+    <div class="section-label">Supply Health</div>
+    <div class="grid" id="sup-health-cards"></div>
     <div id="sup-freshness" style="font-size:11px;color:var(--muted);margin-bottom:8px"></div>
     <div class="section-label">By Source</div>
     <div class="card" id="source-bars-card">
@@ -1194,6 +1196,22 @@ function renderZeroYield(metadata) {
         ${zyc.map(c => `<span style="background:rgba(210,153,34,0.12);color:var(--yellow);padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600">${esc(c)}</span>`).join('')}
       </div>
     </div>`;
+}
+
+// SUP tab — health stat cards
+function renderSupHealth(metadata) {
+  const el = document.getElementById('sup-health-cards');
+  if (!el || !metadata) return;
+  const bySource = metadata.by_source || {};
+  const activeSources = Object.values(bySource).filter(v => v > 0).length;
+  const totalSources = Object.keys(bySource).length;
+  const zeroYield = (metadata.zero_yield_companies || []).length;
+  // Total companies: count from metadata if available
+  const companyCount = metadata.total_companies || '—';
+  el.innerHTML =
+    statCard({ icon: '🏢', label: 'Active Sources', value: `${activeSources}/${totalSources}`, sub: `${activeSources} returning jobs` }) +
+    statCard({ icon: '⚠️', label: 'Zero-Yield', value: zeroYield, sub: zeroYield > 0 ? 'companies returning 0 jobs' : 'all sources healthy' }) +
+    statCard({ icon: '📊', label: 'Total Jobs', value: fmt(metadata.total_jobs || 0), sub: `${totalSources} sources in pool` });
 }
 
 function renderSourceBars(d, metadata) {
@@ -2564,6 +2582,7 @@ async function loadAll() {
     supFresh.textContent = `Data as of ${age(metadata.generated)} · ${Object.keys(metadata.by_source || {}).length} sources · ${fmt(metadata.total_jobs)} total jobs`;
   }
   renderSourceBars(metrics, metadata);
+  renderSupHealth(metadata);
   renderDomainBars(metadata);
   renderTopCompanies(metadata, enrichStats, generalReview);
   renderSourceTrend(allHistoryMerged);
