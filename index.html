@@ -1017,8 +1017,9 @@ function renderOutHealth(d, daily) {
   // Consumer freshness: repos updated <2h ago
   let freshCount = 0;
   repoEntries.forEach(([, r]) => {
-    if (r.updated) {
-      const age = (Date.now() - new Date(r.updated).getTime()) / 3600000;
+    const updateTs = r.lastJobsUpdate || r.workflowLastRun;
+    if (updateTs) {
+      const age = (Date.now() - new Date(updateTs).getTime()) / 3600000;
       if (age < 2) freshCount++;
     }
   });
