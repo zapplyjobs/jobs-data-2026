@@ -203,9 +203,9 @@
     .bar-value { font-size: 12px; width: 60px; text-align: right; }
     .sortable { cursor: pointer; user-select: none; }
     .sortable:hover { color: var(--accent); }
-    .sortable::after { content: ' ⇅'; font-size: 11px; opacity: 0.5; }
-    .sortable.sort-asc::after { content: ' ↑'; opacity: 1; color: var(--accent); }
-    .sortable.sort-desc::after { content: ' ↓'; opacity: 1; color: var(--accent); }
+    .sortable::after { content: ' ⇅'; font-size: 11px; opacity: 0.5; display: inline-block; width: 16px; text-align: left; }
+    .sortable.sort-asc::after { content: ' ↑'; opacity: 1; color: var(--accent); display: inline-block; width: 16px; text-align: left; }
+    .sortable.sort-desc::after { content: ' ↓'; opacity: 1; color: var(--accent); display: inline-block; width: 16px; text-align: left; }
     #unified-enr-table tr:nth-child(even),
     #pipeline-source-table tr:nth-child(even),
     #class-companies-table tr:nth-child(even),
@@ -1877,6 +1877,11 @@ function makeSortable(tableId) {
         return aText.localeCompare(bText) * dir;
       });
       rows.forEach(r => table.appendChild(r));
+      // Keep total rows at the top
+      table.querySelectorAll('.total-row').forEach(tr => {
+        const tbody = tr.parentElement;
+        if (tbody) tbody.insertBefore(tr, tbody.firstChild);
+      });
     });
   });
 }
@@ -2063,6 +2068,9 @@ function sortUnifiedTable(colIdx) {
     tbody.appendChild(sr);
     (companyMap[sr.dataset.source] || []).forEach(cr => tbody.appendChild(cr));
   });
+  // Keep total row at the top
+  const totalRow = tbody.querySelector('.total-row');
+  if (totalRow) tbody.insertBefore(totalRow, tbody.firstChild);
 }
 
 function renderPipelineSourceTable(metrics, metadata, enrichStats) {
@@ -2074,6 +2082,20 @@ function renderPipelineSourceTable(metrics, metadata, enrichStats) {
   const ORDER = ['workday', 'greenhouse', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'netflix', 'eightfold'];
   const sources = ORDER.filter(s => bySource[s]);
   if (!sources.length) return;
+  // Total row
+  const totalAll = sources.reduce((s, src) => s + (bySource[src] || 0), 0);
+  const totalTechUs = sources.reduce((s, src) => s + ((enrichBySource[src] || {}).tech_us || 0), 0);
+  const totalTechPct = totalAll > 0 ? Math.round(100 * totalTechUs / totalAll) : 0;
+  const totalRow = document.createElement('tr');
+  totalRow.className = 'total-row';
+  totalRow.style.cssText = 'font-weight:700;border-bottom:2px solid var(--border);background:var(--bg-card-hover)';
+  totalRow.innerHTML = `
+    <td>All Sources</td>
+    <td style="text-align:right">${fmt(totalAll)}</td>
+    <td style="text-align:right"><span class="muted">—</span></td>
+    <td style="text-align:right">${fmt(totalTechUs)} <span style="color:var(--muted)">(${totalTechPct}%)</span></td>
+  `;
+  tbl.appendChild(totalRow);
   sources.forEach(src => {
     const total = bySource[src] || 0;
     const delta = srcDelta[src];
