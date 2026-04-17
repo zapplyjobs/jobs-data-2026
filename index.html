@@ -480,7 +480,9 @@
 
   <!-- OUT TAB — Output: consumer repos, stars, Discord -->
   <section id="tab-out" class="tab-panel" style="display:none">
-    <div class="section-label">Consumer Repos</div>
+    <div class="section-label">Output Health</div>
+    <div class="grid" id="out-health-cards"></div>
+    <div class="section-label" style="margin-top:24px">Consumer Repos</div>
     <div class="card">
       <table id="repo-table">
         <tr>
@@ -999,6 +1001,34 @@ function renderQuality(d, enrichStats, metadata, enrichHistory) {
 // Distribution tab — repo table
 // OUT tab — summary stat cards (glance level)
 // renderOutSummary removed S266 — stat cards failed actionability test (stars/repo count/discord total don't prompt decisions)
+
+// OUT tab — health stat cards
+function renderOutHealth(d, daily) {
+  const el = document.getElementById('out-health-cards');
+  if (!el) return;
+  const repos = d.repos || {};
+  const repoEntries = Object.entries(repos);
+  // Total stars
+  const totalStars = repoEntries.reduce((s, [, r]) => s + (r.stars || 0), 0);
+  // Star delta (7d) from daily
+  const starHistory = (daily && daily.stars) ? daily.stars : {};
+  const starValues = Object.values(starHistory);
+  const starDelta = starValues.length >= 2 ? starValues[starValues.length - 1] - starValues[0] : null;
+  const starDeltaStr = starDelta != null ? `<span style="color:${starDelta >= 0 ? 'var(--green)' : 'var(--red)'}">${starDelta >= 0 ? '+' : ''}${starDelta}/7d</span>` : '';
+  // Consumer freshness: repos updated <2h ago
+  let freshCount = 0;
+  repoEntries.forEach(([, r]) => {
+    if (r.updated) {
+      const age = (Date.now() - new Date(r.updated).getTime()) / 3600000;
+      if (age < 2) freshCount++;
+    }
+  });
+  const freshPct = repoEntries.length > 0 ? Math.round(100 * freshCount / repoEntries.length) : 0;
+  const freshColor = freshPct >= 80 ? 'var(--green)' : freshPct >= 50 ? 'var(--yellow)' : 'var(--red)';
+  el.innerHTML =
+    statCard({ icon: '⭐', label: 'Total Stars', value: fmt(totalStars), sub: starDeltaStr + (starDeltaStr ? ' · ' : '') + repoEntries.length + ' repos' }) +
+    statCard({ icon: '🔄', label: 'Consumer Freshness', value: `<span style="color:${freshColor}">${freshPct}%</span>`, sub: `${freshCount}/${repoEntries.length} repos updated <2h ago` });
+}
 
 function renderRepos(d, daily) {
   const repos = d.repos || {};
@@ -2576,6 +2606,7 @@ async function loadAll() {
   renderUnifiedENR(enrichStats);
   window._poolTotal = metadata ? metadata.total_jobs : null;
   renderRepos(metrics, daily);
+  renderOutHealth(metrics, daily);
   // SUP freshness indicator
   const supFresh = document.getElementById('sup-freshness');
   if (supFresh && metadata && metadata.generated) {
