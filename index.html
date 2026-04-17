@@ -318,6 +318,8 @@
   <section id="tab-agg" class="tab-panel">
     <div class="section-label">Pipeline Status</div>
     <div class="grid" id="ops-pipeline-stats"></div>
+    <div class="section-label" style="margin-top:16px">Secrets & Deadlines</div>
+    <div class="grid" id="agg-deadlines"></div>
     <!-- Last Run section removed S266 — Pool Size + Active Sources duplicate stat cards above -->
     <div class="section-label" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center">
       <span>Pool Trend</span>
@@ -831,14 +833,14 @@ function renderGeneralTrendChart(all, days) {
 
 // INF tab — secrets and deadlines (hardcoded known dates — update when rotated)
 function renderDeadlines() {
-  const el = document.getElementById('inf-deadlines');
-  if (!el) return;
+  const targets = [document.getElementById('inf-deadlines'), document.getElementById('agg-deadlines')].filter(Boolean);
+  if (!targets.length) return;
   const DEADLINES = [
     { label: 'GH_PAT Expiry', date: '2026-05-30', action: 'Rotate by May 1 (INF-17)' },
     { label: 'GIT_CRYPT_KEY', date: '2026-07-04', action: 'Rotate by Jul 4 (INF-20)' },
   ];
   const now = Date.now();
-  el.innerHTML = DEADLINES.map(d => {
+  const html = DEADLINES.map(d => {
     const daysLeft = Math.ceil((new Date(d.date).getTime() - now) / 86400000);
     const urgency = daysLeft <= 7 ? 'var(--red)' : daysLeft <= 30 ? 'var(--yellow)' : 'var(--green)';
     const icon = daysLeft <= 7 ? '🔴' : daysLeft <= 30 ? '🟡' : '🟢';
@@ -849,6 +851,7 @@ function renderDeadlines() {
       sub: `${d.date} — ${d.action}`,
     });
   }).join('');
+  targets.forEach(el => { el.innerHTML = html; });
 }
 
 // Supply tab — domain distribution bars (moved from Overview)
