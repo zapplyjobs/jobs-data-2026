@@ -1236,8 +1236,6 @@ function renderSupHealth(metadata) {
   const activeSources = Object.values(bySource).filter(v => v > 0).length;
   const totalSources = Object.keys(bySource).length;
   const zeroYield = (metadata.zero_yield_companies || []).length;
-  // Total companies: count from metadata if available
-  const companyCount = metadata.total_companies || '—';
   el.innerHTML =
     statCard({ icon: '🏢', label: 'Active Sources', value: `${activeSources}/${totalSources}`, sub: `${activeSources} returning jobs` }) +
     statCard({ icon: '⚠️', label: 'Zero-Yield', value: zeroYield, sub: zeroYield > 0 ? 'companies returning 0 jobs' : 'all sources healthy' }) +
