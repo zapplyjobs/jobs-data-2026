@@ -396,7 +396,7 @@
     <div class="section-label" style="margin-top:24px">Top Companies by Unclassified Jobs</div>
     <div class="card" id="class-companies-card">
       <table id="class-companies-table">
-        <tr><th>#</th><th class="sortable">Company</th><th class="sortable" style="text-align:right">General</th><th class="sortable" style="text-align:right">Classified</th><th class="sortable">Top Domain</th><th class="sortable" style="text-align:right">Desc%</th></tr>
+        <tr><th>#</th><th class="sortable">Company</th><th class="sortable">Source</th><th class="sortable" style="text-align:right">General</th><th class="sortable" style="text-align:right">Classified</th><th class="sortable">Top Domain</th><th class="sortable" style="text-align:right">Desc%</th></tr>
       </table>
     </div>
     <div class="section-label" style="margin-top:24px">General Rate by ATS</div>
@@ -2408,15 +2408,14 @@ function renderClassification(data) {
 
   const s = data.summary;
   const classifiedRate = (100 - s.us_general_rate).toFixed(1);
-
-  // Summary cards — using statCard() for visual consistency with other tabs
-  // Reduced from 6 to 4: removed Desc Coverage (low actionability) and Review Date (meta, not operational)
+  const companyCount = data.by_company ? data.by_company.length : 0;
   const descPct = data.descriptions && s.us_general > 0 ? Math.round(data.descriptions.withDesc / s.us_general * 100) : null;
+
+  // Summary cards — 2 cards: G1 rate (primary), US total (scale)
+  // Company count and desc coverage moved to table/subtitles
   summaryEl.innerHTML =
-    statCard({ icon: '🏷️', label: 'US General Rate', value: `<span style="color:${s.us_general_rate > 10 ? 'var(--yellow)' : 'var(--green)'}">${s.us_general_rate}%</span>`, sub: `Target: <40% · ${fmt(s.us_general)} jobs` }) +
-    statCard({ icon: '✅', label: 'US Classified Rate', value: `<span style="color:var(--green)">${classifiedRate}%</span>`, sub: `${fmt(s.us_total - s.us_general)} classified` }) +
-    statCard({ icon: '🏢', label: 'Companies w/ Generals', value: data.by_company ? data.by_company.length : '—', sub: 'companies to review' }) +
-    statCard({ icon: '📄', label: 'Desc Coverage', value: descPct != null ? descPct + '%' : '—', sub: `${s.generated ? 'As of ' + s.generated.slice(0, 10) : ''}` });
+    statCard({ icon: '🏷️', label: 'US General Rate', value: `<span style="color:${s.us_general_rate > 10 ? 'var(--yellow)' : 'var(--green)'}">${s.us_general_rate}%</span>`, sub: `Target: <40% · ${fmt(s.us_general)} jobs · ${companyCount} companies` }) +
+    statCard({ icon: '📊', label: 'US Total Jobs', value: fmt(s.us_total), sub: `${fmt(s.us_total - s.us_general)} classified (${classifiedRate}%) · ${s.generated ? 'Updated ' + s.generated.slice(0, 10) : ''}` });
 
   // Top companies table
   if (data.by_company && data.by_company.length > 0) {
@@ -2424,23 +2423,32 @@ function renderClassification(data) {
       const tr = document.createElement('tr');
       const idx = data.by_company.indexOf(co) + 1;
       const topDomain = co.domain_dist ? co.domain_dist.split(',')[0].trim() : '—';
-      tr.innerHTML = `<td>${idx}</td><td>${esc(co.name)}</td><td style="text-align:right">${co.general}</td><td style="text-align:right">${co.classified}</td><td style="color:var(--muted);font-size:12px">${esc(topDomain)}</td><td style="text-align:right">${co.has_desc_pct}%</td>`;
+      tr.innerHTML = `<td>${idx}</td><td>${esc(co.name)}</td><td style="color:var(--muted);font-size:12px">${esc(co.source || '—')}</td><td style="text-align:right">${co.general}</td><td style="text-align:right">${co.classified}</td><td style="color:var(--muted);font-size:12px">${esc(topDomain)}</td><td style="text-align:right">${co.has_desc_pct}%</td>`;
       companiesTable.appendChild(tr);
     }
   }
 
-  // ATS bars
+  // ATS bars with total row
   if (data.by_ats && data.by_ats.length > 0) {
+    const totalGeneral = data.by_ats.reduce((s, a) => s + a.general, 0);
+    const totalAll = data.by_ats.reduce((s, a) => s + a.total, 0);
+    const totalPct = totalAll > 0 ? (totalGeneral / totalAll * 100).toFixed(1) : 0;
     const max = Math.max(...data.by_ats.map(a => a.general));
-    atsBarsEl.innerHTML = data.by_ats.map(a => {
-      const pct = max > 0 ? Math.round((a.general / max) * 100) : 0;
-      return `
-        <div class="bar-row">
-          <span class="bar-label">${esc(a.source)}</span>
-          <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
-          <span class="bar-value">${a.general} <span class="muted">(${a.general_pct}%)</span></span>
-        </div>`;
-    }).join('');
+    atsBarsEl.innerHTML =
+      `<div class="bar-row" style="font-weight:700;border-bottom:2px solid var(--border);padding-bottom:6px;margin-bottom:8px">
+        <span class="bar-label">All Sources</span>
+        <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+        <span class="bar-value">${totalGeneral} <span class="muted">(${totalPct}%)</span></span>
+      </div>` +
+      data.by_ats.map(a => {
+        const pct = max > 0 ? Math.round((a.general / max) * 100) : 0;
+        return `
+          <div class="bar-row">
+            <span class="bar-label">${esc(a.source)}</span>
+            <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+            <span class="bar-value">${a.general} <span class="muted">(${a.general_pct}%)</span></span>
+          </div>`;
+      }).join('');
   }
 
   // Title patterns
