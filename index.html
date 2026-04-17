@@ -444,8 +444,7 @@
     <div class="card" id="tier-source-card" style="position:relative;height:380px">
       <canvas id="tier-source-canvas"></canvas>
     </div>
-    <div class="grid" id="visa-signal-overview" style="margin-top:24px;margin-bottom:12px"></div>
-    <div class="section-label" style="margin-top:12px">Source &amp; Company Quality</div>
+    <div class="section-label" style="margin-top:24px">Source &amp; Company Quality</div>
     <div class="card">
       <table id="unified-enr-table">
         <thead>
@@ -1836,7 +1835,6 @@ function makeSortable(tableId) {
 // ENR-12 S262: Field coverage heatmap — answers "WHAT is broken?" per source
 function renderUnifiedENR(enrichStats) {
   const tbody = document.querySelector('#unified-enr-table tbody');
-  const overview = document.getElementById('visa-signal-overview');
   if (!tbody || !enrichStats || !enrichStats.by_source) return;
 
   const ORDER = ['workday','greenhouse','ashby','lever','smartrecruiters','amazon','jsearch','netflix','eightfold'];
@@ -1844,24 +1842,54 @@ function renderUnifiedENR(enrichStats) {
   const tbs = enrichStats.tiers_by_source || {};
   const colorPct = (v) => v >= 80 ? 'color:#3fb950' : v >= 40 ? 'color:#d29922' : 'color:#f85149';
 
-  // Aggregate visa stats for overview cards
-  let totalEnriched = 0, totalHard = 0, totalLca = 0, totalNone = 0;
+  // Aggregate stats for total row
+  let totalTechUs = 0, totalEnriched = 0, totalT3 = 0, totalT3Count = 0;
+  let totalSkills = 0, totalSkillsCount = 0;
+  let totalVisa = 0, totalHard = 0, totalLca = 0, totalNone = 0;
   sources.forEach(src => {
     const v = enrichStats.by_source[src];
     const e = v.enriched || 0;
+    totalTechUs += v.tech_us || 0;
     totalEnriched += e;
     totalHard += v.sponsors_visa || 0;
-    totalLca += v.possible_sponsor || 0;
+    totalLca += Math.max(0, (v.possible_sponsor || 0) - (v.sponsors_visa || 0));
     totalNone += Math.max(0, e - (v.any_visa_signal || 0));
+    totalVisa += v.any_visa_signal || 0;
+    totalSkills += v.required_skills || 0;
+    const tier = tbs[src] || { t0:0, t1:0, t2:0, t3:0 };
+    const tierTotal = tier.t0 + tier.t1 + tier.t2 + tier.t3;
+    if (tierTotal > 0) { totalT3 += tier.t3 || 0; totalT3Count += tierTotal; }
+    if (e > 0) { totalSkillsCount += e; }
   });
 
-  // Overview stat cards (absorbed from Visa Intelligence panel)
-  if (overview && totalEnriched > 0) {
-    const anyPct = Math.round(100 * (totalEnriched - totalNone) / totalEnriched);
-    overview.innerHTML =
-      statCard({ icon: '🌍', label: 'Any Visa Signal', value: anyPct + '%', sub: fmt(totalEnriched - totalNone) + ' of ' + fmt(totalEnriched) + ' jobs' }) +
-      statCard({ icon: '✅', label: 'Hard Text', value: fmt(totalHard), sub: Math.round(100 * totalHard / totalEnriched) + '% — strongest signal' }) +
-      statCard({ icon: '🏢', label: 'LCA Match Only', value: fmt(totalLca), sub: Math.round(100 * totalLca / totalEnriched) + '% — company-level evidence' });
+  // Total row (summary — always first, not sortable)
+  if (totalEnriched > 0) {
+    const aggT3 = totalT3Count > 0 ? Math.round(1000 * totalT3 / totalT3Count) / 10 : 0;
+    const aggT3style = aggT3 >= 70 ? 'color:#3fb950' : aggT3 >= 40 ? 'color:#d29922' : 'color:#f85149';
+    const aggSkills = totalSkillsCount > 0 ? Math.round(100 * totalSkills / totalSkillsCount) : 0;
+    const aggVisa = Math.round(100 * totalVisa / totalEnriched);
+    const hardP = Math.round(100 * totalHard / totalEnriched);
+    const lcaP = Math.round(100 * totalLca / totalEnriched);
+    const noneP = Math.round(100 * totalNone / totalEnriched);
+    const tr = document.createElement('tr');
+    tr.className = 'total-row';
+    tr.style.cssText = 'font-weight:700;border-bottom:2px solid var(--border);background:var(--bg-card-hover)';
+    tr.innerHTML =
+      '<td></td>' +
+      '<td>All Sources</td>' +
+      '<td style="text-align:right">' + fmt(totalTechUs) + '</td>' +
+      '<td style="text-align:right">' + fmt(totalEnriched) + '</td>' +
+      '<td style="text-align:right;' + aggT3style + '">' + aggT3 + '%</td>' +
+      '<td style="text-align:right;' + colorPct(aggSkills) + '">' + aggSkills + '%</td>' +
+      '<td style="text-align:right;' + colorPct(aggVisa) + '">' + aggVisa + '%</td>' +
+      '<td style="text-align:center;font-size:11px">' +
+        '<span style="color:#3fb950" title="Hard text: ' + fmt(totalHard) + ' jobs">' + hardP + '%</span>' +
+        '<span style="color:var(--muted)"> / </span>' +
+        '<span style="color:#58a6ff" title="LCA match only: ' + fmt(totalLca) + ' jobs">' + lcaP + '%</span>' +
+        '<span style="color:var(--muted)"> / </span>' +
+        '<span style="color:#8b949e" title="No signal: ' + fmt(totalNone) + ' jobs">' + noneP + '%</span>' +
+      '</td>';
+    tbody.appendChild(tr);
   }
 
   // Build source + company rows
