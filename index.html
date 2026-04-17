@@ -302,9 +302,7 @@
 
   <!-- INF TAB — Infrastructure: services, alerts, architecture -->
   <section id="tab-inf" class="tab-panel" style="display:none">
-    <div class="section-label">System Health</div>
-    <div class="grid" id="inf-health-summary"></div>
-    <div class="section-label" style="margin-top:24px">Services</div>
+    <div class="section-label">Services</div>
     <div class="grid-3" id="ops-services"></div>
     <div class="section-label" style="margin-top:24px">Pipeline Alert</div>
     <div id="ops-alert" class="card"><span class="muted">No alerts.</span></div>
@@ -830,43 +828,6 @@ function renderGeneralTrendChart(all, days) {
       }
     }
   });
-}
-
-// INF tab — cross-module health summary (answers "is everything OK?" in one glance)
-function renderInfHealthSummary(metrics, enrichStats, metadata, generalReview) {
-  const el = document.getElementById('inf-health-summary');
-  if (!el) return;
-  // Pipeline status
-  const statusTs = (metadata && metadata.generated) ? metadata.generated : (metrics && metrics.timestamp);
-  const hours = statusTs ? (Date.now() - new Date(statusTs).getTime()) / 3600000 : null;
-  const pipelineOk = hours != null && hours < 0.5;
-  // Pool size
-  const poolTotal = (metadata && metadata.total_jobs) ? metadata.total_jobs : null;
-  // T3 rate
-  let t3pct = null;
-  if (enrichStats && enrichStats.tiers) {
-    const t = enrichStats.tiers;
-    const total = t.t0 + t.t1 + t.t2 + t.t3;
-    t3pct = total > 0 ? Math.round(100 * t.t3 / total) : 0;
-  }
-  // G1 rate
-  const g1 = generalReview && generalReview.summary ? generalReview.summary.us_general_rate : null;
-  // DASH-5: Employment type split
-  const emp = enrichStats?.by_employment || {};
-  const internCount = emp.internship || 0;
-  const newGradCount = (emp.new_grad || 0) + (emp.entry_level || 0);
-  const empSub = internCount || newGradCount ? `${fmt(newGradCount)} new-grad · ${fmt(internCount)} intern` : '';
-
-  // Health cards are clickable — navigate to the relevant detail tab
-  el.innerHTML =
-    `<div style="cursor:pointer" onclick="document.querySelector('[data-tab=agg]').click()" title="Go to AGG tab">` +
-    statCard({ icon: pipelineOk ? '🟢' : '🔴', label: 'Pipeline', value: pipelineOk ? 'LIVE' : (hours != null ? 'DELAYED' : '—'), sub: statusTs ? `Last: ${age(statusTs)}` : '' }) + `</div>` +
-    `<div style="cursor:pointer" onclick="document.querySelector('[data-tab=agg]').click()" title="Go to AGG tab">` +
-    statCard({ icon: '🏗️', label: 'Pool Size', value: fmt(poolTotal), sub: empSub }) + `</div>` +
-    `<div style="cursor:pointer" onclick="document.querySelector('[data-tab=enr]').click()" title="Go to ENR tab">` +
-    statCard({ icon: '🏆', label: 'ENR T3 Rate', value: t3pct != null ? t3pct + '%' : '—', sub: 'Target: &gt;80%' }) + `</div>` +
-    `<div style="cursor:pointer" onclick="document.querySelector('[data-tab=tag]').click()" title="Go to TAG tab">` +
-    statCard({ icon: '🏷️', label: 'TAG General', value: g1 != null ? g1 + '%' : '—', sub: 'Target: &lt;40%' }) + `</div>`;
 }
 
 // INF tab — secrets and deadlines (hardcoded known dates — update when rotated)
@@ -2550,7 +2511,6 @@ async function loadAll() {
   renderPipelineSourceTable(metrics, metadata, enrichStats);
   renderBreakdownTrend(historyEntries);
   renderFilterFunnel(metadata);
-  renderInfHealthSummary(metrics, enrichStats, metadata, generalReview);
   renderDeadlines();
   renderQuality(metrics, enrichStats, metadata, enrichHistory);
   renderEnrichTrend(enrichHistory);
