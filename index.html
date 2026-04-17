@@ -450,78 +450,35 @@
     <div class="card" id="tier-source-card" style="position:relative;height:380px">
       <canvas id="tier-source-canvas"></canvas>
     </div>
-    <div class="section-label" style="margin-top:24px">Field Coverage by Source — What's Missing?</div>
+    <div class="grid" id="visa-signal-overview" style="margin-top:24px;margin-bottom:12px"></div>
+    <div class="section-label" style="margin-top:12px">Source &amp; Company Quality</div>
     <div class="card">
-      <table id="field-coverage-table">
-        <tr>
-          <th class="sortable">Source</th>
-          <th class="sortable" style="text-align:right">Enriched</th>
-          <th class="sortable" style="text-align:right">T3%</th>
-          <th class="sortable" style="text-align:center">Skills</th>
-          <th class="sortable" style="text-align:center">Summary</th>
-          <th class="sortable" style="text-align:center">Degree</th>
-          <th class="sortable" style="text-align:center" title="Experience level extracted from description text (e.g., '3-5 years', 'senior-level'). Tag-based classification (entry_level/internship/etc.) covers 100% — this shows the subset where specific years/level were found. Low % does NOT mean missing — most jobs don't state years explicitly.">Exp (desc)</th>
-          <th class="sortable" style="text-align:center">Visa (any)</th>
-          <th class="sortable" style="text-align:center">Questions</th>
-        </tr>
+      <table id="unified-enr-table">
+        <thead>
+          <tr>
+            <th style="width:20px"></th>
+            <th class="sortable">Source</th>
+            <th class="sortable" style="text-align:right">Jobs</th>
+            <th class="sortable" style="text-align:right">Enriched</th>
+            <th class="sortable" style="text-align:right">T3%</th>
+            <th class="sortable" style="text-align:right">Skills%</th>
+            <th class="sortable" style="text-align:right">Visa%</th>
+            <th style="text-align:center">Visa Split</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
       </table>
       <div style="margin-top:8px;font-size:11px;color:var(--muted)">
-        Cell color: <span style="color:#3fb950">green (&gt;80%)</span> ·
-        <span style="color:#d29922">yellow (40-80%)</span> ·
-        <span style="color:#f85149">red (&lt;40%)</span> ·
-<span style="color:#8b949e">gray ⊘ = structural (ATS doesn't expose this data — not an extraction failure)</span>
-      </div>
-      <div style="margin-top:4px;font-size:11px;color:var(--muted)">
-        <strong>Questions:</strong> Only Greenhouse, Ashby, and Lever expose application form questions via API. Other ATS platforms don't provide this data — ⊘ is expected, not a bug.
+        Click ▶ to expand companies under a source.
+        <strong>Visa Split:</strong> <span style="color:#3fb950">hard text</span> / <span style="color:#58a6ff">LCA-only</span> / <span style="color:#8b949e">no signal</span>.
+        <strong>Visa%</strong> = any signal (union of all types).
+        <strong>Company Visa%</strong> = hard text only (LCA matches not in per-company data yet).
       </div>
     </div>
     <div class="section-label" style="margin-top:24px">Enrichment Trend <span id="enrich-trend-pills" style="margin-left:8px"></span></div>
     <div class="card" id="enrich-trend-card" style="position:relative;height:220px">
       <canvas id="enrich-trend-canvas"></canvas>
     </div>
-    <!-- S268A: Enrichment Details table removed — data merged into Field Coverage (Enriched + T3% columns) -->
-    <div class="section-label" style="margin-top:24px">Top Companies — Enrichment Quality</div>
-    <div class="card">
-      <table id="company-quality-table">
-        <tr>
-          <th class="sortable">Company</th>
-          <th class="sortable">Source</th>
-          <th class="sortable" style="text-align:right">Enriched</th>
-          <th class="sortable" style="text-align:right">T3%</th>
-          <th class="sortable" style="text-align:right">Skills %</th>
-          <th class="sortable" style="text-align:right">Summary %</th>
-          <th class="sortable" style="text-align:right" title="Jobs where the description text explicitly mentions visa sponsorship (sponsors_visa=true). LCA database matches (possible_sponsor) are NOT included here — see Visa Intelligence panel below.">Hard Visa %</th>
-        </tr>
-      </table>
-      <div style="margin-top:8px;font-size:11px;color:var(--muted)">
-        <strong>Hard Visa %</strong> = jobs with explicit visa language in description (e.g., "we sponsor H-1B"). Companies like Amazon, Boeing, Intel show 0% because their job postings don't mention visa status — but many match the DOL LCA database as known sponsors. See <em>Visa Signal Intelligence</em> panel below for full LCA vs hard-text breakdown.
-      </div>
-    </div>
-    <div class="section-label" style="margin-top:24px">Visa Signal Intelligence</div>
-    <div class="card">
-      <div class="grid" id="visa-signal-overview" style="margin-bottom:12px"></div>
-      <table id="visa-intelligence-table">
-        <tr>
-          <th>Source</th>
-          <th style="text-align:right">Enriched</th>
-          <th style="text-align:center">✅ Hard Text</th>
-          <th style="text-align:center">🏢 LCA Match</th>
-          <th style="text-align:center">No Signal</th>
-          <th style="text-align:center">Any Visa %</th>
-        </tr>
-      </table>
-      <div style="margin-top:8px;font-size:11px;color:var(--muted)">
-        Signal types: <span style="color:#3fb950">✅ Hard Text</span> = job says "we sponsor" ·
-        <span style="color:#58a6ff">🏢 LCA Match</span> = employer in DOL LCA database (possible_sponsor) ·
-        <span style="color:#8b949e">Blank</span> = no evidence found ·
-        Counts are not mutually exclusive — a job can have multiple signals. "Any Visa %" is the union.
-      </div>
-      <div id="visa-signal-legend" style="font-size:11px;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--border)"></div>
-    </div>
-
-        <!-- Skills Fill Rate bars and Description Fill Rate bars removed S266 -->
-    <!-- Redundant with Field Coverage table (same data: per-source fill rates, already color-coded) -->
-    <!-- Few's mistake #4 (indirect expression) + #6 (meaningless variety): same data in bars AND table columns -->
   </section>
 
   <!-- OUT TAB — Output: consumer repos, stars, Discord -->
@@ -1722,7 +1679,7 @@ let _companyDataSources = {};
 function initCompanyExpander(enrichStats, metadata, generalReview) {
   _companyDataSources = { enrichStats, metadata, generalReview };
   // Make company name cells clickable in all company tables
-  ['company-quality-table', 'class-companies-table', 'top-companies-table'].forEach(tableId => {
+  ['class-companies-table', 'top-companies-table'].forEach(tableId => {
     const table = document.getElementById(tableId);
     if (!table) return;
     table.querySelectorAll('tr').forEach((tr, i) => {
@@ -1785,13 +1742,18 @@ function initSourceFilter() {
   if (!select) return;
   select.addEventListener('change', () => {
     const val = select.value;
-    ['field-coverage-table', 'enrich-source-table', 'company-quality-table', 'visa-intelligence-table'].forEach(tableId => {
+    ['unified-enr-table'].forEach(tableId => {
       const table = document.getElementById(tableId);
       if (!table) return;
       Array.from(table.querySelectorAll('tr')).slice(1).forEach(tr => {
-        const source = tr.cells[0]?.textContent.trim().toLowerCase();
-        tr.style.display = (val === 'all' || source === val) ? '' : 'none';
-      });
+      if (tr.classList.contains('source-row')) {
+        const src = tr.dataset.source;
+        tr.style.display = (val === 'all' || src === val) ? '' : 'none';
+      } else if (tr.classList.contains('company-row')) {
+        const parent = tr.dataset.parent;
+        tr.style.display = (val === 'all' || parent === val) ? '' : 'none';
+      }
+    });
     });
   });
 }
@@ -1915,152 +1877,158 @@ function makeSortable(tableId) {
 }
 
 // ENR-12 S262: Field coverage heatmap — answers "WHAT is broken?" per source
-function renderFieldCoverage(enrichStats) {
-  const tbl = document.getElementById('field-coverage-table');
-  if (!tbl || !enrichStats || !enrichStats.by_source) return;
-  const ORDER = ['workday', 'greenhouse', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'netflix', 'eightfold'];
-  // Sources that structurally CANNOT provide certain fields (gray, not red)
-  const STRUCTURAL = {
-    workday: ['question_count'], smartrecruiters: ['question_count'],
-    amazon: ['question_count'], jsearch: ['question_count'],
-    netflix: ['question_count'], eightfold: ['question_count'],
-  };
-  const cellColor = (pct, src, field) => {
-    if ((STRUCTURAL[src] || []).includes(field)) return 'color:#8b949e';  // gray — structural
-    if (pct >= 80) return 'color:#3fb950';  // green
-    if (pct >= 40) return 'color:#d29922';  // yellow
-    return 'color:#f85149';                  // red
-  };
-  // S268A: Added Enriched count and T3% columns (merged from Enrichment Details table)
-  const tbs = enrichStats.tiers_by_source || {};
-  ORDER.filter(s => enrichStats.by_source[s]).forEach(src => {
-    const v = enrichStats.by_source[src];
-    const e = v.enriched || 1;
-    const t = tbs[src] || {};
-    const tot = (t.t0 || 0) + (t.t1 || 0) + (t.t2 || 0) + (t.t3 || 0);
-    const t3pct = tot > 0 ? Math.round(1000 * (t.t3 || 0) / tot) / 10 : 0;
-    const t3color = t3pct >= 70 ? 'color:#3fb950' : t3pct >= 40 ? 'color:#d29922' : 'color:#f85149';
-    const fields = {
-      skills: Math.round(100 * (v.required_skills || 0) / e),
-      summary: Math.round(100 * (v.summary_line || 0) / e),
-      degree: Math.round(100 * (v.min_degree || 0) / e),
-      experience: Math.round(100 * (v.experience_level_from_desc || 0) / e),
-      any_visa: Math.round(100 * (v.any_visa_signal || 0) / e),
-      question_count: Math.round(100 * (v.question_count || 0) / e),
-    };
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${src}</td>` +
-      `<td style="text-align:right;color:var(--muted)">${fmt(e)}</td>` +
-      `<td style="text-align:right;font-weight:600;${t3color}">${t3pct}%</td>` +
-      ['skills', 'summary', 'degree', 'experience', 'any_visa', 'question_count'].map(f => {
-        const pct = fields[f];
-        const style = cellColor(pct, src, f);
-        const label = (STRUCTURAL[src] || []).includes(f) ? `${pct}% ⊘` : `${pct}%`;
-        return `<td style="text-align:center;font-weight:600;${style}">${label}</td>`;
-      }).join('');
-    tbl.appendChild(tr);
-  });
-}
-
-// ENRICH-QUALITY-2: Per-company enrichment quality table
-function renderCompanyQuality(enrichStats) {
-  const tbl = document.getElementById('company-quality-table');
-  if (!tbl || !enrichStats || !enrichStats.by_company) return;
-  const colorPct = (v) => v >= 70 ? 'var(--green)' : v >= 40 ? 'var(--yellow)' : 'var(--red)';
-  enrichStats.by_company.forEach(c => {
-    const t3 = c.t3_pct != null ? c.t3_pct : '—';
-    const t3color = t3 !== '—' ? colorPct(t3) : 'var(--muted)';
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${esc(c.company)}</td>
-      <td style="font-size:11px;color:var(--muted)">${c.source}</td>
-      <td style="text-align:right">${fmt(c.enriched)}</td>
-      <td style="text-align:right;color:${t3color}">${t3 === '—' ? '—' : t3 + '%'}</td>
-      <td style="text-align:right;color:${colorPct(c.skills_pct)}">${c.skills_pct}%</td>
-      <td style="text-align:right;color:${colorPct(c.summary_pct)}">${c.summary_pct}%</td>
-      <td style="text-align:right;color:${colorPct(c.visa_pct)}">${c.visa_pct}%</td>
-    `;
-    tbl.appendChild(tr);
-  });
-}
-
-// Pipeline tab — last run stat cards
-// Pipeline stat cards: Pool Size + Active Sources only
-// Filter breakdown lives in the Senior Filter Funnel below (single-home rule)
-// Duration + US Tech Jobs live on Ops tab (no cross-tab duplication)
-function renderPipelineRunStats(metrics, metadata) {
-  const el = document.getElementById('pipeline-run-stats');
-  if (!el) return;
-  const poolTotal = (metadata && metadata.total_jobs) ? metadata.total_jobs : ((metrics && metrics.pipeline) || {}).pipelineTotal;
-  const bySource = (metadata && metadata.by_source) || {};
-  const sourceCount = Object.keys(bySource).length;
-
-  el.innerHTML =
-    statCard({ icon: '🏗️', label: 'Pool Size', value: fmt(poolTotal), sub: 'total jobs in pipeline' }) +
-    statCard({ icon: '🔌', label: 'Active Sources', value: sourceCount || '—', sub: `${sourceCount} ATS connected` });
-}
-
-// Pipeline tab — source breakdown table (Total, WoW, Tech US only)
-// DASH-2a: Has Desc / Desc% removed — those are quality metrics, not pipeline run metrics
-
-// S274: Visa signal intelligence — per-source breakdown of signal types
-function renderVisaIntelligence(enrichStats) {
-  const tbl = document.getElementById('visa-intelligence-table');
+function renderUnifiedENR(enrichStats) {
+  const tbody = document.querySelector('#unified-enr-table tbody');
   const overview = document.getElementById('visa-signal-overview');
-  const legend = document.getElementById('visa-signal-legend');
-  if (!tbl || !enrichStats || !enrichStats.by_source) return;
+  if (!tbody || !enrichStats || !enrichStats.by_source) return;
 
-  const ORDER = ['workday', 'greenhouse', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'netflix', 'eightfold'];
+  const ORDER = ['workday','greenhouse','ashby','lever','smartrecruiters','amazon','jsearch','netflix','eightfold'];
   const sources = ORDER.filter(s => enrichStats.by_source[s]);
+  const tbs = enrichStats.tiers_by_source || {};
+  const colorPct = (v) => v >= 80 ? 'color:#3fb950' : v >= 40 ? 'color:#d29922' : 'color:#f85149';
 
-  let totalEnriched = 0, totalHard = 0, totalLca = 0, totalForm = 0, totalNone = 0;
-
+  // Aggregate visa stats for overview cards
+  let totalEnriched = 0, totalHard = 0, totalLca = 0, totalNone = 0;
   sources.forEach(src => {
     const v = enrichStats.by_source[src];
     const e = v.enriched || 0;
-    const hard = v.sponsors_visa || 0;
-    const lca = v.possible_sponsor || 0;
-        const any = v.any_visa_signal || 0;
-    const none = Math.max(0, e - any);
-
     totalEnriched += e;
-    totalHard += hard;
-    totalLca += lca;
-        totalNone += none;
-
-    const pct = (n) => e > 0 ? Math.round(100 * n / e) + '%' : '—';
-    const pctColor = (n) => {
-      const r = e > 0 ? n / e : 0;
-      if (r >= 80) return 'color:#3fb950';
-      if (r >= 40) return 'color:#d29922';
-      if (r >= 10) return 'color:#f85149';
-      return 'color:#8b949e';
-    };
-
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${src}</td>` +
-      `<td style="text-align:right;color:var(--muted)">${fmt(e)}</td>` +
-      `<td style="text-align:center;font-weight:600;${pctColor(hard)}">${pct(hard)}</td>` +
-      `<td style="text-align:center;font-weight:600;${pctColor(lca)}">${pct(lca)}</td>` +
-      
-
-      `<td style="text-align:center;font-weight:600;${pctColor(none)}">${pct(none)}</td>` +
-      `<td style="text-align:center;font-weight:600;${pctColor(any)}">${pct(any)}</td>`;
-    tbl.appendChild(tr);
+    totalHard += v.sponsors_visa || 0;
+    totalLca += v.possible_sponsor || 0;
+    totalNone += Math.max(0, e - (v.any_visa_signal || 0));
   });
 
-  // Overview stat cards
+  // Overview stat cards (absorbed from Visa Intelligence panel)
   if (overview && totalEnriched > 0) {
     const anyPct = Math.round(100 * (totalEnriched - totalNone) / totalEnriched);
     overview.innerHTML =
-      statCard({ icon: '🌍', label: 'Any Visa Signal', value: anyPct + '%', sub: `${fmt(totalEnriched - totalNone)} of ${fmt(totalEnriched)} jobs` }) +
+      statCard({ icon: '🌍', label: 'Any Visa Signal', value: anyPct + '%', sub: fmt(totalEnriched - totalNone) + ' of ' + fmt(totalEnriched) + ' jobs' }) +
       statCard({ icon: '✅', label: 'Hard Text', value: fmt(totalHard), sub: Math.round(100 * totalHard / totalEnriched) + '% — strongest signal' }) +
       statCard({ icon: '🏢', label: 'LCA Match Only', value: fmt(totalLca), sub: Math.round(100 * totalLca / totalEnriched) + '% — company-level evidence' });
   }
 
-  if (legend) {
-    legend.innerHTML = `<strong>Why this matters:</strong> "Any Visa %" in the Field Coverage table combines all three signals into one number. This panel shows <em>which</em> signal type drives that number per source. A source with high "LCA Match" and low "Hard Text" means most visa labels come from database matching, not job text — lower confidence. Sources with high "Hard Text" have the strongest signal.<br><br><strong>Note:</strong> Column counts are not mutually exclusive — a job can have multiple signal types. "Any Visa %" is the union of all three.`;
-  }
+  // Build source + company rows
+  sources.forEach(src => {
+    const v = enrichStats.by_source[src];
+    const techUs = v.tech_us || 0;
+    const e = v.enriched || 1;
+    const tier = tbs[src] || { t0:0, t1:0, t2:0, t3:0 };
+    const tierTotal = tier.t0 + tier.t1 + tier.t2 + tier.t3;
+    const t3pct = tierTotal > 0 ? Math.round(1000 * (tier.t3 || 0) / tierTotal) / 10 : 0;
+    const t3style = t3pct >= 70 ? 'color:#3fb950' : t3pct >= 40 ? 'color:#d29922' : 'color:#f85149';
+    const skillsPct = Math.round(100 * (v.required_skills || 0) / e);
+    const visaPct = Math.round(100 * (v.any_visa_signal || 0) / e);
+    const visaStyle = colorPct(visaPct);
+    const hard = v.sponsors_visa || 0;
+    const lca = Math.max(0, (v.possible_sponsor || 0) - hard);
+    const none = Math.max(0, e - (v.any_visa_signal || 0));
+    const hardP = e > 0 ? Math.round(100 * hard / e) : 0;
+    const lcaP = e > 0 ? Math.round(100 * lca / e) : 0;
+    const noneP = e > 0 ? Math.round(100 * none / e) : 0;
+
+    // Source row
+    const sr = document.createElement('tr');
+    sr.className = 'source-row';
+    sr.dataset.source = src;
+    sr.innerHTML =
+      '<td class="expand-arrow" style="cursor:pointer;font-size:10px;color:var(--muted);user-select:none)">▶</td>' +
+      '<td style="font-weight:600">' + src + '</td>' +
+      '<td style="text-align:right;color:var(--muted)">' + fmt(techUs) + '</td>' +
+      '<td style="text-align:right">' + fmt(e) + '</td>' +
+      '<td style="text-align:right;font-weight:600;' + t3style + '">' + t3pct + '%</td>' +
+      '<td style="text-align:right;font-weight:600;' + colorPct(skillsPct) + '">' + skillsPct + '%</td>' +
+      '<td style="text-align:right;font-weight:600;' + visaStyle + '">' + visaPct + '%</td>' +
+      '<td style="text-align:center;font-size:11px">' +
+        '<span style="color:#3fb950" title="Hard text: job says sponsor">' + hardP + '%</span>' +
+        '<span style="color:var(--muted)"> / </span>' +
+        '<span style="color:#58a6ff" title="LCA match only">' + lcaP + '%</span>' +
+        '<span style="color:var(--muted)"> / </span>' +
+        '<span style="color:#8b949e" title="No signal">' + noneP + '%</span>' +
+      '</td>';
+    tbody.appendChild(sr);
+
+    // Click handler for expand arrow and source name
+    sr.querySelector('.expand-arrow').addEventListener('click', () => toggleSourceExpand(sr));
+
+    // Company rows for this source
+    const companies = (enrichStats.by_company || []).filter(c => c.source === src);
+    companies.forEach(c => {
+      const cr = document.createElement('tr');
+      cr.className = 'company-row';
+      cr.dataset.parent = src;
+      cr.style.display = 'none';
+      const ct3 = c.t3_pct != null ? c.t3_pct : '—';
+      const ct3style = ct3 !== '—' ? colorPct(ct3) : '';
+      const tiers = c.tiers || {};
+      cr.innerHTML =
+        '<td></td>' +
+        '<td style="padding-left:24px;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:2px">' + esc(c.company) + '</td>' +
+        '<td style="text-align:right">' + fmt(c.enriched) + '</td>' +
+        '<td style="text-align:right;font-weight:600;' + ct3style + '">' + (ct3 === '—' ? '—' : ct3 + '%') + '</td>' +
+        '<td style="text-align:right;' + colorPct(c.skills_pct) + '">' + c.skills_pct + '%</td>' +
+        '<td style="text-align:right;' + colorPct(c.visa_pct) + '">' + c.visa_pct + '%</td>' +
+        '<td style="text-align:center;font-size:10px;color:var(--muted)" title="T0/T1/T2/T3 tier counts">' +
+          (tiers.t0||0) + '·' + (tiers.t1||0) + '·' + (tiers.t2||0) + '·' + (tiers.t3||0) +
+        '</td>';
+      tbody.appendChild(cr);
+    });
+  });
+
+  // Wire up company name click handlers (reuse company expander)
+  initCompanyExpanderENR();
+}
+
+function toggleSourceExpand(sourceRow) {
+  const src = sourceRow.dataset.source;
+  const arrow = sourceRow.querySelector('.expand-arrow');
+  const companyRows = document.querySelectorAll('#unified-enr-table .company-row[data-parent="' + src + '"]');
+  const isExpanded = arrow.textContent.trim() === '▼';
+  companyRows.forEach(cr => { cr.style.display = isExpanded ? 'none' : ''; });
+  arrow.textContent = isExpanded ? '▶' : '▼';
+  sourceRow.classList.toggle('expanded', !isExpanded);
+}
+
+function initCompanyExpanderENR() {
+  const table = document.getElementById('unified-enr-table');
+  if (!table) return;
+  table.querySelectorAll('.company-row').forEach(tr => {
+    const nameCell = tr.cells[1];
+    if (!nameCell || nameCell.dataset.wired) return;
+    nameCell.dataset.wired = '1';
+    const name = nameCell.textContent.trim();
+    nameCell.title = 'Click for company details';
+    nameCell.addEventListener('click', () => toggleCompanyDetail(tr, name, 'unified-enr-table'));
+  });
+}
+
+function sortUnifiedTable(colIdx) {
+  const tbody = document.querySelector('#unified-enr-table tbody');
+  if (!tbody) return;
+  const header = tbody.closest('table').querySelectorAll('thead th')[colIdx];
+  const isAsc = header && header.classList.contains('sort-asc');
+  // Clear all sort indicators
+  tbody.closest('table').querySelectorAll('thead th.sortable').forEach(h => h.classList.remove('sort-asc','sort-desc'));
+  if (header && header.classList.contains('sortable')) header.classList.add(isAsc ? 'sort-desc' : 'sort-asc');
+  const dir = isAsc ? -1 : 1;
+  // Detach all company rows, sort source rows, reattach
+  const sourceRows = Array.from(tbody.querySelectorAll('.source-row'));
+  const companyMap = {};
+  sourceRows.forEach(sr => {
+    const src = sr.dataset.source;
+    companyMap[src] = Array.from(tbody.querySelectorAll('.company-row[data-parent="' + src + '"]'));
+  });
+  sourceRows.sort((a, b) => {
+    const aText = a.cells[colIdx]?.textContent.trim() || '';
+    const bText = b.cells[colIdx]?.textContent.trim() || '';
+    const aNum = parseFloat(aText.replace(/[,%]/g, ''));
+    const bNum = parseFloat(bText.replace(/[,%]/g, ''));
+    if (!isNaN(aNum) && !isNaN(bNum)) return (aNum - bNum) * dir;
+    return aText.localeCompare(bText) * dir;
+  });
+  sourceRows.forEach(sr => {
+    tbody.appendChild(sr);
+    (companyMap[sr.dataset.source] || []).forEach(cr => tbody.appendChild(cr));
+  });
 }
 
 function renderPipelineSourceTable(metrics, metadata, enrichStats) {
@@ -2592,13 +2560,7 @@ async function loadAll() {
   renderEnrichTrend(enrichHistory);
   // S268A: T3-by-Source chart removed — merged as filter pills on Tier Distribution
   renderTierSourceChart(enrichStats);
-  renderFieldCoverage(enrichStats);
-  // renderSkillsBars removed — redundant with Field Coverage table
-  // NOTE: Sorting, pagination, and column toggles are at end of loadAll()
-  // (must run after ALL tables are populated including async renders)
-  // renderEnrichBars removed — redundant with Field Coverage table
-  renderCompanyQuality(enrichStats);
-  renderVisaIntelligence(enrichStats);
+  renderUnifiedENR(enrichStats);
   window._poolTotal = metadata ? metadata.total_jobs : null;
   renderRepos(metrics, daily);
   // SUP freshness indicator
@@ -2622,18 +2584,19 @@ async function loadAll() {
 
   // Interactive features — MUST run after all tables are populated
   // S268A: enrich-source-table removed
-  makeSortable('field-coverage-table');
-  makeSortable('company-quality-table');
+  // Unified ENR table has custom sort
+  document.querySelectorAll('#unified-enr-table thead th.sortable').forEach((th, i) => {
+    th.addEventListener('click', () => sortUnifiedTable(i));
+  });
   makeSortable('pipeline-source-table');
   makeSortable('class-companies-table');
   makeSortable('class-patterns-table');
   makeSortable('repo-table');
   paginateTable('class-companies-table', 10);
-  paginateTable('company-quality-table', 10);
   paginateTable('class-patterns-table', 10);
   // S268A: enrich-source-table removed
   addColumnToggle('class-companies-table', { exclude: [0, 1] });
-  addColumnToggle('company-quality-table', { exclude: [0, 1] });
+  addColumnToggle('unified-enr-table', { exclude: [0, 1] });
   addColumnToggle('repo-table', { exclude: [0, 1] });
   // Company detail expander (click company name for cross-source data)
   initCompanyExpander(enrichStats, metadata, generalReview);
@@ -2676,7 +2639,7 @@ loadAll();
 
   function doRefresh() {
     // Clear table rows so re-renders don't duplicate (tables append rows)
-    ['pipeline-source-table','enrich-source-table','repo-table','field-coverage-table','company-quality-table','class-companies-table','class-patterns-table'].forEach(id => {
+    ['pipeline-source-table','enrich-source-table','repo-table','unified-enr-table','class-companies-table','class-patterns-table'].forEach(id => {
       const el = document.getElementById(id);
       if (el) { while (el.rows.length > 1) el.deleteRow(1); }
     });
