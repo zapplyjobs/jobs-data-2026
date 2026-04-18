@@ -55,8 +55,8 @@
       padding: 16px 24px;
       border-bottom: 1px solid var(--border);
       background: var(--bg);
-      position: sticky;
-      top: 0;
+      position: fixed;
+      top: 0; left: 0; right: 0;
       z-index: 10;
     }
     header h1 { font-size: 18px; font-weight: 700; flex: 1; }
@@ -71,10 +71,22 @@
     }
     #theme-toggle:hover { background: var(--bg-card); }
     /* Layout: sidebar + content wrapper */
+    #status-bar {
+      position: fixed;
+      top: 57px; left: 0; right: 0;
+      z-index: 10;
+      padding: 8px 24px;
+      background: var(--status-bar-bg);
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+    #status-bar.warn { background: rgba(210, 153, 34, 0.10); }
+    #status-bar.err  { background: rgba(248, 81, 73, 0.10); }
     #app-body {
       display: flex;
-      height: calc(100vh - 57px); /* fill below header */
-      overflow: hidden; /* prevent app-body from scrolling — content-wrap scrolls instead */
+      margin-top: 93px; /* header(57px) + status-bar(~36px) */
+      height: calc(100vh - 93px);
+      overflow: hidden;
     }
     #sidebar {
       width: 240px;
@@ -83,6 +95,9 @@
       border-right: 1px solid var(--border);
       padding: 16px 12px;
       overflow-y: auto;
+      position: sticky;
+      top: 0;
+      height: calc(100vh - 93px);
     }
     #sidebar-label {
       font-size: 10px;
@@ -134,14 +149,6 @@
       .tab { white-space: nowrap; margin-bottom: 0; }
       #content-wrap { padding-bottom: 72px; }
     }
-    #status-bar {
-      padding: 8px 24px;
-      background: var(--status-bar-bg);
-      border-bottom: 1px solid var(--border);
-      font-size: 12px;
-    }
-    #status-bar.warn { background: rgba(210, 153, 34, 0.10); }
-    #status-bar.err  { background: rgba(248, 81, 73, 0.10); }
     .section-label {
       font-size: 11px;
       font-weight: 600;
