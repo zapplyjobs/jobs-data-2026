@@ -718,7 +718,7 @@ function renderStatusBar(isoTs) {
 }
 
 // Ops tab — pipeline stats section (always populated from metrics/metadata)
-function renderOpsPipelineStats(metrics, metadata, enrichStats, daily) {
+function renderOpsPipelineStats(metrics, metadata, enrichStats, daily, historyEntries) {
   const el = document.getElementById('ops-pipeline-stats');
   if (!el) return;
   const p = (metrics && metrics.pipeline) || {};
@@ -731,14 +731,17 @@ function renderOpsPipelineStats(metrics, metadata, enrichStats, daily) {
   const sf = metadata && metadata.senior_filter_stats;
   const entryCount = sf ? sf.entry_level_jobs : null;
   const usTechJobs = enrichStats ? enrichStats.total_tech_us : null;
-  // Pool WoW delta from daily stats history array (7 daily pool totals)
+  // Pool WoW delta from history.jsonl (same data series as displayed pool total)
   let poolSub = entryCount ? `${fmt(entryCount)} entry-level` : null;
-  if (daily && Array.isArray(daily.history) && daily.history.length >= 7 && poolTotal != null) {
-    const pool7dAgo = daily.history[0]; // oldest entry = 7 days ago
-    const delta = poolTotal - pool7dAgo;
-    const pct = pool7dAgo > 0 ? ((delta / pool7dAgo) * 100).toFixed(1) : 0;
-    const color = delta >= 0 ? 'var(--green)' : 'var(--red)';
-    poolSub = `${entryCount ? fmt(entryCount) + ' entry-level · ' : ''}<span style="color:${color}">${delta >= 0 ? '+' : ''}${fmt(delta)} WoW (${delta >= 0 ? '+' : ''}${pct}%)</span>`;
+  if (historyEntries && historyEntries.length >= 2 && poolTotal != null) {
+    const oldest = historyEntries[0];
+    const oldestTotal = oldest.total || oldest.pipelineTotal;
+    if (oldestTotal > 0) {
+      const delta = poolTotal - oldestTotal;
+      const pct = ((delta / oldestTotal) * 100).toFixed(1);
+      const color = delta >= 0 ? 'var(--green)' : 'var(--red)';
+      poolSub = `${entryCount ? fmt(entryCount) + ' entry-level · ' : ''}<span style="color:${color}">${delta >= 0 ? '+' : ''}${fmt(delta)} WoW (${delta >= 0 ? '+' : ''}${pct}%)</span>`;
+    }
   }
 
   el.innerHTML =
@@ -1002,17 +1005,17 @@ function renderQuality(d, enrichStats, metadata, enrichHistory) {
 // renderOutSummary removed S266 — stat cards failed actionability test (stars/repo count/discord total don't prompt decisions)
 
 // OUT tab — health stat cards
-function renderOutHealth(d, daily) {
+function renderOutHealth(d, daily, historyEntries) {
   const el = document.getElementById('out-health-cards');
   if (!el) return;
   const repos = d.repos || {};
   const repoEntries = Object.entries(repos);
   // Total stars
   const totalStars = repoEntries.reduce((s, [, r]) => s + (r.stars || 0), 0);
-  // Star delta (7d) from daily
-  const starHistory = (daily && daily.stars) ? daily.stars : {};
-  const starValues = Object.values(starHistory);
-  const starDelta = starValues.length >= 2 ? starValues[starValues.length - 1] - starValues[0] : null;
+  // Star delta (7d) from history.jsonl — daily.stars is a snapshot dict, NOT a time series
+  const starEntries = (historyEntries || []).filter(e => e.stars && typeof e.stars === 'object')
+    .map(e => ({ date: e.date, total: Object.values(e.stars).reduce((s, v) => s + v, 0) }));
+  const starDelta = starEntries.length >= 2 ? starEntries[starEntries.length - 1].total - starEntries[0].total : null;
   const starDeltaStr = starDelta != null ? `<span style="color:${starDelta >= 0 ? 'var(--green)' : 'var(--red)'}">${starDelta >= 0 ? '+' : ''}${starDelta}/7d</span>` : '';
   // Consumer freshness: repos updated <2h ago
   let freshCount = 0;
@@ -2598,7 +2601,7 @@ async function loadAll() {
   const statusTs = (metadata && metadata.generated) ? metadata.generated : metrics.timestamp;
   renderStatusBar(statusTs);
   renderOpsServices(metadata);
-  renderOpsPipelineStats(metrics, metadata, enrichStats, daily);
+  renderOpsPipelineStats(metrics, metadata, enrichStats, daily, historyEntries);
   renderAlert(pipelineAlert);
   // Parse long-term archive for "All" toggle on Pool Trend
   const archiveEntries = archiveRaw
@@ -2626,7 +2629,7 @@ async function loadAll() {
   renderUnifiedENR(enrichStats);
   window._poolTotal = metadata ? metadata.total_jobs : null;
   renderRepos(metrics, daily);
-  renderOutHealth(metrics, daily);
+  renderOutHealth(metrics, daily, allHistoryMerged);
   // SUP freshness indicator
   const supFresh = document.getElementById('sup-freshness');
   if (supFresh && metadata && metadata.generated) {
