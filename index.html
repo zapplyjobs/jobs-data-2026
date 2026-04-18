@@ -318,9 +318,7 @@
   <section id="tab-agg" class="tab-panel">
     <div class="section-label">Pipeline Status</div>
     <div class="grid" id="ops-pipeline-stats"></div>
-    <div class="section-label" style="margin-top:16px">Secrets & Deadlines</div>
-    <div class="grid" id="agg-deadlines"></div>
-    <!-- Last Run section removed S266 — Pool Size + Active Sources duplicate stat cards above -->
+    <!-- Deadlines removed from AGG (duplicated INF) — see INF tab -->
     <div class="section-label" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center">
       <span>Pool Trend</span>
       <span id="pool-trend-pills"></span>
@@ -411,14 +409,14 @@
     <div class="card" id="general-trend-card" style="position:relative;height:200px">
       <canvas id="general-trend-canvas"></canvas>
     </div>
-    <div class="section-label" style="margin-top:24px;cursor:pointer;user-select:none" onclick="const w=this.nextElementSibling;w.style.display=w.style.display==='none'?'':'none';this.querySelector('.caret').style.transform=w.style.display==='none'?'':'rotate(90deg)'"><span class="caret" style="display:inline-block;transition:transform 0.15s;font-size:0.7em;margin-right:6px">▶</span>Recurring Title Patterns</div>
-    <div class="card" id="class-patterns-card" style="display:none">
+    <div class="section-label" style="margin-top:24px">Recurring Title Patterns</div>
+    <div class="card" id="class-patterns-card">
       <table id="class-patterns-table">
         <tr><th class="sortable">Title Pattern</th><th class="sortable" style="text-align:right">Count</th><th class="sortable" style="text-align:right">Companies</th></tr>
       </table>
     </div>
-    <div class="section-label" style="margin-top:24px;cursor:pointer;user-select:none" onclick="const w=this.nextElementSibling;w.style.display=w.style.display==='none'?'':'none';this.querySelector('.caret').style.transform=w.style.display==='none'?'':'rotate(90deg)'"><span class="caret" style="display:inline-block;transition:transform 0.15s;font-size:0.7em;margin-right:6px">▶</span>Tenant Default Candidates</div>
-    <div class="card" id="class-tenants-card" style="display:none">
+    <div class="section-label" style="margin-top:24px">Tenant Default Candidates</div>
+    <div class="card" id="class-tenants-card">
       <p class="muted" style="text-align:center; padding:20px 0">Loading...</p>
     </div>
   </section>
@@ -840,7 +838,7 @@ function renderGeneralTrendChart(all, days) {
 
 // INF tab — secrets and deadlines (hardcoded known dates — update when rotated)
 function renderDeadlines() {
-  const targets = [document.getElementById('inf-deadlines'), document.getElementById('agg-deadlines')].filter(Boolean);
+  const targets = [document.getElementById('inf-deadlines')].filter(Boolean);
   if (!targets.length) return;
   const DEADLINES = [
     { label: 'GH_PAT Expiry', date: '2026-05-30', action: 'Rotate by May 1 (INF-17)' },
