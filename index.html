@@ -21,6 +21,7 @@
       --yellow: #9a6700;
       --red: #d1242f;
       --accent: #ff5e3c;
+      --info: #4a9eff;
       --accent-bg: rgba(255, 94, 60, 0.10);
       --status-bar-bg: rgba(255, 94, 60, 0.05);
       --shadow: 0px 4px 24px 0px rgba(37,37,37,0.08);
@@ -36,6 +37,7 @@
       --yellow: #d29922;
       --red: #f85149;
       --accent: #ff5e3c;
+      --info: #58a6ff;
       --accent-bg: rgba(255, 94, 60, 0.10);
       --status-bar-bg: rgba(255, 94, 60, 0.08);
       --shadow: 0 1px 3px rgba(0,0,0,0.3);
@@ -489,7 +491,7 @@
       </table>
       <div style="margin-top:8px;font-size:11px;color:var(--muted)">
         Click ▶ to expand companies under a source.
-        <strong>Visa Split:</strong> <span style="color:var(--green)">hard text</span> / <span style="color:#58a6ff">LCA-only</span> / <span style="color:var(--yellow)">ATS form</span> / <span style="color:var(--muted)">no signal</span>.
+        <strong>Visa Split:</strong> <span style="color:var(--info)">LCA match</span> / <span style="color:var(--green)">hard text</span> / <span style="color:var(--yellow)">ATS form</span> / <span style="color:var(--muted)">no signal</span>.
         <strong>Visa%</strong> = any signal (union of all types). <strong>Company Visa%</strong> = hard text only.
       </div>
     </div>
@@ -671,7 +673,7 @@ const _cs = getComputedStyle(document.documentElement);
 function cv(name) { return (_cs.getPropertyValue(name) || '').trim(); }
 const C = {
   green: cv('--green'), yellow: cv('--yellow'), red: cv('--red'),
-  accent: cv('--accent'), muted: cv('--muted'),
+  accent: cv('--accent'), info: cv('--info'), muted: cv('--muted'),
   text: cv('--text'), border: cv('--border'),
 };
 
@@ -2025,9 +2027,9 @@ function renderUnifiedENR(enrichStats) {
       '<td style="text-align:right;' + colorPct(aggSkills) + '">' + aggSkills + '%</td>' +
       '<td style="text-align:right;' + colorPct(aggVisa) + '">' + aggVisa + '%</td>' +
       '<td style="text-align:center;font-size:11px">' +
-        '<span style="color:var(--green)" title="Hard text: ' + fmt(totalHard) + ' jobs">' + hardP + '%</span>' +
+        '<span style="color:var(--info)" title="LCA match: ' + fmt(totalLca) + ' jobs">' + lcaP + '%</span>' +
         '<span style="color:var(--muted)"> / </span>' +
-        '<span style="color:#58a6ff" title="LCA match only: ' + fmt(totalLca) + ' jobs">' + lcaP + '%</span>' +
+        '<span style="color:var(--green)" title="Hard text: ' + fmt(totalHard) + ' jobs">' + hardP + '%</span>' +
         '<span style="color:var(--muted)"> / </span>' +
         '<span style="color:var(--yellow)" title="ATS form question: ' + fmt(totalForm) + ' jobs">' + formP + '%</span>' +
         '<span style="color:var(--muted)"> / </span>' +
@@ -2071,9 +2073,9 @@ function renderUnifiedENR(enrichStats) {
       '<td style="text-align:right;font-weight:600;' + colorPct(skillsPct) + '">' + skillsPct + '%</td>' +
       '<td style="text-align:right;font-weight:600;' + visaStyle + '">' + visaPct + '%</td>' +
       '<td style="text-align:center;font-size:11px">' +
-        '<span style="color:var(--green)" title="Hard text: ' + fmt(hard) + ' jobs">' + hardP + '%</span>' +
+        '<span style="color:var(--info)" title="LCA match: ' + fmt(lca) + ' jobs">' + lcaP + '%</span>' +
         '<span style="color:var(--muted)"> / </span>' +
-        '<span style="color:#58a6ff" title="LCA match: ' + fmt(lca) + ' jobs">' + lcaP + '%</span>' +
+        '<span style="color:var(--green)" title="Hard text: ' + fmt(hard) + ' jobs">' + hardP + '%</span>' +
         '<span style="color:var(--muted)"> / </span>' +
         '<span style="color:var(--yellow)" title="ATS form: ' + fmt(form) + ' jobs">' + formP + '%</span>' +
         '<span style="color:var(--muted)"> / </span>' +
