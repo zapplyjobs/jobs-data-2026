@@ -2511,6 +2511,14 @@ function renderClassification(data) {
 
   // Top companies table
   if (data.by_company && data.by_company.length > 0) {
+    // Total row
+    const totalGeneral = data.by_company.reduce((s, c) => s + (c.general || 0), 0);
+    const totalClassified = data.by_company.reduce((s, c) => s + (c.classified || 0), 0);
+    const totalRow = document.createElement('tr');
+    totalRow.className = 'total-row';
+    totalRow.style.cssText = 'font-weight:700;border-bottom:2px solid var(--border);background:var(--bg-card-hover)';
+    totalRow.innerHTML = `<td></td><td>All ${data.by_company.length} Companies</td><td></td><td style="text-align:right">${totalGeneral}</td><td style="text-align:right">${totalClassified}</td><td></td><td></td>`;
+    companiesTable.appendChild(totalRow);
     for (const co of data.by_company.slice(0, 25)) {
       const tr = document.createElement('tr');
       const idx = data.by_company.indexOf(co) + 1;
