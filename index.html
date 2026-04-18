@@ -326,6 +326,9 @@
   <section id="tab-agg" class="tab-panel">
     <div class="section-label">Pipeline Status</div>
     <div class="grid" id="ops-pipeline-stats"></div>
+    <div style="margin-top:4px;font-size:11px;color:var(--muted)">
+      <strong>Pool Size</strong> includes jobs &amp; internships. <strong>US Tech Jobs</strong> = SW + DS + HW + AI domains, US-tagged.
+    </div>
     <!-- Deadlines removed from AGG (duplicated INF) — see INF tab -->
     <div class="section-label" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center">
       <span>Pool Trend</span>
@@ -365,6 +368,9 @@
   <section id="tab-sup" class="tab-panel" style="display:none">
     <div class="section-label">Source & Job Supply</div>
     <div class="grid" id="sup-health-cards"></div>
+    <div style="margin-top:4px;font-size:11px;color:var(--muted)">
+      <strong>Active Sources</strong> = ATS sources returning &gt;0 jobs. <strong>Zero-Yield</strong> = companies with 0 jobs across all sources.
+    </div>
     <div id="sup-freshness" style="font-size:11px;color:var(--muted);margin-bottom:8px"></div>
     <div class="section-label">Jobs & Internships by Source <span style="font-weight:400;font-size:11px;color:var(--muted)">(current pool)</span></div>
     <div class="card">
@@ -433,6 +439,9 @@
     <div class="section-label" style="margin-top:24px">Tenant Default Candidates</div>
     <div class="card" id="class-tenants-card">
       <p class="muted" style="text-align:center; padding:20px 0">Loading...</p>
+    </div>
+    <div style="margin-top:4px;font-size:11px;color:var(--muted)">
+      Companies whose default ATS job category was overridden by TAG classification. These are candidates for permanent tenant defaults in <code>tag-engine.js</code>.
     </div>
   </section>
 
