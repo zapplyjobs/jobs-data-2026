@@ -401,10 +401,6 @@
         <tr><th>#</th><th class="sortable">Company</th><th class="sortable">Source</th><th class="sortable" style="text-align:right">General</th><th class="sortable" style="text-align:right">Classified</th><th class="sortable">Top Domain</th><th class="sortable" style="text-align:right">Desc%</th></tr>
       </table>
     </div>
-    <div class="section-label" style="margin-top:24px">General Rate by ATS</div>
-    <div class="card" id="class-ats-card">
-      <div id="class-ats-bars"></div>
-    </div>
     <div class="section-label" style="margin-top:24px">General Rate Trend <span id="general-trend-pills"></span></div>
     <div class="card" id="general-trend-card" style="position:relative;height:200px">
       <canvas id="general-trend-canvas"></canvas>
@@ -499,8 +495,6 @@
     <div class="card" id="stars-trend-card" style="position:relative;height:200px">
       <canvas id="stars-trend-canvas"></canvas>
     </div>
-    <div class="section-label" style="margin-top:24px">Traffic</div>
-    <div class="grid" id="traffic-stats"></div>
     <div class="section-label" style="margin-top:24px">Discord</div>
     <div class="grid" id="discord-verification"></div>
     <div class="card" id="discord-stats-card">
@@ -2549,12 +2543,17 @@ function renderClassification(data) {
       }).join('');
   }
 
-  // Title patterns
+  // Title patterns — show top 10 (maintenance mode — full list in source data)
   if (data.title_patterns && data.title_patterns.length > 0) {
-    for (const p of data.title_patterns.slice(0, 20)) {
+    for (const p of data.title_patterns.slice(0, 10)) {
       const tr = document.createElement('tr');
       tr.innerHTML = `<td style="font-family:monospace;font-size:12px">${esc(p.title)}</td><td style="text-align:right">${p.count}</td><td style="text-align:right">${p.companies}</td>`;
       patternsTable.appendChild(tr);
+    }
+    if (data.title_patterns.length > 10) {
+      const note = document.createElement('tr');
+      note.innerHTML = `<td colspan="3" style="text-align:center;font-size:11px;color:var(--muted);padding:6px">+${data.title_patterns.length - 10} more patterns in source data</td>`;
+      patternsTable.appendChild(note);
     }
   } else {
     patternsTable.parentElement.innerHTML = '<p class="muted" style="text-align:center; padding:20px 0">No recurring patterns (3+ occurrences).</p>';
