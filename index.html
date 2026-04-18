@@ -314,7 +314,7 @@
     <div class="grid-3" id="ops-services"></div>
     <div class="section-label" style="margin-top:24px">Pipeline Alert</div>
     <div id="ops-alert" class="card"><span class="muted">No alerts.</span></div>
-    <div class="section-label" style="margin-top:24px">Secrets & Deadlines</div>
+    <div class="section-label" style="margin-top:24px">Credentials & Key Dates</div>
     <div class="grid" id="inf-deadlines"></div>
     <div class="section-label" style="margin-top:24px">Pipeline Architecture</div>
     <div class="card" style="overflow-x:auto">
@@ -341,11 +341,11 @@
     <div class="card" id="duration-trend-card" style="position:relative;height:200px">
       <canvas id="duration-trend-canvas"></canvas>
     </div>
-    <div class="section-label" style="margin-top:24px">Domain Distribution</div>
+    <div class="section-label" style="margin-top:24px">Domain Distribution <span style="font-weight:400;font-size:11px;color:var(--muted)">(jobs by field across the pool)</span></div>
     <div class="card" id="domain-bars-wrap">
       <div id="domain-bars"></div>
     </div>
-    <div class="section-label" style="margin-top:24px">Senior Filter Funnel</div>
+    <div class="section-label" style="margin-top:24px">Senior Filter Funnel <span style="font-weight:400;font-size:11px;color:var(--muted)">(how many jobs survive senior-level filtering)</span></div>
     <div class="card" id="filter-funnel">
       <p class="muted" style="text-align:center; padding:20px 0">Loading…</p>
     </div>
@@ -361,7 +361,7 @@
 
   <!-- SUP TAB — Supply: sources, companies, source trends -->
   <section id="tab-sup" class="tab-panel" style="display:none">
-    <div class="section-label">Supply Health</div>
+    <div class="section-label">Source & Job Supply</div>
     <div class="grid" id="sup-health-cards"></div>
     <div id="sup-freshness" style="font-size:11px;color:var(--muted);margin-bottom:8px"></div>
     <div class="section-label">Jobs by Source <span style="font-weight:400;font-size:11px;color:var(--muted)">(current pool)</span></div>
@@ -388,12 +388,15 @@
           <th style="text-align:right">Jobs</th>
         </tr>
       </table>
+      <div style="margin-top:8px;font-size:11px;color:var(--muted)">
+        Top companies by active job postings across all sources. Click ⚙ to toggle columns.
+      </div>
     </div>
     <div class="section-label" style="margin-top:24px">Per-Source Trend <span id="source-trend-pills"></span></div>
     <div class="card" id="source-trend-card" style="position:relative;height:220px">
       <canvas id="source-trend-canvas"></canvas>
     </div>
-    <div class="section-label" style="margin-top:24px">Zero-Yield Companies — Sources Returning 0 Jobs</div>
+    <div class="section-label" style="margin-top:24px">Zero-Yield Sources</div>
     <div class="card" id="zero-yield-card">
       <p class="muted" style="text-align:center;padding:20px 0">Loading...</p>
     </div>
@@ -401,13 +404,19 @@
 
   <!-- TAG TAB — Classification: G1 KPIs first, then domain detail -->
   <section id="tab-tag" class="tab-panel" style="display:none">
-    <div class="section-label">General Pool Overview</div>
+    <div class="section-label">Classification Health</div>
     <div class="grid" id="class-summary"></div>
+    <div style="margin-top:4px;font-size:11px;color:var(--muted)">
+      <strong>G1 Rate</strong> = % of jobs classified into a domain (not "General"). <strong>Desc%</strong> = jobs with a real description (not just title). Higher is better for both.
+    </div>
     <div class="section-label" style="margin-top:24px">Top Companies by Unclassified Jobs</div>
     <div class="card" id="class-companies-card">
       <table id="class-companies-table">
         <tr><th>#</th><th class="sortable">Company</th><th class="sortable">Source</th><th class="sortable" style="text-align:right">General</th><th class="sortable" style="text-align:right">Classified</th><th class="sortable">Top Domain</th><th class="sortable" style="text-align:right">Desc%</th></tr>
       </table>
+      <div style="margin-top:8px;font-size:11px;color:var(--muted)">
+        Companies with the most <strong>General</strong> (unclassified) jobs. These are candidates for taxonomy expansion or manual review. Click ⚙ to toggle columns.
+      </div>
     </div>
     <div class="section-label" style="margin-top:24px">General Rate Trend <span id="general-trend-pills"></span></div>
     <div class="card" id="general-trend-card" style="position:relative;height:200px">
@@ -481,8 +490,11 @@
 
   <!-- OUT TAB — Output: consumer repos, stars, Discord -->
   <section id="tab-out" class="tab-panel" style="display:none">
-    <div class="section-label">Output Health</div>
+    <div class="section-label">Consumer Health</div>
     <div class="grid" id="out-health-cards"></div>
+    <div style="margin-top:4px;font-size:11px;color:var(--muted)">
+      <strong>Consumer Freshness</strong> = repos updated &lt;2h ago. <strong>Stars</strong> = GitHub repo stars across all job boards. 7d delta from daily snapshots.
+    </div>
     <div class="section-label" style="margin-top:24px">Consumer Repos</div>
     <div class="card">
       <table id="repo-table">
@@ -495,6 +507,9 @@
           <th class="sortable" style="text-align:right">⭐</th>
         </tr>
       </table>
+      <div style="margin-top:8px;font-size:11px;color:var(--muted)">
+        <strong>Health</strong> = composite of workflow status + data freshness. Green = updated &lt;2h ago. Yellow = &lt;6h. Red = &gt;6h or workflow failed.
+      </div>
     </div>
     <div class="section-label" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center">
       <span>Stars Trend</span>
