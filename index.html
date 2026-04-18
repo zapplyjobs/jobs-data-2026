@@ -356,11 +356,7 @@
     <div class="section-label">Supply Health</div>
     <div class="grid" id="sup-health-cards"></div>
     <div id="sup-freshness" style="font-size:11px;color:var(--muted);margin-bottom:8px"></div>
-    <div class="section-label">By Source</div>
-    <div class="card" id="source-bars-card">
-      <div id="source-bars"></div>
-    </div>
-    <div class="section-label" style="margin-top:24px">Jobs by Source (current pool)</div>
+    <div class="section-label">Jobs by Source <span style="font-weight:400;font-size:11px;color:var(--muted)">(current pool)</span></div>
     <div class="card">
       <table id="pipeline-source-table">
         <tr>
@@ -370,6 +366,10 @@
           <th class="sortable" style="text-align:right">Tech US</th>
         </tr>
       </table>
+      <div style="margin-top:8px;font-size:11px;color:var(--muted)">
+        <strong>Total</strong> = all jobs from this source in the 7-day pool. <strong>Tech US</strong> = jobs tagged tech-domain + US-location.
+        WoW deltas from daily snapshots. Color: <span style="color:#2d8a4e">growth</span> / <span style="color:var(--muted)">stable</span> / <span style="color:var(--yellow)">decline</span>.
+      </div>
     </div>
     <div class="section-label" style="margin-top:24px">Companies by Total Job Count</div>
     <div class="card" id="top-companies-card">
@@ -465,9 +465,8 @@
       </table>
       <div style="margin-top:8px;font-size:11px;color:var(--muted)">
         Click ▶ to expand companies under a source.
-        <strong>Visa Split:</strong> <span style="color:#3fb950">hard text</span> / <span style="color:#58a6ff">LCA-only</span> / <span style="color:#8b949e">no signal</span>.
-        <strong>Visa%</strong> = any signal (union of all types).
-        <strong>Company Visa%</strong> = hard text only (LCA matches not in per-company data yet).
+        <strong>Visa Split:</strong> <span style="color:#3fb950">hard text</span> / <span style="color:#58a6ff">LCA-only</span> / <span style="color:#d29922">ATS form</span> / <span style="color:#8b949e">no signal</span>.
+        <strong>Visa%</strong> = any signal (union of all types). <strong>Company Visa%</strong> = hard text only.
       </div>
     </div>
     <div class="section-label" style="margin-top:24px">Enrichment Trend <span id="enrich-trend-pills" style="margin-left:8px"></span></div>
@@ -727,26 +726,29 @@ function renderOpsPipelineStats(metrics, metadata, enrichStats, daily, historyEn
   const pipelineStatus = hours == null ? '—' : hours < 0.5 ? 'LIVE' : hours < 6 ? 'DELAYED' : 'DOWN';
   const statusIcon = hours == null ? '⚪' : hours < 0.5 ? '🟢' : hours < 6 ? '🟡' : '🔴';
   const sf = metadata && metadata.senior_filter_stats;
-  const entryCount = sf ? sf.entry_level_jobs : null;
   const usTechJobs = enrichStats ? enrichStats.total_tech_us : null;
-  // Pool WoW delta from history.jsonl (same data series as displayed pool total)
-  let poolSub = entryCount ? `${fmt(entryCount)} entry-level after senior filter` : null;
+  // Pool WoW delta — use history series for both card value and delta (same data source = honest comparison)
+  let poolDisplay = poolTotal;
+  let poolSub = null;
   if (historyEntries && historyEntries.length >= 2 && poolTotal != null) {
     const last7 = historyEntries.slice(-7);
+    const newest = last7[last7.length - 1];
     const oldest = last7[0];
+    const newestTotal = newest.total || newest.pipelineTotal;
     const oldestTotal = oldest.total || oldest.pipelineTotal;
+    poolDisplay = newestTotal || poolTotal;
     if (oldestTotal > 0) {
-      const delta = poolTotal - oldestTotal;
+      const delta = poolDisplay - oldestTotal;
       const pct = ((delta / oldestTotal) * 100).toFixed(1);
       const color = delta >= 0 ? 'var(--green)' : 'var(--red)';
-      poolSub = `${poolSub ? poolSub + ' · ' : ''}<span style="color:${color}">${delta >= 0 ? '+' : ''}${fmt(delta)} WoW (${delta >= 0 ? '+' : ''}${pct}%)</span>`;
+      poolSub = `<span style="color:${color}">${delta >= 0 ? '+' : ''}${fmt(delta)} WoW (${delta >= 0 ? '+' : ''}${pct}%)</span>`;
     }
   }
 
   el.innerHTML =
     statCard({ icon: statusIcon, label: 'Pipeline Status', value: pipelineStatus,
                sub: statusTs ? `Last run: ${age(statusTs)}` : null }) +
-    statCard({ icon: '🏗️', label: 'Pool Size', value: fmt(poolTotal),
+    statCard({ icon: '🏗️', label: 'Pool Size', value: fmt(poolDisplay),
                sub: poolSub }) +
     statCard({ icon: '💻', label: 'US Tech Jobs', value: fmt(usTechJobs),
                sub: 'SW + DS + HW + AI, US-tagged' });
@@ -1906,16 +1908,21 @@ function renderUnifiedENR(enrichStats) {
   // Aggregate stats for total row
   let totalTechUs = 0, totalEnriched = 0, totalT3 = 0, totalT3Count = 0;
   let totalSkills = 0, totalSkillsCount = 0;
-  let totalVisa = 0, totalHard = 0, totalLca = 0, totalNone = 0;
+  let totalVisa = 0, totalHard = 0, totalLca = 0, totalForm = 0, totalNone = 0;
   sources.forEach(src => {
     const v = enrichStats.by_source[src];
     const e = v.enriched || 0;
     totalTechUs += v.tech_us || 0;
     totalEnriched += e;
-    totalHard += v.sponsors_visa || 0;
-    totalLca += Math.max(0, (v.possible_sponsor || 0) - (v.sponsors_visa || 0));
-    totalNone += Math.max(0, e - (v.any_visa_signal || 0));
-    totalVisa += v.any_visa_signal || 0;
+    const hard = v.sponsors_visa || 0;
+    const lca = Math.max(0, (v.possible_sponsor || 0) - hard);
+    const anyV = v.any_visa_signal || 0;
+    const form = Math.max(0, anyV - hard - lca); // jobs with signal but not hard or LCA = ATS form question
+    totalHard += hard;
+    totalLca += lca;
+    totalForm += form;
+    totalNone += Math.max(0, e - anyV);
+    totalVisa += anyV;
     totalSkills += v.required_skills || 0;
     const tier = tbs[src] || { t0:0, t1:0, t2:0, t3:0 };
     const tierTotal = tier.t0 + tier.t1 + tier.t2 + tier.t3;
@@ -1931,6 +1938,7 @@ function renderUnifiedENR(enrichStats) {
     const aggVisa = Math.round(100 * totalVisa / totalEnriched);
     const hardP = Math.round(100 * totalHard / totalEnriched);
     const lcaP = Math.round(100 * totalLca / totalEnriched);
+    const formP = Math.round(100 * totalForm / totalEnriched);
     const noneP = Math.round(100 * totalNone / totalEnriched);
     const tr = document.createElement('tr');
     tr.className = 'total-row';
@@ -1947,6 +1955,8 @@ function renderUnifiedENR(enrichStats) {
         '<span style="color:#3fb950" title="Hard text: ' + fmt(totalHard) + ' jobs">' + hardP + '%</span>' +
         '<span style="color:var(--muted)"> / </span>' +
         '<span style="color:#58a6ff" title="LCA match only: ' + fmt(totalLca) + ' jobs">' + lcaP + '%</span>' +
+        '<span style="color:var(--muted)"> / </span>' +
+        '<span style="color:#d29922" title="ATS form question: ' + fmt(totalForm) + ' jobs">' + formP + '%</span>' +
         '<span style="color:var(--muted)"> / </span>' +
         '<span style="color:#8b949e" title="No signal: ' + fmt(totalNone) + ' jobs">' + noneP + '%</span>' +
       '</td>';
@@ -1967,9 +1977,12 @@ function renderUnifiedENR(enrichStats) {
     const visaStyle = colorPct(visaPct);
     const hard = v.sponsors_visa || 0;
     const lca = Math.max(0, (v.possible_sponsor || 0) - hard);
-    const none = Math.max(0, e - (v.any_visa_signal || 0));
+    const anyV = v.any_visa_signal || 0;
+    const form = Math.max(0, anyV - hard - lca);
+    const none = Math.max(0, e - anyV);
     const hardP = e > 0 ? Math.round(100 * hard / e) : 0;
     const lcaP = e > 0 ? Math.round(100 * lca / e) : 0;
+    const formP = e > 0 ? Math.round(100 * form / e) : 0;
     const noneP = e > 0 ? Math.round(100 * none / e) : 0;
 
     // Source row
@@ -1985,11 +1998,13 @@ function renderUnifiedENR(enrichStats) {
       '<td style="text-align:right;font-weight:600;' + colorPct(skillsPct) + '">' + skillsPct + '%</td>' +
       '<td style="text-align:right;font-weight:600;' + visaStyle + '">' + visaPct + '%</td>' +
       '<td style="text-align:center;font-size:11px">' +
-        '<span style="color:#3fb950" title="Hard text: job says sponsor">' + hardP + '%</span>' +
+        '<span style="color:#3fb950" title="Hard text: ' + fmt(hard) + ' jobs">' + hardP + '%</span>' +
         '<span style="color:var(--muted)"> / </span>' +
-        '<span style="color:#58a6ff" title="LCA match only">' + lcaP + '%</span>' +
+        '<span style="color:#58a6ff" title="LCA match: ' + fmt(lca) + ' jobs">' + lcaP + '%</span>' +
         '<span style="color:var(--muted)"> / </span>' +
-        '<span style="color:#8b949e" title="No signal">' + noneP + '%</span>' +
+        '<span style="color:#d29922" title="ATS form: ' + fmt(form) + ' jobs">' + formP + '%</span>' +
+        '<span style="color:var(--muted)"> / </span>' +
+        '<span style="color:#8b949e" title="No signal: ' + fmt(none) + ' jobs">' + noneP + '%</span>' +
       '</td>';
     tbody.appendChild(sr);
 
@@ -2639,7 +2654,6 @@ async function loadAll() {
   if (supFresh && metadata && metadata.generated) {
     supFresh.textContent = `Data as of ${age(metadata.generated)} · ${Object.keys(metadata.by_source || {}).length} sources · ${fmt(metadata.total_jobs)} total jobs`;
   }
-  renderSourceBars(metrics, metadata);
   renderSupHealth(metadata);
   renderDomainBars(metadata);
   renderTopCompanies(metadata, enrichStats, generalReview);
