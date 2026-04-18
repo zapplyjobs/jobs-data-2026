@@ -734,7 +734,8 @@ function renderOpsPipelineStats(metrics, metadata, enrichStats, daily, historyEn
   // Pool WoW delta from history.jsonl (same data series as displayed pool total)
   let poolSub = entryCount ? `${fmt(entryCount)} entry-level` : null;
   if (historyEntries && historyEntries.length >= 2 && poolTotal != null) {
-    const oldest = historyEntries[0];
+    const last7 = historyEntries.slice(-7);
+    const oldest = last7[0];
     const oldestTotal = oldest.total || oldest.pipelineTotal;
     if (oldestTotal > 0) {
       const delta = poolTotal - oldestTotal;
@@ -1013,8 +1014,9 @@ function renderOutHealth(d, daily, historyEntries) {
   // Total stars
   const totalStars = repoEntries.reduce((s, [, r]) => s + (r.stars || 0), 0);
   // Star delta (7d) from history.jsonl — daily.stars is a snapshot dict, NOT a time series
-  const starEntries = (historyEntries || []).filter(e => e.stars && typeof e.stars === 'object')
+  const allStarEntries = (historyEntries || []).filter(e => e.stars && typeof e.stars === 'object')
     .map(e => ({ date: e.date, total: Object.values(e.stars).reduce((s, v) => s + v, 0) }));
+  const starEntries = allStarEntries.slice(-7);
   const starDelta = starEntries.length >= 2 ? starEntries[starEntries.length - 1].total - starEntries[0].total : null;
   const starDeltaStr = starDelta != null ? `<span style="color:${starDelta >= 0 ? 'var(--green)' : 'var(--red)'}">${starDelta >= 0 ? '+' : ''}${starDelta}/7d</span>` : '';
   // Consumer freshness: repos updated <2h ago
