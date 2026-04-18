@@ -1772,35 +1772,40 @@ function initSourceFilter() {
   });
 }
 
-// Column toggle — gear icon shows checkboxes to show/hide columns
+// Column toggle — gear icon anchored to card (not inside table headers)
 // Usage: addColumnToggle('table-id', {exclude: [0]}) — exclude col 0 (name) from being hideable
 function addColumnToggle(tableId, { exclude = [0] } = {}) {
   const table = document.getElementById(tableId);
   if (!table) return;
+  const card = table.closest('.card');
+  if (!card) return;
   const headers = table.querySelectorAll('tr:first-child th');
   if (headers.length <= 5) return; // not worth it for small tables
 
   const storageKey = `col-toggle-${tableId}`;
   const saved = JSON.parse(localStorage.getItem(storageKey) || '{}');
 
-  // Create columns button (visible label, not just an icon)
-  const gear = document.createElement('span');
-  gear.innerHTML = ' ⚙ Columns';
-  gear.style.cssText = 'cursor:pointer;font-size:10px;opacity:0.6;position:relative;margin-left:8px;padding:2px 6px;border:1px solid var(--border);border-radius:4px;';
-  gear.title = 'Show/hide columns';
-  const headerRow = table.querySelector('tr');
-  const lastTh = headerRow.lastElementChild;
-  lastTh.appendChild(gear);
+  // Make card position:relative so gear can be absolutely positioned
+  if (!card.style.position || card.style.position === 'static' || card.style.position === '') {
+    card.style.position = 'relative';
+  }
 
-  // Create dropdown
+  // Create columns button — anchored to card top-right, outside the table
+  const gear = document.createElement('span');
+  gear.innerHTML = '⚙ Columns';
+  gear.style.cssText = 'cursor:pointer;font-size:10px;opacity:0.5;position:absolute;right:12px;top:8px;padding:2px 8px;border:1px solid var(--border);border-radius:4px;z-index:10;background:var(--bg-card);';
+  gear.title = 'Show/hide columns';
+  card.appendChild(gear);
+
+  // Create dropdown — below the gear button
   const dropdown = document.createElement('div');
-  dropdown.style.cssText = 'display:none;position:absolute;right:0;top:20px;background:var(--bg-card);border:1px solid var(--border);border-radius:6px;padding:8px;z-index:100;min-width:140px;box-shadow:0 4px 12px rgba(0,0,0,0.3);';
-  gear.style.position = 'relative';
-  gear.appendChild(dropdown);
+  dropdown.style.cssText = 'display:none;position:absolute;right:12px;top:30px;background:var(--bg-card);border:1px solid var(--border);border-radius:6px;padding:8px;z-index:100;min-width:140px;box-shadow:0 4px 12px rgba(0,0,0,0.3);';
+  card.appendChild(dropdown);
 
   headers.forEach((th, i) => {
     if (exclude.includes(i)) return;
     const label = th.textContent.replace(/[⇅↑↓⚙]/g, '').trim();
+    if (!label) return; // skip empty header (expand arrow column)
     const checked = saved[i] !== false; // default visible
     const row = document.createElement('label');
     row.style.cssText = 'display:block;font-size:11px;color:var(--muted);cursor:pointer;padding:2px 0;font-weight:normal;';
