@@ -345,7 +345,7 @@
     <div class="card" id="domain-bars-wrap">
       <div id="domain-bars"></div>
     </div>
-    <div class="section-label" style="margin-top:24px">Senior Filter Funnel <span style="font-weight:400;font-size:11px;color:var(--muted)">(how many jobs survive senior-level filtering)</span></div>
+    <div class="section-label" style="margin-top:24px">Senior Filter Composition <span style="font-weight:400;font-size:11px;color:var(--muted)">(why jobs are kept or removed)</span></div>
     <div class="card" id="filter-funnel">
       <p class="muted" style="text-align:center; padding:20px 0">Loading…</p>
     </div>
@@ -1429,18 +1429,42 @@ function renderFilterFunnel(metadata) {
     return;
   }
   const total = sf.total_input;
-  const senior = sf.senior_jobs || 0;
   const entry = sf.entry_level_jobs || 0;
-  const rate = total > 0 ? Math.round(senior / total * 100) : 0;
-  const rateColor = rate >= 55 && rate <= 65 ? 'var(--green)' : rate > 65 ? 'var(--red)' : 'var(--yellow)';
-  renderHBars('filter-funnel', [
-    { label: 'Total input',   value: total,  sub: '100%' },
-    { label: 'Senior removed', value: senior, sub: `${rate}%` },
-    { label: 'Entry-level',   value: entry,  sub: `${100 - rate}%` },
-  ], {
-    labelWidth: '130px',
-    colorFn: (v, max) => v === senior ? rateColor : 'var(--accent)',
-  });
+  const reasons = sf.senior_reasons || {};
+  const both = reasons.both || 0;
+  const titleOnly = (reasons.senior_title || 0) - both;
+  const expOnly = (reasons.senior_experience || 0) - both;
+  const seniorTotal = sf.senior_jobs || 0;
+  const pct = (v) => total > 0 ? Math.round(100 * v / total) : 0;
+
+  // Stacked composition bar — shows WHY jobs are filtered
+  el.innerHTML = `
+    <div style="margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <span style="font-size:12px;color:var(--muted)">${fmt(total)} jobs fetched by aggregator</span>
+        <span style="font-size:12px;color:var(--muted)">→ ${fmt(entry)} entry-level kept (${pct(entry)}%)</span>
+      </div>
+      <div style="display:flex;height:32px;border-radius:6px;overflow:hidden">
+        <div style="width:${pct(entry)}%;background:var(--green);display:flex;align-items:center;justify-content:center;min-width:${pct(entry) >= 8 ? '0' : '24px'}">
+          ${pct(entry) >= 8 ? `<span style="font-size:10px;font-weight:600;color:#fff">${pct(entry)}%</span>` : ''}
+        </div>
+        <div style="width:${pct(both)}%;background:var(--red);display:flex;align-items:center;justify-content:center;min-width:${pct(both) >= 8 ? '0' : '24px'}">
+          ${pct(both) >= 8 ? `<span style="font-size:10px;font-weight:600;color:#fff">${pct(both)}%</span>` : ''}
+        </div>
+        <div style="width:${pct(titleOnly)}%;background:var(--yellow);display:flex;align-items:center;justify-content:center;min-width:${pct(titleOnly) >= 8 ? '0' : '24px'}">
+          ${pct(titleOnly) >= 8 ? `<span style="font-size:10px;font-weight:600">${pct(titleOnly)}%</span>` : ''}
+        </div>
+        <div style="width:${pct(expOnly)}%;background:#8b949e;display:flex;align-items:center;justify-content:center;min-width:${pct(expOnly) >= 8 ? '0' : '24px'}">
+          ${pct(expOnly) >= 8 ? `<span style="font-size:10px;font-weight:600;color:#fff">${pct(expOnly)}%</span>` : ''}
+        </div>
+      </div>
+      <div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap;font-size:11px">
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--green);vertical-align:middle;margin-right:4px"></span>Entry-level ${fmt(entry)} (${pct(entry)}%)</span>
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--red);vertical-align:middle;margin-right:4px"></span>Title + Experience ${fmt(both)} (${pct(both)}%)</span>
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--yellow);vertical-align:middle;margin-right:4px"></span>Title only ${fmt(titleOnly)} (${pct(titleOnly)}%)</span>
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#8b949e;vertical-align:middle;margin-right:4px"></span>Experience only ${fmt(expOnly)} (${pct(expOnly)}%)</span>
+      </div>
+    </div>`;
 }
 
 // Quality tab — enrichment fill rate bars by source
