@@ -255,7 +255,7 @@
     #auth-btn {
       width: 100%; padding: 9px;
       background: var(--accent); border: none; border-radius: 6px;
-      color: #0d1117; font-size: 14px; font-weight: 600; cursor: pointer;
+      color: var(--text); font-size: 14px; font-weight: 600; cursor: pointer;
     }
     #auth-btn:hover { opacity: 0.85; }
     #auth-error { color: var(--red); font-size: 12px; margin-top: 8px; min-height: 16px; }
@@ -378,7 +378,7 @@
       </table>
       <div style="margin-top:8px;font-size:11px;color:var(--muted)">
         <strong>Total</strong> = all jobs from this source in the 7-day pool. <strong>Tech US</strong> = jobs tagged tech-domain + US-location.
-        WoW deltas from daily snapshots. Color: <span style="color:#2d8a4e">growth</span> / <span style="color:var(--muted)">stable</span> / <span style="color:var(--yellow)">decline</span>.
+        WoW deltas from daily snapshots. Color: <span style="color:var(--green)">growth</span> / <span style="color:var(--muted)">stable</span> / <span style="color:var(--yellow)">decline</span>.
       </div>
     </div>
     <div class="section-label" style="margin-top:24px">Companies by Total Job Count</div>
@@ -480,7 +480,7 @@
       </table>
       <div style="margin-top:8px;font-size:11px;color:var(--muted)">
         Click ▶ to expand companies under a source.
-        <strong>Visa Split:</strong> <span style="color:#3fb950">hard text</span> / <span style="color:#58a6ff">LCA-only</span> / <span style="color:#d29922">ATS form</span> / <span style="color:#8b949e">no signal</span>.
+        <strong>Visa Split:</strong> <span style="color:var(--green)">hard text</span> / <span style="color:#58a6ff">LCA-only</span> / <span style="color:var(--yellow)">ATS form</span> / <span style="color:var(--muted)">no signal</span>.
         <strong>Visa%</strong> = any signal (union of all types). <strong>Company Visa%</strong> = hard text only.
       </div>
     </div>
@@ -656,6 +656,15 @@ let _mermaidRendered = false;
     });
   });
 })();
+
+// Resolve CSS variables for chart.js (canvas can't read CSS vars directly)
+const _cs = getComputedStyle(document.documentElement);
+function cv(name) { return (_cs.getPropertyValue(name) || '').trim(); }
+const C = {
+  green: cv('--green'), yellow: cv('--yellow'), red: cv('--red'),
+  accent: cv('--accent'), muted: cv('--muted'),
+  text: cv('--text'), border: cv('--border'),
+};
 
 // Data URLs — function so each loadAll() call gets a fresh cache-busting timestamp (invariant D-2)
 function dataUrls() {
@@ -842,7 +851,7 @@ function renderGeneralTrendChart(all, days) {
       datasets: [{
         label: 'General Rate %',
         data: rates.map(r => r.rate),
-        borderColor: '#e67e22', backgroundColor: 'rgba(230,126,34,0.08)', fill: true,
+        borderColor: C.accent, backgroundColor: 'rgba(255,94,60,0.08)', fill: true,
         tension: 0.3, pointRadius: 2, pointHoverRadius: 5, borderWidth: 2,
       }]
     },
@@ -927,7 +936,7 @@ function renderTopCompanies(metadata, enrichStats, generalReview) {
       const t3 = enr?.t3_pct;
       const genCount = gen?.general;
       // T3% with gradient: dark green >80, green 50-80, yellow 20-50, red <20
-      const t3Color = t3 == null ? '' : t3 >= 80 ? 'color:#2d8a4e' : t3 >= 50 ? 'color:var(--green)' : t3 >= 20 ? 'color:var(--yellow)' : 'color:var(--red)';
+      const t3Color = t3 == null ? '' : t3 >= 80 ? 'color:var(--green)' : t3 >= 50 ? 'color:var(--green)' : t3 >= 20 ? 'color:var(--yellow)' : 'color:var(--red)';
       const t3Display = t3 != null ? `<span style="${t3Color}">${t3}%</span>` : '<span class="muted" title="Not in tech+US enrichment pool">N/A</span>';
       // General with gradient: red >20, yellow 1-20, muted 0
       const genColor = genCount == null ? '' : genCount > 20 ? 'color:var(--red)' : genCount > 0 ? 'color:var(--yellow)' : '';
@@ -1326,7 +1335,7 @@ function renderSourceTrendChart(allEntries, days) {
     },
     options: {
       ...CHART_DEFAULTS,
-      plugins: { legend: { display: true, position: 'top', labels: { color: '#8b949e', font: { size: 9 }, boxWidth: 10, padding: 8 } } },
+      plugins: { legend: { display: true, position: 'top', labels: { color: C.muted, font: { size: 9 }, boxWidth: 10, padding: 8 } } },
       scales: {
         x: CHART_DEFAULTS.scales.x,
         y: { ...CHART_DEFAULTS.scales.y, beginAtZero: true, ticks: { ...CHART_DEFAULTS.scales.y.ticks, callback: v => fmt(v) } }
@@ -1342,10 +1351,10 @@ let _breakdownAllEntries = null;
 let _breakdownActiveSeries = new Set(['total', 'entry', 'us']);
 // BREAKDOWN_SERIES uses inline colors (not CHART_COLORS) to avoid forward reference
 const BREAKDOWN_SERIES = {
-  total: { label: 'Total (pre-filter)', color: '#8b949e', field: e => e.filter ? e.filter.total : e.total },
-  entry: { label: 'Entry-level', color: '#ff5e3c', field: e => e.filter ? e.filter.entry : null },
-  senior: { label: 'Senior (removed)', color: '#f85149', field: e => e.filter ? e.filter.senior : null },
-  us: { label: 'US-tagged', color: '#3498db', field: e => e.by_location ? e.by_location.us : null },
+  total: { label: 'Total (pre-filter)', color: C.muted, field: e => e.filter ? e.filter.total : e.total },
+  entry: { label: 'Entry-level', color: C.accent, field: e => e.filter ? e.filter.entry : null },
+  senior: { label: 'Senior (removed)', color: C.red, field: e => e.filter ? e.filter.senior : null },
+  us: { label: 'US-tagged', color: '#3498db', field: e => e.by_location ? e.by_location.us : null },  // blue — non-semantic, chart-specific
   remote: { label: 'Remote', color: '#9b59b6', field: e => e.by_location ? e.by_location.remote : null },
   software: { label: 'Software', color: '#27ae60', field: e => e.by_domain ? e.by_domain.software : null },
   data_science: { label: 'Data Science', color: '#2ecc71', field: e => e.by_domain ? e.by_domain.data_science : null },
@@ -1546,7 +1555,7 @@ function renderEnrichTrendChart(all, days) {
     },
     options: {
       ...CHART_DEFAULTS,
-      plugins: { legend: { display: true, position: 'top', labels: { color: '#8b949e', font: { size: 10 }, boxWidth: 12, padding: 8 } } },
+      plugins: { legend: { display: true, position: 'top', labels: { color: C.muted, font: { size: 10 }, boxWidth: 12, padding: 8 } } },
       scales: {
         x: CHART_DEFAULTS.scales.x,
         y: { ...CHART_DEFAULTS.scales.y, position: 'left', ticks: { ...CHART_DEFAULTS.scales.y.ticks, callback: v => fmt(v) } },
@@ -1605,7 +1614,7 @@ function renderSourceT3Chart(all, days) {
     data: { labels: entries.map(e => (e.date || '').slice(5)), datasets },
     options: {
       ...CHART_DEFAULTS,
-      plugins: { legend: { display: true, position: 'top', labels: { color: '#8b949e', font: { size: 10 }, boxWidth: 12, padding: 8 } } },
+      plugins: { legend: { display: true, position: 'top', labels: { color: C.muted, font: { size: 10 }, boxWidth: 12, padding: 8 } } },
       scales: {
         x: CHART_DEFAULTS.scales.x,
         y: { ...CHART_DEFAULTS.scales.y, min: 0, max: 100,
@@ -1654,10 +1663,10 @@ function renderTierSourceChart(enrichStats, filterTier) {
   if (pillsEl) {
     const tiers = [
       { key: 'all', label: 'All' },
-      { key: 't3', label: 'T3 Degree+Visa', color: '#3fb950' },
+      { key: 't3', label: 'T3 Degree+Visa', color: C.green },
       { key: 't2', label: 'T2 Skills', color: '#3498db' },
-      { key: 't1', label: 'T1 Desc', color: '#d29922' },
-      { key: 't0', label: 'T0 None', color: '#f85149' },
+      { key: 't1', label: 'T1 Desc', color: C.yellow },
+      { key: 't0', label: 'T0 None', color: C.red },
     ];
     pillsEl.innerHTML = tiers.map(t => {
       const active = t.key === activeTier;
@@ -1681,7 +1690,7 @@ function renderTierSourceChart(enrichStats, filterTier) {
     return tot > 0 ? Math.round(1000 * t[tier] / tot) / 10 : 0;
   };
 
-  const TIER_COLORS = { t3: '#3fb950', t2: '#3498db', t1: '#d29922', t0: '#f85149' };
+  const TIER_COLORS = { t3: C.green, t2: '#3498db', t1: C.yellow, t0: C.red };
   const TIER_LABELS = { t3: 'T3 — Degree + Visa', t2: 'T2 — Skills', t1: 'T1 — Description', t0: 'T0 — No description' };
 
   let datasets, stacked;
@@ -1701,7 +1710,7 @@ function renderTierSourceChart(enrichStats, filterTier) {
       data: sources.map(s => pct(s, tierKey)),
       backgroundColor: sources.map(s => {
         const v = pct(s, tierKey);
-        return v >= 70 ? '#3fb950' : v >= 40 ? '#d29922' : '#f85149';
+        return v >= 70 ? C.green : v >= 40 ? C.yellow : C.red;
       }),
     }];
     stacked = false;
@@ -1715,7 +1724,7 @@ function renderTierSourceChart(enrichStats, filterTier) {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: { display: activeTier === 'all', position: 'bottom', labels: { color: '#8b949e', font: { size: 11 }, boxWidth: 14, padding: 10 } },
+        legend: { display: activeTier === 'all', position: 'bottom', labels: { color: C.muted, font: { size: 11 }, boxWidth: 14, padding: 10 } },
         tooltip: {
           callbacks: {
             label: function(ctx) {
@@ -1732,7 +1741,7 @@ function renderTierSourceChart(enrichStats, filterTier) {
       },
       scales: {
         x: { stacked, max: 100, ...CHART_DEFAULTS.scales.x, ticks: { ...CHART_DEFAULTS.scales.x.ticks, callback: v => v + '%' } },
-        y: { stacked, ...CHART_DEFAULTS.scales.y, ticks: { color: '#8b949e', font: { size: 11 } } }
+        y: { stacked, ...CHART_DEFAULTS.scales.y, ticks: { color: C.muted, font: { size: 11 } } }
       }
     }
   });
@@ -1959,7 +1968,7 @@ function renderUnifiedENR(enrichStats) {
   const ORDER = ['workday','greenhouse','ashby','lever','smartrecruiters','amazon','jsearch','netflix','eightfold'];
   const sources = ORDER.filter(s => enrichStats.by_source[s]);
   const tbs = enrichStats.tiers_by_source || {};
-  const colorPct = (v) => v >= 80 ? 'color:#3fb950' : v >= 40 ? 'color:#d29922' : 'color:#f85149';
+  const colorPct = (v) => v >= 80 ? 'color:var(--green)' : v >= 40 ? 'color:var(--yellow)' : 'color:var(--red)';
 
   // Aggregate stats for total row
   let totalTechUs = 0, totalEnriched = 0, totalT3 = 0, totalT3Count = 0;
@@ -1989,7 +1998,7 @@ function renderUnifiedENR(enrichStats) {
   // Total row (summary — always first, not sortable)
   if (totalEnriched > 0) {
     const aggT3 = totalT3Count > 0 ? Math.round(1000 * totalT3 / totalT3Count) / 10 : 0;
-    const aggT3style = aggT3 >= 70 ? 'color:#3fb950' : aggT3 >= 40 ? 'color:#d29922' : 'color:#f85149';
+    const aggT3style = aggT3 >= 70 ? 'color:var(--green)' : aggT3 >= 40 ? 'color:var(--yellow)' : 'color:var(--red)';
     const aggSkills = totalSkillsCount > 0 ? Math.round(100 * totalSkills / totalSkillsCount) : 0;
     const aggVisa = Math.round(100 * totalVisa / totalEnriched);
     const hardP = Math.round(100 * totalHard / totalEnriched);
@@ -2008,13 +2017,13 @@ function renderUnifiedENR(enrichStats) {
       '<td style="text-align:right;' + colorPct(aggSkills) + '">' + aggSkills + '%</td>' +
       '<td style="text-align:right;' + colorPct(aggVisa) + '">' + aggVisa + '%</td>' +
       '<td style="text-align:center;font-size:11px">' +
-        '<span style="color:#3fb950" title="Hard text: ' + fmt(totalHard) + ' jobs">' + hardP + '%</span>' +
+        '<span style="color:var(--green)" title="Hard text: ' + fmt(totalHard) + ' jobs">' + hardP + '%</span>' +
         '<span style="color:var(--muted)"> / </span>' +
         '<span style="color:#58a6ff" title="LCA match only: ' + fmt(totalLca) + ' jobs">' + lcaP + '%</span>' +
         '<span style="color:var(--muted)"> / </span>' +
-        '<span style="color:#d29922" title="ATS form question: ' + fmt(totalForm) + ' jobs">' + formP + '%</span>' +
+        '<span style="color:var(--yellow)" title="ATS form question: ' + fmt(totalForm) + ' jobs">' + formP + '%</span>' +
         '<span style="color:var(--muted)"> / </span>' +
-        '<span style="color:#8b949e" title="No signal: ' + fmt(totalNone) + ' jobs">' + noneP + '%</span>' +
+        '<span style="color:var(--muted)" title="No signal: ' + fmt(totalNone) + ' jobs">' + noneP + '%</span>' +
       '</td>';
     tbody.appendChild(tr);
   }
@@ -2027,7 +2036,7 @@ function renderUnifiedENR(enrichStats) {
     const tier = tbs[src] || { t0:0, t1:0, t2:0, t3:0 };
     const tierTotal = tier.t0 + tier.t1 + tier.t2 + tier.t3;
     const t3pct = tierTotal > 0 ? Math.round(1000 * (tier.t3 || 0) / tierTotal) / 10 : 0;
-    const t3style = t3pct >= 70 ? 'color:#3fb950' : t3pct >= 40 ? 'color:#d29922' : 'color:#f85149';
+    const t3style = t3pct >= 70 ? 'color:var(--green)' : t3pct >= 40 ? 'color:var(--yellow)' : 'color:var(--red)';
     const skillsPct = Math.round(100 * (v.required_skills || 0) / e);
     const visaPct = Math.round(100 * (v.any_visa_signal || 0) / e);
     const visaStyle = colorPct(visaPct);
@@ -2054,13 +2063,13 @@ function renderUnifiedENR(enrichStats) {
       '<td style="text-align:right;font-weight:600;' + colorPct(skillsPct) + '">' + skillsPct + '%</td>' +
       '<td style="text-align:right;font-weight:600;' + visaStyle + '">' + visaPct + '%</td>' +
       '<td style="text-align:center;font-size:11px">' +
-        '<span style="color:#3fb950" title="Hard text: ' + fmt(hard) + ' jobs">' + hardP + '%</span>' +
+        '<span style="color:var(--green)" title="Hard text: ' + fmt(hard) + ' jobs">' + hardP + '%</span>' +
         '<span style="color:var(--muted)"> / </span>' +
         '<span style="color:#58a6ff" title="LCA match: ' + fmt(lca) + ' jobs">' + lcaP + '%</span>' +
         '<span style="color:var(--muted)"> / </span>' +
-        '<span style="color:#d29922" title="ATS form: ' + fmt(form) + ' jobs">' + formP + '%</span>' +
+        '<span style="color:var(--yellow)" title="ATS form: ' + fmt(form) + ' jobs">' + formP + '%</span>' +
         '<span style="color:var(--muted)"> / </span>' +
-        '<span style="color:#8b949e" title="No signal: ' + fmt(none) + ' jobs">' + noneP + '%</span>' +
+        '<span style="color:var(--muted)" title="No signal: ' + fmt(none) + ' jobs">' + noneP + '%</span>' +
       '</td>';
     tbody.appendChild(sr);
 
@@ -2184,7 +2193,7 @@ function renderPipelineSourceTable(metrics, metadata, enrichStats) {
       const pctChange = prev > 0 ? Math.round(100 * delta / prev) : 0;
       const absPct = Math.abs(pctChange);
       let color;
-      if (pctChange > 10) color = '#2d8a4e';        // dark green — strong growth
+      if (pctChange > 10) color = 'var(--green)';        // dark green — strong growth
       else if (pctChange > 5) color = 'var(--green)'; // light green — mild growth
       else if (pctChange >= -5) color = 'var(--muted)'; // muted — normal fluctuation
       else if (pctChange >= -15) color = 'var(--yellow)'; // yellow — mild decline
@@ -2196,7 +2205,7 @@ function renderPipelineSourceTable(metrics, metadata, enrichStats) {
     const techUs = ev.tech_us || 0;
     const techPct = total > 0 ? Math.round(100 * techUs / total) : 0;
     // Tech US % gradient: dark green (>80%) → green (50-80%) → yellow (20-50%) → red (<20%)
-    const techColor = techPct >= 80 ? '#2d8a4e' : techPct >= 50 ? 'var(--green)' : techPct >= 20 ? 'var(--yellow)' : 'var(--red)';
+    const techColor = techPct >= 80 ? 'var(--green)' : techPct >= 50 ? 'var(--green)' : techPct >= 20 ? 'var(--yellow)' : 'var(--red)';
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${src}</td>
@@ -2211,7 +2220,7 @@ function renderPipelineSourceTable(metrics, metadata, enrichStats) {
 // Pipeline tab — pool trend chart (30d from history.jsonl, fallback 7d from daily-stats.json.history)
 // Chart.js shared config
 const CHART_COLORS = {
-  accent: '#ff5e3c', green: '#3fb950', red: '#f85149', yellow: '#d29922', muted: '#8b949e',
+  accent: C.accent, green: C.green, red: C.red, yellow: C.yellow, muted: C.muted,
   sources: { workday: '#e67e22', greenhouse: '#27ae60', ashby: '#3498db', lever: '#9b59b6',
              smartrecruiters: '#e74c3c', amazon: '#f39c12', jsearch: '#1abc9c', netflix: '#c0392b', eightfold: '#7f8c8d' }
 };
@@ -2219,8 +2228,8 @@ const CHART_DEFAULTS = {
   responsive: true, maintainAspectRatio: false,
   plugins: { legend: { display: false } },
   scales: {
-    x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#8b949e', font: { size: 10 } } },
-    y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#8b949e', font: { size: 10 } } }
+    x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: C.muted, font: { size: 10 } } },
+    y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: C.muted, font: { size: 10 } } }
   }
 };
 const _charts = {}; // store chart instances for cleanup
@@ -2384,7 +2393,7 @@ function renderStarsTrendChart(allEntries, days) {
     },
     options: {
       ...CHART_DEFAULTS,
-      plugins: { legend: { display: true, position: 'top', labels: { color: '#8b949e', font: { size: 9 }, boxWidth: 10, padding: 8 } } },
+      plugins: { legend: { display: true, position: 'top', labels: { color: C.muted, font: { size: 9 }, boxWidth: 10, padding: 8 } } },
       scales: {
         x: CHART_DEFAULTS.scales.x,
         y: { ...CHART_DEFAULTS.scales.y, beginAtZero: false, ticks: { ...CHART_DEFAULTS.scales.y.ticks } }
