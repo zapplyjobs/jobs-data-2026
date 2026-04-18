@@ -200,6 +200,7 @@
       padding: 4px 8px 8px 0;
       border-bottom: 1px solid var(--border);
     }
+    th:not(:first-child), td:not(:first-child) { text-align: center }
     td {
       padding: 7px 8px 7px 0;
       border-bottom: 1px solid var(--border);
@@ -379,9 +380,9 @@
       <table id="pipeline-source-table">
         <tr>
           <th class="sortable">Source</th>
-          <th class="sortable" style="text-align:right">Total</th>
-          <th class="sortable" style="text-align:right">WoW</th>
-          <th class="sortable" style="text-align:right">Tech US</th>
+          <th class="sortable">Total</th>
+          <th class="sortable">WoW</th>
+          <th class="sortable">Tech US</th>
         </tr>
       </table>
       <div style="margin-top:8px;font-size:11px;color:var(--muted)">
@@ -395,7 +396,7 @@
         <tr>
           <th>#</th>
           <th>Company</th>
-          <th style="text-align:right">Jobs</th>
+          <th>Jobs</th>
         </tr>
       </table>
       <div style="margin-top:8px;font-size:11px;color:var(--muted)">
@@ -422,7 +423,7 @@
     <div class="section-label" style="margin-top:24px">Top Companies by Unclassified Jobs</div>
     <div class="card" id="class-companies-card">
       <table id="class-companies-table">
-        <tr><th>#</th><th class="sortable">Company</th><th class="sortable">Source</th><th class="sortable" style="text-align:right">General</th><th class="sortable" style="text-align:right">Classified</th><th class="sortable">Top Domain</th><th class="sortable" style="text-align:right">Desc%</th></tr>
+        <tr><th>#</th><th class="sortable">Company</th><th class="sortable">Source</th><th class="sortable">General</th><th class="sortable">Classified</th><th class="sortable">Top Domain</th><th class="sortable">Desc%</th></tr>
       </table>
       <div style="margin-top:8px;font-size:11px;color:var(--muted)">
         Companies with the most <strong>General</strong> (unclassified) jobs. These are candidates for taxonomy expansion or manual review. Click ⚙ to toggle columns.
@@ -435,7 +436,7 @@
     <div class="section-label" style="margin-top:24px">Recurring Title Patterns</div>
     <div class="card" id="class-patterns-card">
       <table id="class-patterns-table">
-        <tr><th class="sortable">Title Pattern</th><th class="sortable" style="text-align:right">Count</th><th class="sortable" style="text-align:right">Companies</th></tr>
+        <tr><th class="sortable">Title Pattern</th><th class="sortable">Count</th><th class="sortable">Companies</th></tr>
       </table>
     </div>
     <div class="section-label" style="margin-top:24px">Tenant Default Candidates</div>
@@ -479,12 +480,12 @@
           <tr>
             <th style="width:20px"></th>
             <th class="sortable">Source</th>
-            <th class="sortable" style="text-align:right">Jobs</th>
-            <th class="sortable" style="text-align:right">Enriched</th>
-            <th class="sortable" style="text-align:right">T3%</th>
-            <th class="sortable" style="text-align:right">Skills%</th>
-            <th class="sortable" style="text-align:right">Visa%</th>
-            <th style="text-align:center">Visa Split</th>
+            <th class="sortable">Jobs</th>
+            <th class="sortable">Enriched</th>
+            <th class="sortable">T3%</th>
+            <th class="sortable">Skills%</th>
+            <th class="sortable">Visa%</th>
+            <th>Visa Split</th>
           </tr>
         </thead>
         <tbody></tbody>
@@ -515,9 +516,9 @@
           <th>Health</th>
           <th class="sortable">Repo</th>
           <th class="sortable">Type</th>
-          <th class="sortable" style="text-align:right">Jobs</th>
+          <th class="sortable">Jobs</th>
           <th class="sortable">Updated</th>
-          <th class="sortable" style="text-align:right">⭐</th>
+          <th class="sortable">⭐</th>
         </tr>
       </table>
       <div style="margin-top:8px;font-size:11px;color:var(--muted)">
@@ -940,7 +941,7 @@ function renderTopCompanies(metadata, enrichStats, generalReview) {
   const pctColor = v => v == null ? '' : v >= 80 ? 'color:var(--green)' : v >= 40 ? 'color:var(--yellow)' : 'color:var(--red)';
 
   card.innerHTML = `<table id="top-companies-table">
-    <tr><th>#</th><th>Company</th>${hasDomain ? '<th>Domain</th>' : ''}<th style="text-align:right">Jobs</th><th style="text-align:right">T3%</th><th style="text-align:right">General</th></tr>
+    <tr><th>#</th><th>Company</th>${hasDomain ? '<th>Domain</th>' : ''}<th>Jobs</th><th>T3%</th><th>General</th></tr>
     ${companies.map((c, i) => {
       const enr = enrMap[c.company];
       const gen = genMap[c.company];
@@ -956,9 +957,9 @@ function renderTopCompanies(metadata, enrichStats, generalReview) {
       <td style="color:var(--muted);width:32px">${i + 1}</td>
       <td>${esc(c.company)}</td>
       ${hasDomain ? `<td style="color:var(--muted)">${esc(c.domain || 'general')}</td>` : ''}
-      <td style="text-align:right">${fmt(c.count)}</td>
-      <td style="text-align:right">${t3Display}</td>
-      <td style="text-align:right">${genDisplay}</td>
+      <td>${fmt(c.count)}</td>
+      <td>${t3Display}</td>
+      <td>${genDisplay}</td>
     </tr>`;
     }).join('')}
   </table>`;
@@ -2021,11 +2022,11 @@ function renderUnifiedENR(enrichStats) {
     tr.innerHTML =
       '<td></td>' +
       '<td>All Sources</td>' +
-      '<td style="text-align:right">' + fmt(totalTechUs) + '</td>' +
-      '<td style="text-align:right">' + fmt(totalEnriched) + '</td>' +
-      '<td style="text-align:right;' + aggT3style + '">' + aggT3 + '%</td>' +
-      '<td style="text-align:right;' + colorPct(aggSkills) + '">' + aggSkills + '%</td>' +
-      '<td style="text-align:right;' + colorPct(aggVisa) + '">' + aggVisa + '%</td>' +
+      '<td>' + fmt(totalTechUs) + '</td>' +
+      '<td>' + fmt(totalEnriched) + '</td>' +
+      '<td style="' + aggT3style + '">' + aggT3 + '%</td>' +
+      '<td style="' + colorPct(aggSkills) + '">' + aggSkills + '%</td>' +
+      '<td style="' + colorPct(aggVisa) + '">' + aggVisa + '%</td>' +
       '<td style="text-align:center;font-size:11px">' +
         '<span style="color:var(--info)" title="LCA match: ' + fmt(totalLca) + ' jobs">' + lcaP + '%</span>' +
         '<span style="color:var(--muted)"> / </span>' +
@@ -2067,11 +2068,11 @@ function renderUnifiedENR(enrichStats) {
     sr.innerHTML =
       '<td class="expand-arrow" style="cursor:pointer;font-size:10px;color:var(--muted);user-select:none)">▶</td>' +
       '<td style="font-weight:600">' + src + '</td>' +
-      '<td style="text-align:right;color:var(--muted)">' + fmt(techUs) + '</td>' +
-      '<td style="text-align:right">' + fmt(e) + '</td>' +
-      '<td style="text-align:right;font-weight:600;' + t3style + '">' + t3pct + '%</td>' +
-      '<td style="text-align:right;font-weight:600;' + colorPct(skillsPct) + '">' + skillsPct + '%</td>' +
-      '<td style="text-align:right;font-weight:600;' + visaStyle + '">' + visaPct + '%</td>' +
+      '<td style="color:var(--muted)">' + fmt(techUs) + '</td>' +
+      '<td>' + fmt(e) + '</td>' +
+      '<td style="font-weight:600;' + t3style + '">' + t3pct + '%</td>' +
+      '<td style="font-weight:600;' + colorPct(skillsPct) + '">' + skillsPct + '%</td>' +
+      '<td style="font-weight:600;' + visaStyle + '">' + visaPct + '%</td>' +
       '<td style="text-align:center;font-size:11px">' +
         '<span style="color:var(--info)" title="LCA match: ' + fmt(lca) + ' jobs">' + lcaP + '%</span>' +
         '<span style="color:var(--muted)"> / </span>' +
@@ -2099,10 +2100,10 @@ function renderUnifiedENR(enrichStats) {
       cr.innerHTML =
         '<td></td>' +
         '<td style="padding-left:24px;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:2px">' + esc(c.company) + '</td>' +
-        '<td style="text-align:right">' + fmt(c.enriched) + '</td>' +
-        '<td style="text-align:right;font-weight:600;' + ct3style + '">' + (ct3 === '—' ? '—' : ct3 + '%') + '</td>' +
-        '<td style="text-align:right;' + colorPct(c.skills_pct) + '">' + c.skills_pct + '%</td>' +
-        '<td style="text-align:right;' + colorPct(c.visa_pct) + '">' + c.visa_pct + '%</td>' +
+        '<td>' + fmt(c.enriched) + '</td>' +
+        '<td style="font-weight:600;' + ct3style + '">' + (ct3 === '—' ? '—' : ct3 + '%') + '</td>' +
+        '<td style="' + colorPct(c.skills_pct) + '">' + c.skills_pct + '%</td>' +
+        '<td style="' + colorPct(c.visa_pct) + '">' + c.visa_pct + '%</td>' +
         '<td style="text-align:center;font-size:10px;color:var(--muted)" title="T0/T1/T2/T3 tier counts">' +
           (tiers.t0||0) + '·' + (tiers.t1||0) + '·' + (tiers.t2||0) + '·' + (tiers.t3||0) +
         '</td>';
@@ -2188,9 +2189,9 @@ function renderPipelineSourceTable(metrics, metadata, enrichStats) {
   totalRow.style.cssText = 'font-weight:700;border-bottom:2px solid var(--border);background:var(--bg-card-hover)';
   totalRow.innerHTML = `
     <td>All Sources</td>
-    <td style="text-align:right">${fmt(totalAll)}</td>
-    <td style="text-align:right"><span class="muted">—</span></td>
-    <td style="text-align:right">${fmt(totalTechUs)} <span style="color:var(--muted)">(${totalTechPct}%)</span></td>
+    <td>${fmt(totalAll)}</td>
+    <td><span class="muted">—</span></td>
+    <td>${fmt(totalTechUs)} <span style="color:var(--muted)">(${totalTechPct}%)</span></td>
   `;
   tbl.appendChild(totalRow);
   sources.forEach(src => {
@@ -2219,9 +2220,9 @@ function renderPipelineSourceTable(metrics, metadata, enrichStats) {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${src}</td>
-      <td style="text-align:right">${fmt(total)}</td>
-      <td style="text-align:right">${deltaStr}</td>
-      <td style="text-align:right">${techUs ? `${fmt(techUs)} <span style="color:${techColor}">(${techPct}%)</span>` : '<span class="muted">—</span>'}</td>
+      <td>${fmt(total)}</td>
+      <td>${deltaStr}</td>
+      <td>${techUs ? `${fmt(techUs)} <span style="color:${techColor}">(${techPct}%)</span>` : '<span class="muted">—</span>'}</td>
     `;
     tbl.appendChild(tr);
   });
@@ -2545,16 +2546,16 @@ function renderDiscordStats(posted, metadata) {
     <table style="width:100%; border-collapse:collapse">
       <tr>
         <th style="text-align:left;font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 8px 8px 0;border-bottom:1px solid var(--border)">Channel</th>
-        <th style="text-align:right;font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 0 8px;border-bottom:1px solid var(--border)">All-Time</th>
-        <th style="text-align:right;font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 0 8px 8px;border-bottom:1px solid var(--border)">Last Post</th>
-        <th style="text-align:right;font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 0 8px;border-bottom:1px solid var(--border)">Status</th>
+        <th style="font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 0 8px;border-bottom:1px solid var(--border)">All-Time</th>
+        <th style="font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 0 8px 8px;border-bottom:1px solid var(--border)">Last Post</th>
+        <th style="font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 0 8px;border-bottom:1px solid var(--border)">Status</th>
       </tr>
       ${allChannels.map(ch => `
         <tr>
           <td style="padding:6px 8px 6px 0;border-bottom:1px solid var(--border);font-size:13px">${ch.name}</td>
-          <td style="text-align:right;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;${ch.count === 0 ? 'color:var(--red)' : ''}">${fmt(ch.count)}</td>
-          <td style="text-align:right;padding:6px 0 6px 8px;border-bottom:1px solid var(--border)">${lastPostCell(ch)}</td>
-          <td style="text-align:right;padding:6px 0;border-bottom:1px solid var(--border)">${channelStatus(ch)}</td>
+          <td style="padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;${ch.count === 0 ? 'color:var(--red)' : ''}">${fmt(ch.count)}</td>
+          <td style="padding:6px 0 6px 8px;border-bottom:1px solid var(--border)">${lastPostCell(ch)}</td>
+          <td style="padding:6px 0;border-bottom:1px solid var(--border)">${channelStatus(ch)}</td>
         </tr>`).join('')}
     </table>`;
 }
@@ -2593,13 +2594,13 @@ function renderClassification(data) {
     const totalRow = document.createElement('tr');
     totalRow.className = 'total-row';
     totalRow.style.cssText = 'font-weight:700;border-bottom:2px solid var(--border);background:var(--bg-card-hover)';
-    totalRow.innerHTML = `<td></td><td>All ${data.by_company.length} Companies</td><td></td><td style="text-align:right">${totalGeneral}</td><td style="text-align:right">${totalClassified}</td><td></td><td></td>`;
+    totalRow.innerHTML = `<td></td><td>All ${data.by_company.length} Companies</td><td></td><td>${totalGeneral}</td><td>${totalClassified}</td><td></td><td></td>`;
     companiesTable.appendChild(totalRow);
     for (const co of data.by_company.slice(0, 25)) {
       const tr = document.createElement('tr');
       const idx = data.by_company.indexOf(co) + 1;
       const topDomain = co.domain_dist ? co.domain_dist.split(',')[0].trim() : '—';
-      tr.innerHTML = `<td>${idx}</td><td>${esc(co.name)}</td><td style="color:var(--muted);font-size:12px">${esc(co.source || '—')}</td><td style="text-align:right">${co.general}</td><td style="text-align:right">${co.classified}</td><td style="color:var(--muted);font-size:12px">${esc(topDomain)}</td><td style="text-align:right">${co.has_desc_pct}%</td>`;
+      tr.innerHTML = `<td>${idx}</td><td>${esc(co.name)}</td><td style="color:var(--muted);font-size:12px">${esc(co.source || '—')}</td><td>${co.general}</td><td>${co.classified}</td><td style="color:var(--muted);font-size:12px">${esc(topDomain)}</td><td>${co.has_desc_pct}%</td>`;
       companiesTable.appendChild(tr);
     }
   }
@@ -2631,7 +2632,7 @@ function renderClassification(data) {
   if (data.title_patterns && data.title_patterns.length > 0) {
     for (const p of data.title_patterns.slice(0, 10)) {
       const tr = document.createElement('tr');
-      tr.innerHTML = `<td style="font-family:monospace;font-size:12px">${esc(p.title)}</td><td style="text-align:right">${p.count}</td><td style="text-align:right">${p.companies}</td>`;
+      tr.innerHTML = `<td style="font-family:monospace;font-size:12px">${esc(p.title)}</td><td>${p.count}</td><td>${p.companies}</td>`;
       patternsTable.appendChild(tr);
     }
     if (data.title_patterns.length > 10) {
@@ -2645,10 +2646,10 @@ function renderClassification(data) {
 
   // Tenant candidates
   if (data.tenant_candidates && data.tenant_candidates.length > 0) {
-    let html = '<table style="width:100%"><tr><th>Company</th><th style="text-align:right">General</th><th style="text-align:right">Classified</th><th>Top Domain</th></tr>';
+    let html = '<table style="width:100%"><tr><th>Company</th><th>General</th><th>Classified</th><th>Top Domain</th></tr>';
     for (const tc of data.tenant_candidates.slice(0, 15)) {
       const topDomain = tc.domain_dist ? tc.domain_dist.split(',')[0].trim() : '—';
-      html += `<tr><td>${esc(tc.name)}</td><td style="text-align:right">${tc.general}</td><td style="text-align:right">${tc.classified}</td><td style="color:var(--muted);font-size:12px">${esc(topDomain)}</td></tr>`;
+      html += `<tr><td>${esc(tc.name)}</td><td>${tc.general}</td><td>${tc.classified}</td><td style="color:var(--muted);font-size:12px">${esc(topDomain)}</td></tr>`;
     }
     html += '</table>';
     tenantsEl.innerHTML = html;
