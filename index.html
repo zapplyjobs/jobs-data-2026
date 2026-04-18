@@ -2121,14 +2121,11 @@ function toggleSourceExpand(sourceRow) {
   const arrow = sourceRow.querySelector('.expand-arrow');
   const companyRows = document.querySelectorAll('#unified-enr-table .company-row[data-parent="' + src + '"]');
   const isExpanded = arrow.textContent.trim() === '▼';
-  companyRows.forEach(cr => {
-    cr.style.display = isExpanded ? 'none' : '';
-    // Also hide any expanded detail rows under this company
-    if (isExpanded) {
-      const detail = cr.nextElementSibling;
-      if (detail && detail.classList.contains('company-detail-row')) detail.remove();
-    }
-  });
+  if (isExpanded) {
+    // Remove all detail rows for this source's companies
+    document.querySelectorAll('#unified-enr-table .company-detail-row[data-parent-source="' + src + '"]').forEach(dr => dr.remove());
+  }
+  companyRows.forEach(cr => { cr.style.display = isExpanded ? 'none' : ''; });
   arrow.textContent = isExpanded ? '▶' : '▼';
   sourceRow.classList.toggle('expanded', !isExpanded);
 }
