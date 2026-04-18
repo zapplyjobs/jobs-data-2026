@@ -2493,7 +2493,7 @@ function renderClassification(data) {
 
   if (!data || !data.summary) {
     summaryEl.innerHTML = '<div class="card" style="grid-column:1/-1"><span class="muted">Classification review data not yet available. Run prepare-general-review.js --json to generate.</span></div>';
-    atsBarsEl.innerHTML = '';
+    if (atsBarsEl) atsBarsEl.innerHTML = '';
     tenantsEl.innerHTML = '<p class="muted" style="text-align:center; padding:20px 0">No data.</p>';
     return;
   }
@@ -2528,8 +2528,8 @@ function renderClassification(data) {
     }
   }
 
-  // ATS bars with total row
-  if (data.by_ats && data.by_ats.length > 0) {
+  // ATS bars with total row (removed from HTML — skip if element gone)
+  if (atsBarsEl && data.by_ats && data.by_ats.length > 0) {
     const totalGeneral = data.by_ats.reduce((s, a) => s + a.general, 0);
     const totalAll = data.by_ats.reduce((s, a) => s + a.total, 0);
     const totalPct = totalAll > 0 ? (totalGeneral / totalAll * 100).toFixed(1) : 0;
