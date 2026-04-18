@@ -732,7 +732,7 @@ function renderOpsPipelineStats(metrics, metadata, enrichStats, daily, historyEn
   const entryCount = sf ? sf.entry_level_jobs : null;
   const usTechJobs = enrichStats ? enrichStats.total_tech_us : null;
   // Pool WoW delta from history.jsonl (same data series as displayed pool total)
-  let poolSub = entryCount ? `${fmt(entryCount)} entry-level` : null;
+  let poolSub = entryCount ? `${fmt(entryCount)} entry-level after senior filter` : null;
   if (historyEntries && historyEntries.length >= 2 && poolTotal != null) {
     const last7 = historyEntries.slice(-7);
     const oldest = last7[0];
@@ -741,7 +741,7 @@ function renderOpsPipelineStats(metrics, metadata, enrichStats, daily, historyEn
       const delta = poolTotal - oldestTotal;
       const pct = ((delta / oldestTotal) * 100).toFixed(1);
       const color = delta >= 0 ? 'var(--green)' : 'var(--red)';
-      poolSub = `${entryCount ? fmt(entryCount) + ' entry-level · ' : ''}<span style="color:${color}">${delta >= 0 ? '+' : ''}${fmt(delta)} WoW (${delta >= 0 ? '+' : ''}${pct}%)</span>`;
+      poolSub = `${poolSub ? poolSub + ' · ' : ''}<span style="color:${color}">${delta >= 0 ? '+' : ''}${fmt(delta)} WoW (${delta >= 0 ? '+' : ''}${pct}%)</span>`;
     }
   }
 
@@ -1019,20 +1019,24 @@ function renderOutHealth(d, daily, historyEntries) {
   const starEntries = allStarEntries.slice(-7);
   const starDelta = starEntries.length >= 2 ? starEntries[starEntries.length - 1].total - starEntries[0].total : null;
   const starDeltaStr = starDelta != null ? `<span style="color:${starDelta >= 0 ? 'var(--green)' : 'var(--red)'}">${starDelta >= 0 ? '+' : ''}${starDelta}/7d</span>` : '';
-  // Consumer freshness: repos updated <2h ago
-  let freshCount = 0;
+  // Consumer freshness: repos updated <2h ago (skip repos with no data)
+  let freshCount = 0, dataCount = 0;
   repoEntries.forEach(([, r]) => {
     const updateTs = r.lastJobsUpdate || r.workflowLastRun;
     if (updateTs) {
+      dataCount++;
       const age = (Date.now() - new Date(updateTs).getTime()) / 3600000;
       if (age < 2) freshCount++;
     }
   });
-  const freshPct = repoEntries.length > 0 ? Math.round(100 * freshCount / repoEntries.length) : 0;
+  const totalRepos = repoEntries.length;
+  const noData = totalRepos - dataCount;
+  const freshPct = dataCount > 0 ? Math.round(100 * freshCount / dataCount) : 0;
   const freshColor = freshPct >= 80 ? 'var(--green)' : freshPct >= 50 ? 'var(--yellow)' : 'var(--red)';
+  const freshSub = noData > 0 ? `${freshCount}/${dataCount} updated <2h ago · ${noData} no data` : `${freshCount}/${dataCount} repos updated <2h ago`;
   el.innerHTML =
     statCard({ icon: '⭐', label: 'Total Stars', value: fmt(totalStars), sub: starDeltaStr + (starDeltaStr ? ' · ' : '') + repoEntries.length + ' repos' }) +
-    statCard({ icon: '🔄', label: 'Consumer Freshness', value: `<span style="color:${freshColor}">${freshPct}%</span>`, sub: `${freshCount}/${repoEntries.length} repos updated <2h ago` });
+    statCard({ icon: '🔄', label: 'Consumer Freshness', value: `<span style="color:${freshColor}">${freshPct}%</span>`, sub: freshSub });
 }
 
 function renderRepos(d, daily) {
