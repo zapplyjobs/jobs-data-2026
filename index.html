@@ -1277,8 +1277,7 @@ function renderSupHealth(metadata) {
   const zeroYield = (metadata.zero_yield_companies || []).length;
   el.innerHTML =
     statCard({ icon: '🏢', label: 'Active Sources', value: `${activeSources}/${totalSources}`, sub: `${activeSources} returning jobs` }) +
-    statCard({ icon: '⚠️', label: 'Zero-Yield', value: zeroYield, sub: zeroYield > 0 ? 'companies returning 0 jobs' : 'all sources healthy' }) +
-    statCard({ icon: '📊', label: 'Pool Total', value: fmt(metadata.total_jobs || 0), sub: `${totalSources} sources · jobs & internships` });
+    statCard({ icon: '⚠️', label: 'Zero-Yield', value: zeroYield, sub: zeroYield > 0 ? 'companies returning 0 jobs' : 'all sources healthy' });
 }
 
 function renderSourceBars(d, metadata) {
@@ -2730,7 +2729,7 @@ async function loadAll() {
   // SUP freshness indicator
   const supFresh = document.getElementById('sup-freshness');
   if (supFresh && metadata && metadata.generated) {
-    supFresh.textContent = `Data as of ${age(metadata.generated)} · ${Object.keys(metadata.by_source || {}).length} sources · ${fmt(metadata.total_jobs)} jobs & internships`;
+    supFresh.textContent = `Data as of ${age(metadata.generated)}`;
   }
   renderSupHealth(metadata);
   renderDomainBars(metadata);
