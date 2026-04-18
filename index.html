@@ -345,9 +345,11 @@
     <div class="card" id="domain-bars-wrap">
       <div id="domain-bars"></div>
     </div>
-    <div class="section-label" style="margin-top:24px">Senior Filter Composition <span style="font-weight:400;font-size:11px;color:var(--muted)">(why jobs are kept or removed)</span></div>
-    <div class="card" id="filter-funnel">
-      <p class="muted" style="text-align:center; padding:20px 0">Loading…</p>
+    <div class="section-label" style="margin-top:24px">Senior Filter <span style="font-weight:400;font-size:11px;color:var(--muted)">(why jobs & internships are kept or removed)</span></div>
+    <div class="card">
+      <div id="filter-funnel">
+        <p class="muted" style="text-align:center; padding:20px 0">Loading…</p>
+      </div>
     </div>
     <div class="section-label" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center">
       <span>Job Breakdown Trend</span>
@@ -364,7 +366,7 @@
     <div class="section-label">Source & Job Supply</div>
     <div class="grid" id="sup-health-cards"></div>
     <div id="sup-freshness" style="font-size:11px;color:var(--muted);margin-bottom:8px"></div>
-    <div class="section-label">Jobs by Source <span style="font-weight:400;font-size:11px;color:var(--muted)">(current pool)</span></div>
+    <div class="section-label">Jobs & Internships by Source <span style="font-weight:400;font-size:11px;color:var(--muted)">(current pool)</span></div>
     <div class="card">
       <table id="pipeline-source-table">
         <tr>
@@ -766,7 +768,7 @@ function renderOpsPipelineStats(metrics, metadata, enrichStats, daily, historyEn
     statCard({ icon: statusIcon, label: 'Pipeline Status', value: pipelineStatus,
                sub: statusTs ? `Last run: ${age(statusTs)}` : null }) +
     statCard({ icon: '🏗️', label: 'Pool Size', value: fmt(poolDisplay),
-               sub: poolSub }) +
+               sub: poolSub ? poolSub : 'jobs & internships' }) +
     statCard({ icon: '💻', label: 'US Tech Jobs', value: fmt(usTechJobs),
                sub: 'SW + DS + HW + AI, US-tagged' });
 }
@@ -888,10 +890,12 @@ function renderDomainBars(metadata) {
   const max = entries[0][1];
   barsEl.innerHTML = entries.map(([k, v]) => {
     const pct = max > 0 ? Math.round((v / max) * 100) : 0;
+    const ratio = max > 0 ? v / max : 0;
+    const color = ratio >= 0.6 ? 'var(--accent)' : ratio >= 0.3 ? 'var(--yellow)' : 'var(--muted)';
     return `
       <div class="bar-row">
         <span class="bar-label">${k}</span>
-        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div>
         <span class="bar-value">${fmt(v)}</span>
       </div>`;
   }).join('');
@@ -1265,7 +1269,7 @@ function renderSupHealth(metadata) {
   el.innerHTML =
     statCard({ icon: '🏢', label: 'Active Sources', value: `${activeSources}/${totalSources}`, sub: `${activeSources} returning jobs` }) +
     statCard({ icon: '⚠️', label: 'Zero-Yield', value: zeroYield, sub: zeroYield > 0 ? 'companies returning 0 jobs' : 'all sources healthy' }) +
-    statCard({ icon: '📊', label: 'Total Jobs', value: fmt(metadata.total_jobs || 0), sub: `${totalSources} sources in pool` });
+    statCard({ icon: '📊', label: 'Pool Total', value: fmt(metadata.total_jobs || 0), sub: `${totalSources} sources · jobs & internships` });
 }
 
 function renderSourceBars(d, metadata) {
@@ -1430,41 +1434,47 @@ function renderFilterFunnel(metadata) {
   }
   const total = sf.total_input;
   const entry = sf.entry_level_jobs || 0;
+  const seniorTotal = sf.senior_jobs || 0;
   const reasons = sf.senior_reasons || {};
   const both = reasons.both || 0;
-  const titleOnly = (reasons.senior_title || 0) - both;
-  const expOnly = (reasons.senior_experience || 0) - both;
-  const seniorTotal = sf.senior_jobs || 0;
-  const pct = (v) => total > 0 ? Math.round(100 * v / total) : 0;
+  const titleOnly = Math.max(0, (reasons.senior_title || 0) - both);
+  const expOnly = Math.max(0, (reasons.senior_experience || 0) - both);
+  const maxReason = Math.max(both, titleOnly, expOnly, 1);
 
-  // Stacked composition bar — shows WHY jobs are filtered
   el.innerHTML = `
-    <div style="margin-bottom:16px">
-      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
-        <span style="font-size:12px;color:var(--muted)">${fmt(total)} jobs fetched by aggregator</span>
-        <span style="font-size:12px;color:var(--muted)">→ ${fmt(entry)} entry-level kept (${pct(entry)}%)</span>
+    <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+      <div style="flex:1;min-width:120px;padding:12px;background:var(--accent-bg);border-radius:8px;text-align:center">
+        <div style="font-size:24px;font-weight:700">${fmt(total)}</div>
+        <div style="font-size:11px;color:var(--muted)">Fetched by aggregator</div>
       </div>
-      <div style="display:flex;height:32px;border-radius:6px;overflow:hidden">
-        <div style="width:${pct(entry)}%;background:var(--green);display:flex;align-items:center;justify-content:center;min-width:${pct(entry) >= 8 ? '0' : '24px'}">
-          ${pct(entry) >= 8 ? `<span style="font-size:10px;font-weight:600;color:#fff">${pct(entry)}%</span>` : ''}
-        </div>
-        <div style="width:${pct(both)}%;background:var(--red);display:flex;align-items:center;justify-content:center;min-width:${pct(both) >= 8 ? '0' : '24px'}">
-          ${pct(both) >= 8 ? `<span style="font-size:10px;font-weight:600;color:#fff">${pct(both)}%</span>` : ''}
-        </div>
-        <div style="width:${pct(titleOnly)}%;background:var(--yellow);display:flex;align-items:center;justify-content:center;min-width:${pct(titleOnly) >= 8 ? '0' : '24px'}">
-          ${pct(titleOnly) >= 8 ? `<span style="font-size:10px;font-weight:600">${pct(titleOnly)}%</span>` : ''}
-        </div>
-        <div style="width:${pct(expOnly)}%;background:#8b949e;display:flex;align-items:center;justify-content:center;min-width:${pct(expOnly) >= 8 ? '0' : '24px'}">
-          ${pct(expOnly) >= 8 ? `<span style="font-size:10px;font-weight:600;color:#fff">${pct(expOnly)}%</span>` : ''}
-        </div>
+      <div style="display:flex;align-items:center;font-size:20px;color:var(--muted)">→</div>
+      <div style="flex:1;min-width:120px;padding:12px;background:rgba(26,127,55,0.08);border-radius:8px;text-align:center">
+        <div style="font-size:24px;font-weight:700;color:var(--green)">${fmt(entry)}</div>
+        <div style="font-size:11px;color:var(--muted)">Kept (entry-level + internships)</div>
       </div>
-      <div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap;font-size:11px">
-        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--green);vertical-align:middle;margin-right:4px"></span>Entry-level ${fmt(entry)} (${pct(entry)}%)</span>
-        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--red);vertical-align:middle;margin-right:4px"></span>Title + Experience ${fmt(both)} (${pct(both)}%)</span>
-        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--yellow);vertical-align:middle;margin-right:4px"></span>Title only ${fmt(titleOnly)} (${pct(titleOnly)}%)</span>
-        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#8b949e;vertical-align:middle;margin-right:4px"></span>Experience only ${fmt(expOnly)} (${pct(expOnly)}%)</span>
+      <div style="display:flex;align-items:center;font-size:20px;color:var(--muted)">→</div>
+      <div style="flex:1;min-width:120px;padding:12px;background:rgba(209,38,47,0.06);border-radius:8px;text-align:center">
+        <div style="font-size:24px;font-weight:700;color:var(--red)">${fmt(seniorTotal)}</div>
+        <div style="font-size:11px;color:var(--muted)">Removed (senior-level)</div>
       </div>
-    </div>`;
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Why ${fmt(seniorTotal)} were removed:</div>
+    <div class="bar-row">
+      <span class="bar-label" style="width:140px">Title + Experience</span>
+      <div class="bar-track" style="flex:1"><div class="bar-fill" style="width:${Math.round(both/maxReason*100)}%;background:var(--red)"></div></div>
+      <span class="bar-value">${fmt(both)}</span>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label" style="width:140px">Title only</span>
+      <div class="bar-track" style="flex:1"><div class="bar-fill" style="width:${Math.round(titleOnly/maxReason*100)}%;background:var(--yellow)"></div></div>
+      <span class="bar-value">${fmt(titleOnly)}</span>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label" style="width:140px">Experience only</span>
+      <div class="bar-track" style="flex:1"><div class="bar-fill" style="width:${Math.round(expOnly/maxReason*100)}%;background:#8b949e"></div></div>
+      <span class="bar-value">${fmt(expOnly)}</span>
+    </div>
+  `;
 }
 
 // Quality tab — enrichment fill rate bars by source
@@ -2711,7 +2721,7 @@ async function loadAll() {
   // SUP freshness indicator
   const supFresh = document.getElementById('sup-freshness');
   if (supFresh && metadata && metadata.generated) {
-    supFresh.textContent = `Data as of ${age(metadata.generated)} · ${Object.keys(metadata.by_source || {}).length} sources · ${fmt(metadata.total_jobs)} total jobs`;
+    supFresh.textContent = `Data as of ${age(metadata.generated)} · ${Object.keys(metadata.by_source || {}).length} sources · ${fmt(metadata.total_jobs)} jobs & internships`;
   }
   renderSupHealth(metadata);
   renderDomainBars(metadata);
