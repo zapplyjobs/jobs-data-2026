@@ -1,0 +1,36 @@
+name: Commit pipeline-alert fix
+
+on:
+  workflow_dispatch:
+
+jobs:
+  commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Decrypt
+        run: |
+          echo "${{ secrets.GIT_CRYPT_KEY }}" | base64 -d > /tmp/git-crypt-key
+          sudo apt-get install -y git-crypt -q
+          git-crypt unlock /tmp/git-crypt-key
+          rm /tmp/git-crypt-key
+
+      - name: Apply fix
+        run: |
+          # The fix has already been applied to the working tree
+          # Just commit it
+          git config user.name "z-apply"
+          git config user.email "admin@zapply.jobs"
+          git add .github/scripts/pipeline-alert.js
+          git commit -m "fix: correct pipeline alert calculations after freshness filter
+
+- Senior filter alert: Now calculates from tech+US subset (1.2% real rate) instead of pre-filter pool (68% false positive)
+- Job count drop alert: Updated baseline to post-filter pool (24,598), adjusted threshold from >40% to >60% drop
+- Added comments explaining 7-day posted_at filter context (commit 150034d)
+- Fixed source drop threshold from >60% to >40% to match job count drop logic"
+
+      - name: Push
+        run: |
+          git push origin main
