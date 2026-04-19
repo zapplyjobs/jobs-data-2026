@@ -334,7 +334,7 @@
     </div>
     <!-- Deadlines removed from AGG (duplicated INF) — see INF tab -->
     <div class="section-label" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center">
-      <span>Pool Trend</span>
+      <span>Pool Trend <span style="font-weight:400;font-size:10px;color:var(--muted)">(pre-filter: all fetched jobs before freshness filter)</span></span>
       <span id="pool-trend-pills"></span>
     </div>
     <div class="card" id="pool-trend-card" style="position:relative;height:220px">
@@ -767,22 +767,16 @@ function renderOpsPipelineStats(metrics, metadata, enrichStats, daily, historyEn
   const statusIcon = hours == null ? '⚪' : hours < 0.5 ? '🟢' : hours < 6 ? '🟡' : '🔴';
   const sf = metadata && metadata.senior_filter_stats;
   const usTechJobs = enrichStats ? enrichStats.total_tech_us : null;
-  // Pool WoW delta — use history series for both card value and delta (same data source = honest comparison)
-  let poolDisplay = poolTotal;
+  // Pool card: metadata.total_jobs is the real post-filter count (primary source).
+  // history.jsonl records pre-filter totals — not suitable for card display after freshness filter.
+  const poolDisplay = poolTotal;
   let poolSub = null;
-  if (historyEntries && historyEntries.length >= 2 && poolTotal != null) {
-    const last7 = historyEntries.slice(-7);
-    const newest = last7[last7.length - 1];
-    const oldest = last7[0];
-    const newestTotal = newest.total || newest.pipelineTotal;
-    const oldestTotal = oldest.total || oldest.pipelineTotal;
-    poolDisplay = newestTotal || poolTotal;
-    if (oldestTotal > 0) {
-      const delta = poolDisplay - oldestTotal;
-      const pct = ((delta / oldestTotal) * 100).toFixed(1);
-      const color = delta >= 0 ? 'var(--green)' : 'var(--red)';
-      poolSub = `<span style="color:${color}">${delta >= 0 ? '+' : ''}${fmt(delta)} WoW (${delta >= 0 ? '+' : ''}${pct}%)</span>`;
-    }
+  const growth = (metrics && metrics.growth) || {};
+  const poolDelta = growth.total_delta;
+  const poolPct = growth.total_delta_pct;
+  if (poolDelta != null && poolPct != null) {
+    const color = poolDelta >= 0 ? 'var(--green)' : 'var(--red)';
+    poolSub = `<span style="color:${color}">${poolDelta >= 0 ? '+' : ''}${fmt(poolDelta)} (${poolDelta >= 0 ? '+' : ''}${poolPct}%)</span> · 7d trend`;
   }
 
   el.innerHTML =
