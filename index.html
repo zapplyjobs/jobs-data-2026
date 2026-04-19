@@ -507,22 +507,23 @@
     <div class="section-label">Consumer Health</div>
     <div class="grid" id="out-health-cards"></div>
     <div style="margin-top:4px;font-size:11px;color:var(--muted)">
-      <strong>Consumer Freshness</strong> = repos updated &lt;2h ago. <strong>Stars</strong> = GitHub repo stars across all job boards. 7d delta from daily snapshots.
+      <strong>Consumer Freshness</strong> = repos updated &lt;2h ago. <strong>Stars</strong> = GitHub repo stars across all job boards. Delta = current vs 7 snapshots back.
     </div>
     <div class="section-label" style="margin-top:24px">Consumer Repos</div>
     <div class="card">
       <table id="repo-table">
         <tr>
-          <th>Health</th>
-          <th class="sortable">Repo</th>
-          <th class="sortable">Type</th>
+          <th style="text-align:left">Health</th>
+          <th style="text-align:left" class="sortable">Repo</th>
           <th class="sortable">Jobs</th>
-          <th class="sortable">Updated</th>
           <th class="sortable">⭐</th>
+          <th class="sortable">⭐ WoW</th>
+          <th class="sortable">👁 Views</th>
+          <th class="sortable">Updated</th>
         </tr>
       </table>
       <div style="margin-top:8px;font-size:11px;color:var(--muted)">
-        <strong>Health</strong> = composite of workflow status + data freshness. Green = updated &lt;2h ago. Yellow = &lt;6h. Red = &gt;6h or workflow failed.
+        <strong>⭐ WoW</strong> = star change over last 7 snapshots. <strong>👁 Views</strong> = 14-day total from GitHub Traffic API. <strong>Health</strong> = workflow status + freshness.
       </div>
     </div>
     <div class="section-label" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center">
@@ -531,6 +532,21 @@
     </div>
     <div class="card" id="stars-trend-card" style="position:relative;height:200px">
       <canvas id="stars-trend-canvas"></canvas>
+    </div>
+    <div class="section-label" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center">
+      <span>GitHub Traffic</span>
+      <span id="traffic-trend-pills"></span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="card" id="traffic-trend-card" style="position:relative;height:200px">
+        <canvas id="traffic-trend-canvas"></canvas>
+      </div>
+      <div class="card" id="traffic-referrers">
+        <p class="muted" style="text-align:center; padding:40px 0">Loading…</p>
+      </div>
+    </div>
+    <div style="margin-top:4px;font-size:11px;color:var(--muted)">
+      <strong>Views</strong> = 14-day rolling window from GitHub Traffic API. Updated daily. <strong>Referrers</strong> = top sources driving traffic across all repos.
     </div>
     <div class="section-label" style="margin-top:24px">Discord</div>
     <div class="grid" id="discord-verification"></div>
@@ -719,7 +735,8 @@ function addRow(tableId, cells) {
   cells.forEach((c, i) => {
     const td = document.createElement('td');
     td.innerHTML = c;
-    if (i > 0) td.style.textAlign = 'right';
+    if (i >= 2) td.style.textAlign = 'center';
+    else if (i > 0) td.style.textAlign = 'left';
     tr.appendChild(td);
   });
   document.getElementById(tableId).appendChild(tr);
@@ -1049,7 +1066,9 @@ function renderOutHealth(d, daily, historyEntries) {
     .map(e => ({ date: e.date, total: Object.values(e.stars).reduce((s, v) => s + v, 0) }));
   const starEntries = allStarEntries.slice(-7);
   const starDelta = starEntries.length >= 2 ? starEntries[starEntries.length - 1].total - starEntries[0].total : null;
-  const starDeltaStr = starDelta != null ? `<span style="color:${starDelta >= 0 ? 'var(--green)' : 'var(--red)'}">${starDelta >= 0 ? '+' : ''}${starDelta}/7d</span>` : '';
+  const starRangeStart = starEntries.length >= 2 ? starEntries[0].date : null;
+  const starRangeEnd = starEntries.length >= 2 ? starEntries[starEntries.length - 1].date : null;
+  const starDeltaStr = starDelta != null ? `<span style="color:${starDelta >= 0 ? 'var(--green)' : 'var(--red)'}">${starDelta >= 0 ? '+' : ''}${starDelta}</span> <span style="font-size:10px">(${starRangeStart} → ${starRangeEnd})</span>` : '';
   // Consumer freshness: repos updated <2h ago (skip repos with no data)
   let freshCount = 0, dataCount = 0;
   repoEntries.forEach(([, r]) => {
@@ -1070,7 +1089,7 @@ function renderOutHealth(d, daily, historyEntries) {
     statCard({ icon: '🔄', label: 'Consumer Freshness', value: `<span style="color:${freshColor}">${freshPct}%</span>`, sub: freshSub });
 }
 
-function renderRepos(d, daily) {
+function renderRepos(d, daily, historyEntries, trafficRaw) {
   const repos = d.repos || {};
   const starMap = (daily && daily.stars) ? daily.stars : {};
   const REPO_NAME_MAP = {
@@ -1081,11 +1100,27 @@ function renderRepos(d, daily) {
     'Hardware':     'New-Grad-Hardware-Engineering-Jobs-2026',
     'Healthcare':   'New-Grad-Healthcare-Jobs-2026',
   };
+  // Compute per-repo star WoW from history.jsonl
+  const starHistory = (historyEntries || []).filter(e => e.stars && typeof e.stars === 'object');
+  const starNow = starHistory.length > 0 ? starHistory[starHistory.length - 1] : null;
+  const starPrev = starHistory.length >= 8 ? starHistory[starHistory.length - 8] : starHistory.length >= 2 ? starHistory[0] : null;
+  // Parse traffic data for per-repo views
+  const trafficEntries = trafficRaw ? trafficRaw.split('\n').filter(l => l.trim()).map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean) : [];
+  const trafficLatest = trafficEntries.length > 0 ? trafficEntries[trafficEntries.length - 1] : null;
+  const trafficRepos = trafficLatest ? (trafficLatest.repos || {}) : {};
+  const TRAFFIC_REPO_MAP = {
+    'New-Grad':     'New-Grad-Jobs-2026',
+    'Internships':  'Internships-2026',
+    'Software':     'New-Grad-Software-Engineering-Jobs-2026',
+    'Data-Science': 'New-Grad-Data-Science-Jobs-2026',
+    'Hardware':     'New-Grad-Hardware-Engineering-Jobs-2026',
+    'Healthcare':   'New-Grad-Healthcare-Jobs-2026',
+  };
   Object.entries(repos).forEach(([name, r]) => {
-    const stars = r.stars != null ? r.stars : (starMap[REPO_NAME_MAP[name]] ?? '—');
+    const repoFullName = REPO_NAME_MAP[name];
+    const stars = r.stars != null ? r.stars : (starMap[repoFullName] ?? '—');
     const updateTs = r.lastJobsUpdate || r.workflowLastRun;
     const hoursAgo = updateTs ? (Date.now() - new Date(updateTs).getTime()) / 3600000 : null;
-
     // Health = composite of workflow + freshness
     const wfOk = r.workflowStatus === 'success';
     const fresh = hoursAgo != null && hoursAgo < 6;
@@ -1093,7 +1128,6 @@ function renderRepos(d, daily) {
                  : !fresh && hoursAgo != null ? '<span style="color:var(--yellow)">🟡 Stale</span>'
                  : wfOk ? '<span style="color:var(--green)">🟢 OK</span>'
                  : '<span class="muted">—</span>';
-
     // Freshness label
     let freshLabel = '—';
     if (hoursAgo != null) {
@@ -1101,17 +1135,34 @@ function renderRepos(d, daily) {
                  : hoursAgo < 24 ? `${Math.round(hoursAgo)}h ago`
                  : `${Math.round(hoursAgo/24)}d ago`;
     }
-
-    // Type: Internship or New Grad
-    const type = name === 'Internships' ? 'Internship' : 'New Grad';
+    // Star WoW
+    let starWow = '<span class="muted">—</span>';
+    if (starNow && starPrev && starNow.stars && starPrev.stars) {
+      const nowVal = starNow.stars[repoFullName] ?? null;
+      const prevVal = starPrev.stars[repoFullName] ?? null;
+      if (nowVal != null && prevVal != null) {
+        const delta = nowVal - prevVal;
+        if (delta !== 0) {
+          const color = delta > 0 ? 'var(--green)' : 'var(--red)';
+          starWow = `<span style="color:${color}">${delta > 0 ? '+' : ''}${delta}</span>`;
+        } else {
+          starWow = '<span class="muted">0</span>';
+        }
+      }
+    }
+    // Views from traffic
+    const trafficRepoName = TRAFFIC_REPO_MAP[name];
+    const views = trafficRepoName && trafficRepos[trafficRepoName] ? trafficRepos[trafficRepoName].views : null;
+    const viewsStr = views != null ? fmt(views) : '<span class="muted">—</span>';
 
     addRow('repo-table', [
       health,
       name,
-      `<span style="font-size:11px;color:var(--muted)">${type}</span>`,
       r.jobCount != null ? fmt(r.jobCount) : fmt(window._poolTotal),
-      freshLabel,
       stars,
+      starWow,
+      viewsStr,
+      freshLabel,
     ]);
   });
 }
@@ -2408,38 +2459,97 @@ function renderStarsTrendChart(allEntries, days) {
 }
 
 // OUT tab — Traffic stats from traffic-history.jsonl
+let _trafficAllEntries = null;
 function renderTrafficStats(trafficRaw) {
-  const el = document.getElementById('traffic-stats');
-  if (!el) return;
   if (!trafficRaw) {
-    el.innerHTML = statCard({ icon: '📊', label: 'Traffic', value: '—', sub: 'No traffic data yet' });
+    document.getElementById('traffic-trend-card').innerHTML = '<p class="muted" style="text-align:center;padding:40px 0">No traffic data yet</p>';
+    document.getElementById('traffic-referrers').innerHTML = '<p class="muted" style="text-align:center;padding:40px 0">No traffic data</p>';
     return;
   }
   const entries = trafficRaw.split('\n').filter(l => l.trim()).map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
-  if (!entries.length) { el.innerHTML = statCard({ icon: '📊', label: 'Traffic', value: '—' }); return; }
+  if (!entries.length) return;
+  _trafficAllEntries = entries;
+  renderTrafficTrendChart(entries, 14);
+  renderTrafficReferrers(entries);
+}
+
+function renderTrafficTrendChart(allEntries, days) {
+  const canvas = document.getElementById('traffic-trend-canvas');
+  if (!canvas) return;
+  const pillsEl = document.getElementById('traffic-trend-pills');
+  const TRAFFIC_REPO_LABELS = {
+    'New-Grad-Jobs-2026': 'New-Grad',
+    'Internships-2026': 'Internships',
+    'New-Grad-Software-Engineering-Jobs-2026': 'Software',
+    'New-Grad-Data-Science-Jobs-2026': 'Data-Science',
+    'New-Grad-Hardware-Engineering-Jobs-2026': 'Hardware',
+    'New-Grad-Healthcare-Jobs-2026': 'Healthcare',
+  };
+  const ps = (d) => d === days ? 'font-weight:700;color:var(--accent);cursor:pointer;font-size:12px' : 'cursor:pointer;font-size:12px;color:var(--muted)';
+  if (pillsEl) {
+    pillsEl.innerHTML = [14, 30, null].map(d => {
+      const label = d === null ? 'All' : `${d}d`;
+      return `<span style="${ps(d)}" onclick="renderTrafficTrendChart(_trafficAllEntries,${d})">${label}</span>`;
+    }).join(' · ');
+  }
+  const sliced = days ? allEntries.slice(-days) : allEntries;
+  const labels = sliced.map(e => (e.date || '').slice(5));
+  const activeRepos = Object.keys(TRAFFIC_REPO_LABELS).filter(r => sliced.some(e => e.repos && e.repos[r] && (e.repos[r].views || 0) > 0));
+  const colors = ['#ff5e3c','#3fb950','#d29922','#58a6ff','#bc8cff','#f78166'];
+  makeChart('traffic-trend-canvas', {
+    type: 'line',
+    data: {
+      labels,
+      datasets: activeRepos.map((repo, i) => ({
+        label: TRAFFIC_REPO_LABELS[repo] || repo,
+        data: sliced.map(e => e.repos && e.repos[repo] ? (e.repos[repo].views || 0) : 0),
+        borderColor: colors[i % colors.length],
+        backgroundColor: colors[i % colors.length] + '15',
+        tension: 0.3,
+        fill: false,
+        pointRadius: 1,
+        borderWidth: 2,
+      })),
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 12, font: { size: 10 }, color: 'var(--muted)' } } },
+      scales: {
+        x: { display: true, ticks: { font: { size: 9 }, color: 'var(--muted)', maxTicksLimit: 10 }, grid: { color: '#ffffff10' } },
+        y: { display: true, ticks: { font: { size: 9 }, color: 'var(--muted)' }, grid: { color: '#ffffff10' }, beginAtZero: true },
+      },
+    },
+  });
+}
+
+function renderTrafficReferrers(entries) {
+  const el = document.getElementById('traffic-referrers');
+  if (!el) return;
   const latest = entries[entries.length - 1];
   const repos = latest.repos || {};
   const totalViews = Object.values(repos).reduce((s, r) => s + (r.views || 0), 0);
   const totalUniques = Object.values(repos).reduce((s, r) => s + (r.uniques || 0), 0);
-  // Top referrers across all repos
+  // Aggregate referrers across all repos
   const refMap = {};
   for (const r of Object.values(repos)) {
     for (const ref of (r.referrers || [])) {
       refMap[ref.referrer] = (refMap[ref.referrer] || 0) + ref.count;
     }
   }
-  const topRefs = Object.entries(refMap).sort((a, b) => b[1] - a[1]).slice(0, 4);
-  const refSub = topRefs.map(([name, count]) => `${name}: ${count}`).join(' · ');
-  el.innerHTML =
-    statCard({ icon: '👁️', label: 'Views (14d)', value: fmt(totalViews), sub: `${fmt(totalUniques)} unique visitors` }) +
-    statCard({ icon: '🔗', label: 'Top Referrers', value: topRefs[0] ? topRefs[0][0] : '—', sub: refSub }) +
-    (() => {
-      const dataDate = latest.date;
-      const daysOld = dataDate ? Math.round((Date.now() - new Date(dataDate + 'T00:00:00').getTime()) / 86400000) : null;
-      const staleColor = daysOld != null && daysOld > 3 ? 'color:var(--red)' : daysOld != null && daysOld > 1 ? 'color:var(--yellow)' : '';
-      const staleSub = daysOld != null && daysOld > 3 ? `⚠ ${daysOld}d stale` : `${entries.length} daily snapshots`;
-      return statCard({ icon: '📅', label: 'Data as of', value: `<span style="${staleColor}">${dataDate || '—'}</span>`, sub: staleSub });
-    })();
+  const topRefs = Object.entries(refMap).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  const dataDate = latest.date;
+  const daysOld = dataDate ? Math.round((Date.now() - new Date(dataDate + 'T00:00:00').getTime()) / 86400000) : null;
+  const staleTag = daysOld > 3 ? `<span style="color:var(--red);font-size:10px"> ⚠ ${daysOld}d old</span>` : '';
+  el.innerHTML = `
+    <div style="margin-bottom:12px">
+      <span class="stat-label">Total Views (14d)</span>
+      <div style="font-size:20px;font-weight:700">${fmt(totalViews)}</div>
+      <div style="font-size:11px;color:var(--muted)">${fmt(totalUniques)} unique visitors · data as of ${dataDate || '—'}${staleTag}</div>
+    </div>
+    <table style="width:100%;border-collapse:collapse">
+      <tr><th style="text-align:left;font-size:10px;text-transform:uppercase;color:var(--muted);padding:4px 0 6px;border-bottom:1px solid var(--border)">Source</th><th style="text-align:right;font-size:10px;text-transform:uppercase;color:var(--muted);padding:4px 0 6px;border-bottom:1px solid var(--border)">Views</th></tr>
+      ${topRefs.map(([name, count]) => `<tr><td style="padding:4px 0;font-size:12px;border-bottom:1px solid var(--border)">${name}</td><td style="padding:4px 0;font-size:12px;text-align:right;border-bottom:1px solid var(--border)">${fmt(count)}</td></tr>`).join('')}
+    </table>`;
 }
 
 // OUT tab — Discord verification status from discord-verification.json
@@ -2730,7 +2840,7 @@ async function loadAll() {
   renderTierSourceChart(enrichStats);
   renderUnifiedENR(enrichStats);
   window._poolTotal = metadata ? metadata.total_jobs : null;
-  renderRepos(metrics, daily);
+  renderRepos(metrics, daily, allHistoryMerged, trafficRaw);
   renderOutHealth(metrics, daily, allHistoryMerged);
   // SUP freshness indicator
   const supFresh = document.getElementById('sup-freshness');
