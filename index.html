@@ -769,15 +769,10 @@ function renderOpsPipelineStats(metrics, metadata, enrichStats, daily, historyEn
   const usTechJobs = enrichStats ? enrichStats.total_tech_us : null;
   // Pool card: metadata.total_jobs is the real post-filter count (primary source).
   // history.jsonl records pre-filter totals — not suitable for card display after freshness filter.
+  // growth.total_delta compares post-filter vs pre-filter baseline — dishonest as "trend".
+  // Show honest note until post-filter history accumulates (pipeline change needed).
   const poolDisplay = poolTotal;
-  let poolSub = null;
-  const growth = (metrics && metrics.growth) || {};
-  const poolDelta = growth.total_delta;
-  const poolPct = growth.total_delta_pct;
-  if (poolDelta != null && poolPct != null) {
-    const color = poolDelta >= 0 ? 'var(--green)' : 'var(--red)';
-    poolSub = `<span style="color:${color}">${poolDelta >= 0 ? '+' : ''}${fmt(poolDelta)} (${poolDelta >= 0 ? '+' : ''}${poolPct}%)</span> · 7d trend`;
-  }
+  const poolSub = 'jobs & internships · post freshness filter';
 
   el.innerHTML =
     statCard({ icon: statusIcon, label: 'Pipeline Status', value: pipelineStatus,
