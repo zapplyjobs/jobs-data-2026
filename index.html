@@ -515,11 +515,11 @@
         <tr>
           <th style="text-align:left">Health</th>
           <th style="text-align:left" class="sortable">Repo</th>
-          <th class="sortable">Jobs</th>
-          <th class="sortable">⭐</th>
-          <th class="sortable">⭐ WoW</th>
-          <th class="sortable">👁 Views</th>
-          <th class="sortable">Updated</th>
+          <th style="text-align:center" class="sortable">Jobs</th>
+          <th style="text-align:center" class="sortable">⭐</th>
+          <th style="text-align:center" class="sortable">⭐ WoW</th>
+          <th style="text-align:center" class="sortable">👁 Views</th>
+          <th style="text-align:center" class="sortable">Updated</th>
         </tr>
       </table>
       <div style="margin-top:8px;font-size:11px;color:var(--muted)">
@@ -2678,20 +2678,23 @@ function renderDiscordStats(posted, metadata) {
     <table style="width:100%; border-collapse:collapse">
       <tr>
         <th style="text-align:left;font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 8px 8px 0;border-bottom:1px solid var(--border)">Channel</th>
-        <th style="font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 0 8px;border-bottom:1px solid var(--border)">All-Time</th>
-        <th style="font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 0 8px;border-bottom:1px solid var(--border)">7d (WoW)</th>
-        <th style="font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 0 8px 8px;border-bottom:1px solid var(--border)">Last Post</th>
-        <th style="font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 0 8px;border-bottom:1px solid var(--border)">Status</th>
+        <th style="text-align:center;font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 0 8px;border-bottom:1px solid var(--border)">All-Time</th>
+        <th style="text-align:center;font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 0 8px;border-bottom:1px solid var(--border)">7d (WoW)</th>
+        <th style="text-align:center;font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 0 8px 8px;border-bottom:1px solid var(--border)">Last Post</th>
+        <th style="text-align:center;font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 0 8px;border-bottom:1px solid var(--border)">Status</th>
       </tr>
       ${allChannels.map(ch => `
         <tr>
           <td style="padding:6px 8px 6px 0;border-bottom:1px solid var(--border);font-size:13px">${ch.name}</td>
-          <td style="padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;${ch.count === 0 ? 'color:var(--red)' : ''}">${fmt(ch.count)}</td>
-          <td style="padding:6px 0;border-bottom:1px solid var(--border)">${wowCell(ch)}</td>
-          <td style="padding:6px 0 6px 8px;border-bottom:1px solid var(--border)">${lastPostCell(ch)}</td>
-          <td style="padding:6px 0;border-bottom:1px solid var(--border)">${channelStatus(ch)}</td>
+          <td style="text-align:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;${ch.count === 0 ? 'color:var(--red)' : ''}">${fmt(ch.count)}</td>
+          <td style="text-align:center;padding:6px 0;border-bottom:1px solid var(--border)">${wowCell(ch)}</td>
+          <td style="text-align:center;padding:6px 0 6px 8px;border-bottom:1px solid var(--border)">${lastPostCell(ch)}</td>
+          <td style="text-align:center;padding:6px 0;border-bottom:1px solid var(--border)">${channelStatus(ch)}</td>
         </tr>`).join('')}
-    </table>`;
+    </table>
+    <div style="margin-top:8px;font-size:11px;color:var(--muted)">
+      <strong>7d (WoW)</strong> = posts in last 7 days vs prior 7 days. <strong>SILENT</strong> = no post in 7+ days. <strong>NEVER</strong> = channel has 0 posts.
+    </div>`;
 }
 
 // Classification tab (general-review.json)
