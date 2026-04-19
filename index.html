@@ -550,6 +550,9 @@
     </div>
     <div class="section-label" style="margin-top:24px">Discord</div>
     <div class="grid" id="discord-verification"></div>
+    <div class="card" id="discord-posting-trend" style="position:relative;height:180px">
+      <canvas id="discord-posting-canvas"></canvas>
+    </div>
     <div class="card" id="discord-stats-card">
       <p class="muted" style="text-align:center; padding:40px 0">Loading…</p>
     </div>
@@ -2697,6 +2700,81 @@ function renderDiscordStats(posted, metadata) {
     </div>`;
 }
 
+// DASH-15E: Discord posting volume trend chart
+function renderDiscordPostingTrend(posted) {
+  const canvas = document.getElementById('discord-posting-canvas');
+  if (!canvas || !posted || !Array.isArray(posted.jobs)) return;
+
+  const now = Date.now();
+  const DAYS = 30;
+  const DAY_MS = 86400000;
+
+  // Build daily post counts
+  const dailyCounts = new Array(DAYS).fill(0);
+  for (const job of posted.jobs) {
+    for (const post of Object.values(job.discordPosts || {})) {
+      const ts = new Date(post.postedAt).getTime();
+      if (isNaN(ts)) continue;
+      const daysAgo = Math.floor((now - ts) / DAY_MS);
+      if (daysAgo >= 0 && daysAgo < DAYS) {
+        dailyCounts[DAYS - 1 - daysAgo]++;
+      }
+    }
+  }
+
+  // Generate date labels
+  const labels = [];
+  for (let i = DAYS - 1; i >= 0; i--) {
+    const d = new Date(now - i * DAY_MS);
+    labels.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+  }
+
+  // Resolve CSS variable for chart color
+  const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#58a6ff';
+
+  new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Posts',
+        data: dailyCounts,
+        borderColor: accentColor,
+        backgroundColor: accentColor + '33',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 0,
+        pointHitRadius: 8,
+        borderWidth: 2,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            title: (items) => items[0].label,
+            label: (item) => `${item.raw} posts`
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: 'var(--muted)', font: { size: 10 }, maxTicksLimit: 8 },
+          grid: { display: false }
+        },
+        y: {
+          beginAtZero: true,
+          ticks: { color: 'var(--muted)', font: { size: 10 } },
+          grid: { color: 'var(--border)' }
+        }
+      }
+    }
+  });
+}
+
 // Classification tab (general-review.json)
 function renderClassification(data) {
   const summaryEl = document.getElementById('class-summary');
@@ -2889,6 +2967,7 @@ async function loadAll() {
   renderGeneralTrend(allHistoryMerged);
   renderTrafficStats(trafficRaw);
   renderDiscordVerification(discordVerification);
+  renderDiscordPostingTrend(postedJobs);
   renderDiscordStats(postedJobs, metadata);
   renderClassification(generalReview);
 
