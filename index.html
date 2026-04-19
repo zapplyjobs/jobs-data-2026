@@ -2585,15 +2585,10 @@ function renderDiscordStats(posted, metadata) {
     return;
   }
   const meta = posted.metadata || {};
-  // Total posts across all channels (not unique jobs — a job posted to 5 channels = 5 posts)
   const channelNumbers = meta.channelJobNumbers || {};
-  const totalPosts = Object.values(channelNumbers).reduce((s, v) => s + v, 0) || null;
-  const uniqueJobs = meta.totalJobs || (Array.isArray(posted.jobs) ? posted.jobs.length : null);
   const lastUpdatedTs = (metadata && metadata.generated) ? metadata.generated : posted.lastUpdated;
   const lastUpdated = lastUpdatedTs ? age(lastUpdatedTs) : '—';
 
-  // DASH-6: Use pre-computed channelLastPosted from metadata (avoids iterating 11K+ jobs)
-  // Falls back to job iteration if pre-computed data not available yet
   let lastPostByChannel = meta.channelLastPosted || {};
   if (!meta.channelLastPosted && Array.isArray(posted.jobs)) {
     lastPostByChannel = {};
@@ -2609,10 +2604,30 @@ function renderDiscordStats(posted, metadata) {
 
   const now = Date.now();
   const SILENT_DAYS = 7;
+  const WEEK_MS = 7 * 86400000;
 
-  // Build all channels list with names, sorted by count desc
+  // DASH-15C: Per-channel WoW from postedAt timestamps
+  const wowCurrent = {};
+  const wowPrev = {};
+  if (Array.isArray(posted.jobs)) {
+    for (const job of posted.jobs) {
+      for (const [chId, post] of Object.entries(job.discordPosts || {})) {
+        const ts = new Date(post.postedAt).getTime();
+        if (isNaN(ts)) continue;
+        if (ts > now - WEEK_MS) {
+          wowCurrent[chId] = (wowCurrent[chId] || 0) + 1;
+        } else if (ts > now - 2 * WEEK_MS) {
+          wowPrev[chId] = (wowPrev[chId] || 0) + 1;
+        }
+      }
+    }
+  }
+  const totalWowCurrent = Object.values(wowCurrent).reduce((s, v) => s + v, 0);
+  const totalWowPrev = Object.values(wowPrev).reduce((s, v) => s + v, 0);
+  const totalWowDelta = totalWowCurrent - totalWowPrev;
+
   const allChannels = Object.entries(channelNumbers)
-    .map(([id, count]) => ({ id, name: CHANNEL_NAMES[id] || id, count, lastPost: lastPostByChannel[id] || null }))
+    .map(([id, count]) => ({ id, name: CHANNEL_NAMES[id] || id, count, lastPost: lastPostByChannel[id] || null, wowNow: wowCurrent[id] || 0, wowBefore: wowPrev[id] || 0 }))
     .sort((a, b) => b.count - a.count);
 
   function channelStatus(ch) {
@@ -2634,6 +2649,18 @@ function renderDiscordStats(posted, metadata) {
     return `<span style="font-size:12px;color:var(--muted)">${label}</span>`;
   }
 
+  function wowCell(ch) {
+    if (ch.wowNow === 0 && ch.wowBefore === 0) return '<span class="muted">—</span>';
+    const delta = ch.wowNow - ch.wowBefore;
+    if (delta === 0) return `<span style="font-size:12px">${ch.wowNow}</span>`;
+    const color = delta > 0 ? 'var(--green)' : 'var(--red)';
+    return `<span style="font-size:12px">${ch.wowNow} <span style="color:${color}">(${delta > 0 ? '+' : ''}${delta})</span></span>`;
+  }
+
+  function wowDeltaColor(delta) {
+    return delta > 0 ? 'var(--green)' : delta < 0 ? 'var(--red)' : 'var(--muted)';
+  }
+
   el.innerHTML = `
     <div style="display:flex; gap:24px; flex-wrap:wrap; margin-bottom:16px">
       ${(() => {
@@ -2642,6 +2669,7 @@ function renderDiscordStats(posted, metadata) {
         const neverCount = allChannels.filter(ch => ch.count === 0).length;
         return `
       <div><span class="stat-label">Active Channels</span><div class="stat-value" style="font-size:18px;color:var(--green)">${activeCount}<span style="font-size:12px;color:var(--muted)"> / ${allChannels.length}</span></div></div>
+      <div><span class="stat-label">7d Posts</span><div class="stat-value" style="font-size:18px">${totalWowCurrent} <span style="font-size:12px;color:${wowDeltaColor(totalWowDelta)}">(${totalWowDelta > 0 ? '+' : ''}${totalWowDelta} vs prior 7d)</span></div></div>
       <div><span class="stat-label">Silent (&gt;7d)</span><div class="stat-value" style="font-size:18px;color:${silentCount > 0 ? 'var(--yellow)' : 'var(--green)'}">${silentCount}</div></div>
       ${neverCount > 0 ? `<div><span class="stat-label">Never Posted</span><div class="stat-value" style="font-size:18px;color:var(--red)">${neverCount}</div></div>` : ''}
       <div><span class="stat-label">Data as of</span><div class="stat-value" style="font-size:18px">${lastUpdated}</div></div>`;
@@ -2651,6 +2679,7 @@ function renderDiscordStats(posted, metadata) {
       <tr>
         <th style="text-align:left;font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 8px 8px 0;border-bottom:1px solid var(--border)">Channel</th>
         <th style="font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 0 8px;border-bottom:1px solid var(--border)">All-Time</th>
+        <th style="font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 0 8px;border-bottom:1px solid var(--border)">7d (WoW)</th>
         <th style="font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 0 8px 8px;border-bottom:1px solid var(--border)">Last Post</th>
         <th style="font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 0 8px;border-bottom:1px solid var(--border)">Status</th>
       </tr>
@@ -2658,6 +2687,7 @@ function renderDiscordStats(posted, metadata) {
         <tr>
           <td style="padding:6px 8px 6px 0;border-bottom:1px solid var(--border);font-size:13px">${ch.name}</td>
           <td style="padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;${ch.count === 0 ? 'color:var(--red)' : ''}">${fmt(ch.count)}</td>
+          <td style="padding:6px 0;border-bottom:1px solid var(--border)">${wowCell(ch)}</td>
           <td style="padding:6px 0 6px 8px;border-bottom:1px solid var(--border)">${lastPostCell(ch)}</td>
           <td style="padding:6px 0;border-bottom:1px solid var(--border)">${channelStatus(ch)}</td>
         </tr>`).join('')}
