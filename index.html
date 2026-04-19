@@ -509,6 +509,11 @@
     <div style="margin-top:4px;font-size:11px;color:var(--muted)">
       <strong>Consumer Freshness</strong> = repos updated &lt;2h ago. <strong>Stars</strong> = GitHub repo stars across all job boards. Delta = current vs 7 snapshots back.
     </div>
+    <div class="section-label" style="margin-top:24px">Data Quality</div>
+    <div class="grid" id="out-quality-cards"></div>
+    <div style="margin-top:4px;font-size:11px;color:var(--muted)">
+      <strong>Visa Reach</strong> = % of enriched tech+US jobs with any visa signal (hard text, LCA match, or ATS form). <strong>Daily Report</strong> = how current the daily stats baseline is. <strong>Alert Check</strong> = last pipeline alert health check.
+    </div>
     <div class="section-label" style="margin-top:24px">Consumer Repos</div>
     <div class="card">
       <table id="repo-table">
@@ -1090,6 +1095,52 @@ function renderOutHealth(d, daily, historyEntries) {
   el.innerHTML =
     statCard({ icon: '⭐', label: 'Total Stars', value: fmt(totalStars), sub: starDeltaStr + (starDeltaStr ? ' · ' : '') + repoEntries.length + ' repos' }) +
     statCard({ icon: '🔄', label: 'Consumer Freshness', value: `<span style="color:${freshColor}">${freshPct}%</span>`, sub: freshSub });
+}
+
+// OUT tab — data quality stat cards (DASH-10)
+function renderOutQuality(enrichStats, dailyStats, alertData) {
+  const el = document.getElementById('out-quality-cards');
+  if (!el) return;
+  // 1. Visa signal reach from enrichment-stats.json
+  let visaReach = null, visaSub = '';
+  if (enrichStats && enrichStats.by_source) {
+    let totalAnyVisa = 0, totalEnriched = 0;
+    for (const [, src] of Object.entries(enrichStats.by_source)) {
+      totalAnyVisa += (src.any_visa_signal || 0);
+      totalEnriched += (src.enriched || 0);
+    }
+    if (totalEnriched > 0) {
+      visaReach = Math.round(100 * totalAnyVisa / totalEnriched);
+      visaSub = `${totalAnyVisa.toLocaleString()} of ${totalEnriched.toLocaleString()} enriched jobs`;
+    }
+  }
+  const visaColor = visaReach != null
+    ? (visaReach >= 80 ? 'var(--green)' : visaReach >= 50 ? 'var(--yellow)' : 'var(--red)')
+    : 'var(--muted)';
+  // 2. Daily report freshness
+  let dailyAge = null, dailySub = '';
+  if (dailyStats && dailyStats.date) {
+    dailyAge = Math.round((Date.now() - new Date(dailyStats.date).getTime()) / 3600000);
+    dailySub = dailyAge < 24 ? `Updated ${dailyAge}h ago` : `Updated ${Math.round(dailyAge / 24)}d ago`;
+  }
+  const dailyColor = dailyAge != null
+    ? (dailyAge < 24 ? 'var(--green)' : dailyAge < 72 ? 'var(--yellow)' : 'var(--red)')
+    : 'var(--muted)';
+  // 3. Pipeline alert freshness
+  let alertAge = null, alertSub = '';
+  if (alertData && alertData.checked_at) {
+    alertAge = Math.round((Date.now() - new Date(alertData.checked_at).getTime()) / 3600000);
+    alertSub = alertAge < 2 ? `Checked ${alertAge}h ago` : `Checked ${alertAge < 48 ? alertAge + 'h' : Math.round(alertAge / 24) + 'd'} ago`;
+    if (alertData.active) alertSub += ' · ALERT ACTIVE';
+  }
+  const alertColor = alertAge != null
+    ? (alertAge < 2 ? 'var(--green)' : alertAge < 24 ? 'var(--yellow)' : 'var(--red)')
+    : 'var(--muted)';
+  const alertStatus = alertAge != null ? (alertAge < 2 ? 'Healthy' : (alertAge < 24 ? 'Stale' : 'Stale')) : 'No data';
+  el.innerHTML =
+    statCard({ icon: '🛂', label: 'Visa Signal Reach', value: visaReach != null ? `<span style="color:${visaColor}">${visaReach}%</span>` : '—', sub: visaSub }) +
+    statCard({ icon: '📊', label: 'Daily Report', value: dailyAge != null ? `<span style="color:${dailyColor}">${dailyAge < 24 ? 'Fresh' : 'Stale'}</span>` : '—', sub: dailySub }) +
+    statCard({ icon: '🔔', label: 'Alert Check', value: `<span style="color:${alertColor}">${alertStatus}</span>`, sub: alertSub });
 }
 
 function renderRepos(d, daily, historyEntries, trafficRaw) {
@@ -2953,6 +3004,7 @@ async function loadAll() {
   window._poolTotal = metadata ? metadata.total_jobs : null;
   renderRepos(metrics, daily, allHistoryMerged, trafficRaw);
   renderOutHealth(metrics, daily, allHistoryMerged);
+  renderOutQuality(enrichStats, daily, pipelineAlert);
   // SUP freshness indicator
   const supFresh = document.getElementById('sup-freshness');
   if (supFresh && metadata && metadata.generated) {
