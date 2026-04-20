@@ -1237,7 +1237,7 @@ function renderCompanyQuality(enrichStats) {
       <td style="font-size:11px;color:var(--muted)">${c.source}</td>
       <td style="text-align:right">${fmt(c.enriched)}</td>
       <td style="text-align:right;color:${colorPct(c.skills_pct)}">${c.skills_pct}%</td>
-      <td style="text-align:right;color="${colorPct(c.visa_any_pct || 0)}">${c.visa_any_pct || 0}%</td>
+      <td style="text-align:right;color:${colorPct(c.visa_any_pct || 0)}">${c.visa_any_pct || 0}%</td>
       <td style="text-align:right;color:${colorPct(c.visa_pct)}">${c.visa_pct}%</td>
     `;
     tbl.appendChild(tr);
