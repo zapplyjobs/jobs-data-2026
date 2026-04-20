@@ -21,7 +21,6 @@
       --yellow: #9a6700;
       --red: #d1242f;
       --accent: #ff5e3c;
-      --info: #4a9eff;
       --accent-bg: rgba(255, 94, 60, 0.10);
       --status-bar-bg: rgba(255, 94, 60, 0.05);
       --shadow: 0px 4px 24px 0px rgba(37,37,37,0.08);
@@ -37,7 +36,6 @@
       --yellow: #d29922;
       --red: #f85149;
       --accent: #ff5e3c;
-      --info: #58a6ff;
       --accent-bg: rgba(255, 94, 60, 0.10);
       --status-bar-bg: rgba(255, 94, 60, 0.08);
       --shadow: 0 1px 3px rgba(0,0,0,0.3);
@@ -48,8 +46,7 @@
       color: var(--text);
       font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       font-size: 14px;
-      height: 100vh;
-      overflow: hidden;
+      min-height: 100vh;
     }
     header {
       display: flex;
@@ -58,8 +55,8 @@
       padding: 16px 24px;
       border-bottom: 1px solid var(--border);
       background: var(--bg);
-      position: fixed;
-      top: 0; left: 0; right: 0;
+      position: sticky;
+      top: 0;
       z-index: 10;
     }
     header h1 { font-size: 18px; font-weight: 700; flex: 1; }
@@ -74,22 +71,10 @@
     }
     #theme-toggle:hover { background: var(--bg-card); }
     /* Layout: sidebar + content wrapper */
-    #status-bar {
-      position: fixed;
-      top: 57px; left: 0; right: 0;
-      z-index: 10;
-      padding: 8px 24px;
-      background: var(--status-bar-bg);
-      border-bottom: 1px solid var(--border);
-      font-size: 12px;
-    }
-    #status-bar.warn { background: rgba(210, 153, 34, 0.10); }
-    #status-bar.err  { background: rgba(248, 81, 73, 0.10); }
     #app-body {
       display: flex;
-      margin-top: 93px; /* header(57px) + status-bar(~36px) */
-      height: calc(100vh - 93px);
-      overflow: hidden;
+      height: calc(100vh - 57px); /* fill below header */
+      overflow: hidden; /* prevent app-body from scrolling — content-wrap scrolls instead */
     }
     #sidebar {
       width: 240px;
@@ -98,9 +83,6 @@
       border-right: 1px solid var(--border);
       padding: 16px 12px;
       overflow-y: auto;
-      position: sticky;
-      top: 0;
-      height: calc(100vh - 93px);
     }
     #sidebar-label {
       font-size: 10px;
@@ -152,6 +134,14 @@
       .tab { white-space: nowrap; margin-bottom: 0; }
       #content-wrap { padding-bottom: 72px; }
     }
+    #status-bar {
+      padding: 8px 24px;
+      background: var(--status-bar-bg);
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+    #status-bar.warn { background: rgba(210, 153, 34, 0.10); }
+    #status-bar.err  { background: rgba(248, 81, 73, 0.10); }
     .section-label {
       font-size: 11px;
       font-weight: 600;
@@ -200,7 +190,6 @@
       padding: 4px 8px 8px 0;
       border-bottom: 1px solid var(--border);
     }
-    th:not(:first-child):not(:nth-child(2)), td:not(:first-child):not(:nth-child(2)) { text-align: center }
     td {
       padding: 7px 8px 7px 0;
       border-bottom: 1px solid var(--border);
@@ -212,21 +201,6 @@
     .bar-track { flex: 1; background: var(--border); border-radius: 3px; height: 10px; }
     .bar-fill { height: 10px; border-radius: 3px; background: var(--accent); }
     .bar-value { font-size: 12px; width: 60px; text-align: right; }
-    .sortable { cursor: pointer; user-select: none; }
-    .sortable:hover { color: var(--accent); }
-    .sortable::after { content: ' ⇅'; font-size: 11px; opacity: 0.5; display: inline-block; width: 16px; text-align: left; }
-    .sortable.sort-asc::after { content: ' ↑'; opacity: 1; color: var(--accent); display: inline-block; width: 16px; text-align: left; }
-    .sortable.sort-desc::after { content: ' ↓'; opacity: 1; color: var(--accent); display: inline-block; width: 16px; text-align: left; }
-    #unified-enr-table tr:nth-child(even),
-    #pipeline-source-table tr:nth-child(even),
-    #class-companies-table tr:nth-child(even),
-    #class-patterns-table tr:nth-child(even),
-    #repo-table tr:nth-child(even) { background: rgba(128,128,128,0.08); }
-    #unified-enr-table tr:hover,
-    #pipeline-source-table tr:hover,
-    #class-companies-table tr:hover,
-    #class-patterns-table tr:hover,
-    #repo-table tr:hover { background: rgba(128,128,128,0.15); }
     .ok { color: var(--green); }
     .warn { color: var(--yellow); }
     .err { color: var(--red); }
@@ -258,7 +232,7 @@
     #auth-btn {
       width: 100%; padding: 9px;
       background: var(--accent); border: none; border-radius: 6px;
-      color: var(--text); font-size: 14px; font-weight: 600; cursor: pointer;
+      color: #0d1117; font-size: 14px; font-weight: 600; cursor: pointer;
     }
     #auth-btn:hover { opacity: 0.85; }
     #auth-error { color: var(--red); font-size: 12px; margin-top: 8px; min-height: 16px; }
@@ -300,62 +274,88 @@
 <div id="app-body">
 <aside id="sidebar">
   <div id="sidebar-label">Navigation</div>
-  <button class="tab active" data-tab="agg">⚙️ AGG</button>
-  <button class="tab" data-tab="tag">🏷️ TAG</button>
-  <button class="tab" data-tab="enr">🔬 ENR</button>
+  <button class="tab active" data-tab="inf">🔧 INF</button>
+  <button class="tab" data-tab="agg">⚙️ AGG</button>
   <button class="tab" data-tab="sup">🏭 SUP</button>
+  <button class="tab" data-tab="tag">🏷️ TAG</button>
+  <button class="tab" data-tab="enr">✅ ENR</button>
   <button class="tab" data-tab="out">📡 OUT</button>
-  <button class="tab" data-tab="inf">🔧 INF</button>
 </aside>
 
 <div id="content-wrap" style="flex:1;min-width:0;overflow-y:auto">
 <main id="content" style="padding: 24px; display:none">
 
   <!-- INF TAB — Infrastructure: services, alerts, architecture -->
-  <section id="tab-inf" class="tab-panel" style="display:none">
+  <section id="tab-inf" class="tab-panel">
     <div class="section-label">Services</div>
     <div class="grid-3" id="ops-services"></div>
     <div class="section-label" style="margin-top:24px">Pipeline Alert</div>
     <div id="ops-alert" class="card"><span class="muted">No alerts.</span></div>
-    <div class="section-label" style="margin-top:24px">Credentials & Key Dates</div>
-    <div class="grid" id="inf-deadlines"></div>
     <div class="section-label" style="margin-top:24px">Pipeline Architecture</div>
     <div class="card" style="overflow-x:auto">
-      <div id="arch-diagram-container"></div>
+      <div class="mermaid" id="arch-diagram" style="max-width:100%">
+graph TB
+  subgraph Trigger
+    CFW["CF Worker<br/>job-board-cron-worker<br/>15 min cycle"]
+  end
+  subgraph Pipeline
+    JBS["job-board-shared<br/>private submodule"] -.->|logic| AGG
+    AGG["jobs-aggregator-private<br/>fetch 9 ATS, tag, dedupe"]
+  end
+  subgraph Data["Data Layer"]
+    JD2["jobs-data-2026<br/>all_jobs.json + sidecars"]
+    ENR["enrich-jobs.js<br/>skills + visa + desc"]
+    DSC["discord-poster.js<br/>26 channels"]
+    DASH["Dashboard<br/>index.html"]
+  end
+  subgraph Consumers["Consumer Repos"]
+    NGJ["New-Grad-Jobs"]
+    INT["Internships"]
+    SWE["Software-Eng"]
+    DSN["Data-Science"]
+    HW["Hardware-Eng"]
+    HC["Healthcare"]
+  end
+  CFW -->|dispatch| AGG
+  CFW -->|dispatch| ENR
+  CFW -->|dispatch| DSC
+  AGG -->|all_jobs.json| JD2
+  ENR -->|enriched_jobs.json| JD2
+  DSC -.->|reads| JD2
+  DASH -.->|reads| JD2
+  JD2 -->|update-jobs.yml| NGJ
+  JD2 -->|update-jobs.yml| INT
+  JD2 -->|update-jobs.yml| SWE
+  JD2 -->|update-jobs.yml| DSN
+  JD2 -->|update-jobs.yml| HW
+  JD2 -->|update-jobs.yml| HC
+      </div>
     </div>
   </section>
 
   <!-- AGG TAB — Aggregation: pipeline runs, pool, duration, senior filter -->
-  <section id="tab-agg" class="tab-panel">
+  <section id="tab-agg" class="tab-panel" style="display:none">
     <div class="section-label">Pipeline Status</div>
     <div class="grid" id="ops-pipeline-stats"></div>
-    <div style="margin-top:4px;font-size:11px;color:var(--muted)">
-      <strong>Pool Size</strong> includes jobs &amp; internships. <strong>US Tech Jobs</strong> = SW + DS + HW + AI domains, US-tagged.
-    </div>
-    <!-- Deadlines removed from AGG (duplicated INF) — see INF tab -->
+    <div class="section-label" style="margin-top:24px">Last Run</div>
+    <div class="grid" id="pipeline-run-stats"></div>
     <div class="section-label" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center">
-      <span>Pool Trend <span style="font-weight:400;font-size:10px;color:var(--muted)">(pre-filter: all fetched jobs before freshness filter)</span></span>
+      <span>Pool Trend</span>
       <span id="pool-trend-pills"></span>
     </div>
     <div class="card" id="pool-trend-card" style="position:relative;height:220px">
       <canvas id="pool-trend-canvas"></canvas>
     </div>
     <div class="section-label" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center">
-      <span>Run Duration <span style="font-weight:400;font-size:10px;color:var(--muted)">(last run per day, minutes · target ≤25)</span></span>
+      <span>Run Duration</span>
       <span id="duration-trend-pills"></span>
     </div>
     <div class="card" id="duration-trend-card" style="position:relative;height:200px">
       <canvas id="duration-trend-canvas"></canvas>
     </div>
-    <div class="section-label" style="margin-top:24px">Domain Distribution <span style="font-weight:400;font-size:11px;color:var(--muted)">(jobs by field across the pool)</span></div>
-    <div class="card" id="domain-bars-wrap">
-      <div id="domain-bars"></div>
-    </div>
-    <div class="section-label" style="margin-top:24px">Senior Filter <span style="font-weight:400;font-size:11px;color:var(--muted)">(why jobs & internships are kept or removed)</span></div>
-    <div class="card">
-      <div id="filter-funnel">
-        <p class="muted" style="text-align:center; padding:20px 0">Loading…</p>
-      </div>
+    <div class="section-label" style="margin-top:24px">Senior Filter Funnel</div>
+    <div class="card" id="filter-funnel">
+      <p class="muted" style="text-align:center; padding:20px 0">Loading…</p>
     </div>
     <div class="section-label" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center">
       <span>Job Breakdown Trend</span>
@@ -369,167 +369,123 @@
 
   <!-- SUP TAB — Supply: sources, companies, source trends -->
   <section id="tab-sup" class="tab-panel" style="display:none">
-    <div class="section-label">Source & Job Supply</div>
-    <div class="grid" id="sup-health-cards"></div>
-    <div style="margin-top:4px;font-size:11px;color:var(--muted)">
-      <strong>Active Sources</strong> = ATS sources returning &gt;0 jobs. <strong>Zero-Yield</strong> = companies with 0 jobs across all sources.
+    <div class="section-label">By Source</div>
+    <div class="card" id="source-bars-card">
+      <div id="source-bars"></div>
     </div>
-    <div id="sup-freshness" style="font-size:11px;color:var(--muted);margin-bottom:8px"></div>
-    <div class="section-label">Jobs & Internships by Source <span style="font-weight:400;font-size:11px;color:var(--muted)">(current pool)</span></div>
+    <div class="section-label" style="margin-top:24px">Jobs by Source (current pool)</div>
     <div class="card">
       <table id="pipeline-source-table">
         <tr>
-          <th class="sortable">Source</th>
-          <th class="sortable">Total</th>
-          <th class="sortable">WoW</th>
-          <th class="sortable">Tech US</th>
+          <th>Source</th>
+          <th style="text-align:right">Total</th>
+          <th style="text-align:right">WoW</th>
+          <th style="text-align:right">Tech US</th>
         </tr>
       </table>
-      <div style="margin-top:8px;font-size:11px;color:var(--muted)">
-        <strong>Total</strong> = all jobs from this source in the 7-day pool. <strong>Tech US</strong> = jobs tagged tech-domain + US-location.
-        WoW deltas from daily snapshots. Color: <span style="color:var(--green)">growth</span> / <span style="color:var(--muted)">stable</span> / <span style="color:var(--yellow)">decline</span>.
-      </div>
     </div>
-    <div class="section-label" style="margin-top:24px">Companies by Total Job Count</div>
+    <div class="section-label" style="margin-top:24px">Top Companies</div>
     <div class="card" id="top-companies-card">
       <table id="top-companies-table">
         <tr>
           <th>#</th>
           <th>Company</th>
-          <th>Jobs</th>
+          <th style="text-align:right">Jobs</th>
         </tr>
       </table>
-      <div style="margin-top:8px;font-size:11px;color:var(--muted)">
-        Top companies by active job postings across all sources. Click ⚙ to toggle columns.
-      </div>
     </div>
-    <div class="section-label" style="margin-top:24px">Per-Source Trend <span id="source-trend-pills"></span></div>
+    <div class="section-label" style="margin-top:24px">Per-Source Trend</div>
     <div class="card" id="source-trend-card" style="position:relative;height:220px">
       <canvas id="source-trend-canvas"></canvas>
     </div>
-    <div class="section-label" style="margin-top:24px">Zero-Yield Sources</div>
-    <div class="card" id="zero-yield-card">
-      <p class="muted" style="text-align:center;padding:20px 0">Loading...</p>
-    </div>
   </section>
 
-  <!-- TAG TAB — Classification: G1 KPIs first, then domain detail -->
+  <!-- TAG TAB — Classification: domain distribution, general pool review -->
   <section id="tab-tag" class="tab-panel" style="display:none">
-    <div class="section-label">Classification Health</div>
-    <div class="grid" id="class-summary"></div>
-    <div style="margin-top:4px;font-size:11px;color:var(--muted)">
-      <strong>G1 Rate</strong> = % of jobs classified into a domain (not "General"). <strong>Desc%</strong> = jobs with a real description (not just title). Higher is better for both.
+    <div class="section-label">Domain Distribution</div>
+    <div class="card" id="domain-bars-wrap">
+      <div id="domain-bars"></div>
     </div>
+    <div class="section-label" style="margin-top:24px">General Pool Overview</div>
+    <div class="grid" id="class-summary"></div>
     <div class="section-label" style="margin-top:24px">Top Companies by Unclassified Jobs</div>
     <div class="card" id="class-companies-card">
       <table id="class-companies-table">
-        <tr><th>#</th><th class="sortable">Company</th><th class="sortable">Source</th><th class="sortable">General</th><th class="sortable">Classified</th><th class="sortable">Top Domain</th><th class="sortable">Desc%</th></tr>
+        <tr><th>#</th><th>Company</th><th style="text-align:right">General</th><th style="text-align:right">Classified</th><th>Top Domain</th><th style="text-align:right">Desc%</th></tr>
       </table>
-      <div style="margin-top:8px;font-size:11px;color:var(--muted)">
-        Companies with the most <strong>General</strong> (unclassified) jobs. These are candidates for taxonomy expansion or manual review. Click ⚙ to toggle columns.
-      </div>
     </div>
-    <div class="section-label" style="margin-top:24px">General Rate Trend <span id="general-trend-pills"></span></div>
-    <div class="card" id="general-trend-card" style="position:relative;height:200px">
-      <canvas id="general-trend-canvas"></canvas>
+    <div class="section-label" style="margin-top:24px">General Rate by ATS</div>
+    <div class="card" id="class-ats-card">
+      <div id="class-ats-bars"></div>
     </div>
     <div class="section-label" style="margin-top:24px">Recurring Title Patterns</div>
     <div class="card" id="class-patterns-card">
       <table id="class-patterns-table">
-        <tr><th class="sortable">Title Pattern</th><th class="sortable">Count</th><th class="sortable">Companies</th></tr>
+        <tr><th>Title Pattern</th><th style="text-align:right">Count</th><th style="text-align:right">Companies</th></tr>
       </table>
     </div>
     <div class="section-label" style="margin-top:24px">Tenant Default Candidates</div>
     <div class="card" id="class-tenants-card">
       <p class="muted" style="text-align:center; padding:20px 0">Loading...</p>
     </div>
-    <div style="margin-top:4px;font-size:11px;color:var(--muted)">
-      Companies whose default ATS job category was overridden by TAG classification. These are candidates for permanent tenant defaults in <code>tag-engine.js</code>.
-    </div>
   </section>
 
-  <!-- ENR TAB — Enrichment: tier-based quality view (redesigned S262 Phase 2) -->
+  <!-- ENR TAB — Enrichment: coverage, fill rates by source, trend, company quality -->
   <section id="tab-enr" class="tab-panel" style="display:none">
-    <div class="section-label" style="display:flex;justify-content:space-between;align-items:center">
-      <span>Enrichment Health</span>
-      <select id="enr-source-filter" style="font-size:11px;padding:3px 8px;border:1px solid var(--border);border-radius:4px;background:transparent;color:var(--muted);cursor:pointer">
-        <option value="all">All Sources</option>
-        <option value="workday">workday</option>
-        <option value="greenhouse">greenhouse</option>
-        <option value="ashby">ashby</option>
-        <option value="lever">lever</option>
-        <option value="smartrecruiters">smartrecruiters</option>
-        <option value="amazon">amazon</option>
-        <option value="jsearch">jsearch</option>
-        <option value="netflix">netflix</option>
-        <option value="eightfold">eightfold</option>
-      </select>
-    </div>
+    <div class="section-label">Coverage Summary</div>
     <div class="grid" id="quality-enrich"></div>
     <div class="section-label" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center">
-      <span>Tier Distribution by Source</span>
-      <span id="tier-filter-pills"></span>
+      <span>Enrichment Trend</span>
+      <span id="enrich-trend-pills"></span>
     </div>
-    <div class="card" id="tier-source-card" style="position:relative;height:380px">
-      <canvas id="tier-source-canvas"></canvas>
-    </div>
-    <div class="section-label" style="margin-top:24px">Source &amp; Company Quality</div>
-    <div class="card">
-      <table id="unified-enr-table">
-        <thead>
-          <tr>
-            <th style="width:20px"></th>
-            <th class="sortable">Source</th>
-            <th class="sortable">Jobs</th>
-            <th class="sortable">Enriched</th>
-            <th class="sortable">T3%</th>
-            <th class="sortable">Skills%</th>
-            <th class="sortable">Visa%</th>
-            <th>Visa Split</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-      <div style="margin-top:8px;font-size:11px;color:var(--muted)">
-        Click ▶ to expand companies under a source.
-        <strong>Visa Split:</strong> <span style="color:var(--info)">LCA match</span> / <span style="color:var(--green)">hard text</span> / <span style="color:var(--yellow)">ATS form</span> / <span style="color:var(--muted)">no signal</span>.
-        <strong>Visa%</strong> = any signal (union of all types). <strong>Company Visa%</strong> = hard text only.
-      </div>
-    </div>
-    <div class="section-label" style="margin-top:24px">Enrichment Trend <span id="enrich-trend-pills" style="margin-left:8px"></span></div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;margin-top:-4px" id="enrich-trend-source-pills"></div>
     <div class="card" id="enrich-trend-card" style="position:relative;height:220px">
       <canvas id="enrich-trend-canvas"></canvas>
+    </div>
+    <div class="section-label" style="margin-top:24px">Fill Rates by Source</div>
+    <div class="card">
+      <table id="enrich-source-table">
+        <tr>
+          <th>Source</th>
+          <th style="text-align:right">Tech US</th>
+          <th style="text-align:right">Enriched</th>
+          <th style="text-align:right">Enrich %</th>
+          <th style="text-align:right">Has Desc</th>
+          <th style="text-align:right">Desc %</th>
+          <th style="text-align:right">Skills</th>
+          <th style="text-align:right">Skills %</th>
+          <th style="text-align:right">Visa</th>
+          <th>Notes</th>
+        </tr>
+      </table>
+    </div>
+    <div class="section-label" style="margin-top:24px">Top Companies — Enrichment Quality</div>
+    <div class="card">
+      <table id="company-quality-table">
+        <tr>
+          <th>Company</th>
+          <th>Source</th>
+          <th style="text-align:right">Enriched</th>
+          <th style="text-align:right">Skills %</th>
+          <th style="text-align:right">Summary %</th>
+          <th style="text-align:right">Visa %</th>
+        </tr>
+      </table>
     </div>
   </section>
 
   <!-- OUT TAB — Output: consumer repos, stars, Discord -->
   <section id="tab-out" class="tab-panel" style="display:none">
-    <div class="section-label">Consumer Health</div>
-    <div class="grid" id="out-health-cards"></div>
-    <div style="margin-top:4px;font-size:11px;color:var(--muted)">
-      <strong>Consumer Freshness</strong> = repos updated &lt;2h ago. <strong>Stars</strong> = GitHub repo stars across all job boards. Delta = current vs 7 snapshots back.
-    </div>
-    <div class="section-label" style="margin-top:24px">Data Quality</div>
-    <div class="grid" id="out-quality-cards"></div>
-    <div style="margin-top:4px;font-size:11px;color:var(--muted)">
-      <strong>Visa Reach</strong> = % of enriched tech+US jobs with any visa signal (hard text, LCA match, or ATS form). <strong>Daily Report</strong> = how current the daily stats baseline is. <strong>Alert Check</strong> = last pipeline alert health check.
-    </div>
-    <div class="section-label" style="margin-top:24px">Consumer Repos</div>
+    <div class="section-label">Consumer Repos</div>
     <div class="card">
       <table id="repo-table">
         <tr>
-          <th style="text-align:left">Health</th>
-          <th style="text-align:left" class="sortable">Repo</th>
-          <th style="text-align:center" class="sortable">Jobs</th>
-          <th style="text-align:center" class="sortable">⭐</th>
-          <th style="text-align:center" class="sortable">⭐ WoW</th>
-          <th style="text-align:center" class="sortable">👁 Views</th>
-          <th style="text-align:center" class="sortable">Updated</th>
+          <th>Repo</th>
+          <th style="text-align:right">Jobs</th>
+          <th>Status</th>
+          <th style="text-align:right">⭐</th>
         </tr>
       </table>
-      <div style="margin-top:8px;font-size:11px;color:var(--muted)">
-        <strong>⭐ WoW</strong> = star change over last 7 snapshots. <strong>👁 Views</strong> = 14-day total from GitHub Traffic API. <strong>Health</strong> = workflow status + freshness.
-      </div>
     </div>
     <div class="section-label" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center">
       <span>Stars Trend</span>
@@ -538,38 +494,20 @@
     <div class="card" id="stars-trend-card" style="position:relative;height:200px">
       <canvas id="stars-trend-canvas"></canvas>
     </div>
-    <div class="section-label" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center">
-      <span>GitHub Traffic</span>
-      <span id="traffic-trend-pills"></span>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div class="card" id="traffic-trend-card" style="position:relative;height:200px">
-        <canvas id="traffic-trend-canvas"></canvas>
-      </div>
-      <div class="card" id="traffic-referrers">
-        <p class="muted" style="text-align:center; padding:40px 0">Loading…</p>
-      </div>
-    </div>
-    <div style="margin-top:4px;font-size:11px;color:var(--muted)">
-      <strong>Views</strong> = 14-day rolling window from GitHub Traffic API. Updated daily. <strong>Referrers</strong> = top sources driving traffic across all repos.
-    </div>
     <div class="section-label" style="margin-top:24px">Discord</div>
-    <div class="grid" id="discord-verification"></div>
-    <div class="card" id="discord-posting-trend" style="position:relative;height:180px">
-      <canvas id="discord-posting-canvas"></canvas>
-    </div>
     <div class="card" id="discord-stats-card">
       <p class="muted" style="text-align:center; padding:40px 0">Loading…</p>
     </div>
   </section>
 
 </main>
+</div><!-- #content-wrap -->
+</div><!-- #app-body -->
+
 <footer>
   Auto-refreshed from <a href="https://github.com/zapplyjobs/jobs-data-2026" style="color:var(--muted)">jobs-data-2026</a> · pipeline runs every 15 min ·
   <a href="https://github.com/zapplyjobs" style="color:var(--muted)">zapplyjobs</a>
 </footer>
-</div><!-- #content-wrap -->
-</div><!-- #app-body -->
 
 <script>
 // Dashboard proxy secret — injected at deploy time via deploy-pages.yml
@@ -629,7 +567,6 @@ const DASHBOARD_SECRET = '__DASHBOARD_SECRET__';
 })();
 
 // Tab switching
-let _mermaidRendered = false;
 (function () {
   document.querySelectorAll('.tab').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -637,70 +574,9 @@ let _mermaidRendered = false;
       document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
       btn.classList.add('active');
       document.getElementById('tab-' + btn.dataset.tab).style.display = 'block';
-      // Render mermaid when INF tab becomes visible using mermaid.render() API
-      if (btn.dataset.tab === 'inf' && !_mermaidRendered) {
-        setTimeout(async () => {
-          try {
-            const container = document.getElementById('arch-diagram-container');
-            if (!container) return;
-            const diagramDef = `graph TB
-  CFW["CF Worker - 15 min cycle"]
-  JBS["job-board-shared - private submodule"] -.->|logic| AGG
-  AGG["jobs-aggregator - fetch + tag + dedupe"]
-  JD2["jobs-data-2026 - all_jobs.json"]
-  ARC["jobs-archive-private - weekly expired JSONL"]
-  ENR["enrich-jobs - skills + visa"]
-  DSC["discord-poster - 26 channels"]
-  NGJ["New-Grad"]
-  INT["Internships"]
-  SWE["Software"]
-  DSN["Data-Sci"]
-  HW["Hardware"]
-  HC["Healthcare"]
-  CFW -->|dispatch| AGG
-  CFW -->|dispatch| ENR
-  CFW -->|dispatch| DSC
-  AGG -->|all_jobs| JD2
-  AGG -.->|expired jobs| ARC
-  ENR -->|enriched| JD2
-  DSC -.->|reads| JD2
-  JD2 -->|update| NGJ
-  JD2 -->|update| INT
-  JD2 -->|update| SWE
-  JD2 -->|update| DSN
-  JD2 -->|update| HW
-  JD2 -->|update| HC
-  style CFW fill:transparent,stroke:#f97316,stroke-width:2px,color:#fdba74
-  style AGG fill:transparent,stroke:#4a9eff,stroke-width:2px,color:#88bbff
-  style JD2 fill:transparent,stroke:#4aff7e,stroke-width:2px,color:#88ffaa
-  style ARC fill:transparent,stroke:#f59e0b,stroke-dasharray:4,color:#fbbf24
-  style ENR fill:transparent,stroke:#4a9eff,color:#88bbff
-  style DSC fill:transparent,stroke:#9b7eff,color:#bb99ff
-  style JBS fill:transparent,stroke:#f59e0b,color:#fbbf24
-  style NGJ fill:transparent,stroke:#9b7eff,color:#bb99ff
-  style INT fill:transparent,stroke:#9b7eff,color:#bb99ff
-  style SWE fill:transparent,stroke:#9b7eff,color:#bb99ff
-  style DSN fill:transparent,stroke:#9b7eff,color:#bb99ff
-  style HW fill:transparent,stroke:#9b7eff,color:#bb99ff
-  style HC fill:transparent,stroke:#9b7eff,color:#bb99ff`;
-            const { svg } = await mermaid.render('arch-diagram-svg', diagramDef);
-            container.innerHTML = svg;
-            _mermaidRendered = true;
-          } catch(e) { console.warn('mermaid render:', e); }
-        }, 200);
-      }
     });
   });
 })();
-
-// Resolve CSS variables for chart.js (canvas can't read CSS vars directly)
-const _cs = getComputedStyle(document.documentElement);
-function cv(name) { return (_cs.getPropertyValue(name) || '').trim(); }
-const C = {
-  green: cv('--green'), yellow: cv('--yellow'), red: cv('--red'),
-  accent: cv('--accent'), info: cv('--info'), muted: cv('--muted'),
-  text: cv('--text'), border: cv('--border'),
-};
 
 // Data URLs — function so each loadAll() call gets a fresh cache-busting timestamp (invariant D-2)
 function dataUrls() {
@@ -716,8 +592,6 @@ function dataUrls() {
     pipelineAlert: `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/pipeline-alert.json?t=${t}`,
     historyArchive: `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/history-archive.jsonl?t=${t}`,
     generalReview: `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/general-review.json?t=${t}`,
-    discordVerification: `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/discord-verification.json?t=${t}`,
-    trafficHistory: `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/traffic-history.jsonl?t=${t}`,
   };
 }
 
@@ -743,8 +617,7 @@ function addRow(tableId, cells) {
   cells.forEach((c, i) => {
     const td = document.createElement('td');
     td.innerHTML = c;
-    if (i >= 2) td.style.textAlign = 'center';
-    else if (i > 0) td.style.textAlign = 'left';
+    if (i > 0) td.style.textAlign = 'right';
     tr.appendChild(td);
   });
   document.getElementById(tableId).appendChild(tr);
@@ -780,7 +653,7 @@ function renderStatusBar(isoTs) {
 }
 
 // Ops tab — pipeline stats section (always populated from metrics/metadata)
-function renderOpsPipelineStats(metrics, metadata, enrichStats, daily, historyEntries) {
+function renderOpsPipelineStats(metrics, metadata, enrichStats) {
   const el = document.getElementById('ops-pipeline-stats');
   if (!el) return;
   const p = (metrics && metrics.pipeline) || {};
@@ -791,19 +664,16 @@ function renderOpsPipelineStats(metrics, metadata, enrichStats, daily, historyEn
   const pipelineStatus = hours == null ? '—' : hours < 0.5 ? 'LIVE' : hours < 6 ? 'DELAYED' : 'DOWN';
   const statusIcon = hours == null ? '⚪' : hours < 0.5 ? '🟢' : hours < 6 ? '🟡' : '🔴';
   const sf = metadata && metadata.senior_filter_stats;
+  const entryCount = sf ? sf.entry_level_jobs : null;
   const usTechJobs = enrichStats ? enrichStats.total_tech_us : null;
-  // Pool card: metadata.total_jobs is the real post-filter count (primary source).
-  // history.jsonl records pre-filter totals — not suitable for card display after freshness filter.
-  // growth.total_delta compares post-filter vs pre-filter baseline — dishonest as "trend".
-  // Show honest note until post-filter history accumulates (pipeline change needed).
-  const poolDisplay = poolTotal;
-  const poolSub = 'jobs & internships · post freshness filter';
 
   el.innerHTML =
     statCard({ icon: statusIcon, label: 'Pipeline Status', value: pipelineStatus,
                sub: statusTs ? `Last run: ${age(statusTs)}` : null }) +
-    statCard({ icon: '🏗️', label: 'Pool Size', value: fmt(poolDisplay),
-               sub: poolSub ? poolSub : 'jobs & internships' }) +
+    statCard({ icon: '🏗️', label: 'Pool Size', value: fmt(poolTotal),
+               sub: entryCount ? `${fmt(entryCount)} entry-level` : null }) +
+    statCard({ icon: '⏱️', label: 'Last Run Duration', value: durationMin ? `${durationMin} min` : '—',
+               sub: 'Target: ≤25 min' }) +
     statCard({ icon: '💻', label: 'US Tech Jobs', value: fmt(usTechJobs),
                sub: 'SW + DS + HW + AI, US-tagged' });
 }
@@ -816,7 +686,7 @@ function renderOpsServices(metadata) {
   const aggOk = ts && (Date.now() - new Date(ts).getTime()) < 6 * 3600000;
   const services = [
     { name: 'Aggregator', ok: aggOk, detail: ts ? age(ts) : 'unknown' },
-    // CF Worker card removed S266 — always shows "Online" (hardcoded ok: true). Zero information value.
+    { name: 'CF Worker cron', ok: true, detail: 'every 15 min' },
   ];
   el.innerHTML = services.map(s => `
     <div class="stat-card">
@@ -829,90 +699,12 @@ function renderOpsServices(metadata) {
 
 // Ops tab — pipeline alert only (role status + decisions removed — duplicates LCC, goes stale)
 function renderAlert(pipelineAlert) {
-  const el = document.getElementById('ops-alert');
-  if (!el || !pipelineAlert) return;
-  const checkedAt = pipelineAlert.checked_at ? age(pipelineAlert.checked_at) : null;
-  if (pipelineAlert.active && pipelineAlert.message) {
-    const failures = pipelineAlert.failures || [];
-    el.innerHTML = `<span class="err">🔴 ${failures.length} check(s) failing</span>` +
-      failures.map(f => `<div style="margin:4px 0 0 20px;font-size:12px;color:var(--red)">• ${esc(f)}</div>`).join('') +
-      (checkedAt ? `<div style="margin-top:8px;font-size:11px;color:var(--muted)">Last checked: ${checkedAt}</div>` : '');
-  } else {
-    el.innerHTML = `<span class="ok">✅ All checks passing</span>` +
-      (checkedAt ? `<span style="margin-left:12px;font-size:11px;color:var(--muted)">Checked ${checkedAt}</span>` : '');
+  const alertText = (pipelineAlert && pipelineAlert.active && pipelineAlert.message)
+    ? pipelineAlert.message
+    : null;
+  if (alertText) {
+    document.getElementById('ops-alert').innerHTML = `<span class="err">🔴 ${esc(alertText)}</span>`;
   }
-}
-
-// TAG tab — General rate trend over time
-let _generalTrendAll = null;
-function renderGeneralTrend(historyEntries) {
-  _generalTrendAll = (historyEntries || []).filter(e => e.by_domain && e.total);
-  renderGeneralTrendChart(_generalTrendAll, 30);
-}
-function renderGeneralTrendChart(all, days) {
-  if (!all || all.length < 2) {
-    const el = document.getElementById('general-trend-card');
-    if (el) el.innerHTML = '<p class="muted" style="text-align:center;padding:60px 0">General rate trend — data accumulates daily.</p>';
-    return;
-  }
-  const entries = days ? all.slice(-days) : all;
-  if (entries.length < 2) { renderGeneralTrendChart(all, null); return; }
-  const pillsEl = document.getElementById('general-trend-pills');
-  if (pillsEl) {
-    const ps = d => `display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--border);margin-left:4px;` +
-      (d === days ? 'background:var(--accent);color:#fff;border-color:var(--accent)' : 'background:transparent;color:var(--muted)');
-    pillsEl.innerHTML = [7, 14, 30, null].map(d => {
-      const label = d === 7 ? '7D' : d === 14 ? '14D' : d === 30 ? '30D' : 'All';
-      return `<span style="${ps(d)}" onclick="renderGeneralTrendChart(_generalTrendAll,${d})">${label}</span>`;
-    }).join('');
-  }
-  const rates = entries.map(e => {
-    const gen = (e.by_domain && e.by_domain.general) || 0;
-    return { date: e.date, rate: e.total > 0 ? Math.round(1000 * gen / e.total) / 10 : 0 };
-  });
-  makeChart('general-trend-canvas', {
-    type: 'line',
-    data: {
-      labels: rates.map(r => (r.date || '').slice(5)),
-      datasets: [{
-        label: 'General Rate %',
-        data: rates.map(r => r.rate),
-        borderColor: C.accent, backgroundColor: 'rgba(255,94,60,0.08)', fill: true,
-        tension: 0.3, pointRadius: 2, pointHoverRadius: 5, borderWidth: 2,
-      }]
-    },
-    options: {
-      ...CHART_DEFAULTS,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: CHART_DEFAULTS.scales.x,
-        y: { ...CHART_DEFAULTS.scales.y, min: 0, ticks: { ...CHART_DEFAULTS.scales.y.ticks, callback: v => v + '%' } }
-      }
-    }
-  });
-}
-
-// INF tab — secrets and deadlines (hardcoded known dates — update when rotated)
-function renderDeadlines() {
-  const targets = [document.getElementById('inf-deadlines')].filter(Boolean);
-  if (!targets.length) return;
-  const DEADLINES = [
-    { label: 'GH_PAT Expiry', date: '2026-05-30', action: 'Rotate by May 1 (INF-17)' },
-    { label: 'GIT_CRYPT_KEY', date: '2026-07-04', action: 'Rotate by Jul 4 (INF-20)' },
-  ];
-  const now = Date.now();
-  const html = DEADLINES.map(d => {
-    const daysLeft = Math.ceil((new Date(d.date).getTime() - now) / 86400000);
-    const urgency = daysLeft <= 7 ? 'var(--red)' : daysLeft <= 30 ? 'var(--yellow)' : 'var(--green)';
-    const icon = daysLeft <= 7 ? '🔴' : daysLeft <= 30 ? '🟡' : '🟢';
-    return statCard({
-      icon,
-      label: d.label,
-      value: `${daysLeft}d`,
-      sub: `${d.date} — ${d.action}`,
-    });
-  }).join('');
-  targets.forEach(el => { el.innerHTML = html; });
 }
 
 // Supply tab — domain distribution bars (moved from Overview)
@@ -925,19 +717,17 @@ function renderDomainBars(metadata) {
   const max = entries[0][1];
   barsEl.innerHTML = entries.map(([k, v]) => {
     const pct = max > 0 ? Math.round((v / max) * 100) : 0;
-    const ratio = max > 0 ? v / max : 0;
-    const color = ratio >= 0.6 ? 'var(--accent)' : ratio >= 0.3 ? 'var(--yellow)' : 'var(--muted)';
     return `
       <div class="bar-row">
         <span class="bar-label">${k}</span>
-        <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
         <span class="bar-value">${fmt(v)}</span>
       </div>`;
   }).join('');
 }
 
 // Supply tab — top companies table
-function renderTopCompanies(metadata, enrichStats, generalReview) {
+function renderTopCompanies(metadata) {
   const card = document.getElementById('top-companies-card');
   if (!card) return;
   const companies = metadata && Array.isArray(metadata.top_companies) ? metadata.top_companies : [];
@@ -945,205 +735,82 @@ function renderTopCompanies(metadata, enrichStats, generalReview) {
     card.innerHTML = '<p class="muted" style="text-align:center;padding:20px 0">Top companies data unavailable.</p>';
     return;
   }
-  // Cross-source lookup maps
-  const enrMap = {};
-  (enrichStats?.by_company || []).forEach(c => { enrMap[c.company] = c; });
-  const genMap = {};
-  (generalReview?.by_company || []).forEach(c => { genMap[c.name] = c; });
-
+  // DASH-4b: show domain column if data includes it
   const hasDomain = companies.some(c => c.domain);
-  const pctColor = v => v == null ? '' : v >= 80 ? 'color:var(--green)' : v >= 40 ? 'color:var(--yellow)' : 'color:var(--red)';
-
   card.innerHTML = `<table id="top-companies-table">
-    <tr><th>#</th><th>Company</th>${hasDomain ? '<th>Domain</th>' : ''}<th>Jobs</th><th>T3%</th><th>General</th></tr>
-    ${companies.map((c, i) => {
-      const enr = enrMap[c.company];
-      const gen = genMap[c.company];
-      const t3 = enr?.t3_pct;
-      const genCount = gen?.general;
-      // T3% with gradient: dark green >80, green 50-80, yellow 20-50, red <20
-      const t3Color = t3 == null ? '' : t3 >= 80 ? 'color:var(--green)' : t3 >= 50 ? 'color:var(--green)' : t3 >= 20 ? 'color:var(--yellow)' : 'color:var(--red)';
-      const t3Display = t3 != null ? `<span style="${t3Color}">${t3}%</span>` : '<span class="muted" title="Not in tech+US enrichment pool">N/A</span>';
-      // General with gradient: red >20, yellow 1-20, muted 0
-      const genColor = genCount == null ? '' : genCount > 20 ? 'color:var(--red)' : genCount > 0 ? 'color:var(--yellow)' : '';
-      const genDisplay = genCount != null ? `<span style="${genColor}">${genCount}</span>` : '<span class="muted">—</span>';
-      return `<tr>
+    <tr><th>#</th><th>Company</th>${hasDomain ? '<th>Domain</th>' : ''}<th style="text-align:right">Jobs</th></tr>
+    ${companies.map((c, i) => `<tr>
       <td style="color:var(--muted);width:32px">${i + 1}</td>
       <td>${esc(c.company)}</td>
       ${hasDomain ? `<td style="color:var(--muted)">${esc(c.domain || 'general')}</td>` : ''}
-      <td>${fmt(c.count)}</td>
-      <td>${t3Display}</td>
-      <td>${genDisplay}</td>
-    </tr>`;
-    }).join('')}
+      <td style="text-align:right">${fmt(c.count)}</td>
+    </tr>`).join('')}
   </table>`;
 }
 
-// Quality tab
-function renderQuality(d, enrichStats, metadata, enrichHistory) {
-  const p = d.pipeline || {};
-  const enrich = d.enrichment || p.enrichment || {};
+// ENR tab — Coverage Summary cards + Fill Rates by Source table
+// Reads exclusively from enrichment-stats.json (not metrics.json which can be hours stale)
+function renderQuality(d, enrichStats, metadata) {
+  if (!enrichStats) return;
 
-  let visaTotal = null;
-  if (enrichStats && enrichStats.by_source) {
-    visaTotal = Object.values(enrichStats.by_source)
-      .reduce((s, v) => s + (v.sponsors_visa || 0), 0);
-  }
+  const techUs = enrichStats.total_tech_us || 0;
+  const enriched = enrichStats.total_enriched || 0;
+  const hasDesc = enrichStats.total_has_description || 0;
+  const totalSkills = Object.values(enrichStats.by_source || {})
+    .reduce((s, v) => s + (v.required_skills || 0), 0);
+  const descGap = techUs - hasDesc; // tech+US jobs still waiting for a description
 
-  // Compute deltas from yesterday's enrichment history snapshot
-  let prevSnapshot = null;
-  if (enrichHistory && enrichHistory.length >= 2) {
-    prevSnapshot = enrichHistory[enrichHistory.length - 2]; // yesterday
-  }
-  function delta(current, prevKey) {
-    if (!prevSnapshot || current == null) return '';
-    const prev = prevSnapshot[prevKey];
-    if (prev == null) return '';
-    const diff = current - prev;
-    if (diff === 0) return '';
-    const sign = diff > 0 ? '+' : '';
-    const color = diff > 0 ? 'var(--green)' : 'var(--red)';
-    return ` <span style="font-size:11px;color:${color}">${sign}${diff}</span>`;
-  }
+  const coveragePct = techUs > 0 ? Math.round(100 * enriched / techUs) : 0;
+  const skillsPct   = enriched > 0 ? Math.round(100 * totalSkills / enriched) : 0;
+  const descPct     = techUs > 0 ? Math.round(100 * hasDesc / techUs) : 0;
 
-  // Filter Performance removed — lives in Pipeline tab Senior Filter Funnel (single-home rule)
-  let t3rate = '—', t3sub = '', t3trend = '';
-  if (enrichStats && enrichStats.tiers) {
-    const t = enrichStats.tiers;
-    const total = t.t0 + t.t1 + t.t2 + t.t3;
-    const t3pct = total > 0 ? Math.round(100 * t.t3 / total) : 0;
-    t3rate = t3pct + '%';
-    t3sub = `${fmt(t.t3)} of ${fmt(total)} jobs`;
-    if (prevSnapshot && prevSnapshot.t3_pct != null) {
-      const diff = t3pct - prevSnapshot.t3_pct;
-      if (diff !== 0) {
-        const sign = diff > 0 ? '+' : '';
-        const color = diff > 0 ? 'var(--green)' : 'var(--red)';
-        t3trend = `${sign}${diff}pp`;
-        t3sub += ` <span style="color:${color};font-weight:600">${t3trend}</span>`;
-      }
-    }
-  }
-  const techUs = enrichStats ? enrichStats.total_tech_us : null;
-  const enriched = enrichStats ? enrichStats.total_enriched : null;
-  const hasDesc = enrichStats ? enrichStats.total_has_description : null;
-  const queueGap = (techUs != null && enriched != null) ? techUs - enriched : null;
+  const pctColor = (v, warn, ok) => v >= ok ? 'var(--green)' : v >= warn ? 'var(--yellow)' : 'var(--red)';
+
   document.getElementById('quality-enrich').innerHTML =
-    statCard({ icon: '🏆', label: 'Tier 3 Rate',     value: t3rate, sub: t3sub, trend: t3trend || null, trendDir: t3trend && t3trend.startsWith('+') ? 'up' : t3trend ? 'down' : null }) +
-    statCard({ icon: '🔬', label: 'Processed',  value: fmt(enriched) + delta(enriched, 'total_enriched'), sub: `of ${fmt(techUs)} tech+US · Target: 100%` }) +
-    statCard({ icon: '📄', label: 'Has Description', value: fmt(hasDesc), sub: (hasDesc != null && techUs != null ? Math.round(100 * hasDesc / techUs) + '% of pool · ' : '') + 'Target: 100%' }) +
-    statCard({ icon: '⏳', label: 'In Queue',  value: queueGap != null ? fmt(queueGap) : '—', sub: queueGap != null && queueGap === 0 ? 'All caught up' : 'awaiting enrichment · Target: 0' });
+    statCard({ icon: '🔬', label: 'Coverage',      value: `<span style="color:${pctColor(coveragePct,70,85)}">${coveragePct}%</span>`, sub: `${fmt(enriched)} / ${fmt(techUs)} tech+US enriched` }) +
+    statCard({ icon: '🛠️', label: 'Skills Fill',   value: `<span style="color:${pctColor(skillsPct,70,85)}">${skillsPct}%</span>`,   sub: `${fmt(totalSkills)} / ${fmt(enriched)} enriched have skills` }) +
+    statCard({ icon: '📄', label: 'Desc Fill',      value: `<span style="color:${pctColor(descPct,70,85)}">${descPct}%</span>`,       sub: `${fmt(hasDesc)} / ${fmt(techUs)} tech+US have description` }) +
+    statCard({ icon: '⏳', label: 'Desc Queue',     value: fmt(descGap),  sub: 'tech+US jobs without description yet' });
 
-  if (enrichStats && enrichStats.by_source) {
-    const ORDER = ['greenhouse', 'workday', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'netflix', 'eightfold'];
+  if (enrichStats.by_source) {
+    const ORDER = ['greenhouse', 'workday', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'eightfold'];
     const SOURCE_NOTES = {
       workday:   'Desc backfill in progress',
       eightfold: 'No description fetcher',
     };
+    const colorPct = (v, warn, ok) => v >= ok ? 'var(--green)' : v >= warn ? 'var(--yellow)' : 'var(--red)';
     const sources = ORDER.filter(s => enrichStats.by_source[s]);
+    const tbl = document.getElementById('enrich-source-table');
     sources.forEach(src => {
       const v = enrichStats.by_source[src];
-      const tech = v.tech_us || 0;
-      const enriched = v.enriched || 0;
-      // ENR-12: Tier data for detail table
-      const tbs = enrichStats.tiers_by_source || {};
-      const tier = tbs[src] || { t0: 0, t1: 0, t2: 0, t3: 0 };
-      const tierTotal = tier.t0 + tier.t1 + tier.t2 + tier.t3;
-      const t3pct = tierTotal > 0 ? Math.round(100 * tier.t3 / tierTotal) : 0;
-      const t3color = t3pct >= 80 ? 'var(--green)' : t3pct >= 40 ? 'var(--yellow)' : 'var(--red)';
-      // S268A: Enrichment Details table removed — data merged into Field Coverage
-      // Tier counts visible in Tier Distribution chart tooltips
+      const tech    = v.tech_us  || 0;
+      const enr     = v.enriched || 0;
+      const desc    = v.has_desc || 0;
+      const skills  = v.required_skills || 0;
+      const enrichPct = tech   > 0 ? Math.round(100 * enr    / tech) : 0;
+      const descPct   = tech   > 0 ? Math.round(100 * desc   / tech) : 0;
+      const skillsPct = enr    > 0 ? Math.round(100 * skills / enr)  : 0;
+      const note = SOURCE_NOTES[src] || '';
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${src}</td>
+        <td style="text-align:right">${fmt(tech)}</td>
+        <td style="text-align:right">${fmt(enr)}</td>
+        <td style="text-align:right;color:${colorPct(enrichPct,70,85)}">${enrichPct}%</td>
+        <td style="text-align:right">${fmt(desc)}</td>
+        <td style="text-align:right;color:${colorPct(descPct,70,85)}">${descPct}%</td>
+        <td style="text-align:right">${fmt(skills)}</td>
+        <td style="text-align:right;color:${colorPct(skillsPct,70,85)}">${skillsPct}%</td>
+        <td style="text-align:right">${fmt(v.sponsors_visa || 0)}</td>
+        <td style="font-size:11px;color:var(--muted)">${note}</td>
+      `;
+      tbl.appendChild(tr);
     });
   }
 }
 
 // Distribution tab — repo table
-// OUT tab — summary stat cards (glance level)
-// renderOutSummary removed S266 — stat cards failed actionability test (stars/repo count/discord total don't prompt decisions)
-
-// OUT tab — health stat cards
-function renderOutHealth(d, daily, historyEntries) {
-  const el = document.getElementById('out-health-cards');
-  if (!el) return;
-  const repos = d.repos || {};
-  const repoEntries = Object.entries(repos);
-  // Total stars
-  const totalStars = repoEntries.reduce((s, [, r]) => s + (r.stars || 0), 0);
-  // Star delta (7d) from history.jsonl — daily.stars is a snapshot dict, NOT a time series
-  const allStarEntries = (historyEntries || []).filter(e => e.stars && typeof e.stars === 'object')
-    .map(e => ({ date: e.date, total: Object.values(e.stars).reduce((s, v) => s + v, 0) }));
-  const starEntries = allStarEntries.slice(-7);
-  const starDelta = starEntries.length >= 2 ? starEntries[starEntries.length - 1].total - starEntries[0].total : null;
-  const starRangeStart = starEntries.length >= 2 ? starEntries[0].date : null;
-  const starRangeEnd = starEntries.length >= 2 ? starEntries[starEntries.length - 1].date : null;
-  const starDeltaStr = starDelta != null ? `<span style="color:${starDelta >= 0 ? 'var(--green)' : 'var(--red)'}">${starDelta >= 0 ? '+' : ''}${starDelta}</span> <span style="font-size:10px">(${starRangeStart} → ${starRangeEnd})</span>` : '';
-  // Consumer freshness: repos updated <2h ago (skip repos with no data)
-  let freshCount = 0, dataCount = 0;
-  repoEntries.forEach(([, r]) => {
-    const updateTs = r.lastJobsUpdate || r.workflowLastRun;
-    if (updateTs) {
-      dataCount++;
-      const age = (Date.now() - new Date(updateTs).getTime()) / 3600000;
-      if (age < 2) freshCount++;
-    }
-  });
-  const totalRepos = repoEntries.length;
-  const noData = totalRepos - dataCount;
-  const freshPct = dataCount > 0 ? Math.round(100 * freshCount / dataCount) : 0;
-  const freshColor = freshPct >= 80 ? 'var(--green)' : freshPct >= 50 ? 'var(--yellow)' : 'var(--red)';
-  const freshSub = noData > 0 ? `${freshCount}/${dataCount} updated <2h ago · ${noData} no data` : `${freshCount}/${dataCount} repos updated <2h ago`;
-  el.innerHTML =
-    statCard({ icon: '⭐', label: 'Total Stars', value: fmt(totalStars), sub: starDeltaStr + (starDeltaStr ? ' · ' : '') + repoEntries.length + ' repos' }) +
-    statCard({ icon: '🔄', label: 'Consumer Freshness', value: `<span style="color:${freshColor}">${freshPct}%</span>`, sub: freshSub });
-}
-
-// OUT tab — data quality stat cards (DASH-10)
-function renderOutQuality(enrichStats, dailyStats, alertData) {
-  const el = document.getElementById('out-quality-cards');
-  if (!el) return;
-  // 1. Visa signal reach from enrichment-stats.json
-  let visaReach = null, visaSub = '';
-  if (enrichStats && enrichStats.by_source) {
-    let totalAnyVisa = 0, totalEnriched = 0;
-    for (const [, src] of Object.entries(enrichStats.by_source)) {
-      totalAnyVisa += (src.any_visa_signal || 0);
-      totalEnriched += (src.enriched || 0);
-    }
-    if (totalEnriched > 0) {
-      visaReach = Math.round(100 * totalAnyVisa / totalEnriched);
-      visaSub = `${totalAnyVisa.toLocaleString()} of ${totalEnriched.toLocaleString()} enriched jobs`;
-    }
-  }
-  const visaColor = visaReach != null
-    ? (visaReach >= 80 ? 'var(--green)' : visaReach >= 50 ? 'var(--yellow)' : 'var(--red)')
-    : 'var(--muted)';
-  // 2. Daily report freshness
-  let dailyAge = null, dailySub = '';
-  if (dailyStats && dailyStats.date) {
-    dailyAge = Math.round((Date.now() - new Date(dailyStats.date).getTime()) / 3600000);
-    dailySub = dailyAge < 24 ? `Updated ${dailyAge}h ago` : `Updated ${Math.round(dailyAge / 24)}d ago`;
-  }
-  const dailyColor = dailyAge != null
-    ? (dailyAge < 24 ? 'var(--green)' : dailyAge < 72 ? 'var(--yellow)' : 'var(--red)')
-    : 'var(--muted)';
-  // 3. Pipeline alert freshness
-  let alertAge = null, alertSub = '';
-  if (alertData && alertData.checked_at) {
-    alertAge = Math.round((Date.now() - new Date(alertData.checked_at).getTime()) / 3600000);
-    alertSub = alertAge < 2 ? `Checked ${alertAge}h ago` : `Checked ${alertAge < 48 ? alertAge + 'h' : Math.round(alertAge / 24) + 'd'} ago`;
-    if (alertData.active) alertSub += ' · ALERT ACTIVE';
-  }
-  const alertColor = alertAge != null
-    ? (alertAge < 2 ? 'var(--green)' : alertAge < 24 ? 'var(--yellow)' : 'var(--red)')
-    : 'var(--muted)';
-  const alertStatus = alertAge != null ? (alertAge < 2 ? 'Healthy' : (alertAge < 24 ? 'Stale' : 'Stale')) : 'No data';
-  el.innerHTML =
-    statCard({ icon: '🛂', label: 'Visa Signal Reach', value: visaReach != null ? `<span style="color:${visaColor}">${visaReach}%</span>` : '—', sub: visaSub }) +
-    statCard({ icon: '📊', label: 'Daily Report', value: dailyAge != null ? `<span style="color:${dailyColor}">${dailyAge < 24 ? 'Fresh' : 'Stale'}</span>` : '—', sub: dailySub }) +
-    statCard({ icon: '🔔', label: 'Alert Check', value: `<span style="color:${alertColor}">${alertStatus}</span>`, sub: alertSub });
-}
-
-function renderRepos(d, daily, historyEntries, trafficRaw) {
+function renderRepos(d, daily) {
   const repos = d.repos || {};
   const starMap = (daily && daily.stars) ? daily.stars : {};
   const REPO_NAME_MAP = {
@@ -1154,69 +821,16 @@ function renderRepos(d, daily, historyEntries, trafficRaw) {
     'Hardware':     'New-Grad-Hardware-Engineering-Jobs-2026',
     'Healthcare':   'New-Grad-Healthcare-Jobs-2026',
   };
-  // Compute per-repo star WoW from history.jsonl
-  const starHistory = (historyEntries || []).filter(e => e.stars && typeof e.stars === 'object');
-  const starNow = starHistory.length > 0 ? starHistory[starHistory.length - 1] : null;
-  const starPrev = starHistory.length >= 8 ? starHistory[starHistory.length - 8] : starHistory.length >= 2 ? starHistory[0] : null;
-  // Parse traffic data for per-repo views
-  const trafficEntries = trafficRaw ? trafficRaw.split('\n').filter(l => l.trim()).map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean) : [];
-  const trafficLatest = trafficEntries.length > 0 ? trafficEntries[trafficEntries.length - 1] : null;
-  const trafficRepos = trafficLatest ? (trafficLatest.repos || {}) : {};
-  const TRAFFIC_REPO_MAP = {
-    'New-Grad':     'New-Grad-Jobs-2026',
-    'Internships':  'Internships-2026',
-    'Software':     'New-Grad-Software-Engineering-Jobs-2026',
-    'Data-Science': 'New-Grad-Data-Science-Jobs-2026',
-    'Hardware':     'New-Grad-Hardware-Engineering-Jobs-2026',
-    'Healthcare':   'New-Grad-Healthcare-Jobs-2026',
-  };
   Object.entries(repos).forEach(([name, r]) => {
-    const repoFullName = REPO_NAME_MAP[name];
-    const stars = r.stars != null ? r.stars : (starMap[repoFullName] ?? '—');
-    const updateTs = r.lastJobsUpdate || r.workflowLastRun;
-    const hoursAgo = updateTs ? (Date.now() - new Date(updateTs).getTime()) / 3600000 : null;
-    // Health = composite of workflow + freshness
-    const wfOk = r.workflowStatus === 'success';
-    const fresh = hoursAgo != null && hoursAgo < 6;
-    const health = !wfOk ? '<span style="color:var(--red)">🔴 Down</span>'
-                 : !fresh && hoursAgo != null ? '<span style="color:var(--yellow)">🟡 Stale</span>'
-                 : wfOk ? '<span style="color:var(--green)">🟢 OK</span>'
-                 : '<span class="muted">—</span>';
-    // Freshness label
-    let freshLabel = '—';
-    if (hoursAgo != null) {
-      freshLabel = hoursAgo < 1 ? 'just now'
-                 : hoursAgo < 24 ? `${Math.round(hoursAgo)}h ago`
-                 : `${Math.round(hoursAgo/24)}d ago`;
-    }
-    // Star WoW
-    let starWow = '<span class="muted">—</span>';
-    if (starNow && starPrev && starNow.stars && starPrev.stars) {
-      const nowVal = starNow.stars[repoFullName] ?? null;
-      const prevVal = starPrev.stars[repoFullName] ?? null;
-      if (nowVal != null && prevVal != null) {
-        const delta = nowVal - prevVal;
-        if (delta !== 0) {
-          const color = delta > 0 ? 'var(--green)' : 'var(--red)';
-          starWow = `<span style="color:${color}">${delta > 0 ? '+' : ''}${delta}</span>`;
-        } else {
-          starWow = '<span class="muted">0</span>';
-        }
-      }
-    }
-    // Views from traffic
-    const trafficRepoName = TRAFFIC_REPO_MAP[name];
-    const views = trafficRepoName && trafficRepos[trafficRepoName] ? trafficRepos[trafficRepoName].views : null;
-    const viewsStr = views != null ? fmt(views) : '<span class="muted">—</span>';
-
+    const statusIcon = r.workflowStatus === 'success' ? '<span class="ok">✅</span>'
+                     : r.workflowStatus === 'failure' ? '<span class="err">❌</span>'
+                     : '<span class="warn">⚠️</span>';
+    const stars = r.stars != null ? r.stars : (starMap[REPO_NAME_MAP[name]] ?? '—');
     addRow('repo-table', [
-      health,
       name,
       r.jobCount != null ? fmt(r.jobCount) : fmt(window._poolTotal),
+      statusIcon,
       stars,
-      starWow,
-      viewsStr,
-      freshLabel,
     ]);
   });
 }
@@ -1345,47 +959,7 @@ function renderHBars(containerId, items, { labelWidth = '110px', colorFn } = {})
   }).join('');
 }
 
-// renderSupSummary removed S266 — stat cards failed actionability test (source count/pool/top source don't prompt decisions)
-
-// S268A: Zero-yield companies — sources configured but returning 0 jobs
-function renderZeroYield(metadata) {
-  const el = document.getElementById('zero-yield-card');
-  if (!el) return;
-  const zyc = metadata && metadata.zero_yield_companies;
-  if (!zyc || !Array.isArray(zyc)) {
-    el.innerHTML = '<p class="muted" style="text-align:center;padding:20px 0">Zero-yield data not yet available (requires aggregator update)</p>';
-    return;
-  }
-  if (zyc.length === 0) {
-    el.innerHTML = '<div style="display:flex;align-items:center;gap:8px;padding:12px"><span style="font-size:20px">✅</span><span style="color:var(--green);font-weight:600">All configured companies returning jobs</span></div>';
-    return;
-  }
-  el.innerHTML = `
-    <div style="padding:12px">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-        <span style="font-size:20px">⚠️</span>
-        <span style="font-weight:600;color:var(--yellow)">${zyc.length} company${zyc.length > 1 ? 'ies' : 'y'} returning 0 jobs</span>
-        <span style="color:var(--muted);font-size:11px">— check ATS slug, board status, or API changes</span>
-      </div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px">
-        ${zyc.map(c => `<span style="background:rgba(210,153,34,0.12);color:var(--yellow);padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600">${esc(c)}</span>`).join('')}
-      </div>
-    </div>`;
-}
-
-// SUP tab — health stat cards
-function renderSupHealth(metadata) {
-  const el = document.getElementById('sup-health-cards');
-  if (!el || !metadata) return;
-  const bySource = metadata.by_source || {};
-  const activeSources = Object.values(bySource).filter(v => v > 0).length;
-  const totalSources = Object.keys(bySource).length;
-  const zeroYield = (metadata.zero_yield_companies || []).length;
-  el.innerHTML =
-    statCard({ icon: '🏢', label: 'Active Sources', value: `${activeSources}/${totalSources}`, sub: `${activeSources} returning jobs` }) +
-    statCard({ icon: '⚠️', label: 'Zero-Yield', value: zeroYield, sub: zeroYield > 0 ? 'companies returning 0 jobs' : 'all sources healthy' });
-}
-
+// Supply tab — by-source bar chart
 function renderSourceBars(d, metadata) {
   const bySource = (metadata && metadata.by_source) ? metadata.by_source : (d.pipeline || {}).bySource || {};
   const items = Object.entries(bySource)
@@ -1410,17 +984,8 @@ function renderSourceTrendChart(allEntries, days) {
   }
   const entries = days ? allEntries.slice(-days) : allEntries;
   if (entries.length < 2) { renderSourceTrendChart(allEntries, null); return; }
-  const pillsEl = document.getElementById('source-trend-pills');
-  if (pillsEl) {
-    const ps = d => `display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--border);margin-left:4px;` +
-      (d === days ? 'background:var(--accent);color:#fff;border-color:var(--accent)' : 'background:transparent;color:var(--muted)');
-    pillsEl.innerHTML = [7, 14, 30, null].map(d => {
-      const label = d === 7 ? '7D' : d === 14 ? '14D' : d === 30 ? '30D' : 'All';
-      return `<span style="${ps(d)}" onclick="renderSourceTrendChart(_sourceTrendAllEntries,${d})">${label}</span>`;
-    }).join('');
-  }
 
-  const SOURCES = ['workday', 'greenhouse', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'netflix', 'eightfold'];
+  const SOURCES = ['workday', 'greenhouse', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'eightfold'];
   const active = SOURCES.filter(s => entries.some(e => (e.by_source[s] || 0) > 0));
 
   makeChart('source-trend-canvas', {
@@ -1440,7 +1005,7 @@ function renderSourceTrendChart(allEntries, days) {
     },
     options: {
       ...CHART_DEFAULTS,
-      plugins: { legend: { display: true, position: 'top', labels: { color: C.muted, font: { size: 9 }, boxWidth: 10, padding: 8 } } },
+      plugins: { legend: { display: true, position: 'top', labels: { color: '#8b949e', font: { size: 9 }, boxWidth: 10, padding: 8 } } },
       scales: {
         x: CHART_DEFAULTS.scales.x,
         y: { ...CHART_DEFAULTS.scales.y, beginAtZero: true, ticks: { ...CHART_DEFAULTS.scales.y.ticks, callback: v => fmt(v) } }
@@ -1456,10 +1021,10 @@ let _breakdownAllEntries = null;
 let _breakdownActiveSeries = new Set(['total', 'entry', 'us']);
 // BREAKDOWN_SERIES uses inline colors (not CHART_COLORS) to avoid forward reference
 const BREAKDOWN_SERIES = {
-  total: { label: 'Total (pre-filter)', color: C.muted, field: e => e.filter ? e.filter.total : e.total },
-  entry: { label: 'Entry-level', color: C.accent, field: e => e.filter ? e.filter.entry : null },
-  senior: { label: 'Senior (removed)', color: C.red, field: e => e.filter ? e.filter.senior : null },
-  us: { label: 'US-tagged', color: '#3498db', field: e => e.by_location ? e.by_location.us : null },  // blue — non-semantic, chart-specific
+  total: { label: 'Total (pre-filter)', color: '#8b949e', field: e => e.filter ? e.filter.total : e.total },
+  entry: { label: 'Entry-level', color: '#ff5e3c', field: e => e.filter ? e.filter.entry : null },
+  senior: { label: 'Senior (removed)', color: '#f85149', field: e => e.filter ? e.filter.senior : null },
+  us: { label: 'US-tagged', color: '#3498db', field: e => e.by_location ? e.by_location.us : null },
   remote: { label: 'Remote', color: '#9b59b6', field: e => e.by_location ? e.by_location.remote : null },
   software: { label: 'Software', color: '#27ae60', field: e => e.by_domain ? e.by_domain.software : null },
   data_science: { label: 'Data Science', color: '#2ecc71', field: e => e.by_domain ? e.by_domain.data_science : null },
@@ -1547,120 +1112,114 @@ function renderFilterFunnel(metadata) {
     return;
   }
   const total = sf.total_input;
+  const senior = sf.senior_jobs || 0;
   const entry = sf.entry_level_jobs || 0;
-  const seniorTotal = sf.senior_jobs || 0;
-  const reasons = sf.senior_reasons || {};
-  const both = reasons.both || 0;
-  const titleOnly = Math.max(0, (reasons.senior_title || 0) - both);
-  const expOnly = Math.max(0, (reasons.senior_experience || 0) - both);
-  const maxReason = Math.max(both, titleOnly, expOnly, 1);
-
-  el.innerHTML = `
-    <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">
-      <div style="flex:1;min-width:120px;padding:12px;background:var(--accent-bg);border-radius:8px;text-align:center">
-        <div style="font-size:24px;font-weight:700">${fmt(total)}</div>
-        <div style="font-size:11px;color:var(--muted)">Fetched by aggregator</div>
-      </div>
-      <div style="display:flex;align-items:center;font-size:20px;color:var(--muted)">→</div>
-      <div style="flex:1;min-width:120px;padding:12px;background:rgba(26,127,55,0.08);border-radius:8px;text-align:center">
-        <div style="font-size:24px;font-weight:700;color:var(--green)">${fmt(entry)}</div>
-        <div style="font-size:11px;color:var(--muted)">Kept (entry-level + internships)</div>
-      </div>
-      <div style="display:flex;align-items:center;font-size:20px;color:var(--muted)">→</div>
-      <div style="flex:1;min-width:120px;padding:12px;background:rgba(209,38,47,0.06);border-radius:8px;text-align:center">
-        <div style="font-size:24px;font-weight:700;color:var(--red)">${fmt(seniorTotal)}</div>
-        <div style="font-size:11px;color:var(--muted)">Removed (senior-level)</div>
-      </div>
-    </div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Why ${fmt(seniorTotal)} were removed:</div>
-    <div class="bar-row">
-      <span class="bar-label" style="width:140px">Title + Experience</span>
-      <div class="bar-track" style="flex:1"><div class="bar-fill" style="width:${Math.round(both/maxReason*100)}%;background:var(--red)"></div></div>
-      <span class="bar-value">${fmt(both)}</span>
-    </div>
-    <div class="bar-row">
-      <span class="bar-label" style="width:140px">Title only</span>
-      <div class="bar-track" style="flex:1"><div class="bar-fill" style="width:${Math.round(titleOnly/maxReason*100)}%;background:var(--yellow)"></div></div>
-      <span class="bar-value">${fmt(titleOnly)}</span>
-    </div>
-    <div class="bar-row">
-      <span class="bar-label" style="width:140px">Experience only</span>
-      <div class="bar-track" style="flex:1"><div class="bar-fill" style="width:${Math.round(expOnly/maxReason*100)}%;background:var(--muted)"></div></div>
-      <span class="bar-value">${fmt(expOnly)}</span>
-    </div>
-  `;
-}
-
-// Quality tab — enrichment fill rate bars by source
-function renderEnrichBars(enrichStats) {
-  if (!enrichStats || !enrichStats.by_source) return;
-  const ORDER = ['greenhouse', 'workday', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'netflix', 'eightfold'];
-  const items = ORDER
-    .filter(s => enrichStats.by_source[s])
-    .map(s => {
-      const v = enrichStats.by_source[s];
-      const tech = v.tech_us || 0;
-      const hasdesc = v.has_desc || 0;
-      const fill = tech > 0 ? Math.round(100 * hasdesc / tech) : 0;
-      return { label: s, value: fill, sub: `${fmt(hasdesc)}/${fmt(tech)}` };
-    });
-  renderHBars('enrich-bars', items, {
+  const rate = total > 0 ? Math.round(senior / total * 100) : 0;
+  const rateColor = rate >= 55 && rate <= 65 ? 'var(--green)' : rate > 65 ? 'var(--red)' : 'var(--yellow)';
+  renderHBars('filter-funnel', [
+    { label: 'Total input',   value: total,  sub: '100%' },
+    { label: 'Senior removed', value: senior, sub: `${rate}%` },
+    { label: 'Entry-level',   value: entry,  sub: `${100 - rate}%` },
+  ], {
     labelWidth: '130px',
-    colorFn: (v) => v >= 70 ? 'var(--green)' : v >= 40 ? 'var(--yellow)' : 'var(--red)',
+    colorFn: (v, max) => v === senior ? rateColor : 'var(--accent)',
   });
 }
 
-// ENRICH-QUALITY-2: Enrichment trend chart (from enrichment-history.jsonl)
-// Enrichment Trend — Chart.js multi-dataset (counts on left axis, percentages on right)
-// Click legend items to toggle datasets on/off. Pill toggles for time range.
+// renderEnrichBars removed — desc fill rate now in Fill Rates by Source table (renderQuality)
+
+// ENR tab — Enrichment Trend chart
+// Time window pills (7D/14D/30D/All) + source selector pills
+// "All" mode: aggregate Enriched count, Tech US Pool, Skills %, Summary % (dual-axis)
+// Per-source mode: that source's skills_pct and summary_pct from by_source in history
 let _enrichTrendAll = null;
+let _enrichTrendSource = 'all'; // 'all' or a source key
+
 function renderEnrichTrend(enrichHistory) {
-  if (!enrichHistory || enrichHistory.length < 2) {
-    const el = document.getElementById('enrich-trend-card');
+  _enrichTrendAll = enrichHistory || [];
+  renderEnrichTrendChart(_enrichTrendAll, 30, _enrichTrendSource);
+}
+
+function renderEnrichTrendChart(all, days, source) {
+  _enrichTrendSource = source;
+  const el = document.getElementById('enrich-trend-card');
+
+  if (!all || all.length < 2) {
     if (el) el.innerHTML = '<p class="muted" style="text-align:center;padding:60px 0">Enrichment trend — data accumulates daily.</p>';
     return;
   }
-  _enrichTrendAll = enrichHistory;
-  renderEnrichTrendChart(enrichHistory, 30);
-}
-function renderEnrichTrendChart(all, days) {
-  if (!all || all.length < 2) return;
+
   const entries = days ? all.slice(-days) : all;
-  // Render pills
+
+  // Time pills
   const pillsEl = document.getElementById('enrich-trend-pills');
   if (pillsEl) {
     const ps = d => `display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--border);margin-left:4px;` +
       (d === days ? 'background:var(--accent);color:#fff;border-color:var(--accent)' : 'background:transparent;color:var(--muted)');
     pillsEl.innerHTML = [7, 14, 30, null].map(d => {
       const label = d === 7 ? '7D' : d === 14 ? '14D' : d === 30 ? '30D' : 'All';
-      return `<span style="${ps(d)}" onclick="renderEnrichTrendChart(_enrichTrendAll,${d})">${label}</span>`;
+      return `<span style="${ps(d)}" onclick="renderEnrichTrendChart(_enrichTrendAll,${d},'${source}')">${label}</span>`;
     }).join('');
   }
+
+  // Source selector pills — only sources that have by_source data in history
+  const sourcePillsEl = document.getElementById('enrich-trend-source-pills');
+  if (sourcePillsEl) {
+    const knownSources = ['workday','greenhouse','ashby','lever','smartrecruiters','amazon','jsearch','eightfold'];
+    const available = knownSources.filter(s => all.some(e => e.by_source && e.by_source[s]));
+    const activePill = src => source === src;
+    const srcPillStyle = src => `display:inline-block;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:600;cursor:pointer;` +
+      `border:1px solid ${activePill(src) ? (CHART_COLORS.sources[src]||'var(--accent)') : 'var(--border)'};` +
+      `color:${activePill(src) ? '#fff' : 'var(--muted)'};background:${activePill(src) ? (CHART_COLORS.sources[src]||'var(--accent)') : 'transparent'}`;
+    sourcePillsEl.innerHTML =
+      `<span style="${srcPillStyle('all')}" onclick="renderEnrichTrendChart(_enrichTrendAll,${days},'all')">All</span>` +
+      available.map(s =>
+        `<span style="${srcPillStyle(s)}" onclick="renderEnrichTrendChart(_enrichTrendAll,${days},'${s}')">${s}</span>`
+      ).join('');
+  }
+
+  // Build datasets based on selected source
+  let datasets;
+  if (source === 'all') {
+    datasets = [
+      { label: 'Enriched', data: entries.map(e => e.total_enriched || 0),
+        borderColor: CHART_COLORS.accent, backgroundColor: 'rgba(255,94,60,0.08)', fill: true,
+        tension: 0.3, pointRadius: 2, pointHoverRadius: 5, borderWidth: 2, yAxisID: 'y' },
+      { label: 'Tech US Pool', data: entries.map(e => e.total_tech_us || 0),
+        borderColor: '#3498db', borderDash: [8, 4],
+        tension: 0.3, pointRadius: 1, pointHoverRadius: 4, borderWidth: 1.5, yAxisID: 'y' },
+      { label: 'Skills %', data: entries.map(e => e.skills_pct || 0),
+        borderColor: CHART_COLORS.green,
+        tension: 0.3, pointRadius: 2, pointHoverRadius: 4, borderWidth: 2, yAxisID: 'y1' },
+      { label: 'Summary %', data: entries.map(e => e.summary_pct || 0),
+        borderColor: CHART_COLORS.yellow, borderDash: [4, 3],
+        tension: 0.3, pointRadius: 1, pointHoverRadius: 4, borderWidth: 1.5, yAxisID: 'y1' },
+    ];
+  } else {
+    // Per-source: show that source's enriched count, skills%, summary% from by_source
+    const srcColor = CHART_COLORS.sources[source] || CHART_COLORS.accent;
+    datasets = [
+      { label: `${source} enriched`, data: entries.map(e => e.by_source && e.by_source[source] ? e.by_source[source].enriched || 0 : null),
+        borderColor: srcColor, backgroundColor: srcColor.replace(')', ',0.08)').replace('rgb','rgba'),
+        fill: true, tension: 0.3, pointRadius: 2, pointHoverRadius: 5, borderWidth: 2, yAxisID: 'y',
+        spanGaps: false },
+      { label: `${source} skills %`, data: entries.map(e => e.by_source && e.by_source[source] ? e.by_source[source].skills_pct || 0 : null),
+        borderColor: CHART_COLORS.green,
+        tension: 0.3, pointRadius: 2, pointHoverRadius: 4, borderWidth: 2, yAxisID: 'y1',
+        spanGaps: false },
+      { label: `${source} summary %`, data: entries.map(e => e.by_source && e.by_source[source] ? e.by_source[source].summary_pct || 0 : null),
+        borderColor: CHART_COLORS.yellow, borderDash: [4, 3],
+        tension: 0.3, pointRadius: 1, pointHoverRadius: 4, borderWidth: 1.5, yAxisID: 'y1',
+        spanGaps: false },
+    ];
+  }
+
   makeChart('enrich-trend-canvas', {
     type: 'line',
-    data: {
-      labels: entries.map(e => (e.date || '').slice(5)),
-      datasets: [
-        { label: 'Enriched', data: entries.map(e => e.total_enriched || 0),
-          borderColor: CHART_COLORS.accent, backgroundColor: 'rgba(255,94,60,0.08)', fill: true,
-          tension: 0.3, pointRadius: 2, pointHoverRadius: 5, borderWidth: 2, yAxisID: 'y' },
-        { label: 'Tech US Pool', data: entries.map(e => e.total_tech_us || 0),
-          borderColor: '#3498db', borderDash: [8, 4],
-          tension: 0.3, pointRadius: 1, pointHoverRadius: 4, borderWidth: 1.5, yAxisID: 'y' },
-        { label: 'Skills %', data: entries.map(e => e.skills_pct || 0),
-          borderColor: CHART_COLORS.green,
-          tension: 0.3, pointRadius: 2, pointHoverRadius: 4, borderWidth: 2, yAxisID: 'y1' },
-        { label: 'Summary %', data: entries.map(e => e.summary_pct || 0),
-          borderColor: CHART_COLORS.yellow, borderDash: [4, 3],
-          tension: 0.3, pointRadius: 1, pointHoverRadius: 4, borderWidth: 1.5, yAxisID: 'y1' },
-        { label: 'Tier 3 %', data: entries.map(e => e.t3_pct != null ? e.t3_pct : null),
-          borderColor: '#a855f7', borderWidth: 2.5, spanGaps: false,
-          tension: 0.3, pointRadius: 3, pointHoverRadius: 6, yAxisID: 'y1' },
-      ]
-    },
+    data: { labels: entries.map(e => (e.date || '').slice(5)), datasets },
     options: {
       ...CHART_DEFAULTS,
-      plugins: { legend: { display: true, position: 'top', labels: { color: C.muted, font: { size: 10 }, boxWidth: 12, padding: 8 } } },
+      plugins: { legend: { display: true, position: 'top', labels: { color: '#8b949e', font: { size: 10 }, boxWidth: 12, padding: 8 } } },
       scales: {
         x: CHART_DEFAULTS.scales.x,
         y: { ...CHART_DEFAULTS.scales.y, position: 'left', ticks: { ...CHART_DEFAULTS.scales.y.ticks, callback: v => fmt(v) } },
@@ -1672,656 +1231,66 @@ function renderEnrichTrendChart(all, days) {
   });
 }
 
-// DASH-7: Per-source T3% trend chart (from enrichment-history.jsonl expanded format)
-// Shows how each source's T3 rate changes over time — helps operator decide where to invest.
-// Only renders entries that have per-source t3_pct (v22+ snapshots).
-let _sourceT3All = null;
-function renderSourceT3Trend(enrichHistory) {
-  if (!enrichHistory) return;
-  // Filter to entries with per-source T3 data
-  const entries = enrichHistory.filter(e => {
-    const bs = e.by_source || {};
-    const first = Object.values(bs)[0];
-    return first && first.t3_pct !== undefined;
-  });
-  if (entries.length === 0) {
-    const el = document.getElementById('source-t3-card');
-    if (el) el.innerHTML = '<p class="muted" style="text-align:center;padding:80px 0">Per-source T3 trend — data accumulates daily (requires v22+ snapshots).</p>';
-    return;
-  }
-  _sourceT3All = entries;
-  renderSourceT3Chart(entries, 30);
-}
-function renderSourceT3Chart(all, days) {
-  if (!all || all.length === 0) return;
-  const entries = days ? all.slice(-days) : all;
-  const pillsEl = document.getElementById('source-t3-pills');
-  if (pillsEl) {
-    const ps = d => `display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--border);margin-left:4px;` +
-      (d === days ? 'background:var(--accent);color:#fff;border-color:var(--accent)' : 'background:transparent;color:var(--muted)');
-    pillsEl.innerHTML = [7, 14, 30, null].map(d => {
-      const label = d === 7 ? '7D' : d === 14 ? '14D' : d === 30 ? '30D' : 'All';
-      return `<span style="${ps(d)}" onclick="renderSourceT3Chart(_sourceT3All,${d})">${label}</span>`;
-    }).join('');
-  }
-  const ORDER = ['workday', 'greenhouse', 'amazon', 'ashby', 'lever', 'smartrecruiters', 'jsearch', 'netflix'];
-  const datasets = ORDER.map(src => ({
-    label: src,
-    data: entries.map(e => {
-      const s = (e.by_source || {})[src];
-      return s && s.t3_pct !== undefined ? s.t3_pct : null;
-    }),
-    borderColor: CHART_COLORS.sources[src] || '#8b949e',
-    tension: 0.3, pointRadius: 3, pointHoverRadius: 6, borderWidth: 2, spanGaps: true,
-  }));
-  makeChart('source-t3-canvas', {
-    type: 'line',
-    data: { labels: entries.map(e => (e.date || '').slice(5)), datasets },
-    options: {
-      ...CHART_DEFAULTS,
-      plugins: { legend: { display: true, position: 'top', labels: { color: C.muted, font: { size: 10 }, boxWidth: 12, padding: 8 } } },
-      scales: {
-        x: CHART_DEFAULTS.scales.x,
-        y: { ...CHART_DEFAULTS.scales.y, min: 0, max: 100,
-             ticks: { ...CHART_DEFAULTS.scales.y.ticks, callback: v => v + '%' } }
-      }
-    }
-  });
-}
+// renderSkillsBars removed — skills fill rate now in Fill Rates by Source table (renderQuality)
 
-// ENRICH-QUALITY-2: Skills fill rate bars by source
-function renderSkillsBars(enrichStats) {
-  if (!enrichStats || !enrichStats.by_source) return;
-  const ORDER = ['greenhouse', 'workday', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'netflix', 'eightfold'];
-  const items = ORDER
-    .filter(s => enrichStats.by_source[s] && enrichStats.by_source[s].enriched > 0)
-    .map(s => {
-      const v = enrichStats.by_source[s];
-      const enriched = v.enriched || 0;
-      const skills = v.required_skills || 0;
-      const pct = enriched > 0 ? Math.round(100 * skills / enriched) : 0;
-      return { label: s, value: pct, sub: `${fmt(skills)}/${fmt(enriched)}` };
-    });
-  renderHBars('skills-bars', items, {
-    labelWidth: '130px',
-    colorFn: (v) => v >= 70 ? 'var(--green)' : v >= 40 ? 'var(--yellow)' : 'var(--red)',
-  });
-}
-
-// ENR-12: Tier distribution — Chart.js horizontal stacked bar (S262 Phase 2 redesign)
-// Color semantics: green=T3(good), blue=T2(neutral/partial), yellow=T1(warning), red=T0(bad)
-// S268A: Tier Distribution with filter pills — replaces separate T3-by-Source chart.
-// "All" shows stacked percentage bars (original). Single tier shows that tier's % as simple bars.
-let _tierEnrichStats = null;
-function renderTierSourceChart(enrichStats, filterTier) {
-  _tierEnrichStats = enrichStats;
-  const canvas = document.getElementById('tier-source-canvas');
-  if (!canvas || !enrichStats || !enrichStats.tiers_by_source) {
-    const card = document.getElementById('tier-source-card');
-    if (card) card.innerHTML = '<p class="muted" style="text-align:center;padding:80px 0">Tier data not yet available — requires ENRICHER_VERSION 15+</p>';
-    return;
-  }
-  const activeTier = filterTier || 'all';
-
-  // Render filter pills
-  const pillsEl = document.getElementById('tier-filter-pills');
-  if (pillsEl) {
-    const tiers = [
-      { key: 'all', label: 'All' },
-      { key: 't3', label: 'T3 Degree+Visa', color: C.green },
-      { key: 't2', label: 'T2 Skills', color: '#3498db' },
-      { key: 't1', label: 'T1 Desc', color: C.yellow },
-      { key: 't0', label: 'T0 None', color: C.red },
-    ];
-    pillsEl.innerHTML = tiers.map(t => {
-      const active = t.key === activeTier;
-      const bg = active ? (t.color || 'var(--accent)') : 'transparent';
-      const fg = active ? '#fff' : 'var(--muted)';
-      const border = active ? (t.color || 'var(--accent)') : 'var(--border)';
-      return `<span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid ${border};margin-left:4px;background:${bg};color:${fg}" onclick="renderTierSourceChart(_tierEnrichStats,'${t.key}')">${t.label}</span>`;
-    }).join('');
-  }
-
-  const ORDER = ['workday', 'greenhouse', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'netflix', 'eightfold'];
-  const tbs = enrichStats.tiers_by_source;
-  const sources = ORDER.filter(s => tbs[s]);
-  const labels = sources.map(s => {
-    const t = tbs[s];
-    return `${s} (${fmt(t.t0 + t.t1 + t.t2 + t.t3)})`;
-  });
-  const pct = (src, tier) => {
-    const t = tbs[src];
-    const tot = t.t0 + t.t1 + t.t2 + t.t3;
-    return tot > 0 ? Math.round(1000 * t[tier] / tot) / 10 : 0;
-  };
-
-  const TIER_COLORS = { t3: C.green, t2: '#3498db', t1: C.yellow, t0: C.red };
-  const TIER_LABELS = { t3: 'T3 — Degree + Visa', t2: 'T2 — Skills', t1: 'T1 — Description', t0: 'T0 — No description' };
-
-  let datasets, stacked;
-  if (activeTier === 'all') {
-    datasets = [
-      { label: TIER_LABELS.t3, data: sources.map(s => pct(s, 't3')), backgroundColor: TIER_COLORS.t3 },
-      { label: TIER_LABELS.t2, data: sources.map(s => pct(s, 't2')), backgroundColor: TIER_COLORS.t2 },
-      { label: TIER_LABELS.t1, data: sources.map(s => pct(s, 't1')), backgroundColor: TIER_COLORS.t1 },
-      { label: TIER_LABELS.t0, data: sources.map(s => pct(s, 't0')), backgroundColor: TIER_COLORS.t0 },
-    ];
-    stacked = true;
-  } else {
-    // Single tier view — simple bar chart, color-coded by threshold
-    const tierKey = activeTier;
-    datasets = [{
-      label: TIER_LABELS[tierKey],
-      data: sources.map(s => pct(s, tierKey)),
-      backgroundColor: sources.map(s => {
-        const v = pct(s, tierKey);
-        return v >= 70 ? C.green : v >= 40 ? C.yellow : C.red;
-      }),
-    }];
-    stacked = false;
-  }
-
-  makeChart('tier-source-canvas', {
-    type: 'bar',
-    data: { labels, datasets },
-    options: {
-      indexAxis: 'y',
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: activeTier === 'all', position: 'bottom', labels: { color: C.muted, font: { size: 11 }, boxWidth: 14, padding: 10 } },
-        tooltip: {
-          callbacks: {
-            label: function(ctx) {
-              const src = sources[ctx.dataIndex];
-              const t = tbs[src];
-              if (activeTier === 'all') {
-                const tierKey = ['t3', 't2', 't1', 't0'][ctx.datasetIndex];
-                return `${ctx.dataset.label}: ${ctx.raw}% (${t[tierKey]} jobs)`;
-              }
-              return `${ctx.dataset.label}: ${ctx.raw}% (${t[activeTier]} jobs)`;
-            }
-          }
-        }
-      },
-      scales: {
-        x: { stacked, max: 100, ...CHART_DEFAULTS.scales.x, ticks: { ...CHART_DEFAULTS.scales.x.ticks, callback: v => v + '%' } },
-        y: { stacked, ...CHART_DEFAULTS.scales.y, ticks: { color: C.muted, font: { size: 11 } } }
-      }
-    }
-  });
-}
-
-// Company detail expander — click company name to see cross-source data
-// Stores loaded data references for lookup
-let _companyDataSources = {};
-function initCompanyExpander(enrichStats, metadata, generalReview) {
-  _companyDataSources = { enrichStats, metadata, generalReview };
-  // Make company name cells clickable in all company tables
-  ['class-companies-table', 'top-companies-table'].forEach(tableId => {
-    const table = document.getElementById(tableId);
-    if (!table) return;
-    table.querySelectorAll('tr').forEach((tr, i) => {
-      if (i === 0) return; // skip header
-      // Find the company name cell (first text cell, skip # column)
-      const hasNumberCol = tableId === 'class-companies-table' || tableId === 'top-companies-table';
-      const nameCell = hasNumberCol ? tr.cells[1] : tr.cells[0];
-      if (!nameCell) return;
-      const name = nameCell.textContent.trim();
-      nameCell.style.cursor = 'pointer';
-      nameCell.style.textDecoration = 'underline';
-      nameCell.style.textDecorationStyle = 'dotted';
-      nameCell.title = 'Click to expand company details';
-      nameCell.addEventListener('click', () => toggleCompanyDetail(tr, name, tableId));
-    });
-  });
-}
-
-function toggleCompanyDetail(tr, companyName, tableId) {
-  // Check if detail row already exists
-  const existingDetail = tr.nextElementSibling;
-  if (existingDetail && existingDetail.classList.contains('company-detail-row')) {
-    existingDetail.remove();
-    return;
-  }
-  const d = _companyDataSources;
-  // Look up company across all sources
-  const enrData = (d.enrichStats?.by_company || []).find(c => c.company === companyName);
-  const metaData = (d.metadata?.top_companies || []).find(c => c.company === companyName);
-  const genData = (d.generalReview?.by_company || []).find(c => c.name === companyName);
-
-  const val = (v, suffix = '') => v != null ? v + suffix : '<span class="muted">—</span>';
-  const pctColor = (v) => v == null ? '' : v >= 80 ? 'color:var(--green)' : v >= 40 ? 'color:var(--yellow)' : 'color:var(--red)';
-
-  const detailRow = document.createElement('tr');
-  detailRow.classList.add('company-detail-row');
-  detailRow.dataset.parentSource = tr.dataset.parent || '';
-  const cols = tr.cells.length;
-  detailRow.innerHTML = `<td colspan="${cols}" style="background:rgba(128,128,128,0.06);padding:12px 16px;font-size:12px">
-    <div style="display:grid;grid-template-columns:auto auto auto auto;gap:4px 20px;align-items:baseline">
-      <span style="color:var(--muted)">Source</span><span>${val(enrData?.source || genData?.source)}</span>
-      <span style="color:var(--muted)">Domain</span><span>${val(metaData?.domain || (genData?.domain_dist?.split(',')[0]))}</span>
-      <span style="color:var(--muted)">Total Jobs</span><span>${val(metaData?.count ? fmt(metaData.count) : null)}</span>
-      <span style="color:var(--muted)">Enriched</span><span>${val(enrData?.enriched ? fmt(enrData.enriched) : null)}</span>
-      <span style="color:var(--muted)">T3%</span><span style="${pctColor(enrData?.t3_pct)}">${val(enrData?.t3_pct, '%')}</span>
-      <span style="color:var(--muted)">Tiers</span><span>T0=${enrData?.tiers?.t0 ?? '—'} · T1=${enrData?.tiers?.t1 ?? '—'} · T2=${enrData?.tiers?.t2 ?? '—'} · T3=${enrData?.tiers?.t3 ?? '—'}</span>
-      <span style="color:var(--muted)">Skills%</span><span style="${pctColor(enrData?.skills_pct)}">${val(enrData?.skills_pct, '%')}</span>
-      <span style="color:var(--muted)">Summary%</span><span style="${pctColor(enrData?.summary_pct)}">${val(enrData?.summary_pct, '%')}</span>
-      <span style="color:var(--muted)">Hard Visa%</span><span><span style="${pctColor(enrData?.visa_pct)}">${val(enrData?.visa_pct, '%')}</span> <span style="font-size:10px;color:var(--muted)">(text only)</span></span>
-      <span style="color:var(--muted)">General</span><span>${val(genData?.general)}</span>
-      <span style="color:var(--muted)">Classified</span><span>${val(genData?.classified)}</span>
-      <span style="color:var(--muted)">Desc%</span><span>${val(genData?.has_desc_pct, '%')}</span>
-    </div>
-  </td>`;
-  tr.after(detailRow);
-}
-
-// ENR source filter — filters Field Coverage + Enrichment Details tables by source
-function initSourceFilter() {
-  const select = document.getElementById('enr-source-filter');
-  if (!select) return;
-  select.addEventListener('change', () => {
-    const val = select.value;
-    ['unified-enr-table'].forEach(tableId => {
-      const table = document.getElementById(tableId);
-      if (!table) return;
-      Array.from(table.querySelectorAll('tr')).slice(1).forEach(tr => {
-      if (tr.classList.contains('source-row')) {
-        const src = tr.dataset.source;
-        tr.style.display = (val === 'all' || src === val) ? '' : 'none';
-      } else if (tr.classList.contains('company-row')) {
-        const parent = tr.dataset.parent;
-        tr.style.display = (val === 'all' || parent === val) ? '' : 'none';
-      }
-    });
-    });
-  });
-}
-
-// Column toggle — gear icon anchored to card (not inside table headers)
-// Usage: addColumnToggle('table-id', {exclude: [0]}) — exclude col 0 (name) from being hideable
-function addColumnToggle(tableId, { exclude = [0] } = {}) {
-  const table = document.getElementById(tableId);
-  if (!table) return;
-  const card = table.closest('.card');
-  if (!card) return;
-  const headers = table.querySelectorAll('tr:first-child th');
-  if (headers.length <= 5) return; // not worth it for small tables
-
-  const storageKey = `col-toggle-${tableId}`;
-  const saved = JSON.parse(localStorage.getItem(storageKey) || '{}');
-
-  // Make card position:relative so gear can be absolutely positioned
-  if (!card.style.position || card.style.position === 'static' || card.style.position === '') {
-    card.style.position = 'relative';
-  }
-
-  // Create columns button — anchored to card top-right, outside the table
-  const gear = document.createElement('span');
-  gear.innerHTML = '⚙ Columns';
-  gear.style.cssText = 'cursor:pointer;font-size:10px;opacity:0.5;position:absolute;right:12px;top:8px;padding:2px 8px;border:1px solid var(--border);border-radius:4px;z-index:10;background:var(--bg-card);';
-  gear.title = 'Show/hide columns';
-  card.appendChild(gear);
-
-  // Create dropdown — below the gear button
-  const dropdown = document.createElement('div');
-  dropdown.style.cssText = 'display:none;position:absolute;right:12px;top:30px;background:var(--bg-card);border:1px solid var(--border);border-radius:6px;padding:8px;z-index:100;min-width:140px;box-shadow:0 4px 12px rgba(0,0,0,0.3);';
-  card.appendChild(dropdown);
-
-  headers.forEach((th, i) => {
-    if (exclude.includes(i)) return;
-    const label = th.textContent.replace(/[⇅↑↓⚙]/g, '').trim();
-    if (!label) return; // skip empty header (expand arrow column)
-    const checked = saved[i] !== false; // default visible
-    const row = document.createElement('label');
-    row.style.cssText = 'display:block;font-size:11px;color:var(--muted);cursor:pointer;padding:2px 0;font-weight:normal;';
-    row.innerHTML = `<input type="checkbox" ${checked ? 'checked' : ''} style="margin-right:6px;accent-color:var(--accent)"> ${label}`;
-    row.querySelector('input').addEventListener('change', (e) => {
-      const visible = e.target.checked;
-      saved[i] = visible;
-      localStorage.setItem(storageKey, JSON.stringify(saved));
-      toggleCol(i, visible);
-    });
-    dropdown.appendChild(row);
-    if (!checked) toggleCol(i, false);
-  });
-
-  function toggleCol(colIdx, visible) {
-    table.querySelectorAll('tr').forEach(tr => {
-      const cell = tr.cells[colIdx];
-      if (cell) cell.style.display = visible ? '' : 'none';
-    });
-  }
-
-  gear.addEventListener('click', (e) => {
-    e.stopPropagation();
-    dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
-  });
-  document.addEventListener('click', () => { dropdown.style.display = 'none'; });
-}
-
-// Pagination for long tables — shows N rows per page with prev/next buttons
-function paginateTable(tableId, rowsPerPage = 10) {
-  const table = document.getElementById(tableId);
-  if (!table) return;
-  const rows = Array.from(table.querySelectorAll('tr')).slice(1); // skip header
-  if (rows.length <= rowsPerPage) return; // no pagination needed
-  let page = 0;
-  const totalPages = Math.ceil(rows.length / rowsPerPage);
-
-  // Remove any existing pagination controls (prevents duplicates on refresh)
-  const existing = table.parentElement.querySelectorAll('[data-pagination="' + tableId + '"]');
-  existing.forEach(el => el.remove());
-
-  // Create pagination controls
-  const controls = document.createElement('div');
-  controls.style.cssText = 'display:flex;justify-content:center;gap:8px;margin-top:8px;font-size:12px;';
-  controls.setAttribute('data-pagination', tableId);
-  table.parentElement.appendChild(controls);
-
-  function render() {
-    rows.forEach((r, i) => {
-      r.style.display = (i >= page * rowsPerPage && i < (page + 1) * rowsPerPage) ? '' : 'none';
-    });
-    controls.innerHTML = `
-      <button onclick="this.parentElement._prev()" style="padding:2px 10px;border:1px solid var(--border);border-radius:4px;background:transparent;color:var(--muted);cursor:pointer" ${page === 0 ? 'disabled' : ''}>← Prev</button>
-      <span style="color:var(--muted);line-height:24px">Page ${page + 1} of ${totalPages} (${rows.length} rows)</span>
-      <button onclick="this.parentElement._next()" style="padding:2px 10px;border:1px solid var(--border);border-radius:4px;background:transparent;color:var(--muted);cursor:pointer" ${page >= totalPages - 1 ? 'disabled' : ''}>Next →</button>
-    `;
-  }
-  controls._prev = () => { if (page > 0) { page--; render(); } };
-  controls._next = () => { if (page < totalPages - 1) { page++; render(); } };
-  render();
-}
-
-// Sortable tables — click any .sortable header to sort rows
-function makeSortable(tableId) {
-  const table = document.getElementById(tableId);
-  if (!table) return;
-  const headers = table.querySelectorAll('th.sortable');
-  headers.forEach((th, colIdx) => {
-    th.addEventListener('click', () => {
-      const rows = Array.from(table.querySelectorAll('tr')).slice(1); // skip header
-      if (!rows.length) return;
-      const isAsc = th.classList.contains('sort-asc');
-      // Clear all sort indicators
-      headers.forEach(h => h.classList.remove('sort-asc', 'sort-desc'));
-      th.classList.add(isAsc ? 'sort-desc' : 'sort-asc');
-      const dir = isAsc ? -1 : 1;
-      rows.sort((a, b) => {
-        const aText = a.cells[colIdx]?.textContent.trim() || '';
-        const bText = b.cells[colIdx]?.textContent.trim() || '';
-        const aNum = parseFloat(aText.replace(/[,%⊘]/g, ''));
-        const bNum = parseFloat(bText.replace(/[,%⊘]/g, ''));
-        if (!isNaN(aNum) && !isNaN(bNum)) return (aNum - bNum) * dir;
-        return aText.localeCompare(bText) * dir;
-      });
-      rows.forEach(r => table.appendChild(r));
-      // Keep total rows at the top
-      table.querySelectorAll('.total-row').forEach(tr => {
-        const tbody = tr.parentElement;
-        if (tbody) tbody.insertBefore(tr, tbody.firstChild);
-      });
-    });
-  });
-}
-
-// ENR-12 S262: Field coverage heatmap — answers "WHAT is broken?" per source
-function renderUnifiedENR(enrichStats) {
-  const tbody = document.querySelector('#unified-enr-table tbody');
-  if (!tbody || !enrichStats || !enrichStats.by_source) return;
-
-  const ORDER = ['workday','greenhouse','ashby','lever','smartrecruiters','amazon','jsearch','netflix','eightfold'];
-  const sources = ORDER.filter(s => enrichStats.by_source[s]);
-  const tbs = enrichStats.tiers_by_source || {};
-  const colorPct = (v) => v >= 80 ? 'color:var(--green)' : v >= 40 ? 'color:var(--yellow)' : 'color:var(--red)';
-
-  // Aggregate stats for total row
-  let totalTechUs = 0, totalEnriched = 0, totalT3 = 0, totalT3Count = 0;
-  let totalSkills = 0, totalSkillsCount = 0;
-  let totalVisa = 0, totalHard = 0, totalLca = 0, totalForm = 0, totalNone = 0;
-  sources.forEach(src => {
-    const v = enrichStats.by_source[src];
-    const e = v.enriched || 0;
-    totalTechUs += v.tech_us || 0;
-    totalEnriched += e;
-    const hard = v.sponsors_visa || 0;
-    const lca = Math.max(0, (v.possible_sponsor || 0) - hard);
-    const anyV = v.any_visa_signal || 0;
-    const form = Math.max(0, anyV - hard - lca); // jobs with signal but not hard or LCA = ATS form question
-    totalHard += hard;
-    totalLca += lca;
-    totalForm += form;
-    totalNone += Math.max(0, e - anyV);
-    totalVisa += anyV;
-    totalSkills += v.required_skills || 0;
-    const tier = tbs[src] || { t0:0, t1:0, t2:0, t3:0 };
-    const tierTotal = tier.t0 + tier.t1 + tier.t2 + tier.t3;
-    if (tierTotal > 0) { totalT3 += tier.t3 || 0; totalT3Count += tierTotal; }
-    if (e > 0) { totalSkillsCount += e; }
-  });
-
-  // Total row (summary — always first, not sortable)
-  if (totalEnriched > 0) {
-    const aggT3 = totalT3Count > 0 ? Math.round(1000 * totalT3 / totalT3Count) / 10 : 0;
-    const aggT3style = aggT3 >= 70 ? 'color:var(--green)' : aggT3 >= 40 ? 'color:var(--yellow)' : 'color:var(--red)';
-    const aggSkills = totalSkillsCount > 0 ? Math.round(100 * totalSkills / totalSkillsCount) : 0;
-    const aggVisa = Math.round(100 * totalVisa / totalEnriched);
-    const hardP = Math.round(100 * totalHard / totalEnriched);
-    const lcaP = Math.round(100 * totalLca / totalEnriched);
-    const formP = Math.round(100 * totalForm / totalEnriched);
-    const noneP = Math.round(100 * totalNone / totalEnriched);
+// ENRICH-QUALITY-2: Per-company enrichment quality table
+function renderCompanyQuality(enrichStats) {
+  const tbl = document.getElementById('company-quality-table');
+  if (!tbl || !enrichStats || !enrichStats.by_company) return;
+  const colorPct = (v) => v >= 70 ? 'var(--green)' : v >= 40 ? 'var(--yellow)' : 'var(--red)';
+  enrichStats.by_company.forEach(c => {
     const tr = document.createElement('tr');
-    tr.className = 'total-row';
-    tr.style.cssText = 'font-weight:700;border-bottom:2px solid var(--border);background:var(--bg-card-hover)';
-    tr.innerHTML =
-      '<td></td>' +
-      '<td>All Sources</td>' +
-      '<td>' + fmt(totalTechUs) + '</td>' +
-      '<td>' + fmt(totalEnriched) + '</td>' +
-      '<td style="' + aggT3style + '">' + aggT3 + '%</td>' +
-      '<td style="' + colorPct(aggSkills) + '">' + aggSkills + '%</td>' +
-      '<td style="' + colorPct(aggVisa) + '">' + aggVisa + '%</td>' +
-      '<td style="text-align:center;font-size:11px">' +
-        '<span style="color:var(--info)" title="LCA match: ' + fmt(totalLca) + ' jobs">' + lcaP + '%</span>' +
-        '<span style="color:var(--muted)"> / </span>' +
-        '<span style="color:var(--green)" title="Hard text: ' + fmt(totalHard) + ' jobs">' + hardP + '%</span>' +
-        '<span style="color:var(--muted)"> / </span>' +
-        '<span style="color:var(--yellow)" title="ATS form question: ' + fmt(totalForm) + ' jobs">' + formP + '%</span>' +
-        '<span style="color:var(--muted)"> / </span>' +
-        '<span style="color:var(--muted)" title="No signal: ' + fmt(totalNone) + ' jobs">' + noneP + '%</span>' +
-      '</td>';
-    tbody.appendChild(tr);
-  }
-
-  // Build source + company rows
-  sources.forEach(src => {
-    const v = enrichStats.by_source[src];
-    const techUs = v.tech_us || 0;
-    const e = v.enriched || 1;
-    const tier = tbs[src] || { t0:0, t1:0, t2:0, t3:0 };
-    const tierTotal = tier.t0 + tier.t1 + tier.t2 + tier.t3;
-    const t3pct = tierTotal > 0 ? Math.round(1000 * (tier.t3 || 0) / tierTotal) / 10 : 0;
-    const t3style = t3pct >= 70 ? 'color:var(--green)' : t3pct >= 40 ? 'color:var(--yellow)' : 'color:var(--red)';
-    const skillsPct = Math.round(100 * (v.required_skills || 0) / e);
-    const visaPct = Math.round(100 * (v.any_visa_signal || 0) / e);
-    const visaStyle = colorPct(visaPct);
-    const hard = v.sponsors_visa || 0;
-    const lca = Math.max(0, (v.possible_sponsor || 0) - hard);
-    const anyV = v.any_visa_signal || 0;
-    const form = Math.max(0, anyV - hard - lca);
-    const none = Math.max(0, e - anyV);
-    const hardP = e > 0 ? Math.round(100 * hard / e) : 0;
-    const lcaP = e > 0 ? Math.round(100 * lca / e) : 0;
-    const formP = e > 0 ? Math.round(100 * form / e) : 0;
-    const noneP = e > 0 ? Math.round(100 * none / e) : 0;
-
-    // Source row
-    const sr = document.createElement('tr');
-    sr.className = 'source-row';
-    sr.dataset.source = src;
-    sr.innerHTML =
-      '<td class="expand-arrow" style="cursor:pointer;font-size:10px;color:var(--muted);user-select:none)">▶</td>' +
-      '<td style="font-weight:600">' + src + '</td>' +
-      '<td style="color:var(--muted)">' + fmt(techUs) + '</td>' +
-      '<td>' + fmt(e) + '</td>' +
-      '<td style="font-weight:600;' + t3style + '">' + t3pct + '%</td>' +
-      '<td style="font-weight:600;' + colorPct(skillsPct) + '">' + skillsPct + '%</td>' +
-      '<td style="font-weight:600;' + visaStyle + '">' + visaPct + '%</td>' +
-      '<td style="text-align:center;font-size:11px">' +
-        '<span style="color:var(--info)" title="LCA match: ' + fmt(lca) + ' jobs">' + lcaP + '%</span>' +
-        '<span style="color:var(--muted)"> / </span>' +
-        '<span style="color:var(--green)" title="Hard text: ' + fmt(hard) + ' jobs">' + hardP + '%</span>' +
-        '<span style="color:var(--muted)"> / </span>' +
-        '<span style="color:var(--yellow)" title="ATS form: ' + fmt(form) + ' jobs">' + formP + '%</span>' +
-        '<span style="color:var(--muted)"> / </span>' +
-        '<span style="color:var(--muted)" title="No signal: ' + fmt(none) + ' jobs">' + noneP + '%</span>' +
-      '</td>';
-    tbody.appendChild(sr);
-
-    // Click handler for expand arrow and source name
-    sr.querySelector('.expand-arrow').addEventListener('click', () => toggleSourceExpand(sr));
-
-    // Company rows for this source
-    const companies = (enrichStats.by_company || []).filter(c => c.source === src);
-    companies.forEach(c => {
-      const cr = document.createElement('tr');
-      cr.className = 'company-row';
-      cr.dataset.parent = src;
-      cr.style.display = 'none';
-      const ct3 = c.t3_pct != null ? c.t3_pct : '—';
-      const ct3style = ct3 !== '—' ? colorPct(ct3) : '';
-      const tiers = c.tiers || {};
-      cr.innerHTML =
-        '<td></td>' +
-        '<td style="padding-left:24px;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:2px">' + esc(c.company) + '</td>' +
-        '<td>' + fmt(c.enriched) + '</td>' +
-        '<td style="font-weight:600;' + ct3style + '">' + (ct3 === '—' ? '—' : ct3 + '%') + '</td>' +
-        '<td style="' + colorPct(c.skills_pct) + '">' + c.skills_pct + '%</td>' +
-        '<td style="' + colorPct(c.visa_pct) + '">' + c.visa_pct + '%</td>' +
-        '<td style="text-align:center;font-size:10px;color:var(--muted)" title="T0/T1/T2/T3 tier counts">' +
-          (tiers.t0||0) + '·' + (tiers.t1||0) + '·' + (tiers.t2||0) + '·' + (tiers.t3||0) +
-        '</td>';
-      tbody.appendChild(cr);
-    });
-  });
-
-  // Wire up company name click handlers (reuse company expander)
-  initCompanyExpanderENR();
-}
-
-function toggleSourceExpand(sourceRow) {
-  const src = sourceRow.dataset.source;
-  const arrow = sourceRow.querySelector('.expand-arrow');
-  const companyRows = document.querySelectorAll('#unified-enr-table .company-row[data-parent="' + src + '"]');
-  const isExpanded = arrow.textContent.trim() === '▼';
-  if (isExpanded) {
-    // Remove all detail rows for this source's companies
-    document.querySelectorAll('#unified-enr-table .company-detail-row[data-parent-source="' + src + '"]').forEach(dr => dr.remove());
-  }
-  companyRows.forEach(cr => { cr.style.display = isExpanded ? 'none' : ''; });
-  arrow.textContent = isExpanded ? '▶' : '▼';
-  sourceRow.classList.toggle('expanded', !isExpanded);
-}
-
-function initCompanyExpanderENR() {
-  const table = document.getElementById('unified-enr-table');
-  if (!table) return;
-  table.querySelectorAll('.company-row').forEach(tr => {
-    const nameCell = tr.cells[1];
-    if (!nameCell || nameCell.dataset.wired) return;
-    nameCell.dataset.wired = '1';
-    const name = nameCell.textContent.trim();
-    nameCell.title = 'Click for company details';
-    nameCell.addEventListener('click', () => toggleCompanyDetail(tr, name, 'unified-enr-table'));
+    tr.innerHTML = `
+      <td>${esc(c.company)}</td>
+      <td style="font-size:11px;color:var(--muted)">${c.source}</td>
+      <td style="text-align:right">${fmt(c.enriched)}</td>
+      <td style="text-align:right;color:${colorPct(c.skills_pct)}">${c.skills_pct}%</td>
+      <td style="text-align:right;color:${colorPct(c.summary_pct)}">${c.summary_pct}%</td>
+      <td style="text-align:right;color:${colorPct(c.visa_pct)}">${c.visa_pct}%</td>
+    `;
+    tbl.appendChild(tr);
   });
 }
 
-function sortUnifiedTable(colIdx) {
-  const tbody = document.querySelector('#unified-enr-table tbody');
-  if (!tbody) return;
-  const header = tbody.closest('table').querySelectorAll('thead th')[colIdx];
-  const isAsc = header && header.classList.contains('sort-asc');
-  // Clear all sort indicators
-  tbody.closest('table').querySelectorAll('thead th.sortable').forEach(h => h.classList.remove('sort-asc','sort-desc'));
-  if (header && header.classList.contains('sortable')) header.classList.add(isAsc ? 'sort-desc' : 'sort-asc');
-  const dir = isAsc ? -1 : 1;
-  // Detach all company rows, sort source rows, reattach
-  const sourceRows = Array.from(tbody.querySelectorAll('.source-row'));
-  const companyMap = {};
-  sourceRows.forEach(sr => {
-    const src = sr.dataset.source;
-    companyMap[src] = Array.from(tbody.querySelectorAll('.company-row[data-parent="' + src + '"]'));
-  });
-  sourceRows.sort((a, b) => {
-    const aText = a.cells[colIdx]?.textContent.trim() || '';
-    const bText = b.cells[colIdx]?.textContent.trim() || '';
-    const aNum = parseFloat(aText.replace(/[,%]/g, ''));
-    const bNum = parseFloat(bText.replace(/[,%]/g, ''));
-    if (!isNaN(aNum) && !isNaN(bNum)) return (aNum - bNum) * dir;
-    return aText.localeCompare(bText) * dir;
-  });
-  sourceRows.forEach(sr => {
-    tbody.appendChild(sr);
-    (companyMap[sr.dataset.source] || []).forEach(cr => tbody.appendChild(cr));
-  });
-  // Keep total row at the top
-  const totalRow = tbody.querySelector('.total-row');
-  if (totalRow) tbody.insertBefore(totalRow, tbody.firstChild);
+// Pipeline tab — last run stat cards
+// Pipeline stat cards: Pool Size + Active Sources only
+// Filter breakdown lives in the Senior Filter Funnel below (single-home rule)
+// Duration + US Tech Jobs live on Ops tab (no cross-tab duplication)
+function renderPipelineRunStats(metrics, metadata) {
+  const el = document.getElementById('pipeline-run-stats');
+  if (!el) return;
+  const poolTotal = (metadata && metadata.total_jobs) ? metadata.total_jobs : ((metrics && metrics.pipeline) || {}).pipelineTotal;
+  const bySource = (metadata && metadata.by_source) || {};
+  const sourceCount = Object.keys(bySource).length;
+
+  el.innerHTML =
+    statCard({ icon: '🏗️', label: 'Pool Size', value: fmt(poolTotal), sub: 'total jobs in pipeline' }) +
+    statCard({ icon: '🔌', label: 'Active Sources', value: sourceCount || '—', sub: `${sourceCount} ATS connected` });
 }
 
+// Pipeline tab — source breakdown table (Total, WoW, Tech US only)
+// DASH-2a: Has Desc / Desc% removed — those are quality metrics, not pipeline run metrics
 function renderPipelineSourceTable(metrics, metadata, enrichStats) {
   const tbl = document.getElementById('pipeline-source-table');
   if (!tbl) return;
   const bySource = (metadata && metadata.by_source) || {};
   const enrichBySource = (enrichStats && enrichStats.by_source) || {};
   const srcDelta = ((metrics && metrics.growth) || {}).by_source_delta || {};
-  const ORDER = ['workday', 'greenhouse', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'netflix', 'eightfold'];
+  const ORDER = ['workday', 'greenhouse', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'eightfold'];
   const sources = ORDER.filter(s => bySource[s]);
   if (!sources.length) return;
-  // Total row
-  const totalAll = sources.reduce((s, src) => s + (bySource[src] || 0), 0);
-  const totalTechUs = sources.reduce((s, src) => s + ((enrichBySource[src] || {}).tech_us || 0), 0);
-  const totalTechPct = totalAll > 0 ? Math.round(100 * totalTechUs / totalAll) : 0;
-  const totalRow = document.createElement('tr');
-  totalRow.className = 'total-row';
-  totalRow.style.cssText = 'font-weight:700;border-bottom:2px solid var(--border);background:var(--bg-card-hover)';
-  totalRow.innerHTML = `
-    <td>All Sources</td>
-    <td>${fmt(totalAll)}</td>
-    <td><span class="muted">—</span></td>
-    <td>${fmt(totalTechUs)} <span style="color:var(--muted)">(${totalTechPct}%)</span></td>
-  `;
-  tbl.appendChild(totalRow);
   sources.forEach(src => {
     const total = bySource[src] || 0;
     const delta = srcDelta[src];
-    // WoW with gradient coloring: dark green (>10% growth) → light green (5-10%) → muted (<5%) → yellow (5-15% drop) → red (>15% drop)
-    let deltaStr = '<span class="muted">—</span>';
-    if (delta != null) {
-      const prev = total - delta;
-      const pctChange = prev > 0 ? Math.round(100 * delta / prev) : 0;
-      const absPct = Math.abs(pctChange);
-      let color;
-      if (pctChange > 10) color = 'var(--green)';        // dark green — strong growth
-      else if (pctChange > 5) color = 'var(--green)'; // light green — mild growth
-      else if (pctChange >= -5) color = 'var(--muted)'; // muted — normal fluctuation
-      else if (pctChange >= -15) color = 'var(--yellow)'; // yellow — mild decline
-      else color = 'var(--red)';                      // red — significant decline
-      const sign = delta >= 0 ? '+' : '';
-      deltaStr = `<span style="color:${color}">${fmtDelta(delta)} (${sign}${pctChange}%)</span>`;
-    }
+    const deltaStr = delta != null ? `<span class="${delta >= 0 ? 'ok' : 'err'}">${fmtDelta(delta)}</span>` : '<span class="muted">—</span>';
     const ev = enrichBySource[src] || {};
     const techUs = ev.tech_us || 0;
-    const techPct = total > 0 ? Math.round(100 * techUs / total) : 0;
-    // Tech US % gradient: dark green (>80%) → green (50-80%) → yellow (20-50%) → red (<20%)
-    const techColor = techPct >= 80 ? 'var(--green)' : techPct >= 50 ? 'var(--green)' : techPct >= 20 ? 'var(--yellow)' : 'var(--red)';
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${src}</td>
-      <td>${fmt(total)}</td>
-      <td>${deltaStr}</td>
-      <td>${techUs ? `${fmt(techUs)} <span style="color:${techColor}">(${techPct}%)</span>` : '<span class="muted">—</span>'}</td>
+      <td style="text-align:right">${fmt(total)}</td>
+      <td style="text-align:right">${deltaStr}</td>
+      <td style="text-align:right">${techUs ? fmt(techUs) : '<span class="muted">—</span>'}</td>
     `;
     tbl.appendChild(tr);
   });
@@ -2330,16 +1299,16 @@ function renderPipelineSourceTable(metrics, metadata, enrichStats) {
 // Pipeline tab — pool trend chart (30d from history.jsonl, fallback 7d from daily-stats.json.history)
 // Chart.js shared config
 const CHART_COLORS = {
-  accent: C.accent, green: C.green, red: C.red, yellow: C.yellow, muted: C.muted,
+  accent: '#ff5e3c', green: '#3fb950', red: '#f85149', yellow: '#d29922', muted: '#8b949e',
   sources: { workday: '#e67e22', greenhouse: '#27ae60', ashby: '#3498db', lever: '#9b59b6',
-             smartrecruiters: '#e74c3c', amazon: '#f39c12', jsearch: '#1abc9c', netflix: '#c0392b', eightfold: '#7f8c8d' }
+             smartrecruiters: '#e74c3c', amazon: '#f39c12', jsearch: '#1abc9c', eightfold: '#7f8c8d' }
 };
 const CHART_DEFAULTS = {
   responsive: true, maintainAspectRatio: false,
   plugins: { legend: { display: false } },
   scales: {
-    x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: C.muted, font: { size: 10 } } },
-    y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: C.muted, font: { size: 10 } } }
+    x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#8b949e', font: { size: 10 } } },
+    y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#8b949e', font: { size: 10 } } }
   }
 };
 const _charts = {}; // store chart instances for cleanup
@@ -2461,27 +1430,12 @@ const CHANNEL_NAMES = {
 
 // Distribution tab — Discord stats from posted_jobs.json
 // Stars Trend — multi-line chart from history.jsonl stars field
-let _starsTrendAll = null;
 function renderStarsTrend(historyEntries) {
-  _starsTrendAll = (historyEntries || []).filter(e => e.stars);
-  renderStarsTrendChart(_starsTrendAll, 30);
-}
-function renderStarsTrendChart(allEntries, days) {
-  if (!allEntries || allEntries.length < 2) {
+  const entries = (historyEntries || []).filter(e => e.stars);
+  if (entries.length < 2) {
     const el = document.getElementById('stars-trend-card');
     if (el) el.innerHTML = '<p class="muted" style="text-align:center;padding:60px 0">Stars trend accumulating — data appears after daily stats runs.</p>';
     return;
-  }
-  const entries = days ? allEntries.slice(-days) : allEntries;
-  if (entries.length < 2) { renderStarsTrendChart(allEntries, null); return; }
-  const pillsEl = document.getElementById('stars-trend-pills');
-  if (pillsEl) {
-    const ps = d => `display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--border);margin-left:4px;` +
-      (d === days ? 'background:var(--accent);color:#fff;border-color:var(--accent)' : 'background:transparent;color:var(--muted)');
-    pillsEl.innerHTML = [7, 14, 30, null].map(d => {
-      const label = d === 7 ? '7D' : d === 14 ? '14D' : d === 30 ? '30D' : 'All';
-      return `<span style="${ps(d)}" onclick="renderStarsTrendChart(_starsTrendAll,${d})">${label}</span>`;
-    }).join('');
   }
   const REPOS = ['New-Grad-Jobs-2026','Internships-2026','New-Grad-Software-Engineering-Jobs-2026',
     'New-Grad-Data-Science-Jobs-2026','New-Grad-Hardware-Engineering-Jobs-2026','New-Grad-Healthcare-Jobs-2026'];
@@ -2503,132 +1457,13 @@ function renderStarsTrendChart(allEntries, days) {
     },
     options: {
       ...CHART_DEFAULTS,
-      plugins: { legend: { display: true, position: 'top', labels: { color: C.muted, font: { size: 9 }, boxWidth: 10, padding: 8 } } },
+      plugins: { legend: { display: true, position: 'top', labels: { color: '#8b949e', font: { size: 9 }, boxWidth: 10, padding: 8 } } },
       scales: {
         x: CHART_DEFAULTS.scales.x,
         y: { ...CHART_DEFAULTS.scales.y, beginAtZero: false, ticks: { ...CHART_DEFAULTS.scales.y.ticks } }
       }
     }
   });
-}
-
-// OUT tab — Traffic stats from traffic-history.jsonl
-let _trafficAllEntries = null;
-function renderTrafficStats(trafficRaw) {
-  if (!trafficRaw) {
-    document.getElementById('traffic-trend-card').innerHTML = '<p class="muted" style="text-align:center;padding:40px 0">No traffic data yet</p>';
-    document.getElementById('traffic-referrers').innerHTML = '<p class="muted" style="text-align:center;padding:40px 0">No traffic data</p>';
-    return;
-  }
-  const entries = trafficRaw.split('\n').filter(l => l.trim()).map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
-  if (!entries.length) return;
-  _trafficAllEntries = entries;
-  renderTrafficTrendChart(entries, 14);
-  renderTrafficReferrers(entries);
-}
-
-function renderTrafficTrendChart(allEntries, days) {
-  const canvas = document.getElementById('traffic-trend-canvas');
-  if (!canvas) return;
-  const pillsEl = document.getElementById('traffic-trend-pills');
-  const TRAFFIC_REPO_LABELS = {
-    'New-Grad-Jobs-2026': 'New-Grad',
-    'Internships-2026': 'Internships',
-    'New-Grad-Software-Engineering-Jobs-2026': 'Software',
-    'New-Grad-Data-Science-Jobs-2026': 'Data-Science',
-    'New-Grad-Hardware-Engineering-Jobs-2026': 'Hardware',
-    'New-Grad-Healthcare-Jobs-2026': 'Healthcare',
-  };
-  const ps = (d) => d === days ? 'font-weight:700;color:var(--accent);cursor:pointer;font-size:12px' : 'cursor:pointer;font-size:12px;color:var(--muted)';
-  if (pillsEl) {
-    pillsEl.innerHTML = [14, 30, null].map(d => {
-      const label = d === null ? 'All' : `${d}d`;
-      return `<span style="${ps(d)}" onclick="renderTrafficTrendChart(_trafficAllEntries,${d})">${label}</span>`;
-    }).join(' · ');
-  }
-  const sliced = days ? allEntries.slice(-days) : allEntries;
-  const labels = sliced.map(e => (e.date || '').slice(5));
-  const activeRepos = Object.keys(TRAFFIC_REPO_LABELS).filter(r => sliced.some(e => e.repos && e.repos[r] && (e.repos[r].views || 0) > 0));
-  const colors = ['#ff5e3c','#3fb950','#d29922','#58a6ff','#bc8cff','#f78166'];
-  makeChart('traffic-trend-canvas', {
-    type: 'line',
-    data: {
-      labels,
-      datasets: activeRepos.map((repo, i) => ({
-        label: TRAFFIC_REPO_LABELS[repo] || repo,
-        data: sliced.map(e => e.repos && e.repos[repo] ? (e.repos[repo].views || 0) : 0),
-        borderColor: colors[i % colors.length],
-        backgroundColor: colors[i % colors.length] + '15',
-        tension: 0.3,
-        fill: false,
-        pointRadius: 1,
-        borderWidth: 2,
-      })),
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 12, font: { size: 10 }, color: 'var(--muted)' } } },
-      scales: {
-        x: { display: true, ticks: { font: { size: 9 }, color: 'var(--muted)', maxTicksLimit: 10 }, grid: { color: '#ffffff10' } },
-        y: { display: true, ticks: { font: { size: 9 }, color: 'var(--muted)' }, grid: { color: '#ffffff10' }, beginAtZero: true },
-      },
-    },
-  });
-}
-
-function renderTrafficReferrers(entries) {
-  const el = document.getElementById('traffic-referrers');
-  if (!el) return;
-  const latest = entries[entries.length - 1];
-  const repos = latest.repos || {};
-  const totalViews = Object.values(repos).reduce((s, r) => s + (r.views || 0), 0);
-  const totalUniques = Object.values(repos).reduce((s, r) => s + (r.uniques || 0), 0);
-  // Aggregate referrers across all repos
-  const refMap = {};
-  for (const r of Object.values(repos)) {
-    for (const ref of (r.referrers || [])) {
-      refMap[ref.referrer] = (refMap[ref.referrer] || 0) + ref.count;
-    }
-  }
-  const topRefs = Object.entries(refMap).sort((a, b) => b[1] - a[1]).slice(0, 8);
-  const dataDate = latest.date;
-  const daysOld = dataDate ? Math.round((Date.now() - new Date(dataDate + 'T00:00:00').getTime()) / 86400000) : null;
-  const staleTag = daysOld > 3 ? `<span style="color:var(--red);font-size:10px"> ⚠ ${daysOld}d old</span>` : '';
-  el.innerHTML = `
-    <div style="margin-bottom:12px">
-      <span class="stat-label">Total Views (14d)</span>
-      <div style="font-size:20px;font-weight:700">${fmt(totalViews)}</div>
-      <div style="font-size:11px;color:var(--muted)">${fmt(totalUniques)} unique visitors · data as of ${dataDate || '—'}${staleTag}</div>
-    </div>
-    <table style="width:100%;border-collapse:collapse">
-      <tr><th style="text-align:left;font-size:10px;text-transform:uppercase;color:var(--muted);padding:4px 0 6px;border-bottom:1px solid var(--border)">Source</th><th style="text-align:right;font-size:10px;text-transform:uppercase;color:var(--muted);padding:4px 0 6px;border-bottom:1px solid var(--border)">Views</th></tr>
-      ${topRefs.map(([name, count]) => `<tr><td style="padding:4px 0;font-size:12px;border-bottom:1px solid var(--border)">${name}</td><td style="padding:4px 0;font-size:12px;text-align:right;border-bottom:1px solid var(--border)">${fmt(count)}</td></tr>`).join('')}
-    </table>`;
-}
-
-// OUT tab — Discord verification status from discord-verification.json
-function renderDiscordVerification(data) {
-  const el = document.getElementById('discord-verification');
-  if (!el) return;
-  if (!data) {
-    el.innerHTML = statCard({ icon: '⚪', label: 'Verification', value: 'Pending', sub: 'First run at midnight UTC' });
-    return;
-  }
-  const c = data.criticalIssuesCount || {};
-  const totalIssues = (c.recentDuplicates || 0) + (c.locationErrors || 0) + (c.routingErrors || 0) + (c.missingChannels || 0);
-  const checkedAt = data.timestamp ? age(data.timestamp) : '—';
-  const statusIcon = totalIssues === 0 ? '✅' : '⚠️';
-  const statusValue = totalIssues === 0 ? 'All Clear' : `${totalIssues} issue${totalIssues > 1 ? 's' : ''}`;
-  // Only show detail cards when there are issues — zero-value cards are noise
-  if (totalIssues === 0) {
-    el.innerHTML = statCard({ icon: statusIcon, label: 'Discord Verification', value: statusValue, sub: `Checked ${checkedAt}` });
-  } else {
-    el.innerHTML =
-      statCard({ icon: statusIcon, label: 'Discord Verification', value: statusValue, sub: `Checked ${checkedAt}` }) +
-      (c.routingErrors ? statCard({ icon: '🧭', label: 'Routing Errors', value: c.routingErrors, sub: 'jobs in wrong channel' }) : '') +
-      (c.missingChannels ? statCard({ icon: '📡', label: 'Missing Channels', value: c.missingChannels, sub: 'not accessible' }) : '') +
-      (c.recentDuplicates ? statCard({ icon: '📋', label: 'Duplicates', value: c.recentDuplicates, sub: c.historicalDuplicates ? `${c.historicalDuplicates} historical` : '' }) : '');
-  }
 }
 
 function renderDiscordStats(posted, metadata) {
@@ -2639,13 +1474,16 @@ function renderDiscordStats(posted, metadata) {
     return;
   }
   const meta = posted.metadata || {};
+  // Total posts across all channels (not unique jobs — a job posted to 5 channels = 5 posts)
   const channelNumbers = meta.channelJobNumbers || {};
+  const totalPosts = Object.values(channelNumbers).reduce((s, v) => s + v, 0) || null;
+  const uniqueJobs = meta.totalJobs || (Array.isArray(posted.jobs) ? posted.jobs.length : null);
   const lastUpdatedTs = (metadata && metadata.generated) ? metadata.generated : posted.lastUpdated;
   const lastUpdated = lastUpdatedTs ? age(lastUpdatedTs) : '—';
 
-  let lastPostByChannel = meta.channelLastPosted || {};
-  if (!meta.channelLastPosted && Array.isArray(posted.jobs)) {
-    lastPostByChannel = {};
+  // Build last-post-per-channel from jobs[].discordPosts[channelId].postedAt
+  const lastPostByChannel = {};
+  if (Array.isArray(posted.jobs)) {
     for (const job of posted.jobs) {
       for (const [chId, post] of Object.entries(job.discordPosts || {})) {
         const ts = post.postedAt;
@@ -2658,30 +1496,10 @@ function renderDiscordStats(posted, metadata) {
 
   const now = Date.now();
   const SILENT_DAYS = 7;
-  const WEEK_MS = 7 * 86400000;
 
-  // DASH-15C: Per-channel WoW from postedAt timestamps
-  const wowCurrent = {};
-  const wowPrev = {};
-  if (Array.isArray(posted.jobs)) {
-    for (const job of posted.jobs) {
-      for (const [chId, post] of Object.entries(job.discordPosts || {})) {
-        const ts = new Date(post.postedAt).getTime();
-        if (isNaN(ts)) continue;
-        if (ts > now - WEEK_MS) {
-          wowCurrent[chId] = (wowCurrent[chId] || 0) + 1;
-        } else if (ts > now - 2 * WEEK_MS) {
-          wowPrev[chId] = (wowPrev[chId] || 0) + 1;
-        }
-      }
-    }
-  }
-  const totalWowCurrent = Object.values(wowCurrent).reduce((s, v) => s + v, 0);
-  const totalWowPrev = Object.values(wowPrev).reduce((s, v) => s + v, 0);
-  const totalWowDelta = totalWowCurrent - totalWowPrev;
-
+  // Build all channels list with names, sorted by count desc
   const allChannels = Object.entries(channelNumbers)
-    .map(([id, count]) => ({ id, name: CHANNEL_NAMES[id] || id, count, lastPost: lastPostByChannel[id] || null, wowNow: wowCurrent[id] || 0, wowBefore: wowPrev[id] || 0 }))
+    .map(([id, count]) => ({ id, name: CHANNEL_NAMES[id] || id, count, lastPost: lastPostByChannel[id] || null }))
     .sort((a, b) => b.count - a.count);
 
   function channelStatus(ch) {
@@ -2703,127 +1521,28 @@ function renderDiscordStats(posted, metadata) {
     return `<span style="font-size:12px;color:var(--muted)">${label}</span>`;
   }
 
-  function wowCell(ch) {
-    if (ch.wowNow === 0 && ch.wowBefore === 0) return '<span class="muted">—</span>';
-    const delta = ch.wowNow - ch.wowBefore;
-    if (delta === 0) return `<span style="font-size:12px">${ch.wowNow}</span>`;
-    const color = delta > 0 ? 'var(--green)' : 'var(--red)';
-    return `<span style="font-size:12px">${ch.wowNow} <span style="color:${color}">(${delta > 0 ? '+' : ''}${delta})</span></span>`;
-  }
-
-  function wowDeltaColor(delta) {
-    return delta > 0 ? 'var(--green)' : delta < 0 ? 'var(--red)' : 'var(--muted)';
-  }
-
   el.innerHTML = `
     <div style="display:flex; gap:24px; flex-wrap:wrap; margin-bottom:16px">
-      ${(() => {
-        const activeCount = allChannels.filter(ch => ch.lastPost && (now - new Date(ch.lastPost).getTime()) / 86400000 < SILENT_DAYS).length;
-        const silentCount = allChannels.filter(ch => ch.lastPost && (now - new Date(ch.lastPost).getTime()) / 86400000 >= SILENT_DAYS).length;
-        const neverCount = allChannels.filter(ch => ch.count === 0).length;
-        return `
-      <div><span class="stat-label">Active Channels</span><div class="stat-value" style="font-size:18px;color:var(--green)">${activeCount}<span style="font-size:12px;color:var(--muted)"> / ${allChannels.length}</span></div></div>
-      <div><span class="stat-label">7d Posts</span><div class="stat-value" style="font-size:18px">${totalWowCurrent} <span style="font-size:12px;color:${wowDeltaColor(totalWowDelta)}">(${totalWowDelta > 0 ? '+' : ''}${totalWowDelta} vs prior 7d)</span></div></div>
-      <div><span class="stat-label">Silent (&gt;7d)</span><div class="stat-value" style="font-size:18px;color:${silentCount > 0 ? 'var(--yellow)' : 'var(--green)'}">${silentCount}</div></div>
-      ${neverCount > 0 ? `<div><span class="stat-label">Never Posted</span><div class="stat-value" style="font-size:18px;color:var(--red)">${neverCount}</div></div>` : ''}
-      <div><span class="stat-label">Data as of</span><div class="stat-value" style="font-size:18px">${lastUpdated}</div></div>`;
-      })()}
+      <div><span class="stat-label">Total Posts (all time)</span><div class="stat-value" style="font-size:18px">${fmt(totalPosts)}</div></div>
+      <div><span class="stat-label">Unique Jobs Posted</span><div class="stat-value" style="font-size:18px">${fmt(uniqueJobs)}</div></div>
+      <div><span class="stat-label">Channels</span><div class="stat-value" style="font-size:18px">${allChannels.length}</div></div>
+      <div><span class="stat-label">Data as of</span><div class="stat-value" style="font-size:18px">${lastUpdated}</div></div>
     </div>
     <table style="width:100%; border-collapse:collapse">
       <tr>
         <th style="text-align:left;font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 8px 8px 0;border-bottom:1px solid var(--border)">Channel</th>
-        <th style="text-align:center;font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 0 8px;border-bottom:1px solid var(--border)">All-Time</th>
-        <th style="text-align:center;font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 0 8px;border-bottom:1px solid var(--border)">7d (WoW)</th>
-        <th style="text-align:center;font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 0 8px 8px;border-bottom:1px solid var(--border)">Last Post</th>
-        <th style="text-align:center;font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 0 8px;border-bottom:1px solid var(--border)">Status</th>
+        <th style="text-align:right;font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 0 8px;border-bottom:1px solid var(--border)">All-Time</th>
+        <th style="text-align:right;font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 0 8px 8px;border-bottom:1px solid var(--border)">Last Post</th>
+        <th style="text-align:right;font-size:11px;text-transform:uppercase;color:var(--muted);padding:4px 0 8px;border-bottom:1px solid var(--border)">Status</th>
       </tr>
       ${allChannels.map(ch => `
         <tr>
           <td style="padding:6px 8px 6px 0;border-bottom:1px solid var(--border);font-size:13px">${ch.name}</td>
-          <td style="text-align:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;${ch.count === 0 ? 'color:var(--red)' : ''}">${fmt(ch.count)}</td>
-          <td style="text-align:center;padding:6px 0;border-bottom:1px solid var(--border)">${wowCell(ch)}</td>
-          <td style="text-align:center;padding:6px 0 6px 8px;border-bottom:1px solid var(--border)">${lastPostCell(ch)}</td>
-          <td style="text-align:center;padding:6px 0;border-bottom:1px solid var(--border)">${channelStatus(ch)}</td>
+          <td style="text-align:right;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;${ch.count === 0 ? 'color:var(--red)' : ''}">${fmt(ch.count)}</td>
+          <td style="text-align:right;padding:6px 0 6px 8px;border-bottom:1px solid var(--border)">${lastPostCell(ch)}</td>
+          <td style="text-align:right;padding:6px 0;border-bottom:1px solid var(--border)">${channelStatus(ch)}</td>
         </tr>`).join('')}
-    </table>
-    <div style="margin-top:8px;font-size:11px;color:var(--muted)">
-      <strong>7d (WoW)</strong> = posts in last 7 days vs prior 7 days. <strong>SILENT</strong> = no post in 7+ days. <strong>NEVER</strong> = channel has 0 posts.
-    </div>`;
-}
-
-// DASH-15E: Discord posting volume trend chart
-function renderDiscordPostingTrend(posted) {
-  const canvas = document.getElementById('discord-posting-canvas');
-  if (!canvas || !posted || !Array.isArray(posted.jobs)) return;
-
-  const now = Date.now();
-  const DAYS = 30;
-  const DAY_MS = 86400000;
-
-  // Build daily post counts
-  const dailyCounts = new Array(DAYS).fill(0);
-  for (const job of posted.jobs) {
-    for (const post of Object.values(job.discordPosts || {})) {
-      const ts = new Date(post.postedAt).getTime();
-      if (isNaN(ts)) continue;
-      const daysAgo = Math.floor((now - ts) / DAY_MS);
-      if (daysAgo >= 0 && daysAgo < DAYS) {
-        dailyCounts[DAYS - 1 - daysAgo]++;
-      }
-    }
-  }
-
-  // Generate date labels
-  const labels = [];
-  for (let i = DAYS - 1; i >= 0; i--) {
-    const d = new Date(now - i * DAY_MS);
-    labels.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-  }
-
-  // Resolve CSS variable for chart color
-  const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#58a6ff';
-
-  new Chart(canvas, {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [{
-        label: 'Posts',
-        data: dailyCounts,
-        borderColor: accentColor,
-        backgroundColor: accentColor + '33',
-        fill: true,
-        tension: 0.3,
-        pointRadius: 0,
-        pointHitRadius: 8,
-        borderWidth: 2,
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            title: (items) => items[0].label,
-            label: (item) => `${item.raw} posts`
-          }
-        }
-      },
-      scales: {
-        x: {
-          ticks: { color: 'var(--muted)', font: { size: 10 }, maxTicksLimit: 8 },
-          grid: { display: false }
-        },
-        y: {
-          beginAtZero: true,
-          ticks: { color: 'var(--muted)', font: { size: 10 } },
-          grid: { color: 'var(--border)' }
-        }
-      }
-    }
-  });
+    </table>`;
 }
 
 // Classification tab (general-review.json)
@@ -2836,75 +1555,55 @@ function renderClassification(data) {
 
   if (!data || !data.summary) {
     summaryEl.innerHTML = '<div class="card" style="grid-column:1/-1"><span class="muted">Classification review data not yet available. Run prepare-general-review.js --json to generate.</span></div>';
-    if (atsBarsEl) atsBarsEl.innerHTML = '';
+    atsBarsEl.innerHTML = '';
     tenantsEl.innerHTML = '<p class="muted" style="text-align:center; padding:20px 0">No data.</p>';
     return;
   }
 
   const s = data.summary;
   const classifiedRate = (100 - s.us_general_rate).toFixed(1);
-  const companyCount = data.by_company ? data.by_company.length : 0;
-  const descPct = data.descriptions && s.us_general > 0 ? Math.round(data.descriptions.withDesc / s.us_general * 100) : null;
 
-  // Summary cards — 2 cards: G1 rate (primary), US total (scale)
-  // Company count and desc coverage moved to table/subtitles
-  summaryEl.innerHTML =
-    statCard({ icon: '🏷️', label: 'US General Rate', value: `<span style="color:${s.us_general_rate > 10 ? 'var(--yellow)' : 'var(--green)'}">${s.us_general_rate}%</span>`, sub: `Target: <40% · ${fmt(s.us_general)} jobs · ${companyCount} companies` }) +
-    statCard({ icon: '📊', label: 'US Total Jobs', value: fmt(s.us_total), sub: `${fmt(s.us_total - s.us_general)} classified (${classifiedRate}%) · ${s.generated ? 'Updated ' + s.generated.slice(0, 10) : ''}` });
+  // Summary cards
+  summaryEl.innerHTML = `
+    <div class="card"><div class="stat-label">US General Rate</div><div class="stat-val ${s.us_general_rate > 10 ? 'yellow' : 'green'}">${s.us_general_rate}%</div></div>
+    <div class="card"><div class="stat-label">US General Jobs</div><div class="stat-val">${fmt(s.us_general)}</div></div>
+    <div class="card"><div class="stat-label">US Classified Rate</div><div class="stat-val green">${classifiedRate}%</div></div>
+    <div class="card"><div class="stat-label">Companies w/ Generals</div><div class="stat-val">${data.by_company ? data.by_company.length : '—'}</div></div>
+    <div class="card"><div class="stat-label">Desc Coverage</div><div class="stat-val">${data.descriptions ? Math.round(data.descriptions.withDesc / s.us_general * 100) : '—'}%</div></div>
+    <div class="card"><div class="stat-label">Review Date</div><div class="stat-val" style="font-size:14px">${s.generated ? s.generated.slice(0, 10) : '—'}</div></div>
+  `;
 
   // Top companies table
   if (data.by_company && data.by_company.length > 0) {
-    // Total row
-    const totalGeneral = data.by_company.reduce((s, c) => s + (c.general || 0), 0);
-    const totalClassified = data.by_company.reduce((s, c) => s + (c.classified || 0), 0);
-    const totalRow = document.createElement('tr');
-    totalRow.className = 'total-row';
-    totalRow.style.cssText = 'font-weight:700;border-bottom:2px solid var(--border);background:var(--bg-card-hover)';
-    totalRow.innerHTML = `<td></td><td>All ${data.by_company.length} Companies</td><td></td><td>${totalGeneral}</td><td>${totalClassified}</td><td></td><td></td>`;
-    companiesTable.appendChild(totalRow);
     for (const co of data.by_company.slice(0, 25)) {
       const tr = document.createElement('tr');
       const idx = data.by_company.indexOf(co) + 1;
       const topDomain = co.domain_dist ? co.domain_dist.split(',')[0].trim() : '—';
-      tr.innerHTML = `<td>${idx}</td><td>${esc(co.name)}</td><td style="color:var(--muted);font-size:12px">${esc(co.source || '—')}</td><td>${co.general}</td><td>${co.classified}</td><td style="color:var(--muted);font-size:12px">${esc(topDomain)}</td><td>${co.has_desc_pct}%</td>`;
+      tr.innerHTML = `<td>${idx}</td><td>${esc(co.name)}</td><td style="text-align:right">${co.general}</td><td style="text-align:right">${co.classified}</td><td style="color:var(--muted);font-size:12px">${esc(topDomain)}</td><td style="text-align:right">${co.has_desc_pct}%</td>`;
       companiesTable.appendChild(tr);
     }
   }
 
-  // ATS bars with total row (removed from HTML — skip if element gone)
-  if (atsBarsEl && data.by_ats && data.by_ats.length > 0) {
-    const totalGeneral = data.by_ats.reduce((s, a) => s + a.general, 0);
-    const totalAll = data.by_ats.reduce((s, a) => s + a.total, 0);
-    const totalPct = totalAll > 0 ? (totalGeneral / totalAll * 100).toFixed(1) : 0;
+  // ATS bars
+  if (data.by_ats && data.by_ats.length > 0) {
     const max = Math.max(...data.by_ats.map(a => a.general));
-    atsBarsEl.innerHTML =
-      `<div class="bar-row" style="font-weight:700;border-bottom:2px solid var(--border);padding-bottom:6px;margin-bottom:8px">
-        <span class="bar-label">All Sources</span>
-        <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
-        <span class="bar-value">${totalGeneral} <span class="muted">(${totalPct}%)</span></span>
-      </div>` +
-      data.by_ats.map(a => {
-        const pct = max > 0 ? Math.round((a.general / max) * 100) : 0;
-        return `
-          <div class="bar-row">
-            <span class="bar-label">${esc(a.source)}</span>
-            <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
-            <span class="bar-value">${a.general} <span class="muted">(${a.general_pct}%)</span></span>
-          </div>`;
-      }).join('');
+    atsBarsEl.innerHTML = data.by_ats.map(a => {
+      const pct = max > 0 ? Math.round((a.general / max) * 100) : 0;
+      return `
+        <div class="bar-row">
+          <span class="bar-label">${esc(a.source)}</span>
+          <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+          <span class="bar-value">${a.general} <span class="muted">(${a.general_pct}%)</span></span>
+        </div>`;
+    }).join('');
   }
 
-  // Title patterns — show top 10 (maintenance mode — full list in source data)
+  // Title patterns
   if (data.title_patterns && data.title_patterns.length > 0) {
-    for (const p of data.title_patterns.slice(0, 10)) {
+    for (const p of data.title_patterns.slice(0, 20)) {
       const tr = document.createElement('tr');
-      tr.innerHTML = `<td style="font-family:monospace;font-size:12px">${esc(p.title)}</td><td>${p.count}</td><td>${p.companies}</td>`;
+      tr.innerHTML = `<td style="font-family:monospace;font-size:12px">${esc(p.title)}</td><td style="text-align:right">${p.count}</td><td style="text-align:right">${p.companies}</td>`;
       patternsTable.appendChild(tr);
-    }
-    if (data.title_patterns.length > 10) {
-      const note = document.createElement('tr');
-      note.innerHTML = `<td colspan="3" style="text-align:center;font-size:11px;color:var(--muted);padding:6px">+${data.title_patterns.length - 10} more patterns in source data</td>`;
-      patternsTable.appendChild(note);
     }
   } else {
     patternsTable.parentElement.innerHTML = '<p class="muted" style="text-align:center; padding:20px 0">No recurring patterns (3+ occurrences).</p>';
@@ -2912,10 +1611,10 @@ function renderClassification(data) {
 
   // Tenant candidates
   if (data.tenant_candidates && data.tenant_candidates.length > 0) {
-    let html = '<table style="width:100%"><tr><th>Company</th><th>General</th><th>Classified</th><th>Top Domain</th></tr>';
+    let html = '<table style="width:100%"><tr><th>Company</th><th style="text-align:right">General</th><th style="text-align:right">Classified</th><th>Top Domain</th></tr>';
     for (const tc of data.tenant_candidates.slice(0, 15)) {
       const topDomain = tc.domain_dist ? tc.domain_dist.split(',')[0].trim() : '—';
-      html += `<tr><td>${esc(tc.name)}</td><td>${tc.general}</td><td>${tc.classified}</td><td style="color:var(--muted);font-size:12px">${esc(topDomain)}</td></tr>`;
+      html += `<tr><td>${esc(tc.name)}</td><td style="text-align:right">${tc.general}</td><td style="text-align:right">${tc.classified}</td><td style="color:var(--muted);font-size:12px">${esc(topDomain)}</td></tr>`;
     }
     html += '</table>';
     tenantsEl.innerHTML = html;
@@ -2949,7 +1648,7 @@ async function loadAll() {
   }
 
   // Secondary fetches (non-fatal) — metadata is primary source for pool total + tags
-  const [daily, historyRaw, enrichStats, enrichHistoryRaw, metadata, postedJobs, pipelineAlert, archiveRaw, generalReview, discordVerification, trafficRaw] = await Promise.all([
+  const [daily, historyRaw, enrichStats, enrichHistoryRaw, metadata, postedJobs, pipelineAlert, archiveRaw, generalReview] = await Promise.all([
     safeJson(urls.daily),
     fetch(urls.history).then(r => r.ok ? r.text() : null).catch(() => null),
     safeJson(urls.enrichment),
@@ -2959,8 +1658,6 @@ async function loadAll() {
     safeJson(urls.pipelineAlert),
     fetch(urls.historyArchive).then(r => r.ok ? r.text() : null).catch(() => null),
     safeJson(urls.generalReview),
-    safeJson(urls.discordVerification),
-    fetch(urls.trafficHistory).then(r => r.ok ? r.text() : null).catch(() => null),
   ]);
   // Parse history.jsonl into array of {date, total} objects
   const historyEntries = historyRaw
@@ -2975,89 +1672,33 @@ async function loadAll() {
   const statusTs = (metadata && metadata.generated) ? metadata.generated : metrics.timestamp;
   renderStatusBar(statusTs);
   renderOpsServices(metadata);
-  renderOpsPipelineStats(metrics, metadata, enrichStats, daily, historyEntries);
+  renderOpsPipelineStats(metrics, metadata, enrichStats);
   renderAlert(pipelineAlert);
   // Parse long-term archive for "All" toggle on Pool Trend
   const archiveEntries = archiveRaw
     ? archiveRaw.split('\n').filter(l => l.trim()).map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean)
     : null;
-  // Merge history + archive (deduped by date) for full timeline in all trend charts
-  const allHistoryMerged = (() => {
-    const byDate = {};
-    (archiveEntries || []).forEach(e => { if (e.date) byDate[e.date] = e; });
-    (historyEntries || []).forEach(e => { if (e.date) byDate[e.date] = e; }); // history overwrites archive for same date
-    return Object.values(byDate).sort((a, b) => a.date.localeCompare(b.date));
-  })();
-
   renderPoolTrend(daily, historyEntries, archiveEntries);
   renderDurationTrend(metrics, daily, historyEntries, metadata);
-  // renderPipelineRunStats removed — Last Run section removed (redundant with stat cards)
+  renderPipelineRunStats(metrics, metadata);
   renderPipelineSourceTable(metrics, metadata, enrichStats);
   renderBreakdownTrend(historyEntries);
   renderFilterFunnel(metadata);
-  renderDeadlines();
-  renderQuality(metrics, enrichStats, metadata, enrichHistory);
+  renderQuality(metrics, enrichStats, metadata);
   renderEnrichTrend(enrichHistory);
-  // S268A: T3-by-Source chart removed — merged as filter pills on Tier Distribution
-  renderTierSourceChart(enrichStats);
-  renderUnifiedENR(enrichStats);
+  renderCompanyQuality(enrichStats);
   window._poolTotal = metadata ? metadata.total_jobs : null;
-  renderRepos(metrics, daily, allHistoryMerged, trafficRaw);
-  renderOutHealth(metrics, daily, allHistoryMerged);
-  renderOutQuality(enrichStats, daily, pipelineAlert);
-  // SUP freshness indicator
-  const supFresh = document.getElementById('sup-freshness');
-  if (supFresh && metadata && metadata.generated) {
-    supFresh.textContent = `Data as of ${age(metadata.generated)}`;
-  }
-  renderSupHealth(metadata);
+  renderRepos(metrics, daily);
+  renderSourceBars(metrics, metadata);
   renderDomainBars(metadata);
-  renderTopCompanies(metadata, enrichStats, generalReview);
-  renderSourceTrend(allHistoryMerged);
-  renderZeroYield(metadata);
-  renderStarsTrend(allHistoryMerged);
-  renderGeneralTrend(allHistoryMerged);
-  renderTrafficStats(trafficRaw);
-  renderDiscordVerification(discordVerification);
-  renderDiscordPostingTrend(postedJobs);
+  renderTopCompanies(metadata);
+  renderSourceTrend(historyEntries);
+  renderStarsTrend(historyEntries);
   renderDiscordStats(postedJobs, metadata);
   renderClassification(generalReview);
 
   document.getElementById('content').style.display = 'block';
-
-  // Interactive features — MUST run after all tables are populated
-  // S268A: enrich-source-table removed
-  // Unified ENR table has custom sort
-  document.querySelectorAll('#unified-enr-table thead th.sortable').forEach((th, i) => {
-    th.addEventListener('click', () => sortUnifiedTable(i));
-  });
-  makeSortable('pipeline-source-table');
-  makeSortable('class-companies-table');
-  makeSortable('class-patterns-table');
-  makeSortable('repo-table');
-  paginateTable('class-companies-table', 10);
-  paginateTable('class-patterns-table', 10);
-  // S268A: enrich-source-table removed
-  addColumnToggle('class-companies-table', { exclude: [0, 1] });
-  addColumnToggle('unified-enr-table', { exclude: [0, 1] });
-  addColumnToggle('repo-table', { exclude: [0, 1] });
-  // Company detail expander (click company name for cross-source data)
-  initCompanyExpander(enrichStats, metadata, generalReview);
-  // Source filter on ENR tab
-  initSourceFilter();
-  paginateTable('top-companies-table', 10);
-  addColumnToggle('top-companies-table', { exclude: [0, 1] });
-
-  // Render mermaid diagram after all data is loaded and DOM is ready
-  // Mermaid render moved to tab-switch handler — can't render hidden elements (INF tab is not default)
 }
-
-// Initialize mermaid BEFORE loadAll (loadAll calls mermaid.run() at end)
-mermaid.initialize({
-  startOnLoad: false,
-  theme: document.documentElement.classList.contains('dark') ? 'dark' : 'default',
-  securityLevel: 'loose',
-});
 
 loadAll();
 
@@ -3082,7 +1723,7 @@ loadAll();
 
   function doRefresh() {
     // Clear table rows so re-renders don't duplicate (tables append rows)
-    ['pipeline-source-table','enrich-source-table','repo-table','unified-enr-table','class-companies-table','class-patterns-table'].forEach(id => {
+    ['pipeline-source-table','enrich-source-table','company-quality-table','repo-table'].forEach(id => {
       const el = document.getElementById(id);
       if (el) { while (el.rows.length > 1) el.deleteRow(1); }
     });
@@ -3094,7 +1735,20 @@ loadAll();
   startCountdown();
 })();
 
-// Mermaid init moved to before loadAll() — see line before loadAll() call
+// Mermaid — init after auth (renders lazily when tab is visible)
+mermaid.initialize({
+  startOnLoad: false,
+  theme: document.documentElement.classList.contains('dark') ? 'dark' : 'default',
+  securityLevel: 'loose',
+});
+// Render on Supply tab activation (diagram lives in Supply tab)
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (btn.dataset.tab === 'supply') {
+      setTimeout(() => mermaid.run({ nodes: [document.getElementById('arch-diagram')] }), 50);
+    }
+  });
+});
 </script>
 </body>
 </html>
