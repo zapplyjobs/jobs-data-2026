@@ -467,7 +467,7 @@ graph TB
           <th>Source</th>
           <th style="text-align:right">Enriched</th>
           <th style="text-align:right">Skills %</th>
-          <th style="text-align:right">Summary %</th>
+          <th style="text-align:right">Visa Any %</th>
           <th style="text-align:right">Visa %</th>
         </tr>
       </table>
@@ -1130,8 +1130,8 @@ function renderFilterFunnel(metadata) {
 
 // ENR tab — Enrichment Trend chart
 // Time window pills (7D/14D/30D/All) + source selector pills
-// "All" mode: aggregate Enriched count, Tech US Pool, Skills %, Summary % (dual-axis)
-// Per-source mode: that source's skills_pct and summary_pct from by_source in history
+// "All" mode: aggregate Enriched count, Tech US Pool, Skills % (dual-axis)
+// Per-source mode: that source's skills_pct from by_source in history
 let _enrichTrendAll = null;
 let _enrichTrendSource = 'all'; // 'all' or a source key
 
@@ -1191,9 +1191,6 @@ function renderEnrichTrendChart(all, days, source) {
       { label: 'Skills %', data: entries.map(e => e.skills_pct || 0),
         borderColor: CHART_COLORS.green,
         tension: 0.3, pointRadius: 2, pointHoverRadius: 4, borderWidth: 2, yAxisID: 'y1' },
-      { label: 'Summary %', data: entries.map(e => e.summary_pct || 0),
-        borderColor: CHART_COLORS.yellow, borderDash: [4, 3],
-        tension: 0.3, pointRadius: 1, pointHoverRadius: 4, borderWidth: 1.5, yAxisID: 'y1' },
     ];
   } else {
     // Per-source: show that source's enriched count, skills%, summary% from by_source
@@ -1207,13 +1204,8 @@ function renderEnrichTrendChart(all, days, source) {
         borderColor: CHART_COLORS.green,
         tension: 0.3, pointRadius: 2, pointHoverRadius: 4, borderWidth: 2, yAxisID: 'y1',
         spanGaps: false },
-      { label: `${source} summary %`, data: entries.map(e => e.by_source && e.by_source[source] ? e.by_source[source].summary_pct || 0 : null),
-        borderColor: CHART_COLORS.yellow, borderDash: [4, 3],
-        tension: 0.3, pointRadius: 1, pointHoverRadius: 4, borderWidth: 1.5, yAxisID: 'y1',
-        spanGaps: false },
     ];
   }
-
   makeChart('enrich-trend-canvas', {
     type: 'line',
     data: { labels: entries.map(e => (e.date || '').slice(5)), datasets },
@@ -1245,7 +1237,7 @@ function renderCompanyQuality(enrichStats) {
       <td style="font-size:11px;color:var(--muted)">${c.source}</td>
       <td style="text-align:right">${fmt(c.enriched)}</td>
       <td style="text-align:right;color:${colorPct(c.skills_pct)}">${c.skills_pct}%</td>
-      <td style="text-align:right;color:${colorPct(c.summary_pct)}">${c.summary_pct}%</td>
+      <td style="text-align:right;color="${colorPct(c.visa_any_pct || 0)}">${c.visa_any_pct || 0}%</td>
       <td style="text-align:right;color:${colorPct(c.visa_pct)}">${c.visa_pct}%</td>
     `;
     tbl.appendChild(tr);
