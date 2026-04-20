@@ -36,7 +36,7 @@ const he = require('he');
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
-const ENRICHER_VERSION = 8;   // S241: taxonomy additions — sdk, api, microwave
+const ENRICHER_VERSION = 24;  // S289B: LCA aliases (25 companies) + degree regex expansion + SR bypass removal
 const SLOW_BATCH_SIZE = 40;   // GH, Ashby, Lever — HTTP calls per job
 const FAST_BATCH_SIZE = 500;  // WD, SR, JSearch, Amazon, Netflix, EF — CPU only
 const FAST_SOURCES = new Set(['workday', 'smartrecruiters', 'jsearch', 'amazon', 'netflix', 'eightfold']);
@@ -98,9 +98,43 @@ function normalizeLcaName(name) {
   return n;
 }
 
+// LCA_COMPANY_ALIASES: job company_name → LCA database entry name.
+// Companies whose common name doesn't normalize-match their LCA filing entity.
+// Verified against lca-sponsors.json (66,579 employers, FY2025Q1–FY2026Q1).
+const LCA_COMPANY_ALIASES = {
+  'SpaceX': 'Space Exploration Technologies Corp',
+  'Northrop Grumman': 'Northrop Grumman Systems Corp',
+  'Cursor': 'Anysphere Inc',
+  'SharkNinja': 'SharkNinja Operating LLC',
+  'HPE': 'Hewlett Packard Enterprise Company LP',
+  'HPE (University)': 'Hewlett Packard Enterprise Company LP',
+  'DeepMind': 'Google LLC',
+  'Intuitive': 'Intuitive Surgical Operations Inc',
+  'Cadence': 'Cadence Design Systems Inc',
+  'Cadence (University)': 'Cadence Design Systems Inc',
+  'FLIR Systems': 'Teledyne FLIR LLC',
+  'LLNL': 'Lawrence Livermore National Security LLC',
+  'Bosch Group': 'Robert Bosch LLC',
+  'Dell Technologies': 'Dell USA LP',
+  'Intrinsic Robotics': 'Intrinsic Innovation LLC',
+  'Veolia Environnement SA': 'Veolia North America LLC',
+  'The Hartford': 'Hartford Fire Insurance Company',
+  'GE Vernova': 'General Electric Company',
+  'GE Aerospace': 'General Electric Company',
+  'GE HEALTHCARE': 'General Electric Company',
+  'Merck & Co.': 'Merck Sharp & Dohme Corp',
+  'Warner Bros. Discovery': 'Warner Bros Entertainment Inc',
+  'Prudential Financial': 'The Prudential Insurance Company of America',
+  'Freddie Mac': 'Federal Home Loan Mortgage Corporation',
+  'Western Digital': 'Western Digital Technologies Inc',
+};
+
 function isPossibleSponsor(companyName, lcaSet) {
   if (!lcaSet.size) return null;
-  const n = normalizeLcaName(companyName);
+  // Check alias map first — handles companies whose common name doesn't match LCA entity
+  const aliasName = LCA_COMPANY_ALIASES[companyName];
+  const nameToCheck = aliasName || companyName;
+  const n = normalizeLcaName(nameToCheck);
   if (!n || n.length < 3) return null;
   if (lcaSet.has(n)) return true;
   // Prefix match: handles "Amazon Web Services" → matches "amazon" parent or subsidiaries
@@ -787,27 +821,32 @@ function extractSummaryLine(plainText) {
 //   No-degree explicit: ~5% of GH pool
 // ---------------------------------------------------------------------------
 const DEGREE_PHD = /\b(ph\.?d\.?|doctoral|doctorate)\b/i;
-const DEGREE_MASTERS = /\b(master'?s?)\s*(degree|of science|of arts|of engineering|in\s+\w|or higher|preferred|required|or phd|or doctoral)/i;
-const DEGREE_MASTERS_ABBREV = /\bm\.s\.(\s|,|$)/i;
+const DEGREE_MASTERS = /\b(master'?s?)\s*(degree|of science|of arts|of engineering|in\s+\w|or higher|preferred|required|or phd|or doctoral|\/bs|\/bachelor)/i;
+const DEGREE_MASTERS_ABBREV = /\bm\.?s\.?(\s|,|$)/i;
 const DEGREE_MBA = /\bmba\b/i;
-const DEGREE_BACHELORS = /\b(bachelor'?s?)\s*(degree|of science|of arts|of engineering|in\s+\w|or higher|preferred|required|or master)/i;
-const DEGREE_BACHELORS_ABBREV = /\bb\.s\.(\s|,|$)|\bb\.e\.(\s|,|$)/i;
+const DEGREE_BACHELORS = /\b(bachelor'?s?)\s*(degree|of science|of arts|of engineering|in\s+\w|or higher|preferred|required|or master|\/ms|\/master)/i;
+const DEGREE_BACHELORS_ABBREV = /\bb\.?s\.?(\s|,|$)|\bb\.?e\.?(\s|,|$)|\bba\s*(degree|$)/i;
+const DEGREE_BACHELORS_SHORT = /\b(bachelor'?s?|bs|ba)\s*[\+\/]\s*\d/i;
+const DEGREE_MS_BS = /\bms\s*\/\s*bs\b|\bbs\s*\/\s*ms\b/i;
 const DEGREE_ASSOCIATE = /\b(associate'?s?)\s*(degree|in\s+\w)/i;
-const DEGREE_NONE = /\b(no (degree|college required)|equivalent experience|without (a )?degree|degree not required|equivalent combination|in lieu of degree|high school diploma|ged\b)/i;
+const DEGREE_NONE = /\b(no (degree|college required)|equivalent experience|without (a )?degree|degree not required|equivalent combination|in lieu of degree|high school diploma|hs diploma|ged\b)/i;
+const DEGREE_STANDALONE = /\bdegree\s+(required|preferred|in\s+\w|or\s+(higher|equivalent))\b/i;
 
 function extractMinDegree(text) {
   if (!text) return null;
   if (DEGREE_NONE.test(text)) return 'none';
   // Detect all degree levels present, then return the minimum requirement.
   // "Bachelor's or Master's or PhD" → bachelors (lowest mentioned = minimum).
-  const hasBachelors = DEGREE_BACHELORS.test(text) || DEGREE_BACHELORS_ABBREV.test(text);
-  const hasMasters = DEGREE_MASTERS.test(text) || DEGREE_MASTERS_ABBREV.test(text) || DEGREE_MBA.test(text);
+  const hasBachelors = DEGREE_BACHELORS.test(text) || DEGREE_BACHELORS_ABBREV.test(text) || DEGREE_BACHELORS_SHORT.test(text) || DEGREE_MS_BS.test(text);
+  const hasMasters = DEGREE_MASTERS.test(text) || DEGREE_MASTERS_ABBREV.test(text) || DEGREE_MBA.test(text) || DEGREE_MS_BS.test(text);
   const hasPhd = DEGREE_PHD.test(text);
   const hasAssociate = DEGREE_ASSOCIATE.test(text);
+  const hasStandalone = DEGREE_STANDALONE.test(text);
   if (hasAssociate) return 'associates';
   if (hasBachelors) return 'bachelors';
   if (hasMasters) return 'masters';
   if (hasPhd) return 'phd';
+  if (hasStandalone) return 'bachelors'; // "degree required" → at least bachelor's
   return null;
 }
 
