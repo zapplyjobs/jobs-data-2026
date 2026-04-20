@@ -1,44 +1,58 @@
-name: Re-encrypt plaintext files
+name: Re-encrypt plaintext files v2
 
 on:
   repository_dispatch:
-    types: [re-encrypt]
+    types: [re-encrypt-v2]
 
 jobs:
   re-encrypt:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Unlock git-crypt
+      - name: Setup git-crypt and unlock
         run: |
-          echo "${{ secrets.GIT_CRYPT_KEY }}" | base64 -d > /tmp/git-crypt-key
+          echo "${{ secrets.GIT_CRYPT_KEY }}" | base64 -d > /tmp/key
           sudo apt-get install -y git-crypt -q
-          git-crypt unlock /tmp/git-crypt-key
-          rm /tmp/git-crypt-key
+          git-crypt unlock /tmp/key
+          rm /tmp/key
 
-      - name: Force re-stage encrypted files
+      - name: Force re-encryption
         run: |
-          # git-crypt status -f forces re-staging of files that should be encrypted
-          git-crypt status -f
+          for FILE in .github/scripts/discord-poster.js .github/scripts/pipeline-alert.js; do
+            echo "Processing $FILE..."
+            BLOB_SHA=$(git ls-files -s "$FILE" | awk '{print $2}')
+            FIRST_BYTES=$(git cat-file blob "$BLOB_SHA" | head -c 10)
+            if echo "$FIRST_BYTES" | grep -q "GITCRYPT"; then
+              echo "  Already encrypted — skipping"
+            else
+              echo "  PLAINTEXT — re-encrypting via rm --cached + add"
+              git rm --cached "$FILE" 2>/dev/null || true
+              git add "$FILE"
+              # Verify
+              NEW_BLOB=$(git ls-files -s "$FILE" | awk '{print $2}')
+              NEW_BYTES=$(git cat-file blob "$NEW_BLOB" | head -c 10)
+              if echo "$NEW_BYTES" | grep -q "GITCRYPT"; then
+                echo "  SUCCESS — now encrypted"
+              else
+                echo "  FAILED — still plaintext"
+              fi
+            fi
+          done
 
-      - name: Commit and push re-encrypted files
+      - name: Commit and push
         run: |
           git config user.name "z-apply"
           git config user.email "admin@zapply.jobs"
           git diff --cached --stat
-          git diff --cached --quiet && echo "No changes needed" && exit 0
-          git commit -m "security: re-encrypt plaintext files (discord-poster.js, pipeline-alert.js)"
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "security: re-encrypt discord-poster.js + pipeline-alert.js"
+          git -c filter.git-crypt.smudge=cat pull --rebase origin main || true
           git push origin main
-
-      - name: Self-cleanup
-        run: |
-          # Remove this workflow file
-          gh api repos/zapplyjobs/jobs-data-2026/contents/.github/workflows/re-encrypt-files.yml \
-            --method PUT \
-            --field message="chore: remove temp re-encrypt workflow [skip ci]" \
-            --field content="{}" \
-            --field sha="$(gh api repos/zapplyjobs/jobs-data-2026/contents/.github/workflows/re-encrypt-files.yml --jq '.sha')" \
-            || echo "Cleanup skipped"
-        env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}
