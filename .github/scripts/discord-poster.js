@@ -289,7 +289,7 @@ async function postJobToDiscord(job, channelId, discordClient, channelName, chan
   }
 
   // Visa sponsorship tag — tiered to match GitHub README labels
-  // ✅ Sponsors Visa = hard text match (sponsors_visa) or ATS form question (visa_question_present)
+  // Sponsors Visa = hard text match (sponsors_visa) or ATS form question (visa_question_present)
   // 🏢 Sponsor Employer = LCA database match only (not available in enriched_jobs.json yet)
   const enriched = enrichedMap.get(job.id);
   if (enriched) {
@@ -297,7 +297,7 @@ async function postJobToDiscord(job, channelId, discordClient, channelName, chan
     if (hasHard) {
       embed.addFields({
         name: '🌐 Visa',
-        value: '✅ Sponsors Visa',
+        value: 'Sponsors Visa',
         inline: true
       });
     }
