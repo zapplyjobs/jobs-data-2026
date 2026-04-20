@@ -1,8 +1,8 @@
-name: Re-encrypt plaintext files v2
+name: Re-encrypt plaintext files v3
 
 on:
   repository_dispatch:
-    types: [re-encrypt-v2]
+    types: [re-encrypt-v3]
 
 jobs:
   re-encrypt:
@@ -11,8 +11,6 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup git-crypt and unlock
         run: |
@@ -24,22 +22,21 @@ jobs:
       - name: Force re-encryption
         run: |
           for FILE in .github/scripts/discord-poster.js .github/scripts/pipeline-alert.js; do
-            echo "Processing $FILE..."
+            echo "=== Processing $FILE ==="
             BLOB_SHA=$(git ls-files -s "$FILE" | awk '{print $2}')
             FIRST_BYTES=$(git cat-file blob "$BLOB_SHA" | head -c 10)
             if echo "$FIRST_BYTES" | grep -q "GITCRYPT"; then
-              echo "  Already encrypted — skipping"
+              echo "  Already encrypted in index — skipping"
             else
-              echo "  PLAINTEXT — re-encrypting via rm --cached + add"
-              git rm --cached "$FILE" 2>/dev/null || true
+              echo "  PLAINTEXT in index — re-encrypting"
+              git rm --cached "$FILE"
               git add "$FILE"
-              # Verify
               NEW_BLOB=$(git ls-files -s "$FILE" | awk '{print $2}')
               NEW_BYTES=$(git cat-file blob "$NEW_BLOB" | head -c 10)
               if echo "$NEW_BYTES" | grep -q "GITCRYPT"; then
-                echo "  SUCCESS — now encrypted"
+                echo "  SUCCESS — now encrypted in index"
               else
-                echo "  FAILED — still plaintext"
+                echo "  FAILED — still plaintext after re-add"
               fi
             fi
           done
@@ -50,9 +47,13 @@ jobs:
           git config user.email "admin@zapply.jobs"
           git diff --cached --stat
           if git diff --cached --quiet; then
-            echo "No changes to commit"
+            echo "No staged changes — exiting"
             exit 0
           fi
-          git commit -m "security: re-encrypt discord-poster.js + pipeline-alert.js"
+          git commit -m "security: re-encrypt discord-poster.js + pipeline-alert.js
+
+Both files stored as plaintext due to Git Data API pushes bypassing
+git-crypt clean filter."
           git -c filter.git-crypt.smudge=cat pull --rebase origin main || true
           git push origin main
+          echo "Pushed"
