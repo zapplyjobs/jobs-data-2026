@@ -36,7 +36,7 @@ const he = require('he');
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
-const ENRICHER_VERSION = 9;   // ENR-23 batch: LCA aliases, degree regex, desc quality, exp cap, summary/key_req deprecated, visa_any_pct, expanded snapshots
+const ENRICHER_VERSION = 10;   // ENR-23 batch: LCA aliases, degree regex, desc quality, exp cap, summary/key_req deprecated, visa_any_pct, expanded snapshots
 const SLOW_BATCH_SIZE = 40;   // GH, Ashby, Lever — HTTP calls per job
 const FAST_BATCH_SIZE = 500;  // WD, SR, JSearch, Amazon, Netflix, EF — CPU only
 const FAST_SOURCES = new Set(['workday', 'smartrecruiters', 'jsearch', 'amazon', 'eightfold']);
@@ -123,6 +123,7 @@ const LCA_COMPANY_ALIASES = {
   'Prudential Financial': 'The Prudential Insurance of America',
   'GE Aerospace': 'General Electric',
   'Freddie Mac': 'Federal Home Loan Mortgage',
+  'SpaceX': 'Space Exploration Technologies',
 };
 
 // Load per-source description sidecars → Map<id, description_text>
