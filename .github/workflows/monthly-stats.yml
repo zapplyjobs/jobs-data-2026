@@ -44,5 +44,8 @@ jobs:
           git config user.name "Aggregator Bot"
           git add .github/data/monthly-stats.json || exit 0
           git commit -m "chore: update monthly-stats.json [skip ci]" || exit 0
-          git pull --rebase origin main || true
-          git push
+          for i in 1 2 3; do
+            git -c filter.git-crypt.smudge=cat -c filter.git-crypt.clean=cat -c filter.git-crypt.required=false pull --rebase origin main && git push && break
+            echo "Push attempt $i failed, retrying in 5s..."
+            sleep 5
+          done
