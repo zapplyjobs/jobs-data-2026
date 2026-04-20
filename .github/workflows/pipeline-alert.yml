@@ -13,6 +13,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github/scripts
+            .github/data
+            .github/workflows
+            package.json
+            package-lock.json
+            companies.json
 
       - name: Decrypt repository secrets
         run: |
@@ -38,16 +46,25 @@ jobs:
           DISCORD_PIPELINE_ALERT_CHANNEL_ID: ${{ secrets.DISCORD_PIPELINE_ALERT_CHANNEL_ID }}
         run: node .github/scripts/pipeline-alert.js
 
-      - name: Commit alert status
+      - name: Push alert status via API
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
-          git config user.name "z-apply"
-          git config user.email "admin@zapply.jobs"
-          git add .github/data/pipeline-alert.json .github/data/alert-history.jsonl 2>/dev/null || true
-          git diff --cached --quiet && echo "No changes to commit" && exit 0
-          git commit -m "chore: update pipeline alert status [skip ci]"
-          # git-crypt unlock leaves unstaged changes that block pull --rebase
-          # Reset working tree to clean state (keeps our commit), then pull+push
-          git checkout -- . 2>/dev/null || true
-          git clean -fd 2>/dev/null || true
-          git pull --rebase origin main -q
-          git push origin main -q || true
+          # Use GitHub Contents API to update the alert file (bypasses git-crypt dirty tree issues)
+          ALERT_FILE=".github/data/pipeline-alert.json"
+          if [ -f "$ALERT_FILE" ]; then
+            CURRENT_SHA=$(gh api repos/zapplyjobs/jobs-data-2026/contents/$ALERT_FILE --jq '.sha' 2>/dev/null || echo "")
+            CONTENT=$(base64 -w 0 "$ALERT_FILE")
+            if [ -n "$CURRENT_SHA" ]; then
+              gh api repos/zapplyjobs/jobs-data-2026/contents/$ALERT_FILE \
+                --method PUT \
+                --field message="chore: update pipeline alert status [skip ci]" \
+                --field content="$CONTENT" \
+                --field sha="$CURRENT_SHA" \
+                --jq '.commit.sha' 2>/dev/null && echo "Alert status pushed" || echo "Push failed or no change"
+            else
+              echo "Could not get current SHA — skipping push"
+            fi
+          else
+            echo "Alert file not found — skipping push"
+          fi
