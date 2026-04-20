@@ -1698,12 +1698,28 @@ function renderSkillsBars(enrichStats) {
 // S268A: Tier Distribution with filter pills — replaces separate T3-by-Source chart.
 // "All" shows stacked percentage bars (original). Single tier shows that tier's % as simple bars.
 let _tierEnrichStats = null;
+function computeTiersFromAggregates(enrichStats) {
+  if (!enrichStats || enrichStats.tiers_by_source || !enrichStats.by_source) return;
+  const tbs = {};
+  for (const [src, v] of Object.entries(enrichStats.by_source)) {
+    const deg = v.min_degree || 0, visa = v.sponsors_visa || 0;
+    const skills = v.required_skills || 0, summ = v.summary_line || 0;
+    const enriched = v.enriched || 0;
+    const t3 = Math.min(deg, visa);
+    const t2 = Math.max(0, skills - t3);
+    const t1 = Math.max(0, summ - skills - Math.max(0, t3 - skills));
+    const t0 = Math.max(0, enriched - summ);
+    if (enriched > 0) tbs[src] = { t0, t1, t2, t3 };
+  }
+  if (Object.keys(tbs).length > 0) enrichStats.tiers_by_source = tbs;
+}
 function renderTierSourceChart(enrichStats, filterTier) {
   _tierEnrichStats = enrichStats;
+  computeTiersFromAggregates(enrichStats);
   const canvas = document.getElementById('tier-source-canvas');
   if (!canvas || !enrichStats || !enrichStats.tiers_by_source) {
     const card = document.getElementById('tier-source-card');
-    if (card) card.innerHTML = '<p class="muted" style="text-align:center;padding:80px 0">Tier data not yet available — requires ENRICHER_VERSION 15+</p>';
+    if (card) card.innerHTML = '<p class="muted" style="text-align:center;padding:80px 0">Tier data not yet available</p>';
     return;
   }
   const activeTier = filterTier || 'all';
