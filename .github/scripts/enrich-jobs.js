@@ -36,7 +36,7 @@ const he = require('he');
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
-const ENRICHER_VERSION = 8;   // S241: taxonomy additions — sdk, api, microwave
+const ENRICHER_VERSION = 9;   // ENR-23 batch: LCA aliases, degree regex, desc quality, exp cap, summary/key_req deprecated, visa_any_pct, expanded snapshots
 const SLOW_BATCH_SIZE = 40;   // GH, Ashby, Lever — HTTP calls per job
 const FAST_BATCH_SIZE = 500;  // WD, SR, JSearch, Amazon, Netflix, EF — CPU only
 const FAST_SOURCES = new Set(['workday', 'smartrecruiters', 'jsearch', 'amazon', 'eightfold']);
@@ -100,7 +100,10 @@ function normalizeLcaName(name) {
 
 function isPossibleSponsor(companyName, lcaSet) {
   if (!lcaSet.size) return null;
-  const n = normalizeLcaName(companyName);
+  // ENR-20: Check alias table first (handles university-suffix and alternate names)
+  const alias = LCA_COMPANY_ALIASES[companyName];
+  const nameToCheck = alias || companyName;
+  const n = normalizeLcaName(nameToCheck);
   if (!n || n.length < 3) return null;
   if (lcaSet.has(n)) return true;
   // Prefix match: handles "Amazon Web Services" → matches "amazon" parent or subsidiaries
@@ -109,6 +112,18 @@ function isPossibleSponsor(companyName, lcaSet) {
   }
   return null;
 }
+
+// ENR-20: Company name aliases for LCA matching.
+// Some companies post under names that don't match their DOL filing name.
+const LCA_COMPANY_ALIASES = {
+  'HPE (University)': 'Hewlett Packard Enterprise',
+  'Cadence (University)': 'Cadence Design',
+  'The Hartford': 'Hartford Fire Insurance',
+  'Warner Bros. Discovery': 'WarnerMedia',
+  'Prudential Financial': 'The Prudential Insurance of America',
+  'GE Aerospace': 'General Electric',
+  'Freddie Mac': 'Federal Home Loan Mortgage',
+};
 
 // Load per-source description sidecars → Map<id, description_text>
 //
@@ -219,7 +234,10 @@ async function fetchMissingDescriptions(allJobs, descriptionsMap, activeChunkPat
   // Previous: tech+US only (DESC-MIGRATE-1). Expanded to ALL US for TAG-7.
   const pending = allJobs.filter(j => {
     if (j.source !== 'workday' && j.source !== 'smartrecruiters') return false;
-    if (descriptionsMap.has(j.id)) return false;
+    // Skip jobs with valid cached descriptions. Re-fetch if cached text is
+    // suspiciously short or matches known gate-page patterns (Broadcom S268).
+    const cached = descriptionsMap.get(j.id);
+    if (cached && cached.length >= 100 && !/please create your candidate|first time user/i.test(cached)) return false;
     if (failCache[j.id]) return false; // skip known-failed URLs for 24h
     const locs = j.tags?.locations || [];
     return locs.includes('us');
@@ -793,7 +811,7 @@ const DEGREE_MBA = /\bmba\b/i;
 const DEGREE_BACHELORS = /\b(bachelor'?s?)\s*(degree|of science|of arts|of engineering|in\s+\w|or higher|preferred|required|or master)/i;
 const DEGREE_BACHELORS_ABBREV = /\bb\.s\.(\s|,|$)|\bb\.e\.(\s|,|$)/i;
 const DEGREE_ASSOCIATE = /\b(associate'?s?)\s*(degree|in\s+\w)/i;
-const DEGREE_NONE = /\b(no (degree|college required)|equivalent experience|without (a )?degree|degree not required|equivalent combination|in lieu of degree|high school diploma|ged\b)/i;
+const DEGREE_NONE = /\b(no (degree|college required)|equivalent experience|without (a )?degree|degree not required|equivalent combination|in lieu of degree|high school (diploma|degree)|ged\b)/i;
 
 function extractMinDegree(text) {
   if (!text) return null;
@@ -838,6 +856,7 @@ function extractExperienceLevel(text) {
   const m = EXP_YEAR_RE.exec(filteredText);
   if (!m) return null;
   const years = parseInt(m[1], 10); // use lower bound of range
+  if (years > 20) return null; // Company-history boilerplate ("more than 100 years"). No job requires >20.
   if (years <= 2) return 'entry_level';
   if (years <= 5) return 'mid_level';
   return 'senior';
@@ -927,8 +946,8 @@ async function enrichJob(job, termMap, descriptionsMap, lcaSet) {
     // DATA-4: experience level extracted from description text (distinct from tags.employment)
     experience_level_from_desc: experienceLevelFromDesc,
     // DATA-7: job summary panel fields
-    summary_line: summaryLine,
-    key_requirements: keyRequirements,
+    summary_line: null,  // DEPRECATED — use raw description. extractSummaryLine retained for potential future use.
+    key_requirements: null,  // DEPRECATED — use required_skills.slice(0, 6). No consumers read this field.
     // DATA-8: simple apply signal (GH: exact; Ashby/Lever: null pending schema verification)
     is_simple_apply: isSimpleApply,
     question_count: questionCount,
@@ -1132,11 +1151,12 @@ async function main() {
 
         // Per-company tracking
         const co = obj.company_name || 'Unknown';
-        if (!companyMap[co]) companyMap[co] = { source: src, enriched: 0, has_skills: 0, has_summary: 0, has_visa: 0 };
+        if (!companyMap[co]) companyMap[co] = { source: src, enriched: 0, has_skills: 0, has_summary: 0, has_visa: 0, has_any_visa: 0 };
         companyMap[co].enriched++;
         if (obj.required_skills?.length > 0) companyMap[co].has_skills++;
         if (obj.summary_line) companyMap[co].has_summary++;
         if (obj.sponsors_visa !== null) companyMap[co].has_visa++;
+        if (obj.sponsors_visa === true || obj.possible_sponsor === true || obj.visa_question_present === true) companyMap[co].has_any_visa++;
       } catch (_) {}
     }
 
@@ -1149,6 +1169,7 @@ async function main() {
         skills_pct: Math.round(100 * s.has_skills / s.enriched),
         summary_pct: Math.round(100 * s.has_summary / s.enriched),
         visa_pct: Math.round(100 * s.has_visa / s.enriched),
+        visa_any_pct: s.enriched > 0 ? Math.round(100 * s.has_any_visa / s.enriched) : 0,
       }));
 
     const totalTechUs = Object.values(statsBySource).reduce((s, v) => s + v.tech_us, 0);
@@ -1190,6 +1211,12 @@ async function main() {
           enriched: v.enriched,
           skills_pct: v.enriched > 0 ? Math.round(100 * v.required_skills / v.enriched) : 0,
           summary_pct: v.enriched > 0 ? Math.round(100 * v.summary_line / v.enriched) : 0,
+          total_jobs: v.total || 0,
+          tech_us_jobs: v.tech_us || 0,
+          has_desc_pct: v.tech_us > 0 ? Math.round(100 * v.has_desc / v.tech_us) : 0,
+          visa_pct: v.enriched > 0 ? Math.round(100 * v.sponsors_visa / v.enriched) : 0,
+          degree_pct: v.enriched > 0 ? Math.round(100 * v.min_degree / v.enriched) : 0,
+          exp_pct: v.enriched > 0 ? Math.round(100 * v.experience_level_from_desc / v.enriched) : 0,
         };
       }
       // POSTING-HISTORY-1: Count jobs posted today by source
