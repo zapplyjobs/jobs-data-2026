@@ -1,0 +1,44 @@
+name: Re-encrypt plaintext files
+
+on:
+  repository_dispatch:
+    types: [re-encrypt]
+
+jobs:
+  re-encrypt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Unlock git-crypt
+        run: |
+          echo "${{ secrets.GIT_CRYPT_KEY }}" | base64 -d > /tmp/git-crypt-key
+          sudo apt-get install -y git-crypt -q
+          git-crypt unlock /tmp/git-crypt-key
+          rm /tmp/git-crypt-key
+
+      - name: Force re-stage encrypted files
+        run: |
+          # git-crypt status -f forces re-staging of files that should be encrypted
+          git-crypt status -f
+
+      - name: Commit and push re-encrypted files
+        run: |
+          git config user.name "z-apply"
+          git config user.email "admin@zapply.jobs"
+          git diff --cached --stat
+          git diff --cached --quiet && echo "No changes needed" && exit 0
+          git commit -m "security: re-encrypt plaintext files (discord-poster.js, pipeline-alert.js)"
+          git push origin main
+
+      - name: Self-cleanup
+        run: |
+          # Remove this workflow file
+          gh api repos/zapplyjobs/jobs-data-2026/contents/.github/workflows/re-encrypt-files.yml \
+            --method PUT \
+            --field message="chore: remove temp re-encrypt workflow [skip ci]" \
+            --field content="{}" \
+            --field sha="$(gh api repos/zapplyjobs/jobs-data-2026/contents/.github/workflows/re-encrypt-files.yml --jq '.sha')" \
+            || echo "Cleanup skipped"
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
