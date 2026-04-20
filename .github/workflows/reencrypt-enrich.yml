@@ -1,0 +1,34 @@
+name: Re-encrypt enrich-jobs.js
+on:
+  repository_dispatch:
+    types: [reencrypt-enrich]
+jobs:
+  reencrypt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unlock git-crypt
+        run: |
+          sudo apt-get install -y git-crypt
+          echo "$GITCRYPT_KEY" | base64 -d > /tmp/key
+          git-crypt unlock /tmp/key
+          rm /tmp/key
+        env:
+          GITCRYPT_KEY: ${{ secrets.GITCRYPT_KEY }}
+      - name: Re-encrypt
+        run: |
+          git-crypt status -f .github/scripts/enrich-jobs.js
+      - name: Commit and push
+        run: |
+          git config user.name "z-apply"
+          git config user.email "admin@zapply.jobs"
+          git add .github/scripts/enrich-jobs.js
+          git diff --cached --quiet || git commit -m "chore: re-encrypt enrich-jobs.js [skip ci]"
+          git push
+      - name: Self-cleanup
+        run: |
+          git config user.name "z-apply"
+          git config user.email "admin@zapply.jobs"
+          git rm .github/workflows/reencrypt-enrich.yml
+          git commit -m "chore: remove temp reencrypt workflow [skip ci]"
+          git push
