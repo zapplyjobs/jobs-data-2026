@@ -44,4 +44,7 @@ jobs:
           git config user.email "admin@zapply.jobs"
           git add .github/data/pipeline-alert.json .github/data/alert-history.jsonl 2>/dev/null || true
           git diff --cached --quiet || git commit -m "chore: update pipeline alert status [skip ci]"
-          git pull --rebase origin main -q && git push origin main -q || true
+          git stash --include-untracked -q 2>/dev/null || true
+          git pull --rebase origin main -q
+          git stash pop -q 2>/dev/null || true
+          git push origin main -q || true
