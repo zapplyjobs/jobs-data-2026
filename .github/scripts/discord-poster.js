@@ -393,6 +393,13 @@ async function main() {
 
   for (const job of uniqueJobs) {
     try {
+      // Check by stable jobId first (prevents re-posting when url/title/company vary across runs)
+      if (globalDedupeManager.hasJobIdBeenPosted && globalDedupeManager.hasJobIdBeenPosted(job.id)) {
+        console.log(`  ⏭️  Skipping (jobId already posted): ${job.job_title} @ ${job.employer_name}`);
+        skippedCount++;
+        continue;
+      }
+
       // Generate fingerprint for this job
       const fingerprint = generateMinimalJobFingerprint(job);
 
