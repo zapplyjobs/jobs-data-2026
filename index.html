@@ -1128,16 +1128,13 @@ function renderRepos(d, daily, historyEntries, trafficRaw) {
     const stars = r.stars != null ? r.stars : (starMap[repoFullName] ?? '—');
     const updateTs = r.lastJobsUpdate || r.workflowLastRun;
     const hoursAgo = updateTs ? (Date.now() - new Date(updateTs).getTime()) / 3600000 : null;
-    // Health = composite of workflow + freshness
-    // null workflowStatus = metrics fetch failed (intermittent ~1.8%), not a real failure
-    const wfNull = r.workflowStatus == null;
-    const wfOk = r.workflowStatus === 'success';
+    // Health = freshness-first. workflowStatus is unreliable (null ~1.8% of runs from transient API failures).
+    // If repo has fresh data (<6h old) and jobs, it's OK regardless of workflowStatus.
+    const wfFail = r.workflowStatus != null && r.workflowStatus !== 'success';
     const fresh = hoursAgo != null && hoursAgo < 6;
-    const health = wfOk ? '<span style="color:var(--green)">🟢 OK</span>'
-                 : !wfOk && !wfNull ? '<span style="color:var(--red)">🔴 Down</span>'
-                 : wfNull && fresh ? '<span style="color:var(--yellow)">🟡 Unknown</span>'
-                 : wfNull ? '<span style="color:var(--yellow)">🟡 Unknown</span>'
+    const health = wfFail ? '<span style="color:var(--red)">🔴 Down</span>'
                  : !fresh && hoursAgo != null ? '<span style="color:var(--yellow)">🟡 Stale</span>'
+                 : fresh ? '<span style="color:var(--green)">🟢 OK</span>'
                  : '<span class="muted">—</span>';
     // Freshness label
     let freshLabel = '—';
