@@ -103,7 +103,6 @@ function normalizeLcaName(name) {
 // Verified against lca-sponsors.json (66,579 employers, FY2025Q1–FY2026Q1).
 const LCA_COMPANY_ALIASES = {
   'SpaceX': 'Space Exploration Technologies Corp',
-  'Northrop Grumman': 'Northrop Grumman Systems Corp',
   'Cursor': 'Anysphere Inc',
   'SharkNinja': 'SharkNinja Operating LLC',
   'HPE': 'Hewlett Packard Enterprise Company LP',
