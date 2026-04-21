@@ -1188,10 +1188,11 @@ async function main() {
 
         // Per-company tracking
         const co = obj.company_name || 'Unknown';
-        if (!companyMap[co]) companyMap[co] = { source: src, enriched: 0, has_skills: 0, has_summary: 0, has_visa: 0, has_any_visa: 0 };
+        if (!companyMap[co]) companyMap[co] = { source: src, enriched: 0, has_skills: 0, has_summary: 0, has_degree: 0, has_visa: 0, has_any_visa: 0 };
         companyMap[co].enriched++;
         if (obj.required_skills?.length > 0) companyMap[co].has_skills++;
         if (obj.summary_line) companyMap[co].has_summary++;
+        if (obj.min_degree) companyMap[co].has_degree++;
         if (obj.sponsors_visa !== null) companyMap[co].has_visa++;
         if (obj.sponsors_visa !== null || obj.possible_sponsor !== null || obj.visa_question_present !== null) companyMap[co].has_any_visa++;
       } catch (_) {}
@@ -1205,7 +1206,9 @@ async function main() {
         company: co, source: s.source, enriched: s.enriched,
         skills_pct: Math.round(100 * s.has_skills / s.enriched),
         summary_pct: Math.round(100 * s.has_summary / s.enriched),
+        degree_pct: Math.round(100 * s.has_degree / s.enriched),
         visa_pct: Math.round(100 * s.has_any_visa / s.enriched),
+        t3_pct: Math.round(100 * Math.min(s.has_degree, s.has_any_visa) / s.enriched),
       }));
 
     const totalTechUs = Object.values(statsBySource).reduce((s, v) => s + v.tech_us, 0);
