@@ -264,6 +264,44 @@ function computeGrowthTrends(currentPipeline) {
   };
 }
 
+/**
+ * Read traffic data from traffic-history.jsonl (local file, updated by collect-traffic.yml).
+ * Returns latest day's views/uniques + aggregated top referrers, or null if file missing.
+ */
+function getTrafficData() {
+  try {
+    const trafficPath = path.join(DATA_DIR, 'traffic-history.jsonl');
+    if (!fs.existsSync(trafficPath)) return null;
+    const lines = fs.readFileSync(trafficPath, 'utf8').trim().split('\n').filter(Boolean);
+    if (lines.length === 0) return null;
+
+    const referrerTotals = {};
+    let latestEntry = null;
+
+    for (const line of lines) {
+      const entry = JSON.parse(line);
+      if (!latestEntry || entry.date > latestEntry.date) latestEntry = entry;
+      for (const repoData of Object.values(entry.repos || {})) {
+        for (const ref of repoData.referrers || []) {
+          referrerTotals[ref.referrer] = (referrerTotals[ref.referrer] || 0) + ref.count;
+        }
+      }
+    }
+
+    const topReferrers = Object.entries(referrerTotals)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([referrer, count]) => ({ referrer, count }));
+
+    const totalViews = Object.values(latestEntry.repos || {}).reduce((s, r) => s + (r.views || 0), 0);
+    const totalUniques = Object.values(latestEntry.repos || {}).reduce((s, r) => s + (r.uniques || 0), 0);
+
+    return { date: latestEntry.date, totalViews, totalUniques, topReferrers, daysTracked: lines.length };
+  } catch {
+    return null;
+  }
+}
+
 function loadPreviousSnapshot() {
   try {
     if (!fs.existsSync(LATEST_FILE)) return null;
@@ -312,7 +350,9 @@ async function main() {
 
   const stars = getStarCounts();
   const enrichment = getEnrichmentStats();
+  const traffic = getTrafficData();
   if (enrichment) console.log(`  Enrichment: ${enrichment.totalEnriched} enriched / ${enrichment.totalHasDescription} have description`);
+  if (traffic) console.log(`  Traffic: ${traffic.totalViews} views, ${traffic.totalUniques} uniques, top referrer: ${traffic.topReferrers[0]?.referrer || 'none'}`);
 
   console.log('  Fetching per-repo data...');
   const repoResults = await Promise.all(REPOS.map(getRepoMetrics));
@@ -350,6 +390,7 @@ async function main() {
     pipeline,
     repos,
     enrichment,
+    traffic,
     summary: { operationalRepos: operationalCount, failedRepos: failedCount },
     growth,
   };
