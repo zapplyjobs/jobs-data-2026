@@ -367,6 +367,28 @@ async function main() {
     return bDate - aDate;
   });
 
+  // UX-3: Title dedup — cap 1 post per title+company per run (OUT-32).
+  // Prevents multi-location spam: Lowe's "Part Time - Fulfillment Associate" posted
+  // 129 times across different store locations. Each has a unique jobId and URL, so
+  // fingerprint dedup misses them. Only the newest posting per title+company is kept.
+  const MAX_SAME_TITLE_PER_COMPANY = 1;
+  const titleCompanySeen = new Map();
+  const titleDedupedJobs = uniqueJobs.filter(job => {
+    const key = `${(job.job_title || '').toLowerCase().trim()}|${(job.employer_name || '').toLowerCase().trim()}`;
+    const count = titleCompanySeen.get(key) || 0;
+    if (count >= MAX_SAME_TITLE_PER_COMPANY) {
+      return false;
+    }
+    titleCompanySeen.set(key, count + 1);
+    return true;
+  });
+  const titleDedupedCount = uniqueJobs.length - titleDedupedJobs.length;
+  if (titleDedupedCount > 0) {
+    console.log(`✅ Title dedup: removed ${titleDedupedCount} multi-location duplicates (${titleDedupedJobs.length} unique title+company)`);
+  }
+  uniqueJobs.length = 0;
+  uniqueJobs.push(...titleDedupedJobs);
+
   // UX-2: Load enriched data for visa tag lookup (id → visa_question_present)
   const enrichedMap = new Map();
   const enrichedPath = path.join(DATA_DIR, 'enriched_jobs.json');
@@ -546,6 +568,7 @@ async function main() {
   console.log(`\n📊 Posting Summary:`);
   console.log(`  ✅ Posted: ${postedCount} jobs`);
   console.log(`  ⏭️  Skipped (already posted): ${skippedCount} jobs`);
+  console.log(`  🏷️  Title dedup (multi-location): ${titleDedupedCount} jobs`);
   console.log(`  🌍 Filtered (non-US): ${nonUsCount} jobs`);
   console.log(`  📅 Filtered (too old): ${staleCount} jobs`);
   console.log(`  🔵 Filtered (mid-level): ${midLevelCount} jobs`);
