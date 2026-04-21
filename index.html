@@ -2364,6 +2364,32 @@ function renderPoolTrendChart(all, days) {
   const vals = entries.map(e => e.v);
   const minVal = Math.min(...vals);
   const range = Math.max(...vals) - minVal || 1;
+  // Detect gaps (>2 days between entries) for annotation
+  const gapPlugin = {
+    id: 'gapAnnotation',
+    beforeDraw(chart) {
+      const { ctx: c, chartArea: { top, bottom }, scales: { x } } = chart;
+      const labels = entries.map(e => e.label);
+      for (let i = 1; i < labels.length; i++) {
+        if (!labels[i] || !labels[i-1]) continue;
+        const prev = new Date(labels[i-1]);
+        const curr = new Date(labels[i]);
+        const dayDiff = (curr - prev) / 86400000;
+        if (dayDiff > 2) {
+          const x1 = x.getPixelForValue(i - 1);
+          const x2 = x.getPixelForValue(i);
+          c.save();
+          c.fillStyle = 'rgba(210,153,34,0.08)';
+          c.fillRect(x1, top, x2 - x1, bottom - top);
+          c.fillStyle = 'rgba(210,153,34,0.6)';
+          c.font = '10px sans-serif';
+          c.textAlign = 'center';
+          c.fillText(`${Math.round(dayDiff)}d gap`, (x1 + x2) / 2, top + 14);
+          c.restore();
+        }
+      }
+    }
+  };
   makeChart('pool-trend-canvas', {
     type: 'line',
     data: {
@@ -2389,7 +2415,8 @@ function renderPoolTrendChart(all, days) {
       plugins: { ...CHART_DEFAULTS.plugins,
         tooltip: { callbacks: { label: ctx => `Pool: ${fmt(ctx.raw)}` } }
       }
-    }
+    },
+    plugins: [gapPlugin]
   });
 }
 
