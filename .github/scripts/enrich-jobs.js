@@ -1229,6 +1229,7 @@ async function main() {
     }
 
     const enrichmentStats = {
+      enricher_version: ENRICHER_VERSION,
       generated: new Date().toISOString(),
       total_tech_us: totalTechUs,
       total_enriched: totalEnriched,
