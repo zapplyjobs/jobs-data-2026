@@ -36,7 +36,7 @@ const he = require('he');
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
-const ENRICHER_VERSION = 24;  // S289B: LCA aliases (25 companies) + degree regex expansion + SR bypass removal
+const ENRICHER_VERSION = 25;  // S291C: ENR-32 — fall back to job.description for JSearch/inline sources
 const SLOW_BATCH_SIZE = 40;   // GH, Ashby, Lever — HTTP calls per job
 const FAST_BATCH_SIZE = 500;  // WD, SR, JSearch, Amazon, Netflix, EF — CPU only
 const FAST_SOURCES = new Set(['workday', 'smartrecruiters', 'jsearch', 'amazon', 'netflix', 'eightfold']);
@@ -901,7 +901,10 @@ function isEnrichable(job, descriptionsMap) {
 
 async function enrichJob(job, termMap, descriptionsMap, lcaSet) {
 
-  const rawDescription = descriptionsMap.get(job.id) || null;
+  // ENR-32: Fall back to job.description for sources that embed descriptions in the
+  // job data itself (JSearch, Greenhouse, Ashby, Lever) rather than requiring sidecar.
+  // WD/SR descriptions are fetched asynchronously and stored in descriptions-*.jsonl.
+  const rawDescription = descriptionsMap.get(job.id) || job.description || null;
   const plainText = toPlainText(rawDescription || '');
   const { required, preferred } = splitSections(plainText);
 
