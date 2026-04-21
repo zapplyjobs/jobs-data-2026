@@ -506,7 +506,7 @@
     <div class="section-label">Consumer Health</div>
     <div class="grid" id="out-health-cards"></div>
     <div style="margin-top:4px;font-size:11px;color:var(--muted)">
-      <strong>Consumer Freshness</strong> = repos updated &lt;6h ago. <strong>Stars</strong> = GitHub repo stars across all job boards. Delta = current vs 7 snapshots back.
+      <strong>Consumer Freshness</strong> = repos updated &lt;2h ago. <strong>Stars</strong> = GitHub repo stars across all job boards. Delta = current vs 7 snapshots back.
     </div>
     <div class="section-label" style="margin-top:24px">Consumer Repos</div>
     <div class="card">
@@ -1076,21 +1076,21 @@ function renderOutHealth(d, daily, historyEntries) {
   const starRangeStart = starEntries.length >= 2 ? starEntries[0].date : null;
   const starRangeEnd = starEntries.length >= 2 ? starEntries[starEntries.length - 1].date : null;
   const starDeltaStr = starDelta != null ? `<span style="color:${starDelta >= 0 ? 'var(--green)' : 'var(--red)'}">${starDelta >= 0 ? '+' : ''}${starDelta}</span> <span style="font-size:10px">(${starRangeStart} → ${starRangeEnd})</span>` : '';
-  // Consumer freshness: repos updated <6h ago (skip repos with no data)
+  // Consumer freshness: repos updated <2h ago (skip repos with no data)
   let freshCount = 0, dataCount = 0;
   repoEntries.forEach(([, r]) => {
     const updateTs = r.lastJobsUpdate || r.workflowLastRun;
     if (updateTs) {
       dataCount++;
       const age = (Date.now() - new Date(updateTs).getTime()) / 3600000;
-      if (age < 6) freshCount++;
+      if (age < 2) freshCount++;
     }
   });
   const totalRepos = repoEntries.length;
   const noData = totalRepos - dataCount;
   const freshPct = dataCount > 0 ? Math.round(100 * freshCount / dataCount) : 0;
   const freshColor = freshPct >= 80 ? 'var(--green)' : freshPct >= 50 ? 'var(--yellow)' : 'var(--red)';
-  const freshSub = noData > 0 ? `${freshCount}/${dataCount} updated <6h ago · ${noData} no data` : `${freshCount}/${dataCount} repos updated <6h ago`;
+  const freshSub = noData > 0 ? `${freshCount}/${dataCount} updated <2h ago · ${noData} no data` : `${freshCount}/${dataCount} repos updated <2h ago`;
   el.innerHTML =
     statCard({ icon: '⭐', label: 'Total Stars', value: fmt(totalStars), sub: starDeltaStr + (starDeltaStr ? ' · ' : '') + repoEntries.length + ' repos' }) +
     statCard({ icon: '🔄', label: 'Consumer Freshness', value: `<span style="color:${freshColor}">${freshPct}%</span>`, sub: freshSub });
