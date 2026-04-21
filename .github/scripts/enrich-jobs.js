@@ -1253,6 +1253,9 @@ async function main() {
           enriched: v.enriched,
           skills_pct: v.enriched > 0 ? Math.round(100 * v.required_skills / v.enriched) : 0,
           summary_pct: v.enriched > 0 ? Math.round(100 * v.summary_line / v.enriched) : 0,
+          degree_pct: v.enriched > 0 ? Math.round(100 * v.min_degree / v.enriched) : 0,
+          exp_pct: v.enriched > 0 ? Math.round(100 * v.experience_level_from_desc / v.enriched) : 0,
+          visa_pct: v.enriched > 0 ? Math.round(100 * v.any_visa_signal / v.enriched) : 0,
         };
       }
       // POSTING-HISTORY-1: Count jobs posted today by source
@@ -1271,6 +1274,10 @@ async function main() {
         pool_total: allJobs.length,
         skills_pct: totalEnriched > 0 ? Math.round(100 * totalSkills / totalEnriched) : 0,
         summary_pct: totalEnriched > 0 ? Math.round(100 * totalSummary / totalEnriched) : 0,
+        degree_pct: totalEnriched > 0 ? Math.round(100 * Object.values(statsBySource).reduce((s, v) => s + v.min_degree, 0) / totalEnriched) : 0,
+        exp_pct: totalEnriched > 0 ? Math.round(100 * Object.values(statsBySource).reduce((s, v) => s + v.experience_level_from_desc, 0) / totalEnriched) : 0,
+        visa_pct: totalEnriched > 0 ? Math.round(100 * Object.values(statsBySource).reduce((s, v) => s + v.any_visa_signal, 0) / totalEnriched) : 0,
+        t3_pct: totalEnriched > 0 ? Math.round(100 * totalT3 / totalEnriched) : 0,
         posted_today: postedToday,
         by_source: srcSummary,
       };
