@@ -36,7 +36,7 @@ const he = require('he');
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
-const ENRICHER_VERSION = 25;  // S291C: ENR-32 — fall back to job.description for JSearch/inline sources
+const ENRICHER_VERSION = 26;  // ENR-34: Amazon LCA aliases (4 subsidiaries, 47 jobs)
 const SLOW_BATCH_SIZE = 40;   // GH, Ashby, Lever — HTTP calls per job
 const FAST_BATCH_SIZE = 500;  // WD, SR, JSearch, Amazon, Netflix, EF — CPU only
 const FAST_SOURCES = new Set(['workday', 'smartrecruiters', 'jsearch', 'amazon', 'netflix', 'eightfold']);
@@ -126,6 +126,12 @@ const LCA_COMPANY_ALIASES = {
   'Prudential Financial': 'The Prudential Insurance Company of America',
   'Freddie Mac': 'Federal Home Loan Mortgage Corporation',
   'Western Digital': 'Western Digital Technologies Inc',
+  // ENR-34: Amazon subsidiaries — normalizeLcaName creates spaces from dots ('amazon.com' → 'amazon com')
+  // but LCA data has 'amazoncom' (dots removed without space). Prefix match bridges the gap.
+  'Amazon.com Services LLC': 'amazoncom services llc',
+  'Amazon Development Center U.S., Inc.': 'amazon development center us inc',
+  'Amazon Web Services, Inc. - A97': 'amazon web services inc',
+  'Amazon.com LLC': 'amazon llc',
 };
 
 function isPossibleSponsor(companyName, lcaSet) {
