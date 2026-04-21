@@ -338,6 +338,14 @@ function mergeWithPrevious(current, previous) {
   return result;
 }
 
+function carryForwardMetric(current, previous, fieldName) {
+  if (current === null && previous !== null) {
+    console.log(`  ⚠️  ${fieldName}: carried forward from previous (read failure)`);
+    return previous;
+  }
+  return current;
+}
+
 async function main() {
   console.log('🔍 Collecting metrics...');
 
@@ -351,8 +359,16 @@ async function main() {
   const stars = getStarCounts();
   const enrichment = getEnrichmentStats();
   const traffic = getTrafficData();
-  if (enrichment) console.log(`  Enrichment: ${enrichment.totalEnriched} enriched / ${enrichment.totalHasDescription} have description`);
-  if (traffic) console.log(`  Traffic: ${traffic.totalViews} views, ${traffic.totalUniques} uniques, top referrer: ${traffic.topReferrers[0]?.referrer || 'none'}`);
+
+  // Carry forward pipeline/enrichment/traffic on read failure
+  const prevPipeline = previous?.pipeline ?? null;
+  const prevEnrichment = previous?.enrichment ?? null;
+  const prevTraffic = previous?.traffic ?? null;
+  const safePipeline = pipeline ?? carryForwardMetric(pipeline, prevPipeline, 'pipeline');
+  const safeEnrichment = enrichment ?? carryForwardMetric(enrichment, prevEnrichment, 'enrichment');
+  const safeTraffic = traffic ?? carryForwardMetric(traffic, prevTraffic, 'traffic');
+  if (safeEnrichment) console.log(`  Enrichment: ${safeEnrichment.totalEnriched} enriched / ${safeEnrichment.totalHasDescription} have description`);
+  if (safeTraffic) console.log(`  Traffic: ${safeTraffic.totalViews} views, ${safeTraffic.totalUniques} uniques, top referrer: ${safeTraffic.topReferrers[0]?.referrer || 'none'}`);
 
   console.log('  Fetching per-repo data...');
   const repoResults = await Promise.all(REPOS.map(getRepoMetrics));
@@ -372,7 +388,7 @@ async function main() {
     console.log(`  ${emoji} ${r.name}: ${jobStr}, workflow=${wfStr}${staleTag}`);
   }
 
-  const growth = computeGrowthTrends(pipeline);
+  const growth = computeGrowthTrends(safePipeline);
   if (growth) {
     const sign = growth.total_delta >= 0 ? '+' : '';
     console.log(`  Week-over-week: ${sign}${growth.total_delta} jobs (${sign}${growth.total_delta_pct}%) vs ${growth.compared_to}`);
@@ -387,10 +403,10 @@ async function main() {
 
   const snapshot = {
     timestamp: new Date().toISOString(),
-    pipeline,
+    pipeline: safePipeline,
     repos,
-    enrichment,
-    traffic,
+    enrichment: safeEnrichment,
+    traffic: safeTraffic,
     summary: { operationalRepos: operationalCount, failedRepos: failedCount },
     growth,
   };
