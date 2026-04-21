@@ -1280,6 +1280,7 @@ async function main() {
       }
       const snapshot = {
         date: today,
+        enricher_version: ENRICHER_VERSION,
         total_enriched: totalEnriched,
         total_tech_us: totalTechUs,
         pool_total: allJobs.length,
@@ -1289,6 +1290,7 @@ async function main() {
         exp_pct: totalEnriched > 0 ? Math.round(100 * Object.values(statsBySource).reduce((s, v) => s + v.experience_level_from_desc, 0) / totalEnriched) : 0,
         visa_pct: totalEnriched > 0 ? Math.round(100 * Object.values(statsBySource).reduce((s, v) => s + v.any_visa_signal, 0) / totalEnriched) : 0,
         t3_pct: totalEnriched > 0 ? Math.round(100 * totalT3 / totalEnriched) : 0,
+        tiers: { t0: totalT0, t1: totalT1, t2: totalT2, t3: totalT3 },
         posted_today: postedToday,
         by_source: srcSummary,
       };
