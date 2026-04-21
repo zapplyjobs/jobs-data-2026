@@ -744,13 +744,14 @@ function addRow(tableId, cells) {
   document.getElementById(tableId).appendChild(tr);
 }
 
-function statCard({ icon, label, value, trend, trendDir, sub }) {
+function statCard({ icon, label, value, trend, trendDir, sub, valueColor }) {
   const trendClass = trendDir === 'up' ? 'up' : trendDir === 'down' ? 'down' : 'neutral';
+  const vcStyle = valueColor ? ` style="color:${valueColor}"` : '';
   return `
     <div class="stat-card">
       <div class="stat-icon">${icon || '📊'}</div>
       <div class="stat-label">${label}</div>
-      <div class="stat-value">${value ?? '—'}</div>
+      <div class="stat-value"${vcStyle}>${value ?? '—'}</div>
       ${trend ? `<div class="stat-trend ${trendClass}">${trend}</div>` : ''}
       ${sub   ? `<div class="stat-sub">${sub}</div>` : ''}
     </div>`;
@@ -795,6 +796,7 @@ function renderOpsPipelineStats(metrics, metadata, enrichStats, daily, historyEn
 
   el.innerHTML =
     statCard({ icon: statusIcon, label: 'Pipeline Status', value: pipelineStatus,
+               valueColor: hours < 0.5 ? 'var(--green)' : hours < 6 ? 'var(--yellow)' : 'var(--red)',
                sub: statusTs ? `Last run: ${age(statusTs)}` : null }) +
     statCard({ icon: '🏗️', label: 'Pool Size', value: fmt(poolDisplay),
                sub: poolSub ? poolSub : 'jobs & internships' }) +
@@ -903,6 +905,7 @@ function renderDeadlines() {
       icon,
       label: d.label,
       value: `${daysLeft}d`,
+      valueColor: urgency,
       sub: `${d.date} — ${d.action}`,
     });
   }).join('');
@@ -1001,11 +1004,11 @@ function renderQuality(d, enrichStats, metadata, enrichHistory) {
   }
 
   // Filter Performance removed — lives in Pipeline tab Senior Filter Funnel (single-home rule)
-  let t3rate = '—', t3sub = '', t3trend = '';
+  let t3rate = '—', t3sub = '', t3trend = '', t3pct = 0;
   if (enrichStats && enrichStats.tiers) {
     const t = enrichStats.tiers;
     const total = t.t0 + t.t1 + t.t2 + t.t3;
-    const t3pct = total > 0 ? Math.round(100 * t.t3 / total) : 0;
+    t3pct = total > 0 ? Math.round(100 * t.t3 / total) : 0;
     t3rate = t3pct + '%';
     t3sub = `${fmt(t.t3)} of ${fmt(total)} jobs`;
     if (prevSnapshot && prevSnapshot.t3_pct != null) {
@@ -1022,11 +1025,13 @@ function renderQuality(d, enrichStats, metadata, enrichHistory) {
   const enriched = enrichStats ? enrichStats.total_enriched : null;
   const hasDesc = enrichStats ? enrichStats.total_has_description : null;
   const queueGap = (techUs != null && enriched != null) ? techUs - enriched : null;
+  const t3Color = t3pct >= 60 ? 'var(--green)' : t3pct >= 40 ? 'var(--yellow)' : t3pct > 0 ? 'var(--red)' : '';
+  const queueColor = queueGap === 0 ? 'var(--green)' : queueGap != null && queueGap > 50 ? 'var(--red)' : queueGap != null ? 'var(--yellow)' : '';
   document.getElementById('quality-enrich').innerHTML =
-    statCard({ icon: '🏆', label: 'Tier 3 Rate',     value: t3rate, sub: t3sub, trend: t3trend || null, trendDir: t3trend && t3trend.startsWith('+') ? 'up' : t3trend ? 'down' : null }) +
+    statCard({ icon: '🏆', label: 'Tier 3 Rate',     value: t3rate, valueColor: t3Color, sub: t3sub, trend: t3trend || null, trendDir: t3trend && t3trend.startsWith('+') ? 'up' : t3trend ? 'down' : null }) +
     statCard({ icon: '🔬', label: 'Processed',  value: fmt(enriched) + delta(enriched, 'total_enriched'), sub: `of ${fmt(techUs)} tech+US · Target: 100%` }) +
     statCard({ icon: '📄', label: 'Has Description', value: fmt(hasDesc), sub: (hasDesc != null && techUs != null ? Math.round(100 * hasDesc / techUs) + '% of pool · ' : '') + 'Target: 100%' }) +
-    statCard({ icon: '⏳', label: 'In Queue',  value: queueGap != null ? fmt(queueGap) : '—', sub: queueGap != null && queueGap === 0 ? 'All caught up' : 'awaiting enrichment · Target: 0' });
+    statCard({ icon: '⏳', label: 'In Queue',  value: queueGap != null ? fmt(queueGap) : '—', valueColor: queueColor, sub: queueGap != null && queueGap === 0 ? 'All caught up' : 'awaiting enrichment · Target: 0' });
 
   if (enrichStats && enrichStats.by_source) {
     const ORDER = ['greenhouse', 'workday', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'eightfold'];
@@ -1331,7 +1336,7 @@ function renderSupHealth(metadata) {
   const zeroYield = (metadata.zero_yield_companies || []).length;
   el.innerHTML =
     statCard({ icon: '🏢', label: 'Active Sources', value: `${activeSources}/${totalSources}`, sub: `${activeSources} returning jobs` }) +
-    statCard({ icon: '⚠️', label: 'Zero-Yield', value: zeroYield, sub: zeroYield > 0 ? 'companies returning 0 jobs' : 'all sources healthy' });
+    statCard({ icon: '⚠️', label: 'Zero-Yield', value: zeroYield, valueColor: zeroYield > 0 ? 'var(--red)' : 'var(--green)', sub: zeroYield > 0 ? 'companies returning 0 jobs' : 'all sources healthy' });
 }
 
 function renderSourceBars(d, metadata) {
@@ -2582,10 +2587,10 @@ function renderDiscordVerification(data) {
   const statusValue = totalIssues === 0 ? 'All Clear' : `${totalIssues} issue${totalIssues > 1 ? 's' : ''}`;
   // Only show detail cards when there are issues — zero-value cards are noise
   if (totalIssues === 0) {
-    el.innerHTML = statCard({ icon: statusIcon, label: 'Discord Verification', value: statusValue, sub: `Checked ${checkedAt}` });
+    el.innerHTML = statCard({ icon: statusIcon, label: 'Discord Verification', value: statusValue, valueColor: 'var(--green)', sub: `Checked ${checkedAt}` });
   } else {
     el.innerHTML =
-      statCard({ icon: statusIcon, label: 'Discord Verification', value: statusValue, sub: `Checked ${checkedAt}` }) +
+      statCard({ icon: statusIcon, label: 'Discord Verification', value: statusValue, valueColor: 'var(--yellow)', sub: `Checked ${checkedAt}` }) +
       (c.routingErrors ? statCard({ icon: '🧭', label: 'Routing Errors', value: c.routingErrors, sub: 'jobs in wrong channel' }) : '') +
       (c.missingChannels ? statCard({ icon: '📡', label: 'Missing Channels', value: c.missingChannels, sub: 'not accessible' }) : '') +
       (c.recentDuplicates ? statCard({ icon: '📋', label: 'Duplicates', value: c.recentDuplicates, sub: c.historicalDuplicates ? `${c.historicalDuplicates} historical` : '' }) : '');
