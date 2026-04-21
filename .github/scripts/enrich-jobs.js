@@ -36,7 +36,7 @@ const he = require('he');
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
-const ENRICHER_VERSION = 26;  // ENR-34: Amazon LCA aliases (4 subsidiaries, 47 jobs)
+const ENRICHER_VERSION = 27;  // ENR-35: Normalize LCA entries at load time for consistent matching
 const SLOW_BATCH_SIZE = 40;   // GH, Ashby, Lever — HTTP calls per job
 const FAST_BATCH_SIZE = 500;  // WD, SR, JSearch, Amazon, Netflix, EF — CPU only
 const FAST_SOURCES = new Set(['workday', 'smartrecruiters', 'jsearch', 'amazon', 'netflix', 'eightfold']);
@@ -84,8 +84,12 @@ function loadLcaSponsors() {
     return new Set();
   }
   const data = JSON.parse(fs.readFileSync(LCA_SPONSORS_PATH, 'utf8'));
-  const set = new Set(data.employers || []);
-  console.log(`[enrich-jobs] LCA sponsors loaded: ${set.size} employers (${data._meta?.source || 'unknown source'})`);
+  const raw = data.employers || [];
+  // ENR-35: Normalize at load time so exact/prefix matching is consistent.
+  // 10% of LCA entries contain special chars (&, commas, hyphens) that break
+  // comparison against normalizeLcaName()'s output (which strips those chars).
+  const set = new Set(raw.map(normalizeLcaName).filter(Boolean));
+  console.log(`[enrich-jobs] LCA sponsors loaded: ${set.size} normalized employers from ${raw.length} raw (${data._meta?.source || 'unknown source'})`);
   return set;
 }
 
