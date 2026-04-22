@@ -1668,6 +1668,10 @@ function renderEnrichTrendChart(all, days) {
         { label: 'T0 (no desc)', data: entries.map(e => e.tiers && e.tiers.t0 != null ? e.tiers.t0 : null),
           borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.08)', fill: true,
           tension: 0.3, pointRadius: 2, pointHoverRadius: 5, borderWidth: 2, yAxisID: 'y', borderDash: [4, 2] },
+        // ENR-42: Re-enrichment queue trend (data accumulates from Apr 23+)
+        { label: 'Re-enrich Queue', data: entries.map(e => e.reenrichment_pending != null ? e.reenrichment_pending : null),
+          borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.05)', fill: true,
+          tension: 0.3, pointRadius: 2, pointHoverRadius: 5, borderWidth: 1.5, yAxisID: 'y', borderDash: [6, 3], spanGaps: true },
       ]
     },
     options: {
