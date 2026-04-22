@@ -415,6 +415,7 @@
 
   <!-- TAG TAB — Classification: G1 KPIs first, then domain detail -->
   <section id="tab-tag" class="tab-panel" style="display:none">
+    <div id="tag-freshness" style="font-size:11px;color:var(--muted);margin-bottom:8px"></div>
     <div class="section-label">Classification Health</div>
     <div class="grid" id="class-summary"></div>
     <div style="margin-top:4px;font-size:11px;color:var(--muted)">
@@ -450,6 +451,7 @@
 
   <!-- ENR TAB — Enrichment: tier-based quality view (redesigned S262 Phase 2) -->
   <section id="tab-enr" class="tab-panel" style="display:none">
+    <div id="enr-freshness" style="font-size:11px;color:var(--muted);margin-bottom:8px"></div>
     <div class="section-label" style="display:flex;justify-content:space-between;align-items:center">
       <span>Enrichment Health</span>
       <select id="enr-source-filter" style="font-size:11px;padding:3px 8px;border:1px solid var(--border);border-radius:4px;background:transparent;color:var(--muted);cursor:pointer">
@@ -504,6 +506,7 @@
 
   <!-- OUT TAB — Output: consumer repos, stars, Discord -->
   <section id="tab-out" class="tab-panel" style="display:none">
+    <div id="out-freshness" style="font-size:11px;color:var(--muted);margin-bottom:8px"></div>
     <div class="section-label">Consumer Health</div>
     <div class="grid" id="out-health-cards"></div>
     <div style="margin-top:4px;font-size:11px;color:var(--muted)">
@@ -567,6 +570,9 @@
 </div><!-- #app-body -->
 
 <script>
+// Master source list — single definition, all functions reference this
+const MASTER_SOURCES = ['workday','greenhouse','ashby','lever','smartrecruiters','amazon','jsearch','eightfold','netflix'];
+
 // Dashboard proxy secret — injected at deploy time via deploy-pages.yml
 const DASHBOARD_SECRET = '__DASHBOARD_SECRET__';
 
@@ -1035,7 +1041,7 @@ function renderQuality(d, enrichStats, metadata, enrichHistory) {
     statCard({ icon: '⏳', label: 'In Queue',  value: queueGap != null ? fmt(queueGap) : '—', valueColor: queueColor, sub: queueGap != null && queueGap === 0 ? 'All caught up' : 'awaiting enrichment · Target: 0' });
 
   if (enrichStats && enrichStats.by_source) {
-    const ORDER = ['greenhouse', 'workday', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'eightfold', 'netflix'];
+    const ORDER = MASTER_SOURCES;
     const SOURCE_NOTES = {
       workday:   'Desc backfill in progress',
       eightfold: 'No description fetcher',
@@ -1375,7 +1381,7 @@ function renderSourceTrendChart(allEntries, days) {
     }).join('');
   }
 
-  const SOURCES = ['workday', 'greenhouse', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'eightfold', 'netflix'];
+  const SOURCES = MASTER_SOURCES;
   const active = SOURCES.filter(s => entries.some(e => (e.by_source[s] || 0) > 0));
 
   makeChart('source-trend-canvas', {
@@ -1549,7 +1555,7 @@ function renderFilterFunnel(metadata) {
 // Quality tab — enrichment fill rate bars by source
 function renderEnrichBars(enrichStats) {
   if (!enrichStats || !enrichStats.by_source) return;
-  const ORDER = ['greenhouse', 'workday', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'eightfold', 'netflix'];
+  const ORDER = MASTER_SOURCES;
   const items = ORDER
     .filter(s => enrichStats.by_source[s])
     .map(s => {
@@ -1656,7 +1662,7 @@ function renderSourceT3Chart(all, days) {
       return `<span style="${ps(d)}" onclick="renderSourceT3Chart(_sourceT3All,${d})">${label}</span>`;
     }).join('');
   }
-  const ORDER = ['workday', 'greenhouse', 'amazon', 'ashby', 'lever', 'smartrecruiters', 'jsearch', 'eightfold', 'netflix'];
+  const ORDER = MASTER_SOURCES;
   const datasets = ORDER.map(src => ({
     label: src,
     data: entries.map(e => {
@@ -1684,7 +1690,7 @@ function renderSourceT3Chart(all, days) {
 // ENRICH-QUALITY-2: Skills fill rate bars by source
 function renderSkillsBars(enrichStats) {
   if (!enrichStats || !enrichStats.by_source) return;
-  const ORDER = ['greenhouse', 'workday', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'eightfold', 'netflix'];
+  const ORDER = MASTER_SOURCES;
   const items = ORDER
     .filter(s => enrichStats.by_source[s] && enrichStats.by_source[s].enriched > 0)
     .map(s => {
@@ -1750,7 +1756,7 @@ function renderTierSourceChart(enrichStats, filterTier) {
     }).join('');
   }
 
-  const ORDER = ['workday', 'greenhouse', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'eightfold', 'netflix'];
+  const ORDER = MASTER_SOURCES;
   const tbs = enrichStats.tiers_by_source;
   const sources = ORDER.filter(s => tbs[s]);
   const labels = sources.map(s => {
@@ -2039,7 +2045,7 @@ function renderUnifiedENR(enrichStats) {
   const tbody = document.querySelector('#unified-enr-table tbody');
   if (!tbody || !enrichStats || !enrichStats.by_source) return;
 
-  const ORDER = ['workday','greenhouse','ashby','lever','smartrecruiters','amazon','jsearch','eightfold','netflix'];
+  const ORDER = MASTER_SOURCES;
   const sources = ORDER.filter(s => enrichStats.by_source[s]);
   const tbs = enrichStats.tiers_by_source || {};
   const colorPct = (v) => v >= 80 ? 'color:var(--green)' : v >= 40 ? 'color:var(--yellow)' : 'color:var(--red)';
@@ -2244,7 +2250,7 @@ function renderPipelineSourceTable(metrics, metadata, enrichStats) {
   const bySource = (metadata && metadata.by_source) || {};
   const enrichBySource = (enrichStats && enrichStats.by_source) || {};
   const srcDelta = ((metrics && metrics.growth) || {}).by_source_delta || {};
-  const ORDER = ['workday', 'greenhouse', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'eightfold', 'netflix'];
+  const ORDER = MASTER_SOURCES;
   const sources = ORDER.filter(s => bySource[s]);
   if (!sources.length) return;
   // Total row
@@ -2591,9 +2597,9 @@ function renderTrafficReferrers(entries) {
   const staleTag = daysOld > 3 ? `<span style="color:var(--red);font-size:10px"> ⚠ ${daysOld}d old</span>` : '';
   el.innerHTML = `
     <div style="margin-bottom:12px">
-      <span class="stat-label">Total Views (14d)</span>
+      <span class="stat-label">Total Views${daysOld != null ? ` (${daysOld === 0 ? 'today' : daysOld === 1 ? 'yesterday' : daysOld + 'd ago'})` : ''}</span>
       <div style="font-size:20px;font-weight:700">${fmt(totalViews)}</div>
-      <div style="font-size:11px;color:var(--muted)">${fmt(totalUniques)} unique visitors · data as of ${dataDate || '—'}${staleTag}</div>
+      <div style="font-size:11px;color:var(--muted)">${fmt(totalUniques)} unique visitors · ${dataDate || '—'}${staleTag}</div>
     </div>
     <table style="width:100%;border-collapse:collapse">
       <tr><th style="text-align:left;font-size:10px;text-transform:uppercase;color:var(--muted);padding:4px 0 6px;border-bottom:1px solid var(--border)">Source</th><th style="text-align:right;font-size:10px;text-transform:uppercase;color:var(--muted);padding:4px 0 6px;border-bottom:1px solid var(--border)">Views</th></tr>
@@ -3004,6 +3010,13 @@ async function loadAll() {
   if (supFresh && metadata && metadata.generated) {
     supFresh.textContent = `Data as of ${age(metadata.generated)}`;
   }
+  // DASH-19E: Freshness indicators for ENR, TAG, OUT tabs
+  ['enr-freshness','tag-freshness','out-freshness'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && metadata && metadata.generated) {
+      el.textContent = `Data as of ${age(metadata.generated)}`;
+    }
+  });
   renderSupHealth(metadata);
   renderDomainBars(metadata);
   renderTopCompanies(metadata, enrichStats, generalReview);
