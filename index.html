@@ -798,15 +798,25 @@ function renderOpsPipelineStats(metrics, metadata, enrichStats, daily, historyEn
   // history.jsonl records pre-filter totals — not suitable for card display after freshness filter.
   // growth.total_delta compares post-filter vs pre-filter baseline — dishonest as "trend".
   // Show honest note until post-filter history accumulates (pipeline change needed).
+  // Pool WoW: use history.jsonl totals for direction (pre-filter, but trend is correct)
+  let poolDelta = null;
+  if (historyEntries && historyEntries.length >= 2) {
+    const today = historyEntries[historyEntries.length - 1].total;
+    const yesterday = historyEntries[historyEntries.length - 2].total;
+    if (today != null && yesterday != null) poolDelta = today - yesterday;
+  }
+  const poolDeltaStr = poolDelta != null && poolDelta !== 0
+    ? ` <span style="font-size:11px;color:${poolDelta > 0 ? 'var(--green)' : 'var(--red)'};font-weight:600">${poolDelta > 0 ? '↑' : '↓'}${Math.abs(poolDelta)} vs yesterday</span>`
+    : '';
   const poolDisplay = poolTotal;
-  const poolSub = 'jobs & internships · post freshness filter';
+  const poolSub = 'jobs & internships · post freshness filter' + poolDeltaStr;
 
   el.innerHTML =
     statCard({ icon: statusIcon, label: 'Pipeline Status', value: pipelineStatus,
                valueColor: hours < 0.5 ? 'var(--green)' : hours < 6 ? 'var(--yellow)' : 'var(--red)',
                sub: statusTs ? `Last run: ${age(statusTs)}` : null }) +
     statCard({ icon: '🏗️', label: 'Pool Size', value: fmt(poolDisplay),
-               sub: poolSub ? poolSub : 'jobs & internships' }) +
+               sub: poolSub }) +
     statCard({ icon: '💻', label: 'US Tech Jobs', value: fmt(usTechJobs),
                sub: 'SW + DS + HW + AI, US-tagged' });
 }
@@ -1041,13 +1051,15 @@ function renderQuality(d, enrichStats, metadata, enrichHistory) {
   const enriched = enrichStats ? enrichStats.total_enriched : null;
   const hasDesc = enrichStats ? enrichStats.total_has_description : null;
   const queueGap = (techUs != null && enriched != null) ? techUs - enriched : null;
+  const reenrichPending = enrichStats ? enrichStats.reenrichment_pending || 0 : 0;
+  const totalBacklog = (queueGap != null) ? queueGap + reenrichPending : null;
   const t3Color = t3pct >= 60 ? 'var(--green)' : t3pct >= 40 ? 'var(--yellow)' : t3pct > 0 ? 'var(--red)' : '';
-  const queueColor = queueGap === 0 ? 'var(--green)' : queueGap != null && queueGap > 1000 ? 'var(--red)' : queueGap != null ? 'var(--yellow)' : '';
+  const backlogColor = totalBacklog === 0 ? 'var(--green)' : totalBacklog != null && totalBacklog > 1000 ? 'var(--red)' : totalBacklog != null ? 'var(--yellow)' : '';
   document.getElementById('quality-enrich').innerHTML =
     statCard({ icon: '🏆', label: 'Tier 3 Rate',     value: t3rate, valueColor: t3Color, sub: t3sub, trend: t3trend || null, trendDir: t3trend && t3trend.startsWith('+') ? 'up' : t3trend ? 'down' : null }) +
     statCard({ icon: '🔬', label: 'Processed',  value: fmt(enriched) + delta(enriched, 'total_enriched'), sub: `of ${fmt(techUs)} tech+US · Target: 100%` }) +
     statCard({ icon: '📄', label: 'Has Description', value: fmt(hasDesc), sub: (hasDesc != null && techUs != null ? Math.round(100 * hasDesc / techUs) + '% of pool · ' : '') + 'Target: 100%' }) +
-    statCard({ icon: '⏳', label: 'In Queue',  value: queueGap != null ? fmt(queueGap) : '—', valueColor: queueColor, sub: queueGap != null && queueGap === 0 ? 'All caught up' : 'awaiting enrichment · Target: 0' });
+    statCard({ icon: '⏳', label: 'In Queue',  value: totalBacklog != null ? fmt(totalBacklog) : '—', valueColor: backlogColor, sub: totalBacklog != null && totalBacklog === 0 ? 'All caught up' : (queueGap != null ? fmt(queueGap) + ' new' : '') + (reenrichPending > 0 ? ' + ' + fmt(reenrichPending) + ' re-enrich' : '') + ' · Target: 0' });
 
   if (enrichStats && enrichStats.by_source) {
     const ORDER = MASTER_SOURCES;
@@ -2856,11 +2868,13 @@ function renderClassification(data) {
   const companyCount = data.by_company ? data.by_company.length : 0;
   const descPct = data.descriptions && s.us_general > 0 ? Math.round(data.descriptions.withDesc / s.us_general * 100) : null;
 
-  // Summary cards — 2 cards: G1 rate (primary), US total (scale)
-  // Company count and desc coverage moved to table/subtitles
+  // Summary cards — 3 cards: all-US G1, tech-US G1 (primary audience), US total (scale)
+  const techG1 = s.tech_us_general_rate != null ? s.tech_us_general_rate : null;
+  const techG1Color = techG1 != null ? (techG1 > 30 ? 'var(--red)' : techG1 > 15 ? 'var(--yellow)' : 'var(--green)') : '';
   summaryEl.innerHTML =
-    statCard({ icon: '🏷️', label: 'US General Rate', value: `<span style="color:${s.us_general_rate > 10 ? 'var(--yellow)' : 'var(--green)'}">${s.us_general_rate}%</span>`, sub: `Target: <40% · ${fmt(s.us_general)} jobs · ${companyCount} companies` }) +
-    statCard({ icon: '📊', label: 'US Total Jobs', value: fmt(s.us_total), sub: `${fmt(s.us_total - s.us_general)} classified (${classifiedRate}%) · ${s.generated ? 'Updated ' + s.generated.slice(0, 10) : ''}` });
+    statCard({ icon: '🏷️', label: 'US General Rate', value: `<span style="color:${s.us_general_rate > 10 ? 'var(--yellow)' : 'var(--green)'}">${s.us_general_rate}%</span>`, sub: `All jobs · Target: <40%` }) +
+    statCard({ icon: '🎯', label: 'Tech-US General', value: techG1 != null ? `<span style="color:${techG1Color}">${techG1}%</span>` : '—', sub: techG1 != null ? `Primary audience · ${fmt(s.tech_us_total || 0)} tech jobs` : 'Data not available' }) +
+    statCard({ icon: '📊', label: 'US Total Jobs', value: fmt(s.us_total), sub: `${fmt(s.us_total - s.us_general)} classified (${classifiedRate}%) · ${companyCount} companies` });
 
   // Top companies table
   if (data.by_company && data.by_company.length > 0) {
