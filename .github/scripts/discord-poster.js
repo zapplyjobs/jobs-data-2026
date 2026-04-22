@@ -306,11 +306,11 @@ async function postJobToDiscord(job, channelId, discordClient, channelName, chan
   // Add footer with job number and channel name
   if (channelName && channelJobNumber) {
     embed.setFooter({
-      text: `Job #${channelJobNumber} in #${channelName}`
+      text: `Job #${channelJobNumber} in #${channelName} | Jobs by zapply.jobs`
     });
   } else {
     embed.setFooter({
-      text: job._sourceRepo || 'aggregator'
+      text: (job._sourceRepo || 'aggregator') + ' | Jobs by zapply.jobs'
     });
   }
 
