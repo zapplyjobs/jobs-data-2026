@@ -1055,9 +1055,28 @@ function renderQuality(d, enrichStats, metadata, enrichHistory) {
   const totalBacklog = (queueGap != null) ? queueGap + reenrichPending : null;
   const t3Color = t3pct >= 60 ? 'var(--green)' : t3pct >= 40 ? 'var(--yellow)' : t3pct > 0 ? 'var(--red)' : '';
   const backlogColor = totalBacklog === 0 ? 'var(--green)' : totalBacklog != null && totalBacklog > 1000 ? 'var(--red)' : totalBacklog != null ? 'var(--yellow)' : '';
+  // DASH-25: distinguish churn from regression in Processed delta
+  let churnNote = '';
+  if (prevSnapshot && enriched != null && prevSnapshot.total_enriched != null) {
+    const enrichedDiff = enriched - prevSnapshot.total_enriched;
+    const prevTechUs = prevSnapshot.total_tech_us;
+    if (enrichedDiff < 0 && prevTechUs != null && techUs != null) {
+      const techUsDiff = techUs - prevTechUs;
+      if (techUsDiff < 0) {
+        // Pool shrank — check if proportional
+        const enrichedPct = Math.abs(enrichedDiff / prevSnapshot.total_enriched * 100);
+        const poolPct = Math.abs(techUsDiff / prevTechUs * 100);
+        if (Math.abs(enrichedPct - poolPct) < 3) {
+          churnNote = ' <span style="font-size:10px;color:var(--muted)">(pool churn)</span>';
+        } else if (enrichedPct > poolPct + 3) {
+          churnNote = ' <span style="font-size:10px;color:var(--red)">(regression)</span>';
+        }
+      }
+    }
+  }
   document.getElementById('quality-enrich').innerHTML =
     statCard({ icon: '🏆', label: 'Tier 3 Rate',     value: t3rate, valueColor: t3Color, sub: t3sub, trend: t3trend || null, trendDir: t3trend && t3trend.startsWith('+') ? 'up' : t3trend ? 'down' : null }) +
-    statCard({ icon: '🔬', label: 'Processed',  value: fmt(enriched) + delta(enriched, 'total_enriched'), sub: `of ${fmt(techUs)} tech+US · Target: 100%` }) +
+    statCard({ icon: '🔬', label: 'Processed',  value: fmt(enriched) + delta(enriched, 'total_enriched'), sub: `of ${fmt(techUs)} tech+US · Target: 100%${churnNote}` }) +
     statCard({ icon: '📄', label: 'Has Description', value: fmt(hasDesc), sub: (hasDesc != null && techUs != null ? Math.round(100 * hasDesc / techUs) + '% of pool · ' : '') + 'Target: 100%' }) +
     statCard({ icon: '⏳', label: 'In Queue',  value: totalBacklog != null ? fmt(totalBacklog) : '—', valueColor: backlogColor, sub: totalBacklog != null && totalBacklog === 0 ? 'All caught up' : (queueGap != null ? fmt(queueGap) + ' new' : '') + (reenrichPending > 0 ? ' + ' + fmt(reenrichPending) + ' re-enrich' : '') + ' · Target: 0' });
 
