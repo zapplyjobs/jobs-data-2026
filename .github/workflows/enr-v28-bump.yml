@@ -19,6 +19,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: main
+          fetch-depth: 0
 
       - name: Decrypt repository secrets
         run: |
@@ -27,11 +28,8 @@ jobs:
           git-crypt unlock /tmp/git-crypt-key
           rm /tmp/git-crypt-key
 
-      - name: Pull latest and bump ENRICHER_VERSION to 28
+      - name: Bump ENRICHER_VERSION to 28
         run: |
-          git stash
-          git pull --rebase origin main
-          git stash pop
           sed -i 's/const ENRICHER_VERSION = 27;/const ENRICHER_VERSION = 28;/' .github/scripts/enrich-jobs.js
           grep "ENRICHER_VERSION" .github/scripts/enrich-jobs.js | head -1
 
@@ -42,12 +40,12 @@ jobs:
           git add .github/scripts/enrich-jobs.js
           git diff --cached --quiet && echo "No changes to commit" && exit 0
           git commit -m "ENR-36: bump ENRICHER_VERSION 27 → 28 (T0 recovery for 248 version-gated jobs)"
-          git pull --rebase origin main
+          git pull --rebase origin main 2>/dev/null || true
           git push
 
       - name: Remove this workflow
         run: |
-          git pull --rebase origin main
+          git pull --rebase origin main 2>/dev/null || true
           git rm .github/workflows/enr-v28-bump.yml
           git commit -m "chore: remove temp v28 bump workflow"
           git push
