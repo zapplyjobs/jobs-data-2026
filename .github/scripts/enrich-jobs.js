@@ -36,7 +36,7 @@ const he = require('he');
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
-const ENRICHER_VERSION = 30;   // ENR-40: increase slow batch size 40->120 to clear re-enrichment backlog
+const ENRICHER_VERSION = 31;   // ENR-24: taxonomy canonicalization (6 alias pairs → consistent skill names)
 const SLOW_BATCH_SIZE = 120;   // GH, Ashby, Lever — HTTP calls per job
 const FAST_BATCH_SIZE = 500;  // WD, SR, JSearch, Amazon, Netflix, EF — CPU only
 const FAST_SOURCES = new Set(['workday', 'smartrecruiters', 'jsearch', 'amazon', 'netflix', 'eightfold']);
@@ -53,15 +53,25 @@ const LCA_SPONSORS_PATH = path.join(DATA_DIR, 'lca-sponsors.json');
 // ---------------------------------------------------------------------------
 // Load taxonomy — flatten all categories into a single Set for O(1) lookup,
 // preserving canonical casing from the JSON for output.
+// Aliases are canonicalized so consumers see consistent skill names.
 // ---------------------------------------------------------------------------
+const SKILL_ALIASES = {
+'react.js': 'React', 'reactjs': 'React',
+'vue.js': 'Vue', 'vuejs': 'Vue',
+'node.js': 'Node.js',
+'postgres': 'PostgreSQL',
+'k8s': 'Kubernetes',
+'nlp': 'Natural Language Processing',
+};
 function loadTaxonomy() {
 const raw = JSON.parse(fs.readFileSync(TAXONOMY_PATH, 'utf8'));
-// Map lowercase → canonical term
+// Map lowercase → canonical term (aliases resolve to primary form)
 const termMap = new Map();
 for (const [category, terms] of Object.entries(raw)) {
 if (category === '_meta') continue;
 for (const term of terms) {
-termMap.set(term.toLowerCase(), term);
+const canonical = SKILL_ALIASES[term.toLowerCase()] || term;
+termMap.set(term.toLowerCase(), canonical);
 }
 }
 return termMap;
