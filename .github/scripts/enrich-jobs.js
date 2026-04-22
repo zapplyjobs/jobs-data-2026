@@ -1328,6 +1328,7 @@ exp_pct: totalEnriched > 0 ? Math.round(100 * Object.values(statsBySource).reduc
 visa_pct: totalEnriched > 0 ? Math.round(100 * Object.values(statsBySource).reduce((s, v) => s + v.any_visa_signal, 0) / totalEnriched) : 0,
 t3_pct: totalEnriched > 0 ? Math.round(100 * totalT3 / totalEnriched) : 0,
 tiers: { t0: totalT0, t1: totalT1, t2: totalT2, t3: totalT3 },
+reenrichment_pending: reenrichmentPending,
 posted_today: postedToday,
 by_source: srcSummary,
 };
