@@ -36,7 +36,7 @@ const he = require('he');
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
-const ENRICHER_VERSION = 29;   // ENR-37: race condition guard — don't mark T0 jobs as done
+const ENRICHER_VERSION = 29;   // ENR-37 + ENR-38: race guard + by_source percentage fields
 const SLOW_BATCH_SIZE = 40;   // GH, Ashby, Lever — HTTP calls per job
 const FAST_BATCH_SIZE = 500;  // WD, SR, JSearch, Amazon, Netflix, EF — CPU only
 const FAST_SOURCES = new Set(['workday', 'smartrecruiters', 'jsearch', 'amazon', 'netflix', 'eightfold']);
@@ -1191,7 +1191,18 @@ async function main() {
       desc_waiting: descWaiting,
       tiers: { t0: totalT0, t1: totalT1, t2: totalT2, t3: totalT3 },
       tiers_by_source: tiersBySource,
-      by_source: statsBySource,
+      by_source: Object.fromEntries(
+        Object.entries(statsBySource).map(([src, v]) => {
+          const e = v.enriched || 1; // avoid div-by-zero
+          return [src, {
+            ...v,
+            skills_pct: Math.round(100 * v.required_skills / e),
+            summary_pct: Math.round(100 * v.summary_line / e),
+            degree_pct: Math.round(100 * v.min_degree / e),
+            visa_pct: Math.round(100 * v.any_visa_signal / e),
+          }];
+        })
+      ),
       by_company: byCompany,
     };
 
@@ -1214,10 +1225,13 @@ async function main() {
     if (shouldAppend) {
       const srcSummary = {};
       for (const [src, v] of Object.entries(statsBySource)) {
+        const e = v.enriched || 1;
         srcSummary[src] = {
           enriched: v.enriched,
-          skills_pct: v.enriched > 0 ? Math.round(100 * v.required_skills / v.enriched) : 0,
-          summary_pct: v.enriched > 0 ? Math.round(100 * v.summary_line / v.enriched) : 0,
+          skills_pct: Math.round(100 * v.required_skills / e),
+          summary_pct: Math.round(100 * v.summary_line / e),
+          degree_pct: Math.round(100 * v.min_degree / e),
+          visa_pct: Math.round(100 * v.any_visa_signal / e),
         };
       }
       // POSTING-HISTORY-1: Count jobs posted today by source
