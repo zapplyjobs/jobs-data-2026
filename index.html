@@ -1059,6 +1059,12 @@ function renderQuality(d, enrichStats, metadata, enrichHistory) {
   const totalBacklog = (queueGap != null) ? queueGap + reenrichPending : null;
   const t3Color = t3pct >= 60 ? 'var(--green)' : t3pct >= 40 ? 'var(--yellow)' : t3pct > 0 ? 'var(--red)' : '';
   const backlogColor = totalBacklog === 0 ? 'var(--green)' : totalBacklog != null && totalBacklog > 1000 ? 'var(--red)' : totalBacklog != null ? 'var(--yellow)' : '';
+  // ENR-42: T0 spike alert + drain estimate
+  const t0Count = enrichStats && enrichStats.tiers ? enrichStats.tiers.t0 : 0;
+  let t0Alert = '';
+  if (t0Count > 50) t0Alert = ' ⚠️ T0 spike';
+  const drainEstimate = reenrichPending > 0 ? Math.ceil(reenrichPending / 120) * 15 : 0; // 120/run, 15min/run
+  const drainLabel = drainEstimate > 0 ? `~${drainEstimate >= 60 ? (drainEstimate/60).toFixed(1) + 'h' : drainEstimate + 'm'} to drain` : '';
   // DASH-25: distinguish churn from regression in Processed delta
   let churnNote = '';
   if (prevSnapshot && enriched != null && prevSnapshot.total_enriched != null) {
@@ -1082,7 +1088,7 @@ function renderQuality(d, enrichStats, metadata, enrichHistory) {
     statCard({ icon: '🏆', label: 'Tier 3 Rate',     value: t3rate, valueColor: t3Color, sub: t3sub, trend: t3trend || null, trendDir: t3trend && t3trend.startsWith('+') ? 'up' : t3trend ? 'down' : null }) +
     statCard({ icon: '🔬', label: 'Processed',  value: fmt(enriched) + delta(enriched, 'total_enriched'), sub: `of ${fmt(techUs)} tech+US · Target: 100%${churnNote}` }) +
     statCard({ icon: '📄', label: 'Has Description', value: fmt(hasDesc), sub: (hasDesc != null && techUs != null ? Math.round(100 * hasDesc / techUs) + '% of pool · ' : '') + 'Target: 100%' }) +
-    statCard({ icon: '⏳', label: 'In Queue',  value: totalBacklog != null ? fmt(totalBacklog) : '—', valueColor: backlogColor, sub: totalBacklog != null && totalBacklog === 0 ? 'All caught up' : (queueGap != null ? fmt(queueGap) + ' new' : '') + (reenrichPending > 0 ? ' + ' + fmt(reenrichPending) + ' re-enrich' : '') + ' · Target: 0' });
+    statCard({ icon: '⏳', label: 'In Queue',  value: totalBacklog != null ? fmt(totalBacklog) : '—', valueColor: backlogColor, sub: totalBacklog != null && totalBacklog === 0 ? 'All caught up' : (queueGap != null ? fmt(queueGap) + ' new' : '') + (reenrichPending > 0 ? ' + ' + fmt(reenrichPending) + ' re-enrich' : '') + (drainLabel ? ' · ' + drainLabel : '') + (t0Alert ? ' · ' + t0Alert : '') + ' · Target: 0' });
 
   if (enrichStats && enrichStats.by_source) {
     const ORDER = MASTER_SOURCES;
@@ -1658,6 +1664,10 @@ function renderEnrichTrendChart(all, days) {
         { label: 'Tier 3 %', data: entries.map(e => e.t3_pct != null ? e.t3_pct : null),
           borderColor: '#a855f7', borderWidth: 2.5, spanGaps: false,
           tension: 0.3, pointRadius: 3, pointHoverRadius: 6, yAxisID: 'y1' },
+        // ENR-42: T0 count on left axis — shows spike events
+        { label: 'T0 (no desc)', data: entries.map(e => e.tiers && e.tiers.t0 != null ? e.tiers.t0 : null),
+          borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.08)', fill: true,
+          tension: 0.3, pointRadius: 2, pointHoverRadius: 5, borderWidth: 2, yAxisID: 'y', borderDash: [4, 2] },
       ]
     },
     options: {
