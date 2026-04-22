@@ -1,14 +1,9 @@
 name: Verify Discord Posts
 
 on:
-  # Run daily at midnight UTC
   schedule:
     - cron: '0 0 * * *'
-
-  # Allow manual trigger
   workflow_dispatch:
-
-  # Run after posting workflow completes
   workflow_run:
     workflows: ["Post Jobs to Discord"]
     types:
@@ -44,8 +39,6 @@ jobs:
       - name: Verify Discord posts
         env:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
-
-          # New-Grad industry channels
           DISCORD_TECH_CHANNEL_ID: ${{ secrets.DISCORD_TECH_CHANNEL_ID }}
           DISCORD_AI_CHANNEL_ID: ${{ secrets.DISCORD_AI_CHANNEL_ID }}
           DISCORD_DS_CHANNEL_ID: ${{ secrets.DISCORD_DS_CHANNEL_ID }}
@@ -55,15 +48,11 @@ jobs:
           DISCORD_HARDWARE_CHANNEL_ID: ${{ secrets.DISCORD_HARDWARE_CHANNEL_ID }}
           DISCORD_SALES_CHANNEL_ID: ${{ secrets.DISCORD_SALES_CHANNEL_ID }}
           DISCORD_OTHER_INDUSTRY_CHANNEL_ID: ${{ secrets.DISCORD_OTHER_INDUSTRY_CHANNEL_ID }}
-
-          # New-Grad location channels
           DISCORD_BAY_AREA_CHANNEL_ID: ${{ secrets.DISCORD_BAY_AREA_CHANNEL_ID }}
           DISCORD_NY_CHANNEL_ID: ${{ secrets.DISCORD_NY_CHANNEL_ID }}
           DISCORD_PNW_CHANNEL_ID: ${{ secrets.DISCORD_PNW_CHANNEL_ID }}
           DISCORD_REMOTE_USA_CHANNEL_ID: ${{ secrets.DISCORD_REMOTE_USA_CHANNEL_ID }}
           DISCORD_OTHER_USA_CHANNEL_ID: ${{ secrets.DISCORD_OTHER_USA_CHANNEL_ID }}
-
-          # Internship industry channels
           DISCORD_TECH_INT_CHANNEL_ID: ${{ secrets.DISCORD_TECH_INT_CHANNEL_ID }}
           DISCORD_AI_INT_CHANNEL_ID: ${{ secrets.DISCORD_AI_INT_CHANNEL_ID }}
           DISCORD_DS_INT_CHANNEL_ID: ${{ secrets.DISCORD_DS_INT_CHANNEL_ID }}
@@ -72,8 +61,6 @@ jobs:
           DISCORD_BUSINESS_INT_CHANNEL_ID: ${{ secrets.DISCORD_BUSINESS_INT_CHANNEL_ID }}
           DISCORD_HEALTHCARE_INT_CHANNEL_ID: ${{ secrets.DISCORD_HEALTHCARE_INT_CHANNEL_ID }}
           DISCORD_OTHER_INDUSTRY_INT_CHANNEL_ID: ${{ secrets.DISCORD_OTHER_INDUSTRY_INT_CHANNEL_ID }}
-
-          # Internship location channels
           DISCORD_REMOTE_USA_INT_CHANNEL_ID: ${{ secrets.DISCORD_REMOTE_USA_INT_CHANNEL_ID }}
           DISCORD_BAY_AREA_INT_CHANNEL_ID: ${{ secrets.DISCORD_BAY_AREA_INT_CHANNEL_ID }}
           DISCORD_NY_INT_CHANNEL_ID: ${{ secrets.DISCORD_NY_INT_CHANNEL_ID }}
@@ -82,7 +69,7 @@ jobs:
           DISCORD_OTHER_USA_INT_CHANNEL_ID: ${{ secrets.DISCORD_OTHER_USA_INT_CHANNEL_ID }}
         run: node .github/scripts/verify-discord.js
 
-      - name: Post results to summary (private - repo access only)
+      - name: Post results to summary
         if: always()
         run: |
           if [ -f /tmp/verification-summary.json ]; then
@@ -97,23 +84,20 @@ jobs:
 
       - name: Commit verification results
         run: |
-          git config user.name "z-apply"
-          git config user.email "admin@zapply.jobs"
-          # Stash decrypted files to allow clean rebase
-          git stash --include-untracked -q || true
-          for i in 1 2 3; do
-            git pull --rebase origin main -q && break
-            echo "Pull attempt $i failed, retrying in 5s..."
-            sleep 5
-          done
-          git stash pop -q 2>/dev/null || true
-          git add .github/data/discord-verification.json 2>/dev/null || true
-          git diff --staged --quiet || git commit -m "chore: update discord verification [skip ci]"
-          for i in 1 2 3; do
-            git push origin main -q && break
-            echo "Push attempt $i failed, retrying in 5s..."
-            sleep 5
-          done
+          FILE=".github/data/discord-verification.json"
+          if [ ! -f "/tmp/verification-summary.json" ]; then
+            echo "No verification data to commit"
+            exit 0
+          fi
+          # Copy verification output to data dir
+          cp /tmp/verification-summary.json "$FILE"
+          # Push via Contents API (avoids git-crypt dirty tree issues)
+          SHA=$(gh api repos/{owner}/{repo}/contents/$FILE --jq '.sha' 2>/dev/null || echo "")
+          ENCODED=$(base64 -w0 "$FILE")
+          PAYLOAD=$(jq -n --arg msg "chore: update discord verification [skip ci]" --arg sha "$SHA" --arg content "$ENCODED" '{message:$msg,sha:$sha,content:$content}')
+          echo "$PAYLOAD" | gh api repos/{owner}/{repo}/contents/$FILE --method PUT --input -
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Delete temporary files
         if: always()
