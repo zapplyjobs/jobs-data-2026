@@ -387,7 +387,7 @@
       </table>
       <div style="margin-top:8px;font-size:11px;color:var(--muted)">
         <strong>Total</strong> = all jobs from this source in the 7-day pool. <strong>Tech US</strong> = jobs tagged tech-domain + US-location.
-        <strong>WoW</strong> = change vs 7 days ago. Large swings may reflect policy changes (e.g. freshness filter), not pipeline regressions. Color: <span style="color:var(--green)">growth</span> / <span style="color:var(--muted)">stable</span> / <span style="color:var(--yellow)">decline</span>.
+        <strong>WoW</strong> = change vs 7 days ago. <span id="wow-ttl-note" style="display:none;color:var(--yellow);font-weight:600">⚠ WoW baseline is pre-freshness-filter — negative deltas reflect policy change, not regression. Self-corrects when baseline passes Apr 19.</span><span id="wow-normal-note">Large swings may reflect policy changes (e.g. freshness filter), not pipeline regressions.</span> Color: <span style="color:var(--green)">growth</span> / <span style="color:var(--muted)">stable</span> / <span style="color:var(--yellow)">decline</span>.
       </div>
     </div>
     <div class="section-label" style="margin-top:24px">Companies by Total Job Count</div>
@@ -2271,6 +2271,17 @@ function renderPipelineSourceTable(metrics, metadata, enrichStats) {
   const bySource = (metadata && metadata.by_source) || {};
   const enrichBySource = (enrichStats && enrichStats.by_source) || {};
   const srcDelta = ((metrics && metrics.growth) || {}).by_source_delta || {};
+  // DASH-21: Flag WoW deltas when baseline is pre-TTL-change (Apr 19, 2026)
+  const comparedTo = (metrics && metrics.growth && metrics.growth.compared_to) ? new Date(metrics.growth.compared_to) : null;
+  const ttlChangeDate = new Date('2026-04-19T00:00:00Z');
+  const isPreTtlBaseline = comparedTo && comparedTo < ttlChangeDate;
+  // Toggle TTL annotation notes
+  const ttlNote = document.getElementById('wow-ttl-note');
+  const normalNote = document.getElementById('wow-normal-note');
+  if (ttlNote && normalNote) {
+    ttlNote.style.display = isPreTtlBaseline ? 'inline' : 'none';
+    normalNote.style.display = isPreTtlBaseline ? 'none' : 'inline';
+  }
   const ORDER = MASTER_SOURCES;
   const sources = ORDER.filter(s => bySource[s]);
   if (!sources.length) return;
@@ -2292,19 +2303,24 @@ function renderPipelineSourceTable(metrics, metadata, enrichStats) {
     const total = bySource[src] || 0;
     const delta = srcDelta[src];
     // WoW with gradient coloring: dark green (>10% growth) → light green (5-10%) → muted (<5%) → yellow (5-15% drop) → red (>15% drop)
+    // DASH-21: suppress misleading colors when baseline is pre-TTL-change
     let deltaStr = '<span class="muted">—</span>';
     if (delta != null) {
       const prev = total - delta;
       const pctChange = prev > 0 ? Math.round(100 * delta / prev) : 0;
-      const absPct = Math.abs(pctChange);
-      let color;
-      if (pctChange > 10) color = 'var(--green)';        // dark green — strong growth
-      else if (pctChange > 5) color = 'var(--green)'; // light green — mild growth
-      else if (pctChange >= -5) color = 'var(--muted)'; // muted — normal fluctuation
-      else if (pctChange >= -15) color = 'var(--yellow)'; // yellow — mild decline
-      else color = 'var(--red)';                      // red — significant decline
-      const sign = delta >= 0 ? '+' : '';
-      deltaStr = `<span style="color:${color}">${fmtDelta(delta)} (${sign}${pctChange}%)</span>`;
+      if (isPreTtlBaseline && delta < 0) {
+        // Pre-TTL baseline: show number but neutral color + annotation
+        deltaStr = `<span style="color:var(--muted)">${fmtDelta(delta)}</span> <span style="font-size:9px;color:var(--muted)" title="Baseline is pre-freshness-filter (Apr 15). Delta reflects policy change, not pipeline regression. Self-corrects ~Apr 26.">⚠ TTL</span>`;
+      } else {
+        let color;
+        if (pctChange > 10) color = 'var(--green)';
+        else if (pctChange > 5) color = 'var(--green)';
+        else if (pctChange >= -5) color = 'var(--muted)';
+        else if (pctChange >= -15) color = 'var(--yellow)';
+        else color = 'var(--red)';
+        const sign = delta >= 0 ? '+' : '';
+        deltaStr = `<span style="color:${color}">${fmtDelta(delta)} (${sign}${pctChange}%)</span>`;
+      }
     }
     const ev = enrichBySource[src] || {};
     const techUs = ev.tech_us || 0;
