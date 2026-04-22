@@ -1026,7 +1026,7 @@ function renderQuality(d, enrichStats, metadata, enrichHistory) {
   const hasDesc = enrichStats ? enrichStats.total_has_description : null;
   const queueGap = (techUs != null && enriched != null) ? techUs - enriched : null;
   const t3Color = t3pct >= 60 ? 'var(--green)' : t3pct >= 40 ? 'var(--yellow)' : t3pct > 0 ? 'var(--red)' : '';
-  const queueColor = queueGap === 0 ? 'var(--green)' : queueGap != null && queueGap > 50 ? 'var(--red)' : queueGap != null ? 'var(--yellow)' : '';
+  const queueColor = queueGap === 0 ? 'var(--green)' : queueGap != null && queueGap > 1000 ? 'var(--red)' : queueGap != null ? 'var(--yellow)' : '';
   document.getElementById('quality-enrich').innerHTML =
     statCard({ icon: '🏆', label: 'Tier 3 Rate',     value: t3rate, valueColor: t3Color, sub: t3sub, trend: t3trend || null, trendDir: t3trend && t3trend.startsWith('+') ? 'up' : t3trend ? 'down' : null }) +
     statCard({ icon: '🔬', label: 'Processed',  value: fmt(enriched) + delta(enriched, 'total_enriched'), sub: `of ${fmt(techUs)} tech+US · Target: 100%` }) +
@@ -1034,7 +1034,7 @@ function renderQuality(d, enrichStats, metadata, enrichHistory) {
     statCard({ icon: '⏳', label: 'In Queue',  value: queueGap != null ? fmt(queueGap) : '—', valueColor: queueColor, sub: queueGap != null && queueGap === 0 ? 'All caught up' : 'awaiting enrichment · Target: 0' });
 
   if (enrichStats && enrichStats.by_source) {
-    const ORDER = ['greenhouse', 'workday', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'eightfold'];
+    const ORDER = ['greenhouse', 'workday', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'eightfold', 'netflix'];
     const SOURCE_NOTES = {
       workday:   'Desc backfill in progress',
       eightfold: 'No description fetcher',
@@ -1374,7 +1374,7 @@ function renderSourceTrendChart(allEntries, days) {
     }).join('');
   }
 
-  const SOURCES = ['workday', 'greenhouse', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'eightfold'];
+  const SOURCES = ['workday', 'greenhouse', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'eightfold', 'netflix'];
   const active = SOURCES.filter(s => entries.some(e => (e.by_source[s] || 0) > 0));
 
   makeChart('source-trend-canvas', {
@@ -1548,7 +1548,7 @@ function renderFilterFunnel(metadata) {
 // Quality tab — enrichment fill rate bars by source
 function renderEnrichBars(enrichStats) {
   if (!enrichStats || !enrichStats.by_source) return;
-  const ORDER = ['greenhouse', 'workday', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'eightfold'];
+  const ORDER = ['greenhouse', 'workday', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'eightfold', 'netflix'];
   const items = ORDER
     .filter(s => enrichStats.by_source[s])
     .map(s => {
@@ -1655,7 +1655,7 @@ function renderSourceT3Chart(all, days) {
       return `<span style="${ps(d)}" onclick="renderSourceT3Chart(_sourceT3All,${d})">${label}</span>`;
     }).join('');
   }
-  const ORDER = ['workday', 'greenhouse', 'amazon', 'ashby', 'lever', 'smartrecruiters', 'jsearch'];
+  const ORDER = ['workday', 'greenhouse', 'amazon', 'ashby', 'lever', 'smartrecruiters', 'jsearch', 'netflix'];
   const datasets = ORDER.map(src => ({
     label: src,
     data: entries.map(e => {
@@ -1683,7 +1683,7 @@ function renderSourceT3Chart(all, days) {
 // ENRICH-QUALITY-2: Skills fill rate bars by source
 function renderSkillsBars(enrichStats) {
   if (!enrichStats || !enrichStats.by_source) return;
-  const ORDER = ['greenhouse', 'workday', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'eightfold'];
+  const ORDER = ['greenhouse', 'workday', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'eightfold', 'netflix'];
   const items = ORDER
     .filter(s => enrichStats.by_source[s] && enrichStats.by_source[s].enriched > 0)
     .map(s => {
@@ -1749,7 +1749,7 @@ function renderTierSourceChart(enrichStats, filterTier) {
     }).join('');
   }
 
-  const ORDER = ['workday', 'greenhouse', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'eightfold'];
+  const ORDER = ['workday', 'greenhouse', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'eightfold', 'netflix'];
   const tbs = enrichStats.tiers_by_source;
   const sources = ORDER.filter(s => tbs[s]);
   const labels = sources.map(s => {
@@ -2038,7 +2038,7 @@ function renderUnifiedENR(enrichStats) {
   const tbody = document.querySelector('#unified-enr-table tbody');
   if (!tbody || !enrichStats || !enrichStats.by_source) return;
 
-  const ORDER = ['workday','greenhouse','ashby','lever','smartrecruiters','amazon','jsearch','eightfold'];
+  const ORDER = ['workday','greenhouse','ashby','lever','smartrecruiters','amazon','jsearch','eightfold', 'netflix'];
   const sources = ORDER.filter(s => enrichStats.by_source[s]);
   const tbs = enrichStats.tiers_by_source || {};
   const colorPct = (v) => v >= 80 ? 'color:var(--green)' : v >= 40 ? 'color:var(--yellow)' : 'color:var(--red)';
@@ -2243,7 +2243,7 @@ function renderPipelineSourceTable(metrics, metadata, enrichStats) {
   const bySource = (metadata && metadata.by_source) || {};
   const enrichBySource = (enrichStats && enrichStats.by_source) || {};
   const srcDelta = ((metrics && metrics.growth) || {}).by_source_delta || {};
-  const ORDER = ['workday', 'greenhouse', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'eightfold'];
+  const ORDER = ['workday', 'greenhouse', 'ashby', 'lever', 'smartrecruiters', 'amazon', 'jsearch', 'eightfold', 'netflix'];
   const sources = ORDER.filter(s => bySource[s]);
   if (!sources.length) return;
   // Total row
