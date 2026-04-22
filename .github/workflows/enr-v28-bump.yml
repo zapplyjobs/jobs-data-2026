@@ -29,7 +29,9 @@ jobs:
 
       - name: Pull latest and bump ENRICHER_VERSION to 28
         run: |
+          git stash
           git pull --rebase origin main
+          git stash pop
           sed -i 's/const ENRICHER_VERSION = 27;/const ENRICHER_VERSION = 28;/' .github/scripts/enrich-jobs.js
           grep "ENRICHER_VERSION" .github/scripts/enrich-jobs.js | head -1
 
