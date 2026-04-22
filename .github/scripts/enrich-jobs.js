@@ -36,8 +36,8 @@ const he = require('he');
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
-const ENRICHER_VERSION = 29;   // ENR-37 + ENR-38: race guard + by_source pct fields
-const SLOW_BATCH_SIZE = 40;   // GH, Ashby, Lever — HTTP calls per job
+const ENRICHER_VERSION = 30;   // ENR-40: increase slow batch size 40->120 to clear re-enrichment backlog
+const SLOW_BATCH_SIZE = 120;   // GH, Ashby, Lever — HTTP calls per job
 const FAST_BATCH_SIZE = 500;  // WD, SR, JSearch, Amazon, Netflix, EF — CPU only
 const FAST_SOURCES = new Set(['workday', 'smartrecruiters', 'jsearch', 'amazon', 'netflix', 'eightfold']);
 const DESC_FETCH_PER_RUN = 500; // DESC-MIGRATE-1: WD/SR descriptions fetched by enrichment (3s timeout per)
@@ -1058,7 +1058,24 @@ console.log(`[enrich-jobs] WD/SR jobs waiting for description: ${descWaiting} (w
 }
 
 const enrichablePending = pending.filter(j => isEnrichable(j, descriptionsMap));
-console.log(`[enrich-jobs] Enrichable pending: ${enrichablePending.length}`);
+// ENR-41: Count stale-version jobs awaiting re-enrichment
+const pendingIds = new Set(pending.map(j => j.id));
+let reenrichmentPending = 0;
+if (fs.existsSync(ENRICHED_PATH)) {
+  const enrichedLines = fs.readFileSync(ENRICHED_PATH, 'utf8').trim().split('\n');
+  const seen = new Set();
+  for (let i = enrichedLines.length - 1; i >= 0; i--) {
+    try {
+      const obj = JSON.parse(enrichedLines[i]);
+      if (seen.has(obj.id)) continue; // dedup: last wins
+      seen.add(obj.id);
+      if (pendingIds.has(obj.id) && (obj.enricher_version || 0) < ENRICHER_VERSION) {
+        reenrichmentPending++;
+      }
+    } catch (_) {}
+  }
+}
+console.log(`[enrich-jobs] Enrichable pending: ${enrichablePending.length} (re-enrichment: ${reenrichmentPending})`);
 
 // ENRICH-THROUGHPUT-1: Split batch by source type. Fast sources (CPU-only, no HTTP)
 // can process 500/run. Slow sources (GH/Ashby/Lever need HTTP per job) stay at 40.
@@ -1244,6 +1261,7 @@ total_tech_us: totalTechUs,
 total_enriched: totalEnriched,
 total_has_description: totalHasDesc,
 desc_waiting: descWaiting,
+reenrichment_pending: reenrichmentPending,
 tiers: { t0: totalT0, t1: totalT1, t2: totalT2, t3: totalT3 },
 tiers_by_source: tiersBySource,
 by_source: Object.fromEntries(
