@@ -99,10 +99,18 @@ jobs:
         run: |
           git config user.name "z-apply"
           git config user.email "admin@zapply.jobs"
+          # Stash decrypted files to allow clean rebase
+          git stash --include-untracked -q || true
+          for i in 1 2 3; do
+            git pull --rebase origin main -q && break
+            echo "Pull attempt $i failed, retrying in 5s..."
+            sleep 5
+          done
+          git stash pop -q 2>/dev/null || true
           git add .github/data/discord-verification.json 2>/dev/null || true
           git diff --staged --quiet || git commit -m "chore: update discord verification [skip ci]"
           for i in 1 2 3; do
-            git -c filter.git-crypt.smudge=cat -c filter.git-crypt.clean=cat -c filter.git-crypt.required=false pull --rebase origin main && git push && break
+            git push origin main -q && break
             echo "Push attempt $i failed, retrying in 5s..."
             sleep 5
           done
