@@ -2761,7 +2761,7 @@ function renderDiscordStats(posted, metadata) {
         const neverCount = allChannels.filter(ch => ch.count === 0).length;
         return `
       <div><span class="stat-label">Active Channels</span><div class="stat-value" style="font-size:18px;color:var(--green)">${activeCount}<span style="font-size:12px;color:var(--muted)"> / ${allChannels.length}</span></div></div>
-      <div><span class="stat-label">7d Posts</span><div class="stat-value" style="font-size:18px">${totalWowCurrent} <span style="font-size:12px;color:${wowDeltaColor(totalWowDelta)}">(${totalWowDelta > 0 ? '+' : ''}${totalWowDelta} vs prior 7d)</span></div></div>
+      <div><span class="stat-label">7d Posts</span><div class="stat-value" style="font-size:18px">${totalWowCurrent} <span style="font-size:12px;color:${totalWowPrev === 0 ? 'var(--muted)' : wowDeltaColor(totalWowDelta)}">(${totalWowPrev === 0 ? 'building baseline' : (totalWowDelta > 0 ? '+' : '') + totalWowDelta + ' vs prior 7d'})</span></div></div>
       <div><span class="stat-label">Silent (&gt;7d)</span><div class="stat-value" style="font-size:18px;color:${silentCount > 0 ? 'var(--yellow)' : 'var(--green)'}">${silentCount}</div></div>
       ${neverCount > 0 ? `<div><span class="stat-label">Never Posted</span><div class="stat-value" style="font-size:18px;color:var(--red)">${neverCount}</div></div>` : ''}
       <div><span class="stat-label">Data as of</span><div class="stat-value" style="font-size:18px">${lastUpdated}</div></div>`;
