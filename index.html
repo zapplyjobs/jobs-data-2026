@@ -964,10 +964,19 @@ function renderTopCompanies(metadata, enrichStats, generalReview) {
       const enr = enrMap[c.company];
       const gen = genMap[c.company];
       const t3 = enr?.t3_pct;
+      const visaPct = enr?.visa_pct;
+      const skillsPct = enr?.skills_pct;
       const genCount = gen?.general;
-      // T3% with gradient: dark green >80, green 50-80, yellow 20-50, red <20
+      // T3% with gradient: green >=50, yellow >=20, red <20
       const t3Color = t3 == null ? '' : t3 >= 50 ? 'color:var(--green)' : t3 >= 20 ? 'color:var(--yellow)' : 'color:var(--red)';
-      const t3Display = t3 != null ? `<span style="${t3Color}">${t3}%</span>` : '<span class="muted" title="Not in tech+US enrichment pool">N/A</span>';
+      let t3Tooltip = '';
+      if (t3 != null && t3 === 0 && enr) {
+        const parts = [];
+        if (skillsPct != null) parts.push(`skills=${skillsPct}%`);
+        if (visaPct != null) parts.push(`visa=${visaPct}%`);
+        t3Tooltip = parts.length ? ` title="T3=0 because: ${parts.join(', ')}"` : '';
+      }
+      const t3Display = t3 != null ? `<span style="${t3Color}"${t3Tooltip}>${t3}%</span>` : '<span class="muted" title="Not in tech+US enrichment pool">N/A</span>';
       // General with gradient: red >20, yellow 1-20, muted 0
       const genColor = genCount == null ? '' : genCount > 20 ? 'color:var(--red)' : genCount > 0 ? 'color:var(--yellow)' : '';
       const genDisplay = genCount != null ? `<span style="${genColor}">${genCount}</span>` : '<span class="muted">—</span>';
