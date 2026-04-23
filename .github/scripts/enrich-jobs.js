@@ -12,12 +12,11 @@
 *   - visa_question_present    (true | false | null — from ATS application form)
 *   - is_remote                (bool, from tags.locations includes 'remote')
 *   - experience_level         (from tags.employment)
-*   - summary_line             (string | null — DATA-7: first non-boilerplate sentence)
-*   - key_requirements         (string[] — DATA-7: top 6 required_skills, display alias)
 *   - is_simple_apply          (bool | null — DATA-8: GH only, question_count <= 13)
 *   - question_count           (int | null — DATA-8: GH/Ashby/Lever)
 *   - min_degree               ('bachelors'|'masters'|'phd'|'associates'|'none'|null — DATA-3)
 *   - experience_level_from_desc ('entry_level'|'mid_level'|'senior'|null — DATA-4)
+*   - has_description          (bool — whether a description was available during enrichment)
 *   + denormalized display fields: title, company_name, job_city, job_state, url, posted_at
 *
 * visa_question_present detection (per ATS):
@@ -36,7 +35,7 @@ const he = require('he');
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
-const ENRICHER_VERSION = 31;   // ENR-24: taxonomy canonicalization (6 alias pairs → consistent skill names)
+const ENRICHER_VERSION = 32;   // ENR-47: per-record tier classification. ENR-48: remove summary_line/key_requirements.
 const SLOW_BATCH_SIZE = 120;   // GH, Ashby, Lever — HTTP calls per job
 const FAST_BATCH_SIZE = 500;  // WD, SR, JSearch, Amazon, Netflix, EF — CPU only
 const FAST_SOURCES = new Set(['workday', 'smartrecruiters', 'jsearch', 'amazon', 'netflix', 'eightfold']);
@@ -770,7 +769,8 @@ if (obj.id && (obj.enricher_version || 0) >= ENRICHER_VERSION) {
         // ENR-37: Don't treat as "done" if enrichment produced zero skills AND no summary.
         // Race condition: enricher processed the job before description sidecar was updated.
         // These jobs should retry on the next run when descriptions may be available.
-        const hasResults = (obj.required_skills?.length > 0) || obj.summary_line;
+        // ENR-47: Use has_description instead of summary_line for the "got nothing" check.
+        const hasResults = (obj.required_skills?.length > 0) || obj.has_description;
         if (hasResults) ids.add(obj.id);
       }
 } catch (_) {}
@@ -796,42 +796,6 @@ const BOILERPLATE_OPENERS = [
 /^join (us|our team|the team)/i,                   // "Join us at..."
 /\bwith \d+\+?\s*years of experience\b/i,          // "[Company], with 25+ years of experience..." — company history
 ];
-
-function extractSummaryLine(plainText) {
-if (!plainText) return null;
-
-// Pre-split on double newlines to isolate paragraphs.
-// Plain-text section headers ("Opportunity Overview", "About the Role") have no trailing
-// punctuation, so sentence splitting alone concatenates them with the next sentence.
-// Discarding ≤4-word paragraphs removes headers without needing an exhaustive list.
-const paragraphs = plainText.split(/\n\n+/).map(p => p.replace(/\n/g, ' ').trim()).filter(Boolean);
-const substantiveParagraphs = paragraphs.filter(p => {
-if (p.length < 30) return false;
-if (/^###SECTION:/.test(p)) return false;
-// Discard short paragraphs that are likely section headers (≤4 words)
-const wordCount = p.split(/\s+/).filter(Boolean).length;
-if (wordCount <= 4) return false;
-return true;
-});
-
-// Sentence-split each substantive paragraph in order, return first non-boilerplate sentence
-for (const para of substantiveParagraphs) {
-const sentences = para.split(/(?<=[.!?])\s+/).map(s => s.trim()).filter(Boolean);
-for (const sentence of sentences) {
-if (sentence.length < 30) continue;
-if (BOILERPLATE_OPENERS.some(re => re.test(sentence))) continue;
-if (/^###SECTION:/.test(sentence)) continue;
-return sentence.length > 200 ? sentence.slice(0, 200).trimEnd() + '…' : sentence;
-}
-}
-
-// Fallback: first sentence of full text, stripped of ###SECTION:### markers
-const allSentences = plainText.split(/(?<=[.!?])\s+/).map(s => s.trim()).filter(Boolean);
-const fallback = allSentences.find(s => s.length >= 10);
-if (!fallback) return null;
-const stripped = fallback.replace(/###SECTION:[^#]*###\s*/g, '').trim();
-return stripped.slice(0, 200) || null;
-}
 
 // ---------------------------------------------------------------------------
 // DATA-3: Education requirement extraction
@@ -965,11 +929,6 @@ const { visaPresent: visaQuestionPresent, questionCount } = await fetchApplicati
 const isRemote = (job.tags?.locations || []).includes('remote');
 const experienceLevel = job.tags?.employment || null;
 
-// DATA-7: summary_line — try required section first (role-specific), fall back to full text
-const summaryLine = (required ? extractSummaryLine(required) : null) ?? extractSummaryLine(plainText);
-// DATA-7: key_requirements — alias for required_skills (already extracted, no new work)
-const keyRequirements = requiredSkills.slice(0, 6);
-
 // DATA-8: simple apply detection — GH only (question count exact); Ashby/Lever schema unverified
 const isSimpleApply = questionCount !== null ? questionCount <= SIMPLE_APPLY_THRESHOLD : null;
 
@@ -989,13 +948,11 @@ possible_sponsor: possibleSponsor,
 visa_question_present: visaQuestionPresent,
 is_remote: isRemote,
 experience_level: experienceLevel,
+has_description: !!rawDescription,
 // DATA-3: education requirement extracted from description text
 min_degree: minDegree,
 // DATA-4: experience level extracted from description text (distinct from tags.employment)
 experience_level_from_desc: experienceLevelFromDesc,
-// DATA-7: job summary panel fields
-summary_line: summaryLine,
-key_requirements: keyRequirements,
 // DATA-8: simple apply signal (GH: exact; Ashby/Lever: null pending schema verification)
 is_simple_apply: isSimpleApply,
 question_count: questionCount,
@@ -1178,7 +1135,7 @@ for (const job of allJobs) {
 const src = job.source || 'unknown';
 if (!statsBySource[src]) {
 statsBySource[src] = { total: 0, tech_us: 0, has_desc: 0, enriched: 0,
-summary_line: 0, required_skills: 0, sponsors_visa: 0, question_count: 0,
+required_skills: 0, sponsors_visa: 0, question_count: 0,
 min_degree: 0, experience_level_from_desc: 0,
 possible_sponsor: 0, any_visa_signal: 0, visa_question_present: 0 };
 }
@@ -1200,7 +1157,10 @@ const techUsIds = new Set(allJobs
 .map(j => j.id));
 
 // ENRICH-QUALITY-2: Also build per-company stats for dashboard
-const companyMap = {}; // company_name → { source, enriched, has_skills, has_summary, has_visa }
+const companyMap = {}; // company_name → { source, enriched, has_skills, has_desc, has_degree, has_visa, has_any_visa }
+// ENR-47: Per-record tier classification (honest metrics, no Math.min approximation)
+const tiersBySource = {};
+let totalT0 = 0, totalT1 = 0, totalT2 = 0, totalT3 = 0;
 for (const line of finalLines) {
 try {
 const obj = JSON.parse(line);
@@ -1208,7 +1168,6 @@ if (!techUsIds.has(obj.id)) continue; // skip enriched records for non-tech-US j
 const src = obj.source || 'unknown';
 if (!statsBySource[src]) continue;
 statsBySource[src].enriched++;
-if (obj.summary_line) statsBySource[src].summary_line++;
 if (obj.required_skills?.length > 0) statsBySource[src].required_skills++;
 if (obj.sponsors_visa !== null) statsBySource[src].sponsors_visa++;
 if (obj.question_count !== null) statsBySource[src].question_count++;
@@ -1219,15 +1178,31 @@ if (obj.visa_question_present !== null) statsBySource[src].visa_question_present
 // any_visa_signal: union of all three visa signal types
 if (obj.sponsors_visa !== null || obj.possible_sponsor !== null || obj.visa_question_present !== null) statsBySource[src].any_visa_signal++;
 
+// ENR-47: Per-record tier classification
+// Transition: pre-v32 records have summary_line (description proxy) but no has_description
+const hasDesc = obj.has_description !== undefined ? !!obj.has_description : !!obj.summary_line;
+const hasSkills = obj.required_skills?.length > 0;
+const hasDegree = obj.min_degree !== null && obj.min_degree !== undefined;
+const hasVisa = obj.sponsors_visa !== null || obj.possible_sponsor !== null || obj.visa_question_present !== null;
+let tier;
+if (!hasDesc) tier = 0;
+else if (!hasSkills) tier = 1;
+else if (hasDegree && hasVisa) tier = 3;
+else tier = 2; // has skills but missing degree and/or visa
+if (!tiersBySource[src]) tiersBySource[src] = { t0: 0, t1: 0, t2: 0, t3: 0 };
+tiersBySource[src][`t${tier}`]++;
+if (tier === 0) totalT0++; else if (tier === 1) totalT1++; else if (tier === 2) totalT2++; else totalT3++;
+
 // Per-company tracking
 const co = obj.company_name || 'Unknown';
-if (!companyMap[co]) companyMap[co] = { source: src, enriched: 0, has_skills: 0, has_summary: 0, has_degree: 0, has_visa: 0, has_any_visa: 0 };
+if (!companyMap[co]) companyMap[co] = { source: src, enriched: 0, has_skills: 0, has_desc: 0, has_degree: 0, has_visa: 0, has_any_visa: 0, t3: 0 };
 companyMap[co].enriched++;
-if (obj.required_skills?.length > 0) companyMap[co].has_skills++;
-if (obj.summary_line) companyMap[co].has_summary++;
-if (obj.min_degree) companyMap[co].has_degree++;
+if (hasSkills) companyMap[co].has_skills++;
+if (hasDesc) companyMap[co].has_desc++;
+if (hasDegree) companyMap[co].has_degree++;
 if (obj.sponsors_visa !== null) companyMap[co].has_visa++;
-if (obj.sponsors_visa !== null || obj.possible_sponsor !== null || obj.visa_question_present !== null) companyMap[co].has_any_visa++;
+if (hasVisa) companyMap[co].has_any_visa++;
+if (tier === 3) companyMap[co].t3++;
 } catch (_) {}
 }
 
@@ -1238,31 +1213,18 @@ const byCompany = Object.entries(companyMap)
 .map(([co, s]) => ({
 company: co, source: s.source, enriched: s.enriched,
 skills_pct: Math.round(100 * s.has_skills / s.enriched),
-summary_pct: Math.round(100 * s.has_summary / s.enriched),
+desc_pct: Math.round(100 * s.has_desc / s.enriched),
 degree_pct: Math.round(100 * s.has_degree / s.enriched),
 visa_pct: Math.round(100 * s.has_any_visa / s.enriched),
-t3_pct: Math.round(100 * Math.min(s.has_degree, s.has_any_visa) / s.enriched),
+t3_pct: Math.round(100 * s.t3 / s.enriched),
 }));
 
 const totalTechUs = Object.values(statsBySource).reduce((s, v) => s + v.tech_us, 0);
 const totalEnriched = Object.values(statsBySource).reduce((s, v) => s + v.enriched, 0);
 const totalHasDesc = Object.values(statsBySource).reduce((s, v) => s + v.has_desc, 0);
 const totalSkills = Object.values(statsBySource).reduce((s, v) => s + v.required_skills, 0);
-const totalSummary = Object.values(statsBySource).reduce((s, v) => s + v.summary_line, 0);
 
-// Tier computation: T3 = min(degree, visa), T2 = skills beyond T3, T1 = summary beyond T2, T0 = rest
-const tiersBySource = {};
-let totalT0 = 0, totalT1 = 0, totalT2 = 0, totalT3 = 0;
-for (const [src, v] of Object.entries(statsBySource)) {
-const enriched = v.enriched || 0;
-if (enriched === 0) continue;
-const t3 = Math.min(v.min_degree || 0, v.any_visa_signal || 0);
-const t2 = Math.max(0, (v.required_skills || 0) - t3);
-const t1 = Math.max(0, (v.summary_line || 0) - (v.required_skills || 0) - Math.max(0, t3 - (v.required_skills || 0)));
-const t0 = Math.max(0, enriched - (v.summary_line || 0));
-tiersBySource[src] = { t0, t1, t2, t3 };
-totalT0 += t0; totalT1 += t1; totalT2 += t2; totalT3 += t3;
-}
+// ENR-47: Tiers computed per-record above. No more Math.min approximation.
 
 const enrichmentStats = {
 enricher_version: ENRICHER_VERSION,
@@ -1279,7 +1241,6 @@ by_source: Object.fromEntries(
           const e = v.enriched || 1;
           return [src, { ...v,
             skills_pct: Math.round(100 * v.required_skills / e),
-            summary_pct: Math.round(100 * v.summary_line / e),
             degree_pct: Math.round(100 * v.min_degree / e),
             visa_pct: Math.round(100 * v.any_visa_signal / e),
           }];
@@ -1310,7 +1271,6 @@ for (const [src, v] of Object.entries(statsBySource)) {
 srcSummary[src] = {
 enriched: v.enriched,
 skills_pct: v.enriched > 0 ? Math.round(100 * v.required_skills / v.enriched) : 0,
-summary_pct: v.enriched > 0 ? Math.round(100 * v.summary_line / v.enriched) : 0,
 degree_pct: v.enriched > 0 ? Math.round(100 * v.min_degree / v.enriched) : 0,
 exp_pct: v.enriched > 0 ? Math.round(100 * v.experience_level_from_desc / v.enriched) : 0,
 visa_pct: v.enriched > 0 ? Math.round(100 * v.any_visa_signal / v.enriched) : 0,
@@ -1332,7 +1292,6 @@ total_enriched: totalEnriched,
 total_tech_us: totalTechUs,
 pool_total: allJobs.length,
 skills_pct: totalEnriched > 0 ? Math.round(100 * totalSkills / totalEnriched) : 0,
-summary_pct: totalEnriched > 0 ? Math.round(100 * totalSummary / totalEnriched) : 0,
 degree_pct: totalEnriched > 0 ? Math.round(100 * Object.values(statsBySource).reduce((s, v) => s + v.min_degree, 0) / totalEnriched) : 0,
 exp_pct: totalEnriched > 0 ? Math.round(100 * Object.values(statsBySource).reduce((s, v) => s + v.experience_level_from_desc, 0) / totalEnriched) : 0,
 visa_pct: totalEnriched > 0 ? Math.round(100 * Object.values(statsBySource).reduce((s, v) => s + v.any_visa_signal, 0) / totalEnriched) : 0,
