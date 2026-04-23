@@ -1065,7 +1065,7 @@ function renderQuality(d, enrichStats, metadata, enrichHistory) {
   let t0Alert = '';
   if (t0Count > 50) t0Alert = ' ⚠️ T0 spike';
   const t1Note = t1Count > 0 ? ` · T1=${t1Count} (no skills)` : '';
-  const drainEstimate = reenrichPending > 0 ? Math.ceil(reenrichPending / 120) * 15 : 0; // 120/run, 15min/run
+  const drainEstimate = reenrichPending > 0 ? Math.ceil(reenrichPending / 217) * 15 : 0; // ENR-49: 200 slow + ~17 fast = ~217/run, 15min/run
   const drainLabel = drainEstimate > 0 ? `~${drainEstimate >= 60 ? (drainEstimate/60).toFixed(1) + 'h' : drainEstimate + 'm'} to drain` : '';
   // DASH-25: distinguish churn from regression in Processed delta
   let churnNote = '';
