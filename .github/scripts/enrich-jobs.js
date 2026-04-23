@@ -35,7 +35,7 @@ const he = require('he');
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
-const ENRICHER_VERSION = 32;   // ENR-47: per-record tier classification. ENR-48: remove summary_line/key_requirements.
+const ENRICHER_VERSION = 33;   // ENR-51: remove http, add 16 modern terms
 const SLOW_BATCH_SIZE = 200;   // GH, Ashby/Lever — HTTP calls per job (ENR-49: 120→200)
 const FAST_BATCH_SIZE = 500;  // WD, SR, JSearch, Amazon, Netflix, EF — CPU only
 const FAST_SOURCES = new Set(['workday', 'smartrecruiters', 'jsearch', 'amazon', 'netflix', 'eightfold']);
