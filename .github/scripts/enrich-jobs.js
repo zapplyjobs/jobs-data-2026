@@ -36,7 +36,7 @@ const he = require('he');
 // Config
 // ---------------------------------------------------------------------------
 const ENRICHER_VERSION = 32;   // ENR-47: per-record tier classification. ENR-48: remove summary_line/key_requirements.
-const SLOW_BATCH_SIZE = 120;   // GH, Ashby, Lever — HTTP calls per job
+const SLOW_BATCH_SIZE = 200;   // GH, Ashby/Lever — HTTP calls per job (ENR-49: 120→200)
 const FAST_BATCH_SIZE = 500;  // WD, SR, JSearch, Amazon, Netflix, EF — CPU only
 const FAST_SOURCES = new Set(['workday', 'smartrecruiters', 'jsearch', 'amazon', 'netflix', 'eightfold']);
 const DESC_FETCH_PER_RUN = 500; // DESC-MIGRATE-1: WD/SR descriptions fetched by enrichment (3s timeout per)
@@ -1025,6 +1025,9 @@ console.log(`[enrich-jobs] WD/SR jobs waiting for description: ${descWaiting} (w
 }
 
 const enrichablePending = pending.filter(j => isEnrichable(j, descriptionsMap));
+// ENR-49: Process newest jobs first — posted_at descending.
+// Prevents new jobs from waiting behind stale re-enrichment records.
+enrichablePending.sort((a, b) => (b.posted_at || '').localeCompare(a.posted_at || ''));
 // ENR-41: Count stale-version jobs awaiting re-enrichment
 const pendingIds = new Set(pending.map(j => j.id));
 let reenrichmentPending = 0;
