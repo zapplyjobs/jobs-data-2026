@@ -279,8 +279,16 @@ async function postJobToDiscord(job, channelId, discordClient, channelName, chan
       { name: '💰 Posted', value: formatPostedDate(job), inline: true }
     );
 
-  // Add tags field with hashtag formatting
-  if (tags.length > 0) {
+  // Add tags field — enriched skills take priority, synthetic tags as fallback
+  const enriched = enrichedMap.get(job.id);
+  const enrichedSkills = enriched?.required_skills?.slice(0, 5) || [];
+  if (enrichedSkills.length > 0) {
+    embed.addFields({
+      name: '🏷️ Skills',
+      value: enrichedSkills.map(s => `\`${s}\``).join(' '),
+      inline: false
+    });
+  } else if (tags.length > 0) {
     embed.addFields({
       name: '🏷️ Tags',
       value: tags.map(tag => `#${tag}`).join(' '),
@@ -291,7 +299,6 @@ async function postJobToDiscord(job, channelId, discordClient, channelName, chan
   // Visa sponsorship tag — tiered to match GitHub README labels
   // Sponsors Visa = hard text match (sponsors_visa) or ATS form question (visa_question_present)
   // 🏢 Sponsor Employer = LCA database match only (not available in enriched_jobs.json yet)
-  const enriched = enrichedMap.get(job.id);
   if (enriched) {
     const hasHard = enriched.sponsors_visa === true || enriched.visa_question_present === true;
     if (hasHard) {
