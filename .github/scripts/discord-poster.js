@@ -165,12 +165,26 @@ function generateTags(job) {
 
   // Technology/skill tags (limit to most relevant - check title first)
   const techStack = {
-    'machine learning': 'ML', 'ai': 'AI', 'data science': 'DataScience',
-    'digital engineer': 'SWE', 'digital engineering': 'SWE',
+    // Languages
+    'python': 'Python', 'java ': 'Java', 'javascript': 'JavaScript', 'typescript': 'TypeScript',
+    'c++': 'C++', 'c#': 'C#', 'go ': 'Go', 'golang': 'Go', 'rust ': 'Rust',
+    'ruby': 'Ruby', 'php': 'PHP', 'swift': 'Swift', 'kotlin': 'Kotlin',
+    'scala': 'Scala', 'r ': 'R', 'matlab': 'MATLAB', 'sql': 'SQL',
+    // Domains
+    'machine learning': 'ML', 'deep learning': 'Deep Learning', 'ai': 'AI',
+    'data science': 'Data Science', 'data engineer': 'Data Engineering',
+    'digital engineer': 'Software Engineer', 'digital engineering': 'Software Engineer',
+    // Platforms
+    'aws': 'AWS', 'azure': 'Azure', 'gcp': 'GCP', 'cloud': 'Cloud',
+    // Frameworks
+    'react': 'React', 'angular': 'Angular', 'vue': 'Vue', 'node': 'Node.js',
+    'spring': 'Spring', 'django': 'Django', 'flask': 'Flask',
+    'kubernetes': 'Kubernetes', 'docker': 'Docker', 'terraform': 'Terraform',
+    // Specialties
     'ios': 'iOS', 'android': 'Android', 'mobile': 'Mobile',
-    'frontend': 'Frontend', 'backend': 'Backend', 'fullstack': 'FullStack',
+    'frontend': 'Frontend', 'backend': 'Backend', 'fullstack': 'Full Stack',
     'devops': 'DevOps', 'security': 'Security', 'blockchain': 'Blockchain',
-    'aws': 'AWS', 'azure': 'Azure', 'gcp': 'GCP'
+    'embedded': 'Embedded', 'fpga': 'FPGA', 'iot': 'IoT',
   };
 
   // Only match tags from title (more accurate than description)
@@ -186,14 +200,14 @@ function generateTags(job) {
   }
 
   // Role category tags (only if not already added via tech stack)
-  if (!tags.includes('DataScience') && (title.includes('data scientist') || title.includes('analyst'))) {
-    tags.push('DataScience');
+  if (!tags.includes('Data Science') && (title.includes('data scientist') || title.includes('analyst'))) {
+    tags.push('Data Science');
   }
   if (!tags.includes('ML') && (title.includes('machine learning') || title.includes('ml engineer'))) {
     tags.push('ML');
   }
   if (title.includes('product manager') || title.includes('pm ')) {
-    tags.push('ProductManager');
+    tags.push('Product Manager');
   }
   if (title.includes('designer') || title.includes('ux') || title.includes('ui')) {
     tags.push('Design');
@@ -279,19 +293,29 @@ async function postJobToDiscord(job, channelId, discordClient, channelName, chan
       { name: '💰 Posted', value: formatPostedDate(job), inline: true }
     );
 
-  // Add tags field — enriched skills take priority, synthetic tags as fallback
+  // Add tags field — merge enriched skills + synthetic tags, all as #Capitalized
   const enriched = enrichedMap.get(job.id);
-  const enrichedSkills = enriched?.required_skills?.slice(0, 5) || [];
-  if (enrichedSkills.length > 0) {
-    embed.addFields({
-      name: '🏷️ Skills',
-      value: enrichedSkills.map(s => '• ' + s).join('  '),
-      inline: false
-    });
-  } else if (tags.length > 0) {
+  const enrichedSkills = enriched?.required_skills?.slice(0, 8) || [];
+  const allTags = [];
+
+  // Enriched skills first (higher quality — extracted from description)
+  for (const skill of enrichedSkills) {
+    const capitalized = skill.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+    allTags.push(capitalized);
+  }
+
+  // Then synthetic tags (from title/company), skip duplicates
+  for (const tag of tags) {
+    const lower = tag.toLowerCase();
+    if (!allTags.some(t => t.toLowerCase() === lower)) {
+      allTags.push(tag);
+    }
+  }
+
+  if (allTags.length > 0) {
     embed.addFields({
       name: '🏷️ Tags',
-      value: tags.map(tag => `#${tag}`).join(' '),
+      value: allTags.slice(0, 8).map(t => `#${t}`).join(' '),
       inline: false
     });
   }
