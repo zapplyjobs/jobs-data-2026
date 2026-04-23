@@ -1775,24 +1775,8 @@ function renderSkillsBars(enrichStats) {
 // S268A: Tier Distribution with filter pills — replaces separate T3-by-Source chart.
 // "All" shows stacked percentage bars (original). Single tier shows that tier's % as simple bars.
 let _tierEnrichStats = null;
-function computeTiersFromAggregates(enrichStats) {
-  if (!enrichStats || enrichStats.tiers_by_source || !enrichStats.by_source) return;
-  const tbs = {};
-  for (const [src, v] of Object.entries(enrichStats.by_source)) {
-    const deg = v.min_degree || 0, visa = v.sponsors_visa || 0;
-    const skills = v.required_skills || 0, summ = v.summary_line || 0;
-    const enriched = v.enriched || 0;
-    const t3 = Math.min(deg, visa);
-    const t2 = Math.max(0, skills - t3);
-    const t1 = Math.max(0, summ - skills - Math.max(0, t3 - skills));
-    const t0 = Math.max(0, enriched - summ);
-    if (enriched > 0) tbs[src] = { t0, t1, t2, t3 };
-  }
-  if (Object.keys(tbs).length > 0) enrichStats.tiers_by_source = tbs;
-}
 function renderTierSourceChart(enrichStats, filterTier) {
   _tierEnrichStats = enrichStats;
-  computeTiersFromAggregates(enrichStats);
   const canvas = document.getElementById('tier-source-canvas');
   if (!canvas || !enrichStats || !enrichStats.tiers_by_source) {
     const card = document.getElementById('tier-source-card');
@@ -1944,7 +1928,6 @@ function toggleCompanyDetail(tr, companyName, tableId) {
       <span style="color:var(--muted)">T3%</span><span style="${pctColor(enrData?.t3_pct)}">${val(enrData?.t3_pct, '%')}</span>
       <span style="color:var(--muted)">Tiers</span><span>T0=${enrData?.tiers?.t0 ?? '—'} · T1=${enrData?.tiers?.t1 ?? '—'} · T2=${enrData?.tiers?.t2 ?? '—'} · T3=${enrData?.tiers?.t3 ?? '—'}</span>
       <span style="color:var(--muted)">Skills%</span><span style="${pctColor(enrData?.skills_pct)}">${val(enrData?.skills_pct, '%')}</span>
-      <span style="color:var(--muted)">Summary%</span><span style="${pctColor(enrData?.summary_pct)}">${val(enrData?.summary_pct, '%')}</span>
       <span style="color:var(--muted)">Hard Visa%</span><span><span style="${pctColor(enrData?.visa_pct)}">${val(enrData?.visa_pct, '%')}</span> <span style="font-size:10px;color:var(--muted)">(text only)</span></span>
       <span style="color:var(--muted)">General</span><span>${val(genData?.general)}</span>
       <span style="color:var(--muted)">Classified</span><span>${val(genData?.classified)}</span>
