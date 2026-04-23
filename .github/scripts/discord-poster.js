@@ -285,7 +285,7 @@ async function postJobToDiscord(job, channelId, discordClient, channelName, chan
   if (enrichedSkills.length > 0) {
     embed.addFields({
       name: '🏷️ Skills',
-      value: enrichedSkills.map(s => `\`${s}\``).join(' '),
+      value: enrichedSkills.map(s => '• ' + s).join('  '),
       inline: false
     });
   } else if (tags.length > 0) {
