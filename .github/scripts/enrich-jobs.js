@@ -35,7 +35,7 @@ const he = require('he');
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
-const ENRICHER_VERSION = 35;   // ENR-57: fix DEGREE_NONE priority bug (check after specific degrees, before standalone)
+const ENRICHER_VERSION = 36;   // ENR-53: filter openai company-name FP in skills extraction
 const SLOW_BATCH_SIZE = 200;   // GH, Ashby/Lever — HTTP calls per job (ENR-49: 120→200)
 const FAST_BATCH_SIZE = 500;  // WD, SR, JSearch, Amazon, Netflix, EF — CPU only
 const FAST_SOURCES = new Set(['workday', 'smartrecruiters', 'jsearch', 'amazon', 'netflix', 'eightfold']);
@@ -485,6 +485,11 @@ preferred: extractSection(preferredStart),
 // within the same sentence/bullet to count as a match.
 const AMBIGUOUS_TERMS = new Set(['go', 'r', 'c', 'rest', 'restful', 'assembly', 'lean', 'chef', 'classification', 'move']);
 
+// ENR-53: Terms that match company names in boilerplate text. Filter these out
+// when the job's company_name contains the term — the match is almost always
+// boilerplate ("OpenAI's mission is to..."), not a skill requirement.
+const COMPANY_NAME_TERMS = new Set(['openai']);
+
 const TECH_CONTEXT_SIGNALS = [
 /\b(programming|language|developer|engineer|code|software|written in|experience with|proficien|framework|backend|api)\b/i,
 ];
@@ -928,6 +933,22 @@ niceToHaveSkills = [];
 // in the description. Fall back to full text as last resort.
 if (requiredSkills.length === 0 && required && plainText.length > required.length) {
 requiredSkills = matchSkills(plainText, termMap);
+}
+
+// ENR-53: Remove skills that match company-name boilerplate. e.g., "openai"
+// appears in OpenAI job descriptions as company boilerplate, not as a skill.
+// Only filter when company_name contains the term (keeps legitimate matches
+// at non-OpenAI companies like "looking for OpenAI API experience").
+const companyLower = (job.company_name || '').toLowerCase();
+if (companyLower) {
+for (const term of COMPANY_NAME_TERMS) {
+if (companyLower.includes(term) && requiredSkills.includes(term)) {
+requiredSkills = requiredSkills.filter(s => s.toLowerCase() !== term);
+}
+if (companyLower.includes(term) && niceToHaveSkills.includes(term)) {
+niceToHaveSkills = niceToHaveSkills.filter(s => s.toLowerCase() !== term);
+}
+}
 }
 
 const sponsorsVisa = detectVisa(plainText);
