@@ -35,7 +35,7 @@ const he = require('he');
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
-const ENRICHER_VERSION = 33;   // ENR-51: remove http, add 16 modern terms
+const ENRICHER_VERSION = 34;   // ENR-55: restore lost LCA aliases + add 3 new, lower length guard <3→<2
 const SLOW_BATCH_SIZE = 200;   // GH, Ashby/Lever — HTTP calls per job (ENR-49: 120→200)
 const FAST_BATCH_SIZE = 500;  // WD, SR, JSearch, Amazon, Netflix, EF — CPU only
 const FAST_SOURCES = new Set(['workday', 'smartrecruiters', 'jsearch', 'amazon', 'netflix', 'eightfold']);
@@ -145,6 +145,13 @@ const LCA_COMPANY_ALIASES = {
 'Amazon Development Center U.S., Inc.': 'amazon development center us inc',
 'Amazon Web Services, Inc. - A97': 'amazon web services inc',
 'Amazon.com LLC': 'amazon llc',
+// ENR-55: Restore lost aliases (Together AI, F5) + add new (Annapurna Labs, NXP, HP Inc)
+'Together AI': 'Together Computer',
+'F5': 'F5 Networks Inc',
+'Annapurna Labs (U.S.) Inc.': 'annapurna labs (us) inc',
+'Annapurna Labs (U.S.) Inc. - D63': 'Amazon Web Services, Inc.',
+'US63 NXP USA Inc.': 'NXP USA',
+'HP Inc': 'HP Inc',
 };
 
 function isPossibleSponsor(companyName, lcaSet) {
@@ -153,7 +160,7 @@ if (!lcaSet.size) return null;
 const aliasName = LCA_COMPANY_ALIASES[companyName];
 const nameToCheck = aliasName || companyName;
 const n = normalizeLcaName(nameToCheck);
-if (!n || n.length < 3) return null;
+if (!n || n.length < 2) return null;
 if (lcaSet.has(n)) return true;
 // Prefix match: handles "Amazon Web Services" → matches "amazon" parent or subsidiaries
 for (const entry of lcaSet) {
