@@ -35,7 +35,7 @@ const he = require('he');
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
-const ENRICHER_VERSION = 34;   // ENR-55: restore lost LCA aliases + add 3 new, lower length guard <3→<2
+const ENRICHER_VERSION = 35;   // ENR-57: fix DEGREE_NONE priority bug (check after specific degrees, before standalone)
 const SLOW_BATCH_SIZE = 200;   // GH, Ashby/Lever — HTTP calls per job (ENR-49: 120→200)
 const FAST_BATCH_SIZE = 500;  // WD, SR, JSearch, Amazon, Netflix, EF — CPU only
 const FAST_SOURCES = new Set(['workday', 'smartrecruiters', 'jsearch', 'amazon', 'netflix', 'eightfold']);
@@ -830,18 +830,19 @@ const DEGREE_STANDALONE = /\bdegree\s+(required|preferred|in\s+\w|or\s+(higher|e
 
 function extractMinDegree(text) {
 if (!text) return null;
-if (DEGREE_NONE.test(text)) return 'none';
 // Detect all degree levels present, then return the minimum requirement.
 // "Bachelor's or Master's or PhD" → bachelors (lowest mentioned = minimum).
 const hasBachelors = DEGREE_BACHELORS.test(text) || DEGREE_BACHELORS_ABBREV.test(text) || DEGREE_BACHELORS_SHORT.test(text) || DEGREE_MS_BS.test(text);
 const hasMasters = DEGREE_MASTERS.test(text) || DEGREE_MASTERS_ABBREV.test(text) || DEGREE_MBA.test(text) || DEGREE_MS_BS.test(text);
 const hasPhd = DEGREE_PHD.test(text);
 const hasAssociate = DEGREE_ASSOCIATE.test(text);
+const hasNone = DEGREE_NONE.test(text);
 const hasStandalone = DEGREE_STANDALONE.test(text);
 if (hasAssociate) return 'associates';
 if (hasBachelors) return 'bachelors';
 if (hasMasters) return 'masters';
 if (hasPhd) return 'phd';
+if (hasNone) return 'none';
 if (hasStandalone) return 'bachelors'; // "degree required" → at least bachelor's
 return null;
 }
