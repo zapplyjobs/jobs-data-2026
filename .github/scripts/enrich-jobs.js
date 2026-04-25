@@ -1222,6 +1222,49 @@ visa_pct: Math.round(100 * s.has_any_visa / s.enriched),
 t3_pct: Math.round(100 * s.t3 / s.enriched),
 }));
 
+// ENR-54: Per-company funnel — how many jobs entered vs how many enriched, by company.
+// Iterates allJobs + processedMap to build input-side visibility (not just output-side).
+// companyMap (built above) has enriched-side data; this adds the skipped/unprocessed side.
+const funnelMap = {};
+for (const job of allJobs) {
+  const co = job.company_name || 'Unknown';
+  const src = job.source || 'unknown';
+  const domains = job.tags?.domains || [];
+  const locations = job.tags?.locations || [];
+  const isTechUs = domains.some(d => TECH_DOMAINS.has(d)) && locations.includes('us');
+  const pm = processedMap[job.id];
+
+  if (!funnelMap[co]) {
+    funnelMap[co] = { company: co, source: src, total_fetched: 0, tech_us: 0, non_tech_skipped: 0, non_us_skipped: 0, desc_waiting: 0, enriched: 0, t0: 0, t1: 0, t2: 0, t3: 0 };
+  }
+  funnelMap[co].total_fetched++;
+  if (isTechUs) funnelMap[co].tech_us++;
+
+  if (pm && pm.status === 'skipped') {
+    if (pm.reason === 'non-tech') funnelMap[co].non_tech_skipped++;
+    else if (pm.reason === 'non-us') funnelMap[co].non_us_skipped++;
+  }
+  // WD/SR desc-waiting: in tech+US pool, not enriched, not skipped, no description
+  if (!pm && (src === 'workday' || src === 'smartrecruiters') && isTechUs && !descriptionsMap.get(job.id)) {
+    funnelMap[co].desc_waiting++;
+  }
+}
+// Merge enriched counts + tiers from companyMap into funnelMap
+for (const [co, s] of Object.entries(companyMap)) {
+  if (funnelMap[co]) {
+    funnelMap[co].enriched = s.enriched;
+    // Tier breakdown comes from the enriched records loop above — reconstruct from companyMap
+    funnelMap[co].t0 = s.enriched - s.has_desc; // no description = T0
+    funnelMap[co].t1 = s.has_desc - s.has_skills; // has desc but no skills = T1
+    // T2 vs T3: use t3 count directly
+    funnelMap[co].t3 = s.t3;
+    funnelMap[co].t2 = s.enriched - funnelMap[co].t0 - funnelMap[co].t1 - funnelMap[co].t3;
+  }
+}
+const companyFunnel = Object.values(funnelMap)
+  .filter(f => f.tech_us > 0)
+  .sort((a, b) => b.tech_us - a.tech_us);
+
 const totalTechUs = Object.values(statsBySource).reduce((s, v) => s + v.tech_us, 0);
 const totalEnriched = Object.values(statsBySource).reduce((s, v) => s + v.enriched, 0);
 const totalHasDesc = Object.values(statsBySource).reduce((s, v) => s + v.has_desc, 0);
@@ -1250,6 +1293,7 @@ by_source: Object.fromEntries(
         })
       ),
 by_company: byCompany,
+company_funnel: companyFunnel,
 };
 
 fs.writeFileSync(STATS_PATH, JSON.stringify(enrichmentStats, null, 2), 'utf8');
