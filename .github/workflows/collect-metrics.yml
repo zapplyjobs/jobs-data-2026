@@ -19,10 +19,6 @@ jobs:
 
       - name: Decrypt repository secrets
         run: |
-          echo "${{ secrets.GIT_CRYPT_KEY }}" | base64 -d > /tmp/git-crypt-key
-          sudo apt-get install -y git-crypt -q
-          git-crypt unlock /tmp/git-crypt-key
-          rm /tmp/git-crypt-key
 
       - name: Setup Node.js
         uses: actions/setup-node@v5
@@ -32,7 +28,7 @@ jobs:
       - name: Collect metrics
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node .github/scripts/collect-metrics.js
+        run: node .github/scripts/shared/lib/jobs-data-scripts/collect-metrics.js
 
       - name: Commit and push metrics
         run: |
@@ -41,11 +37,9 @@ jobs:
           git add .github/data/metrics/ || exit 0
           git diff --cached --quiet && { echo "No changes to commit"; exit 0; }
           git commit -m "chore: update metrics [skip ci]"
-          # git-crypt's smudge filter re-runs on every index operation, causing
           # decrypted scripts to appear "modified" even after stash/checkout.
           # Bypass the filter during pull --rebase (same fix as enrich-jobs.yml INF-19).
           for i in 1 2 3; do
-            git -c filter.git-crypt.smudge=cat -c filter.git-crypt.clean=cat -c filter.git-crypt.required=false pull --rebase origin main && git push && break
             echo "Push attempt $i failed, retrying in 5s..."
             sleep 5
           done

@@ -23,10 +23,6 @@ jobs:
 
       - name: Decrypt repository secrets
         run: |
-          echo "${{ secrets.GIT_CRYPT_KEY }}" | base64 -d > /tmp/git-crypt-key
-          sudo apt-get install -y git-crypt -q
-          git-crypt unlock /tmp/git-crypt-key
-          rm /tmp/git-crypt-key
 
       - name: Setup Node.js
         uses: actions/setup-node@v5
@@ -69,7 +65,7 @@ jobs:
           DISCORD_PNW_INT_CHANNEL_ID: ${{ secrets.DISCORD_PNW_INT_CHANNEL_ID }}
           DISCORD_SOCAL_INT_CHANNEL_ID: ${{ secrets.DISCORD_SOCAL_INT_CHANNEL_ID }}
           DISCORD_OTHER_USA_INT_CHANNEL_ID: ${{ secrets.DISCORD_OTHER_USA_INT_CHANNEL_ID }}
-        run: node .github/scripts/verify-discord.js
+        run: node .github/scripts/shared/lib/jobs-data-scripts/verify-discord.js
 
       - name: Post results to summary
         if: always()
@@ -93,7 +89,6 @@ jobs:
           fi
           # Copy verification output to data dir
           cp /tmp/verification-summary.json "$FILE"
-          # Push via Contents API (avoids git-crypt dirty tree issues)
           SHA=$(gh api repos/{owner}/{repo}/contents/$FILE --jq '.sha' 2>/dev/null || echo "")
           ENCODED=$(base64 -w0 "$FILE")
           PAYLOAD=$(jq -n --arg msg "chore: update discord verification [skip ci]" --arg sha "$SHA" --arg content "$ENCODED" '{message:$msg,sha:$sha,content:$content}')
