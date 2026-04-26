@@ -2681,14 +2681,18 @@ function renderDiscordVerification(data) {
   const c = data.criticalIssuesCount || {};
   const totalIssues = (c.recentDuplicates || 0) + (c.locationErrors || 0) + (c.routingErrors || 0) + (c.missingChannels || 0);
   const checkedAt = data.timestamp ? age(data.timestamp) : '—';
-  const statusIcon = totalIssues === 0 ? '✅' : '⚠️';
-  const statusValue = totalIssues === 0 ? 'All Clear' : `${totalIssues} issue${totalIssues > 1 ? 's' : ''}`;
+  const staleMs = data.timestamp ? Date.now() - new Date(data.timestamp).getTime() : Infinity;
+  const isStale = staleMs > 6 * 3600000; // >6h since last verification
+  const statusIcon = isStale ? '🔴' : (totalIssues === 0 ? '✅' : '⚠️');
+  const statusValue = isStale ? 'STALE' : (totalIssues === 0 ? 'All Clear' : `${totalIssues} issue${totalIssues > 1 ? 's' : ''}`);
+  const statusColor = isStale ? 'var(--red)' : (totalIssues === 0 ? 'var(--green)' : 'var(--yellow)');
+  const staleWarning = isStale ? ` — last check ${checkedAt}` : '';
   // Only show detail cards when there are issues — zero-value cards are noise
-  if (totalIssues === 0) {
-    el.innerHTML = statCard({ icon: statusIcon, label: 'Discord Verification', value: statusValue, valueColor: 'var(--green)', sub: `Checked ${checkedAt}` });
+  if (totalIssues === 0 && !isStale) {
+    el.innerHTML = statCard({ icon: statusIcon, label: 'Discord Verification', value: statusValue, valueColor: statusColor, sub: `Checked ${checkedAt}` });
   } else {
     el.innerHTML =
-      statCard({ icon: statusIcon, label: 'Discord Verification', value: statusValue, valueColor: 'var(--yellow)', sub: `Checked ${checkedAt}` }) +
+      statCard({ icon: statusIcon, label: 'Discord Verification', value: statusValue, valueColor: statusColor, sub: `Checked ${checkedAt}` }) +
       (c.routingErrors ? statCard({ icon: '🧭', label: 'Routing Errors', value: c.routingErrors, sub: 'jobs in wrong channel' }) : '') +
       (c.missingChannels ? statCard({ icon: '📡', label: 'Missing Channels', value: c.missingChannels, sub: 'not accessible' }) : '') +
       (c.recentDuplicates ? statCard({ icon: '📋', label: 'Duplicates', value: c.recentDuplicates, sub: c.historicalDuplicates ? `${c.historicalDuplicates} historical` : '' }) : '');
