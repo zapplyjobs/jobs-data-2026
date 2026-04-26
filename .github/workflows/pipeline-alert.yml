@@ -15,6 +15,7 @@ jobs:
         uses: actions/checkout@v5
         with:
           fetch-depth: 1
+          submodules: true
           sparse-checkout: |
             .github/scripts
             .github/data
@@ -22,9 +23,6 @@ jobs:
             package.json
             package-lock.json
             companies.json
-
-      - name: Decrypt repository secrets
-        run: |
 
       - name: Setup Node.js
         uses: actions/setup-node@v5

@@ -44,9 +44,7 @@ jobs:
         uses: actions/checkout@v5
         with:
           fetch-depth: 1
-
-      - name: Decrypt repository secrets
-        run: |
+          submodules: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v5
@@ -68,8 +66,6 @@ jobs:
           DRY_RUN: ${{ inputs.dry_run }}
           REMOVE_FROM_POSTED: ${{ inputs.remove_from_posted }}
           CHANNEL_IDS: ${{ inputs.channel_ids }}
-
-          # New-Grad channels (11)
           DISCORD_TECH_CHANNEL_ID: ${{ secrets.DISCORD_TECH_CHANNEL_ID }}
           DISCORD_AI_CHANNEL_ID: ${{ secrets.DISCORD_AI_CHANNEL_ID }}
           DISCORD_DS_CHANNEL_ID: ${{ secrets.DISCORD_DS_CHANNEL_ID }}
@@ -81,8 +77,6 @@ jobs:
           DISCORD_PNW_CHANNEL_ID: ${{ secrets.DISCORD_PNW_CHANNEL_ID }}
           DISCORD_REMOTE_USA_CHANNEL_ID: ${{ secrets.DISCORD_REMOTE_USA_CHANNEL_ID }}
           DISCORD_OTHER_USA_CHANNEL_ID: ${{ secrets.DISCORD_OTHER_USA_CHANNEL_ID }}
-
-          # Internship channels (12)
           DISCORD_TECH_INT_CHANNEL_ID: ${{ secrets.DISCORD_TECH_INT_CHANNEL_ID }}
           DISCORD_AI_INT_CHANNEL_ID: ${{ secrets.DISCORD_AI_INT_CHANNEL_ID }}
           DISCORD_DS_INT_CHANNEL_ID: ${{ secrets.DISCORD_DS_INT_CHANNEL_ID }}
@@ -106,6 +100,7 @@ jobs:
           git add .github/data/posted_jobs.json .github/data/global-dedupe-store.json || exit 0
           git diff --staged --quiet || git commit -m "chore: remove cleanup-deleted messages from dedup stores for repost [skip ci]"
           for i in 1 2 3; do
+            git pull --rebase origin main && git push && break
             echo "Push attempt $i failed, retrying in 5s..."
             sleep 5
-          done
+          done
