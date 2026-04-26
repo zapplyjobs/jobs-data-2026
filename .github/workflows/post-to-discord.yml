@@ -12,9 +12,7 @@ jobs:
         uses: actions/checkout@v5
         with:
           fetch-depth: 1
-
-      - name: Decrypt repository secrets
-        run: |
+          submodules: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v5
@@ -28,10 +26,7 @@ jobs:
 
       - name: Post jobs to Discord
         env:
-          # Discord bot token
           DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
-
-          # New-Grad channels (4 industry + 5 location)
           DISCORD_TECH_CHANNEL_ID: ${{ secrets.DISCORD_TECH_CHANNEL_ID }}
           DISCORD_AI_CHANNEL_ID: ${{ secrets.DISCORD_AI_CHANNEL_ID }}
           DISCORD_DS_CHANNEL_ID: ${{ secrets.DISCORD_DS_CHANNEL_ID }}
@@ -46,8 +41,6 @@ jobs:
           DISCORD_OTHER_INDUSTRY_CHANNEL_ID: ${{ secrets.DISCORD_OTHER_INDUSTRY_CHANNEL_ID }}
           DISCORD_HARDWARE_CHANNEL_ID: ${{ secrets.DISCORD_HARDWARE_CHANNEL_ID }}
           DISCORD_SALES_CHANNEL_ID: ${{ secrets.DISCORD_SALES_CHANNEL_ID }}
-
-          # Internship channels (8 industry + 6 location)
           DISCORD_TECH_INT_CHANNEL_ID: ${{ secrets.DISCORD_TECH_INT_CHANNEL_ID }}
           DISCORD_AI_INT_CHANNEL_ID: ${{ secrets.DISCORD_AI_INT_CHANNEL_ID }}
           DISCORD_DS_INT_CHANNEL_ID: ${{ secrets.DISCORD_DS_INT_CHANNEL_ID }}
@@ -62,13 +55,8 @@ jobs:
           DISCORD_PNW_INT_CHANNEL_ID: ${{ secrets.DISCORD_PNW_INT_CHANNEL_ID }}
           DISCORD_SOCAL_INT_CHANNEL_ID: ${{ secrets.DISCORD_SOCAL_INT_CHANNEL_ID }}
           DISCORD_OTHER_USA_INT_CHANNEL_ID: ${{ secrets.DISCORD_OTHER_USA_INT_CHANNEL_ID }}
-
-          # Posting limit (override via repo variable MAX_POSTS_PER_RUN, default 10)
           MAX_POSTS_PER_RUN: ${{ vars.MAX_POSTS_PER_RUN || 10 }}
-
-          # GitHub token for reading repos
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
         run: node .github/scripts/shared/lib/jobs-data-scripts/discord-poster.js
 
       - name: Commit updated database
@@ -78,9 +66,8 @@ jobs:
           git config user.name "Aggregator Bot"
           git add .github/data/posted_jobs.json .github/data/global-dedupe-store.json || exit 0
           git commit -m "chore: update dedupe database [skip ci]" || exit 0
-          # marking decrypted scripts as modified and failing rebase. Bypass it.
           for i in 1 2 3; do
+            git pull --rebase origin main && git push && break
             echo "Push attempt $i failed, retrying in 5s..."
             sleep 5
           done
-

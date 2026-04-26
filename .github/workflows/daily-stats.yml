@@ -15,9 +15,7 @@ jobs:
         uses: actions/checkout@v5
         with:
           fetch-depth: 1
-
-      - name: Decrypt repository secrets
-        run: |
+          submodules: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v5
@@ -43,9 +41,8 @@ jobs:
           git add .github/data/daily-stats.json .github/data/history.jsonl .github/data/history-archive.jsonl .github/data/traffic-history.jsonl 2>/dev/null || true
           git diff --cached --quiet && echo "Nothing to commit" && exit 0
           git commit -m "chore: update daily-stats.json [skip ci]"
-          # decrypted scripts to appear "modified" even after stash/checkout.
-          # Bypass the filter during pull --rebase (same fix as enrich-jobs.yml INF-19).
           for i in 1 2 3; do
+            git pull --rebase origin main && git push && break
             echo "Push attempt $i failed, retrying in 5s..."
             sleep 5
           done
