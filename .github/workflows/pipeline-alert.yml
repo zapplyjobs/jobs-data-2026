@@ -34,6 +34,9 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Syntax check pipeline-alert.js
+        run: node -c .github/scripts/shared/lib/jobs-data-scripts/pipeline-alert.js
+
       - name: Run pipeline checks
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
