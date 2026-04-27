@@ -2369,7 +2369,9 @@ function renderPipelineSourceTable(metrics, metadata, enrichStats) {
 const CHART_COLORS = {
   accent: C.accent, green: C.green, red: C.red, yellow: C.yellow, muted: C.muted,
   sources: { workday: '#e67e22', greenhouse: '#27ae60', ashby: '#3498db', lever: '#9b59b6',
-             smartrecruiters: '#e74c3c', amazon: '#f39c12', jsearch: '#1abc9c', eightfold: '#7f8c8d', netflix: '#e50914' }
+             smartrecruiters: '#e74c3c', amazon: '#f39c12', jsearch: '#1abc9c', eightfold: '#7f8c8d', netflix: '#e50914' },
+  repos: { 'New-Grad-Jobs-2026': '#ff5e3c', 'Internships-2026': '#3498db', 'New-Grad-Software-Engineering-Jobs-2026': '#27ae60',
+           'New-Grad-Data-Science-Jobs-2026': '#9b59b6', 'New-Grad-Hardware-Engineering-Jobs-2026': '#e67e22', 'New-Grad-Healthcare-Jobs-2026': '#e74c3c' }
 };
 const CHART_DEFAULTS = {
   responsive: true, maintainAspectRatio: false,
@@ -2551,7 +2553,7 @@ function renderStarsTrendChart(allEntries, days) {
     'New-Grad-Data-Science-Jobs-2026','New-Grad-Hardware-Engineering-Jobs-2026','New-Grad-Healthcare-Jobs-2026'];
   const SHORT = { 'New-Grad-Jobs-2026':'NGJ', 'Internships-2026':'Intern', 'New-Grad-Software-Engineering-Jobs-2026':'SWE',
     'New-Grad-Data-Science-Jobs-2026':'DS', 'New-Grad-Hardware-Engineering-Jobs-2026':'HW', 'New-Grad-Healthcare-Jobs-2026':'HC' };
-  const COLORS = ['#ff5e3c','#3498db','#27ae60','#9b59b6','#e67e22','#e74c3c'];
+  // Per-repo colors from CHART_COLORS (consistent with theme system)
   const active = REPOS.filter(r => entries.some(e => (e.stars[r] || 0) > 0));
 
   makeChart('stars-trend-canvas', {
@@ -2561,7 +2563,7 @@ function renderStarsTrendChart(allEntries, days) {
       datasets: active.map((repo, i) => ({
         label: SHORT[repo] || repo,
         data: entries.map(e => e.stars[repo] || 0),
-        borderColor: COLORS[i % COLORS.length],
+        borderColor: CHART_COLORS.repos[repo] || CHART_COLORS.accent,
         tension: 0.3, pointRadius: 2, pointHoverRadius: 5, borderWidth: 2, fill: false,
       }))
     },
