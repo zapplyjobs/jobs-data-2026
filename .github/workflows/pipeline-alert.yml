@@ -43,22 +43,32 @@ jobs:
 
       - name: Push alert status via API
         env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ALERT_FILE=".github/data/pipeline-alert.json"
-          if [ -f "$ALERT_FILE" ]; then
-            CURRENT_SHA=$(gh api repos/zapplyjobs/jobs-data-2026/contents/$ALERT_FILE --jq '.sha' 2>/dev/null || echo "")
-            CONTENT=$(base64 -w 0 "$ALERT_FILE")
-            if [ -n "$CURRENT_SHA" ]; then
-              gh api repos/zapplyjobs/jobs-data-2026/contents/$ALERT_FILE \
-                --method PUT \
-                --field message="chore: update pipeline alert status [skip ci]" \
-                --field content="$CONTENT" \
-                --field sha="$CURRENT_SHA" \
-                --jq '.commit.sha' 2>/dev/null && echo "Alert status pushed" || echo "Push failed or no change"
-            else
-              echo "Could not get current SHA — skipping push"
-            fi
-          else
+          if [ ! -f "$ALERT_FILE" ]; then
             echo "Alert file not found — skipping push"
+            exit 0
           fi
+
+          REMOTE_SHA=$(gh api repos/zapplyjobs/jobs-data-2026/contents/$ALERT_FILE --jq '.sha' 2>/dev/null || echo "")
+          REMOTE_CONTENT=$(gh api repos/zapplyjobs/jobs-data-2026/contents/$ALERT_FILE --jq '.content' 2>/dev/null || echo "")
+
+          if [ -z "$REMOTE_SHA" ]; then
+            echo "Could not get remote SHA — skipping push"
+            exit 0
+          fi
+
+          LOCAL_CONTENT=$(base64 -w 0 "$ALERT_FILE")
+
+          if [ "$LOCAL_CONTENT" = "$REMOTE_CONTENT" ]; then
+            echo "Content unchanged — skipping push"
+            exit 0
+          fi
+
+          gh api repos/zapplyjobs/jobs-data-2026/contents/$ALERT_FILE \
+            --method PUT \
+            --field message="chore: update pipeline alert status [skip ci]" \
+            --field content="$LOCAL_CONTENT" \
+            --field sha="$REMOTE_SHA" \
+            --jq '.commit.sha' 2>/dev/null && echo "Alert status pushed" || echo "Push failed or no change"
