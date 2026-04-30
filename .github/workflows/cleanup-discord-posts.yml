@@ -33,6 +33,8 @@ on:
         description: 'Specific channel IDs to clean (comma-separated). Empty = all 23 channels.'
         required: false
         default: ''
+  schedule:
+    - cron: '17 6 * * *'  # Daily at 06:17 UTC
 
 jobs:
   cleanup:
