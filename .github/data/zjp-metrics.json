@@ -1,89 +1,91 @@
 {
   "schema": "zjp-metrics-v1",
-  "generated_at": "2026-04-30T23:08:24.878Z",
+  "generated_at": "2026-04-30T23:36:36.549Z",
   "pool": {
-    "total_jobs": 49689,
-    "tech_us": 10128,
+    "total_jobs": 49788,
+    "tech_us": 10134,
     "source": "jobs-metadata.json + enrichment-stats.json"
   },
   "enrichment": {
-    "total_enriched": 9672,
+    "total_enriched": 9682,
     "enrichment_rate_pct": 95.5,
     "tiers": {
       "t0": 256,
-      "t1": 657,
+      "t1": 658,
       "t2": 234,
-      "t3": 8525
+      "t3": 8534
     },
     "enricher_version": 39,
-    "reenrichment_pending": 6146,
+    "reenrichment_pending": 6145,
     "source": "enrichment-stats.json"
   },
   "alerts": {
-    "active": false,
-    "failures": [],
-    "last_checked": "2026-04-30T22:48:49.830Z",
+    "active": true,
+    "failures": [
+      "**Aggregator runtime high**: avg 20.4 min over last 3 runs (max 25.4 min). Threshold: 20 min. At 25 min, 15-min cadence breaks."
+    ],
+    "last_checked": "2026-04-30T23:19:16.542Z",
     "source": "pipeline-alert.json"
   },
   "pipeline": {
-    "last_aggregator_run": "2026-04-30T23:00:32Z",
+    "last_aggregator_run": "2026-04-30T23:30:32Z",
     "last_aggregator_status": "in_progress",
-    "last_enrichment_run": "2026-04-30T23:00:32Z",
+    "last_enrichment_run": "2026-04-30T23:30:33Z",
     "last_enrichment_status": "success",
-    "aggregator_runtime_minutes": 0.1,
-    "aggregator_queue_minutes": null,
+    "aggregator_runtime_minutes": 3.4,
+    "aggregator_queue_minutes": 3.3,
     "aggregator_execution_minutes": null,
-    "aggregator_cancel_count": 8
+    "aggregator_cancel_count": 7
   },
   "submodules": {
     "aligned": true,
-    "hash": "6d30daeda39475af7d7026d6f301d767c1702745",
+    "hash": "75894a1c31c227985750b0e890f6f5f6be053af8",
     "repos": {
-      "jobs-aggregator-private": "6d30daeda39475af7d7026d6f301d767c1702745",
-      "jobs-data-2026": "6d30daeda39475af7d7026d6f301d767c1702745",
-      "New-Grad-Jobs-2026": "6d30daeda39475af7d7026d6f301d767c1702745",
-      "Internships-2026": "6d30daeda39475af7d7026d6f301d767c1702745",
-      "New-Grad-Software-Engineering-Jobs-2026": "6d30daeda39475af7d7026d6f301d767c1702745",
-      "New-Grad-Data-Science-Jobs-2026": "6d30daeda39475af7d7026d6f301d767c1702745",
-      "New-Grad-Hardware-Engineering-Jobs-2026": "6d30daeda39475af7d7026d6f301d767c1702745",
-      "New-Grad-Healthcare-Jobs-2026": "6d30daeda39475af7d7026d6f301d767c1702745"
+      "jobs-aggregator-private": "75894a1c31c227985750b0e890f6f5f6be053af8",
+      "jobs-data-2026": "75894a1c31c227985750b0e890f6f5f6be053af8",
+      "New-Grad-Jobs-2026": "75894a1c31c227985750b0e890f6f5f6be053af8",
+      "Internships-2026": "75894a1c31c227985750b0e890f6f5f6be053af8",
+      "New-Grad-Software-Engineering-Jobs-2026": "75894a1c31c227985750b0e890f6f5f6be053af8",
+      "New-Grad-Data-Science-Jobs-2026": "75894a1c31c227985750b0e890f6f5f6be053af8",
+      "New-Grad-Hardware-Engineering-Jobs-2026": "75894a1c31c227985750b0e890f6f5f6be053af8",
+      "New-Grad-Healthcare-Jobs-2026": "75894a1c31c227985750b0e890f6f5f6be053af8"
     },
     "p2_status": "PASS"
   },
   "consumers": {
-    "last_update": "2026-04-30T23:00:52Z",
+    "last_update": "2026-04-30T23:30:55Z",
     "repos": {
       "New-Grad-Jobs-2026": {
-        "positions": 22056,
-        "last_commit": "2026-04-30T23:00:52Z"
+        "positions": 22081,
+        "last_commit": "2026-04-30T23:30:55Z"
       },
       "Internships-2026": {
-        "positions": 1213,
-        "last_commit": "2026-04-30T23:00:46Z"
+        "positions": 1209,
+        "last_commit": "2026-04-30T23:30:55Z"
       },
       "New-Grad-Software-Engineering-Jobs-2026": {
-        "positions": 4268,
-        "last_commit": "2026-04-30T23:00:48Z"
+        "positions": 4267,
+        "last_commit": "2026-04-30T23:30:46Z"
       },
       "New-Grad-Data-Science-Jobs-2026": {
-        "positions": 879,
-        "last_commit": "2026-04-30T23:00:48Z"
+        "positions": 880,
+        "last_commit": "2026-04-30T23:30:51Z"
       },
       "New-Grad-Hardware-Engineering-Jobs-2026": {
-        "positions": 2480,
-        "last_commit": "2026-04-30T23:00:50Z"
+        "positions": 2482,
+        "last_commit": "2026-04-30T23:30:54Z"
       },
       "New-Grad-Healthcare-Jobs-2026": {
         "positions": 449,
-        "last_commit": "2026-04-30T23:00:48Z"
+        "last_commit": "2026-04-30T23:30:46Z"
       }
     }
   },
   "repos": {
-    "total_mb": 58424,
+    "total_mb": 58555,
     "repos": {
-      "jobs-aggregator-private": 19971,
-      "jobs-data-2026": 16899,
+      "jobs-aggregator-private": 20048,
+      "jobs-data-2026": 16953,
       "New-Grad-Jobs-2026": 20083,
       "Internships-2026": 918,
       "New-Grad-Software-Engineering-Jobs-2026": 218,
