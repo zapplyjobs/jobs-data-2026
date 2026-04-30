@@ -494,7 +494,7 @@
       </table>
       <div style="margin-top:8px;font-size:11px;color:var(--muted)">
         Click ▶ to expand companies under a source.
-        <strong>Visa Split:</strong> <span style="color:var(--info)">LCA match</span> / <span style="color:var(--green)">hard text</span> / <span style="color:var(--yellow)">ATS form</span> / <span style="color:var(--muted)">no signal</span>.
+        <strong>Visa Split:</strong> <span style="color:var(--green)">hard text</span> / <span style="color:var(--yellow)">ATS form</span> / <span style="color:var(--muted)">no signal</span>.
         <strong>Visa%</strong> = any signal (union of all types). <strong>Company Visa%</strong> = hard text only.
       </div>
     </div>
@@ -2100,20 +2100,19 @@ function renderUnifiedENR(enrichStats) {
   // Aggregate stats for total row
   let totalTechUs = 0, totalEnriched = 0, totalT3 = 0, totalT3Count = 0;
   let totalSkills = 0, totalSkillsCount = 0;
-  let totalVisa = 0, totalHard = 0, totalLca = 0, totalForm = 0, totalNone = 0;
+  let totalVisa = 0, totalHard = 0, totalForm = 0, totalNone = 0, totalExplained = 0;
   sources.forEach(src => {
     const v = enrichStats.by_source[src];
     const e = v.enriched || 0;
     totalTechUs += v.tech_us || 0;
     totalEnriched += e;
     const hard = v.sponsors_visa || 0;
-    const lca = Math.max(0, (v.possible_sponsor || 0) - hard);
     const anyV = v.any_visa_signal || 0;
-    const form = Math.max(0, anyV - hard - lca); // jobs with signal but not hard or LCA = ATS form question
+    const form = Math.max(0, anyV - hard);
     totalHard += hard;
-    totalLca += lca;
     totalForm += form;
     totalNone += Math.max(0, e - anyV);
+    totalExplained += v.visa_explained_gaps || 0;
     totalVisa += anyV;
     totalSkills += v.required_skills || 0;
     const tier = tbs[src] || { t0:0, t1:0, t2:0, t3:0 };
@@ -2129,9 +2128,9 @@ function renderUnifiedENR(enrichStats) {
     const aggSkills = totalSkillsCount > 0 ? Math.round(100 * totalSkills / totalSkillsCount) : 0;
     const aggVisa = Math.round(100 * totalVisa / totalEnriched);
     const hardP = Math.round(100 * totalHard / totalEnriched);
-    const lcaP = Math.round(100 * totalLca / totalEnriched);
     const formP = Math.round(100 * totalForm / totalEnriched);
     const noneP = Math.round(100 * totalNone / totalEnriched);
+    const explainedP = totalExplained > 0 ? Math.round(100 * totalExplained / totalEnriched) : 0;
     const tr = document.createElement('tr');
     tr.className = 'total-row';
     tr.style.cssText = 'font-weight:700;border-bottom:2px solid var(--border);background:var(--bg-card-hover)';
@@ -2144,13 +2143,12 @@ function renderUnifiedENR(enrichStats) {
       '<td style="' + colorPct(aggSkills) + '">' + aggSkills + '%</td>' +
       '<td style="' + colorPct(aggVisa) + '">' + aggVisa + '%</td>' +
       '<td style="text-align:center;font-size:11px">' +
-        '<span style="color:var(--info)" title="LCA match: ' + fmt(totalLca) + ' jobs">' + lcaP + '%</span>' +
-        '<span style="color:var(--muted)"> / </span>' +
         '<span style="color:var(--green)" title="Hard text: ' + fmt(totalHard) + ' jobs">' + hardP + '%</span>' +
         '<span style="color:var(--muted)"> / </span>' +
         '<span style="color:var(--yellow)" title="ATS form question: ' + fmt(totalForm) + ' jobs">' + formP + '%</span>' +
         '<span style="color:var(--muted)"> / </span>' +
         '<span style="color:var(--muted)" title="No signal: ' + fmt(totalNone) + ' jobs">' + noneP + '%</span>' +
+        (totalExplained > 0 ? '<span style="color:var(--muted)"> (' + explainedP + '% <span title="Defense contractor roles — explained gap">explained</span>)</span>' : '') +
       '</td>';
     tbody.appendChild(tr);
   }
@@ -2168,12 +2166,10 @@ function renderUnifiedENR(enrichStats) {
     const visaPct = Math.round(100 * (v.any_visa_signal || 0) / e);
     const visaStyle = colorPct(visaPct);
     const hard = v.sponsors_visa || 0;
-    const lca = Math.max(0, (v.possible_sponsor || 0) - hard);
     const anyV = v.any_visa_signal || 0;
-    const form = Math.max(0, anyV - hard - lca);
+    const form = Math.max(0, anyV - hard);
     const none = Math.max(0, e - anyV);
     const hardP = e > 0 ? Math.round(100 * hard / e) : 0;
-    const lcaP = e > 0 ? Math.round(100 * lca / e) : 0;
     const formP = e > 0 ? Math.round(100 * form / e) : 0;
     const noneP = e > 0 ? Math.round(100 * none / e) : 0;
 
@@ -2190,8 +2186,6 @@ function renderUnifiedENR(enrichStats) {
       '<td style="font-weight:600;' + colorPct(skillsPct) + '">' + skillsPct + '%</td>' +
       '<td style="font-weight:600;' + visaStyle + '">' + visaPct + '%</td>' +
       '<td style="text-align:center;font-size:11px">' +
-        '<span style="color:var(--info)" title="LCA match: ' + fmt(lca) + ' jobs">' + lcaP + '%</span>' +
-        '<span style="color:var(--muted)"> / </span>' +
         '<span style="color:var(--green)" title="Hard text: ' + fmt(hard) + ' jobs">' + hardP + '%</span>' +
         '<span style="color:var(--muted)"> / </span>' +
         '<span style="color:var(--yellow)" title="ATS form: ' + fmt(form) + ' jobs">' + formP + '%</span>' +
