@@ -65,8 +65,8 @@ jobs:
           WINDOW_OLDER_THAN_HOURS: ${{ inputs.window_older_than_hours }}
           WINDOW_NEWER_THAN_HOURS: ${{ inputs.window_newer_than_hours }}
           LAST_N_HOURS: ${{ inputs.last_n_hours }}
-          OLDER_THAN_HOURS: ${{ inputs.older_than_hours }}
-          DRY_RUN: ${{ inputs.dry_run }}
+          OLDER_THAN_HOURS: ${{ github.event_name == 'schedule' && '336' || inputs.older_than_hours }}
+          DRY_RUN: ${{ github.event_name == 'schedule' && 'false' || inputs.dry_run }}
           REMOVE_FROM_POSTED: ${{ inputs.remove_from_posted }}
           CHANNEL_IDS: ${{ inputs.channel_ids }}
           DISCORD_TECH_CHANNEL_ID: ${{ secrets.DISCORD_TECH_CHANNEL_ID }}
