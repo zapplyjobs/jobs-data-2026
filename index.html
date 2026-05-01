@@ -462,7 +462,6 @@
         <option value="lever">lever</option>
         <option value="smartrecruiters">smartrecruiters</option>
         <option value="amazon">amazon</option>
-        <option value="jsearch">jsearch</option>
         <option value="eightfold">eightfold</option>
         <option value="netflix">netflix</option>
       </select>
@@ -575,7 +574,7 @@
 
 <script>
 // Master source list — single definition, all functions reference this
-const MASTER_SOURCES = ['workday','greenhouse','ashby','lever','smartrecruiters','amazon','jsearch','eightfold','netflix'];
+const MASTER_SOURCES = ['workday','greenhouse','ashby','lever','smartrecruiters','amazon','netflix'];
 
 // Dashboard proxy secret — injected at deploy time via deploy-pages.yml
 const DASHBOARD_SECRET = '__DASHBOARD_SECRET__';
@@ -599,7 +598,7 @@ const DASHBOARD_SECRET = '__DASHBOARD_SECRET__';
   const box      = document.getElementById('auth-box');
 
   function attempt() {
-    if (true || input.value === DASHBOARD_PWD) {
+    if (input.value === DASHBOARD_PWD) {
       if (remember.checked) {
         localStorage.setItem(AUTH_KEY, '1');
       } else {
@@ -2363,7 +2362,7 @@ function renderPipelineSourceTable(metrics, metadata, enrichStats) {
 const CHART_COLORS = {
   accent: C.accent, green: C.green, red: C.red, yellow: C.yellow, muted: C.muted,
   sources: { workday: '#e67e22', greenhouse: '#27ae60', ashby: '#3498db', lever: '#9b59b6',
-             smartrecruiters: '#e74c3c', amazon: '#f39c12', jsearch: '#1abc9c', eightfold: '#7f8c8d', netflix: '#e50914' },
+             smartrecruiters: '#e74c3c', amazon: '#f39c12', netflix: '#e50914' },
   repos: { 'New-Grad-Jobs-2026': '#ff5e3c', 'Internships-2026': '#3498db', 'New-Grad-Software-Engineering-Jobs-2026': '#27ae60',
            'New-Grad-Data-Science-Jobs-2026': '#9b59b6', 'New-Grad-Hardware-Engineering-Jobs-2026': '#e67e22', 'New-Grad-Healthcare-Jobs-2026': '#e74c3c' }
 };
