@@ -76,3 +76,37 @@ jobs:
             --field content="$LOCAL_CONTENT" \
             --field sha="$REMOTE_SHA" \
             --jq '.commit.sha' 2>/dev/null && echo "Alert status pushed" || echo "Push failed or no change"
+
+      - name: Push zero-yield tracking state
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TRACKING_FILE=".github/data/zero-yield-tracking.json"
+          if [ ! -f "$TRACKING_FILE" ]; then
+            echo "Tracking file not found — skipping push"
+            exit 0
+          fi
+
+          LOCAL_CONTENT=$(base64 -w 0 "$TRACKING_FILE")
+          REMOTE_SHA=$(gh api repos/zapplyjobs/jobs-data-2026/contents/$TRACKING_FILE --jq '.sha' 2>/dev/null || echo "")
+
+          if [ -z "$REMOTE_SHA" ]; then
+            # File doesn't exist on remote yet — create it
+            gh api repos/zapplyjobs/jobs-data-2026/contents/$TRACKING_FILE \
+              --method PUT \
+              --field message="chore: init zero-yield tracking state [skip ci]" \
+              --field content="$LOCAL_CONTENT" \
+              --jq '.commit.sha' 2>/dev/null && echo "Tracking state created" || echo "Create failed"
+          else
+            REMOTE_CONTENT=$(gh api repos/zapplyjobs/jobs-data-2026/contents/$TRACKING_FILE --jq '.content' 2>/dev/null || echo "")
+            if [ "$LOCAL_CONTENT" = "$REMOTE_CONTENT" ]; then
+              echo "Tracking state unchanged — skipping push"
+              exit 0
+            fi
+            gh api repos/zapplyjobs/jobs-data-2026/contents/$TRACKING_FILE \
+              --method PUT \
+              --field message="chore: update zero-yield tracking state [skip ci]" \
+              --field content="$LOCAL_CONTENT" \
+              --field sha="$REMOTE_SHA" \
+              --jq '.commit.sha' 2>/dev/null && echo "Tracking state pushed" || echo "Push failed or no change"
+          fi
