@@ -1,76 +1,75 @@
 {
   "schema": "zjp-metrics-v1",
-  "generated_at": "2026-05-03T13:51:51.492Z",
+  "generated_at": "2026-05-03T14:25:22.439Z",
   "pool": {
-    "total_jobs": 50746,
-    "tech_us": 10234,
+    "total_jobs": 50773,
+    "tech_us": 10237,
     "domains": {
-      "software": 9423,
-      "general": 13667,
+      "retail": 2351,
+      "logistics": 1036,
+      "general": 13683,
+      "software": 9424,
       "hardware": 4626,
       "ai": 1191,
       "data_science": 2008,
-      "logistics": 1035,
-      "manufacturing": 2624,
+      "manufacturing": 2631,
       "hr": 768,
-      "retail": 2350,
-      "sales": 5463,
+      "sales": 5464,
       "product": 1207,
       "marketing": 1339,
-      "operations": 4814,
+      "operations": 4815,
       "legal": 647,
       "finance": 2829,
       "healthcare": 940
     },
     "general_rate_pct": 26.9,
     "g1_us": {
-      "us_total": 30071,
-      "us_general": 5863,
+      "us_total": 30083,
+      "us_general": 5867,
       "us_general_rate_pct": 19.5,
       "tech_us_general_rate_pct": 36.5
     },
     "source": "jobs-metadata.json + enrichment-stats.json"
   },
   "enrichment": {
-    "total_enriched": 9884,
+    "total_enriched": 9887,
     "enrichment_rate_pct": 96.6,
     "tiers": {
       "t0": 317,
-      "t1": 704,
-      "t2": 532,
-      "t3": 8331
+      "t1": 705,
+      "t2": 515,
+      "t3": 8350
     },
     "enricher_version": 46,
-    "reenrichment_pending": 9056,
+    "reenrichment_pending": 6984,
     "source": "enrichment-stats.json"
   },
   "alerts": {
     "active": true,
     "failures": [
-      "**Submodule bump failed** (run 25280177641, 17 min ago): SHA validation or P-2 verification failed. Check [run log](https://github.com/zapplyjobs/jobs-aggregator-private/actions/runs/25280177641).",
-      "**Submodule bump failed** (run 25280172605, 17 min ago): SHA validation or P-2 verification failed. Check [run log](https://github.com/zapplyjobs/jobs-aggregator-private/actions/runs/25280172605)."
+      "**Submodule bump failed** (run 25280177641, 46 min ago): SHA validation or P-2 verification failed. Check [run log](https://github.com/zapplyjobs/jobs-aggregator-private/actions/runs/25280177641)."
     ],
-    "last_checked": "2026-05-03T13:31:42.013Z",
+    "last_checked": "2026-05-03T14:01:27.945Z",
     "source": "pipeline-alert.json"
   },
   "pipeline": {
-    "last_aggregator_run": "2026-05-03T13:45:53Z",
+    "last_aggregator_run": "2026-05-03T14:24:05Z",
     "last_aggregator_status": "in_progress",
-    "last_enrichment_run": "2026-05-03T13:45:53Z",
+    "last_enrichment_run": "2026-05-03T14:15:53Z",
     "last_enrichment_status": "success",
-    "aggregator_runtime_minutes": 0.1,
-    "aggregator_queue_minutes": 0,
+    "aggregator_runtime_minutes": 0,
+    "aggregator_queue_minutes": null,
     "aggregator_execution_minutes": null,
-    "aggregator_cancel_count": 2,
+    "aggregator_cancel_count": 1,
     "stage_timings": {
-      "step1_fetch_ms": 467259,
-      "step2_enhance_ms": 219,
-      "step3_validate_ms": 222,
-      "step4_filter_ms": 818,
-      "step5_tag_ms": 12856,
-      "step6_dedup_ms": 295,
-      "step8_sort_ms": 159,
-      "step9_write_ms": 2021
+      "step1_fetch_ms": 456879,
+      "step2_enhance_ms": 200,
+      "step3_validate_ms": 208,
+      "step4_filter_ms": 809,
+      "step5_tag_ms": 12334,
+      "step6_dedup_ms": 287,
+      "step8_sort_ms": 153,
+      "step9_write_ms": 1839
     }
   },
   "submodules": {
@@ -89,31 +88,31 @@
     "p2_status": "PASS"
   },
   "consumers": {
-    "last_update": "2026-05-03T13:46:14Z",
+    "last_update": "2026-05-03T14:16:15Z",
     "repos": {
       "New-Grad-Jobs-2026": {
-        "positions": 22960,
-        "last_commit": "2026-05-03T13:46:12Z"
+        "positions": 22964,
+        "last_commit": "2026-05-03T14:16:10Z"
       },
       "Internships-2026": {
         "positions": 1171,
-        "last_commit": "2026-05-03T13:46:11Z"
+        "last_commit": "2026-05-03T14:16:14Z"
       },
       "New-Grad-Software-Engineering-Jobs-2026": {
         "positions": 4157,
-        "last_commit": "2026-05-03T13:46:11Z"
+        "last_commit": "2026-05-03T14:16:08Z"
       },
       "New-Grad-Data-Science-Jobs-2026": {
         "positions": 887,
-        "last_commit": "2026-05-03T13:46:11Z"
+        "last_commit": "2026-05-03T14:16:08Z"
       },
       "New-Grad-Hardware-Engineering-Jobs-2026": {
-        "positions": 2501,
-        "last_commit": "2026-05-03T13:46:12Z"
+        "positions": 2500,
+        "last_commit": "2026-05-03T14:16:15Z"
       },
       "New-Grad-Healthcare-Jobs-2026": {
         "positions": 466,
-        "last_commit": "2026-05-03T13:46:14Z"
+        "last_commit": "2026-05-03T14:16:12Z"
       }
     }
   },
