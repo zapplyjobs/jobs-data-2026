@@ -1,31 +1,31 @@
 {
   "schema": "zjp-metrics-v1",
-  "generated_at": "2026-05-03T20:48:31.120Z",
+  "generated_at": "2026-05-03T21:21:08.120Z",
   "pool": {
-    "total_jobs": 50886,
+    "total_jobs": 50908,
     "tech_us": 10243,
     "domains": {
-      "retail": 2369,
-      "general": 13733,
-      "manufacturing": 2639,
-      "logistics": 1045,
+      "retail": 2372,
+      "general": 13747,
+      "logistics": 1046,
+      "hardware": 4640,
+      "manufacturing": 2641,
       "sales": 5470,
-      "software": 9439,
+      "software": 9440,
       "operations": 4804,
-      "hardware": 4638,
       "product": 1209,
       "ai": 1191,
       "data_science": 2012,
       "hr": 769,
       "marketing": 1339,
       "legal": 646,
-      "finance": 2830,
+      "finance": 2829,
       "healthcare": 940
     },
     "general_rate_pct": 27,
     "g1_us": {
-      "us_total": 30134,
-      "us_general": 5881,
+      "us_total": 30141,
+      "us_general": 5886,
       "us_general_rate_pct": 19.5,
       "tech_us_general_rate_pct": 36.6
     },
@@ -45,29 +45,31 @@
     "source": "enrichment-stats.json"
   },
   "alerts": {
-    "active": false,
-    "failures": [],
-    "last_checked": "2026-05-03T20:13:34.257Z",
+    "active": true,
+    "failures": [
+      "**Aggregator runtime high**: avg 21.5 min over last 3 runs (max 23.0 min). Threshold: 20 min. At 25 min, 15-min cadence breaks."
+    ],
+    "last_checked": "2026-05-03T21:16:07.811Z",
     "source": "pipeline-alert.json"
   },
   "pipeline": {
-    "last_aggregator_run": "2026-05-03T20:46:00Z",
+    "last_aggregator_run": "2026-05-03T21:19:59Z",
     "last_aggregator_status": "in_progress",
-    "last_enrichment_run": "2026-05-03T20:46:00Z",
-    "last_enrichment_status": "in_progress",
-    "aggregator_runtime_minutes": 0,
+    "last_enrichment_run": "2026-05-03T21:16:00Z",
+    "last_enrichment_status": "success",
+    "aggregator_runtime_minutes": null,
     "aggregator_queue_minutes": null,
     "aggregator_execution_minutes": null,
     "aggregator_cancel_count": 1,
     "stage_timings": {
-      "step1_fetch_ms": 465808,
-      "step2_enhance_ms": 254,
-      "step3_validate_ms": 239,
-      "step4_filter_ms": 865,
-      "step5_tag_ms": 13800,
-      "step6_dedup_ms": 302,
-      "step8_sort_ms": 156,
-      "step9_write_ms": 2179
+      "step1_fetch_ms": 458439,
+      "step2_enhance_ms": 207,
+      "step3_validate_ms": 206,
+      "step4_filter_ms": 803,
+      "step5_tag_ms": 11894,
+      "step6_dedup_ms": 265,
+      "step8_sort_ms": 148,
+      "step9_write_ms": 1869
     }
   },
   "submodules": {
@@ -86,39 +88,39 @@
     "p2_status": "PASS"
   },
   "consumers": {
-    "last_update": "2026-05-03T20:46:23Z",
+    "last_update": "2026-05-03T21:16:22Z",
     "repos": {
       "New-Grad-Jobs-2026": {
         "positions": 22991,
-        "last_commit": "2026-05-03T20:46:18Z"
+        "last_commit": "2026-05-03T21:16:15Z"
       },
       "Internships-2026": {
         "positions": 1172,
-        "last_commit": "2026-05-03T20:46:17Z"
+        "last_commit": "2026-05-03T21:16:14Z"
       },
       "New-Grad-Software-Engineering-Jobs-2026": {
-        "positions": 4156,
-        "last_commit": "2026-05-03T20:46:23Z"
+        "positions": 4154,
+        "last_commit": "2026-05-03T21:16:22Z"
       },
       "New-Grad-Data-Science-Jobs-2026": {
         "positions": 888,
-        "last_commit": "2026-05-03T20:46:17Z"
+        "last_commit": "2026-05-03T21:16:17Z"
       },
       "New-Grad-Hardware-Engineering-Jobs-2026": {
-        "positions": 2501,
-        "last_commit": "2026-05-03T20:46:22Z"
+        "positions": 2502,
+        "last_commit": "2026-05-03T21:16:17Z"
       },
       "New-Grad-Healthcare-Jobs-2026": {
         "positions": 466,
-        "last_commit": "2026-05-03T20:46:18Z"
+        "last_commit": "2026-05-03T21:16:16Z"
       }
     }
   },
   "repos": {
-    "total_mb": 62939,
+    "total_mb": 62960,
     "repos": {
-      "jobs-aggregator-private": 22303,
-      "jobs-data-2026": 19041,
+      "jobs-aggregator-private": 22373,
+      "jobs-data-2026": 18992,
       "New-Grad-Jobs-2026": 20106,
       "Internships-2026": 921,
       "New-Grad-Software-Engineering-Jobs-2026": 228,
