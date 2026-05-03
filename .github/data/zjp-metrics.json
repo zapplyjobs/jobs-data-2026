@@ -1,28 +1,28 @@
 {
   "schema": "zjp-metrics-v1",
-  "generated_at": "2026-05-03T00:53:00.939Z",
+  "generated_at": "2026-05-03T01:40:57.704Z",
   "pool": {
-    "total_jobs": 50549,
+    "total_jobs": 50596,
     "tech_us": 10147,
     "domains": {
+      "logistics": 1032,
+      "sales": 5465,
+      "general": 13644,
+      "retail": 2337,
       "operations": 4806,
-      "retail": 2336,
-      "general": 13620,
-      "sales": 5463,
-      "software": 9352,
+      "software": 9358,
       "data_science": 2003,
-      "logistics": 1031,
-      "marketing": 1336,
-      "finance": 2824,
+      "marketing": 1337,
+      "finance": 2828,
       "hardware": 4606,
       "healthcare": 940,
-      "manufacturing": 2616,
+      "manufacturing": 2623,
       "hr": 768,
       "ai": 1184,
-      "legal": 644,
-      "product": 1188
+      "legal": 645,
+      "product": 1189
     },
-    "general_rate_pct": 26.9,
+    "general_rate_pct": 27,
     "source": "jobs-metadata.json + enrichment-stats.json"
   },
   "enrichment": {
@@ -39,29 +39,27 @@
     "source": "enrichment-stats.json"
   },
   "alerts": {
-    "active": true,
-    "failures": [
-      "**Aggregator runtime high**: avg 20.5 min over last 3 runs (max 23.2 min). Threshold: 20 min. At 25 min, 15-min cadence breaks."
-    ],
-    "last_checked": "2026-05-03T00:20:24.993Z",
+    "active": false,
+    "failures": [],
+    "last_checked": "2026-05-03T01:18:53.993Z",
     "source": "pipeline-alert.json"
   },
   "pipeline": {
-    "last_aggregator_run": "2026-05-03T00:45:04Z",
+    "last_aggregator_run": "2026-05-03T01:30:04Z",
     "last_aggregator_status": "in_progress",
-    "last_enrichment_run": "2026-05-03T00:45:04Z",
+    "last_enrichment_run": "2026-05-03T01:30:04Z",
     "last_enrichment_status": "success",
-    "aggregator_runtime_minutes": 0.1,
-    "aggregator_queue_minutes": 0,
+    "aggregator_runtime_minutes": 6.6,
+    "aggregator_queue_minutes": 6.6,
     "aggregator_execution_minutes": null,
     "aggregator_cancel_count": 0,
     "stage_timings": {
-      "step1_fetch_ms": 447029,
-      "step2_enhance_ms": 246,
-      "step3_validate_ms": 226,
-      "step4_filter_ms": 854,
-      "step5_tag_ms": 13804,
-      "step6_dedup_ms": 337,
+      "step1_fetch_ms": 450266,
+      "step2_enhance_ms": 237,
+      "step3_validate_ms": 238,
+      "step4_filter_ms": 867,
+      "step5_tag_ms": 13734,
+      "step6_dedup_ms": 321,
       "step8_sort_ms": 154
     }
   },
@@ -81,39 +79,39 @@
     "p2_status": "PASS"
   },
   "consumers": {
-    "last_update": "2026-05-03T00:45:25Z",
+    "last_update": "2026-05-03T01:30:21Z",
     "repos": {
       "New-Grad-Jobs-2026": {
-        "positions": 22933,
-        "last_commit": "2026-05-03T00:45:21Z"
+        "positions": 22934,
+        "last_commit": "2026-05-03T01:30:21Z"
       },
       "Internships-2026": {
         "positions": 1170,
-        "last_commit": "2026-05-03T00:45:21Z"
+        "last_commit": "2026-05-03T01:30:21Z"
       },
       "New-Grad-Software-Engineering-Jobs-2026": {
         "positions": 4132,
-        "last_commit": "2026-05-03T00:45:22Z"
+        "last_commit": "2026-05-03T01:30:21Z"
       },
       "New-Grad-Data-Science-Jobs-2026": {
         "positions": 883,
-        "last_commit": "2026-05-03T00:45:25Z"
+        "last_commit": "2026-05-03T01:30:21Z"
       },
       "New-Grad-Hardware-Engineering-Jobs-2026": {
-        "positions": 2490,
-        "last_commit": "2026-05-03T00:45:24Z"
+        "positions": 2489,
+        "last_commit": "2026-05-03T01:30:16Z"
       },
       "New-Grad-Healthcare-Jobs-2026": {
         "positions": 466,
-        "last_commit": "2026-05-03T00:45:21Z"
+        "last_commit": "2026-05-03T01:30:20Z"
       }
     }
   },
   "repos": {
-    "total_mb": 61422,
+    "total_mb": 61474,
     "repos": {
-      "jobs-aggregator-private": 21520,
-      "jobs-data-2026": 18324,
+      "jobs-aggregator-private": 21597,
+      "jobs-data-2026": 18299,
       "New-Grad-Jobs-2026": 20099,
       "Internships-2026": 920,
       "New-Grad-Software-Engineering-Jobs-2026": 221,
