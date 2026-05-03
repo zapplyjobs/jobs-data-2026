@@ -1,73 +1,75 @@
 {
   "schema": "zjp-metrics-v1",
-  "generated_at": "2026-05-03T15:50:38.964Z",
+  "generated_at": "2026-05-03T16:22:24.622Z",
   "pool": {
-    "total_jobs": 50773,
-    "tech_us": 10237,
+    "total_jobs": 50793,
+    "tech_us": 10239,
     "domains": {
-      "retail": 2356,
-      "logistics": 1038,
-      "general": 13685,
-      "hardware": 4633,
+      "general": 13697,
+      "operations": 4817,
       "manufacturing": 2619,
-      "software": 9426,
+      "hardware": 4635,
+      "retail": 2357,
+      "logistics": 1039,
+      "software": 9425,
       "ai": 1191,
       "data_science": 2008,
       "hr": 768,
       "sales": 5463,
       "product": 1207,
       "marketing": 1339,
-      "operations": 4815,
       "legal": 646,
-      "finance": 2826,
+      "finance": 2829,
       "healthcare": 940
     },
     "general_rate_pct": 27,
     "g1_us": {
-      "us_total": 30077,
-      "us_general": 5868,
+      "us_total": 30081,
+      "us_general": 5872,
       "us_general_rate_pct": 19.5,
       "tech_us_general_rate_pct": 36.5
     },
     "source": "jobs-metadata.json + enrichment-stats.json"
   },
   "enrichment": {
-    "total_enriched": 9887,
+    "total_enriched": 9889,
     "enrichment_rate_pct": 96.6,
     "tiers": {
       "t0": 317,
       "t1": 705,
       "t2": 509,
-      "t3": 8356
+      "t3": 8358
     },
     "enricher_version": 46,
     "reenrichment_pending": 6025,
     "source": "enrichment-stats.json"
   },
   "alerts": {
-    "active": false,
-    "failures": [],
-    "last_checked": "2026-05-03T15:47:51.701Z",
+    "active": true,
+    "failures": [
+      "**Aggregator runtime high**: avg 23.1 min over last 3 runs (max 24.8 min). Threshold: 20 min. At 25 min, 15-min cadence breaks."
+    ],
+    "last_checked": "2026-05-03T16:16:17.368Z",
     "source": "pipeline-alert.json"
   },
   "pipeline": {
-    "last_aggregator_run": "2026-05-03T15:45:54Z",
+    "last_aggregator_run": "2026-05-03T16:21:11Z",
     "last_aggregator_status": "in_progress",
-    "last_enrichment_run": "2026-05-03T15:45:53Z",
+    "last_enrichment_run": "2026-05-03T16:15:53Z",
     "last_enrichment_status": "success",
     "aggregator_runtime_minutes": 0,
     "aggregator_queue_minutes": null,
     "aggregator_execution_minutes": null,
     "aggregator_cancel_count": 0,
     "stage_timings": {
-      "step1_fetch_ms": 460122,
-      "step2_enhance_ms": 247,
-      "step3_validate_ms": 227,
-      "step4_filter_ms": 880,
-      "step5_tag_ms": 13422,
-      "step6_dedup_ms": 316,
+      "step1_fetch_ms": 447280,
+      "step2_enhance_ms": 216,
+      "step3_validate_ms": 220,
+      "step4_filter_ms": 809,
+      "step5_tag_ms": 12301,
+      "step6_dedup_ms": 269,
       "step8_sort_ms": 156,
-      "step9_write_ms": 2104
+      "step9_write_ms": 1887
     }
   },
   "submodules": {
@@ -86,31 +88,31 @@
     "p2_status": "PASS"
   },
   "consumers": {
-    "last_update": "2026-05-03T15:46:15Z",
+    "last_update": "2026-05-03T16:16:13Z",
     "repos": {
       "New-Grad-Jobs-2026": {
-        "positions": 22971,
-        "last_commit": "2026-05-03T15:46:15Z"
+        "positions": 22975,
+        "last_commit": "2026-05-03T16:16:13Z"
       },
       "Internships-2026": {
         "positions": 1171,
-        "last_commit": "2026-05-03T15:46:14Z"
+        "last_commit": "2026-05-03T16:16:13Z"
       },
       "New-Grad-Software-Engineering-Jobs-2026": {
         "positions": 4158,
-        "last_commit": "2026-05-03T15:46:13Z"
+        "last_commit": "2026-05-03T16:16:10Z"
       },
       "New-Grad-Data-Science-Jobs-2026": {
         "positions": 887,
-        "last_commit": "2026-05-03T15:46:13Z"
+        "last_commit": "2026-05-03T16:16:09Z"
       },
       "New-Grad-Hardware-Engineering-Jobs-2026": {
         "positions": 2501,
-        "last_commit": "2026-05-03T15:46:13Z"
+        "last_commit": "2026-05-03T16:16:08Z"
       },
       "New-Grad-Healthcare-Jobs-2026": {
         "positions": 466,
-        "last_commit": "2026-05-03T15:46:14Z"
+        "last_commit": "2026-05-03T16:16:09Z"
       }
     }
   },
