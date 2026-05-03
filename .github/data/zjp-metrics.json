@@ -1,26 +1,26 @@
 {
   "schema": "zjp-metrics-v1",
-  "generated_at": "2026-05-03T08:15:54.255Z",
+  "generated_at": "2026-05-03T08:57:10.751Z",
   "pool": {
-    "total_jobs": 50602,
+    "total_jobs": 50578,
     "tech_us": 10148,
     "domains": {
-      "general": 13655,
+      "logistics": 1032,
+      "manufacturing": 2618,
+      "general": 13642,
+      "healthcare": 940,
       "software": 9353,
-      "finance": 2828,
-      "manufacturing": 2624,
-      "retail": 2346,
-      "logistics": 1033,
+      "finance": 2825,
+      "retail": 2345,
       "marketing": 1337,
       "operations": 4806,
       "product": 1189,
-      "legal": 646,
+      "legal": 645,
       "sales": 5459,
       "hr": 767,
       "ai": 1183,
       "data_science": 2002,
-      "hardware": 4602,
-      "healthcare": 939
+      "hardware": 4602
     },
     "general_rate_pct": 27,
     "source": "jobs-metadata.json + enrichment-stats.json"
@@ -39,28 +39,30 @@
     "source": "enrichment-stats.json"
   },
   "alerts": {
-    "active": false,
-    "failures": [],
-    "last_checked": "2026-05-03T07:18:29.528Z",
+    "active": true,
+    "failures": [
+      "**Submodule bump failed** (run 25272951072, 54 min ago): SHA validation or P-2 verification failed. Check [run log](https://github.com/zapplyjobs/jobs-aggregator-private/actions/runs/25272951072)."
+    ],
+    "last_checked": "2026-05-03T08:14:16.585Z",
     "source": "pipeline-alert.json"
   },
   "pipeline": {
-    "last_aggregator_run": "2026-05-03T08:01:00Z",
-    "last_aggregator_status": "success",
-    "last_enrichment_run": "2026-05-03T08:01:00Z",
+    "last_aggregator_run": "2026-05-03T08:45:57Z",
+    "last_aggregator_status": "in_progress",
+    "last_enrichment_run": "2026-05-03T08:45:57Z",
     "last_enrichment_status": "success",
-    "aggregator_runtime_minutes": 14.4,
-    "aggregator_queue_minutes": 2,
-    "aggregator_execution_minutes": 12.4,
+    "aggregator_runtime_minutes": 8.9,
+    "aggregator_queue_minutes": 8.9,
+    "aggregator_execution_minutes": null,
     "aggregator_cancel_count": 1,
     "stage_timings": {
-      "step1_fetch_ms": 442671,
+      "step1_fetch_ms": 449112,
       "step2_enhance_ms": 217,
-      "step3_validate_ms": 224,
-      "step4_filter_ms": 814,
-      "step5_tag_ms": 12603,
-      "step6_dedup_ms": 287,
-      "step8_sort_ms": 155
+      "step3_validate_ms": 217,
+      "step4_filter_ms": 807,
+      "step5_tag_ms": 12338,
+      "step6_dedup_ms": 276,
+      "step8_sort_ms": 152
     }
   },
   "submodules": {
@@ -79,39 +81,39 @@
     "p2_status": "PASS"
   },
   "consumers": {
-    "last_update": "2026-05-03T08:01:23Z",
+    "last_update": "2026-05-03T08:46:16Z",
     "repos": {
       "New-Grad-Jobs-2026": {
-        "positions": 22889,
-        "last_commit": "2026-05-03T08:01:23Z"
+        "positions": 22890,
+        "last_commit": "2026-05-03T08:46:16Z"
       },
       "Internships-2026": {
         "positions": 1170,
-        "last_commit": "2026-05-03T08:01:15Z"
+        "last_commit": "2026-05-03T08:46:12Z"
       },
       "New-Grad-Software-Engineering-Jobs-2026": {
         "positions": 4129,
-        "last_commit": "2026-05-03T08:01:16Z"
+        "last_commit": "2026-05-03T08:46:16Z"
       },
       "New-Grad-Data-Science-Jobs-2026": {
         "positions": 882,
-        "last_commit": "2026-05-03T08:01:13Z"
+        "last_commit": "2026-05-03T08:46:11Z"
       },
       "New-Grad-Hardware-Engineering-Jobs-2026": {
         "positions": 2483,
-        "last_commit": "2026-05-03T08:01:15Z"
+        "last_commit": "2026-05-03T08:46:13Z"
       },
       "New-Grad-Healthcare-Jobs-2026": {
         "positions": 466,
-        "last_commit": "2026-05-03T08:01:23Z"
+        "last_commit": "2026-05-03T08:46:16Z"
       }
     }
   },
   "repos": {
-    "total_mb": 61964,
+    "total_mb": 62137,
     "repos": {
-      "jobs-aggregator-private": 21807,
-      "jobs-data-2026": 18570,
+      "jobs-aggregator-private": 21899,
+      "jobs-data-2026": 18651,
       "New-Grad-Jobs-2026": 20103,
       "Internships-2026": 920,
       "New-Grad-Software-Engineering-Jobs-2026": 224,
