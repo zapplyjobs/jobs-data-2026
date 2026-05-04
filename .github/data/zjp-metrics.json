@@ -1,73 +1,75 @@
 {
   "schema": "zjp-metrics-v1",
-  "generated_at": "2026-05-04T01:42:34.926Z",
+  "generated_at": "2026-05-04T02:43:41.887Z",
   "pool": {
-    "total_jobs": 51000,
-    "tech_us": 10233,
+    "total_jobs": 51042,
+    "tech_us": 10244,
     "domains": {
-      "software": 9447,
-      "manufacturing": 2652,
-      "product": 1211,
+      "finance": 2839,
+      "general": 13809,
+      "hardware": 4650,
+      "operations": 4810,
+      "manufacturing": 2654,
+      "sales": 5482,
+      "logistics": 1050,
+      "product": 1212,
+      "healthcare": 944,
+      "software": 9446,
       "retail": 2382,
-      "general": 13791,
-      "sales": 5476,
-      "hardware": 4646,
-      "healthcare": 942,
-      "operations": 4808,
-      "finance": 2834,
-      "logistics": 1048,
       "ai": 1187,
       "data_science": 2008,
       "hr": 770,
       "marketing": 1338,
-      "legal": 646
+      "legal": 647
     },
-    "general_rate_pct": 27,
+    "general_rate_pct": 27.1,
     "g1_us": {
-      "us_total": 30179,
-      "us_general": 5901,
+      "us_total": 30198,
+      "us_general": 5911,
       "us_general_rate_pct": 19.6,
-      "tech_us_general_rate_pct": 36.6
+      "tech_us_general_rate_pct": 36.7
     },
     "source": "jobs-metadata.json + enrichment-stats.json"
   },
   "enrichment": {
-    "total_enriched": 9882,
+    "total_enriched": 9893,
     "enrichment_rate_pct": 96.6,
     "tiers": {
       "t0": 317,
       "t1": 707,
-      "t2": 509,
-      "t3": 8349
+      "t2": 510,
+      "t3": 8359
     },
     "enricher_version": 46,
     "reenrichment_pending": 6025,
     "source": "enrichment-stats.json"
   },
   "alerts": {
-    "active": false,
-    "failures": [],
-    "last_checked": "2026-05-04T01:16:30.790Z",
+    "active": true,
+    "failures": [
+      "**Company zero-yield streak** (3+ runs): re:Cycle Reverse Logistics LLC (3 runs) — fetcher or ATS URL may be broken"
+    ],
+    "last_checked": "2026-05-04T02:19:13.420Z",
     "source": "pipeline-alert.json"
   },
   "pipeline": {
-    "last_aggregator_run": "2026-05-04T01:31:04Z",
+    "last_aggregator_run": "2026-05-04T02:31:01Z",
     "last_aggregator_status": "in_progress",
-    "last_enrichment_run": "2026-05-04T01:31:04Z",
+    "last_enrichment_run": "2026-05-04T02:31:01Z",
     "last_enrichment_status": "success",
-    "aggregator_runtime_minutes": 4.5,
-    "aggregator_queue_minutes": 4.5,
+    "aggregator_runtime_minutes": 0.1,
+    "aggregator_queue_minutes": 0,
     "aggregator_execution_minutes": null,
-    "aggregator_cancel_count": 0,
+    "aggregator_cancel_count": 1,
     "stage_timings": {
-      "step1_fetch_ms": 455081,
-      "step2_enhance_ms": 233,
-      "step3_validate_ms": 222,
-      "step4_filter_ms": 822,
-      "step5_tag_ms": 13051,
-      "step6_dedup_ms": 313,
-      "step8_sort_ms": 160,
-      "step9_write_ms": 1994
+      "step1_fetch_ms": 465670,
+      "step2_enhance_ms": 213,
+      "step3_validate_ms": 225,
+      "step4_filter_ms": 810,
+      "step5_tag_ms": 12630,
+      "step6_dedup_ms": 294,
+      "step8_sort_ms": 158,
+      "step9_write_ms": 1988
     }
   },
   "submodules": {
@@ -86,40 +88,40 @@
     "p2_status": "PASS"
   },
   "consumers": {
-    "last_update": "2026-05-04T01:31:29Z",
+    "last_update": "2026-05-04T02:31:20Z",
     "repos": {
       "New-Grad-Jobs-2026": {
-        "positions": 19767,
-        "last_commit": "2026-05-04T01:31:29Z"
+        "positions": 19798,
+        "last_commit": "2026-05-04T02:31:19Z"
       },
       "Internships-2026": {
         "positions": 1155,
-        "last_commit": "2026-05-04T01:31:24Z"
+        "last_commit": "2026-05-04T02:31:16Z"
       },
       "New-Grad-Software-Engineering-Jobs-2026": {
-        "positions": 3510,
-        "last_commit": "2026-05-04T01:31:15Z"
+        "positions": 3515,
+        "last_commit": "2026-05-04T02:31:18Z"
       },
       "New-Grad-Data-Science-Jobs-2026": {
         "positions": 763,
-        "last_commit": "2026-05-04T01:31:25Z"
+        "last_commit": "2026-05-04T02:31:19Z"
       },
       "New-Grad-Hardware-Engineering-Jobs-2026": {
-        "positions": 2246,
-        "last_commit": "2026-05-04T01:31:22Z"
+        "positions": 2248,
+        "last_commit": "2026-05-04T02:31:18Z"
       },
       "New-Grad-Healthcare-Jobs-2026": {
-        "positions": 438,
-        "last_commit": "2026-05-04T01:31:27Z"
+        "positions": 440,
+        "last_commit": "2026-05-04T02:31:20Z"
       }
     }
   },
   "repos": {
-    "total_mb": 63374,
+    "total_mb": 63476,
     "repos": {
-      "jobs-aggregator-private": 22593,
-      "jobs-data-2026": 19185,
-      "New-Grad-Jobs-2026": 20107,
+      "jobs-aggregator-private": 22594,
+      "jobs-data-2026": 19283,
+      "New-Grad-Jobs-2026": 20110,
       "Internships-2026": 921,
       "New-Grad-Software-Engineering-Jobs-2026": 228,
       "New-Grad-Data-Science-Jobs-2026": 70,
