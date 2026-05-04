@@ -25,6 +25,9 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Install shared submodule dependencies (for R2 client)
+        run: cd .github/scripts/shared && npm install
+
       - name: Download data from R2
         if: success()
         continue-on-error: true
