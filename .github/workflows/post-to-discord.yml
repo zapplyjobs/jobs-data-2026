@@ -25,6 +25,45 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Download data from R2
+        if: success()
+        continue-on-error: true
+        run: |
+          echo "📥 Downloading pipeline data from R2..."
+          node -e "
+          const { createR2Client } = require('./.github/scripts/shared/lib/storage/r2-client');
+          const fs = require('fs');
+          const path = require('path');
+
+          async function main() {
+            const r2 = createR2Client({ prefix: 'data/' });
+            const dataDir = '.github/data';
+            if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+
+            const files = ['all_jobs.json', 'enriched_jobs.json', 'posted_jobs.json', 'global-dedupe-store.json'];
+            let ok = 0;
+            for (const file of files) {
+              try {
+                const raw = await r2.downloadRaw(file);
+                if (raw) {
+                  fs.writeFileSync(path.join(dataDir, file), Buffer.from(raw));
+                  ok++;
+                  console.log('R2 download OK: ' + file);
+                } else {
+                  console.log('R2 SKIP: ' + file + ' (not found — will use git version)');
+                }
+              } catch (e) { console.error('R2 download ERR: ' + file + ' - ' + e.message); }
+            }
+            console.log('R2 download done: ' + ok + ' files');
+          }
+          main().catch(e => { console.error('R2 fatal: ' + e.message); process.exit(1); });
+          "
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+
       - name: Post jobs to Discord
         env:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
@@ -59,6 +98,39 @@ jobs:
           MAX_POSTS_PER_RUN: ${{ vars.MAX_POSTS_PER_RUN || 10 }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node .github/scripts/shared/lib/jobs-data-scripts/discord-poster.js
+
+      - name: Upload dedupe data to R2
+        if: always()
+        continue-on-error: true
+        run: |
+          echo "📤 Uploading dedupe data to R2..."
+          node -e "
+          const { createR2Client } = require('./.github/scripts/shared/lib/storage/r2-client');
+          const fs = require('fs');
+          const path = require('path');
+
+          async function main() {
+            const r2 = createR2Client({ prefix: 'data/' });
+            const dataDir = '.github/data';
+            const files = ['posted_jobs.json', 'global-dedupe-store.json'];
+            let ok = 0;
+            for (const file of files) {
+              const fp = path.join(dataDir, file);
+              if (!fs.existsSync(fp)) { console.log('SKIP: ' + file); continue; }
+              try {
+                const data = fs.readFileSync(fp, 'utf8');
+                if (await r2.uploadRaw(file, data, 'application/json')) ok++;
+              } catch (e) { console.error('ERR: ' + file + ' - ' + e.message); }
+            }
+            console.log('R2 upload done: ' + ok + ' files');
+          }
+          main().catch(e => { console.error('R2 fatal: ' + e.message); process.exit(1); });
+          "
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
 
       - name: Commit updated database
         if: always()
