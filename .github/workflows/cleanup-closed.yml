@@ -1,0 +1,110 @@
+name: Cleanup Closed Jobs
+
+on:
+  schedule:
+    - cron: '30 5,17 * * *'  # Twice daily: 12:30 AM and 12:30 PM CDT (05:30, 17:30 UTC)
+  workflow_dispatch:  # Manual trigger for testing
+
+concurrency:
+  group: cleanup-closed
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+          submodules: recursive
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: |
+          cd .github/scripts/shared && npm install
+
+      - name: Download all_jobs.json from R2
+        if: success()
+        continue-on-error: true
+        run: |
+          echo "📥 Downloading all_jobs.json from R2..."
+          node -e "
+          const { createR2Client } = require('./.github/scripts/shared/lib/storage/r2-client');
+          const fs = require('fs');
+          const path = require('path');
+
+          async function main() {
+            const r2 = createR2Client({ prefix: 'data/' });
+            const dataDir = '.github/data';
+            if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+
+            const raw = await r2.downloadRaw('all_jobs.json');
+            if (raw) {
+              fs.writeFileSync(path.join(dataDir, 'all_jobs.json'), Buffer.from(raw));
+              console.log('R2 download OK: all_jobs.json');
+            } else {
+              console.log('R2 SKIP: all_jobs.json not found — will use git version');
+            }
+          }
+          main().catch(e => { console.error('R2 fatal: ' + e.message); process.exit(1); });
+          "
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+
+      - name: Run closed-job cleanup
+        run: node .github/scripts/cleanup-closed-jobs.js
+
+      - name: Upload cleaned all_jobs.json to R2
+        if: success()
+        continue-on-error: true
+        run: |
+          if [ -f .github/data/all_jobs.json ]; then
+            echo "📤 Uploading cleaned all_jobs.json to R2..."
+            node -e "
+            const { createR2Client } = require('./.github/scripts/shared/lib/storage/r2-client');
+            const fs = require('fs');
+            async function main() {
+              const r2 = createR2Client({ prefix: 'data/' });
+              const data = fs.readFileSync('.github/data/all_jobs.json', 'utf8');
+              await r2.uploadRaw('all_jobs.json', data, 'application/json');
+              console.log('R2 upload OK: all_jobs.json');
+            }
+            main().catch(e => { console.error('R2 fatal: ' + e.message); process.exit(1); });
+            "
+          fi
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+
+      - name: Commit and push if changed
+        run: |
+          if [ -n "$(git status --porcelain .github/data/all_jobs.json)" ]; then
+            git config user.email "bot@zapplyjobs.com"
+            git config user.name "Data Bot"
+            git add .github/data/all_jobs.json
+            REMOVED=$(git diff --cached --stat | grep -o '[0-9]* deletion' | grep -o '[0-9]*' || echo "0")
+            git commit -m "chore: remove closed jobs [skip ci]"
+            for i in 1 2 3; do
+              git pull --rebase origin main && git push origin main && break
+              echo "Push attempt $i failed, retrying in 5s..."
+              sleep 5
+            done
+            echo "✅ Closed jobs removed and pushed"
+          else
+            echo "ℹ️ No changes — pool unchanged"
+          fi

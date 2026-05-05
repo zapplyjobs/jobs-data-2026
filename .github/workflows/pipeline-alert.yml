@@ -1,0 +1,112 @@
+name: Pipeline Alert
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'  # Every 30 minutes
+  workflow_dispatch:
+
+jobs:
+  pipeline-alert:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+          submodules: recursive
+          token: ${{ secrets.GH_PAT }}
+          sparse-checkout: |
+            .github/scripts
+            .github/data
+            .github/workflows
+            package.json
+            package-lock.json
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Syntax check pipeline-alert.js
+        run: node -c .github/scripts/shared/lib/jobs-data-scripts/pipeline-alert.js
+
+      - name: Run pipeline checks
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TEAM_TOKEN }}
+          DISCORD_PIPELINE_ALERT_CHANNEL_ID: ${{ secrets.DISCORD_PIPELINE_ALERT_CHANNEL_ID }}
+          GH_PAT_EXPIRY_DATE: ${{ vars.GH_PAT_EXPIRY_DATE }}
+        run: node .github/scripts/shared/lib/jobs-data-scripts/pipeline-alert.js
+
+      - name: Push alert status via API
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ALERT_FILE=".github/data/pipeline-alert.json"
+          if [ ! -f "$ALERT_FILE" ]; then
+            echo "Alert file not found — skipping push"
+            exit 0
+          fi
+
+          REMOTE_SHA=$(gh api repos/zapplyjobs/jobs-data-2026/contents/$ALERT_FILE --jq '.sha' 2>/dev/null || echo "")
+          REMOTE_CONTENT=$(gh api repos/zapplyjobs/jobs-data-2026/contents/$ALERT_FILE --jq '.content' 2>/dev/null || echo "")
+
+          if [ -z "$REMOTE_SHA" ]; then
+            echo "Could not get remote SHA — skipping push"
+            exit 0
+          fi
+
+          LOCAL_CONTENT=$(base64 -w 0 "$ALERT_FILE")
+
+          if [ "$LOCAL_CONTENT" = "$REMOTE_CONTENT" ]; then
+            echo "Content unchanged — skipping push"
+            exit 0
+          fi
+
+          gh api repos/zapplyjobs/jobs-data-2026/contents/$ALERT_FILE \
+            --method PUT \
+            --field message="chore: update pipeline alert status [skip ci]" \
+            --field content="$LOCAL_CONTENT" \
+            --field sha="$REMOTE_SHA" \
+            --jq '.commit.sha' 2>/dev/null && echo "Alert status pushed" || echo "Push failed or no change"
+
+      - name: Push zero-yield tracking state
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TRACKING_FILE=".github/data/zero-yield-tracking.json"
+          if [ ! -f "$TRACKING_FILE" ]; then
+            echo "Tracking file not found — skipping push"
+            exit 0
+          fi
+
+          LOCAL_CONTENT=$(base64 -w 0 "$TRACKING_FILE")
+          REMOTE_SHA=$(gh api repos/zapplyjobs/jobs-data-2026/contents/$TRACKING_FILE --jq '.sha' 2>/dev/null || echo "")
+
+          if [ -z "$REMOTE_SHA" ]; then
+            # File doesn't exist on remote yet — create it
+            gh api repos/zapplyjobs/jobs-data-2026/contents/$TRACKING_FILE \
+              --method PUT \
+              --field message="chore: init zero-yield tracking state [skip ci]" \
+              --field content="$LOCAL_CONTENT" \
+              --jq '.commit.sha' 2>/dev/null && echo "Tracking state created" || echo "Create failed"
+          else
+            REMOTE_CONTENT=$(gh api repos/zapplyjobs/jobs-data-2026/contents/$TRACKING_FILE --jq '.content' 2>/dev/null || echo "")
+            if [ "$LOCAL_CONTENT" = "$REMOTE_CONTENT" ]; then
+              echo "Tracking state unchanged — skipping push"
+              exit 0
+            fi
+            gh api repos/zapplyjobs/jobs-data-2026/contents/$TRACKING_FILE \
+              --method PUT \
+              --field message="chore: update zero-yield tracking state [skip ci]" \
+              --field content="$LOCAL_CONTENT" \
+              --field sha="$REMOTE_SHA" \
+              --jq '.commit.sha' 2>/dev/null && echo "Tracking state pushed" || echo "Push failed or no change"
+          fi

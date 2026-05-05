@@ -1,0 +1,6 @@
+# Data files change almost entirely each commit — delta compression is futile
+# and causes git pack-objects to consume 12+ GB RAM attempting it.
+# -delta tells pack-objects to store these as-is without delta compression.
+# Same pattern as jobs-aggregator-private/.gitattributes.
+.github/data/*.json -delta
+.github/data/*.jsonl -delta
