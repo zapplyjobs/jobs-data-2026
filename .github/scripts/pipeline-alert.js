@@ -17,7 +17,7 @@
  *   8. JSearch total_fetched = 0 (fetcher completely silent)
  *   9. Any key domain (software/data_science/hardware/healthcare/ai) has 0 tagged jobs
  *  10. Senior filter rate outside 40-65% range (AGG-9)
- *  11. G1 general rate >55% (tag engine regression) (AGG-9)
+ *  11. G1 general rate >35% warning / >45% critical (tag engine regression) (AGG-9)
  *  12. Enrichment coverage <70% of tech jobs (AGG-9)
  *
  * Not alerts (by design, not failures):
@@ -235,12 +235,17 @@ async function runChecks() {
     }
 
     // Check 11 (AGG-9): G1 general rate regression
-    // Target: <40%. Alert at >55% (indicates tag engine regression or broken keywords).
+    // Tiered alerting: warn at 35%, critical at 45%.
+    // Historical context: pre-TAG-11 G1 was 60-63% (March). Post-TAG-11 stable: 18-33%.
+    // Current (May 2026): 27.1%. A 10pp jump to ~37% warrants investigation.
+    // 55% threshold was set when G1 was ~60% — now it would never fire before catastrophic failure.
     const generalCount = domains['general'] ?? null;
     if (generalCount !== null && currTotal > 0) {
       const generalRate = generalCount / currTotal;
-      if (generalRate > 0.55) {
-        failures.push(`**G1 general rate high**: ${Math.round(generalRate * 100)}% of pool is general-tagged (threshold: 55%) — tag engine may have regressed`);
+      if (generalRate > 0.45) {
+        failures.push(`**G1 general rate critical**: ${Math.round(generalRate * 100)}% of pool is general-tagged (threshold: 45%) — tag engine may have regressed`);
+      } else if (generalRate > 0.35) {
+        failures.push(`**G1 general rate warning**: ${Math.round(generalRate * 100)}% of pool is general-tagged (threshold: 35%) — investigate tag engine health`);
       }
     }
 
