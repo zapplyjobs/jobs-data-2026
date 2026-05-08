@@ -94,7 +94,7 @@ jobs:
 
       - name: Upload enriched data to R2
         if: success()
-        continue-on-error: true
+        # continue-on-error removed — R2 upload failures now visible (INF-BLOAT-5)
         run: |
           echo "📤 Uploading enriched data to R2..."
           node -e "
