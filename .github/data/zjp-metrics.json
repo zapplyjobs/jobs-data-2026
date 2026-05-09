@@ -1,31 +1,31 @@
 {
   "schema": "zjp-metrics-v1",
-  "generated_at": "2026-05-09T16:24:45.751Z",
+  "generated_at": "2026-05-09T16:51:31.203Z",
   "pool": {
-    "total_jobs": 63768,
-    "tech_us": 11745,
+    "total_jobs": 63762,
+    "tech_us": 11746,
     "domains": {
+      "manufacturing": 3256,
       "marketing": 1494,
-      "general": 17855,
-      "hardware": 5496,
-      "sales": 6336,
-      "retail": 4927,
-      "product": 1330,
-      "operations": 5557,
-      "finance": 3522,
-      "software": 10776,
-      "data_science": 2299,
+      "operations": 5546,
+      "general": 17816,
+      "sales": 6334,
+      "finance": 3523,
+      "software": 10778,
+      "data_science": 2298,
       "ai": 1296,
-      "healthcare": 1142,
-      "logistics": 1718,
-      "hr": 894,
-      "manufacturing": 3255,
+      "hardware": 5496,
+      "healthcare": 1136,
+      "logistics": 1717,
+      "retail": 4924,
+      "hr": 893,
+      "product": 1324,
       "legal": 719
     },
-    "general_rate_pct": 28,
+    "general_rate_pct": 27.9,
     "g1_us": {
-      "us_total": 38925,
-      "us_general": 7853,
+      "us_total": 38921,
+      "us_general": 7855,
       "us_general_rate_pct": 20.2,
       "tech_us_general_rate_pct": 40.1
     },
@@ -33,36 +33,36 @@
   },
   "tag": {
     "drift": {
-      "drift_rate": 0.024,
-      "drift_pct": "2.4%",
+      "drift_rate": 0.028,
+      "drift_pct": "2.8%",
       "sample_size": 500,
-      "drifted": 12,
+      "drifted": 14,
       "warnings": []
     },
     "precision": {
       "domains": {
         "software": {
-          "total": 6646,
+          "total": 6648,
           "fps": 155,
-          "fp_rate": 0.023322299127294614,
+          "fp_rate": 0.023315282791817087,
           "fp_pct": "2.33%"
         },
         "hardware": {
           "total": 3966,
-          "fps": 51,
-          "fp_rate": 0.012859304084720122,
-          "fp_pct": "1.29%"
+          "fps": 52,
+          "fp_rate": 0.013111447302067574,
+          "fp_pct": "1.31%"
         },
         "healthcare": {
-          "total": 839,
+          "total": 836,
           "fps": 15,
-          "fp_rate": 0.017878426698450536,
+          "fp_rate": 0.017942583732057416,
           "fp_pct": "1.79%"
         },
         "data_science": {
-          "total": 1469,
+          "total": 1468,
           "fps": 27,
-          "fp_rate": 0.018379850238257316,
+          "fp_rate": 0.018392370572207085,
           "fp_pct": "1.84%"
         }
       },
@@ -72,16 +72,16 @@
     "source": "jobs-metadata.json"
   },
   "enrichment": {
-    "total_enriched": 11559,
+    "total_enriched": 11560,
     "enrichment_rate_pct": 98.4,
     "tiers": {
-      "t0": 513,
+      "t0": 528,
       "t1": 815,
-      "t2": 588,
-      "t3": 9643
+      "t2": 589,
+      "t3": 9628
     },
     "enricher_version": 50,
-    "reenrichment_pending": 11366,
+    "reenrichment_pending": 10673,
     "source": "enrichment-stats.json"
   },
   "alerts": {
@@ -91,26 +91,26 @@
     "source": "pipeline-alert.json"
   },
   "pipeline": {
-    "last_aggregator_run": "2026-05-09T16:15:04Z",
+    "last_aggregator_run": "2026-05-09T16:45:04Z",
     "last_aggregator_status": "in_progress",
-    "last_enrichment_run": "2026-05-09T16:15:04Z",
+    "last_enrichment_run": "2026-05-09T16:45:04Z",
     "last_enrichment_status": "success",
-    "aggregator_runtime_minutes": 9.4,
-    "aggregator_queue_minutes": 0,
-    "aggregator_execution_minutes": 9.4,
+    "aggregator_runtime_minutes": 9.3,
+    "aggregator_queue_minutes": 0.1,
+    "aggregator_execution_minutes": 9.2,
     "aggregator_cancel_count": 2,
     "stage_timings": {
-      "step1_fetch_ms": 300230,
-      "step2_enhance_ms": 122,
-      "step3_validate_ms": 117,
-      "step4_filter_ms": 707,
-      "step5_tag_ms": 8491,
-      "step6_dedup_ms": 243,
-      "step8_sort_ms": 95,
-      "step9_write_ms": 3743
+      "step1_fetch_ms": 275276,
+      "step2_enhance_ms": 135,
+      "step3_validate_ms": 125,
+      "step4_filter_ms": 748,
+      "step5_tag_ms": 9366,
+      "step6_dedup_ms": 291,
+      "step8_sort_ms": 97,
+      "step9_write_ms": 4409
     },
-    "pipeline_internal_minutes": 5.2,
-    "push_overhead_minutes": 4.2
+    "pipeline_internal_minutes": 4.8,
+    "push_overhead_minutes": 4.4
   },
   "submodules": {
     "aligned": true,
@@ -128,42 +128,42 @@
     "p2_status": "PASS"
   },
   "consumers": {
-    "last_update": "2026-05-09T16:15:30Z",
+    "last_update": "2026-05-09T16:45:26Z",
     "repos": {
       "New-Grad-Jobs-2026": {
-        "positions": 12457,
-        "last_commit": "2026-05-09T16:15:27Z"
+        "positions": 12450,
+        "last_commit": "2026-05-09T16:45:19Z"
       },
       "Internships-2026": {
-        "positions": 331,
-        "last_commit": "2026-05-09T16:15:23Z"
+        "positions": 333,
+        "last_commit": "2026-05-09T16:45:22Z"
       },
       "New-Grad-Software-Engineering-Jobs-2026": {
         "positions": 1266,
-        "last_commit": "2026-05-09T16:15:20Z"
+        "last_commit": "2026-05-09T16:45:21Z"
       },
       "New-Grad-Data-Science-Jobs-2026": {
         "positions": 269,
-        "last_commit": "2026-05-09T16:15:30Z"
+        "last_commit": "2026-05-09T16:45:26Z"
       },
       "New-Grad-Hardware-Engineering-Jobs-2026": {
-        "positions": 977,
-        "last_commit": "2026-05-09T16:15:19Z"
+        "positions": 976,
+        "last_commit": "2026-05-09T16:45:16Z"
       },
       "New-Grad-Healthcare-Jobs-2026": {
         "positions": 341,
-        "last_commit": "2026-05-09T16:15:29Z"
+        "last_commit": "2026-05-09T16:45:16Z"
       }
     }
   },
   "repos": {
-    "total_mb": 72230,
+    "total_mb": 72237,
     "repos": {
       "jobs-aggregator-private": 27081,
       "jobs-data-2026": 23449,
       "New-Grad-Jobs-2026": 20175,
       "Internships-2026": 923,
-      "New-Grad-Software-Engineering-Jobs-2026": 245,
+      "New-Grad-Software-Engineering-Jobs-2026": 252,
       "New-Grad-Data-Science-Jobs-2026": 71,
       "New-Grad-Hardware-Engineering-Jobs-2026": 129,
       "New-Grad-Healthcare-Jobs-2026": 157
