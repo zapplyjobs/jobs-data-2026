@@ -1,31 +1,31 @@
 {
   "schema": "zjp-metrics-v1",
-  "generated_at": "2026-05-09T23:22:53.300Z",
+  "generated_at": "2026-05-09T23:50:47.783Z",
   "pool": {
-    "total_jobs": 63832,
-    "tech_us": 11772,
+    "total_jobs": 63833,
+    "tech_us": 11745,
     "domains": {
-      "hardware": 5513,
-      "software": 10791,
-      "general": 17816,
+      "hardware": 5512,
+      "software": 10790,
+      "general": 17801,
       "hr": 894,
-      "finance": 3531,
-      "operations": 5552,
+      "retail": 4938,
+      "sales": 6344,
+      "operations": 5551,
       "marketing": 1495,
-      "sales": 6339,
-      "healthcare": 1140,
+      "finance": 3525,
+      "data_science": 2298,
       "ai": 1296,
-      "data_science": 2300,
+      "healthcare": 1136,
       "logistics": 1729,
       "legal": 719,
-      "retail": 4935,
       "manufacturing": 3261,
       "product": 1323
     },
     "general_rate_pct": 27.9,
     "g1_us": {
-      "us_total": 38989,
-      "us_general": 7855,
+      "us_total": 38995,
+      "us_general": 7856,
       "us_general_rate_pct": 20.1,
       "tech_us_general_rate_pct": 40
     },
@@ -33,10 +33,10 @@
   },
   "tag": {
     "drift": {
-      "drift_rate": 0.012,
-      "drift_pct": "1.2%",
+      "drift_rate": 0.036,
+      "drift_pct": "3.6%",
       "sample_size": 500,
-      "drifted": 6,
+      "drifted": 18,
       "warnings": []
     },
     "precision": {
@@ -48,21 +48,21 @@
           "fp_pct": "2.34%"
         },
         "hardware": {
-          "total": 3981,
-          "fps": 52,
-          "fp_rate": 0.013062044712383824,
-          "fp_pct": "1.31%"
+          "total": 3980,
+          "fps": 51,
+          "fp_rate": 0.012814070351758794,
+          "fp_pct": "1.28%"
         },
         "healthcare": {
-          "total": 840,
+          "total": 836,
           "fps": 15,
-          "fp_rate": 0.017857142857142856,
+          "fp_rate": 0.017942583732057416,
           "fp_pct": "1.79%"
         },
         "data_science": {
-          "total": 1469,
+          "total": 1468,
           "fps": 27,
-          "fp_rate": 0.018379850238257316,
+          "fp_rate": 0.018392370572207085,
           "fp_pct": "1.84%"
         }
       },
@@ -72,16 +72,16 @@
     "source": "jobs-metadata.json"
   },
   "enrichment": {
-    "total_enriched": 11590,
+    "total_enriched": 11563,
     "enrichment_rate_pct": 98.5,
     "tiers": {
       "t0": 542,
       "t1": 813,
-      "t2": 598,
-      "t3": 9637
+      "t2": 597,
+      "t3": 9611
     },
     "enricher_version": 50,
-    "reenrichment_pending": 5846,
+    "reenrichment_pending": 5837,
     "source": "enrichment-stats.json"
   },
   "alerts": {
@@ -91,26 +91,26 @@
     "source": "pipeline-alert.json"
   },
   "pipeline": {
-    "last_aggregator_run": "2026-05-09T23:15:04Z",
+    "last_aggregator_run": "2026-05-09T23:45:04Z",
     "last_aggregator_status": "in_progress",
-    "last_enrichment_run": "2026-05-09T23:15:04Z",
+    "last_enrichment_run": "2026-05-09T23:45:04Z",
     "last_enrichment_status": "success",
-    "aggregator_runtime_minutes": 9.7,
+    "aggregator_runtime_minutes": 8.3,
     "aggregator_queue_minutes": 0,
-    "aggregator_execution_minutes": 9.5,
+    "aggregator_execution_minutes": 8.2,
     "aggregator_cancel_count": 0,
     "stage_timings": {
-      "step1_fetch_ms": 293996,
-      "step2_enhance_ms": 131,
-      "step3_validate_ms": 125,
-      "step4_filter_ms": 715,
-      "step5_tag_ms": 8737,
-      "step6_dedup_ms": 258,
-      "step8_sort_ms": 100,
-      "step9_write_ms": 3979
+      "step1_fetch_ms": 225142,
+      "step2_enhance_ms": 125,
+      "step3_validate_ms": 116,
+      "step4_filter_ms": 692,
+      "step5_tag_ms": 8315,
+      "step6_dedup_ms": 248,
+      "step8_sort_ms": 94,
+      "step9_write_ms": 3793
     },
-    "pipeline_internal_minutes": 5.1,
-    "push_overhead_minutes": 4.6
+    "pipeline_internal_minutes": 4,
+    "push_overhead_minutes": 4.3
   },
   "submodules": {
     "aligned": true,
@@ -128,31 +128,31 @@
     "p2_status": "PASS"
   },
   "consumers": {
-    "last_update": "2026-05-09T23:15:26Z",
+    "last_update": "2026-05-09T23:45:26Z",
     "repos": {
       "New-Grad-Jobs-2026": {
-        "positions": 12655,
-        "last_commit": "2026-05-09T23:15:22Z"
+        "positions": 12669,
+        "last_commit": "2026-05-09T23:45:18Z"
       },
       "Internships-2026": {
         "positions": 333,
-        "last_commit": "2026-05-09T23:15:26Z"
+        "last_commit": "2026-05-09T23:45:24Z"
       },
       "New-Grad-Software-Engineering-Jobs-2026": {
-        "positions": 1403,
-        "last_commit": "2026-05-09T23:15:20Z"
+        "positions": 1406,
+        "last_commit": "2026-05-09T23:45:22Z"
       },
       "New-Grad-Data-Science-Jobs-2026": {
         "positions": 269,
-        "last_commit": "2026-05-09T23:15:23Z"
+        "last_commit": "2026-05-09T23:45:26Z"
       },
       "New-Grad-Hardware-Engineering-Jobs-2026": {
         "positions": 990,
-        "last_commit": "2026-05-09T23:15:23Z"
+        "last_commit": "2026-05-09T23:45:22Z"
       },
       "New-Grad-Healthcare-Jobs-2026": {
         "positions": 341,
-        "last_commit": "2026-05-09T23:15:17Z"
+        "last_commit": "2026-05-09T23:45:17Z"
       }
     }
   },
