@@ -1,30 +1,30 @@
 {
   "schema": "zjp-metrics-v1",
-  "generated_at": "2026-05-10T20:34:30.829Z",
+  "generated_at": "2026-05-10T21:06:57.914Z",
   "pool": {
-    "total_jobs": 63463,
+    "total_jobs": 63457,
     "tech_us": 11620,
     "domains": {
-      "healthcare": 1107,
       "marketing": 1483,
       "operations": 5463,
       "general": 17946,
-      "finance": 3472,
       "sales": 6304,
-      "software": 10660,
-      "data_science": 2283,
+      "finance": 3472,
+      "software": 10656,
+      "data_science": 2282,
       "ai": 1318,
       "hardware": 5421,
+      "healthcare": 1107,
       "logistics": 1725,
       "hr": 883,
       "legal": 717,
       "product": 1321,
       "retail": 4903,
-      "manufacturing": 3227
+      "manufacturing": 3226
     },
     "general_rate_pct": 28.3,
     "g1_us": {
-      "us_total": 38818,
+      "us_total": 38814,
       "us_general": 8012,
       "us_general_rate_pct": 20.6,
       "tech_us_general_rate_pct": 40.8
@@ -33,18 +33,18 @@
   },
   "tag": {
     "drift": {
-      "drift_rate": 0.014,
-      "drift_pct": "1.4%",
+      "drift_rate": 0.026,
+      "drift_pct": "2.6%",
       "sample_size": 500,
-      "drifted": 7,
+      "drifted": 13,
       "warnings": []
     },
     "precision": {
       "domains": {
         "software": {
-          "total": 6574,
+          "total": 6571,
           "fps": 153,
-          "fp_rate": 0.02327350167325829,
+          "fp_rate": 0.023284127225688633,
           "fp_pct": "2.33%"
         },
         "hardware": {
@@ -70,13 +70,13 @@
     },
     "keyword_health": {
       "software": {
-        "total_jobs": 6574,
+        "total_jobs": 6571,
         "keyword_count": 278,
         "keywords_with_matches": 172,
         "top_5": [
           {
             "keyword": "software engineer",
-            "matches": 2644,
+            "matches": 2641,
             "rate_pct": "40.2%"
           },
           {
@@ -101,7 +101,7 @@
           }
         ],
         "high_volume": [
-          "software engineer (2644 jobs, 40.2% of domain)"
+          "software engineer (2641 jobs, 40.2% of domain)"
         ]
       },
       "ai": {
@@ -517,7 +517,7 @@
         ]
       },
       "manufacturing": {
-        "total_jobs": 2533,
+        "total_jobs": 2532,
         "keyword_count": 136,
         "keywords_with_matches": 83,
         "top_5": [
@@ -599,40 +599,40 @@
       "t3": 9339
     },
     "enricher_version": 52,
-    "reenrichment_pending": 3853,
+    "reenrichment_pending": 3453,
     "source": "enrichment-stats.json"
   },
   "alerts": {
     "active": false,
     "failures": [],
-    "last_checked": "2026-05-10T20:17:51.200Z",
+    "last_checked": "2026-05-10T20:48:55.166Z",
     "source": "pipeline-alert.json"
   },
   "pipeline": {
-    "last_aggregator_run": "2026-05-10T20:31:01Z",
+    "last_aggregator_run": "2026-05-10T21:01:03Z",
     "last_aggregator_status": "in_progress",
-    "last_enrichment_run": "2026-05-10T20:31:01Z",
-    "last_enrichment_status": "in_progress",
-    "aggregator_runtime_minutes": 0.2,
+    "last_enrichment_run": "2026-05-10T21:01:03Z",
+    "last_enrichment_status": "success",
+    "aggregator_runtime_minutes": 0.3,
     "aggregator_queue_minutes": 0,
     "aggregator_execution_minutes": 0.2,
     "aggregator_cancel_count": 0,
     "stage_timings": {
-      "step1_fetch_ms": 251847,
-      "step2_enhance_ms": 139,
-      "step3_validate_ms": 121,
-      "step4_filter_ms": 742,
-      "step5_tag_ms": 9168,
-      "step6_dedup_ms": 284,
-      "step8_sort_ms": 94,
-      "step9_write_ms": 18538
+      "step1_fetch_ms": 272973,
+      "step2_enhance_ms": 124,
+      "step3_validate_ms": 119,
+      "step4_filter_ms": 749,
+      "step5_tag_ms": 9091,
+      "step6_dedup_ms": 292,
+      "step8_sort_ms": 95,
+      "step9_write_ms": 18932
     },
-    "pipeline_internal_minutes": 4.7,
+    "pipeline_internal_minutes": 5,
     "push_overhead_minutes": 0
   },
   "r2": {
-    "status": "not_configured",
-    "note": "R2 secrets not available in this environment"
+    "status": "error",
+    "error": "Cannot find module '@aws-sdk/client-s3'\nRequire stack:\n- /home/runner/work/jobs-data-2026/jobs-data-2026/.github/scripts/shared/lib/jobs-data-scripts/generate-zjp-metrics.js"
   },
   "submodules": {
     "aligned": true,
@@ -650,39 +650,39 @@
     "p2_status": "PASS"
   },
   "consumers": {
-    "last_update": "2026-05-10T20:31:21Z",
+    "last_update": "2026-05-10T21:01:25Z",
     "repos": {
       "New-Grad-Jobs-2026": {
-        "positions": 12490,
-        "last_commit": "2026-05-10T20:31:18Z"
+        "positions": 12487,
+        "last_commit": "2026-05-10T21:01:18Z"
       },
       "Internships-2026": {
         "positions": 329,
-        "last_commit": "2026-05-10T20:31:15Z"
+        "last_commit": "2026-05-10T21:01:17Z"
       },
       "New-Grad-Software-Engineering-Jobs-2026": {
         "positions": 1350,
-        "last_commit": "2026-05-10T20:31:14Z"
+        "last_commit": "2026-05-10T21:01:25Z"
       },
       "New-Grad-Data-Science-Jobs-2026": {
         "positions": 265,
-        "last_commit": "2026-05-10T20:31:13Z"
+        "last_commit": "2026-05-10T21:01:22Z"
       },
       "New-Grad-Hardware-Engineering-Jobs-2026": {
-        "positions": 950,
-        "last_commit": "2026-05-10T20:31:21Z"
+        "positions": 949,
+        "last_commit": "2026-05-10T21:01:20Z"
       },
       "New-Grad-Healthcare-Jobs-2026": {
         "positions": 326,
-        "last_commit": "2026-05-10T20:31:19Z"
+        "last_commit": "2026-05-10T21:01:21Z"
       }
     }
   },
   "repos": {
-    "total_mb": 73565,
+    "total_mb": 73679,
     "repos": {
-      "jobs-aggregator-private": 27753,
-      "jobs-data-2026": 24098,
+      "jobs-aggregator-private": 27813,
+      "jobs-data-2026": 24152,
       "New-Grad-Jobs-2026": 20181,
       "Internships-2026": 923,
       "New-Grad-Software-Engineering-Jobs-2026": 253,
