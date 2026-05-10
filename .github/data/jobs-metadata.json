@@ -1,15 +1,16 @@
 {
   "version": "1.0",
-  "generated": "2026-05-10T09:21:15.862Z",
-  "duration_ms": 319553,
-  "total_jobs": 63679,
-  "unique_jobs": 22965,
-  "duplicates_removed": 22965,
+  "generated": "2026-05-10T09:35:42.681Z",
+  "duration_ms": 289835,
+  "total_jobs": 63686,
+  "unique_jobs": 22812,
+  "duplicates_removed": 22812,
   "by_source": {
-    "workday": 37226,
+    "greenhouse": 16895,
+    "microsoft": 400,
+    "workday": 37230,
     "lever": 1781,
     "google": 707,
-    "greenhouse": 16894,
     "ashby": 3393,
     "oracle": 193,
     "simplify": 561,
@@ -17,31 +18,30 @@
     "smartrecruiters": 1537,
     "amd": 174,
     "amazon": 218,
-    "microsoft": 398,
     "eightfold": 28,
     "uber": 14,
     "jsearch": 71
   },
   "by_employment_type": {
-    "FULL_TIME": 4901,
-    "INTERN": 102,
-    "PART_TIME": 19,
+    "FULL_TIME": 4894,
+    "INTERN": 100,
+    "PART_TIME": 18,
     "CONTRACT": 117,
     "FULL_TIME,INTERN": 4
   },
   "by_job_type": {
-    "internship": 2382,
-    "new-grad": 57083,
-    "mid_level": 4214
+    "internship": 2388,
+    "new-grad": 57085,
+    "mid_level": 4213
   },
   "by_location": {
     "remote": 4309,
-    "onsite": 59370
+    "onsite": 59377
   },
   "validation_stats": {
-    "total_input": 50733,
-    "valid_jobs": 50656,
-    "invalid_jobs": 77,
+    "total_input": 50860,
+    "valid_jobs": 50785,
+    "invalid_jobs": 75,
     "invalid_reasons": {
       "missing_title": 0,
       "missing_company": 0,
@@ -52,40 +52,40 @@
       "garbage_title": null
     },
     "normalized_fields": {
-      "state_extracted": 9306,
-      "city_extracted": 15065
+      "state_extracted": 9149,
+      "city_extracted": 15406
     }
   },
   "senior_filter_stats": {
-    "total_input": 50656,
-    "entry_level_jobs": 25718,
-    "senior_jobs": 24938,
+    "total_input": 50785,
+    "entry_level_jobs": 25791,
+    "senior_jobs": 24994,
     "override_applied": 330,
     "senior_reasons": {
-      "senior_title": 13962,
-      "senior_experience": 3268,
-      "both": 7708
+      "senior_title": 13990,
+      "senior_experience": 3276,
+      "both": 7728
     }
   },
   "tag_stats": {
     "employment": {
-      "senior": 201,
-      "entry_level": 57083,
-      "internship": 2382,
-      "mid_level": 4214
+      "senior": 203,
+      "entry_level": 57085,
+      "internship": 2388,
+      "mid_level": 4213
     },
     "domains": {
       "marketing": 1494,
-      "operations": 5546,
-      "general": 17747,
-      "sales": 6348,
+      "operations": 5542,
+      "general": 17760,
+      "sales": 6346,
       "finance": 3514,
       "software": 10748,
-      "data_science": 2292,
+      "data_science": 2293,
       "ai": 1295,
       "hardware": 5493,
       "healthcare": 1134,
-      "logistics": 1728,
+      "logistics": 1729,
       "hr": 894,
       "product": 1325,
       "manufacturing": 3256,
@@ -93,29 +93,29 @@
       "legal": 718
     },
     "locations": {
-      "us": 39080,
+      "us": 39081,
       "remote": 4324,
       "hybrid": 897,
       "on_site": 2882
     },
     "experience": {
-      "unknown": 46197,
-      "senior_level": 6413,
-      "mid_level": 6768,
-      "entry_level": 4502
+      "unknown": 46257,
+      "senior_level": 6394,
+      "mid_level": 6739,
+      "entry_level": 4499
     },
     "special": {
       "unicorn": 1381,
-      "faang": 2128,
+      "faang": 2130,
       "fortune500": 4141
     },
-    "total": 63880,
+    "total": 63889,
     "g1": {
-      "us_total": 38914,
-      "us_general": 7828,
+      "us_total": 38915,
+      "us_general": 7833,
       "us_general_rate_pct": 20.1,
-      "tech_us_total": 11719,
-      "tech_us_general_rate_pct": 40
+      "tech_us_total": 11718,
+      "tech_us_general_rate_pct": 40.1
     }
   },
   "tag_drift": {
@@ -127,9 +127,9 @@
   "tag_precision": {
     "domains": {
       "software": {
-        "total": 6626,
+        "total": 6625,
         "fps": 155,
-        "fp_rate": 0.023392695442197405
+        "fp_rate": 0.02339622641509434
       },
       "hardware": {
         "total": 3968,
@@ -150,10 +150,10 @@
     "warnings": []
   },
   "freshness": {
-    "last_1h": 2,
-    "last_6h": 73,
-    "last_24h": 545,
-    "last_48h": 3361
+    "last_1h": 3,
+    "last_6h": 74,
+    "last_24h": 547,
+    "last_48h": 3352
   },
   "top_companies": [
     {
@@ -263,13 +263,13 @@
     "Ivo (lever)"
   ],
   "stage_timings": {
-    "step1_fetch_ms": 300230,
-    "step2_enhance_ms": 151,
-    "step3_validate_ms": 130,
-    "step4_filter_ms": 691,
-    "step5_tag_ms": 8526,
-    "step6_dedup_ms": 272,
-    "step8_sort_ms": 100,
-    "step9_write_ms": 3906
+    "step1_fetch_ms": 270227,
+    "step2_enhance_ms": 135,
+    "step3_validate_ms": 120,
+    "step4_filter_ms": 687,
+    "step5_tag_ms": 8590,
+    "step6_dedup_ms": 280,
+    "step8_sort_ms": 99,
+    "step9_write_ms": 4137
   }
 }
