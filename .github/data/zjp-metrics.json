@@ -1,33 +1,33 @@
 {
   "schema": "zjp-metrics-v1",
-  "generated_at": "2026-05-10T06:28:53.543Z",
+  "generated_at": "2026-05-10T07:24:27.369Z",
   "pool": {
-    "total_jobs": 63754,
-    "tech_us": 11713,
+    "total_jobs": 63729,
+    "tech_us": 11743,
     "domains": {
-      "general": 17861,
-      "operations": 5552,
-      "retail": 4937,
-      "healthcare": 1141,
-      "marketing": 1496,
-      "sales": 6345,
-      "finance": 3525,
-      "software": 10744,
-      "ai": 1294,
-      "data_science": 2293,
-      "hardware": 5493,
+      "hardware": 5506,
+      "software": 10758,
+      "ai": 1293,
+      "data_science": 2295,
+      "hr": 896,
+      "sales": 6347,
+      "general": 17773,
+      "operations": 5548,
+      "marketing": 1495,
+      "finance": 3516,
+      "healthcare": 1133,
       "logistics": 1729,
-      "manufacturing": 3261,
-      "hr": 894,
-      "legal": 723,
-      "product": 1327
+      "product": 1325,
+      "manufacturing": 3259,
+      "retail": 4934,
+      "legal": 722
     },
-    "general_rate_pct": 28,
+    "general_rate_pct": 27.9,
     "g1_us": {
-      "us_total": 38928,
-      "us_general": 7850,
-      "us_general_rate_pct": 20.2,
-      "tech_us_general_rate_pct": 40.1
+      "us_total": 38964,
+      "us_general": 7839,
+      "us_general_rate_pct": 20.1,
+      "tech_us_general_rate_pct": 40
     },
     "source": "jobs-metadata.json + enrichment-stats.json"
   },
@@ -42,27 +42,27 @@
     "precision": {
       "domains": {
         "software": {
-          "total": 6628,
-          "fps": 155,
-          "fp_rate": 0.023385636692818346,
-          "fp_pct": "2.34%"
+          "total": 6641,
+          "fps": 156,
+          "fp_rate": 0.023490438187020027,
+          "fp_pct": "2.35%"
         },
         "hardware": {
-          "total": 3961,
+          "total": 3980,
           "fps": 51,
-          "fp_rate": 0.012875536480686695,
-          "fp_pct": "1.29%"
+          "fp_rate": 0.012814070351758794,
+          "fp_pct": "1.28%"
         },
         "healthcare": {
-          "total": 838,
+          "total": 857,
           "fps": 15,
-          "fp_rate": 0.017899761336515514,
-          "fp_pct": "1.79%"
+          "fp_rate": 0.01750291715285881,
+          "fp_pct": "1.75%"
         },
         "data_science": {
-          "total": 1463,
+          "total": 1462,
           "fps": 27,
-          "fp_rate": 0.01845522898154477,
+          "fp_rate": 0.018467852257181942,
           "fp_pct": "1.85%"
         }
       },
@@ -72,45 +72,45 @@
     "source": "jobs-metadata.json"
   },
   "enrichment": {
-    "total_enriched": 11530,
-    "enrichment_rate_pct": 98.4,
+    "total_enriched": 11543,
+    "enrichment_rate_pct": 98.3,
     "tiers": {
-      "t0": 517,
-      "t1": 813,
+      "t0": 528,
+      "t1": 821,
       "t2": 597,
-      "t3": 9603
+      "t3": 9597
     },
     "enricher_version": 51,
-    "reenrichment_pending": 12038,
+    "reenrichment_pending": 9959,
     "source": "enrichment-stats.json"
   },
   "alerts": {
     "active": false,
     "failures": [],
-    "last_checked": "2026-05-10T05:14:26.560Z",
+    "last_checked": "2026-05-10T07:20:48.574Z",
     "source": "pipeline-alert.json"
   },
   "pipeline": {
-    "last_aggregator_run": "2026-05-10T06:17:09Z",
-    "last_aggregator_status": "success",
-    "last_enrichment_run": null,
-    "last_enrichment_status": null,
-    "aggregator_runtime_minutes": 4.5,
-    "aggregator_queue_minutes": 2.1,
-    "aggregator_execution_minutes": 2.4,
-    "aggregator_cancel_count": 2,
+    "last_aggregator_run": "2026-05-10T07:15:13Z",
+    "last_aggregator_status": "in_progress",
+    "last_enrichment_run": "2026-05-10T07:15:13Z",
+    "last_enrichment_status": "success",
+    "aggregator_runtime_minutes": 8.5,
+    "aggregator_queue_minutes": 0,
+    "aggregator_execution_minutes": 8.4,
+    "aggregator_cancel_count": 1,
     "stage_timings": {
-      "step1_fetch_ms": 277566,
-      "step2_enhance_ms": 137,
-      "step3_validate_ms": 137,
-      "step4_filter_ms": 711,
-      "step5_tag_ms": 8915,
-      "step6_dedup_ms": 260,
-      "step8_sort_ms": 107,
-      "step9_write_ms": 3955
+      "step1_fetch_ms": 243906,
+      "step2_enhance_ms": 155,
+      "step3_validate_ms": 145,
+      "step4_filter_ms": 725,
+      "step5_tag_ms": 9754,
+      "step6_dedup_ms": 312,
+      "step8_sort_ms": 116,
+      "step9_write_ms": 4188
     },
-    "pipeline_internal_minutes": 4.9,
-    "push_overhead_minutes": 0
+    "pipeline_internal_minutes": 4.3,
+    "push_overhead_minutes": 4.2
   },
   "r2": {
     "status": "not_configured",
@@ -132,45 +132,45 @@
     "p2_status": "PASS"
   },
   "consumers": {
-    "last_update": "2026-05-10T06:21:30Z",
+    "last_update": "2026-05-10T07:15:31Z",
     "repos": {
       "New-Grad-Jobs-2026": {
-        "positions": null,
-        "last_commit": "2026-05-10T06:21:23Z"
+        "positions": 12666,
+        "last_commit": "2026-05-10T07:15:30Z"
       },
       "Internships-2026": {
-        "positions": null,
-        "last_commit": "2026-05-10T06:21:24Z"
+        "positions": 330,
+        "last_commit": "2026-05-10T07:15:31Z"
       },
       "New-Grad-Software-Engineering-Jobs-2026": {
-        "positions": null,
-        "last_commit": "2026-05-10T06:21:26Z"
+        "positions": 1404,
+        "last_commit": "2026-05-10T07:15:31Z"
       },
       "New-Grad-Data-Science-Jobs-2026": {
-        "positions": null,
-        "last_commit": "2026-05-10T06:21:27Z"
+        "positions": 272,
+        "last_commit": "2026-05-10T07:15:27Z"
       },
       "New-Grad-Hardware-Engineering-Jobs-2026": {
-        "positions": null,
-        "last_commit": "2026-05-10T06:21:29Z"
+        "positions": 999,
+        "last_commit": "2026-05-10T07:15:31Z"
       },
       "New-Grad-Healthcare-Jobs-2026": {
-        "positions": null,
-        "last_commit": "2026-05-10T06:21:30Z"
+        "positions": 340,
+        "last_commit": "2026-05-10T07:15:29Z"
       }
     }
   },
   "repos": {
-    "total_mb": 73003,
+    "total_mb": 73074,
     "repos": {
-      "jobs-aggregator-private": 27520,
-      "jobs-data-2026": 23773,
+      "jobs-aggregator-private": 27542,
+      "jobs-data-2026": 23823,
       "New-Grad-Jobs-2026": 20177,
       "Internships-2026": 923,
       "New-Grad-Software-Engineering-Jobs-2026": 252,
       "New-Grad-Data-Science-Jobs-2026": 71,
       "New-Grad-Hardware-Engineering-Jobs-2026": 130,
-      "New-Grad-Healthcare-Jobs-2026": 157
+      "New-Grad-Healthcare-Jobs-2026": 156
     }
   }
 }
