@@ -1,39 +1,39 @@
 {
   "schema": "zjp-metrics-v1",
-  "generated_at": "2026-05-11T23:25:58.454Z",
+  "generated_at": "2026-05-11T23:51:54.298Z",
   "pool": {
-    "total_jobs": 61607,
-    "tech_us": 11146,
+    "total_jobs": 61703,
+    "tech_us": 11171,
     "domains": {
-      "general": 15854,
-      "logistics": 1668,
-      "manufacturing": 3385,
-      "data_science": 2099,
+      "general": 15836,
+      "logistics": 1674,
+      "sales": 6039,
+      "finance": 3611,
+      "retail": 5502,
       "software": 9899,
-      "finance": 3589,
-      "healthcare": 1333,
-      "sales": 6028,
-      "retail": 5491,
-      "ai": 1239,
-      "operations": 5503,
-      "marketing": 1359,
-      "hardware": 5528,
-      "hr": 969,
-      "legal": 686,
-      "product": 1190
+      "healthcare": 1341,
+      "manufacturing": 3397,
+      "product": 1194,
+      "hardware": 5539,
+      "operations": 5523,
+      "legal": 689,
+      "hr": 977,
+      "data_science": 2102,
+      "marketing": 1361,
+      "ai": 1239
     },
     "general_rate_pct": 25.7,
     "g1_us": {
-      "us_total": 37511,
-      "us_general": 6188,
-      "us_general_rate_pct": 16.5,
-      "tech_us_general_rate_pct": 35.7
+      "us_total": 37590,
+      "us_general": 6161,
+      "us_general_rate_pct": 16.4,
+      "tech_us_general_rate_pct": 35.6
     },
     "sidecar_counts": {
-      "amazon": 369,
+      "amazon": 371,
       "amd": 151,
-      "apple": 808,
-      "ashby": 3180,
+      "apple": 812,
+      "ashby": 3183,
       "enriched-1": 18460,
       "enriched-10": 14946,
       "enriched-11": 15908,
@@ -44,8 +44,9 @@
       "enriched-16": 10480,
       "enriched-17": 8661,
       "enriched-18": 8957,
-      "enriched-19": 8446,
+      "enriched-19": 8666,
       "enriched-2": 9370,
+      "enriched-20": 255,
       "enriched-3": 14340,
       "enriched-4": 16427,
       "enriched-5": 16291,
@@ -54,29 +55,29 @@
       "enriched-8": 15757,
       "enriched-9": 15638,
       "google": 621,
-      "greenhouse-1": 4322,
-      "greenhouse-2": 4322,
-      "greenhouse-3": 4322,
-      "greenhouse-4": 4319,
+      "greenhouse-1": 4325,
+      "greenhouse-2": 4325,
+      "greenhouse-3": 4325,
+      "greenhouse-4": 4322,
       "lever": 1736,
-      "microsoft": 63,
-      "oracle": 200,
+      "microsoft": 146,
+      "oracle": 208,
       "smartrecruiters": 4287,
       "uber": 28
     },
     "source": "jobs-metadata.json + enrichment-stats.json"
   },
   "enrichment": {
-    "total_enriched": 10935,
-    "enrichment_rate_pct": 98.1,
+    "total_enriched": 10952,
+    "enrichment_rate_pct": 98,
     "tiers": {
       "t0": 408,
-      "t1": 710,
-      "t2": 357,
-      "t3": 9460
+      "t1": 713,
+      "t2": 358,
+      "t3": 9473
     },
     "enricher_version": 54,
-    "reenrichment_pending": 333,
+    "reenrichment_pending": 332,
     "source": "enrichment-stats.json"
   },
   "alerts": {
@@ -89,39 +90,39 @@
     "source": "pipeline-alert.json"
   },
   "pipeline": {
-    "last_aggregator_run": "2026-05-11T23:15:56Z",
+    "last_aggregator_run": "2026-05-11T23:45:56Z",
     "last_aggregator_status": "in_progress",
-    "last_enrichment_run": "2026-05-11T23:15:56Z",
-    "last_enrichment_status": "success",
-    "aggregator_runtime_minutes": 0.4,
+    "last_enrichment_run": "2026-05-11T23:45:56Z",
+    "last_enrichment_status": "in_progress",
+    "aggregator_runtime_minutes": 0.2,
     "aggregator_queue_minutes": 0,
-    "aggregator_execution_minutes": 0.2,
-    "aggregator_cancel_count": 3,
+    "aggregator_execution_minutes": 0.1,
+    "aggregator_cancel_count": 2,
     "stage_timings": {
-      "step1_fetch_ms": 562951,
-      "step2_enhance_ms": 205,
-      "step3_validate_ms": 210,
-      "step4_filter_ms": 786,
-      "step5_tag_ms": 15272,
-      "step6_dedup_ms": 289,
-      "step8_sort_ms": 158,
-      "step9_write_ms": 2674
+      "step1_fetch_ms": 555979,
+      "step2_enhance_ms": 224,
+      "step3_validate_ms": 211,
+      "step4_filter_ms": 846,
+      "step5_tag_ms": 17259,
+      "step6_dedup_ms": 348,
+      "step8_sort_ms": 163,
+      "step9_write_ms": 2925
     },
-    "pipeline_internal_minutes": 9.7,
+    "pipeline_internal_minutes": 9.6,
     "push_overhead_minutes": 0
   },
   "r2": {
     "status": "healthy",
-    "manifest_age_minutes": 3,
-    "manifest_timestamp": "2026-05-11T23:23:29.788Z",
-    "files_uploaded": 24,
+    "manifest_age_minutes": 7,
+    "manifest_timestamp": "2026-05-11T23:45:21.289Z",
+    "files_uploaded": 36,
     "files_failed": null,
     "file_count": 45,
-    "total_size_mb": 1286
+    "total_size_mb": 1287
   },
   "dedupe": {
     "status": "tracked",
-    "size_bytes": 7716109,
+    "size_bytes": 7722159,
     "size_mb": 7.4
   },
   "submodules": {
@@ -140,31 +141,31 @@
     "p2_status": "PASS"
   },
   "consumers": {
-    "last_update": "2026-05-11T23:16:26Z",
+    "last_update": "2026-05-11T23:46:23Z",
     "repos": {
       "New-Grad-Jobs-2026": {
-        "positions": 20559,
-        "last_commit": "2026-05-11T23:16:16Z"
+        "positions": 20644,
+        "last_commit": "2026-05-11T23:46:20Z"
       },
       "Internships-2026": {
-        "positions": 620,
-        "last_commit": "2026-05-11T23:16:15Z"
+        "positions": 618,
+        "last_commit": "2026-05-11T23:46:18Z"
       },
       "New-Grad-Software-Engineering-Jobs-2026": {
-        "positions": 3356,
-        "last_commit": "2026-05-11T23:16:22Z"
+        "positions": 3369,
+        "last_commit": "2026-05-11T23:46:23Z"
       },
       "New-Grad-Data-Science-Jobs-2026": {
-        "positions": 656,
-        "last_commit": "2026-05-11T23:16:18Z"
+        "positions": 660,
+        "last_commit": "2026-05-11T23:46:18Z"
       },
       "New-Grad-Hardware-Engineering-Jobs-2026": {
-        "positions": 2185,
-        "last_commit": "2026-05-11T23:16:16Z"
+        "positions": 2189,
+        "last_commit": "2026-05-11T23:46:17Z"
       },
       "New-Grad-Healthcare-Jobs-2026": {
-        "positions": 563,
-        "last_commit": "2026-05-11T23:16:26Z"
+        "positions": 570,
+        "last_commit": "2026-05-11T23:46:16Z"
       }
     }
   },
