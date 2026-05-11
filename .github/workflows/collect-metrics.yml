@@ -24,6 +24,9 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Install shared submodule dependencies
+        run: cd .github/scripts/shared && npm install
+
       - name: Collect metrics
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
