@@ -1,38 +1,38 @@
 {
   "schema": "zjp-metrics-v1",
-  "generated_at": "2026-05-11T22:53:23.839Z",
+  "generated_at": "2026-05-11T23:25:58.454Z",
   "pool": {
-    "total_jobs": 61613,
+    "total_jobs": 61607,
     "tech_us": 11146,
     "domains": {
-      "software": 9898,
-      "general": 15848,
-      "data_science": 2098,
-      "retail": 5497,
-      "healthcare": 1332,
-      "marketing": 1358,
-      "operations": 5501,
-      "sales": 6034,
-      "manufacturing": 3388,
-      "hardware": 5530,
-      "finance": 3593,
+      "general": 15854,
+      "logistics": 1668,
+      "manufacturing": 3385,
+      "data_science": 2099,
+      "software": 9899,
+      "finance": 3589,
+      "healthcare": 1333,
+      "sales": 6028,
+      "retail": 5491,
+      "ai": 1239,
+      "operations": 5503,
+      "marketing": 1359,
+      "hardware": 5528,
       "hr": 969,
-      "logistics": 1669,
       "legal": 686,
-      "ai": 1238,
       "product": 1190
     },
     "general_rate_pct": 25.7,
     "g1_us": {
-      "us_total": 37523,
-      "us_general": 6187,
+      "us_total": 37511,
+      "us_general": 6188,
       "us_general_rate_pct": 16.5,
       "tech_us_general_rate_pct": 35.7
     },
     "sidecar_counts": {
       "amazon": 369,
       "amd": 151,
-      "apple": 806,
+      "apple": 808,
       "ashby": 3180,
       "enriched-1": 18460,
       "enriched-10": 14946,
@@ -54,11 +54,12 @@
       "enriched-8": 15757,
       "enriched-9": 15638,
       "google": 621,
-      "greenhouse-1": 4319,
-      "greenhouse-2": 4319,
-      "greenhouse-3": 4319,
-      "greenhouse-4": 4316,
-      "lever": 1735,
+      "greenhouse-1": 4322,
+      "greenhouse-2": 4322,
+      "greenhouse-3": 4322,
+      "greenhouse-4": 4319,
+      "lever": 1736,
+      "microsoft": 63,
       "oracle": 200,
       "smartrecruiters": 4287,
       "uber": 28
@@ -81,47 +82,47 @@
   "alerts": {
     "active": true,
     "failures": [
-      "**Company zero-yield streak** (3+ runs): Plaid (3 runs), Findhelp (3 runs) — fetcher or ATS URL may be broken",
+      "**Company zero-yield streak** (3+ runs): Immuta (3 runs), Plaid (4 runs), Findhelp (4 runs) — fetcher or ATS URL may be broken",
       "**Metadata severely incomplete**: 4 fields missing (keyword_overlap, keyword_health, tag_drift, tag_precision). Pipeline code may have a regression."
     ],
-    "last_checked": "2026-05-11T22:50:06.885Z",
+    "last_checked": "2026-05-11T23:22:21.233Z",
     "source": "pipeline-alert.json"
   },
   "pipeline": {
-    "last_aggregator_run": "2026-05-11T22:45:08Z",
+    "last_aggregator_run": "2026-05-11T23:15:56Z",
     "last_aggregator_status": "in_progress",
-    "last_enrichment_run": "2026-05-11T22:45:08Z",
+    "last_enrichment_run": "2026-05-11T23:15:56Z",
     "last_enrichment_status": "success",
-    "aggregator_runtime_minutes": 0.3,
+    "aggregator_runtime_minutes": 0.4,
     "aggregator_queue_minutes": 0,
     "aggregator_execution_minutes": 0.2,
-    "aggregator_cancel_count": 4,
+    "aggregator_cancel_count": 3,
     "stage_timings": {
-      "step1_fetch_ms": 597229,
-      "step2_enhance_ms": 225,
-      "step3_validate_ms": 219,
-      "step4_filter_ms": 832,
-      "step5_tag_ms": 16686,
-      "step6_dedup_ms": 328,
+      "step1_fetch_ms": 562951,
+      "step2_enhance_ms": 205,
+      "step3_validate_ms": 210,
+      "step4_filter_ms": 786,
+      "step5_tag_ms": 15272,
+      "step6_dedup_ms": 289,
       "step8_sort_ms": 158,
-      "step9_write_ms": 2815
+      "step9_write_ms": 2674
     },
-    "pipeline_internal_minutes": 10.3,
+    "pipeline_internal_minutes": 9.7,
     "push_overhead_minutes": 0
   },
   "r2": {
     "status": "healthy",
-    "manifest_age_minutes": 0,
-    "manifest_timestamp": "2026-05-11T22:52:59.835Z",
-    "files_uploaded": 23,
+    "manifest_age_minutes": 3,
+    "manifest_timestamp": "2026-05-11T23:23:29.788Z",
+    "files_uploaded": 24,
     "files_failed": null,
-    "file_count": 44,
-    "total_size_mb": 1285
+    "file_count": 45,
+    "total_size_mb": 1286
   },
   "dedupe": {
     "status": "tracked",
-    "size_bytes": 7703300,
-    "size_mb": 7.3
+    "size_bytes": 7716109,
+    "size_mb": 7.4
   },
   "submodules": {
     "aligned": true,
@@ -139,39 +140,39 @@
     "p2_status": "PASS"
   },
   "consumers": {
-    "last_update": "2026-05-11T22:45:33Z",
+    "last_update": "2026-05-11T23:16:26Z",
     "repos": {
       "New-Grad-Jobs-2026": {
-        "positions": 20306,
-        "last_commit": "2026-05-11T22:45:33Z"
+        "positions": 20559,
+        "last_commit": "2026-05-11T23:16:16Z"
       },
       "Internships-2026": {
-        "positions": 621,
-        "last_commit": "2026-05-11T22:45:28Z"
+        "positions": 620,
+        "last_commit": "2026-05-11T23:16:15Z"
       },
       "New-Grad-Software-Engineering-Jobs-2026": {
-        "positions": 3347,
-        "last_commit": "2026-05-11T22:45:30Z"
+        "positions": 3356,
+        "last_commit": "2026-05-11T23:16:22Z"
       },
       "New-Grad-Data-Science-Jobs-2026": {
-        "positions": 653,
-        "last_commit": "2026-05-11T22:45:31Z"
+        "positions": 656,
+        "last_commit": "2026-05-11T23:16:18Z"
       },
       "New-Grad-Hardware-Engineering-Jobs-2026": {
-        "positions": 2180,
-        "last_commit": "2026-05-11T22:45:24Z"
+        "positions": 2185,
+        "last_commit": "2026-05-11T23:16:16Z"
       },
       "New-Grad-Healthcare-Jobs-2026": {
-        "positions": 560,
-        "last_commit": "2026-05-11T22:45:28Z"
+        "positions": 563,
+        "last_commit": "2026-05-11T23:16:26Z"
       }
     }
   },
   "repos": {
-    "total_mb": 75310,
+    "total_mb": 75394,
     "repos": {
-      "jobs-aggregator-private": 28708,
-      "jobs-data-2026": 24885,
+      "jobs-aggregator-private": 28732,
+      "jobs-data-2026": 24945,
       "New-Grad-Jobs-2026": 20182,
       "Internships-2026": 923,
       "New-Grad-Software-Engineering-Jobs-2026": 254,
