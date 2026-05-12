@@ -2,8 +2,10 @@ name: Pipeline Alert
 
 on:
   schedule:
-    - cron: '*/30 * * * *'  # Every 30 minutes
+    - cron: '*/30 * * * *'  # Every 30 minutes (backup — GitHub cron unreliable during peak)
   workflow_dispatch:
+  repository_dispatch:
+    types: [pipeline-alert]
 
 jobs:
   pipeline-alert:
