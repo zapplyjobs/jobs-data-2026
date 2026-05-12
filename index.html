@@ -440,7 +440,7 @@
         <tr><th class="sortable">Title Pattern</th><th class="sortable">Count</th><th class="sortable">Companies</th></tr>
       </table>
     </div>
-    <div class="section-label" style="margin-top:24px">Tenant Default Candidates</div>
+    <div class="section-label" style="margin-top:24px">Companies with Default Classifications</div>
     <div class="card" id="class-tenants-card">
       <p class="muted" style="text-align:center; padding:20px 0">Loading...</p>
     </div>
@@ -462,7 +462,6 @@
         <option value="lever">lever</option>
         <option value="smartrecruiters">smartrecruiters</option>
         <option value="amazon">amazon</option>
-        <option value="eightfold">eightfold</option>
         <option value="netflix">netflix</option>
       </select>
     </div>
@@ -619,7 +618,7 @@ const DASHBOARD_SECRET = '__DASHBOARD_SECRET__';
   input.focus();
 })();
 
-// Theme toggle
+// Theme toggle — recomputes chart colors and rebuilds active charts
 (function () {
   const btn = document.getElementById('theme-toggle');
   const root = document.documentElement;
@@ -629,6 +628,15 @@ const DASHBOARD_SECRET = '__DASHBOARD_SECRET__';
     const isDark = root.classList.toggle('dark');
     btn.textContent = isDark ? '🌙' : '☀';
     localStorage.setItem('zjp_theme', isDark ? 'dark' : 'light');
+    C = _buildC();
+    CHART_COLORS.accent = C.accent; CHART_COLORS.green = C.green;
+    CHART_COLORS.red = C.red; CHART_COLORS.yellow = C.yellow; CHART_COLORS.muted = C.muted;
+    Object.keys(CHART_COLORS.sources).forEach(k => { CHART_COLORS.sources[k] = _sourceColor(k); });
+    Object.keys(CHART_COLORS.repos).forEach(k => { CHART_COLORS.repos[k] = _repoColor(k); });
+    Object.keys(BREAKDOWN_SERIES).forEach(k => {
+      if (BREAKDOWN_SERIES[k]._themeKey) BREAKDOWN_SERIES[k].color = C[BREAKDOWN_SERIES[k]._themeKey];
+    });
+    if (typeof loadAll === 'function') loadAll();
   });
 })();
 
@@ -698,13 +706,15 @@ let _mermaidRendered = false;
 })();
 
 // Resolve CSS variables for chart.js (canvas can't read CSS vars directly)
-const _cs = getComputedStyle(document.documentElement);
-function cv(name) { return (_cs.getPropertyValue(name) || '').trim(); }
-const C = {
-  green: cv('--green'), yellow: cv('--yellow'), red: cv('--red'),
-  accent: cv('--accent'), info: cv('--info'), muted: cv('--muted'),
-  text: cv('--text'), border: cv('--border'),
-};
+function cv(name) { return (getComputedStyle(document.documentElement).getPropertyValue(name) || '').trim(); }
+function _buildC() {
+  return {
+    green: cv('--green'), yellow: cv('--yellow'), red: cv('--red'),
+    accent: cv('--accent'), info: cv('--info'), muted: cv('--muted'),
+    text: cv('--text'), border: cv('--border'),
+  };
+}
+let C = _buildC();
 
 // Data URLs — function so each loadAll() call gets a fresh cache-busting timestamp (invariant D-2)
 function dataUrls() {
@@ -1095,7 +1105,6 @@ function renderQuality(d, enrichStats, metadata, enrichHistory) {
     const ORDER = MASTER_SOURCES;
     const SOURCE_NOTES = {
       workday:   'Desc backfill in progress',
-      eightfold: 'No description fetcher',
     };
     const sources = ORDER.filter(s => enrichStats.by_source[s]);
     sources.forEach(src => {
@@ -1466,21 +1475,34 @@ function renderSourceTrendChart(allEntries, days) {
 // Data source: history.jsonl entries with by_domain, by_location, filter fields
 let _breakdownAllEntries = null;
 let _breakdownActiveSeries = new Set(['total', 'entry', 'us']);
-// BREAKDOWN_SERIES uses inline colors (not CHART_COLORS) to avoid forward reference
+// BREAKDOWN_SERIES — colors via C.* for semantic, palette helpers for domain/location
+function _locationColor(key) { return key === 'us' ? C.info : '#9b59b6'; }
+function _domainColor(key) {
+  const map = { software: C.green, data_science: '#2ecc71', hardware: '#e67e22', healthcare: C.red, ai: '#f39c12', finance: '#1abc9c', sales: '#d35400', general: '#7f8c8d' };
+  return map[key] || C.muted;
+}
+function _sourceColor(key) {
+  const map = { workday: '#e67e22', greenhouse: '#27ae60', ashby: '#3498db', lever: '#9b59b6', smartrecruiters: '#e74c3c', amazon: '#f39c12', netflix: '#e50914' };
+  return map[key] || C.muted;
+}
+function _repoColor(key) {
+  const map = { 'New-Grad-Jobs-2026': C.accent, 'Internships-2026': '#3498db', 'New-Grad-Software-Engineering-Jobs-2026': '#27ae60', 'New-Grad-Data-Science-Jobs-2026': '#9b59b6', 'New-Grad-Hardware-Engineering-Jobs-2026': '#e67e22', 'New-Grad-Healthcare-Jobs-2026': '#e74c3c' };
+  return map[key] || C.muted;
+}
 const BREAKDOWN_SERIES = {
-  total: { label: 'Total (pre-filter)', color: C.muted, field: e => e.filter ? e.filter.total : e.total },
-  entry: { label: 'Entry-level', color: C.accent, field: e => e.filter ? e.filter.entry : null },
-  senior: { label: 'Senior (removed)', color: C.red, field: e => e.filter ? e.filter.senior : null },
-  us: { label: 'US-tagged', color: '#3498db', field: e => e.by_location ? e.by_location.us : null },  // blue — non-semantic, chart-specific
-  remote: { label: 'Remote', color: '#9b59b6', field: e => e.by_location ? e.by_location.remote : null },
-  software: { label: 'Software', color: '#27ae60', field: e => e.by_domain ? e.by_domain.software : null },
-  data_science: { label: 'Data Science', color: '#2ecc71', field: e => e.by_domain ? e.by_domain.data_science : null },
-  hardware: { label: 'Hardware', color: '#e67e22', field: e => e.by_domain ? e.by_domain.hardware : null },
-  healthcare: { label: 'Healthcare', color: '#e74c3c', field: e => e.by_domain ? e.by_domain.healthcare : null },
-  ai: { label: 'AI', color: '#f39c12', field: e => e.by_domain ? e.by_domain.ai : null },
-  finance: { label: 'Finance', color: '#1abc9c', field: e => e.by_domain ? e.by_domain.finance : null },
-  sales: { label: 'Sales', color: '#d35400', field: e => e.by_domain ? e.by_domain.sales : null },
-  general: { label: 'General', color: '#7f8c8d', field: e => e.by_domain ? e.by_domain.general : null },
+  total: { label: 'Total (pre-filter)', color: C.muted, _themeKey: 'muted', field: e => e.filter ? e.filter.total : e.total },
+  entry: { label: 'Entry-level', color: C.accent, _themeKey: 'accent', field: e => e.filter ? e.filter.entry : null },
+  senior: { label: 'Senior (removed)', color: C.red, _themeKey: 'red', field: e => e.filter ? e.filter.senior : null },
+  us: { label: 'US-tagged', color: _locationColor('us'), field: e => e.by_location ? e.by_location.us : null },
+  remote: { label: 'Remote', color: _locationColor('remote'), field: e => e.by_location ? e.by_location.remote : null },
+  software: { label: 'Software', color: _domainColor('software'), field: e => e.by_domain ? e.by_domain.software : null },
+  data_science: { label: 'Data Science', color: _domainColor('data_science'), field: e => e.by_domain ? e.by_domain.data_science : null },
+  hardware: { label: 'Hardware', color: _domainColor('hardware'), field: e => e.by_domain ? e.by_domain.hardware : null },
+  healthcare: { label: 'Healthcare', color: _domainColor('healthcare'), field: e => e.by_domain ? e.by_domain.healthcare : null },
+  ai: { label: 'AI', color: _domainColor('ai'), field: e => e.by_domain ? e.by_domain.ai : null },
+  finance: { label: 'Finance', color: _domainColor('finance'), field: e => e.by_domain ? e.by_domain.finance : null },
+  sales: { label: 'Sales', color: _domainColor('sales'), field: e => e.by_domain ? e.by_domain.sales : null },
+  general: { label: 'General', color: _domainColor('general'), field: e => e.by_domain ? e.by_domain.general : null },
 };
 
 function renderBreakdownTrend(historyEntries) {
@@ -1657,25 +1679,25 @@ function renderEnrichTrendChart(all, days) {
           borderColor: CHART_COLORS.accent, backgroundColor: 'rgba(255,94,60,0.08)', fill: true,
           tension: 0.3, pointRadius: 2, pointHoverRadius: 5, borderWidth: 2, yAxisID: 'y' },
         { label: 'Tech US Pool', data: entries.map(e => e.total_tech_us || 0),
-          borderColor: '#3498db', borderDash: [8, 4],
+          borderColor: C.info, borderDash: [8, 4],
           tension: 0.3, pointRadius: 1, pointHoverRadius: 4, borderWidth: 1.5, yAxisID: 'y' },
         { label: 'Skills %', data: entries.map(e => e.skills_pct || 0),
           borderColor: CHART_COLORS.green,
           tension: 0.3, pointRadius: 2, pointHoverRadius: 4, borderWidth: 2, yAxisID: 'y1' },
         { label: 'Tier 3 %', data: entries.map(e => e.t3_pct != null ? e.t3_pct : null),
-          borderColor: '#a855f7', borderWidth: 2.5, spanGaps: false,
+          borderColor: '#9b7eff', borderWidth: 2.5, spanGaps: false,
           tension: 0.3, pointRadius: 3, pointHoverRadius: 6, yAxisID: 'y1' },
         // ENR-42: T0 count on left axis — shows spike events
         { label: 'T0 (no desc)', data: entries.map(e => e.tiers && e.tiers.t0 != null ? e.tiers.t0 : null),
-          borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.08)', fill: true,
+          borderColor: C.red, backgroundColor: 'rgba(239,68,68,0.08)', fill: true,
           tension: 0.3, pointRadius: 2, pointHoverRadius: 5, borderWidth: 2, yAxisID: 'y', borderDash: [4, 2] },
         // ENR-44: T1 trend — jobs with description but no skills (vague prose / TAG misroute)
         { label: 'T1 (no skills)', data: entries.map(e => e.tiers && e.tiers.t1 != null ? e.tiers.t1 : null),
-          borderColor: '#eab308', backgroundColor: 'rgba(234,179,8,0.05)', fill: false,
+          borderColor: C.yellow, backgroundColor: 'rgba(234,179,8,0.05)', fill: false,
           tension: 0.3, pointRadius: 2, pointHoverRadius: 5, borderWidth: 1.5, yAxisID: 'y', borderDash: [3, 3], spanGaps: true },
         // ENR-42: Re-enrichment queue trend (data accumulates from Apr 23+)
         { label: 'Re-enrich Queue', data: entries.map(e => e.reenrichment_pending != null ? e.reenrichment_pending : null),
-          borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.05)', fill: true,
+          borderColor: C.yellow, backgroundColor: 'rgba(245,158,11,0.05)', fill: true,
           tension: 0.3, pointRadius: 2, pointHoverRadius: 5, borderWidth: 1.5, yAxisID: 'y', borderDash: [6, 3], spanGaps: true },
       ]
     },
@@ -1790,7 +1812,7 @@ function renderTierSourceChart(enrichStats, filterTier) {
     const tiers = [
       { key: 'all', label: 'All' },
       { key: 't3', label: 'T3 Degree+Visa', color: C.green },
-      { key: 't2', label: 'T2 Skills', color: '#3498db' },
+      { key: 't2', label: 'T2 Skills', color: C.info },
       { key: 't1', label: 'T1 Desc', color: C.yellow },
       { key: 't0', label: 'T0 None', color: C.red },
     ];
@@ -1816,7 +1838,7 @@ function renderTierSourceChart(enrichStats, filterTier) {
     return tot > 0 ? Math.round(1000 * t[tier] / tot) / 10 : 0;
   };
 
-  const TIER_COLORS = { t3: C.green, t2: '#3498db', t1: C.yellow, t0: C.red };
+  const TIER_COLORS = { t3: C.green, t2: C.info, t1: C.yellow, t0: C.red };
   const TIER_LABELS = { t3: 'T3 — Degree + Visa', t2: 'T2 — Skills', t1: 'T1 — Description', t0: 'T0 — No description' };
 
   let datasets, stacked;
@@ -2361,10 +2383,10 @@ function renderPipelineSourceTable(metrics, metadata, enrichStats) {
 // Chart.js shared config
 const CHART_COLORS = {
   accent: C.accent, green: C.green, red: C.red, yellow: C.yellow, muted: C.muted,
-  sources: { workday: '#e67e22', greenhouse: '#27ae60', ashby: '#3498db', lever: '#9b59b6',
-             smartrecruiters: '#e74c3c', amazon: '#f39c12', netflix: '#e50914' },
-  repos: { 'New-Grad-Jobs-2026': '#ff5e3c', 'Internships-2026': '#3498db', 'New-Grad-Software-Engineering-Jobs-2026': '#27ae60',
-           'New-Grad-Data-Science-Jobs-2026': '#9b59b6', 'New-Grad-Hardware-Engineering-Jobs-2026': '#e67e22', 'New-Grad-Healthcare-Jobs-2026': '#e74c3c' }
+  sources: { workday: _sourceColor('workday'), greenhouse: _sourceColor('greenhouse'), ashby: _sourceColor('ashby'), lever: _sourceColor('lever'),
+             smartrecruiters: _sourceColor('smartrecruiters'), amazon: _sourceColor('amazon'), netflix: _sourceColor('netflix') },
+  repos: { 'New-Grad-Jobs-2026': _repoColor('New-Grad-Jobs-2026'), 'Internships-2026': _repoColor('Internships-2026'), 'New-Grad-Software-Engineering-Jobs-2026': _repoColor('New-Grad-Software-Engineering-Jobs-2026'),
+           'New-Grad-Data-Science-Jobs-2026': _repoColor('New-Grad-Data-Science-Jobs-2026'), 'New-Grad-Hardware-Engineering-Jobs-2026': _repoColor('New-Grad-Hardware-Engineering-Jobs-2026'), 'New-Grad-Healthcare-Jobs-2026': _repoColor('New-Grad-Healthcare-Jobs-2026') }
 };
 const CHART_DEFAULTS = {
   responsive: true, maintainAspectRatio: false,
@@ -2915,7 +2937,7 @@ function renderClassification(data) {
   summaryEl.innerHTML =
     statCard({ icon: '🏷️', label: 'US General Rate', value: `<span style="color:${s.us_general_rate > 10 ? 'var(--yellow)' : 'var(--green)'}">${s.us_general_rate}%</span>`, sub: `All jobs · Target: <40%` }) +
     statCard({ icon: '🎯', label: 'Tech-US General', value: techG1 != null ? `<span style="color:${techG1Color}">${techG1}%</span>` : '—', sub: techG1 != null ? `Primary audience · ${fmt(s.tech_us_total || 0)} tech jobs` : 'Data not available' }) +
-    statCard({ icon: '📊', label: 'US Total Jobs', value: fmt(s.us_total), sub: `${fmt(s.us_total - s.us_general)} classified (${classifiedRate}%) · ${companyCount} companies` });
+    statCard({ icon: '📊', label: 'Classification Rate', value: `<span style="color:var(--green)">${classifiedRate}%</span>`, sub: `${fmt(s.us_total - s.us_general)} of ${fmt(s.us_total)} classified · ${companyCount} companies` });
 
   // Top companies table
   if (data.by_company && data.by_company.length > 0) {
