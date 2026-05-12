@@ -162,3 +162,10 @@ jobs:
             echo "Push attempt $i failed, retrying in 5s..."
             sleep 5
           done
+
+      - name: Trigger pipeline alert
+        if: success()
+        run: |
+          gh workflow run pipeline-alert.yml -R zapplyjobs/jobs-data-2026 --ref main 2>/dev/null && echo "Pipeline alert triggered" || echo "Alert trigger failed (non-critical)"
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
