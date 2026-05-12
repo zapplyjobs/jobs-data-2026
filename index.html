@@ -411,6 +411,9 @@
     <div class="card" id="zero-yield-card">
       <p class="muted" style="text-align:center;padding:20px 0">Loading...</p>
     </div>
+    <div style="margin-top:4px;font-size:11px;color:var(--muted)">
+      Companies in <code>company-list.json</code> returning 0 jobs. May indicate dead ATS boards, broken fetcher configs, or senior-only listings. Investigate before removing.
+    </div>
   </section>
 
   <!-- TAG TAB — Classification: G1 KPIs first, then domain detail -->
@@ -439,6 +442,9 @@
       <table id="class-patterns-table">
         <tr><th class="sortable">Title Pattern</th><th class="sortable">Count</th><th class="sortable">Companies</th></tr>
       </table>
+      <div style="margin-top:8px;font-size:11px;color:var(--muted)">
+        Job titles appearing 3+ times across companies. Patterns suggest taxonomy gaps — candidates for new keywords in <code>tag-engine.js</code>.
+      </div>
     </div>
     <div class="section-label" style="margin-top:24px">Companies with Default Classifications</div>
     <div class="card" id="class-tenants-card">
@@ -552,11 +558,17 @@
     </div>
     <div class="card" id="traffic-referrers" style="margin-top:8px">
       <p class="muted" style="text-align:center; padding:20px 0">Loading…</p>
+      <div style="margin-top:8px;font-size:11px;color:var(--muted)">
+        External sources driving traffic to job board repos. Helps identify which platforms and communities bring visitors.
+      </div>
     </div>
     <div class="section-label" style="margin-top:16px">Discord</div>
     <div class="grid" id="discord-verification"></div>
     <div class="card" id="discord-posting-trend" style="position:relative;height:140px">
       <canvas id="discord-posting-canvas"></canvas>
+    </div>
+    <div style="margin-top:4px;font-size:11px;color:var(--muted)">
+      Discord posting trend and verification. Shows jobs posted to Zapply Discord channels each day. Gaps may indicate pipeline issues or Discord API problems.
     </div>
     <div class="card" id="discord-stats-card">
       <p class="muted" style="text-align:center; padding:40px 0">Loading…</p>
