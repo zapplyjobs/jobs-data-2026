@@ -62,7 +62,7 @@ jobs:
       - name: Collect metrics
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node .github/scripts/processing/lib/jobs-data-scripts/collect-metrics.js
+        run: node .github/scripts/processing/lib/collect-metrics.js
 
       - name: Generate consolidated metrics
         env:
@@ -71,7 +71,7 @@ jobs:
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
-        run: node .github/scripts/processing/lib/jobs-data-scripts/generate-zjp-metrics.js
+        run: node .github/scripts/processing/lib/generate-zjp-metrics.js
 
       - name: Commit and push metrics
         run: |
