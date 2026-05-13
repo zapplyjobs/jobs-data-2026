@@ -33,7 +33,7 @@ jobs:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TEAM_TOKEN }}
           DISCORD_DAILY_STATS_CHANNEL_ID: ${{ secrets.DISCORD_DAILY_STATS_CHANNEL_ID }}
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
-        run: node .github/scripts/shared/lib/jobs-data-scripts/daily-stats.js
+        run: node .github/scripts/processing/lib/jobs-data-scripts/daily-stats.js
 
       - name: Commit updated stats file
         run: |

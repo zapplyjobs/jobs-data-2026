@@ -33,7 +33,7 @@ jobs:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TEAM_TOKEN }}
           DISCORD_WEEKLY_STATS_CHANNEL_ID: ${{ secrets.DISCORD_WEEKLY_STATS_CHANNEL_ID }}
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
-        run: node .github/scripts/shared/lib/jobs-data-scripts/monthly-summary.js
+        run: node .github/scripts/processing/lib/jobs-data-scripts/monthly-summary.js
 
       - name: Commit updated stats file
         run: |

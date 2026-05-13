@@ -64,7 +64,7 @@ jobs:
           DISCORD_PNW_INT_CHANNEL_ID: ${{ secrets.DISCORD_PNW_INT_CHANNEL_ID }}
           DISCORD_SOCAL_INT_CHANNEL_ID: ${{ secrets.DISCORD_SOCAL_INT_CHANNEL_ID }}
           DISCORD_OTHER_USA_INT_CHANNEL_ID: ${{ secrets.DISCORD_OTHER_USA_INT_CHANNEL_ID }}
-        run: node .github/scripts/shared/lib/jobs-data-scripts/verify-discord.js
+        run: node .github/scripts/processing/lib/jobs-data-scripts/verify-discord.js
 
       - name: Post results to summary
         if: always()

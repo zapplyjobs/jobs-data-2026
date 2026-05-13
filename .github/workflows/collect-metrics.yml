@@ -25,7 +25,7 @@ jobs:
           node-version: '22'
 
       - name: Install shared submodule dependencies
-        run: cd .github/scripts/shared && npm install
+        run: cd .github/scripts/shared && npm install && cd $GITHUB_WORKSPACE/.github/scripts/processing && npm install
 
       - name: Download data from R2
         continue-on-error: true
@@ -62,7 +62,7 @@ jobs:
       - name: Collect metrics
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node .github/scripts/shared/lib/jobs-data-scripts/collect-metrics.js
+        run: node .github/scripts/processing/lib/jobs-data-scripts/collect-metrics.js
 
       - name: Generate consolidated metrics
         env:
@@ -71,7 +71,7 @@ jobs:
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
-        run: node .github/scripts/shared/lib/jobs-data-scripts/generate-zjp-metrics.js
+        run: node .github/scripts/processing/lib/jobs-data-scripts/generate-zjp-metrics.js
 
       - name: Commit and push metrics
         run: |

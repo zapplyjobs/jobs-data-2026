@@ -93,7 +93,7 @@ jobs:
           DISCORD_SOCAL_INT_CHANNEL_ID: ${{ secrets.DISCORD_SOCAL_INT_CHANNEL_ID }}
           DISCORD_OTHER_USA_INT_CHANNEL_ID: ${{ secrets.DISCORD_OTHER_USA_INT_CHANNEL_ID }}
 
-        run: node .github/scripts/shared/lib/jobs-data-scripts/cleanup-discord-posts.js
+        run: node .github/scripts/processing/lib/jobs-data-scripts/cleanup-discord-posts.js
 
       - name: Commit updated posted_jobs.json
         if: ${{ inputs.dry_run == false && inputs.remove_from_posted == true }}
