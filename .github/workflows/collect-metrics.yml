@@ -32,7 +32,7 @@ jobs:
         run: |
           echo "📥 Downloading pipeline data from R2..."
           node -e "
-          const { createR2Client } = require('./.github/scripts/processing/lib/storage/r2-client');
+          const { createR2Client } = require('./.github/scripts/shared/lib/storage/r2-client');
           const fs = require('fs');
           const path = require('path');
           async function main() {
@@ -82,7 +82,7 @@ jobs:
           git commit -m "chore: update metrics [skip ci]"
           for i in 1 2 3; do
             git stash --include-untracked
-            git pull --rebase origin main
+            git pull --rebase --strategy-option=theirs origin main
             git push && break
             echo "Push attempt $i failed, retrying in 5s..."
             sleep 5
