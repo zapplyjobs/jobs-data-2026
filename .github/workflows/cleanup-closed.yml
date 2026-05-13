@@ -39,7 +39,7 @@ jobs:
         run: |
           echo "📥 Downloading all_jobs.json from R2..."
           node -e "
-          const { createR2Client } = require('./.github/scripts/shared/lib/storage/r2-client');
+          const { createR2Client } = require('./.github/scripts/processing/lib/storage/r2-client');
           const fs = require('fs');
           const path = require('path');
 
@@ -74,7 +74,7 @@ jobs:
           if [ -f .github/data/all_jobs.json ]; then
             echo "📤 Uploading cleaned all_jobs.json to R2..."
             node -e "
-            const { createR2Client } = require('./.github/scripts/shared/lib/storage/r2-client');
+            const { createR2Client } = require('./.github/scripts/processing/lib/storage/r2-client');
             const fs = require('fs');
             async function main() {
               const r2 = createR2Client({ prefix: 'data/' });
