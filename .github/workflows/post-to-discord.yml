@@ -34,7 +34,7 @@ jobs:
         run: |
           echo "📥 Downloading pipeline data from R2..."
           node -e "
-          const { createR2Client } = require('./.github/scripts/shared/lib/storage/r2-client');
+          const { createR2Client } = require('./.github/scripts/processing/lib/storage/r2-client');
           const fs = require('fs');
           const path = require('path');
 
@@ -108,7 +108,7 @@ jobs:
         run: |
           echo "📤 Uploading dedupe data to R2..."
           node -e "
-          const { createR2Client } = require('./.github/scripts/shared/lib/storage/r2-client');
+          const { createR2Client } = require('./.github/scripts/processing/lib/storage/r2-client');
           const fs = require('fs');
           const path = require('path');
 
