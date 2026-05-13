@@ -90,7 +90,7 @@ jobs:
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
 
       - name: Run enrichment
-        run: node .github/scripts/processing/lib/jobs-data-scripts/enrich-jobs.js
+        run: node .github/scripts/processing/lib/enrich-jobs.js
 
       - name: Upload enriched data to R2
         if: success()
