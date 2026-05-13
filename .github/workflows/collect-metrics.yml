@@ -77,12 +77,13 @@ jobs:
         run: |
           git config user.email "bot@zapplyjobs.com"
           git config user.name "Metrics Bot"
-          git submodule foreach --recursive 'git checkout . 2>/dev/null || true'
           git add .github/data/metrics/ .github/data/zjp-metrics.json || exit 0
           git diff --cached --quiet && { echo "No changes to commit"; exit 0; }
           git commit -m "chore: update metrics [skip ci]"
           for i in 1 2 3; do
-            git pull --rebase origin main && git push && break
+            git stash --include-untracked
+            git pull --rebase origin main
+            git push && break
             echo "Push attempt $i failed, retrying in 5s..."
             sleep 5
           done
