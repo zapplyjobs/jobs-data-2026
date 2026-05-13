@@ -100,7 +100,7 @@ jobs:
           DISCORD_OTHER_USA_INT_CHANNEL_ID: ${{ secrets.DISCORD_OTHER_USA_INT_CHANNEL_ID }}
           MAX_POSTS_PER_RUN: ${{ vars.MAX_POSTS_PER_RUN || 10 }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node .github/scripts/processing/lib/jobs-data-scripts/discord-poster.js
+        run: node .github/scripts/processing/lib/discord-poster.js
 
       - name: Upload dedupe data to R2
         if: always()
