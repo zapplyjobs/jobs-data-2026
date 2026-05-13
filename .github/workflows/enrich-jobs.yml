@@ -35,7 +35,7 @@ jobs:
         run: npm ci
 
       - name: Install shared submodule dependencies (for R2 client)
-        run: cd .github/scripts/shared && npm install
+        run: cd .github/scripts/shared && npm install && cd $GITHUB_WORKSPACE/.github/scripts/processing && npm install
 
       - name: Download data from R2
         if: success()
@@ -90,7 +90,7 @@ jobs:
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
 
       - name: Run enrichment
-        run: node .github/scripts/shared/lib/jobs-data-scripts/enrich-jobs.js
+        run: node .github/scripts/processing/lib/jobs-data-scripts/enrich-jobs.js
 
       - name: Upload enriched data to R2
         if: success()

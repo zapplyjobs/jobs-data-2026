@@ -69,7 +69,7 @@ jobs:
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
 
       - name: Syntax check pipeline-alert.js
-        run: node -c .github/scripts/shared/lib/jobs-data-scripts/pipeline-alert.js
+        run: node -c .github/scripts/processing/lib/jobs-data-scripts/pipeline-alert.js
 
       - name: Run pipeline checks
         env:
@@ -77,7 +77,7 @@ jobs:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TEAM_TOKEN }}
           DISCORD_PIPELINE_ALERT_CHANNEL_ID: ${{ secrets.DISCORD_PIPELINE_ALERT_CHANNEL_ID }}
           GH_PAT_EXPIRY_DATE: ${{ vars.GH_PAT_EXPIRY_DATE }}
-        run: node .github/scripts/shared/lib/jobs-data-scripts/pipeline-alert.js
+        run: node .github/scripts/processing/lib/jobs-data-scripts/pipeline-alert.js
 
       - name: Push alert status via API
         env:
