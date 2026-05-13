@@ -94,7 +94,7 @@ jobs:
 
       - name: Prune stale sidecar entries
         if: success()
-        run: node .github/scripts/shared/lib/jobs-data-scripts/prune-sidecars.js --data-dir .github/data
+        run: node .github/scripts/processing/lib/prune-sidecars.js --data-dir .github/data
 
       - name: Upload enriched data to R2
         if: success()
