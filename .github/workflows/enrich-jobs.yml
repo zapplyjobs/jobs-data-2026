@@ -156,16 +156,17 @@ jobs:
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
           GITHUB_RUN_ID: ${{ github.run_id }}
 
-      - name: Commit enriched_jobs.json
+      - name: Commit enrichment stats
         if: success()
         run: |
           git config user.email "bot@zapplyjobs.com"
           git config user.name "Aggregator Bot"
-          git add .github/data/enriched_jobs.json .github/data/processed_ids.json .github/data/enrichment-stats.json || exit 0
+          # Only commit tiny dashboard-facing files. Big data files (sidecars, enriched_jobs, processed_ids)
+          # live in R2 only — INF-BLOAT-5.
+          git add .github/data/enrichment-stats.json || exit 0
           [ -f .github/data/enrichment-history.jsonl ] && git add .github/data/enrichment-history.jsonl
-          git add .github/data/descriptions-enriched-*.jsonl 2>/dev/null || true
-          [ -f .github/data/desc-fetch-failures.json ] && git add .github/data/desc-fetch-failures.json
-          git commit -m "chore: update enriched jobs [skip ci]" || exit 0
+          git diff --cached --quiet && { echo "No changes to commit"; exit 0; }
+          git commit -m "chore: update enrichment stats [skip ci]" || exit 0
           for i in 1 2 3; do
             git pull --rebase --autostash origin main && git push && break
             echo "Push attempt $i failed, retrying in 5s..."
