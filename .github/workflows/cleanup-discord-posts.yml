@@ -103,7 +103,9 @@ jobs:
           git add .github/data/posted_jobs.json .github/data/global-dedupe-store.json || exit 0
           git diff --staged --quiet || git commit -m "chore: remove cleanup-deleted messages from dedup stores for repost [skip ci]"
           for i in 1 2 3; do
-            git pull --rebase origin main && git push && break
+            git stash --include-untracked
+            git pull --rebase --strategy-option=theirs origin main
+            git push && break
             echo "Push attempt $i failed, retrying in 5s..."
             sleep 5
           done

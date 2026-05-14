@@ -143,7 +143,9 @@ jobs:
           git add .github/data/posted_jobs.json .github/data/global-dedupe-store.json || exit 0
           git commit -m "chore: update dedupe database [skip ci]" || exit 0
           for i in 1 2 3; do
-            git pull --rebase origin main && git push && break
+            git stash --include-untracked
+            git pull --rebase --strategy-option=theirs origin main
+            git push && break
             echo "Push attempt $i failed, retrying in 5s..."
             sleep 5
           done
