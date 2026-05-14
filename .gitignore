@@ -36,3 +36,22 @@ setup-*.sh
 # Legacy enriched descriptions — superseded by chunked files (descriptions-enriched-1.jsonl, -2.jsonl, ...)
 # INF-7: file was split in S242. Untracked to prevent re-tracking via git add -u.
 .github/data/descriptions-enriched.jsonl
+
+# INF-BLOAT-5: Large data files live in R2 only. Not tracked in git.
+# These are created locally by workflow steps (seeded from R2) but must not be committed.
+.github/data/enriched_jobs.json
+.github/data/processed_ids.json
+.github/data/descriptions-enriched-*.jsonl
+.github/data/descriptions-greenhouse-*.jsonl
+.github/data/descriptions-ashby.jsonl
+.github/data/descriptions-lever.jsonl
+.github/data/descriptions-smartrecruiters.jsonl
+.github/data/descriptions-jsearch.jsonl
+.github/data/descriptions-microsoft.jsonl
+.github/data/descriptions-amazon.jsonl
+.github/data/descriptions-amd.jsonl
+.github/data/desc-fetch-failures.json
+.github/data/global-dedupe-store.json
+.github/data/all_jobs.json
+.github/data/dedupe-store.json
+.github/data/wd-totals-cache.json
