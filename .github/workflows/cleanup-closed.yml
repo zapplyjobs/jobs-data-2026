@@ -100,7 +100,9 @@ jobs:
             REMOVED=$(git diff --cached --stat | grep -o '[0-9]* deletion' | grep -o '[0-9]*' || echo "0")
             git commit -m "chore: remove closed jobs [skip ci]"
             for i in 1 2 3; do
-              git pull --rebase origin main && git push origin main && break
+              git stash --include-untracked
+              git pull --rebase --strategy-option=theirs origin main
+              git push origin main && break
               echo "Push attempt $i failed, retrying in 5s..."
               sleep 5
             done

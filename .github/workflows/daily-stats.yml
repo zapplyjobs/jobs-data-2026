@@ -43,7 +43,9 @@ jobs:
           git diff --cached --quiet && echo "Nothing to commit" && exit 0
           git commit -m "chore: update daily-stats.json [skip ci]"
           for i in 1 2 3; do
-            git pull --rebase origin main && git push && break
+            git stash --include-untracked
+            git pull --rebase --strategy-option=theirs origin main
+            git push && break
             echo "Push attempt $i failed, retrying in 5s..."
             sleep 5
           done

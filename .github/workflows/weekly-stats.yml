@@ -42,7 +42,9 @@ jobs:
           git add .github/data/weekly-stats.json || exit 0
           git commit -m "chore: update weekly-stats.json [skip ci]" || exit 0
           for i in 1 2 3; do
-            git pull --rebase origin main && git push && break
+            git stash --include-untracked
+            git pull --rebase --strategy-option=theirs origin main
+            git push && break
             echo "Push attempt $i failed, retrying in 5s..."
             sleep 5
           done
