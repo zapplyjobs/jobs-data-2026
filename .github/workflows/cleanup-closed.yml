@@ -91,22 +91,11 @@ jobs:
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
 
-      - name: Commit and push if changed
+      - name: Verify cleanup
         run: |
-          if [ -n "$(git status --porcelain .github/data/all_jobs.json)" ]; then
-            git config user.email "bot@zapplyjobs.com"
-            git config user.name "Data Bot"
-            git add .github/data/all_jobs.json
-            REMOVED=$(git diff --cached --stat | grep -o '[0-9]* deletion' | grep -o '[0-9]*' || echo "0")
-            git commit -m "chore: remove closed jobs [skip ci]"
-            for i in 1 2 3; do
-              git stash --include-untracked
-              git pull --rebase --strategy-option=theirs origin main
-              git push origin main && break
-              echo "Push attempt $i failed, retrying in 5s..."
-              sleep 5
-            done
-            echo "✅ Closed jobs removed and pushed"
+          if [ -f .github/data/all_jobs.json ]; then
+            JOBS=$(wc -l < .github/data/all_jobs.json)
+            echo "✅ Pool after cleanup: $JOBS jobs (R2 updated)"
           else
-            echo "ℹ️ No changes — pool unchanged"
+            echo "⚠️ No all_jobs.json found"
           fi
