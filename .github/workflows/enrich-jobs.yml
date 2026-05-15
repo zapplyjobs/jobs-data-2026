@@ -54,7 +54,8 @@ jobs:
 
             // Download core data files (enriched_jobs.json: INF-BLOAT-5 left it git-tracked but stale;
             // must download from R2 to get fresh version instead of May 14 git snapshot)
-            const coreFiles = ['all_jobs.json', 'processed_ids.json', 'enriched_jobs.json'];
+            // jobs-metadata.json: DASH-METRICS-1 — dashboard reads from git, must download fresh from R2
+            const coreFiles = ['all_jobs.json', 'processed_ids.json', 'enriched_jobs.json', 'jobs-metadata.json'];
             for (const file of coreFiles) {
               try {
                 const raw = await r2.downloadRaw(file);
@@ -165,6 +166,7 @@ jobs:
           # Only commit tiny dashboard-facing files. Big data files (sidecars, enriched_jobs, processed_ids)
           # live in R2 only — INF-BLOAT-5.
           git add .github/data/enrichment-stats.json || exit 0
+          [ -f .github/data/jobs-metadata.json ] && git add .github/data/jobs-metadata.json
           [ -f .github/data/enrichment-history.jsonl ] && git add .github/data/enrichment-history.jsonl
           git diff --cached --quiet && { echo "No changes to commit"; exit 0; }
           git commit -m "chore: update enrichment stats [skip ci]" || exit 0
