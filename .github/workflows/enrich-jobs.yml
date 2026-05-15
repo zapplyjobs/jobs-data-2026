@@ -52,8 +52,9 @@ jobs:
             const dataDir = '.github/data';
             if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
 
-            // Download core data files
-            const coreFiles = ['all_jobs.json', 'processed_ids.json'];
+            // Download core data files (enriched_jobs.json: INF-BLOAT-5 left it git-tracked but stale;
+            // must download from R2 to get fresh version instead of May 14 git snapshot)
+            const coreFiles = ['all_jobs.json', 'processed_ids.json', 'enriched_jobs.json'];
             for (const file of coreFiles) {
               try {
                 const raw = await r2.downloadRaw(file);
