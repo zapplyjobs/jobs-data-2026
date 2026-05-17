@@ -27,18 +27,19 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Inject dashboard password
+      - name: Inject dashboard password hash
         run: |
-          grep -q '__DASHBOARD_PWD__' index.html || { echo "ERROR: placeholder not found in index.html"; exit 1; }
-          sed -i "s/__DASHBOARD_PWD__/${{ secrets.DASHBOARD_PWD }}/g" index.html
-          grep -q '__DASHBOARD_PWD__' index.html && { echo "ERROR: placeholder still present after sed"; exit 1; }
-          echo "Password injected successfully"
+          grep -q '__DASHBOARD_PWD_HASH__' index.html || { echo "ERROR: PWD_HASH placeholder not found in index.html"; exit 1; }
+          PWD_HASH=$(echo -n "${{ secrets.DASHBOARD_PWD }}" | sha256sum | awk '{print $1}')
+          sed -i "s/__DASHBOARD_PWD_HASH__/${PWD_HASH}/g" index.html
+          grep -q '__DASHBOARD_PWD_HASH__' index.html && { echo "ERROR: PWD_HASH placeholder still present after sed"; exit 1; }
+          echo "Password hash injected successfully"
 
       - name: Inject dashboard secret
         run: |
           grep -q '__DASHBOARD_SECRET__' index.html || { echo "ERROR: DASHBOARD_SECRET placeholder not found in index.html"; exit 1; }
           sed -i "s/__DASHBOARD_SECRET__/${{ secrets.DASHBOARD_SECRET }}/g" index.html
-          grep -q '__DASHBOARD_SECRET__' index.html && { echo "ERROR: placeholder still present after sed"; exit 1; }
+          grep -q '__DASHBOARD_SECRET__' index.html && { echo "ERROR: DASHBOARD_SECRET placeholder still present after sed"; exit 1; }
           echo "Dashboard secret injected successfully"
 
       - name: Upload Pages artifact
