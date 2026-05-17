@@ -592,7 +592,7 @@ const DASHBOARD_SECRET = '__DASHBOARD_SECRET__';
 
 // Auth gate — sessionStorage (tab) or localStorage (persistent) token check
 (function () {
-  const DASHBOARD_PWD = '__DASHBOARD_PWD__';
+  const PWD_HASH = '__DASHBOARD_PWD_HASH__';
   const AUTH_KEY      = 'zjp_auth';
   const overlay = document.getElementById('auth-overlay');
 
@@ -608,8 +608,14 @@ const DASHBOARD_SECRET = '__DASHBOARD_SECRET__';
   const err      = document.getElementById('auth-error');
   const box      = document.getElementById('auth-box');
 
-  function attempt() {
-    if (input.value === DASHBOARD_PWD) {
+  async function sha256(str) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  async function attempt() {
+    const hash = await sha256(input.value);
+    if (hash === PWD_HASH) {
       if (remember.checked) {
         localStorage.setItem(AUTH_KEY, '1');
       } else {
