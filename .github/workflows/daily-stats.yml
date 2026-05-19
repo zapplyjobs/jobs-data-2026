@@ -28,6 +28,46 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Install shared+processing submodule dependencies (for R2 client)
+        run: cd .github/scripts/shared && npm install && cd $GITHUB_WORKSPACE/.github/scripts/processing && npm install
+
+      - name: Download data from R2
+        if: success()
+        continue-on-error: true
+        run: |
+          echo "📥 Downloading pipeline data from R2..."
+          node -e "
+          const { createR2Client } = require('./.github/scripts/processing/lib/storage/r2-client');
+          const fs = require('fs');
+          const path = require('path');
+
+          async function main() {
+            const r2 = createR2Client({ prefix: 'data/' });
+            const dataDir = '.github/data';
+            if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+
+            const files = ['all_jobs.json', 'enriched_jobs.json', 'posted_jobs.json', 'jobs-metadata.json', 'daily-stats.json'];
+            for (const file of files) {
+              try {
+                const raw = await r2.downloadRaw(file);
+                if (raw) {
+                  fs.writeFileSync(path.join(dataDir, file), Buffer.from(raw));
+                  console.log('R2 download OK: ' + file);
+                } else {
+                  console.log('R2 SKIP: ' + file + ' (not found)');
+                }
+              } catch (e) { console.error('R2 download ERR: ' + file + ' - ' + e.message); }
+            }
+            console.log('R2 download complete');
+          }
+          main().catch(e => { console.error('R2 fatal: ' + e.message); process.exit(1); });
+          "
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+
       - name: Post daily stats to Discord
         env:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TEAM_TOKEN }}
