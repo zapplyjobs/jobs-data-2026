@@ -1,9 +1,9 @@
 {
   "schema": "zjp-metrics-v1",
-  "generated_at": "2026-05-19T00:58:26.053Z",
+  "generated_at": "2026-05-19T01:20:01.021Z",
   "pool": {
     "total_jobs": 52810,
-    "tech_us": 8688,
+    "tech_us": 8780,
     "domains": {
       "software": 7733,
       "hardware": 6236,
@@ -653,17 +653,17 @@
     "source": "jobs-metadata.json"
   },
   "enrichment": {
-    "total_enriched": 8350,
-    "enrichment_rate_pct": 96.1,
+    "total_enriched": 8450,
+    "enrichment_rate_pct": 96.2,
     "tiers": {
-      "t0": 558,
-      "t1": 417,
-      "t2": 74,
-      "t3": 1158,
-      "t4": 6143
+      "t0": 557,
+      "t1": 410,
+      "t2": 76,
+      "t3": 1175,
+      "t4": 6232
     },
     "enricher_version": 59,
-    "reenrichment_pending": 756,
+    "reenrichment_pending": 734,
     "source": "enrichment-stats.json"
   },
   "alerts": {
@@ -672,18 +672,18 @@
       "**Aggregator execution time high**: 20.6 min (threshold: 8 min). Queue: 0.0 min. At 25 min execution, 15-min cadence breaks.",
       "**Low description coverage**: oracle has 125 sidecar entries for 4044 pool jobs (3.1%)"
     ],
-    "last_checked": "2026-05-19T00:52:05.972Z",
+    "last_checked": "2026-05-19T01:07:22.370Z",
     "source": "pipeline-alert.json"
   },
   "pipeline": {
-    "last_aggregator_run": "2026-05-19T00:53:12Z",
+    "last_aggregator_run": "2026-05-19T01:15:15Z",
     "last_aggregator_status": "in_progress",
-    "last_enrichment_run": null,
-    "last_enrichment_status": null,
-    "aggregator_runtime_minutes": 2.3,
+    "last_enrichment_run": "2026-05-19T01:15:15Z",
+    "last_enrichment_status": "in_progress",
+    "aggregator_runtime_minutes": 0.2,
     "aggregator_queue_minutes": 0,
-    "aggregator_execution_minutes": 2.2,
-    "aggregator_cancel_count": 5,
+    "aggregator_execution_minutes": 0.2,
+    "aggregator_cancel_count": 8,
     "stage_timings": {
       "step1_fetch_ms": 1200239,
       "step2_enhance_ms": 251,
@@ -699,12 +699,12 @@
   },
   "r2": {
     "status": "healthy",
-    "manifest_age_minutes": 7,
-    "manifest_timestamp": "2026-05-19T00:51:37.081Z",
-    "files_uploaded": 40,
+    "manifest_age_minutes": 14,
+    "manifest_timestamp": "2026-05-19T01:05:45.509Z",
+    "files_uploaded": 23,
     "files_failed": null,
     "file_count": 49,
-    "total_size_mb": 573
+    "total_size_mb": 574
   },
   "dedupe": {
     "status": "tracked",
@@ -771,39 +771,39 @@
     "p2_status": "PASS"
   },
   "consumers": {
-    "last_update": "2026-05-19T00:45:38Z",
+    "last_update": "2026-05-19T01:15:38Z",
     "repos": {
       "New-Grad-Jobs-2026": {
-        "positions": 14600,
-        "last_commit": "2026-05-19T00:45:37Z"
+        "positions": 14822,
+        "last_commit": "2026-05-19T01:15:34Z"
       },
       "Internships-2026": {
-        "positions": 1671,
-        "last_commit": "2026-05-19T00:45:34Z"
+        "positions": 1701,
+        "last_commit": "2026-05-19T01:15:34Z"
       },
       "New-Grad-Software-Engineering-Jobs-2026": {
-        "positions": 2066,
-        "last_commit": "2026-05-19T00:45:34Z"
+        "positions": 2092,
+        "last_commit": "2026-05-19T01:15:32Z"
       },
       "New-Grad-Data-Science-Jobs-2026": {
-        "positions": 392,
-        "last_commit": "2026-05-19T00:45:37Z"
+        "positions": 391,
+        "last_commit": "2026-05-19T01:15:38Z"
       },
       "New-Grad-Hardware-Engineering-Jobs-2026": {
-        "positions": 1533,
-        "last_commit": "2026-05-19T00:45:38Z"
+        "positions": 1623,
+        "last_commit": "2026-05-19T01:15:32Z"
       },
       "New-Grad-Healthcare-Jobs-2026": {
-        "positions": 1371,
-        "last_commit": "2026-05-19T00:45:38Z"
+        "positions": 1407,
+        "last_commit": "2026-05-19T01:15:37Z"
       }
     }
   },
   "repos": {
-    "total_mb": 76881,
+    "total_mb": 76871,
     "repos": {
       "jobs-aggregator-private": 29288,
-      "jobs-data-2026": 25875,
+      "jobs-data-2026": 25865,
       "New-Grad-Jobs-2026": 20181,
       "Internships-2026": 923,
       "New-Grad-Software-Engineering-Jobs-2026": 255,
@@ -814,32 +814,32 @@
   },
   "evergreen": {
     "age_buckets": {
-      "fresh_0_3d": 8782,
-      "aging_4_10d": 24815,
-      "evergreen_10_14d": 17704,
-      "beyond_14d": 1509
+      "fresh_0_3d": 8777,
+      "aging_4_10d": 24817,
+      "evergreen_10_14d": 17696,
+      "beyond_14d": 1520
     },
     "age_buckets_original": {
-      "fresh_0_3d": 324,
+      "fresh_0_3d": 322,
       "aging_4_10d": 1792,
-      "evergreen_10_14d": 1262,
-      "beyond_14d": 436,
+      "evergreen_10_14d": 1263,
+      "beyond_14d": 437,
       "coverage": 3814,
       "coverage_pct": 7
     },
     "evergreen_pct": 33.5,
     "first_published_coverage": 7,
-    "first_published_evergreen_pct": 11.4,
+    "first_published_evergreen_pct": 11.5,
     "by_source": {
-      "workday": 15731,
+      "ashby": 285,
+      "greenhouse": 1296,
+      "workday": 15732,
       "amd": 97,
-      "greenhouse": 1295,
       "smartrecruiters": 483,
       "amazon": 61,
       "oracle": 1078,
       "lever": 119,
       "microsoft": 42,
-      "ashby": 284,
       "uber": 7,
       "eightfold": 11,
       "jsearch": 5
