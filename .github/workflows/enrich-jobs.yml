@@ -123,8 +123,8 @@ jobs:
               'enrichment-stats.json',
             ];
 
-            // Add enriched description sidecars
-            const sidecars = fs.readdirSync(dataDir).filter(f => f.startsWith('descriptions-enriched-') && f.endsWith('.jsonl'));
+            // Add all description sidecars (pruned versions overwrite R2 — INF-SIDECAR-COMPACT-1)
+            const sidecars = fs.readdirSync(dataDir).filter(f => f.startsWith('descriptions-') && f.endsWith('.jsonl'));
             for (const s of sidecars) files.push(s);
 
             // Add enrichment history if it exists
