@@ -488,7 +488,7 @@
             <th class="sortable">Source</th>
             <th class="sortable">Jobs</th>
             <th class="sortable">Enriched</th>
-            <th class="sortable">T3%</th>
+            <th class="sortable">T3+%</th>
             <th class="sortable">Skills%</th>
             <th class="sortable">Visa%</th>
             <th>Visa Split</th>
@@ -498,6 +498,7 @@
       </table>
       <div style="margin-top:8px;font-size:11px;color:var(--muted)">
         Click ▶ to expand companies under a source.
+        <strong>T3+%:</strong> Tier 3 (degree) + Tier 4 (degree + visa) combined. Higher = better enrichment.
         <strong>Visa Split:</strong> <span style="color:var(--green)">hard text</span> / <span style="color:var(--yellow)">ATS form</span> / <span style="color:var(--muted)">no signal</span>.
         <strong>Visa%</strong> = any signal (union of all types). <strong>Company Visa%</strong> = hard text only.
       </div>
@@ -585,7 +586,7 @@
 
 <script>
 // Master source list — single definition, all functions reference this
-const MASTER_SOURCES = ['workday','greenhouse','ashby','lever','smartrecruiters','amazon','netflix'];
+const MASTER_SOURCES = ['workday','greenhouse','oracle','ashby','lever','smartrecruiters','simplify','google','microsoft','amazon','amd','tiktok','uber','apple','eightfold','jsearch'];
 
 // Dashboard proxy secret — injected at deploy time via deploy-pages.yml
 const DASHBOARD_SECRET = '__DASHBOARD_SECRET__';
@@ -764,7 +765,10 @@ function fmtDelta(n) {
   return (n >= 0 ? '+' : '') + fmt(n);
 }
 function age(isoTs) {
-  const ms = Date.now() - new Date(isoTs).getTime();
+  if (!isoTs) return '—';
+  const d = new Date(isoTs);
+  if (isNaN(d.getTime())) return '—';
+  const ms = Date.now() - d.getTime();
   const mins = Math.round(ms / 60000);
   if (mins < 60) return `${mins}m ago`;
   return `${Math.round(mins / 60)}h ago`;
@@ -1132,9 +1136,9 @@ function renderQuality(d, enrichStats, metadata, enrichHistory) {
       const enriched = v.enriched || 0;
       // ENR-12: Tier data for detail table
       const tbs = enrichStats.tiers_by_source || {};
-      const tier = tbs[src] || { t0: 0, t1: 0, t2: 0, t3: 0 };
-      const tierTotal = tier.t0 + tier.t1 + tier.t2 + tier.t3;
-      const t3pct = tierTotal > 0 ? Math.round(100 * tier.t3 / tierTotal) : 0;
+      const tier = tbs[src] || { t0: 0, t1: 0, t2: 0, t3: 0, t4: 0 };
+      const tierTotal = tier.t0 + tier.t1 + tier.t2 + tier.t3 + tier.t4;
+      const t3pct = tierTotal > 0 ? Math.round(100 * (tier.t3 + tier.t4) / tierTotal) : 0;
       const t3color = t3pct >= 80 ? 'var(--green)' : t3pct >= 40 ? 'var(--yellow)' : 'var(--red)';
       // S268A: Enrichment Details table removed — data merged into Field Coverage
       // Tier counts visible in Tier Distribution chart tooltips
@@ -1426,14 +1430,6 @@ function renderSupHealth(metadata) {
     statCard({ icon: '⚠️', label: 'Zero-Yield', value: zeroYield, valueColor: zeroYield > 0 ? 'var(--red)' : 'var(--green)', sub: zeroYield > 0 ? 'companies returning 0 jobs' : 'all sources healthy' });
 }
 
-function renderSourceBars(d, metadata) {
-  const bySource = (metadata && metadata.by_source) ? metadata.by_source : (d.pipeline || {}).bySource || {};
-  const items = Object.entries(bySource)
-    .sort(([, a], [, b]) => b - a)
-    .map(([k, v]) => ({ label: k, value: v }));
-  renderHBars('source-bars', items, { labelWidth: '130px' });
-}
-
 // Per-Source Trend — Chart.js multi-line chart
 let _sourceTrendAllEntries = null;
 function renderSourceTrend(historyEntries) {
@@ -1501,7 +1497,7 @@ function _domainColor(key) {
   return map[key] || C.muted;
 }
 function _sourceColor(key) {
-  const map = { workday: '#e67e22', greenhouse: '#27ae60', ashby: '#3498db', lever: '#9b59b6', smartrecruiters: '#e74c3c', amazon: '#f39c12', netflix: '#e50914' };
+  const map = { workday: '#e67e22', greenhouse: '#27ae60', oracle: '#c0392b', ashby: '#3498db', lever: '#9b59b6', smartrecruiters: '#e74c3c', simplify: '#1abc9c', google: '#4285f4', microsoft: '#00a4ef', amazon: '#f39c12', amd: '#ed1c24', tiktok: '#00f2ea', uber: '#000000', apple: '#a2aaad', eightfold: '#6c5ce7', jsearch: '#7f8c8d' };
   return map[key] || C.muted;
 }
 function _repoColor(key) {
@@ -1644,25 +1640,6 @@ function renderFilterFunnel(metadata) {
   `;
 }
 
-// Quality tab — enrichment fill rate bars by source
-function renderEnrichBars(enrichStats) {
-  if (!enrichStats || !enrichStats.by_source) return;
-  const ORDER = MASTER_SOURCES;
-  const items = ORDER
-    .filter(s => enrichStats.by_source[s])
-    .map(s => {
-      const v = enrichStats.by_source[s];
-      const tech = v.tech_us || 0;
-      const hasdesc = v.has_desc || 0;
-      const fill = tech > 0 ? Math.round(100 * hasdesc / tech) : 0;
-      return { label: s, value: fill, sub: `${fmt(hasdesc)}/${fmt(tech)}` };
-    });
-  renderHBars('enrich-bars', items, {
-    labelWidth: '130px',
-    colorFn: (v) => v >= 70 ? 'var(--green)' : v >= 40 ? 'var(--yellow)' : 'var(--red)',
-  });
-}
-
 // ENRICH-QUALITY-2: Enrichment trend chart (from enrichment-history.jsonl)
 // Enrichment Trend — Chart.js multi-dataset (counts on left axis, percentages on right)
 // Click legend items to toggle datasets on/off. Pill toggles for time range.
@@ -1791,25 +1768,6 @@ function renderSourceT3Chart(all, days) {
   });
 }
 
-// ENRICH-QUALITY-2: Skills fill rate bars by source
-function renderSkillsBars(enrichStats) {
-  if (!enrichStats || !enrichStats.by_source) return;
-  const ORDER = MASTER_SOURCES;
-  const items = ORDER
-    .filter(s => enrichStats.by_source[s] && enrichStats.by_source[s].enriched > 0)
-    .map(s => {
-      const v = enrichStats.by_source[s];
-      const enriched = v.enriched || 0;
-      const skills = v.required_skills || 0;
-      const pct = enriched > 0 ? Math.round(100 * skills / enriched) : 0;
-      return { label: s, value: pct, sub: `${fmt(skills)}/${fmt(enriched)}` };
-    });
-  renderHBars('skills-bars', items, {
-    labelWidth: '130px',
-    colorFn: (v) => v >= 70 ? 'var(--green)' : v >= 40 ? 'var(--yellow)' : 'var(--red)',
-  });
-}
-
 // ENR-12: Tier distribution — Chart.js horizontal stacked bar (S262 Phase 2 redesign)
 // Color semantics: green=T3(good), blue=T2(neutral/partial), yellow=T1(warning), red=T0(bad)
 // S268A: Tier Distribution with filter pills — replaces separate T3-by-Source chart.
@@ -1830,7 +1788,8 @@ function renderTierSourceChart(enrichStats, filterTier) {
   if (pillsEl) {
     const tiers = [
       { key: 'all', label: 'All' },
-      { key: 't3', label: 'T3 Degree+Visa', color: C.green },
+      { key: 't4', label: 'T4 Full (Deg+Visa)', color: '#3fb950' },
+      { key: 't3', label: 'T3 Degree', color: C.green },
       { key: 't2', label: 'T2 Skills', color: C.info },
       { key: 't1', label: 'T1 Desc', color: C.yellow },
       { key: 't0', label: 'T0 None', color: C.red },
@@ -1849,20 +1808,21 @@ function renderTierSourceChart(enrichStats, filterTier) {
   const sources = ORDER.filter(s => tbs[s]);
   const labels = sources.map(s => {
     const t = tbs[s];
-    return `${s} (${fmt(t.t0 + t.t1 + t.t2 + t.t3)})`;
+    return `${s} (${fmt(t.t0 + t.t1 + t.t2 + t.t3 + (t.t4 || 0))})`;
   });
   const pct = (src, tier) => {
     const t = tbs[src];
-    const tot = t.t0 + t.t1 + t.t2 + t.t3;
-    return tot > 0 ? Math.round(1000 * t[tier] / tot) / 10 : 0;
+    const tot = t.t0 + t.t1 + t.t2 + t.t3 + (t.t4 || 0);
+    return tot > 0 ? Math.round(1000 * (t[tier] || 0) / tot) / 10 : 0;
   };
 
-  const TIER_COLORS = { t3: C.green, t2: C.info, t1: C.yellow, t0: C.red };
-  const TIER_LABELS = { t3: 'T3 — Degree + Visa', t2: 'T2 — Skills', t1: 'T1 — Description', t0: 'T0 — No description' };
+  const TIER_COLORS = { t4: '#3fb950', t3: C.green, t2: C.info, t1: C.yellow, t0: C.red };
+  const TIER_LABELS = { t4: 'T4 — Degree + Visa', t3: 'T3 — Degree', t2: 'T2 — Skills', t1: 'T1 — Description', t0: 'T0 — No description' };
 
   let datasets, stacked;
   if (activeTier === 'all') {
     datasets = [
+      { label: TIER_LABELS.t4, data: sources.map(s => pct(s, 't4')), backgroundColor: TIER_COLORS.t4 },
       { label: TIER_LABELS.t3, data: sources.map(s => pct(s, 't3')), backgroundColor: TIER_COLORS.t3 },
       { label: TIER_LABELS.t2, data: sources.map(s => pct(s, 't2')), backgroundColor: TIER_COLORS.t2 },
       { label: TIER_LABELS.t1, data: sources.map(s => pct(s, 't1')), backgroundColor: TIER_COLORS.t1 },
@@ -1898,7 +1858,7 @@ function renderTierSourceChart(enrichStats, filterTier) {
               const src = sources[ctx.dataIndex];
               const t = tbs[src];
               if (activeTier === 'all') {
-                const tierKey = ['t3', 't2', 't1', 't0'][ctx.datasetIndex];
+                const tierKey = ['t4', 't3', 't2', 't1', 't0'][ctx.datasetIndex];
                 return `${ctx.dataset.label}: ${ctx.raw}% (${t[tierKey]} jobs)`;
               }
               return `${ctx.dataset.label}: ${ctx.raw}% (${t[activeTier]} jobs)`;
@@ -1965,8 +1925,8 @@ function toggleCompanyDetail(tr, companyName, tableId) {
       <span style="color:var(--muted)">Domain</span><span>${val(metaData?.domain || (genData?.domain_dist?.split(',')[0]))}</span>
       <span style="color:var(--muted)">Total Jobs</span><span>${val(metaData?.count ? fmt(metaData.count) : null)}</span>
       <span style="color:var(--muted)">Enriched</span><span>${val(enrData?.enriched ? fmt(enrData.enriched) : null)}</span>
-      <span style="color:var(--muted)">T3%</span><span style="${pctColor(enrData?.t3_pct)}">${val(enrData?.t3_pct, '%')}</span>
-      <span style="color:var(--muted)">Tiers</span><span>T0=${enrData?.tiers?.t0 ?? '—'} · T1=${enrData?.tiers?.t1 ?? '—'} · T2=${enrData?.tiers?.t2 ?? '—'} · T3=${enrData?.tiers?.t3 ?? '—'}</span>
+      <span style="color:var(--muted)">T3+%</span><span style="${pctColor(enrData?.t3_pct)}">${val(enrData?.t3_pct, '%')}</span>
+      <span style="color:var(--muted)">Tiers</span><span>T0=${enrData?.tiers?.t0 ?? '—'} · T1=${enrData?.tiers?.t1 ?? '—'} · T2=${enrData?.tiers?.t2 ?? '—'} · T3=${enrData?.tiers?.t3 ?? '—'} · T4=${enrData?.tiers?.t4 ?? '—'}</span>
       <span style="color:var(--muted)">Skills%</span><span style="${pctColor(enrData?.skills_pct)}">${val(enrData?.skills_pct, '%')}</span>
       <span style="color:var(--muted)">Hard Visa%</span><span><span style="${pctColor(enrData?.visa_pct)}">${val(enrData?.visa_pct, '%')}</span> <span style="font-size:10px;color:var(--muted)">(text only)</span></span>
       <span style="color:var(--muted)">General</span><span>${val(genData?.general)}</span>
@@ -2155,9 +2115,9 @@ function renderUnifiedENR(enrichStats) {
     totalExplained += v.visa_explained_gaps || 0;
     totalVisa += anyV;
     totalSkills += v.required_skills || 0;
-    const tier = tbs[src] || { t0:0, t1:0, t2:0, t3:0 };
-    const tierTotal = tier.t0 + tier.t1 + tier.t2 + tier.t3;
-    if (tierTotal > 0) { totalT3 += tier.t3 || 0; totalT3Count += tierTotal; }
+    const tier = tbs[src] || { t0:0, t1:0, t2:0, t3:0, t4:0 };
+    const tierTotal = tier.t0 + tier.t1 + tier.t2 + tier.t3 + (tier.t4 || 0);
+    if (tierTotal > 0) { totalT3 += (tier.t3 || 0) + (tier.t4 || 0); totalT3Count += tierTotal; }
     if (e > 0) { totalSkillsCount += e; }
   });
 
@@ -2198,9 +2158,9 @@ function renderUnifiedENR(enrichStats) {
     const v = enrichStats.by_source[src];
     const techUs = v.tech_us || 0;
     const e = v.enriched || 1;
-    const tier = tbs[src] || { t0:0, t1:0, t2:0, t3:0 };
-    const tierTotal = tier.t0 + tier.t1 + tier.t2 + tier.t3;
-    const t3pct = tierTotal > 0 ? Math.round(1000 * (tier.t3 || 0) / tierTotal) / 10 : 0;
+    const tier = tbs[src] || { t0:0, t1:0, t2:0, t3:0, t4:0 };
+    const tierTotal = tier.t0 + tier.t1 + tier.t2 + tier.t3 + (tier.t4 || 0);
+    const t3pct = tierTotal > 0 ? Math.round(1000 * ((tier.t3 || 0) + (tier.t4 || 0)) / tierTotal) / 10 : 0;
     const t3style = t3pct >= 70 ? 'color:var(--green)' : t3pct >= 40 ? 'color:var(--yellow)' : 'color:var(--red)';
     const skillsPct = Math.round(100 * (v.required_skills || 0) / e);
     const visaPct = Math.round(100 * (v.any_visa_signal || 0) / e);
@@ -2254,8 +2214,8 @@ function renderUnifiedENR(enrichStats) {
         '<td style="font-weight:600;' + ct3style + '">' + (ct3 === '—' ? '—' : ct3 + '%') + '</td>' +
         '<td style="' + colorPct(c.skills_pct) + '">' + c.skills_pct + '%</td>' +
         '<td style="' + colorPct(c.visa_pct) + '">' + c.visa_pct + '%</td>' +
-        '<td style="text-align:center;font-size:10px;color:var(--muted)" title="T0/T1/T2/T3 tier counts">' +
-          (tiers.t0||0) + '·' + (tiers.t1||0) + '·' + (tiers.t2||0) + '·' + (tiers.t3||0) +
+        '<td style="text-align:center;font-size:10px;color:var(--muted)" title="T0/T1/T2/T3/T4 tier counts">' +
+          (tiers.t0||0) + '·' + (tiers.t1||0) + '·' + (tiers.t2||0) + '·' + (tiers.t3||0) + '·' + (tiers.t4||0) +
         '</td>';
       tbody.appendChild(cr);
     });
