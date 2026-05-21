@@ -327,7 +327,10 @@
 
   <!-- AGG TAB — Aggregation: pipeline runs, pool, duration, senior filter -->
   <section id="tab-agg" class="tab-panel">
-    <div class="section-label">Pipeline Status</div>
+    <div class="section-label" style="display:flex;justify-content:space-between;align-items:center">
+      <span>Pipeline Status</span>
+      <span id="agg-filter-pills" style="font-weight:400;font-size:11px"></span>
+    </div>
     <div class="grid" id="ops-pipeline-stats"></div>
     <div style="margin-top:4px;font-size:11px;color:var(--muted)">
       <strong>Pool Size</strong> includes jobs &amp; internships. <strong>US Tech Jobs</strong> = SW + DS + HW + AI domains, US-tagged.
@@ -369,7 +372,10 @@
 
   <!-- SUP TAB — Supply: sources, companies, source trends -->
   <section id="tab-sup" class="tab-panel" style="display:none">
-    <div class="section-label">Source & Job Supply</div>
+    <div class="section-label" style="display:flex;justify-content:space-between;align-items:center">
+      <span>Source & Job Supply</span>
+      <span id="sup-filter-pills" style="font-weight:400;font-size:11px"></span>
+    </div>
     <div class="grid" id="sup-health-cards"></div>
     <div style="margin-top:4px;font-size:11px;color:var(--muted)">
       <strong>Active Sources</strong> = ATS sources returning &gt;0 jobs. <strong>Zero-Yield</strong> = companies with 0 jobs across all sources.
@@ -587,6 +593,8 @@
 <script>
 // Master source list — single definition, all functions reference this
 const MASTER_SOURCES = ['workday','greenhouse','oracle','ashby','lever','smartrecruiters','simplify','google','microsoft','amazon','amd','tiktok','uber','apple','eightfold','jsearch'];
+const ATS_SOURCES = new Set(['workday','greenhouse','ashby','lever','smartrecruiters']);
+let _supFilter = 'all'; // 'all' | 'ats' | 'custom'
 
 // Dashboard proxy secret — injected at deploy time via deploy-pages.yml
 const DASHBOARD_SECRET = '__DASHBOARD_SECRET__';
@@ -817,42 +825,81 @@ function renderStatusBar(isoTs) {
   }
 }
 
+// AGG filter state — DASH_FILTER_VISION Phase A
+let _aggFilter = { jobType: 'all', region: 'all' };
+function _aggPill(label, key, val, active) {
+  const bg = active ? 'var(--accent)' : 'transparent';
+  const fg = active ? '#fff' : 'var(--muted)';
+  const border = active ? 'var(--accent)' : 'var(--border)';
+  return `<span style="display:inline-block;padding:2px 10px;border-radius:12px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid ${border};margin-left:4px;background:${bg};color:${fg}" onclick="_setAggFilter('${key}','${val}')">${label}</span>`;
+}
+function renderAggFilterPills() {
+  const el = document.getElementById('agg-filter-pills');
+  if (!el) return;
+  el.innerHTML =
+    _aggPill('All', 'jobType', 'all', _aggFilter.jobType === 'all') +
+    _aggPill('Intern', 'jobType', 'internship', _aggFilter.jobType === 'internship') +
+    _aggPill('New Grad', 'jobType', 'new-grad', _aggFilter.jobType === 'new-grad') +
+    _aggPill('Mid-Level', 'jobType', 'mid_level', _aggFilter.jobType === 'mid_level') +
+    '<span style="margin:0 6px;color:var(--border)">|</span>' +
+    _aggPill('Global', 'region', 'all', _aggFilter.region === 'all') +
+    _aggPill('US Only', 'region', 'us', _aggFilter.region === 'us');
+}
+function _setAggFilter(key, val) {
+  _aggFilter[key] = val;
+  renderAggFilterPills();
+  renderOpsPipelineStats(_D.metrics, _D.metadata, _D.enrichStats, _D.daily, _D.historyEntries);
+}
+
+
 // Ops tab — pipeline stats section (always populated from metrics/metadata)
 function renderOpsPipelineStats(metrics, metadata, enrichStats, daily, historyEntries) {
   const el = document.getElementById('ops-pipeline-stats');
   if (!el) return;
+  renderAggFilterPills();
   const p = (metrics && metrics.pipeline) || {};
   const poolTotal = (metadata && metadata.total_jobs) ? metadata.total_jobs : p.pipelineTotal;
-  const durationMin = (metadata && metadata.duration_ms) ? (metadata.duration_ms / 60000).toFixed(1) : null;
   const statusTs = (metadata && metadata.generated) ? metadata.generated : (metrics && metrics.timestamp);
   const hours = statusTs ? (Date.now() - new Date(statusTs).getTime()) / 3600000 : null;
   const pipelineStatus = hours == null ? '—' : hours < 0.5 ? 'LIVE' : hours < 6 ? 'DELAYED' : 'DOWN';
   const statusIcon = hours == null ? '⚪' : hours < 0.5 ? '🟢' : hours < 6 ? '🟡' : '🔴';
-  const sf = metadata && metadata.senior_filter_stats;
   const usTechJobs = enrichStats ? enrichStats.total_tech_us : null;
-  // Pool card: metadata.total_jobs is the real post-filter count (primary source).
-  // history.jsonl records pre-filter totals — not suitable for card display after freshness filter.
-  // growth.total_delta compares post-filter vs pre-filter baseline — dishonest as "trend".
-  // Show honest note until post-filter history accumulates (pipeline change needed).
-  // Pool WoW: use history.jsonl totals for direction (pre-filter, but trend is correct)
+  const pool = metrics && metrics.pool;
+  // Apply AGG filter pills to Pool Size and US Tech
+  let poolDisplay = poolTotal, poolSub = 'jobs & internships · post freshness filter';
+  const byType = metadata && metadata.by_job_type;
+  const g1us = pool && pool.g1_us;
+  if (_aggFilter.jobType !== 'all' && byType) {
+    poolDisplay = byType[_aggFilter.jobType] || 0;
+    const labels = { internship: 'internships', 'new-grad': 'new-grad jobs', mid_level: 'mid-level jobs' };
+    poolSub = (labels[_aggFilter.jobType] || _aggFilter.jobType) + ' only';
+  }
+  if (_aggFilter.region === 'us') {
+    if (g1us && g1us.us_total) {
+      poolDisplay = _aggFilter.jobType === 'all' ? g1us.us_total : poolDisplay; // per-type US breakdown not available — show all if filtered
+      poolSub += ' · US-tagged';
+    } else if (usTechJobs) {
+      poolDisplay = usTechJobs;
+      poolSub += ' · tech US';
+    }
+  }
+  // Pool WoW delta (always from total — per-type WoW not in data)
   let poolDelta = null;
   if (historyEntries && historyEntries.length >= 2) {
     const today = historyEntries[historyEntries.length - 1].total;
     const yesterday = historyEntries[historyEntries.length - 2].total;
     if (today != null && yesterday != null) poolDelta = today - yesterday;
   }
-  const poolDeltaStr = poolDelta != null && poolDelta !== 0
+  const poolDeltaStr = _aggFilter.jobType === 'all' && _aggFilter.region === 'all' && poolDelta != null && poolDelta !== 0
     ? ` <span style="font-size:11px;color:${poolDelta > 0 ? 'var(--green)' : 'var(--red)'};font-weight:600">${poolDelta > 0 ? '↑' : '↓'}${Math.abs(poolDelta)} vs yesterday</span>`
     : '';
-  const poolDisplay = poolTotal;
-  const poolSub = 'jobs & internships · post freshness filter' + poolDeltaStr;
 
   el.innerHTML =
     statCard({ icon: statusIcon, label: 'Pipeline Status', value: pipelineStatus,
                valueColor: hours < 0.5 ? 'var(--green)' : hours < 6 ? 'var(--yellow)' : 'var(--red)',
                sub: statusTs ? `Last run: ${age(statusTs)}` : null }) +
     statCard({ icon: '🏗️', label: 'Pool Size', value: fmt(poolDisplay),
-               sub: poolSub }) +
+               sub: poolSub + poolDeltaStr }) +
     statCard({ icon: '💻', label: 'US Tech Jobs', value: fmt(usTechJobs),
                sub: 'SW + DS + HW + AI, US-tagged' });
 }
@@ -1422,13 +1469,40 @@ function renderZeroYield(metadata) {
 function renderSupHealth(metadata) {
   const el = document.getElementById('sup-health-cards');
   if (!el || !metadata) return;
+  renderSupFilterPills();
   const bySource = metadata.by_source || {};
   const activeSources = Object.values(bySource).filter(v => v > 0).length;
   const totalSources = Object.keys(bySource).length;
+  const atsCount = MASTER_SOURCES.filter(s => ATS_SOURCES.has(s) && bySource[s]).length;
+  const customCount = MASTER_SOURCES.filter(s => !ATS_SOURCES.has(s) && bySource[s]).length;
   const zeroYield = (metadata.zero_yield_companies || []).length;
   el.innerHTML =
-    statCard({ icon: '🏢', label: 'Active Sources', value: `${activeSources}/${totalSources}`, sub: `${activeSources} returning jobs` }) +
+    statCard({ icon: '🏢', label: 'Active Sources', value: `${activeSources}/${totalSources}`, sub: `${atsCount} ATS · ${customCount} custom` }) +
     statCard({ icon: '⚠️', label: 'Zero-Yield', value: zeroYield, valueColor: zeroYield > 0 ? 'var(--red)' : 'var(--green)', sub: zeroYield > 0 ? 'companies returning 0 jobs' : 'all sources healthy' });
+}
+function renderSupFilterPills() {
+  const el = document.getElementById('sup-filter-pills');
+  if (!el) return;
+  const pill = (label, val) => {
+    const active = _supFilter === val;
+    const bg = active ? 'var(--accent)' : 'transparent';
+    const fg = active ? '#fff' : 'var(--muted)';
+    const border = active ? 'var(--accent)' : 'var(--border)';
+    return `<span style="display:inline-block;padding:2px 10px;border-radius:12px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid ${border};margin-left:4px;background:${bg};color:${fg}" onclick="_setSupFilter('${val}')">${label}</span>`;
+  };
+  el.innerHTML = pill('All Sources', 'all') + pill('ATS Only', 'ats') + pill('Custom Fetchers', 'custom');
+}
+function _setSupFilter(val) {
+  _supFilter = val;
+  renderSupFilterPills();
+  document.querySelectorAll('#pipeline-source-table tr').forEach(tr => {
+    if (tr.classList.contains('total-row')) return;
+    const src = tr.cells[0] && tr.cells[0].textContent.trim();
+    if (!src) return;
+    if (_supFilter === 'all') { tr.style.display = ''; return; }
+    const isAts = ATS_SOURCES.has(src);
+    tr.style.display = (_supFilter === 'ats' && isAts) || (_supFilter === 'custom' && !isAts) ? '' : 'none';
+  });
 }
 
 // Per-Source Trend — Chart.js multi-line chart
