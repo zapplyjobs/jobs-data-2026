@@ -1,6 +1,6 @@
 {
   "schema": "zjp-metrics-v1",
-  "generated_at": "2026-05-21T12:24:40.530Z",
+  "generated_at": "2026-05-21T13:38:17.667Z",
   "pool": {
     "total_jobs": 51870,
     "tech_us": 8836,
@@ -648,38 +648,39 @@
     "source": "jobs-metadata.json"
   },
   "enrichment": {
-    "total_enriched": 8568,
-    "enrichment_rate_pct": 97,
+    "total_enriched": 8596,
+    "enrichment_rate_pct": 97.3,
     "tiers": {
-      "t0": 637,
-      "t1": 441,
-      "t2": 79,
-      "t3": 987,
-      "t4": 6424
+      "t0": 664,
+      "t1": 440,
+      "t2": 77,
+      "t3": 809,
+      "t4": 6606
     },
     "enricher_version": 62,
-    "reenrichment_pending": 8046,
+    "reenrichment_pending": 5750,
     "source": "enrichment-stats.json"
   },
   "alerts": {
     "active": true,
     "failures": [
       "**Aggregator execution time high**: 20.3 min (threshold: 10 min). Queue: 0.0 min. At 25 min execution, 15-min cadence breaks.",
-      "**Enrichment skills drop (ashby)**: 31% have skills (expected >70%) — skills extraction may have broken for this source",
+      "**Enrichment skills drop (ashby)**: 30% have skills (expected >70%) — skills extraction may have broken for this source",
+      "**Enrichment skills drop (lever)**: 42% have skills (expected >70%) — skills extraction may have broken for this source",
       "**Low description coverage**: oracle has 125 sidecar entries for 4255 pool jobs (2.9%)"
     ],
-    "last_checked": "2026-05-21T12:21:19.551Z",
+    "last_checked": "2026-05-21T13:36:23.896Z",
     "source": "pipeline-alert.json"
   },
   "pipeline": {
-    "last_aggregator_run": "2026-05-21T12:15:42Z",
+    "last_aggregator_run": "2026-05-21T13:30:42Z",
     "last_aggregator_status": "in_progress",
-    "last_enrichment_run": "2026-05-21T12:15:42Z",
-    "last_enrichment_status": "success",
+    "last_enrichment_run": null,
+    "last_enrichment_status": null,
     "aggregator_runtime_minutes": 0.3,
     "aggregator_queue_minutes": 0,
-    "aggregator_execution_minutes": 0.2,
-    "aggregator_cancel_count": 5,
+    "aggregator_execution_minutes": 0.3,
+    "aggregator_cancel_count": 8,
     "stage_timings": {
       "step1_fetch_ms": 1200221,
       "step2_enhance_ms": 46,
@@ -695,12 +696,12 @@
   },
   "r2": {
     "status": "healthy",
-    "manifest_age_minutes": 5,
-    "manifest_timestamp": "2026-05-21T12:19:46.450Z",
+    "manifest_age_minutes": 4,
+    "manifest_timestamp": "2026-05-21T13:34:41.703Z",
     "files_uploaded": 41,
     "files_failed": null,
     "file_count": 49,
-    "total_size_mb": 384
+    "total_size_mb": 387
   },
   "dedupe": {
     "status": "tracked",
@@ -767,39 +768,39 @@
     "p2_status": "PASS"
   },
   "consumers": {
-    "last_update": "2026-05-21T12:16:07Z",
+    "last_update": "2026-05-21T13:31:11Z",
     "repos": {
       "New-Grad-Jobs-2026": {
-        "positions": 18376,
-        "last_commit": "2026-05-21T12:16:04Z"
+        "positions": 18311,
+        "last_commit": "2026-05-21T13:31:02Z"
       },
       "Internships-2026": {
         "positions": 1756,
-        "last_commit": "2026-05-21T12:16:04Z"
+        "last_commit": "2026-05-21T13:31:03Z"
       },
       "New-Grad-Software-Engineering-Jobs-2026": {
-        "positions": 2930,
-        "last_commit": "2026-05-21T12:16:01Z"
+        "positions": 2921,
+        "last_commit": "2026-05-21T13:31:07Z"
       },
       "New-Grad-Data-Science-Jobs-2026": {
         "positions": 594,
-        "last_commit": "2026-05-21T12:16:02Z"
+        "last_commit": "2026-05-21T13:31:05Z"
       },
       "New-Grad-Hardware-Engineering-Jobs-2026": {
-        "positions": 2013,
-        "last_commit": "2026-05-21T12:16:07Z"
+        "positions": 2012,
+        "last_commit": "2026-05-21T13:31:11Z"
       },
       "New-Grad-Healthcare-Jobs-2026": {
-        "positions": 1944,
-        "last_commit": "2026-05-21T12:16:01Z"
+        "positions": 1940,
+        "last_commit": "2026-05-21T13:31:04Z"
       }
     }
   },
   "repos": {
-    "total_mb": 76920,
+    "total_mb": 76908,
     "repos": {
       "jobs-aggregator-private": 29288,
-      "jobs-data-2026": 25907,
+      "jobs-data-2026": 25895,
       "New-Grad-Jobs-2026": 20184,
       "Internships-2026": 924,
       "New-Grad-Software-Engineering-Jobs-2026": 256,
@@ -810,40 +811,40 @@
   },
   "evergreen": {
     "age_buckets": {
-      "fresh_0_3d": 19622,
-      "aging_4_10d": 23145,
-      "evergreen_10_14d": 7680,
-      "beyond_14d": 1423
+      "fresh_0_3d": 19534,
+      "aging_4_10d": 23134,
+      "evergreen_10_14d": 7729,
+      "beyond_14d": 1473
     },
     "age_buckets_original": {
-      "fresh_0_3d": 1086,
-      "aging_4_10d": 1895,
-      "evergreen_10_14d": 678,
-      "beyond_14d": 27,
+      "fresh_0_3d": 1072,
+      "aging_4_10d": 1893,
+      "evergreen_10_14d": 679,
+      "beyond_14d": 42,
       "coverage": 3686,
       "coverage_pct": 7
     },
-    "evergreen_pct": 14.8,
+    "evergreen_pct": 14.9,
     "first_published_coverage": 7,
-    "first_published_evergreen_pct": 0.7,
+    "first_published_evergreen_pct": 1.1,
     "by_source": {
-      "greenhouse": 579,
+      "smartrecruiters": 341,
+      "greenhouse": 592,
+      "workday": 7202,
+      "lever": 49,
+      "ashby": 80,
+      "amd": 90,
       "microsoft": 52,
-      "workday": 7129,
       "uber": 4,
-      "lever": 48,
-      "smartrecruiters": 332,
-      "ashby": 78,
       "amazon": 41,
       "oracle": 743,
       "eightfold": 3,
-      "amd": 89,
       "jsearch": 5
     },
     "top_companies": [
       {
         "company": "Lowe's",
-        "evergreen_count": 533
+        "evergreen_count": 534
       },
       {
         "company": "Walmart",
@@ -854,16 +855,16 @@
         "evergreen_count": 243
       },
       {
+        "company": "TD Bank",
+        "evergreen_count": 203
+      },
+      {
         "company": "RTX",
         "evergreen_count": 202
       },
       {
         "company": "Johnson & Johnson",
         "evergreen_count": 202
-      },
-      {
-        "company": "TD Bank",
-        "evergreen_count": 193
       },
       {
         "company": "Abbott",
