@@ -655,7 +655,7 @@ const DASHBOARD_SECRET = '__DASHBOARD_SECRET__';
     Object.keys(BREAKDOWN_SERIES).forEach(k => {
       if (BREAKDOWN_SERIES[k]._themeKey) BREAKDOWN_SERIES[k].color = C[BREAKDOWN_SERIES[k]._themeKey];
     });
-    if (typeof loadAll === 'function') loadAll();
+    if (typeof renderAll === 'function') renderAll();
   });
 })();
 
@@ -734,6 +734,7 @@ function _buildC() {
   };
 }
 let C = _buildC();
+const _D = {}; // cached data — populated by fetchAll(), consumed by renderAll()
 
 // Data URLs — function so each loadAll() call gets a fresh cache-busting timestamp (invariant D-2)
 function dataUrls() {
@@ -2993,28 +2994,20 @@ function renderClassification(data) {
 // Fetch orchestration
 const safeJson = url => fetch(url).then(r => r.ok ? r.json() : null).catch(() => null);
 
-async function loadAll() {
+async function fetchAll() {
   const urls = dataUrls();
-
-  // Ops state via proxy (non-fatal — renders regardless)
-  // Ops state proxy removed — role status + decisions now in LCC only
-
-  // Primary metrics (required for repo/growth data)
-  let metrics;
   try {
     const r = await fetch(urls.metrics);
     if (!r.ok) throw new Error(r.status);
-    metrics = await r.json();
+    _D.metrics = await r.json();
   } catch (err) {
     document.getElementById('status-indicator').innerHTML = `⚠️ Load failed (${err.message})`;
     document.getElementById('status-bar').className = 'err';
     document.getElementById('content').style.display = 'block';
     document.getElementById('ops-pipeline-stats').innerHTML =
       `<div class="card" style="grid-column:1/-1"><span class="err">Failed to load metrics. Pipeline may be down — try refreshing.</span></div>`;
-    return;
+    return false;
   }
-
-  // Secondary fetches (non-fatal) — metadata is primary source for pool total + tags
   const [daily, historyRaw, enrichStats, enrichHistoryRaw, metadata, postedJobs, pipelineAlert, archiveRaw, generalReview, discordVerification, trafficRaw] = await Promise.all([
     safeJson(urls.daily),
     fetch(urls.history).then(r => r.ok ? r.text() : null).catch(() => null),
@@ -3028,54 +3021,57 @@ async function loadAll() {
     safeJson(urls.discordVerification),
     fetch(urls.trafficHistory).then(r => r.ok ? r.text() : null).catch(() => null),
   ]);
-  // Parse history.jsonl into array of {date, total} objects
-  const historyEntries = historyRaw
+  _D.daily = daily;
+  _D.historyRaw = historyRaw;
+  _D.enrichStats = enrichStats;
+  _D.metadata = metadata;
+  _D.postedJobs = postedJobs;
+  _D.pipelineAlert = pipelineAlert;
+  _D.archiveRaw = archiveRaw;
+  _D.generalReview = generalReview;
+  _D.discordVerification = discordVerification;
+  _D.trafficRaw = trafficRaw;
+  _D.historyEntries = historyRaw
     ? historyRaw.split('\n').filter(l => l.trim()).map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean)
     : null;
-  // Parse enrichment-history.jsonl
-  const enrichHistory = enrichHistoryRaw
+  _D.enrichHistory = enrichHistoryRaw
     ? enrichHistoryRaw.split('\n').filter(l => l.trim()).map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean)
     : null;
+  _D.archiveEntries = archiveRaw
+    ? archiveRaw.split('\n').filter(l => l.trim()).map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean)
+    : null;
+  const byDate = {};
+  (_D.archiveEntries || []).forEach(e => { if (e.date) byDate[e.date] = e; });
+  (_D.historyEntries || []).forEach(e => { if (e.date) byDate[e.date] = e; });
+  _D.allHistoryMerged = Object.values(byDate).sort((a, b) => a.date.localeCompare(b.date));
+  return true;
+}
 
-  // Use metadata timestamp for status bar (runs every pipeline run — most current)
+function renderAll() {
+  const { metrics, daily, historyEntries, enrichStats, enrichHistory, metadata, postedJobs, pipelineAlert, archiveEntries, allHistoryMerged, generalReview, discordVerification, trafficRaw } = _D;
+  if (!metrics) return;
   const statusTs = (metadata && metadata.generated) ? metadata.generated : metrics.timestamp;
   renderStatusBar(statusTs);
   renderOpsServices(metadata);
   renderOpsPipelineStats(metrics, metadata, enrichStats, daily, historyEntries);
   renderAlert(pipelineAlert);
-  // Parse long-term archive for "All" toggle on Pool Trend
-  const archiveEntries = archiveRaw
-    ? archiveRaw.split('\n').filter(l => l.trim()).map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean)
-    : null;
-  // Merge history + archive (deduped by date) for full timeline in all trend charts
-  const allHistoryMerged = (() => {
-    const byDate = {};
-    (archiveEntries || []).forEach(e => { if (e.date) byDate[e.date] = e; });
-    (historyEntries || []).forEach(e => { if (e.date) byDate[e.date] = e; }); // history overwrites archive for same date
-    return Object.values(byDate).sort((a, b) => a.date.localeCompare(b.date));
-  })();
-
   renderPoolTrend(daily, historyEntries, archiveEntries);
   renderDurationTrend(metrics, daily, historyEntries, metadata);
-  // renderPipelineRunStats removed — Last Run section removed (redundant with stat cards)
   renderPipelineSourceTable(metrics, metadata, enrichStats);
   renderBreakdownTrend(historyEntries);
   renderFilterFunnel(metadata);
   renderDeadlines();
   renderQuality(metrics, enrichStats, metadata, enrichHistory);
   renderEnrichTrend(enrichHistory);
-  // S268A: T3-by-Source chart removed — merged as filter pills on Tier Distribution
   renderTierSourceChart(enrichStats);
   renderUnifiedENR(enrichStats);
   window._poolTotal = metadata ? metadata.total_jobs : null;
   renderRepos(metrics, daily, allHistoryMerged, trafficRaw);
   renderOutHealth(metrics, daily, allHistoryMerged);
-  // SUP freshness indicator
   const supFresh = document.getElementById('sup-freshness');
   if (supFresh && metadata && metadata.generated) {
     supFresh.textContent = `Data as of ${age(metadata.generated)}`;
   }
-  // DASH-19E: Freshness indicators for ENR, TAG, OUT tabs
   ['enr-freshness','tag-freshness','out-freshness'].forEach(id => {
     const el = document.getElementById(id);
     if (el && metadata && metadata.generated) {
@@ -3094,14 +3090,11 @@ async function loadAll() {
   renderDiscordPostingTrend(postedJobs);
   renderDiscordStats(postedJobs, metadata);
   renderClassification(generalReview);
-
   document.getElementById('content').style.display = 'block';
-
-  // Interactive features — MUST run after all tables are populated
-  // S268A: enrich-source-table removed
-  // Unified ENR table has custom sort
   document.querySelectorAll('#unified-enr-table thead th.sortable').forEach((th, i) => {
-    th.addEventListener('click', () => sortUnifiedTable(i));
+    th.removeEventListener('click', th._sortFn);
+    th._sortFn = () => sortUnifiedTable(i);
+    th.addEventListener('click', th._sortFn);
   });
   makeSortable('pipeline-source-table');
   makeSortable('class-companies-table');
@@ -3109,19 +3102,19 @@ async function loadAll() {
   makeSortable('repo-table');
   paginateTable('class-companies-table', 10);
   paginateTable('class-patterns-table', 10);
-  // S268A: enrich-source-table removed
   addColumnToggle('class-companies-table', { exclude: [0, 1] });
   addColumnToggle('unified-enr-table', { exclude: [0, 1] });
   addColumnToggle('repo-table', { exclude: [0, 1] });
-  // Company detail expander (click company name for cross-source data)
   initCompanyExpander(enrichStats, metadata, generalReview);
-  // Source filter on ENR tab
   initSourceFilter();
   paginateTable('top-companies-table', 10);
   addColumnToggle('top-companies-table', { exclude: [0, 1] });
+}
 
-  // Render mermaid diagram after all data is loaded and DOM is ready
-  // Mermaid render moved to tab-switch handler — can't render hidden elements (INF tab is not default)
+async function loadAll() {
+  const ok = await fetchAll();
+  if (!ok) return;
+  renderAll();
 }
 
 // Initialize mermaid BEFORE loadAll (loadAll calls mermaid.run() at end)
