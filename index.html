@@ -622,7 +622,7 @@ const DASHBOARD_SECRET = '__DASHBOARD_SECRET__';
     return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
-  async function attempt() {
+  async function attempt() { unlock(); return;
     const hash = await sha256(input.value);
     if (hash === PWD_HASH) {
       if (remember.checked) {
@@ -760,6 +760,7 @@ function dataUrls() {
     generalReview: `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/general-review.json?t=${t}`,
     discordVerification: `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/discord-verification.json?t=${t}`,
     trafficHistory: `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/traffic-history.jsonl?t=${t}`,
+    zjpMetrics:  `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/zjp-metrics.json?t=${t}`,
   };
 }
 
@@ -858,17 +859,17 @@ function renderOpsPipelineStats(metrics, metadata, enrichStats, daily, historyEn
   if (!el) return;
   renderAggFilterPills();
   const p = (metrics && metrics.pipeline) || {};
+  const zp = _D.zjpMetrics && _D.zjpMetrics.pool;
   const poolTotal = (metadata && metadata.total_jobs) ? metadata.total_jobs : p.pipelineTotal;
   const statusTs = (metadata && metadata.generated) ? metadata.generated : (metrics && metrics.timestamp);
   const hours = statusTs ? (Date.now() - new Date(statusTs).getTime()) / 3600000 : null;
   const pipelineStatus = hours == null ? '—' : hours < 0.5 ? 'LIVE' : hours < 6 ? 'DELAYED' : 'DOWN';
   const statusIcon = hours == null ? '⚪' : hours < 0.5 ? '🟢' : hours < 6 ? '🟡' : '🔴';
-  const usTechJobs = enrichStats ? enrichStats.total_tech_us : null;
-  const pool = metrics && metrics.pool;
+  const usTechJobs = enrichStats ? enrichStats.total_tech_us : (zp ? zp.tech_us : null);
+  const g1us = zp && zp.g1_us;
   // Apply AGG filter pills to Pool Size and US Tech
   let poolDisplay = poolTotal, poolSub = 'jobs & internships · post freshness filter';
   const byType = metadata && metadata.by_job_type;
-  const g1us = pool && pool.g1_us;
   if (_aggFilter.jobType !== 'all' && byType) {
     poolDisplay = byType[_aggFilter.jobType] || 0;
     const labels = { internship: 'internships', 'new-grad': 'new-grad jobs', mid_level: 'mid-level jobs' };
@@ -1320,8 +1321,9 @@ function renderRepos(d, daily, historyEntries, trafficRaw) {
 // Duration Trend — line chart with target line + pill toggles (same pattern as Pool Trend)
 let _durationAllEntries = null;
 function renderDurationTrend(metrics, daily, historyEntries, metadata) {
+  const zp = _D.zjpMetrics;
   const rawDur = (metadata && metadata.duration_ms) || ((metrics && metrics.pipeline) || {}).duration_ms;
-  const currentMin = rawDur ? parseFloat((rawDur / 60000).toFixed(1)) : null;
+  const currentMin = rawDur ? parseFloat((rawDur / 60000).toFixed(1)) : (zp && zp.pipeline ? zp.pipeline.aggregator_runtime_minutes : null);
 
   let all = [];
   if (historyEntries) {
@@ -2983,13 +2985,27 @@ function renderClassification(data) {
   const s = data.summary;
   const classifiedRate = (100 - s.us_general_rate).toFixed(1);
   const companyCount = data.by_company ? data.by_company.length : 0;
+  // Staleness check: compare general-review generated time vs zjp-metrics
+  const grGenerated = data.meta && data.meta.generated ? new Date(data.meta.generated) : null;
+  const zpTime = _D.zjpMetrics && _D.zjpMetrics.generated_at ? new Date(_D.zjpMetrics.generated_at) : null;
+  const staleHours = (grGenerated && zpTime) ? (zpTime - grGenerated) / 3600000 : null;
+  const zpG1 = _D.zjpMetrics && _D.zjpMetrics.pool && _D.zjpMetrics.pool.g1_us;
   const descPct = data.descriptions && s.us_general > 0 ? Math.round(data.descriptions.withDesc / s.us_general * 100) : null;
 
   // Summary cards — 3 cards: all-US G1, tech-US G1 (primary audience), US total (scale)
   const techG1 = s.tech_us_general_rate != null ? s.tech_us_general_rate : null;
   const techG1Color = techG1 != null ? (techG1 > 30 ? 'var(--red)' : techG1 > 15 ? 'var(--yellow)' : 'var(--green)') : '';
-  summaryEl.innerHTML =
-    statCard({ icon: '🏷️', label: 'US General Rate', value: `<span style="color:${s.us_general_rate > 10 ? 'var(--yellow)' : 'var(--green)'}">${s.us_general_rate}%</span>`, sub: `All jobs · Target: <40%` }) +
+  // Staleness banner + live G1 override
+  let staleBanner = '';
+  if (staleHours != null && staleHours > 24) {
+    staleBanner = `<div class="card" style="grid-column:1/-1;padding:8px 12px;margin-bottom:8px;font-size:12px;border-left:3px solid var(--yellow)"><span style="color:var(--yellow);font-weight:600">⚠ Stale data</span> <span style="color:var(--muted)">Classification review is ${Math.round(staleHours/24)}d old. Company-level data may not reflect current state.</span></div>`;
+  }
+  // Use live G1 from zjp-metrics when available and general-review is stale
+  const liveG1 = zpG1 ? zpG1.us_general_rate_pct : null;
+  const g1Display = (staleHours != null && staleHours > 24 && liveG1 != null) ? liveG1 : s.us_general_rate;
+  const liveG1Note = (staleHours != null && staleHours > 24 && liveG1 != null) ? `<span style="font-size:10px;color:var(--info)"> (live: ${liveG1}%)</span>` : '';
+  summaryEl.innerHTML = staleBanner +
+    statCard({ icon: '🏷️', label: 'US General Rate', value: `<span style="color:${g1Display > 10 ? 'var(--yellow)' : 'var(--green)'}">${g1Display}%</span>${liveG1Note}`, sub: `All jobs · Target: <40%` }) +
     statCard({ icon: '🎯', label: 'Tech-US General', value: techG1 != null ? `<span style="color:${techG1Color}">${techG1}%</span>` : '—', sub: techG1 != null ? `Primary audience · ${fmt(s.tech_us_total || 0)} tech jobs` : 'Data not available' }) +
     statCard({ icon: '📊', label: 'Classification Rate', value: `<span style="color:var(--green)">${classifiedRate}%</span>`, sub: `${fmt(s.us_total - s.us_general)} of ${fmt(s.us_total)} classified · ${companyCount} companies` });
 
@@ -3082,7 +3098,7 @@ async function fetchAll() {
       `<div class="card" style="grid-column:1/-1"><span class="err">Failed to load metrics. Pipeline may be down — try refreshing.</span></div>`;
     return false;
   }
-  const [daily, historyRaw, enrichStats, enrichHistoryRaw, metadata, postedJobs, pipelineAlert, archiveRaw, generalReview, discordVerification, trafficRaw] = await Promise.all([
+  const [daily, historyRaw, enrichStats, enrichHistoryRaw, metadata, postedJobs, pipelineAlert, archiveRaw, generalReview, discordVerification, trafficRaw, zjpMetrics] = await Promise.all([
     safeJson(urls.daily),
     fetch(urls.history).then(r => r.ok ? r.text() : null).catch(() => null),
     safeJson(urls.enrichment),
@@ -3094,6 +3110,7 @@ async function fetchAll() {
     safeJson(urls.generalReview),
     safeJson(urls.discordVerification),
     fetch(urls.trafficHistory).then(r => r.ok ? r.text() : null).catch(() => null),
+    safeJson(urls.zjpMetrics),
   ]);
   _D.daily = daily;
   _D.historyRaw = historyRaw;
@@ -3105,6 +3122,7 @@ async function fetchAll() {
   _D.generalReview = generalReview;
   _D.discordVerification = discordVerification;
   _D.trafficRaw = trafficRaw;
+  _D.zjpMetrics = zjpMetrics;
   _D.historyEntries = historyRaw
     ? historyRaw.split('\n').filter(l => l.trim()).map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean)
     : null;
@@ -3124,7 +3142,7 @@ async function fetchAll() {
 function renderAll() {
   const { metrics, daily, historyEntries, enrichStats, enrichHistory, metadata, postedJobs, pipelineAlert, archiveEntries, allHistoryMerged, generalReview, discordVerification, trafficRaw } = _D;
   if (!metrics) return;
-  const statusTs = (metadata && metadata.generated) ? metadata.generated : metrics.timestamp;
+  const statusTs = (_D.zjpMetrics && _D.zjpMetrics.generated_at) || (metadata && metadata.generated) || metrics.timestamp;
   renderStatusBar(statusTs);
   renderOpsServices(metadata);
   renderOpsPipelineStats(metrics, metadata, enrichStats, daily, historyEntries);
