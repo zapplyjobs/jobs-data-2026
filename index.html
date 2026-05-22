@@ -350,6 +350,14 @@
     <div class="card" id="duration-trend-card" style="position:relative;height:200px">
       <canvas id="duration-trend-canvas"></canvas>
     </div>
+    <div class="section-label" style="margin-top:24px">Pool Freshness <span style="font-weight:400;font-size:11px;color:var(--muted)">(job age distribution)</span></div>
+    <div class="card">
+      <div class="grid" id="evergreen-stats"></div>
+      <div id="evergreen-bars"></div>
+      <div style="margin-top:8px;font-size:11px;color:var(--muted)">
+        <strong>Evergreen</strong> = jobs posted &gt;10 days ago. High evergreen % indicates stale pool. <strong>Fresh</strong> = posted within 3 days.
+      </div>
+    </div>
     <div class="section-label" style="margin-top:24px">Domain Distribution <span style="font-weight:400;font-size:11px;color:var(--muted)">(jobs by field across the pool)</span></div>
     <div class="card" id="domain-bars-wrap">
       <div id="domain-bars"></div>
@@ -1316,6 +1324,42 @@ function renderRepos(d, daily, historyEntries, trafficRaw) {
 
 // Supply tab — source table
 // DASH-2b: renderSources (Supply detail table) removed — bar chart is sufficient
+
+// Pool Freshness — evergreen metrics from zjp-metrics.json
+function renderEvergreen() {
+  const zp = _D.zjpMetrics;
+  const statsEl = document.getElementById('evergreen-stats');
+  const barsEl = document.getElementById('evergreen-bars');
+  if (!statsEl || !barsEl) return;
+  const eg = zp && (zp.evergreen || (_D.metrics && _D.metrics.pipeline && _D.metrics.pipeline.evergreen));
+  if (!eg) {
+    statsEl.innerHTML = '<span class="muted">Evergreen data not available.</span>';
+    return;
+  }
+  const pct = eg.evergreen_pct;
+  const pctColor = pct > 30 ? 'var(--red)' : pct > 15 ? 'var(--yellow)' : 'var(--green)';
+  const ab = eg.age_buckets || {};
+  const fresh = ab.fresh_0_3d || 0;
+  const aging = ab.aging_4_10d || 0;
+  const evergreen = ab.evergreen_10_14d || 0;
+  const beyond = ab.beyond_14d || 0;
+  const total = fresh + aging + evergreen + beyond;
+  statsEl.innerHTML =
+    statCard({ icon: '🌱', label: 'Evergreen %', value: `<span style="color:${pctColor}">${pct}%</span>`, sub: `${fmt(evergreen + beyond)} jobs >10d old` }) +
+    statCard({ icon: '✨', label: 'Fresh Jobs', value: fmt(fresh), sub: total > 0 ? Math.round(100 * fresh / total) + '% of pool' : '—' }) +
+    statCard({ icon: '📦', label: 'Total Pool', value: fmt(total), sub: 'by age distribution' });
+  const bars = [
+    { label: 'Fresh (0-3d)', value: fresh, color: 'var(--green)' },
+    { label: 'Aging (4-10d)', value: aging, color: 'var(--accent)' },
+    { label: 'Evergreen (10-14d)', value: evergreen, color: 'var(--yellow)' },
+    { label: 'Beyond 14d', value: beyond, color: 'var(--red)' },
+  ].filter(b => b.value > 0);
+  const max = bars.length ? bars[0].value : 1;
+  barsEl.innerHTML = bars.map(b => {
+    const pctW = max > 0 ? Math.round(b.value / max * 100) : 0;
+    return `<div class="bar-row"><span class="bar-label">${b.label}</span><div class="bar-track"><div class="bar-fill" style="width:${pctW}%;background:${b.color}"></div></div><span class="bar-value">${fmt(b.value)}</span></div>`;
+  }).join('');
+}
 
 // Pipeline tab — run duration trend (last 5 from history.jsonl or daily-stats.json)
 // Duration Trend — line chart with target line + pill toggles (same pattern as Pool Trend)
@@ -3149,6 +3193,7 @@ function renderAll() {
   renderAlert(pipelineAlert);
   renderPoolTrend(daily, historyEntries, archiveEntries);
   renderDurationTrend(metrics, daily, historyEntries, metadata);
+  renderEvergreen();
   renderPipelineSourceTable(metrics, metadata, enrichStats);
   renderBreakdownTrend(historyEntries);
   renderFilterFunnel(metadata);
