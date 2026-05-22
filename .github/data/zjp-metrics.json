@@ -1,6 +1,6 @@
 {
   "schema": "zjp-metrics-v1",
-  "generated_at": "2026-05-22T02:49:24.220Z",
+  "generated_at": "2026-05-22T04:30:50.332Z",
   "pool": {
     "total_jobs": 53904,
     "tech_us": 9010,
@@ -667,24 +667,24 @@
   "alerts": {
     "active": true,
     "failures": [
-      "**fetch-jobs.yml**: Last run 35m ago (expected ≤30m)",
+      "**fetch-jobs.yml**: Last run 50m ago (expected ≤30m)",
       "**Aggregator execution time high**: 41.5 min (threshold: 10 min). Queue: 0.0 min. At 25 min execution, 15-min cadence breaks.",
       "**Low description coverage**: oracle has 125 sidecar entries for 4437 pool jobs (2.8%)",
       "**Cancel cascade**: 15/15 recent fetch runs cancelled (100%). Last successful fetch: unknownh ago. Pipeline data is stale.",
       "**GH_PAT expires in 7 days** — all 8 repo workflows will fail. Rotate immediately."
     ],
-    "last_checked": "2026-05-22T02:36:43.186Z",
+    "last_checked": "2026-05-22T04:06:35.959Z",
     "source": "pipeline-alert.json"
   },
   "pipeline": {
-    "last_aggregator_run": "2026-05-22T02:11:10Z",
+    "last_aggregator_run": "2026-05-22T03:27:13Z",
     "last_aggregator_status": "success",
-    "last_enrichment_run": "2026-05-22T02:45:53Z",
-    "last_enrichment_status": "in_progress",
+    "last_enrichment_run": "2026-05-22T04:15:53Z",
+    "last_enrichment_status": "success",
     "aggregator_runtime_minutes": 0.2,
     "aggregator_queue_minutes": 0,
-    "aggregator_execution_minutes": 0.1,
-    "aggregator_cancel_count": 3,
+    "aggregator_execution_minutes": 0.2,
+    "aggregator_cancel_count": 4,
     "stage_timings": {
       "step1_fetch_ms": 590617,
       "wd_family_mapping_ms": 1865589,
@@ -701,8 +701,8 @@
   },
   "r2": {
     "status": "healthy",
-    "manifest_age_minutes": 14,
-    "manifest_timestamp": "2026-05-22T02:35:18.154Z",
+    "manifest_age_minutes": 2,
+    "manifest_timestamp": "2026-05-22T04:28:32.861Z",
     "files_uploaded": 42,
     "files_failed": null,
     "file_count": 49,
@@ -773,39 +773,39 @@
     "p2_status": "PASS"
   },
   "consumers": {
-    "last_update": "2026-05-22T02:46:15Z",
+    "last_update": "2026-05-22T04:16:17Z",
     "repos": {
       "New-Grad-Jobs-2026": {
-        "positions": 17858,
-        "last_commit": "2026-05-22T02:46:13Z"
+        "positions": 17830,
+        "last_commit": "2026-05-22T04:16:13Z"
       },
       "Internships-2026": {
         "positions": 1813,
-        "last_commit": "2026-05-22T02:46:09Z"
+        "last_commit": "2026-05-22T04:16:09Z"
       },
       "New-Grad-Software-Engineering-Jobs-2026": {
-        "positions": 2843,
-        "last_commit": "2026-05-22T02:46:10Z"
+        "positions": 2841,
+        "last_commit": "2026-05-22T04:16:12Z"
       },
       "New-Grad-Data-Science-Jobs-2026": {
         "positions": 577,
-        "last_commit": "2026-05-22T02:46:11Z"
+        "last_commit": "2026-05-22T04:16:11Z"
       },
       "New-Grad-Hardware-Engineering-Jobs-2026": {
-        "positions": 2239,
-        "last_commit": "2026-05-22T02:46:15Z"
+        "positions": 2236,
+        "last_commit": "2026-05-22T04:16:14Z"
       },
       "New-Grad-Healthcare-Jobs-2026": {
-        "positions": 1840,
-        "last_commit": "2026-05-22T02:46:14Z"
+        "positions": 1835,
+        "last_commit": "2026-05-22T04:16:17Z"
       }
     }
   },
   "repos": {
-    "total_mb": 76931,
+    "total_mb": 76944,
     "repos": {
       "jobs-aggregator-private": 29288,
-      "jobs-data-2026": 25918,
+      "jobs-data-2026": 25931,
       "New-Grad-Jobs-2026": 20184,
       "Internships-2026": 924,
       "New-Grad-Software-Engineering-Jobs-2026": 256,
@@ -816,32 +816,32 @@
   },
   "evergreen": {
     "age_buckets": {
-      "fresh_0_3d": 17485,
-      "aging_4_10d": 24285,
-      "evergreen_10_14d": 9736,
-      "beyond_14d": 2398
+      "fresh_0_3d": 17449,
+      "aging_4_10d": 24254,
+      "evergreen_10_14d": 9755,
+      "beyond_14d": 2446
     },
     "age_buckets_original": {
-      "fresh_0_3d": 1077,
-      "aging_4_10d": 1912,
-      "evergreen_10_14d": 707,
-      "beyond_14d": 130,
+      "fresh_0_3d": 1057,
+      "aging_4_10d": 1917,
+      "evergreen_10_14d": 717,
+      "beyond_14d": 135,
       "coverage": 3826,
       "coverage_pct": 7
     },
     "evergreen_pct": 18.1,
     "first_published_coverage": 7,
-    "first_published_evergreen_pct": 3.4,
+    "first_published_evergreen_pct": 3.5,
     "by_source": {
-      "workday": 9580,
-      "greenhouse": 655,
+      "workday": 9629,
+      "lever": 70,
+      "greenhouse": 668,
+      "microsoft": 65,
+      "smartrecruiters": 392,
       "ashby": 114,
-      "smartrecruiters": 390,
-      "lever": 68,
       "amazon": 52,
       "eightfold": 8,
       "oracle": 1104,
-      "microsoft": 64,
       "amd": 90,
       "uber": 4,
       "jsearch": 5
@@ -873,7 +873,7 @@
       },
       {
         "company": "TD Bank",
-        "evergreen_count": 219
+        "evergreen_count": 221
       },
       {
         "company": "RTX",
