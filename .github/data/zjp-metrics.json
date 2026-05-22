@@ -1,6 +1,6 @@
 {
   "schema": "zjp-metrics-v1",
-  "generated_at": "2026-05-22T13:13:09.271Z",
+  "generated_at": "2026-05-22T14:04:33.022Z",
   "pool": {
     "total_jobs": 53904,
     "tech_us": 9010,
@@ -667,23 +667,24 @@
   "alerts": {
     "active": true,
     "failures": [
+      "**fetch-jobs.yml**: Last run 35m ago (expected ≤30m)",
       "**Aggregator execution time high**: 41.5 min (threshold: 10 min). Queue: 0.0 min. At 25 min execution, 15-min cadence breaks.",
       "**Low description coverage**: oracle has 125 sidecar entries for 4437 pool jobs (2.8%)",
       "**Cancel cascade**: 15/15 recent fetch runs cancelled (100%). Last successful fetch: unknownh ago. Pipeline data is stale.",
       "**GH_PAT expires in 7 days** — all 8 repo workflows will fail. Rotate immediately."
     ],
-    "last_checked": "2026-05-22T13:09:21.745Z",
+    "last_checked": "2026-05-22T13:51:32.353Z",
     "source": "pipeline-alert.json"
   },
   "pipeline": {
-    "last_aggregator_run": "2026-05-22T13:10:41Z",
+    "last_aggregator_run": "2026-05-22T14:03:10Z",
     "last_aggregator_status": "success",
-    "last_enrichment_run": "2026-05-22T13:00:53Z",
-    "last_enrichment_status": "success",
+    "last_enrichment_run": "2026-05-22T14:00:53Z",
+    "last_enrichment_status": "in_progress",
     "aggregator_runtime_minutes": 0.3,
     "aggregator_queue_minutes": 0,
     "aggregator_execution_minutes": 0.2,
-    "aggregator_cancel_count": 6,
+    "aggregator_cancel_count": 5,
     "stage_timings": {
       "step1_fetch_ms": 590617,
       "wd_family_mapping_ms": 1865589,
@@ -700,8 +701,8 @@
   },
   "r2": {
     "status": "healthy",
-    "manifest_age_minutes": 8,
-    "manifest_timestamp": "2026-05-22T13:05:05.630Z",
+    "manifest_age_minutes": 15,
+    "manifest_timestamp": "2026-05-22T13:49:58.471Z",
     "files_uploaded": 42,
     "files_failed": null,
     "file_count": 49,
@@ -772,31 +773,31 @@
     "p2_status": "PASS"
   },
   "consumers": {
-    "last_update": "2026-05-22T13:01:20Z",
+    "last_update": "2026-05-22T14:01:20Z",
     "repos": {
       "New-Grad-Jobs-2026": {
-        "positions": 17592,
-        "last_commit": "2026-05-22T13:01:20Z"
+        "positions": 17407,
+        "last_commit": "2026-05-22T14:01:16Z"
       },
       "Internships-2026": {
         "positions": 1810,
-        "last_commit": "2026-05-22T13:01:18Z"
+        "last_commit": "2026-05-22T14:01:20Z"
       },
       "New-Grad-Software-Engineering-Jobs-2026": {
-        "positions": 2822,
-        "last_commit": "2026-05-22T13:01:10Z"
+        "positions": 2813,
+        "last_commit": "2026-05-22T14:01:17Z"
       },
       "New-Grad-Data-Science-Jobs-2026": {
-        "positions": 573,
-        "last_commit": "2026-05-22T13:01:10Z"
+        "positions": 572,
+        "last_commit": "2026-05-22T14:01:17Z"
       },
       "New-Grad-Hardware-Engineering-Jobs-2026": {
-        "positions": 2214,
-        "last_commit": "2026-05-22T13:01:15Z"
+        "positions": 2201,
+        "last_commit": "2026-05-22T14:01:17Z"
       },
       "New-Grad-Healthcare-Jobs-2026": {
-        "positions": 1733,
-        "last_commit": "2026-05-22T13:01:18Z"
+        "positions": 1700,
+        "last_commit": "2026-05-22T14:01:16Z"
       }
     }
   },
@@ -815,33 +816,33 @@
   },
   "evergreen": {
     "age_buckets": {
-      "fresh_0_3d": 17163,
-      "aging_4_10d": 23569,
-      "evergreen_10_14d": 9517,
-      "beyond_14d": 3638
+      "fresh_0_3d": 16995,
+      "aging_4_10d": 23598,
+      "evergreen_10_14d": 9609,
+      "beyond_14d": 3685
     },
     "age_buckets_original": {
-      "fresh_0_3d": 986,
-      "aging_4_10d": 1907,
-      "evergreen_10_14d": 724,
-      "beyond_14d": 192,
+      "fresh_0_3d": 969,
+      "aging_4_10d": 1894,
+      "evergreen_10_14d": 742,
+      "beyond_14d": 204,
       "coverage": 3809,
       "coverage_pct": 7
     },
-    "evergreen_pct": 17.7,
+    "evergreen_pct": 17.8,
     "first_published_coverage": 7,
-    "first_published_evergreen_pct": 5,
+    "first_published_evergreen_pct": 5.4,
     "by_source": {
-      "smartrecruiters": 412,
-      "workday": 10492,
-      "greenhouse": 723,
-      "microsoft": 72,
-      "ashby": 120,
+      "workday": 10583,
+      "smartrecruiters": 426,
+      "ashby": 125,
+      "greenhouse": 748,
+      "amd": 92,
+      "microsoft": 74,
       "lever": 73,
       "amazon": 52,
       "eightfold": 8,
       "oracle": 1104,
-      "amd": 90,
       "uber": 4,
       "jsearch": 5
     },
@@ -868,7 +869,7 @@
       },
       {
         "company": "Johnson & Johnson",
-        "evergreen_count": 252
+        "evergreen_count": 256
       },
       {
         "company": "Abbott",
