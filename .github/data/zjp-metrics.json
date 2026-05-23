@@ -1,45 +1,45 @@
 {
   "schema": "zjp-metrics-v1",
-  "generated_at": "2026-05-23T22:05:50.986Z",
+  "generated_at": "2026-05-23T22:35:11.766Z",
   "pool": {
-    "total_jobs": 56266,
-    "tech_us": 9108,
+    "total_jobs": 56270,
+    "tech_us": 9160,
     "domains": {
-      "software": 8383,
-      "hardware": 6634,
-      "product": 882,
-      "data_science": 1417,
-      "manufacturing": 5687,
+      "software": 8393,
+      "hardware": 6631,
+      "general": 8185,
       "ai": 591,
-      "operations": 6995,
-      "general": 8181,
-      "logistics": 1638,
-      "sales": 5129,
+      "data_science": 1418,
+      "product": 882,
+      "manufacturing": 5664,
+      "operations": 6987,
+      "logistics": 1637,
+      "sales": 5130,
       "legal": 547,
       "marketing": 914,
-      "finance": 4660,
-      "retail": 5072,
-      "healthcare": 3774,
-      "hr": 607
+      "finance": 4661,
+      "healthcare": 3799,
+      "hr": 608,
+      "retail": 5071
     },
     "general_rate_pct": 14.5,
     "g1_us": {
       "us_total": 34168,
-      "us_general": 3561,
+      "us_general": 3562,
       "us_general_rate_pct": 10.4,
       "tech_us_general_rate_pct": 28.1
     },
     "fetch_results": {
-      "greenhouse": 40521,
+      "greenhouse": 40522,
       "lever": 5076,
       "ashby": 6988,
-      "workday": 2500,
+      "workday": 1000,
       "smartrecruiters": 4740,
       "amazon": 1457,
       "eightfold": 233,
       "twosigma": 20,
       "uber": 420,
-      "google": 932,
+      "google": 930,
       "simplify": 732,
       "oracle": 14468,
       "amd": 480,
@@ -85,31 +85,31 @@
   },
   "tag": {
     "drift": {
-      "drift_rate": 0.008,
-      "drift_pct": "0.8%",
+      "drift_rate": 0.014,
+      "drift_pct": "1.4%",
       "sample_size": 500,
-      "drifted": 4,
+      "drifted": 7,
       "warnings": []
     },
     "precision": {
       "domains": {
         "software": {
-          "total": 5011,
-          "fps": 270,
-          "fp_rate": 0.05388146078627021,
-          "fp_pct": "5.39%"
+          "total": 5021,
+          "fps": 272,
+          "fp_rate": 0.05417247560246963,
+          "fp_pct": "5.42%"
         },
         "hardware": {
-          "total": 3587,
+          "total": 3584,
           "fps": 58,
-          "fp_rate": 0.016169500975745748,
+          "fp_rate": 0.016183035714285716,
           "fp_pct": "1.62%"
         },
         "healthcare": {
-          "total": 2903,
+          "total": 2927,
           "fps": 30,
-          "fp_rate": 0.010334137099552188,
-          "fp_pct": "1.03%"
+          "fp_rate": 0.010249402118209771,
+          "fp_pct": "1.02%"
         },
         "data_science": {
           "total": 879,
@@ -119,12 +119,12 @@
         }
       },
       "warnings": [
-        "software: 5.39% suspect rate exceeds 5% threshold (270/5011 jobs)"
+        "software: 5.42% suspect rate exceeds 5% threshold (272/5021 jobs)"
       ]
     },
     "keyword_health": {
       "software": {
-        "total_jobs": 5011,
+        "total_jobs": 5021,
         "keyword_count": 343,
         "keywords_with_matches": 207,
         "top_5": [
@@ -228,7 +228,7 @@
         "high_volume": []
       },
       "hardware": {
-        "total_jobs": 3587,
+        "total_jobs": 3584,
         "keyword_count": 321,
         "keywords_with_matches": 189,
         "top_5": [
@@ -261,50 +261,50 @@
         "high_volume": []
       },
       "healthcare": {
-        "total_jobs": 2903,
+        "total_jobs": 2927,
         "keyword_count": 201,
         "keywords_with_matches": 118,
         "top_5": [
           {
             "keyword": "pharmacy tech",
             "matches": 688,
-            "rate_pct": "23.7%"
+            "rate_pct": "23.5%"
           },
           {
             "keyword": "pharmacy technician",
             "matches": 677,
-            "rate_pct": "23.3%"
+            "rate_pct": "23.1%"
           },
           {
             "keyword": "pharmacy intern",
             "matches": 202,
-            "rate_pct": "7.0%"
+            "rate_pct": "6.9%"
           },
           {
             "keyword": "pharmacist",
             "matches": 139,
-            "rate_pct": "4.8%"
+            "rate_pct": "4.7%"
           },
           {
             "keyword": "physician",
             "matches": 138,
-            "rate_pct": "4.8%"
+            "rate_pct": "4.7%"
           }
         ],
         "high_volume": [
-          "pharmacy tech (688 jobs, 23.7% of domain)",
-          "pharmacy technician (677 jobs, 23.3% of domain)"
+          "pharmacy tech (688 jobs, 23.5% of domain)",
+          "pharmacy technician (677 jobs, 23.1% of domain)"
         ]
       },
       "finance": {
-        "total_jobs": 2745,
+        "total_jobs": 2746,
         "keyword_count": 184,
         "keywords_with_matches": 117,
         "top_5": [
           {
             "keyword": "banker",
             "matches": 762,
-            "rate_pct": "27.8%"
+            "rate_pct": "27.7%"
           },
           {
             "keyword": "teller",
@@ -328,11 +328,11 @@
           }
         ],
         "high_volume": [
-          "banker (762 jobs, 27.8% of domain)"
+          "banker (762 jobs, 27.7% of domain)"
         ]
       },
       "sales": {
-        "total_jobs": 3073,
+        "total_jobs": 3074,
         "keyword_count": 80,
         "keywords_with_matches": 55,
         "top_5": [
@@ -353,8 +353,8 @@
           },
           {
             "keyword": "account manager",
-            "matches": 305,
-            "rate_pct": "9.9%"
+            "matches": 306,
+            "rate_pct": "10.0%"
           },
           {
             "keyword": "sales representative",
@@ -402,7 +402,7 @@
         ]
       },
       "operations": {
-        "total_jobs": 4755,
+        "total_jobs": 4747,
         "keyword_count": 380,
         "keywords_with_matches": 186,
         "top_5": [
@@ -468,7 +468,7 @@
         "high_volume": []
       },
       "hr": {
-        "total_jobs": 336,
+        "total_jobs": 337,
         "keyword_count": 53,
         "keywords_with_matches": 40,
         "top_5": [
@@ -480,7 +480,7 @@
           {
             "keyword": "recruiter",
             "matches": 47,
-            "rate_pct": "14.0%"
+            "rate_pct": "13.9%"
           },
           {
             "keyword": "talent acquisition",
@@ -490,7 +490,7 @@
           {
             "keyword": "training specialist",
             "matches": 21,
-            "rate_pct": "6.3%"
+            "rate_pct": "6.2%"
           },
           {
             "keyword": "recruiting coordinator",
@@ -539,7 +539,7 @@
         ]
       },
       "retail": {
-        "total_jobs": 4254,
+        "total_jobs": 4253,
         "keyword_count": 24,
         "keywords_with_matches": 22,
         "top_5": [
@@ -575,14 +575,14 @@
         ]
       },
       "manufacturing": {
-        "total_jobs": 3275,
+        "total_jobs": 3250,
         "keyword_count": 162,
         "keywords_with_matches": 104,
         "top_5": [
           {
             "keyword": "manufacturing engineer",
             "matches": 201,
-            "rate_pct": "6.1%"
+            "rate_pct": "6.2%"
           },
           {
             "keyword": "assembler",
@@ -608,19 +608,19 @@
         "high_volume": []
       },
       "logistics": {
-        "total_jobs": 1385,
+        "total_jobs": 1384,
         "keyword_count": 38,
         "keywords_with_matches": 28,
         "top_5": [
           {
             "keyword": "fulfillment associate",
             "matches": 355,
-            "rate_pct": "25.6%"
+            "rate_pct": "25.7%"
           },
           {
             "keyword": "warehouse",
             "matches": 355,
-            "rate_pct": "25.6%"
+            "rate_pct": "25.7%"
           },
           {
             "keyword": "delivery driver",
@@ -639,8 +639,8 @@
           }
         ],
         "high_volume": [
-          "fulfillment associate (355 jobs, 25.6% of domain)",
-          "warehouse (355 jobs, 25.6% of domain)",
+          "fulfillment associate (355 jobs, 25.7% of domain)",
+          "warehouse (355 jobs, 25.7% of domain)",
           "delivery driver (336 jobs, 24.3% of domain)"
         ]
       }
@@ -649,14 +649,14 @@
     "source": "jobs-metadata.json"
   },
   "enrichment": {
-    "total_enriched": 8675,
-    "enrichment_rate_pct": 95.2,
+    "total_enriched": 8727,
+    "enrichment_rate_pct": 95.3,
     "tiers": {
       "t0": 529,
-      "t1": 428,
-      "t2": 94,
+      "t1": 397,
+      "t2": 95,
       "t3": 634,
-      "t4": 6990
+      "t4": 7072
     },
     "enricher_version": 64,
     "reenrichment_pending": 937,
@@ -665,44 +665,43 @@
   "alerts": {
     "active": true,
     "failures": [
-      "**Aggregator execution time high**: 10.1 min (threshold: 10 min). Queue: 0.0 min. At 25 min execution, 15-min cadence breaks.",
       "**Low description coverage**: oracle has 125 sidecar entries for 4547 pool jobs (2.7%)",
       "**GH_PAT expires in 6 days** — all 8 repo workflows will fail. Rotate immediately."
     ],
-    "last_checked": "2026-05-23T21:51:58.791Z",
+    "last_checked": "2026-05-23T22:22:30.344Z",
     "source": "pipeline-alert.json"
   },
   "pipeline": {
-    "last_aggregator_run": "2026-05-23T22:03:07Z",
-    "last_aggregator_status": "success",
-    "last_enrichment_run": "2026-05-23T22:00:37Z",
+    "last_aggregator_run": "2026-05-23T22:30:35Z",
+    "last_aggregator_status": "in_progress",
+    "last_enrichment_run": "2026-05-23T22:30:36Z",
     "last_enrichment_status": "in_progress",
-    "aggregator_runtime_minutes": 0.3,
+    "aggregator_runtime_minutes": 0.2,
     "aggregator_queue_minutes": 0,
-    "aggregator_execution_minutes": 0.2,
+    "aggregator_execution_minutes": 0.1,
     "aggregator_cancel_count": 0,
     "stage_timings": {
-      "step1_fetch_ms": 497909,
-      "wd_family_mapping_ms": 35,
-      "step2_enhance_ms": 178,
-      "step3_validate_ms": 161,
-      "step4_filter_ms": 953,
-      "step5_tag_ms": 13099,
-      "step6_dedup_ms": 290,
-      "step8_sort_ms": 83,
-      "step9_write_ms": 21689
+      "step1_fetch_ms": 571188,
+      "wd_family_mapping_ms": 33,
+      "step2_enhance_ms": 188,
+      "step3_validate_ms": 158,
+      "step4_filter_ms": 1041,
+      "step5_tag_ms": 14074,
+      "step6_dedup_ms": 291,
+      "step8_sort_ms": 82,
+      "step9_write_ms": 19443
     },
-    "pipeline_internal_minutes": 8.9,
+    "pipeline_internal_minutes": 10.1,
     "push_overhead_minutes": 0
   },
   "r2": {
     "status": "healthy",
-    "manifest_age_minutes": 9,
-    "manifest_timestamp": "2026-05-23T21:57:07.467Z",
+    "manifest_age_minutes": 6,
+    "manifest_timestamp": "2026-05-23T22:29:06.233Z",
     "files_uploaded": 41,
     "files_failed": null,
     "file_count": 50,
-    "total_size_mb": 342
+    "total_size_mb": 527
   },
   "dedupe": {
     "status": "tracked",
@@ -769,39 +768,39 @@
     "p2_status": "PASS"
   },
   "consumers": {
-    "last_update": "2026-05-23T22:01:02Z",
+    "last_update": "2026-05-23T22:30:58Z",
     "repos": {
       "New-Grad-Jobs-2026": {
         "positions": 20032,
-        "last_commit": "2026-05-23T22:00:57Z"
+        "last_commit": "2026-05-23T22:30:52Z"
       },
       "Internships-2026": {
-        "positions": 1822,
-        "last_commit": "2026-05-23T22:00:52Z"
+        "positions": 1821,
+        "last_commit": "2026-05-23T22:30:58Z"
       },
       "New-Grad-Software-Engineering-Jobs-2026": {
-        "positions": 2985,
-        "last_commit": "2026-05-23T22:01:00Z"
+        "positions": 2993,
+        "last_commit": "2026-05-23T22:30:51Z"
       },
       "New-Grad-Data-Science-Jobs-2026": {
         "positions": 575,
-        "last_commit": "2026-05-23T22:00:52Z"
+        "last_commit": "2026-05-23T22:30:55Z"
       },
       "New-Grad-Hardware-Engineering-Jobs-2026": {
-        "positions": 2050,
-        "last_commit": "2026-05-23T22:01:02Z"
+        "positions": 2047,
+        "last_commit": "2026-05-23T22:30:56Z"
       },
       "New-Grad-Healthcare-Jobs-2026": {
-        "positions": 2046,
-        "last_commit": "2026-05-23T22:00:55Z"
+        "positions": 2070,
+        "last_commit": "2026-05-23T22:30:56Z"
       }
     }
   },
   "repos": {
-    "total_mb": 76957,
+    "total_mb": 76965,
     "repos": {
       "jobs-aggregator-private": 29288,
-      "jobs-data-2026": 25941,
+      "jobs-data-2026": 25949,
       "New-Grad-Jobs-2026": 20185,
       "Internships-2026": 925,
       "New-Grad-Software-Engineering-Jobs-2026": 256,
@@ -812,29 +811,29 @@
   },
   "evergreen": {
     "age_buckets": {
-      "fresh_0_3d": 14418,
-      "aging_4_10d": 26503,
-      "evergreen_10_14d": 13806,
+      "fresh_0_3d": 14374,
+      "aging_4_10d": 26509,
+      "evergreen_10_14d": 13848,
       "beyond_14d": 1539
     },
     "age_buckets_original": {
-      "fresh_0_3d": 894,
-      "aging_4_10d": 1830,
-      "evergreen_10_14d": 1177,
+      "fresh_0_3d": 884,
+      "aging_4_10d": 1828,
+      "evergreen_10_14d": 1190,
       "beyond_14d": 18,
-      "coverage": 3919,
+      "coverage": 3920,
       "coverage_pct": 7
     },
-    "evergreen_pct": 24.5,
+    "evergreen_pct": 24.6,
     "first_published_coverage": 7,
     "first_published_evergreen_pct": 0.5,
     "by_source": {
-      "greenhouse": 952,
-      "ashby": 159,
-      "workday": 12343,
-      "smartrecruiters": 515,
-      "lever": 84,
-      "microsoft": 87,
+      "workday": 12369,
+      "greenhouse": 962,
+      "microsoft": 88,
+      "smartrecruiters": 517,
+      "ashby": 161,
+      "lever": 85,
       "amd": 16,
       "amazon": 51,
       "eightfold": 7,
@@ -873,7 +872,7 @@
       },
       {
         "company": "Johnson Controls",
-        "evergreen_count": 236
+        "evergreen_count": 239
       },
       {
         "company": "Sherwin-Williams",
@@ -881,7 +880,7 @@
       },
       {
         "company": "Boeing",
-        "evergreen_count": 214
+        "evergreen_count": 215
       }
     ],
     "top_title_repetition": [
