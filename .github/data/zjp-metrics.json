@@ -1,6 +1,6 @@
 {
   "schema": "zjp-metrics-v1",
-  "generated_at": "2026-05-26T07:20:53.067Z",
+  "generated_at": "2026-05-26T08:43:18.407Z",
   "pool": {
     "total_jobs": 53190,
     "tech_us": 8864,
@@ -669,20 +669,21 @@
     "failures": [
       "**Aggregator execution time high**: 20.6 min (threshold: 10 min). Queue: 0.0 min. At 25 min execution, 15-min cadence breaks.",
       "**Source fetch failure (apple)**: 0 jobs fetched this run despite 104 in pool (carry-forward). Fetcher likely timed out or broken.",
+      "**Cancel cascade**: 8/15 recent fetch runs cancelled (53%). Last successful fetch: 2.1h ago. Pipeline data is stale.",
       "**GH_PAT expires in 3 days** — all 8 repo workflows will fail. Rotate immediately."
     ],
-    "last_checked": "2026-05-26T07:07:05.860Z",
+    "last_checked": "2026-05-26T08:36:26.463Z",
     "source": "pipeline-alert.json"
   },
   "pipeline": {
-    "last_aggregator_run": "2026-05-26T07:13:58Z",
-    "last_aggregator_status": "in_progress",
-    "last_enrichment_run": "2026-05-26T07:15:49Z",
+    "last_aggregator_run": "2026-05-26T08:15:49Z",
+    "last_aggregator_status": "cancelled",
+    "last_enrichment_run": "2026-05-26T08:30:51Z",
     "last_enrichment_status": "success",
-    "aggregator_runtime_minutes": 4.1,
+    "aggregator_runtime_minutes": 0.2,
     "aggregator_queue_minutes": 0,
-    "aggregator_execution_minutes": 4,
-    "aggregator_cancel_count": 4,
+    "aggregator_execution_minutes": 0.1,
+    "aggregator_cancel_count": 7,
     "stage_timings": {
       "step1_fetch_ms": 1200234,
       "step2_enhance_ms": 271,
@@ -698,8 +699,8 @@
   },
   "r2": {
     "status": "healthy",
-    "manifest_age_minutes": 1,
-    "manifest_timestamp": "2026-05-26T07:20:04.177Z",
+    "manifest_age_minutes": 9,
+    "manifest_timestamp": "2026-05-26T08:34:48.047Z",
     "files_uploaded": 42,
     "files_failed": null,
     "file_count": 50,
@@ -770,39 +771,39 @@
     "p2_status": "PASS"
   },
   "consumers": {
-    "last_update": "2026-05-26T07:16:12Z",
+    "last_update": "2026-05-26T08:31:12Z",
     "repos": {
       "New-Grad-Jobs-2026": {
-        "positions": 17006,
-        "last_commit": "2026-05-26T07:16:12Z"
+        "positions": 16717,
+        "last_commit": "2026-05-26T08:31:09Z"
       },
       "Internships-2026": {
         "positions": 2050,
-        "last_commit": "2026-05-26T07:16:05Z"
+        "last_commit": "2026-05-26T08:31:08Z"
       },
       "New-Grad-Software-Engineering-Jobs-2026": {
-        "positions": 2603,
-        "last_commit": "2026-05-26T07:16:09Z"
+        "positions": 2553,
+        "last_commit": "2026-05-26T08:31:10Z"
       },
       "New-Grad-Data-Science-Jobs-2026": {
-        "positions": 498,
-        "last_commit": "2026-05-26T07:16:08Z"
+        "positions": 492,
+        "last_commit": "2026-05-26T08:31:09Z"
       },
       "New-Grad-Hardware-Engineering-Jobs-2026": {
-        "positions": 1814,
-        "last_commit": "2026-05-26T07:16:06Z"
+        "positions": 1783,
+        "last_commit": "2026-05-26T08:31:12Z"
       },
       "New-Grad-Healthcare-Jobs-2026": {
-        "positions": 1921,
-        "last_commit": "2026-05-26T07:16:12Z"
+        "positions": 1918,
+        "last_commit": "2026-05-26T08:31:12Z"
       }
     }
   },
   "repos": {
-    "total_mb": 77020,
+    "total_mb": 77006,
     "repos": {
       "jobs-aggregator-private": 29288,
-      "jobs-data-2026": 26002,
+      "jobs-data-2026": 25988,
       "New-Grad-Jobs-2026": 20186,
       "Internships-2026": 925,
       "New-Grad-Software-Engineering-Jobs-2026": 256,
@@ -813,24 +814,24 @@
   },
   "evergreen": {
     "age_buckets": {
-      "fresh_0_3d": 5598,
-      "aging_4_10d": 29191,
-      "evergreen_10_14d": 16289,
-      "beyond_14d": 2112
+      "fresh_0_3d": 4956,
+      "aging_4_10d": 29825,
+      "evergreen_10_14d": 16193,
+      "beyond_14d": 2216
     },
     "age_buckets_original": {
       "fresh_0_3d": 484,
       "aging_4_10d": 1964,
-      "evergreen_10_14d": 1484,
-      "beyond_14d": 10,
+      "evergreen_10_14d": 1476,
+      "beyond_14d": 18,
       "coverage": 3942,
       "coverage_pct": 7
     },
-    "evergreen_pct": 30.6,
+    "evergreen_pct": 30.4,
     "first_published_coverage": 7,
-    "first_published_evergreen_pct": 0.3,
+    "first_published_evergreen_pct": 0.5,
     "by_source": {
-      "workday": 14958,
+      "workday": 14966,
       "greenhouse": 1208,
       "lever": 83,
       "smartrecruiters": 684,
