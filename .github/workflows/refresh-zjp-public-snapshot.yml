@@ -20,18 +20,7 @@ jobs:
           ref: main
           fetch-depth: 1
 
-      - name: Seed latest aggregator inputs
-        env:
-          GH_PAT: ${{ secrets.GH_PAT }}
-        run: |
-          mkdir -p .github/data
-          curl -sf -H "Authorization: Bearer ${GH_PAT}" -H "Accept: application/vnd.github.raw" \
-            "https://api.github.com/repos/zapplyjobs/jobs-aggregator-private/contents/.github/data/all_jobs.json" \
-            -o .github/data/all_jobs.json
-          curl -sf -H "Authorization: Bearer ${GH_PAT}" -H "Accept: application/vnd.github.raw" \
-            "https://api.github.com/repos/zapplyjobs/jobs-aggregator-private/contents/.github/data/jobs-metadata.json" \
-            -o .github/data/jobs-metadata.json
-          echo "✅ Seeded all_jobs.json + jobs-metadata.json from jobs-aggregator-private"
+
 
 
       - name: Setup Node.js
@@ -44,9 +33,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Seed latest snapshot inputs
+      - name: Seed latest all_jobs from R2
         env:
-          GH_PAT: ${{ secrets.GH_PAT }}
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
@@ -75,12 +63,9 @@ jobs:
                 secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
               },
             });
-            const bucket = process.env.R2_BUCKET_NAME;
-            for (const name of ['all_jobs.json', 'jobs-metadata.json']) {
-              const res = await client.send(new GetObjectCommand({ Bucket: bucket, Key: `data/${name}` }));
-              await streamToFile(res.Body, path.join('.github/data', name));
-            }
-            console.log('SEEDED_R2:2');
+            const res = await client.send(new GetObjectCommand({ Bucket: process.env.R2_BUCKET_NAME, Key: 'data/all_jobs.json' }));
+            await streamToFile(res.Body, path.join('.github/data', 'all_jobs.json'));
+            console.log('SEEDED_R2:all_jobs');
           }
           main().catch(err => { console.error(err.message); process.exit(1); });
           NODE
