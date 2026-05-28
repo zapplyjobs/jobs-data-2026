@@ -1,0 +1,46 @@
+name: Refresh ZJP Public Snapshot
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: refresh-zjp-public-snapshot
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Generate public snapshot
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+        run: node .github/scripts/generate-public-snapshot.js
+
+      - name: Commit snapshot
+        run: |
+          git config user.email "bot@zapplyjobs.com"
+          git config user.name "Data Bot"
+          git add .github/data/zjp-public-snapshot.json
+          git commit -m "chore: refresh zjp public snapshot [skip ci]" || exit 0
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push && break
+            echo "Push attempt $i failed, retrying in 5s..."
+            sleep 5
+          done
