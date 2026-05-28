@@ -486,6 +486,9 @@
       </select>
     </div>
     <div class="grid" id="quality-enrich"></div>
+    <div class="section-label" style="margin-top:24px">Why ENR Moved</div>
+    <div class="grid" id="enrich-explain"></div>
+    <div class="card" id="enrich-explain-detail" style="margin-top:12px"></div>
     <div class="section-label" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center">
       <span>Tier Distribution by Source</span>
       <span id="tier-filter-pills"></span>
@@ -1180,6 +1183,26 @@ function renderQuality(d, enrichStats, metadata, enrichHistory) {
     statCard({ icon: '🔬', label: 'Processed',  value: fmt(enriched) + delta(enriched, 'total_enriched'), sub: `of ${fmt(techUs)} tech+US · Target: 100%${churnNote}` }) +
     statCard({ icon: '📄', label: 'Has Description', value: fmt(hasDesc), sub: (hasDesc != null && techUs != null ? Math.round(100 * hasDesc / techUs) + '% of pool · ' : '') + 'Target: 100%' }) +
     statCard({ icon: '⏳', label: 'In Queue',  value: totalBacklog != null ? fmt(totalBacklog) : '—', valueColor: backlogColor, sub: totalBacklog != null && totalBacklog === 0 ? 'All caught up' : (queueGap != null ? fmt(queueGap) + ' new' : '') + (reenrichPending > 0 ? ' + ' + fmt(reenrichPending) + ' re-enrich' : '') + (drainLabel ? ' · ' + drainLabel : '') + (t0Alert ? ' · ' + t0Alert : '') + t1Note + ' · Target: 0' });
+
+  if (enrichStats && enrichStats.residual_explanations) {
+    const ex = enrichStats.residual_explanations;
+    const owner = ex.by_owner || {};
+    const currentRun = ex.current_run || {};
+    document.getElementById('enrich-explain').innerHTML =
+      statCard({ icon: '🏗️', label: 'AGG / Source-side', value: fmt(owner.agg_source || 0), sub: 'Residuals mainly blocked by missing or weak source text' }) +
+      statCard({ icon: '🏷️', label: 'TAG / Content-side', value: fmt(owner.tag_content || 0), sub: 'Residuals with descriptions but weak or ambiguous technical signal' }) +
+      statCard({ icon: '🧱', label: 'Structural T0', value: fmt(owner.structural || 0), sub: 'Fallback sources without reliable description paths' }) +
+      statCard({ icon: '🛟', label: 'ENR-owned signals', value: fmt(owner.enr_owned_signal || 0), sub: `${fmt(currentRun.late_description_rescues || 0)} rescues this run · ${fmt(currentRun.stuck_records || 0)} stuck-record signals` });
+    const top = (ex.by_source || []).filter(r => r.residual_count > 0).slice(0, 6);
+    const visaReasons = Object.entries(ex.visa_no_signal_reasons || {}).sort((a, b) => b[1] - a[1]).slice(0, 4);
+    document.getElementById('enrich-explain-detail').innerHTML =
+      `<div style="font-size:12px;font-weight:600;margin-bottom:8px">Top residual sources</div>` +
+      (top.length ? `<table style="width:100%;font-size:12px"><tr><th style="text-align:left">Source</th><th style="text-align:right">Residual</th><th style="text-align:left">Owner</th><th style="text-align:left">Why</th></tr>` +
+        top.map(r => `<tr><td>${esc(r.source)}</td><td style="text-align:right">${fmt(r.residual_count)}</td><td>${esc(r.owner)}</td><td style="color:var(--muted)">${esc(r.note || r.reason || '')}</td></tr>`).join('') +
+        `</table>` : `<div class="muted">No residual explanation data.</div>`) +
+      `<div style="font-size:12px;font-weight:600;margin:14px 0 6px">Visa no-signal reasons</div>` +
+      (visaReasons.length ? `<div class="muted" style="font-size:12px">${visaReasons.map(([k, v]) => `${k}: ${fmt(v)}`).join(' · ')}</div>` : `<div class="muted" style="font-size:12px">No visa gap reasons recorded.</div>`);
+  }
 
   if (enrichStats && enrichStats.by_source) {
     const ORDER = MASTER_SOURCES;
@@ -2294,13 +2317,14 @@ function renderUnifiedENR(enrichStats) {
     const formP = e > 0 ? Math.round(100 * form / e) : 0;
     const noneP = e > 0 ? Math.round(100 * none / e) : 0;
 
+    const note = v.primary_gap_note || '';
     // Source row
     const sr = document.createElement('tr');
     sr.className = 'source-row';
     sr.dataset.source = src;
     sr.innerHTML =
       '<td class="expand-arrow" style="cursor:pointer;font-size:10px;color:var(--muted);user-select:none)">▶</td>' +
-      '<td style="font-weight:600">' + src + '</td>' +
+      '<td style="font-weight:600">' + src + (note ? `<div style="font-size:10px;color:var(--muted);font-weight:400">${esc(note)}</div>` : '') + '</td>' +
       '<td style="color:var(--muted)">' + fmt(techUs) + '</td>' +
       '<td>' + fmt(e) + '</td>' +
       '<td style="font-weight:600;' + t3style + '">' + t3pct + '%</td>' +
