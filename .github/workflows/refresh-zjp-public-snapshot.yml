@@ -20,26 +20,56 @@ jobs:
           ref: main
           fetch-depth: 1
 
-      - name: Seed latest aggregator inputs
-        env:
-          GH_PAT: ${{ secrets.GH_PAT }}
-        run: |
-          mkdir -p .github/data
-          curl -sf -H "Authorization: Bearer ${GH_PAT}" -H "Accept: application/vnd.github.raw" \
-            "https://api.github.com/repos/zapplyjobs/jobs-aggregator-private/contents/.github/data/all_jobs.json" \
-            -o .github/data/all_jobs.json
-          curl -sf -H "Authorization: Bearer ${GH_PAT}" -H "Accept: application/vnd.github.raw" \
-            "https://api.github.com/repos/zapplyjobs/jobs-aggregator-private/contents/.github/data/jobs-metadata.json" \
-            -o .github/data/jobs-metadata.json
-          echo "✅ Seeded all_jobs.json + jobs-metadata.json from jobs-aggregator-private"
-
-
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version: '22'
           cache: npm
           cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Seed latest snapshot inputs
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: |
+          mkdir -p .github/data
+          node - <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+          const { S3Client, GetObjectCommand } = require('@aws-sdk/client-s3');
+          async function streamToFile(stream, target) {
+            return new Promise((resolve, reject) => {
+              const file = fs.createWriteStream(target);
+              stream.pipe(file);
+              stream.on('error', reject);
+              file.on('finish', resolve);
+              file.on('error', reject);
+            });
+          }
+          async function main() {
+            const client = new S3Client({
+              region: 'auto',
+              endpoint: process.env.R2_ENDPOINT,
+              credentials: {
+                accessKeyId: process.env.R2_ACCESS_KEY_ID,
+                secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+              },
+            });
+            const bucket = process.env.R2_BUCKET_NAME;
+            for (const name of ['all_jobs.json', 'jobs-metadata.json']) {
+              const res = await client.send(new GetObjectCommand({ Bucket: bucket, Key: `data/${name}` }));
+              await streamToFile(res.Body, path.join('.github/data', name));
+            }
+            console.log('SEEDED_R2:2');
+          }
+          main().catch(err => { console.error(err.message); process.exit(1); });
+          NODE
 
       - name: Generate public snapshot
         env:
