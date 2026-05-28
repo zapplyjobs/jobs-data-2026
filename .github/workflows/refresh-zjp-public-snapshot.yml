@@ -80,6 +80,7 @@ jobs:
         run: |
           git config user.email "bot@zapplyjobs.com"
           git config user.name "Data Bot"
+          git restore .github/data/all_jobs.json || true
           git add .github/data/zjp-public-snapshot.json
           git commit -m "chore: refresh zjp public snapshot [skip ci]" || exit 0
           for i in 1 2 3; do
