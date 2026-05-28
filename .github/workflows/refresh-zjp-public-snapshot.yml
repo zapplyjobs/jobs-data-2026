@@ -20,6 +20,20 @@ jobs:
           ref: main
           fetch-depth: 1
 
+      - name: Seed latest aggregator inputs
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: |
+          mkdir -p .github/data
+          curl -sf -H "Authorization: Bearer ${GH_PAT}" -H "Accept: application/vnd.github.raw" \
+            "https://api.github.com/repos/zapplyjobs/jobs-aggregator-private/contents/.github/data/all_jobs.json" \
+            -o .github/data/all_jobs.json
+          curl -sf -H "Authorization: Bearer ${GH_PAT}" -H "Accept: application/vnd.github.raw" \
+            "https://api.github.com/repos/zapplyjobs/jobs-aggregator-private/contents/.github/data/jobs-metadata.json" \
+            -o .github/data/jobs-metadata.json
+          echo "✅ Seeded all_jobs.json + jobs-metadata.json from jobs-aggregator-private"
+
+
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
