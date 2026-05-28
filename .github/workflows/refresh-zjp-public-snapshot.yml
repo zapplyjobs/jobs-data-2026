@@ -33,7 +33,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Seed latest all_jobs from R2
+      - name: Seed latest snapshot inputs from R2
         env:
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
@@ -63,9 +63,11 @@ jobs:
                 secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
               },
             });
-            const res = await client.send(new GetObjectCommand({ Bucket: process.env.R2_BUCKET_NAME, Key: 'data/all_jobs.json' }));
-            await streamToFile(res.Body, path.join('.github/data', 'all_jobs.json'));
-            console.log('SEEDED_R2:all_jobs');
+            for (const name of ['all_jobs.json', 'jobs-metadata.json']) {
+              const res = await client.send(new GetObjectCommand({ Bucket: process.env.R2_BUCKET_NAME, Key: `data/${name}` }));
+              await streamToFile(res.Body, path.join('.github/data', name));
+            }
+            console.log('SEEDED_R2:all_jobs+jobs-metadata');
           }
           main().catch(err => { console.error(err.message); process.exit(1); });
           NODE
@@ -80,7 +82,7 @@ jobs:
         run: |
           git config user.email "bot@zapplyjobs.com"
           git config user.name "Data Bot"
-          git restore .github/data/all_jobs.json || true
+          git restore .github/data/all_jobs.json .github/data/jobs-metadata.json || true
           git add .github/data/zjp-public-snapshot.json
           git commit -m "chore: refresh zjp public snapshot [skip ci]" || exit 0
           for i in 1 2 3; do
