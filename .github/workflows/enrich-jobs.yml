@@ -121,6 +121,7 @@ jobs:
               'enriched_jobs.json',
               'processed_ids.json',
               'enrichment-stats.json',
+              'tech-us-truth.json',
             ];
 
             // Add all description sidecars (pruned versions overwrite R2 — INF-SIDECAR-COMPACT-1)
@@ -166,6 +167,7 @@ jobs:
           # Only commit tiny dashboard-facing files. Big data files (sidecars, enriched_jobs, processed_ids)
           # live in R2 only — INF-BLOAT-5.
           git add .github/data/enrichment-stats.json || exit 0
+          [ -f .github/data/tech-us-truth.json ] && git add .github/data/tech-us-truth.json
           [ -f .github/data/jobs-metadata.json ] && git add .github/data/jobs-metadata.json
           [ -f .github/data/enrichment-history.jsonl ] && git add .github/data/enrichment-history.jsonl
           git diff --cached --quiet && { echo "No changes to commit"; exit 0; }
