@@ -1,0 +1,99 @@
+{
+  "schema": "tech-us-truth-v1",
+  "generated": "2026-05-30T02:45:26.809Z",
+  "enricher_version": 69,
+  "denominator": {
+    "source_artifact": "all_jobs.json",
+    "pool_total_jobs": 55155,
+    "tech_us_total_jobs": 8816,
+    "logic": {
+      "tech_domains": [
+        "software",
+        "data_science",
+        "hardware",
+        "ai"
+      ],
+      "location_tag_required": "us",
+      "match_rule": "job.tags.domains intersects tech_domains AND job.tags.locations contains us"
+    },
+    "by_source": {
+      "workday": {
+        "total_jobs": 44275,
+        "tech_us_jobs": 6468,
+        "tech_us_with_description": 6351
+      },
+      "greenhouse": {
+        "total_jobs": 3029,
+        "tech_us_jobs": 602,
+        "tech_us_with_description": 602
+      },
+      "simplify": {
+        "total_jobs": 584,
+        "tech_us_jobs": 365,
+        "tech_us_with_description": 0
+      },
+      "google": {
+        "total_jobs": 352,
+        "tech_us_jobs": 302,
+        "tech_us_with_description": 302
+      },
+      "ashby": {
+        "total_jobs": 565,
+        "tech_us_jobs": 125,
+        "tech_us_with_description": 125
+      },
+      "lever": {
+        "total_jobs": 240,
+        "tech_us_jobs": 74,
+        "tech_us_with_description": 74
+      },
+      "smartrecruiters": {
+        "total_jobs": 1374,
+        "tech_us_jobs": 284,
+        "tech_us_with_description": 283
+      },
+      "oracle": {
+        "total_jobs": 4050,
+        "tech_us_jobs": 221,
+        "tech_us_with_description": 155
+      },
+      "amd": {
+        "total_jobs": 39,
+        "tech_us_jobs": 32,
+        "tech_us_with_description": 32
+      },
+      "microsoft": {
+        "total_jobs": 290,
+        "tech_us_jobs": 61,
+        "tech_us_with_description": 0
+      },
+      "uber": {
+        "total_jobs": 10,
+        "tech_us_jobs": 2,
+        "tech_us_with_description": 2
+      },
+      "amazon": {
+        "total_jobs": 226,
+        "tech_us_jobs": 211,
+        "tech_us_with_description": 211
+      },
+      "eightfold": {
+        "total_jobs": 17,
+        "tech_us_jobs": 10,
+        "tech_us_with_description": 0
+      },
+      "apple": {
+        "total_jobs": 104,
+        "tech_us_jobs": 59,
+        "tech_us_with_description": 5
+      }
+    }
+  },
+  "numerator": {
+    "source_artifact": "enriched_jobs.json",
+    "enriched_total_jobs": 8660,
+    "enriched_with_description": 8142,
+    "t3_t4_total_jobs": 7702,
+    "reenrichment_pending": 8314
+  }
+}
