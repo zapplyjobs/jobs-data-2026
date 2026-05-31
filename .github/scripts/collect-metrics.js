@@ -145,11 +145,70 @@ function getPipelineMetrics() {
 
     const metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
 
-    // JSONL line count for pipeline total
+    // JSONL: parse for pipeline total + G1 breakdown (TAG-DIM-1)
     let pipelineTotal = null;
+    let g1Breakdown = null;
     if (fs.existsSync(allJobsPath)) {
       const content = fs.readFileSync(allJobsPath, 'utf8');
-      pipelineTotal = content.split('\n').filter(l => l.trim()).length;
+      const lines = content.split('\n').filter(l => l.trim());
+      pipelineTotal = lines.length;
+
+      // Compute G1 breakdown from live data
+      try {
+        const bySource = {};
+        const byCompany = {};
+        const byEmployment = {};
+        const byVersion = {};
+        let usTotal = 0, usG1 = 0;
+
+        for (const line of lines) {
+          const job = JSON.parse(line);
+          const isUs = job.tags?.locations?.includes('us');
+          if (!isUs) continue;
+          usTotal++;
+
+          const domains = job.tags?.domains || [];
+          const isG1 = domains.includes('general');
+          if (!isG1) continue;
+          usG1++;
+
+          const source = job.source || 'unknown';
+          bySource[source] = (bySource[source] || 0) + 1;
+
+          const company = job.company_name || 'Unknown';
+          byCompany[company] = (byCompany[company] || 0) + 1;
+
+          const emp = job.tags?.employment || 'unknown';
+          byEmployment[emp] = (byEmployment[emp] || 0) + 1;
+        }
+
+        // Top 20 G1 companies
+        const topCompanies = Object.entries(byCompany)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 20)
+          .map(([company, count]) => ({ company, g1: count }));
+
+        // Source rates (need source totals from metadata)
+        const sourceTotals = metadata.by_source || {};
+        const bySourceWithRates = {};
+        for (const [src, g1Count] of Object.entries(bySource)) {
+          const total = sourceTotals[src] || 0;
+          bySourceWithRates[src] = { g1: g1Count, total, rate: total > 0 ? Math.round(1000 * g1Count / total) / 10 : null };
+        }
+
+        g1Breakdown = {
+          updated: new Date().toISOString(),
+          us_total: usTotal,
+          us_g1: usG1,
+          us_g1_rate: usTotal > 0 ? Math.round(1000 * usG1 / usTotal) / 10 : null,
+          by_source: bySourceWithRates,
+          by_company_top20: topCompanies,
+          by_employment: byEmployment,
+        };
+        console.log(`  G1 breakdown: ${usG1}/${usTotal} US general (${g1Breakdown.us_g1_rate}%)`);
+      } catch (g1Err) {
+        console.warn('  ⚠️  G1 breakdown computation failed:', g1Err.message);
+      }
     }
 
     return {
@@ -163,6 +222,7 @@ function getPipelineMetrics() {
         internship: metadata.tag_stats?.employment?.internship ?? null,
         domains: metadata.tag_stats?.domains || null
       },
+      g1Breakdown,
       duplicatesRemoved: metadata.duplicates_removed ?? null,
       generatedAt: metadata.generated || null
     };
