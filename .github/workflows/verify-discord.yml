@@ -70,7 +70,7 @@ jobs:
         if: always()
         run: |
           if [ -f /tmp/verification-summary.json ]; then
-            { 
+            (
               echo "# Discord Verification Report"
               echo ""
               echo "**Timestamp:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
@@ -78,7 +78,7 @@ jobs:
               echo '```json'
               cat /tmp/verification-summary.json
               echo '```'
-            } >> "$GITHUB_STEP_SUMMARY"
+            ) >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Commit verification results
