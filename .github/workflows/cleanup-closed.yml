@@ -31,7 +31,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd .github/scripts/shared && npm install && cd $GITHUB_WORKSPACE/.github/scripts/processing && npm install
+          cd .github/scripts/shared && npm install && cd "$GITHUB_WORKSPACE"/.github/scripts/processing && npm install
 
       - name: Download all_jobs.json from R2
         if: success()

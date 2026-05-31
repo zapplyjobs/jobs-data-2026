@@ -70,13 +70,15 @@ jobs:
         if: always()
         run: |
           if [ -f /tmp/verification-summary.json ]; then
-            echo "# Discord Verification Report" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**Timestamp:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo '```json' >> $GITHUB_STEP_SUMMARY
-            cat /tmp/verification-summary.json >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
+            { 
+              echo "# Discord Verification Report"
+              echo ""
+              echo "**Timestamp:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+              echo ""
+              echo '```json'
+              cat /tmp/verification-summary.json
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Commit verification results

@@ -29,7 +29,7 @@ jobs:
         run: npm install
 
       - name: Install shared+processing submodule dependencies (for R2 client)
-        run: cd .github/scripts/shared && npm install && cd $GITHUB_WORKSPACE/.github/scripts/processing && npm install
+        run: cd .github/scripts/shared && npm install && cd "$GITHUB_WORKSPACE"/.github/scripts/processing && npm install
 
       - name: Download data from R2
         if: success()
