@@ -133,6 +133,16 @@ jobs:
               files.push('enrichment-history.jsonl');
             }
 
+            const desiredSidecars = new Set(sidecars);
+            const existingSidecars = (await r2.list('descriptions-'))
+              .map(obj => obj.key.replace(/^data\//, ''))
+              .filter(name => name.startsWith('descriptions-') && name.endsWith('.jsonl'));
+            const staleSidecars = existingSidecars.filter(name => !desiredSidecars.has(name));
+            for (const stale of staleSidecars) {
+              await r2.remove(stale);
+              console.log('DELETE: ' + stale);
+            }
+
             let ok = 0, fail = 0;
             for (const file of files) {
               const fp = path.join(dataDir, file);
