@@ -25,7 +25,7 @@ jobs:
           node-version: '22'
 
       - name: Install shared submodule dependencies
-        run: cd .github/scripts/shared && npm install && cd $GITHUB_WORKSPACE/.github/scripts/processing && npm install
+        run: cd .github/scripts/shared && npm install && cd "$GITHUB_WORKSPACE"/.github/scripts/processing && npm install
 
       - name: Download data from R2
         continue-on-error: true

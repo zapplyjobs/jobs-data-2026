@@ -70,13 +70,15 @@ jobs:
         if: always()
         run: |
           if [ -f /tmp/verification-summary.json ]; then
-            echo "# Discord Verification Report" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**Timestamp:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo '```json' >> $GITHUB_STEP_SUMMARY
-            cat /tmp/verification-summary.json >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
+            (
+              echo "# Discord Verification Report"
+              echo ""
+              echo "**Timestamp:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+              echo ""
+              echo '```json'
+              cat /tmp/verification-summary.json
+              echo '```'
+            ) >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Commit verification results
@@ -87,10 +89,10 @@ jobs:
             exit 0
           fi
           cp /tmp/verification-summary.json "$FILE"
-          SHA=$(gh api repos/{owner}/{repo}/contents/$FILE --jq '.sha' 2>/dev/null || echo "")
+          SHA=$(gh api repos/zapplyjobs/jobs-data-2026/contents/$FILE --jq '.sha' 2>/dev/null || echo "")
           ENCODED=$(base64 -w0 "$FILE")
           PAYLOAD=$(jq -n --arg msg "chore: update discord verification [skip ci]" --arg sha "$SHA" --arg content "$ENCODED" '{message:$msg,sha:$sha,content:$content}')
-          echo "$PAYLOAD" | gh api repos/{owner}/{repo}/contents/$FILE --method PUT --input -
+          echo "$PAYLOAD" | gh api repos/zapplyjobs/jobs-data-2026/contents/$FILE --method PUT --input -
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
