@@ -1,6 +1,6 @@
 {
   "schema": "zjp-metrics-v1",
-  "generated_at": "2026-06-01T00:10:33.748Z",
+  "generated_at": "2026-06-01T00:54:38.006Z",
   "pool": {
     "total_jobs": 43503,
     "tech_us": 7101,
@@ -638,7 +638,7 @@
     "engine_version": 28,
     "source": "jobs-metadata.json",
     "g1_breakdown": {
-      "updated": "2026-06-01T00:10:32.444Z",
+      "updated": "2026-06-01T00:54:37.012Z",
       "us_total": 25133,
       "us_g1": 2079,
       "us_g1_rate": 8.3,
@@ -859,29 +859,86 @@
     }
   },
   "enrichment": {
-    "total_enriched": 7067,
+    "total_enriched": 7069,
     "enrichment_rate_pct": 99.5,
     "tiers": {
       "t0": 212,
       "t1": 359,
       "t2": 43,
       "t3": 548,
-      "t4": 5905
+      "t4": 5907
     },
     "enricher_version": 75,
-    "reenrichment_pending": 5437,
+    "reenrichment_pending": 5287,
+    "current_missing": {
+      "total": 32,
+      "by_source": {
+        "simplify": 10,
+        "workday": 22
+      },
+      "by_status": {
+        "skipped": 10,
+        "unprocessed": 22
+      },
+      "top_companies": [
+        {
+          "company": "Snap",
+          "count": 21
+        },
+        {
+          "company": "Northwestern Mutual",
+          "count": 2
+        },
+        {
+          "company": "University of Texas at Austin",
+          "count": 1
+        },
+        {
+          "company": "Meta",
+          "count": 1
+        },
+        {
+          "company": "JM Family",
+          "count": 1
+        },
+        {
+          "company": "Rolls Royce",
+          "count": 1
+        },
+        {
+          "company": "Uncountable",
+          "count": 1
+        },
+        {
+          "company": "Nokia",
+          "count": 1
+        },
+        {
+          "company": "Fortinet",
+          "count": 1
+        },
+        {
+          "company": "Robert Bosch Venture Capital",
+          "count": 1
+        },
+        {
+          "company": "CACI",
+          "count": 1
+        }
+      ]
+    },
     "visa_paths": {
-      "actual_job_signal": 1668,
-      "lca_only_signal": 4680,
+      "actual_job_signal": 1672,
+      "lca_only_signal": 4678,
       "unresolved_signal": 719,
       "unresolved_reasons": {
         "defense_contractor": 72
       },
       "by_source": {
         "workday": {
-          "actual_job_signal": 759,
-          "actual_job_signal_pct": 15,
-          "lca_only_signal": 3583,
+          "actual_job_signal": 763,
+          "actual_job_signal_pct": 16,
+          "lca_only_signal": 3581,
           "lca_only_signal_pct": 73,
           "unresolved_signal": 574,
           "unresolved_signal_pct": 12,
@@ -1015,18 +1072,18 @@
     "failures": [
       "**Cancel cascade**: 15/15 recent fetch runs cancelled (100%). Last successful fetch: unknownh ago. Pipeline data is stale."
     ],
-    "last_checked": "2026-06-01T00:06:13.715Z",
+    "last_checked": "2026-06-01T00:50:11.139Z",
     "source": "pipeline-alert.json"
   },
   "pipeline": {
-    "last_aggregator_run": "2026-06-01T00:09:28Z",
+    "last_aggregator_run": "2026-06-01T00:45:41Z",
     "last_aggregator_status": "success",
-    "last_enrichment_run": "2026-06-01T00:08:10Z",
-    "last_enrichment_status": "in_progress",
-    "aggregator_runtime_minutes": 0.3,
+    "last_enrichment_run": "2026-06-01T00:45:42Z",
+    "last_enrichment_status": "success",
+    "aggregator_runtime_minutes": 6.4,
     "aggregator_queue_minutes": 0,
-    "aggregator_execution_minutes": 0.2,
-    "aggregator_cancel_count": 2,
+    "aggregator_execution_minutes": 6.3,
+    "aggregator_cancel_count": 1,
     "stage_timings": {
       "step1a_family_cache_ms": 216,
       "step1_fetch_ms": 218031,
@@ -1040,16 +1097,16 @@
       "step9_write_ms": 13594
     },
     "pipeline_internal_minutes": 4.2,
-    "push_overhead_minutes": 0
+    "push_overhead_minutes": 2.2
   },
   "r2": {
     "status": "healthy",
     "manifest_age_minutes": 6,
-    "manifest_timestamp": "2026-06-01T00:04:42.331Z",
+    "manifest_timestamp": "2026-06-01T00:48:37.422Z",
     "files_uploaded": 27,
     "files_failed": null,
     "file_count": 41,
-    "total_size_mb": 373
+    "total_size_mb": 371
   },
   "dedupe": {
     "status": "tracked",
@@ -1074,17 +1131,17 @@
     },
     "aggregator": {
       "aligned": true,
-      "hash": "f9cb998bd534c7860f5f7b9b8f137b337e7ba7eb",
+      "hash": "cef329ee6406b79f87ff27cbf34c7978f215a1c2",
       "repos": {
-        "jobs-aggregator-private": "f9cb998bd534c7860f5f7b9b8f137b337e7ba7eb"
+        "jobs-aggregator-private": "cef329ee6406b79f87ff27cbf34c7978f215a1c2"
       },
       "p2_status": "PASS"
     },
     "processing": {
       "aligned": true,
-      "hash": "cf4f0ea90412337be77b45abd7689cf270031352",
+      "hash": "a01be84cf357e92d7166f353d26a4f6e971256ab",
       "repos": {
-        "jobs-data-2026": "cf4f0ea90412337be77b45abd7689cf270031352"
+        "jobs-data-2026": "a01be84cf357e92d7166f353d26a4f6e971256ab"
       },
       "p2_status": "PASS"
     },
@@ -1116,39 +1173,39 @@
     "p2_status": "PASS"
   },
   "consumers": {
-    "last_update": "2026-06-01T00:01:07Z",
+    "last_update": "2026-06-01T00:46:08Z",
     "repos": {
       "New-Grad-Jobs-2026": {
         "positions": 15982,
-        "last_commit": "2026-06-01T00:01:02Z"
+        "last_commit": "2026-06-01T00:46:08Z"
       },
       "Internships-2026": {
         "positions": 654,
-        "last_commit": "2026-06-01T00:01:04Z"
+        "last_commit": "2026-06-01T00:46:01Z"
       },
       "New-Grad-Software-Engineering-Jobs-2026": {
         "positions": 2507,
-        "last_commit": "2026-06-01T00:01:03Z"
+        "last_commit": "2026-06-01T00:46:01Z"
       },
       "New-Grad-Data-Science-Jobs-2026": {
         "positions": 447,
-        "last_commit": "2026-06-01T00:01:00Z"
+        "last_commit": "2026-06-01T00:46:01Z"
       },
       "New-Grad-Hardware-Engineering-Jobs-2026": {
         "positions": 1868,
-        "last_commit": "2026-06-01T00:01:07Z"
+        "last_commit": "2026-06-01T00:45:58Z"
       },
       "New-Grad-Healthcare-Jobs-2026": {
         "positions": 1532,
-        "last_commit": "2026-06-01T00:01:01Z"
+        "last_commit": "2026-06-01T00:46:01Z"
       }
     }
   },
   "repos": {
-    "total_mb": 77086,
+    "total_mb": 77080,
     "repos": {
       "jobs-aggregator-private": 29288,
-      "jobs-data-2026": 26057,
+      "jobs-data-2026": 26051,
       "New-Grad-Jobs-2026": 20191,
       "Internships-2026": 926,
       "New-Grad-Software-Engineering-Jobs-2026": 258,
@@ -1159,15 +1216,15 @@
   },
   "evergreen": {
     "age_buckets": {
-      "fresh_0_3d": 11396,
-      "aging_4_10d": 20496,
-      "evergreen_10_14d": 11146,
+      "fresh_0_3d": 11387,
+      "aging_4_10d": 20498,
+      "evergreen_10_14d": 11153,
       "beyond_14d": 445
     },
     "age_buckets_original": {
-      "fresh_0_3d": 513,
-      "aging_4_10d": 1962,
-      "evergreen_10_14d": 1495,
+      "fresh_0_3d": 504,
+      "aging_4_10d": 1966,
+      "evergreen_10_14d": 1500,
       "beyond_14d": 13,
       "coverage": 3983,
       "coverage_pct": 9
@@ -1176,12 +1233,12 @@
     "first_published_coverage": 9,
     "first_published_evergreen_pct": 0.3,
     "by_source": {
-      "greenhouse": 1193,
-      "smartrecruiters": 443,
+      "lever": 92,
+      "greenhouse": 1196,
+      "smartrecruiters": 444,
+      "apple": 71,
       "amazon": 117,
       "oracle": 1915,
-      "lever": 90,
-      "apple": 70,
       "microsoft": 96,
       "ashby": 225,
       "workday": 7409,
