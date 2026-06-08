@@ -1,11 +1,11 @@
 {
   "schema": "tech-us-truth-v1",
-  "generated": "2026-06-08T01:32:43.853Z",
+  "generated": "2026-06-08T01:47:59.244Z",
   "enricher_version": 77,
   "denominator": {
     "source_artifact": "all_jobs.json",
-    "pool_total_jobs": 44785,
-    "tech_us_total_jobs": 7063,
+    "pool_total_jobs": 44812,
+    "tech_us_total_jobs": 7193,
     "logic": {
       "tech_domains": [
         "software",
@@ -17,20 +17,20 @@
       "match_rule": "job.tags.domains intersects tech_domains AND job.tags.locations contains us"
     },
     "by_source": {
+      "workday": {
+        "total_jobs": 33425,
+        "tech_us_jobs": 4781,
+        "tech_us_with_description": 4760
+      },
+      "greenhouse": {
+        "total_jobs": 3354,
+        "tech_us_jobs": 721,
+        "tech_us_with_description": 721
+      },
       "simplify": {
         "total_jobs": 368,
         "tech_us_jobs": 239,
         "tech_us_with_description": 0
-      },
-      "workday": {
-        "total_jobs": 33391,
-        "tech_us_jobs": 4724,
-        "tech_us_with_description": 4703
-      },
-      "greenhouse": {
-        "total_jobs": 3353,
-        "tech_us_jobs": 663,
-        "tech_us_with_description": 663
       },
       "google": {
         "total_jobs": 365,
@@ -38,39 +38,39 @@
         "tech_us_with_description": 310
       },
       "oracle": {
-        "total_jobs": 4594,
-        "tech_us_jobs": 323,
-        "tech_us_with_description": 323
+        "total_jobs": 4596,
+        "tech_us_jobs": 324,
+        "tech_us_with_description": 324
       },
       "smartrecruiters": {
         "total_jobs": 1167,
-        "tech_us_jobs": 241,
-        "tech_us_with_description": 241
+        "tech_us_jobs": 228,
+        "tech_us_with_description": 228
       },
       "ashby": {
-        "total_jobs": 644,
-        "tech_us_jobs": 135,
-        "tech_us_with_description": 135
+        "total_jobs": 645,
+        "tech_us_jobs": 145,
+        "tech_us_with_description": 145
       },
       "microsoft": {
-        "total_jobs": 299,
-        "tech_us_jobs": 58,
-        "tech_us_with_description": 58
+        "total_jobs": 288,
+        "tech_us_jobs": 57,
+        "tech_us_with_description": 57
       },
       "amazon": {
         "total_jobs": 226,
-        "tech_us_jobs": 200,
-        "tech_us_with_description": 200
+        "tech_us_jobs": 211,
+        "tech_us_with_description": 211
       },
       "lever": {
         "total_jobs": 289,
-        "tech_us_jobs": 120,
-        "tech_us_with_description": 120
+        "tech_us_jobs": 121,
+        "tech_us_with_description": 121
       },
       "amd": {
         "total_jobs": 38,
-        "tech_us_jobs": 24,
-        "tech_us_with_description": 24
+        "tech_us_jobs": 30,
+        "tech_us_with_description": 30
       },
       "eightfold": {
         "total_jobs": 19,
@@ -91,9 +91,9 @@
   },
   "numerator": {
     "source_artifact": "enriched_jobs.json",
-    "enriched_total_jobs": 6873,
-    "enriched_with_description": 6780,
-    "t3_t4_total_jobs": 6377,
+    "enriched_total_jobs": 7003,
+    "enriched_with_description": 6910,
+    "t3_t4_total_jobs": 6510,
     "reenrichment_pending": 1075
   }
 }
