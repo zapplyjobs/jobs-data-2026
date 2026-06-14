@@ -13,24 +13,25 @@
     :root {
       --bg: #fff7f2;
       --bg-card: #ffffff;
-      --bg-card-hover: #fff0e7;
-      --border: #f1d7ca;
+      --bg-card-hover: #f8f4f1;
+      --border: #eaded8;
       --text: #201a19;
       --muted: #7b6b65;
       --green: #208a4b;
-      --yellow: #c67b00;
+      --yellow: #b86f00;
       --red: #cf4024;
       --accent: #ff5e3c;
       --accent-strong: #ff6d4d;
       --accent-soft: #fff0e8;
-      --info: #ff8d73;
-      --accent-bg: rgba(255, 94, 60, 0.12);
-      --status-bar-bg: rgba(255, 94, 60, 0.07);
+      --info: #2f6f95;
+      --neutral-track: rgba(32, 26, 25, 0.08);
+      --neutral-fill: rgba(32, 26, 25, 0.42);
+      --status-bar-bg: rgba(255,255,255,0.82);
       --header-bg: rgba(255,247,242,0.94);
-      --sidebar-bg: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(255,247,242,0.94));
+      --sidebar-bg: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,247,242,0.88));
       --sidebar-dot-ring: rgba(255,255,255,0.75);
       --sidebar-shadow: 0 6px 18px rgba(69, 35, 20, 0.05);
-      --shadow: 0px 10px 32px 0px rgba(69, 35, 20, 0.10);
+      --shadow: 0px 8px 24px 0px rgba(69, 35, 20, 0.07);
     }
     :root.dark {
       --bg: #171110;
@@ -45,13 +46,15 @@
       --accent: #ff6b4a;
       --accent-strong: #ff7d5f;
       --accent-soft: rgba(255, 107, 74, 0.14);
-      --info: #ff9a82;
-      --status-bar-bg: rgba(255, 107, 74, 0.10);
+      --info: #7fb4d6;
+      --neutral-track: rgba(244, 239, 237, 0.10);
+      --neutral-fill: rgba(244, 239, 237, 0.44);
+      --status-bar-bg: rgba(34,25,23,0.92);
       --header-bg: rgba(23,17,16,0.94);
       --sidebar-bg: linear-gradient(180deg, rgba(34,25,23,0.98), rgba(23,17,16,0.98));
       --sidebar-dot-ring: rgba(34,25,23,0.92);
       --sidebar-shadow: 0 12px 36px rgba(0,0,0,0.28);
-      --shadow: 0 12px 36px rgba(0,0,0,0.28);
+      --shadow: 0 12px 36px rgba(0,0,0,0.24);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -126,12 +129,12 @@
       z-index: 10;
       padding: 6px 10px;
       background: var(--status-bar-bg);
-      border: 1px solid rgba(255,94,60,0.14);
+      border: 1px solid var(--border);
       border-radius: 10px;
       font-size: 11px;
     }
     #status-bar.warn { background: rgba(210, 153, 34, 0.10); border-color: rgba(210, 153, 34, 0.28); }
-    #status-bar.err  { background: rgba(248, 81, 73, 0.10); border-color: rgba(248, 81, 73, 0.32); }
+    #status-bar.err  { background: rgba(207, 64, 36, 0.10); border-color: rgba(207, 64, 36, 0.32); }
     #app-body {
       display: flex;
       margin-top: 92px;
@@ -193,13 +196,13 @@
     .tab[data-level="critical"]::after { background: var(--red); }
     .tab:hover { color: var(--text); background: var(--bg-card-hover); border-color: var(--border); }
     .tab.active {
-      color: #ffffff;
-      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-      border-color: transparent;
-      box-shadow: 0 8px 20px rgba(255, 94, 60, 0.22);
+      color: var(--text);
+      background: var(--bg-card);
+      border-color: rgba(255, 94, 60, 0.42);
+      box-shadow: inset 3px 0 0 var(--accent), var(--sidebar-shadow);
       font-weight: 800;
     }
-    .tab.active::after { background: #ffffff; box-shadow: 0 0 0 3px rgba(255,255,255,0.25); }
+    .tab.active::after { box-shadow: 0 0 0 3px var(--sidebar-dot-ring); }
     @media (max-width: 639px) {
       #app-body { flex-direction: column; }
       #sidebar {
@@ -255,7 +258,7 @@
     }
     .stat-icon {
       width: 36px; height: 36px;
-      background: var(--accent-bg);
+      background: var(--neutral-track);
       border-radius: 12px;
       display: flex; align-items: center; justify-content: center;
       font-size: 18px;
@@ -287,7 +290,7 @@
     .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
     .bar-label { width: 110px; font-size: 12px; color: var(--muted); text-align: right; flex-shrink: 0; }
     .bar-track { flex: 1; background: var(--border); border-radius: 3px; height: 10px; }
-    .bar-fill { height: 10px; border-radius: 3px; background: var(--accent); }
+    .bar-fill { height: 10px; border-radius: 3px; background: var(--neutral-fill); }
     .bar-value { font-size: 12px; width: 60px; text-align: right; }
     .sortable { cursor: pointer; user-select: none; }
     .sortable:hover { color: var(--accent); }
@@ -335,7 +338,7 @@
     #auth-btn {
       width: 100%; padding: 9px;
       background: var(--accent); border: none; border-radius: 6px;
-      color: var(--text); font-size: 14px; font-weight: 600; cursor: pointer;
+      color: #fff; font-size: 14px; font-weight: 600; cursor: pointer;
     }
     #auth-btn:hover { opacity: 0.85; }
     #auth-error { color: var(--red); font-size: 12px; margin-top: 8px; min-height: 16px; }
@@ -394,8 +397,8 @@
       margin-bottom: 12px;
     }
     .v2-hero-card {
-      background: linear-gradient(135deg, rgba(255,94,60,0.12), rgba(255,94,60,0.03));
-      border: 1px solid rgba(255,94,60,0.20);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
       border-radius: 16px;
       padding: 20px;
       box-shadow: var(--shadow);
@@ -448,7 +451,7 @@
     .v2-card .value { font-size:24px; font-weight:800; line-height:1.15; }
     .v2-card .sub { color: var(--muted); font-size:11px; margin-top:6px; line-height:1.35; }
     .v2-module-card { cursor:pointer; transition:border-color .12s ease, transform .12s ease, box-shadow .12s ease; }
-    .v2-module-card:hover { border-color: var(--accent); transform: translateY(-1px); box-shadow: 0 12px 26px rgba(255, 94, 60, 0.10); }
+    .v2-module-card:hover { border-color: rgba(255, 94, 60, 0.42); transform: translateY(-1px); box-shadow: 0 10px 24px rgba(69, 35, 20, 0.08); }
     .v2-attention {
       border:1px solid var(--border);
       border-radius:12px;
@@ -473,9 +476,9 @@
       cursor: pointer;
     }
     .v2-toggle-chip.active {
-      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-      color: #fff;
-      border-color: transparent;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-color: rgba(255, 94, 60, 0.42);
     }
     .v2-rank-list {
       display: grid;
@@ -496,14 +499,14 @@
     .v2-rank-bar {
       height: 10px;
       border-radius: 999px;
-      background: rgba(255, 94, 60, 0.10);
+      background: var(--neutral-track);
       overflow: hidden;
-      border: 1px solid rgba(255, 94, 60, 0.10);
+      border: 1px solid rgba(128,128,128,0.10);
     }
     .v2-rank-fill {
       height: 100%;
       border-radius: 999px;
-      background: linear-gradient(90deg, var(--accent), var(--accent-strong));
+      background: var(--neutral-fill);
     }
     .v2-attention.ok {
       background: rgba(63,185,80,0.06);
@@ -533,7 +536,7 @@
     .v2-decision { font-size:15px; font-weight:700; margin-bottom:8px; }
     .v2-mini-row { display:grid; grid-template-columns: 110px minmax(0,1fr) 58px; gap:8px; align-items:center; font-size:11px; margin:7px 0; }
     .v2-mini-bar { height:8px; border-radius:999px; background:rgba(128,128,128,.16); overflow:hidden; }
-    .v2-mini-fill { height:100%; border-radius:999px; background:var(--accent); }
+    .v2-mini-fill { height:100%; border-radius:999px; background:var(--neutral-fill); }
     .v2-legacy-details {
       margin-top: 18px;
       border: 1px solid var(--border);
@@ -1081,7 +1084,7 @@ const DASHBOARD_SECRET = '__DASHBOARD_SECRET__';
     btn.textContent = isDark ? '🌙' : '☀';
     localStorage.setItem('zjp_theme', isDark ? 'dark' : 'light');
     C = _buildC();
-    CHART_COLORS.accent = C.accent; CHART_COLORS.green = C.green;
+    CHART_COLORS.accent = C.info; CHART_COLORS.green = C.green;
     CHART_COLORS.red = C.red; CHART_COLORS.yellow = C.yellow; CHART_COLORS.muted = C.muted;
     Object.keys(CHART_COLORS.sources).forEach(k => { CHART_COLORS.sources[k] = _sourceColor(k); });
     Object.keys(CHART_COLORS.repos).forEach(k => { CHART_COLORS.repos[k] = _repoColor(k); });
@@ -1265,8 +1268,8 @@ function v2HydrateOverviewModuleCards(container) {
     if (sub && tab.title) sub.textContent = tab.title;
     if (value) value.textContent = v2DecisionStateLabel(level);
     if (level === 'critical') {
-      card.style.borderColor = 'rgba(255, 94, 60, 0.40)';
-      card.style.background = 'linear-gradient(135deg, rgba(255,94,60,0.12), rgba(255,94,60,0.03))';
+      card.style.borderColor = 'rgba(207, 64, 36, 0.36)';
+      card.style.background = 'rgba(207, 64, 36, 0.06)';
     } else if (level === 'warn') {
       card.style.borderColor = 'rgba(240,183,91,0.38)';
       card.style.background = 'rgba(240,183,91,0.08)';
@@ -1586,8 +1589,8 @@ function renderV2Overview(raw) {
     const heroTitle = nextModule ? `Open ${nextModule.tab.toUpperCase()} next` : vm.hero.title;
     const heroCopy = nextModule ? nextModule.note : vm.hero.copy;
     const heroOwner = nextModule ? `Owner: ${nextModule.tab.toUpperCase()}` : vm.hero.owner;
-    const accent = heroLevel === 'critical' ? 'var(--accent)' : heroLevel === 'warn' ? 'var(--yellow)' : 'var(--green)';
-    hero.innerHTML = `<div class="v2-hero-card"><div class="v2-hero-kicker">Current operating call</div><div class="v2-hero-title" style="color:${accent}">${heroTitle}</div><div class="v2-hero-copy">${heroCopy}</div><div class="v2-hero-meta"><span class="header-chip">${heroOwner}</span><span class="header-chip">${vm.hero.confidence}</span></div></div><div class="v2-hero-side"><div class="v2-note-card"><div class="v2-hero-kicker">How to use this page</div><strong>Start here, drill only when needed</strong><div class="v2-hero-copy">${vm.hero.trust}</div></div><div class="v2-note-card"><div class="v2-hero-kicker">Navigation rule</div><strong>Priority queue beats module order</strong><div class="v2-hero-copy">Act on the first coral/amber card first. Green cards are only confirmation.</div></div></div>`;
+    const accent = heroLevel === 'critical' ? 'var(--red)' : heroLevel === 'warn' ? 'var(--yellow)' : 'var(--green)';
+    hero.innerHTML = `<div class="v2-hero-card"><div class="v2-hero-kicker">Current operating call</div><div class="v2-hero-title" style="color:${accent}">${heroTitle}</div><div class="v2-hero-copy">${heroCopy}</div><div class="v2-hero-meta"><span class="header-chip">${heroOwner}</span><span class="header-chip">${vm.hero.confidence}</span></div></div><div class="v2-hero-side"><div class="v2-note-card"><div class="v2-hero-kicker">How to use this page</div><strong>Start here, drill only when needed</strong><div class="v2-hero-copy">${vm.hero.trust}</div></div><div class="v2-note-card"><div class="v2-hero-kicker">Navigation rule</div><strong>Priority queue beats module order</strong><div class="v2-hero-copy">Act on the first red/amber card first. Green cards are only confirmation.</div></div></div>`;
   }
   v2SetLineage('lineage-v2-command', vm.lineage.command);
   v2SetLineage('lineage-v2-attention', vm.lineage.attention);
@@ -2117,9 +2120,9 @@ function renderStatusBar(isoTs) {
 // AGG filter state — DASH_FILTER_VISION Phase A
 let _aggFilter = { jobType: 'all', region: 'all' };
 function _aggPill(label, key, val, active) {
-  const bg = active ? 'var(--accent)' : 'transparent';
-  const fg = active ? '#fff' : 'var(--muted)';
-  const border = active ? 'var(--accent)' : 'var(--border)';
+  const bg = active ? 'var(--accent-soft)' : 'transparent';
+  const fg = active ? 'var(--accent)' : 'var(--muted)';
+  const border = active ? 'rgba(255,94,60,.42)' : 'var(--border)';
   return `<span style="display:inline-block;padding:2px 10px;border-radius:12px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid ${border};margin-left:4px;background:${bg};color:${fg}" onclick="_setAggFilter('${key}','${val}')">${label}</span>`;
 }
 function renderAggFilterPills() {
@@ -2245,7 +2248,7 @@ function renderGeneralTrendChart(all, days) {
   const pillsEl = document.getElementById('general-trend-pills');
   if (pillsEl) {
     const ps = d => `display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--border);margin-left:4px;` +
-      (d === days ? 'background:var(--accent);color:#fff;border-color:var(--accent)' : 'background:transparent;color:var(--muted)');
+      (d === days ? 'background:var(--accent-soft);color:var(--accent);border-color:rgba(255,94,60,.42)' : 'background:transparent;color:var(--muted)');
     pillsEl.innerHTML = [7, 14, 30, null].map(d => {
       const label = d === 7 ? '7D' : d === 14 ? '14D' : d === 30 ? '30D' : 'All';
       return `<span style="${ps(d)}" onclick="renderGeneralTrendChart(_generalTrendAll,${d})">${label}</span>`;
@@ -2262,7 +2265,7 @@ function renderGeneralTrendChart(all, days) {
       datasets: [{
         label: 'General Rate %',
         data: rates.map(r => r.rate),
-        borderColor: C.accent, backgroundColor: 'rgba(255,94,60,0.08)', fill: true,
+        borderColor: C.info, backgroundColor: 'transparent', fill: false,
         tension: 0.3, pointRadius: 2, pointHoverRadius: 5, borderWidth: 2,
       }]
     },
@@ -2312,7 +2315,7 @@ function renderDomainBars(metadata) {
   barsEl.innerHTML = entries.map(([k, v]) => {
     const pct = max > 0 ? Math.round((v / max) * 100) : 0;
     const ratio = max > 0 ? v / max : 0;
-    const color = ratio >= 0.6 ? 'var(--accent)' : ratio >= 0.3 ? 'var(--yellow)' : 'var(--muted)';
+    const color = ratio >= 0.6 ? 'var(--neutral-fill)' : ratio >= 0.3 ? 'var(--yellow)' : 'var(--muted)';
     return `
       <div class="bar-row">
         <span class="bar-label">${k}</span>
@@ -2630,7 +2633,7 @@ function renderEvergreen() {
     statCard({ icon: '📦', label: 'Total Pool', value: fmt(total), sub: 'by age distribution' });
   const bars = [
     { label: 'Fresh (0-3d)', value: fresh, color: 'var(--green)' },
-    { label: 'Aging (4-10d)', value: aging, color: 'var(--accent)' },
+    { label: 'Aging (4-10d)', value: aging, color: 'var(--yellow)' },
     { label: 'Evergreen (10-14d)', value: evergreen, color: 'var(--yellow)' },
     { label: 'Beyond 14d', value: beyond, color: 'var(--red)' },
   ].filter(b => b.value > 0);
@@ -2685,7 +2688,7 @@ function renderDurationTrendChart(all, days) {
   const pillsEl = document.getElementById('duration-trend-pills');
   if (pillsEl) {
     const pillStyle = d => `display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--border);margin-left:4px;` +
-      (d === days ? 'background:var(--accent);color:#fff;border-color:var(--accent)' : 'background:transparent;color:var(--muted)');
+      (d === days ? 'background:var(--accent-soft);color:var(--accent);border-color:rgba(255,94,60,.42)' : 'background:transparent;color:var(--muted)');
     pillsEl.innerHTML = [7, 14, 30, null].map(d => {
       const label = d === 7 ? '7D' : d === 14 ? '14D' : d === 30 ? '30D' : 'All';
       return `<span style="${pillStyle(d)}" onclick="renderDurationTrendChart(_durationAllEntries,${d})">${label}</span>`;
@@ -2700,9 +2703,9 @@ function renderDurationTrendChart(all, days) {
       datasets: [{
         label: 'Duration (min)',
         data: entries.map(e => e.value),
-        borderColor: CHART_COLORS.accent,
-        backgroundColor: 'rgba(255,94,60,0.08)',
-        fill: true,
+        borderColor: CHART_COLORS.info,
+        backgroundColor: 'transparent',
+        fill: false,
         tension: 0.3,
         pointRadius: 3,
         pointHoverRadius: 6,
@@ -2751,7 +2754,7 @@ function renderHBars(containerId, items, { labelWidth = '110px', colorFn } = {})
   const max = Math.max(...items.map(i => i.value));
   el.innerHTML = items.map(({ label, value, sub }) => {
     const pct = max > 0 ? Math.round((value / max) * 100) : 0;
-    const color = colorFn ? colorFn(value, max) : 'var(--accent)';
+    const color = colorFn ? colorFn(value, max) : 'var(--neutral-fill)';
     return `
       <div class="bar-row">
         <span class="bar-label" style="width:${labelWidth}">${label}</span>
@@ -2811,9 +2814,9 @@ function renderSupFilterPills() {
   if (!el) return;
   const pill = (label, val) => {
     const active = _supFilter === val;
-    const bg = active ? 'var(--accent)' : 'transparent';
-    const fg = active ? '#fff' : 'var(--muted)';
-    const border = active ? 'var(--accent)' : 'var(--border)';
+    const bg = active ? 'var(--accent-soft)' : 'transparent';
+    const fg = active ? 'var(--accent)' : 'var(--muted)';
+    const border = active ? 'rgba(255,94,60,.42)' : 'var(--border)';
     return `<span style="display:inline-block;padding:2px 10px;border-radius:12px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid ${border};margin-left:4px;background:${bg};color:${fg}" onclick="_setSupFilter('${val}')">${label}</span>`;
   };
   el.innerHTML = pill('All Sources', 'all') + pill('ATS Only', 'ats') + pill('Custom Fetchers', 'custom');
@@ -2850,7 +2853,7 @@ function renderSourceTrendChart(allEntries, days) {
   const pillsEl = document.getElementById('source-trend-pills');
   if (pillsEl) {
     const ps = d => `display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--border);margin-left:4px;` +
-      (d === days ? 'background:var(--accent);color:#fff;border-color:var(--accent)' : 'background:transparent;color:var(--muted)');
+      (d === days ? 'background:var(--accent-soft);color:var(--accent);border-color:rgba(255,94,60,.42)' : 'background:transparent;color:var(--muted)');
     pillsEl.innerHTML = [7, 14, 30, null].map(d => {
       const label = d === 7 ? '7D' : d === 14 ? '14D' : d === 30 ? '30D' : 'All';
       return `<span style="${ps(d)}" onclick="renderSourceTrendChart(_sourceTrendAllEntries,${d})">${label}</span>`;
@@ -2902,12 +2905,12 @@ function _sourceColor(key) {
   return map[key] || C.muted;
 }
 function _repoColor(key) {
-  const map = { 'New-Grad-Jobs-2026': C.accent, 'Internships-2026': '#3498db', 'New-Grad-Software-Engineering-Jobs-2026': '#27ae60', 'New-Grad-Data-Science-Jobs-2026': '#9b59b6', 'New-Grad-Hardware-Engineering-Jobs-2026': '#e67e22', 'New-Grad-Healthcare-Jobs-2026': '#e74c3c' };
+  const map = { 'New-Grad-Jobs-2026': C.info, 'Internships-2026': '#3498db', 'New-Grad-Software-Engineering-Jobs-2026': '#27ae60', 'New-Grad-Data-Science-Jobs-2026': '#9b59b6', 'New-Grad-Hardware-Engineering-Jobs-2026': '#e67e22', 'New-Grad-Healthcare-Jobs-2026': '#e74c3c' };
   return map[key] || C.muted;
 }
 const BREAKDOWN_SERIES = {
   total: { label: 'Total (pre-filter)', color: C.muted, _themeKey: 'muted', field: e => e.filter ? e.filter.total : e.total },
-  entry: { label: 'Entry-level', color: C.accent, _themeKey: 'accent', field: e => e.filter ? e.filter.entry : null },
+  entry: { label: 'Entry-level', color: C.info, _themeKey: 'info', field: e => e.filter ? e.filter.entry : null },
   senior: { label: 'Senior (removed)', color: C.red, _themeKey: 'red', field: e => e.filter ? e.filter.senior : null },
   us: { label: 'US-tagged', color: _locationColor('us'), field: e => e.by_location ? e.by_location.us : null },
   remote: { label: 'Remote', color: _locationColor('remote'), field: e => e.by_location ? e.by_location.remote : null },
@@ -2955,7 +2958,7 @@ function renderBreakdownChart(all, days) {
   // Render time pills
   if (pillsEl) {
     const pillStyle = d => `display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--border);margin-left:4px;` +
-      (d === days ? 'background:var(--accent);color:#fff;border-color:var(--accent)' : 'background:transparent;color:var(--muted)');
+      (d === days ? 'background:var(--accent-soft);color:var(--accent);border-color:rgba(255,94,60,.42)' : 'background:transparent;color:var(--muted)');
     pillsEl.innerHTML = [7, 14, 30, null].map(d => {
       const label = d === 7 ? '7D' : d === 14 ? '14D' : d === 30 ? '30D' : 'All';
       return `<span style="${pillStyle(d)}" onclick="renderBreakdownChart(_breakdownAllEntries,${d})">${label}</span>`;
@@ -3007,7 +3010,7 @@ function renderFilterFunnel(metadata) {
 
   el.innerHTML = `
     <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">
-      <div style="flex:1;min-width:120px;padding:12px;background:var(--accent-bg);border-radius:8px;text-align:center">
+      <div style="flex:1;min-width:120px;padding:12px;background:var(--neutral-track);border-radius:8px;text-align:center">
         <div style="font-size:24px;font-weight:700">${fmt(total)}</div>
         <div style="font-size:11px;color:var(--muted)">Fetched by aggregator</div>
       </div>
@@ -3061,7 +3064,7 @@ function renderEnrichTrendChart(all, days) {
   const pillsEl = document.getElementById('enrich-trend-pills');
   if (pillsEl) {
     const ps = d => `display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--border);margin-left:4px;` +
-      (d === days ? 'background:var(--accent);color:#fff;border-color:var(--accent)' : 'background:transparent;color:var(--muted)');
+      (d === days ? 'background:var(--accent-soft);color:var(--accent);border-color:rgba(255,94,60,.42)' : 'background:transparent;color:var(--muted)');
     pillsEl.innerHTML = [7, 14, 30, null].map(d => {
       const label = d === 7 ? '7D' : d === 14 ? '14D' : d === 30 ? '30D' : 'All';
       return `<span style="${ps(d)}" onclick="renderEnrichTrendChart(_enrichTrendAll,${d})">${label}</span>`;
@@ -3073,7 +3076,7 @@ function renderEnrichTrendChart(all, days) {
       labels: entries.map(e => (e.date || '').slice(5)),
       datasets: [
         { label: 'Enriched', data: entries.map(e => e.total_enriched || 0),
-          borderColor: CHART_COLORS.accent, backgroundColor: 'rgba(255,94,60,0.08)', fill: true,
+          borderColor: CHART_COLORS.info, backgroundColor: 'transparent', fill: false,
           tension: 0.3, pointRadius: 2, pointHoverRadius: 5, borderWidth: 2, yAxisID: 'y' },
         { label: 'Tech US Pool', data: entries.map(e => e.total_tech_us || 0),
           borderColor: C.info, borderDash: [8, 4],
@@ -3138,7 +3141,7 @@ function renderSourceT3Chart(all, days) {
   const pillsEl = document.getElementById('source-t3-pills');
   if (pillsEl) {
     const ps = d => `display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--border);margin-left:4px;` +
-      (d === days ? 'background:var(--accent);color:#fff;border-color:var(--accent)' : 'background:transparent;color:var(--muted)');
+      (d === days ? 'background:var(--accent-soft);color:var(--accent);border-color:rgba(255,94,60,.42)' : 'background:transparent;color:var(--muted)');
     pillsEl.innerHTML = [7, 14, 30, null].map(d => {
       const label = d === 7 ? '7D' : d === 14 ? '14D' : d === 30 ? '30D' : 'All';
       return `<span style="${ps(d)}" onclick="renderSourceT3Chart(_sourceT3All,${d})">${label}</span>`;
@@ -3762,7 +3765,7 @@ function renderPipelineSourceTable(metrics, metadata, enrichStats) {
 // Pipeline tab — pool trend chart (30d from history.jsonl, fallback 7d from daily-stats.json.history)
 // Chart.js shared config
 const CHART_COLORS = {
-  accent: C.accent, green: C.green, red: C.red, yellow: C.yellow, muted: C.muted,
+  accent: C.info, green: C.green, red: C.red, yellow: C.yellow, muted: C.muted,
   sources: { workday: _sourceColor('workday'), greenhouse: _sourceColor('greenhouse'), ashby: _sourceColor('ashby'), lever: _sourceColor('lever'),
              smartrecruiters: _sourceColor('smartrecruiters'), amazon: _sourceColor('amazon'), netflix: _sourceColor('netflix') },
   repos: { 'New-Grad-Jobs-2026': _repoColor('New-Grad-Jobs-2026'), 'Internships-2026': _repoColor('Internships-2026'), 'New-Grad-Software-Engineering-Jobs-2026': _repoColor('New-Grad-Software-Engineering-Jobs-2026'),
@@ -3820,7 +3823,7 @@ function renderPoolTrendChart(all, days) {
   const pillsEl = document.getElementById('pool-trend-pills');
   if (pillsEl) {
     const pillStyle = d => `display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--border);margin-left:4px;` +
-      (d === days ? 'background:var(--accent);color:#fff;border-color:var(--accent)' : 'background:transparent;color:var(--muted)');
+      (d === days ? 'background:var(--accent-soft);color:var(--accent);border-color:rgba(255,94,60,.42)' : 'background:transparent;color:var(--muted)');
     pillsEl.innerHTML = [7, 14, 30, 90, null].map(d => {
       const label = d === 7 ? '7D' : d === 14 ? '14D' : d === 30 ? '30D' : d === 90 ? '90D' : 'All';
       return `<span style="${pillStyle(d)}" onclick="renderPoolTrendChart(_poolTrendAllEntries,${d})">${label}</span>`;
@@ -3864,9 +3867,9 @@ function renderPoolTrendChart(all, days) {
       labels: entries.map(e => e.label ? e.label.slice(5) : ''),
       datasets: [{
         data: vals,
-        borderColor: CHART_COLORS.accent,
-        backgroundColor: 'rgba(255,94,60,0.1)',
-        fill: true,
+        borderColor: CHART_COLORS.info,
+        backgroundColor: 'transparent',
+        fill: false,
         tension: 0.3,
         pointRadius: 2,
         pointHoverRadius: 5,
@@ -3938,7 +3941,7 @@ function renderStarsTrendChart(allEntries, days) {
   const pillsEl = document.getElementById('stars-trend-pills');
   if (pillsEl) {
     const ps = d => `display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--border);margin-left:4px;` +
-      (d === days ? 'background:var(--accent);color:#fff;border-color:var(--accent)' : 'background:transparent;color:var(--muted)');
+      (d === days ? 'background:var(--accent-soft);color:var(--accent);border-color:rgba(255,94,60,.42)' : 'background:transparent;color:var(--muted)');
     pillsEl.innerHTML = [7, 14, 30, null].map(d => {
       const label = d === 7 ? '7D' : d === 14 ? '14D' : d === 30 ? '30D' : 'All';
       return `<span style="${ps(d)}" onclick="renderStarsTrendChart(_starsTrendAll,${d})">${label}</span>`;
@@ -4245,19 +4248,19 @@ function renderDiscordPostingTrend(posted) {
     labels.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
   }
 
-  // Resolve CSS variable for chart color
-  const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#58a6ff';
+  // Resolve neutral informational chart color; brand accent is reserved for selection/action.
+  const chartLineColor = getComputedStyle(document.documentElement).getPropertyValue('--info').trim() || '#2f6f95';
 
   makeChart('discord-posting-canvas', {
     type: 'line',
     data: {
-      labels,
+      labels: labels,
       datasets: [{
-        label: 'Posts',
+        label: 'Posts per day',
         data: dailyCounts,
-        borderColor: accentColor,
-        backgroundColor: accentColor + '33',
-        fill: true,
+        borderColor: chartLineColor,
+        backgroundColor: 'transparent',
+        fill: false,
         tension: 0.3,
         pointRadius: 0,
         pointHitRadius: 8,
