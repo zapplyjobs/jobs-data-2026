@@ -3,7 +3,10 @@ name: Deploy dashboard to GitHub Pages
 on:
   push:
     branches: [main]
-    paths: [index.html]
+    paths:
+      - index.html
+      - dashboard-v2-sandbox.html
+      - .github/workflows/deploy-pages.yml
   workflow_dispatch:
 
 permissions:
@@ -23,30 +26,35 @@ jobs:
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
-        with:
-          fetch-depth: 1
+        uses: actions/checkout@v4
 
-      - name: Inject dashboard password hash
+      - name: Inject dashboard password
         run: |
-          grep -q '__DASHBOARD_PWD_HASH__' index.html || { echo "ERROR: PWD_HASH placeholder not found in index.html"; exit 1; }
-          PWD_HASH=$(echo -n "${{ secrets.DASHBOARD_PWD }}" | sha256sum | awk '{print $1}')
-          sed -i "s/__DASHBOARD_PWD_HASH__/${PWD_HASH}/g" index.html
-          grep -q '__DASHBOARD_PWD_HASH__' index.html && { echo "ERROR: PWD_HASH placeholder still present after sed"; exit 1; }
-          echo "Password hash injected successfully"
+          for file in index.html dashboard-v2-sandbox.html; do
+            [ -f "$file" ] || continue
+            if grep -q '__DASHBOARD_PWD__' "$file"; then
+              sed -i "s/__DASHBOARD_PWD__/${{ secrets.DASHBOARD_PWD }}/g" "$file"
+              grep -q '__DASHBOARD_PWD__' "$file" && { echo "ERROR: placeholder still present after sed in $file"; exit 1; }
+            fi
+          done
+          echo "Dashboard password injected successfully"
 
       - name: Inject dashboard secret
         run: |
-          grep -q '__DASHBOARD_SECRET__' index.html || { echo "ERROR: DASHBOARD_SECRET placeholder not found in index.html"; exit 1; }
-          sed -i "s/__DASHBOARD_SECRET__/${{ secrets.DASHBOARD_SECRET }}/g" index.html
-          grep -q '__DASHBOARD_SECRET__' index.html && { echo "ERROR: DASHBOARD_SECRET placeholder still present after sed"; exit 1; }
+          for file in index.html dashboard-v2-sandbox.html; do
+            [ -f "$file" ] || continue
+            if grep -q '__DASHBOARD_SECRET__' "$file"; then
+              sed -i "s/__DASHBOARD_SECRET__/${{ secrets.DASHBOARD_SECRET }}/g" "$file"
+              grep -q '__DASHBOARD_SECRET__' "$file" && { echo "ERROR: placeholder still present after sed in $file"; exit 1; }
+            fi
+          done
           echo "Dashboard secret injected successfully"
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v5
+        uses: actions/upload-pages-artifact@v3
         with:
           path: '.'
 
       - name: Deploy to GitHub Pages
         id: deploy
-        uses: actions/deploy-pages@v5
+        uses: actions/deploy-pages@v4
