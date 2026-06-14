@@ -11,36 +11,40 @@
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
   <style>
     :root {
-      --bg: #f7f8f9;
+      --bg: #fff7f2;
       --bg-card: #ffffff;
-      --bg-card-hover: #eef1f4;
-      --border: #d0d7de;
-      --text: #1f2328;
-      --muted: #636e7b;
-      --green: #1a7f37;
-      --yellow: #9a6700;
-      --red: #d1242f;
+      --bg-card-hover: #fff0e7;
+      --border: #f1d7ca;
+      --text: #201a19;
+      --muted: #7b6b65;
+      --green: #208a4b;
+      --yellow: #c67b00;
+      --red: #cf4024;
       --accent: #ff5e3c;
-      --info: #4a9eff;
-      --accent-bg: rgba(255, 94, 60, 0.10);
-      --status-bar-bg: rgba(255, 94, 60, 0.05);
-      --shadow: 0px 4px 24px 0px rgba(37,37,37,0.08);
+      --accent-strong: #ff6d4d;
+      --accent-soft: #fff0e8;
+      --info: #ff8d73;
+      --accent-bg: rgba(255, 94, 60, 0.12);
+      --status-bar-bg: rgba(255, 94, 60, 0.07);
+      --shadow: 0px 10px 32px 0px rgba(69, 35, 20, 0.10);
     }
     :root.dark {
-      --bg: #1b1b1b;
-      --bg-card: #252525;
-      --bg-card-hover: #2e2e2e;
-      --border: #30363d;
-      --text: #e6edf3;
-      --muted: #8b949e;
-      --green: #3fb950;
-      --yellow: #d29922;
-      --red: #f85149;
-      --accent: #ff5e3c;
-      --info: #58a6ff;
-      --accent-bg: rgba(255, 94, 60, 0.10);
-      --status-bar-bg: rgba(255, 94, 60, 0.08);
-      --shadow: 0 1px 3px rgba(0,0,0,0.3);
+      --bg: #171110;
+      --bg-card: #221917;
+      --bg-card-hover: #2a1e1b;
+      --border: #3c2a25;
+      --text: #f4efed;
+      --muted: #bea9a1;
+      --green: #54c878;
+      --yellow: #f0b75b;
+      --red: #ff7b67;
+      --accent: #ff6b4a;
+      --accent-strong: #ff7d5f;
+      --accent-soft: rgba(255, 107, 74, 0.14);
+      --info: #ff9a82;
+      --accent-bg: rgba(255, 107, 74, 0.14);
+      --status-bar-bg: rgba(255, 107, 74, 0.10);
+      --shadow: 0 12px 36px rgba(0,0,0,0.28);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -57,14 +61,15 @@
       gap: 12px;
       padding: 12px 18px;
       border-bottom: 1px solid var(--border);
-      background: rgba(247,248,249,0.92);
+      background: rgba(255,247,242,0.94);
       backdrop-filter: blur(10px);
       position: fixed;
       top: 0; left: 0; right: 0;
       z-index: 10;
+      box-shadow: 0 6px 18px rgba(69, 35, 20, 0.05);
     }
-    :root.dark header { background: rgba(27,27,27,0.92); }
-    header h1 { font-size: 18px; font-weight: 700; flex: 0 0 auto; }
+    :root.dark header { background: rgba(23,17,16,0.94); }
+    header h1 { font-size: 18px; font-weight: 800; flex: 0 0 auto; color: var(--text); }
     .header-chip {
       border: 1px solid var(--border);
       border-radius: 999px;
@@ -76,15 +81,16 @@
     }
     .header-spacer { flex: 1; }
     #theme-toggle {
-      background: none;
+      background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 8px;
+      border-radius: 10px;
       padding: 6px 10px;
       cursor: pointer;
       color: var(--text);
       font-size: 14px;
+      box-shadow: var(--shadow);
     }
-    #theme-toggle:hover { background: var(--bg-card); }
+    #theme-toggle:hover { background: var(--bg-card-hover); }
     #status-bar {
       position: fixed;
       top: 52px; left: 18px; right: 18px;
@@ -106,7 +112,7 @@
     #sidebar {
       width: 196px;
       flex-shrink: 0;
-      background: var(--bg-card);
+      background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,247,242,0.92));
       border-right: 1px solid var(--border);
       padding: 14px 10px;
       overflow-y: auto;
@@ -130,32 +136,40 @@
       gap: 10px;
       width: 100%;
       padding: 10px 12px;
-      border: none;
+      border: 1px solid transparent;
       background: none;
       color: var(--muted);
       font-family: inherit;
       font-size: 13px;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
-      border-radius: 10px;
+      border-radius: 12px;
       text-align: left;
       white-space: nowrap;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
+      transition: background .12s ease, border-color .12s ease, color .12s ease;
     }
     .tab::after {
       content: '';
-      width: 8px;
-      height: 8px;
+      width: 10px;
+      height: 10px;
       border-radius: 999px;
       background: rgba(128,128,128,0.28);
       flex-shrink: 0;
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.75);
     }
     .tab[data-level="ok"]::after { background: var(--green); }
     .tab[data-level="warn"]::after { background: var(--yellow); }
     .tab[data-level="critical"]::after { background: var(--red); }
-    .tab:hover { color: var(--text); background: var(--bg-card-hover); }
-    .tab.active { color: var(--text); background: var(--accent-bg); font-weight: 700; }
-    .tab.active::after { background: var(--accent); }
+    .tab:hover { color: var(--text); background: var(--bg-card-hover); border-color: var(--border); }
+    .tab.active {
+      color: #ffffff;
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      border-color: transparent;
+      box-shadow: 0 8px 20px rgba(255, 94, 60, 0.22);
+      font-weight: 800;
+    }
+    .tab.active::after { background: #ffffff; box-shadow: 0 0 0 3px rgba(255,255,255,0.25); }
     @media (max-width: 639px) {
       #app-body { flex-direction: column; }
       #sidebar {
@@ -350,10 +364,10 @@
       margin-bottom: 12px;
     }
     .v2-hero-card {
-      background: linear-gradient(135deg, rgba(38,132,255,0.10), rgba(38,132,255,0.03));
-      border: 1px solid rgba(38,132,255,0.18);
-      border-radius: 14px;
-      padding: 18px;
+      background: linear-gradient(135deg, rgba(255,94,60,0.12), rgba(255,94,60,0.03));
+      border: 1px solid rgba(255,94,60,0.20);
+      border-radius: 16px;
+      padding: 20px;
       box-shadow: var(--shadow);
     }
     .v2-hero-kicker {
@@ -365,9 +379,9 @@
       margin-bottom: 10px;
     }
     .v2-hero-title {
-      font-size: 24px;
-      font-weight: 750;
-      line-height: 1.15;
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1.1;
       margin-bottom: 8px;
     }
     .v2-hero-copy {
@@ -390,7 +404,7 @@
     .v2-note-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 14px;
+      border-radius: 16px;
       padding: 16px;
       box-shadow: var(--shadow);
     }
@@ -399,18 +413,67 @@
       font-size: 14px;
       margin-bottom: 6px;
     }
-    .v2-card { background: var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; box-shadow: var(--shadow); min-height:104px; }
+    .v2-card { background: var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:14px; box-shadow: var(--shadow); min-height:104px; }
     .v2-card .label { color: var(--muted); font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px; }
-    .v2-card .value { font-size:24px; font-weight:700; line-height:1.15; }
+    .v2-card .value { font-size:24px; font-weight:800; line-height:1.15; }
     .v2-card .sub { color: var(--muted); font-size:11px; margin-top:6px; line-height:1.35; }
-    .v2-module-card { cursor:pointer; transition:border-color .12s ease, transform .12s ease; }
-    .v2-module-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+    .v2-module-card { cursor:pointer; transition:border-color .12s ease, transform .12s ease, box-shadow .12s ease; }
+    .v2-module-card:hover { border-color: var(--accent); transform: translateY(-1px); box-shadow: 0 12px 26px rgba(255, 94, 60, 0.10); }
     .v2-attention {
       border:1px solid var(--border);
       border-radius:12px;
       padding:10px 12px;
       background: var(--bg-card);
       margin-top: 12px;
+    }
+    .v2-composition-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .v2-toggle-chip {
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .v2-toggle-chip.active {
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      color: #fff;
+      border-color: transparent;
+    }
+    .v2-rank-list {
+      display: grid;
+      gap: 8px;
+      max-height: 320px;
+      overflow: auto;
+      padding-right: 2px;
+    }
+    .v2-rank-row {
+      display: grid;
+      grid-template-columns: minmax(0, 140px) minmax(0, 1fr) 72px 64px;
+      gap: 10px;
+      align-items: center;
+      font-size: 11px;
+    }
+    .v2-rank-name { font-weight: 700; color: var(--text); }
+    .v2-rank-value, .v2-rank-share { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .v2-rank-bar {
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255, 94, 60, 0.10);
+      overflow: hidden;
+      border: 1px solid rgba(255, 94, 60, 0.10);
+    }
+    .v2-rank-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-strong));
     }
     .v2-attention.ok {
       background: rgba(63,185,80,0.06);
@@ -562,8 +625,8 @@
       <div class="v2-panel" id="v2-agg-decision"></div>
       <div class="v2-panel" id="v2-agg-composition"></div>
     </div>
-    <details class="v2-legacy-details">
-      <summary>AGG deep detail and legacy comparison</summary>
+    <details class="v2-legacy-details" open>
+      <summary>AGG primary evidence and drilldown</summary>
     <div class="section-label" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center">
       <span>Legacy AGG Surface</span>
       <span class="muted" style="font-weight:400;font-size:11px">Kept for comparison during sandbox iteration</span>
@@ -1472,6 +1535,27 @@ function v2MiniRows(rows, total) {
 function v2ValueRows(rows) {
   return rows.map(([label, value]) => `<div class="v2-mini-row"><span>${esc(label)}</span><span class="v2-mini-bar"><span class="v2-mini-fill" style="width:0%"></span></span><strong>${esc(String(value))}</strong></div>`).join('');
 }
+const V2_OUT_STATE = { metric: 'jobs', mode: 'share' };
+function v2RepoLabel(name) {
+  return String(name || '')
+    .replace(/^New-Grad-/, '')
+    .replace(/-Jobs-2026$/, '')
+    .replace(/-/g, ' ');
+}
+function v2RankList(rows, metric, mode) {
+  const max = rows.reduce((m, row) => Math.max(m, row[metric] || 0), 0);
+  const total = rows.reduce((s, row) => s + (row[metric] || 0), 0);
+  const sorted = [...rows].sort((a, b) => (b[metric] || 0) - (a[metric] || 0));
+  const items = sorted.map(row => {
+    const value = row[metric] || 0;
+    const share = total ? Math.round((value / total) * 1000) / 10 : 0;
+    const fill = max ? Math.max(8, Math.round((value / max) * 100)) : 0;
+    const valueColor = mode === 'value' ? 'var(--text)' : 'var(--muted)';
+    const shareColor = mode === 'share' ? 'var(--text)' : 'var(--muted)';
+    return `<div class="v2-rank-row"><span class="v2-rank-name">${esc(row.name)}</span><span class="v2-rank-bar"><span class="v2-rank-fill" style="width:${fill}%"></span></span><span class="v2-rank-value" style="color:${valueColor}">${fmt(value)}</span><span class="v2-rank-share" style="color:${shareColor}">${share}%</span></div>`;
+  }).join('');
+  return `<div class="v2-composition-toolbar"><span class="v2-toggle-chip ${metric === 'jobs' ? 'active' : ''}" data-v2-out-metric="jobs">Repo jobs</span><span class="v2-toggle-chip ${metric === 'stars' ? 'active' : ''}" data-v2-out-metric="stars">Stars</span><span class="v2-toggle-chip ${metric === 'views' ? 'active' : ''}" data-v2-out-metric="views">Traffic views</span><span class="v2-toggle-chip ${mode === 'value' ? 'active' : ''}" data-v2-out-mode="value">Numbers</span><span class="v2-toggle-chip ${mode === 'share' ? 'active' : ''}" data-v2-out-mode="share">Share</span></div><div class="v2-rank-list">${items}</div>`;
+}
 function v2DecisionText(issues, clearLabel, clearSub) {
   if (!issues.length) return { label: clearLabel, sub: clearSub, level: 'ok' };
   const first = issues.find(i => i.level === 'critical') || issues[0];
@@ -1765,11 +1849,15 @@ function v2BuildOutViewModel(raw) {
   const discordPostCount = postedJobs.reduce((sum, job) => sum + Object.keys(job.discordPosts || {}).length, 0);
   const trafficEntries = v2ParseJsonl(raw.trafficRaw);
   const latestTraffic = trafficEntries.length ? trafficEntries[trafficEntries.length - 1] : null;
-  const repoRows = repoEntries.map(([name, repo]) => [name, repo.jobCount || 0]).filter(([, value]) => value > 0).sort((a, b) => b[1] - a[1]).slice(0, 4);
-  const starRows = repoEntries.map(([name, repo]) => [name, repo.stars || 0]).filter(([, value]) => value > 0).sort((a, b) => b[1] - a[1]).slice(0, 4);
-  const trafficRows = latestTraffic && latestTraffic.repos ? Object.entries(latestTraffic.repos).map(([name, repo]) => [name.replace('New-Grad-', '').replace('-Jobs-2026', ''), repo.views || 0]).filter(([, value]) => value > 0).sort((a, b) => b[1] - a[1]).slice(0, 4) : [];
-  const repoJobTotal = repoRows.reduce((sum, [, value]) => sum + value, 0);
-  const trafficTopTotal = trafficRows.reduce((sum, [, value]) => sum + value, 0);
+  const trafficByLabel = latestTraffic && latestTraffic.repos
+    ? Object.fromEntries(Object.entries(latestTraffic.repos).map(([name, repo]) => [v2RepoLabel(name), repo.views || 0]))
+    : {};
+  const repoRows = repoEntries.map(([name, repo]) => ({
+    name: v2RepoLabel(name),
+    jobs: repo.jobCount || 0,
+    stars: repo.stars || 0,
+    views: trafficByLabel[v2RepoLabel(name)] || 0
+  })).filter(row => row.jobs > 0 || row.stars > 0 || row.views > 0);
   const trafficViews = latestTraffic && latestTraffic.repos ? Object.values(latestTraffic.repos).reduce((sum, repo) => sum + (repo.views || 0), 0) : null;
   const freshLevel = freshPct == null ? 'warn' : freshPct >= 80 ? 'ok' : freshPct >= 50 ? 'warn' : 'critical';
   const failedLevel = failedRepos === 0 ? 'ok' : failedRepos <= 1 ? 'warn' : 'critical';
@@ -1791,9 +1879,7 @@ function v2BuildOutViewModel(raw) {
     issues,
     decision,
     composition: {
-      repos: v2MiniRows(repoRows, repoJobTotal || 1),
-      stars: v2MiniRows(starRows, totalStars || 1),
-      traffic: v2MiniRows(trafficRows, trafficTopTotal || 1)
+      rows: repoRows
     },
     lineage: [v2SourceLabel(V2_DATA_CONTRACT.consumers.file, 'repos/stars/freshness', metrics.timestamp || metrics.generated_at), v2SourceLabel(V2_DATA_CONTRACT.discord.file, 'discord posts', raw.postedJobs && raw.postedJobs.lastUpdated), v2SourceLabel(V2_DATA_CONTRACT.traffic.file, 'traffic views', latestTraffic && (latestTraffic.timestamp || latestTraffic.date))].join(' | ')
   };
@@ -1811,7 +1897,12 @@ function renderV2Out(raw) {
   }
   const composition = document.getElementById('v2-out-composition');
   if (composition) {
-    composition.innerHTML = `<div class="v2-panel-title">Delivery Composition</div><strong style="font-size:12px">Repo jobs</strong>${vm.composition.repos}<strong style="font-size:12px">Stars</strong>${vm.composition.stars}<strong style="font-size:12px">Traffic views</strong>${vm.composition.traffic}`;
+    const renderComposition = () => {
+      composition.innerHTML = `<div class="v2-panel-title">Delivery Composition</div><div class="muted" style="font-size:11px;margin-bottom:8px">${vm.composition.rows.length} repos · sort by jobs / stars / traffic · view numbers or share</div>${v2RankList(vm.composition.rows, V2_OUT_STATE.metric, V2_OUT_STATE.mode)}`;
+      composition.querySelectorAll('[data-v2-out-metric]').forEach(btn => btn.addEventListener('click', () => { V2_OUT_STATE.metric = btn.dataset.v2OutMetric; renderComposition(); }));
+      composition.querySelectorAll('[data-v2-out-mode]').forEach(btn => btn.addEventListener('click', () => { V2_OUT_STATE.mode = btn.dataset.v2OutMode; renderComposition(); }));
+    };
+    renderComposition();
   }
   grid.innerHTML = vm.cards.map(card => v2Card(...card)).join('');
   v2RenderAttention('v2-out-attention', vm.issues);
