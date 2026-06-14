@@ -26,6 +26,10 @@
       --info: #ff8d73;
       --accent-bg: rgba(255, 94, 60, 0.12);
       --status-bar-bg: rgba(255, 94, 60, 0.07);
+      --header-bg: rgba(255,247,242,0.94);
+      --sidebar-bg: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(255,247,242,0.94));
+      --sidebar-dot-ring: rgba(255,255,255,0.75);
+      --sidebar-shadow: 0 6px 18px rgba(69, 35, 20, 0.05);
       --shadow: 0px 10px 32px 0px rgba(69, 35, 20, 0.10);
     }
     :root.dark {
@@ -42,8 +46,11 @@
       --accent-strong: #ff7d5f;
       --accent-soft: rgba(255, 107, 74, 0.14);
       --info: #ff9a82;
-      --accent-bg: rgba(255, 107, 74, 0.14);
       --status-bar-bg: rgba(255, 107, 74, 0.10);
+      --header-bg: rgba(23,17,16,0.94);
+      --sidebar-bg: linear-gradient(180deg, rgba(34,25,23,0.98), rgba(23,17,16,0.98));
+      --sidebar-dot-ring: rgba(34,25,23,0.92);
+      --sidebar-shadow: 0 12px 36px rgba(0,0,0,0.28);
       --shadow: 0 12px 36px rgba(0,0,0,0.28);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -58,18 +65,38 @@
     header {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
       padding: 12px 18px;
       border-bottom: 1px solid var(--border);
-      background: rgba(255,247,242,0.94);
+      background: var(--header-bg);
       backdrop-filter: blur(10px);
       position: fixed;
       top: 0; left: 0; right: 0;
       z-index: 10;
-      box-shadow: 0 6px 18px rgba(69, 35, 20, 0.05);
+      box-shadow: var(--sidebar-shadow);
     }
-    :root.dark header { background: rgba(23,17,16,0.94); }
-    header h1 { font-size: 18px; font-weight: 800; flex: 0 0 auto; color: var(--text); }
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+    .brand-mark {
+      width: 20px;
+      height: 20px;
+      border-radius: 7px 11px 7px 11px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      box-shadow: 0 8px 18px rgba(255, 94, 60, 0.22);
+      transform: skewX(-14deg);
+      flex-shrink: 0;
+    }
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+    .brand-text strong { font-size: 18px; font-weight: 800; color: var(--text); }
+    .brand-text span { font-size: 10px; color: var(--muted); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
     .header-chip {
       border: 1px solid var(--border);
       border-radius: 999px;
@@ -80,7 +107,8 @@
       white-space: nowrap;
     }
     .header-spacer { flex: 1; }
-    #theme-toggle {
+    #theme-toggle,
+    #refresh-btn {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 10px;
@@ -90,7 +118,8 @@
       font-size: 14px;
       box-shadow: var(--shadow);
     }
-    #theme-toggle:hover { background: var(--bg-card-hover); }
+    #theme-toggle:hover,
+    #refresh-btn:hover { background: var(--bg-card-hover); }
     #status-bar {
       position: fixed;
       top: 52px; left: 18px; right: 18px;
@@ -110,15 +139,16 @@
       overflow: hidden;
     }
     #sidebar {
-      width: 196px;
+      width: 204px;
       flex-shrink: 0;
-      background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,247,242,0.92));
+      background: var(--sidebar-bg);
       border-right: 1px solid var(--border);
       padding: 14px 10px;
       overflow-y: auto;
       position: sticky;
       top: 0;
       height: calc(100vh - 92px);
+      box-shadow: inset -1px 0 0 rgba(255,255,255,0.04);
     }
     #sidebar-label {
       font-size: 10px;
@@ -156,7 +186,7 @@
       border-radius: 999px;
       background: rgba(128,128,128,0.28);
       flex-shrink: 0;
-      box-shadow: 0 0 0 3px rgba(255,255,255,0.75);
+      box-shadow: 0 0 0 3px var(--sidebar-dot-ring);
     }
     .tab[data-level="ok"]::after { background: var(--green); }
     .tab[data-level="warn"]::after { background: var(--yellow); }
@@ -541,11 +571,17 @@
 </div>
 
 <header>
-  <h1>ZJP Dashboard v2 Sandbox</h1>
-  <span class="header-chip">Branch: dash-v2-sandbox</span>
-  <span class="header-chip">Prod separate</span>
+  <div class="header-brand">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <span class="brand-text">
+      <strong>Zapply Ops</strong>
+      <span>Dashboard sandbox</span>
+    </span>
+  </div>
+  <span class="header-chip">dash-v2-sandbox</span>
+  <span class="header-chip">production separate</span>
   <div class="header-spacer"></div>
-  <button id="refresh-btn" title="Refresh now" style="background:none;border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;color:var(--text);font-size:14px">↻</button>
+  <button id="refresh-btn" title="Refresh now">↻</button>
   <span id="refresh-countdown" style="font-size:11px;color:var(--muted)"></span>
   <button id="theme-toggle" title="Toggle theme">☀</button>
 </header>
@@ -574,10 +610,12 @@
     <div class="section-lineage" id="lineage-v2-command">Source: loading…</div>
     <div class="v2-filter-context" id="v2-overview-filters"></div>
     <div class="v2-overview-hero" id="v2-overview-hero"></div>
-    <div class="section-label" style="margin-top:24px">Active exceptions</div>
-    <div class="section-lineage" id="lineage-v2-attention">Source: loading…</div>
-    <div class="v2-attention" id="v2-attention-band"><span class="muted">Loading…</span></div>
-    <div class="section-label" style="margin-top:24px">Owned next actions</div>
+    <div id="v2-overview-exceptions-wrap" style="margin-top:24px">
+      <div class="section-label">Active exceptions</div>
+      <div class="section-lineage" id="lineage-v2-attention">Source: loading…</div>
+      <div class="v2-attention" id="v2-attention-band"><span class="muted">Loading…</span></div>
+    </div>
+    <div class="section-label" style="margin-top:24px">Priority queue</div>
     <div class="section-lineage" id="lineage-v2-modules">Source: loading…</div>
     <div class="v2-module-grid" id="v2-module-grid"></div>
     <div class="section-label" style="margin-top:24px">Evidence at a glance</div>
@@ -1198,6 +1236,7 @@ function v2RenderAttention(id, issues) {
 }
 function v2HydrateOverviewModuleCards(container) {
   const queue = [];
+  const priority = { critical: 0, warn: 1, ok: 2 };
   container.querySelectorAll('[data-v2-tab]').forEach(card => {
     const tab = document.querySelector(`.tab[data-tab="${card.dataset.v2Tab}"]`);
     if (!tab) return;
@@ -1206,8 +1245,22 @@ function v2HydrateOverviewModuleCards(container) {
     const value = card.querySelector('.value');
     if (sub && tab.title) sub.textContent = tab.title;
     if (value) value.textContent = v2DecisionStateLabel(level);
-    card.style.borderColor = level === 'critical' ? 'rgba(248,81,73,0.36)' : level === 'warn' ? 'rgba(210,153,34,0.36)' : 'rgba(63,185,80,0.26)';
-    queue.push({ tab: card.dataset.v2Tab, level, note: tab.title || '' });
+    if (level === 'critical') {
+      card.style.borderColor = 'rgba(255, 94, 60, 0.40)';
+      card.style.background = 'linear-gradient(135deg, rgba(255,94,60,0.12), rgba(255,94,60,0.03))';
+    } else if (level === 'warn') {
+      card.style.borderColor = 'rgba(240,183,91,0.38)';
+      card.style.background = 'rgba(240,183,91,0.08)';
+    } else {
+      card.style.borderColor = 'rgba(84,200,120,0.22)';
+      card.style.background = 'var(--bg-card)';
+    }
+    queue.push({ tab: card.dataset.v2Tab, level, note: tab.title || '', priority: priority[level] ?? 9 });
+  });
+  queue.sort((a, b) => a.priority - b.priority || a.tab.localeCompare(b.tab));
+  queue.forEach(item => {
+    const card = container.querySelector(`[data-v2-tab="${item.tab}"]`);
+    if (card) container.appendChild(card);
   });
   return queue;
 }
@@ -1487,6 +1540,8 @@ function renderV2Overview(raw) {
   const vm = v2BuildOverviewViewModel(v2BuildDashboardData(raw));
   v2SetNavState('overview', v2IssueLevel(vm.issues), vm.issues[0] ? vm.issues[0].title : 'Cross-module summary');
   command.innerHTML = vm.commandCards.map(card => v2Card(...card)).join('');
+  const exceptionsWrap = document.getElementById('v2-overview-exceptions-wrap');
+  if (exceptionsWrap) exceptionsWrap.style.display = vm.issues.length ? 'block' : 'none';
   v2RenderAttention('v2-attention-band', vm.issues);
   let queue = [];
   const modules = document.getElementById('v2-module-grid');
@@ -1512,12 +1567,12 @@ function renderV2Overview(raw) {
     const heroTitle = nextModule ? `Open ${nextModule.tab.toUpperCase()} next` : vm.hero.title;
     const heroCopy = nextModule ? nextModule.note : vm.hero.copy;
     const heroOwner = nextModule ? `Owner: ${nextModule.tab.toUpperCase()}` : vm.hero.owner;
-    const accent = heroLevel === 'critical' ? 'var(--red)' : heroLevel === 'warn' ? 'var(--yellow)' : 'var(--green)';
-    hero.innerHTML = `<div class="v2-hero-card"><div class="v2-hero-kicker">Current operating call</div><div class="v2-hero-title" style="color:${accent}">${heroTitle}</div><div class="v2-hero-copy">${heroCopy}</div><div class="v2-hero-meta"><span class="header-chip">${heroOwner}</span><span class="header-chip">${vm.hero.confidence}</span></div></div><div class="v2-hero-side"><div class="v2-note-card"><div class="v2-hero-kicker">How to use this page</div><strong>Start here, drill only when needed</strong><div class="v2-hero-copy">${vm.hero.trust}</div></div><div class="v2-note-card"><div class="v2-hero-kicker">Navigation rule</div><strong>Colored module dots own follow-up</strong><div class="v2-hero-copy">Open only yellow/red modules. Leave green modules mentally closed.</div></div></div>`;
+    const accent = heroLevel === 'critical' ? 'var(--accent)' : heroLevel === 'warn' ? 'var(--yellow)' : 'var(--green)';
+    hero.innerHTML = `<div class="v2-hero-card"><div class="v2-hero-kicker">Current operating call</div><div class="v2-hero-title" style="color:${accent}">${heroTitle}</div><div class="v2-hero-copy">${heroCopy}</div><div class="v2-hero-meta"><span class="header-chip">${heroOwner}</span><span class="header-chip">${vm.hero.confidence}</span></div></div><div class="v2-hero-side"><div class="v2-note-card"><div class="v2-hero-kicker">How to use this page</div><strong>Start here, drill only when needed</strong><div class="v2-hero-copy">${vm.hero.trust}</div></div><div class="v2-note-card"><div class="v2-hero-kicker">Navigation rule</div><strong>Priority queue beats module order</strong><div class="v2-hero-copy">Act on the first coral/amber card first. Green cards are only confirmation.</div></div></div>`;
   }
   v2SetLineage('lineage-v2-command', vm.lineage.command);
   v2SetLineage('lineage-v2-attention', vm.lineage.attention);
-  v2SetLineage('lineage-v2-modules', vm.lineage.modules);
+  v2SetLineage('lineage-v2-modules', 'Priority queue is sorted by urgency; open the first non-clear owner before scanning the rest.');
 }
 function v2Minutes(ms) {
   if (ms == null) return null;
