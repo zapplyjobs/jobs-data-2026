@@ -934,6 +934,7 @@
     <div class="v2-filter-context" id="v2-out-filters"></div>
     <div class="v2-command-grid" id="v2-out-grid"></div>
     <div class="v2-attention" id="v2-out-attention" style="margin-top:12px"><span class="muted">Loading…</span></div>
+    <div class="v2-panel" id="v2-out-assurance" style="margin-top:12px"></div>
     <div class="v2-split" style="margin-top:12px">
       <div class="v2-panel" id="v2-out-decision"></div>
       <div class="v2-panel" id="v2-out-composition"></div>
@@ -1195,6 +1196,7 @@ function dataUrls() {
     generalReview: dataUrl('general-review.json', t),
     discordVerification: dataUrl('discord-verification.json', t),
     trafficHistory: dataUrl('traffic-history.jsonl', t),
+    outState: dataUrl('out_operator_state.json', t),
     zjpMetrics:  dataUrl('zjp-metrics.json', t),
     aggReview:   dataUrl('agg_improvement_review.json', t),
     sourceTruth: dataUrl('source_truth_audit.json', t),
@@ -1332,6 +1334,7 @@ const V2_DATA_CONTRACT = Object.freeze({
   stars: { owner: 'OUT', file: 'metrics/latest.json + history.jsonl', path: 'repos[*].stars / history[*].stars' },
   discord: { owner: 'OUT', file: 'posted_jobs.json', path: 'jobs[*].discordPosts' },
   traffic: { owner: 'OUT', file: 'traffic-history.jsonl', path: 'latest.repos[*].views' },
+  outState: { owner: 'OUT', file: 'out_operator_state.json', path: 'health/current_problem/next_action/blocked' },
   alert: { owner: 'INF', file: 'pipeline-alert.json', path: 'active/message/warnings/secrets' },
   zjpMetrics: { owner: 'INF', file: 'zjp-metrics.json', path: 'generated_at + runtime/R2 metrics' },
   sources: { owner: 'SUP', file: 'jobs-metadata.json', path: 'by_source' },
@@ -1984,11 +1987,17 @@ function v2BuildOutViewModel(raw) {
   const freshLevel = freshPct == null ? 'warn' : freshPct >= 80 ? 'ok' : freshPct >= 50 ? 'warn' : 'critical';
   const failedLevel = failedRepos === 0 ? 'ok' : failedRepos <= 1 ? 'warn' : 'critical';
   const discordLevel = discordPostCount > 0 ? 'ok' : 'warn';
+  const outState = raw.outState || null;
   const issues = [];
   if (freshLevel !== 'ok') issues.push({ title: 'Consumer freshness drift', detail: freshPct == null ? 'freshness unavailable' : `${freshRepos}/${repoDataCount} repos fresh`, level: freshLevel });
   if (failedLevel !== 'ok') issues.push({ title: 'Repo workflow failures', detail: `${failedRepos} failing repo workflow${failedRepos === 1 ? '' : 's'}`, level: failedLevel });
   if (discordLevel !== 'ok') issues.push({ title: 'Discord delivery missing', detail: 'No Discord posts found in posted_jobs.json', level: discordLevel });
-  const decision = v2DecisionText(issues, 'No OUT action needed', 'Repos, workflows, traffic, and Discord delivery are operating normally.');
+  if (outState && outState.current_problem) {
+    issues.push({ title: 'Routed public-board risk', detail: `${outState.current_problem.issue || 'softwarejobs.dev#9'} · ${outState.current_problem.owner || 'external owner'} owns fix`, level: outState.health && outState.health.level === 'critical' ? 'critical' : 'warn' });
+  }
+  const decision = outState
+    ? { level: outState.health && outState.health.level || 'warn', label: outState.health && outState.health.label || 'OUT state needs review', sub: outState.next_action && outState.next_action.label || 'Check OUT assurance state.' }
+    : v2DecisionText(issues, 'No OUT action needed', 'Repos, workflows, traffic, and Discord delivery are operating normally.');
   return {
     cards: [
       ['Consumer Freshness', freshPct == null ? '—' : `${freshPct}%`, `${freshRepos}/${repoDataCount} repos updated <2h ago`, freshLevel],
@@ -2003,8 +2012,27 @@ function v2BuildOutViewModel(raw) {
     composition: {
       rows: repoRows
     },
-    lineage: [v2SourceLabel(V2_DATA_CONTRACT.consumers.file, 'repos/stars/freshness', metrics.timestamp || metrics.generated_at), v2SourceLabel(V2_DATA_CONTRACT.discord.file, 'discord posts', raw.postedJobs && raw.postedJobs.lastUpdated), v2SourceLabel(V2_DATA_CONTRACT.traffic.file, 'traffic views', latestTraffic && (latestTraffic.timestamp || latestTraffic.date))].join(' | ')
+    assurance: outState,
+    lineage: [v2SourceLabel(V2_DATA_CONTRACT.consumers.file, 'repos/stars/freshness', metrics.timestamp || metrics.generated_at), v2SourceLabel(V2_DATA_CONTRACT.discord.file, 'discord posts', raw.postedJobs && raw.postedJobs.lastUpdated), v2SourceLabel(V2_DATA_CONTRACT.traffic.file, 'traffic views', latestTraffic && (latestTraffic.timestamp || latestTraffic.date)), outState ? v2SourceLabel(V2_DATA_CONTRACT.outState.file, 'assurance owner route', outState.generated_at) : null].filter(Boolean).join(' | ')
   };
+}
+function v2RenderOutAssurance(el, state) {
+  if (!el) return;
+  if (!state) {
+    el.innerHTML = `<div class="v2-panel-title">OUT Assurance State</div><div class="muted" style="font-size:12px">No OUT assurance state artifact loaded.</div>`;
+    return;
+  }
+  const blocked = Array.isArray(state.blocked) ? state.blocked : [];
+  el.innerHTML = `
+    <div class="v2-panel-title">OUT Assurance State</div>
+    <div class="v2-snapshot-grid" style="grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:12px">
+      <div class="v2-snapshot-item"><div class="label">Owned surfaces</div><div class="value" style="color:var(--green)">stable</div><div class="sub">${state.health && state.health.detail || 'README and Discord are stable.'}</div></div>
+      <div class="v2-snapshot-item"><div class="label">Current issue</div><div class="value" style="color:var(--yellow)">${state.current_problem && state.current_problem.issue || 'softwarejobs.dev#9'}</div><div class="sub">${state.current_problem && state.current_problem.label || 'Public-board freshness trust'}</div></div>
+      <div class="v2-snapshot-item"><div class="label">Owner route</div><div class="value">${state.current_problem && state.current_problem.owner || 'public-board/backend'}</div><div class="sub">DASH presents; OUT verifies after fix.</div></div>
+      <div class="v2-snapshot-item"><div class="label">Next OUT action</div><div class="value">${state.next_action && state.next_action.verification_lane || 'OUT-PUBLIC-2'}</div><div class="sub">${state.next_action && state.next_action.label || 'Rerun after owner deploy.'}</div></div>
+    </div>
+    <div class="v2-anomaly-row"><strong>Blocked / gated</strong><span>${blocked.map(item => `${item.issue || item.label}: ${item.detail}`).join(' · ') || 'None'}</span></div>
+  `;
 }
 function renderV2Out(raw) {
   const grid = document.getElementById('v2-out-grid');
@@ -2028,6 +2056,7 @@ function renderV2Out(raw) {
   }
   grid.innerHTML = vm.cards.map(card => v2Card(...card)).join('');
   v2RenderAttention('v2-out-attention', vm.issues);
+  v2RenderOutAssurance(document.getElementById('v2-out-assurance'), vm.assurance);
   v2SetLineage('lineage-v2-out', vm.lineage);
 }
 function v2SoonestSecret(secrets) {
@@ -4425,7 +4454,7 @@ async function fetchAll() {
       `<div class="card" style="grid-column:1/-1"><span class="err">Failed to load metrics. Pipeline may be down — try refreshing.</span></div>`;
     return false;
   }
-  const [daily, historyRaw, enrichStats, enrichHistoryRaw, metadata, postedJobs, pipelineAlert, archiveRaw, generalReview, discordVerification, trafficRaw, zjpMetrics, aggReview, sourceTruth] = await Promise.all([
+  const [daily, historyRaw, enrichStats, enrichHistoryRaw, metadata, postedJobs, pipelineAlert, archiveRaw, generalReview, discordVerification, trafficRaw, outState, zjpMetrics, aggReview, sourceTruth] = await Promise.all([
     safeJson(urls.daily),
     fetch(urls.history).then(r => r.ok ? r.text() : null).catch(() => null),
     safeJson(urls.enrichment),
@@ -4437,6 +4466,7 @@ async function fetchAll() {
     safeJson(urls.generalReview),
     safeJson(urls.discordVerification),
     fetch(urls.trafficHistory).then(r => r.ok ? r.text() : null).catch(() => null),
+    safeJson(urls.outState),
     safeJson(urls.zjpMetrics),
     safeJson(urls.aggReview),
     safeJson(urls.sourceTruth),
@@ -4451,6 +4481,7 @@ async function fetchAll() {
   _D.generalReview = generalReview;
   _D.discordVerification = discordVerification;
   _D.trafficRaw = trafficRaw;
+  _D.outState = outState;
   _D.zjpMetrics = zjpMetrics;
   _D.aggReview = aggReview;
   _D.sourceTruth = sourceTruth;
@@ -4471,7 +4502,7 @@ async function fetchAll() {
 }
 
 function renderAll() {
-  const { metrics, daily, historyEntries, enrichStats, enrichHistory, metadata, postedJobs, pipelineAlert, archiveEntries, allHistoryMerged, generalReview, discordVerification, trafficRaw, aggReview, sourceTruth } = _D;
+  const { metrics, daily, historyEntries, enrichStats, enrichHistory, metadata, postedJobs, pipelineAlert, archiveEntries, allHistoryMerged, generalReview, discordVerification, trafficRaw, outState, aggReview, sourceTruth } = _D;
   if (!metrics) return;
   const statusTs = (_D.zjpMetrics && _D.zjpMetrics.generated_at) || (metadata && metadata.generated) || metrics.timestamp;
   renderStatusBar(statusTs);
@@ -4518,7 +4549,7 @@ function renderAll() {
   renderV2Enr({ metrics, historyEntries, archiveEntries, enrichStats, enrichHistory, metadata, postedJobs, pipelineAlert, generalReview });
   renderV2Tag({ metrics, historyEntries, archiveEntries, enrichStats, enrichHistory, metadata, postedJobs, pipelineAlert, generalReview });
   renderV2Sup({ metrics, historyEntries, archiveEntries, enrichStats, enrichHistory, metadata, postedJobs, pipelineAlert, generalReview });
-  renderV2Out({ metrics, historyEntries, archiveEntries, enrichStats, enrichHistory, metadata, postedJobs, pipelineAlert, generalReview, trafficRaw, discordVerification });
+  renderV2Out({ metrics, historyEntries, archiveEntries, enrichStats, enrichHistory, metadata, postedJobs, pipelineAlert, generalReview, trafficRaw, discordVerification, outState });
   renderV2Inf({ metrics, historyEntries, archiveEntries, enrichStats, enrichHistory, metadata, postedJobs, pipelineAlert, generalReview, trafficRaw, discordVerification, zjpMetrics: _D.zjpMetrics });
   renderV2Overview({ metrics, historyEntries, archiveEntries, enrichStats, enrichHistory, metadata, postedJobs, pipelineAlert, generalReview });
   document.getElementById('content').style.display = 'block';
