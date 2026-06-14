@@ -268,6 +268,57 @@
       40%,80%  { transform: translateX(6px); }
     }
     .shake { animation: shake 0.35s ease; }
+
+    .v2-filter-context {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 12px;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: rgba(128,128,128,0.04);
+      font-size: 11px;
+    }
+    .v2-filter-baseline { color: var(--text); font-weight: 650; }
+    .v2-filter-row { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+    .v2-filter-label { color: var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.06em; margin-right:2px; }
+    .v2-pill {
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 3px 9px;
+      font-size: 11px;
+      font-weight: 600;
+      background: transparent;
+    }
+    .v2-pill.active { color: var(--accent); border-color: var(--accent); background: var(--accent-bg); }
+    .v2-pill.ready { color: var(--green); border-color: rgba(63,185,80,0.45); }
+    .v2-pill.planned { color: var(--yellow); border-color: rgba(210,153,34,0.45); }
+    .v2-pill.blocked { color: var(--muted); border-style:dashed; opacity:.75; }
+    .v2-command-grid { display:grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap:12px; }
+    .v2-module-grid { display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap:12px; }
+    .v2-card { background: var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; box-shadow: var(--shadow); min-height:104px; }
+    .v2-card .label { color: var(--muted); font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px; }
+    .v2-card .value { font-size:24px; font-weight:700; line-height:1.15; }
+    .v2-card .sub { color: var(--muted); font-size:11px; margin-top:6px; line-height:1.35; }
+    .v2-module-card { cursor:pointer; transition:border-color .12s ease, transform .12s ease; }
+    .v2-module-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+    .v2-attention { border:1px solid var(--border); border-radius:12px; padding:12px 14px; background: var(--bg-card); }
+    .v2-attention.ok { border-color: rgba(63,185,80,0.45); }
+    .v2-attention.warn { border-color: rgba(210,153,34,0.60); }
+    .v2-attention.critical { border-color: rgba(248,81,73,0.60); }
+    .v2-issue { display:flex; justify-content:space-between; gap:16px; padding:6px 0; border-top:1px solid var(--border); font-size:12px; }
+    .v2-issue:first-child { border-top:none; }
+    .v2-split { display:grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap:12px; }
+    .v2-panel { background: var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; box-shadow: var(--shadow); }
+    .v2-panel-title { color: var(--muted); font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; margin-bottom:10px; }
+    .v2-decision { font-size:14px; font-weight:700; margin-bottom:8px; }
+    .v2-mini-row { display:grid; grid-template-columns: 110px minmax(0,1fr) 58px; gap:8px; align-items:center; font-size:11px; margin:7px 0; }
+    .v2-mini-bar { height:8px; border-radius:999px; background:rgba(128,128,128,.16); overflow:hidden; }
+    .v2-mini-fill { height:100%; border-radius:999px; background:var(--accent); }
+    @media (max-width: 1200px) { .v2-command-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    @media (max-width: 800px) { .v2-command-grid, .v2-module-grid, .v2-split { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -300,7 +351,8 @@
 <div id="app-body">
 <aside id="sidebar">
   <div id="sidebar-label">Navigation</div>
-  <button class="tab active" data-tab="agg">⚙️ AGG</button>
+  <button class="tab active" data-tab="overview">⌁ Overview</button>
+  <button class="tab" data-tab="agg">⚙️ AGG</button>
   <button class="tab" data-tab="tag">🏷️ TAG</button>
   <button class="tab" data-tab="enr">🔬 ENR</button>
   <button class="tab" data-tab="sup">🏭 SUP</button>
@@ -311,8 +363,34 @@
 <div id="content-wrap" style="flex:1;min-width:0;overflow-y:auto">
 <main id="content" style="padding: 24px; display:none">
 
+  <section id="tab-overview" class="tab-panel">
+        <div class="section-label">Command Strip</div>
+    <div class="section-lineage" id="lineage-v2-command">Source: loading…</div>
+    <div class="v2-filter-context" id="v2-overview-filters"></div>
+    <div class="v2-command-grid" id="v2-command-grid"></div>
+    <div class="section-label" style="margin-top:24px">Needs Attention</div>
+    <div class="section-lineage" id="lineage-v2-attention">Source: loading…</div>
+    <div class="v2-attention" id="v2-attention-band"><span class="muted">Loading…</span></div>
+    <div class="section-label" style="margin-top:24px">Module Summary</div>
+    <div class="section-lineage" id="lineage-v2-modules">Source: loading…</div>
+    <div class="v2-module-grid" id="v2-module-grid"></div>
+  </section>
+
   <!-- INF TAB — Infrastructure: services, alerts, architecture -->
   <section id="tab-inf" class="tab-panel" style="display:none">
+    <div class="section-label">INF v2 Triage</div>
+    <div class="section-lineage" id="lineage-v2-inf">Source: loading…</div>
+    <div class="v2-filter-context" id="v2-inf-filters"></div>
+    <div class="v2-command-grid" id="v2-inf-grid"></div>
+    <div class="v2-attention" id="v2-inf-attention" style="margin-top:12px"><span class="muted">Loading…</span></div>
+    <div class="v2-split" style="margin-top:12px">
+      <div class="v2-panel" id="v2-inf-decision"></div>
+      <div class="v2-panel" id="v2-inf-control"></div>
+    </div>
+    <div class="section-label" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center">
+      <span>INF Detail Surface</span>
+      <span class="muted" style="font-weight:400;font-size:11px">Drilldown detail below the command layer</span>
+    </div>
     <div class="section-label">Services</div>
     <div class="grid-3" id="ops-services"></div>
     <div class="section-label" style="margin-top:24px">Pipeline Alert</div>
@@ -326,7 +404,20 @@
   </section>
 
   <!-- AGG TAB — Aggregation: pipeline runs, pool, duration, senior filter -->
-  <section id="tab-agg" class="tab-panel">
+  <section id="tab-agg" class="tab-panel" style="display:none">
+    <div class="section-label">AGG v2 Triage</div>
+    <div class="section-lineage" id="lineage-v2-agg">Source: loading…</div>
+    <div class="v2-filter-context" id="v2-agg-filters"></div>
+    <div class="v2-command-grid" id="v2-agg-grid"></div>
+    <div class="v2-attention" id="v2-agg-attention" style="margin-top:12px"><span class="muted">Loading…</span></div>
+    <div class="v2-split" style="margin-top:12px">
+      <div class="v2-panel" id="v2-agg-decision"></div>
+      <div class="v2-panel" id="v2-agg-composition"></div>
+    </div>
+    <div class="section-label" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center">
+      <span>AGG Detail Surface</span>
+      <span class="muted" style="font-weight:400;font-size:11px">Drilldown detail below the command layer</span>
+    </div>
     <div class="section-label" style="display:flex;justify-content:space-between;align-items:center">
       <span>Pipeline Status</span>
       <span id="agg-filter-pills" style="font-weight:400;font-size:11px"></span>
@@ -380,6 +471,19 @@
 
   <!-- SUP TAB — Supply: sources, companies, source trends -->
   <section id="tab-sup" class="tab-panel" style="display:none">
+    <div class="section-label">SUP v2 Triage</div>
+    <div class="section-lineage" id="lineage-v2-sup">Source: loading…</div>
+    <div class="v2-filter-context" id="v2-sup-filters"></div>
+    <div class="v2-command-grid" id="v2-sup-grid"></div>
+    <div class="v2-attention" id="v2-sup-attention" style="margin-top:12px"><span class="muted">Loading…</span></div>
+    <div class="v2-split" style="margin-top:12px">
+      <div class="v2-panel" id="v2-sup-decision"></div>
+      <div class="v2-panel" id="v2-sup-composition"></div>
+    </div>
+    <div class="section-label" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center">
+      <span>SUP Detail Surface</span>
+      <span class="muted" style="font-weight:400;font-size:11px">Drilldown detail below the command layer</span>
+    </div>
     <div class="section-label" style="display:flex;justify-content:space-between;align-items:center">
       <span>Source & Job Supply</span>
       <span id="sup-filter-pills" style="font-weight:400;font-size:11px"></span>
@@ -432,6 +536,19 @@
 
   <!-- TAG TAB — Classification: G1 KPIs first, then domain detail -->
   <section id="tab-tag" class="tab-panel" style="display:none">
+    <div class="section-label">TAG v2 Triage</div>
+    <div class="section-lineage" id="lineage-v2-tag">Source: loading…</div>
+    <div class="v2-filter-context" id="v2-tag-filters"></div>
+    <div class="v2-command-grid" id="v2-tag-grid"></div>
+    <div class="v2-attention" id="v2-tag-attention" style="margin-top:12px"><span class="muted">Loading…</span></div>
+    <div class="v2-split" style="margin-top:12px">
+      <div class="v2-panel" id="v2-tag-decision"></div>
+      <div class="v2-panel" id="v2-tag-workqueue"></div>
+    </div>
+    <div class="section-label" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center">
+      <span>TAG Detail Surface</span>
+      <span class="muted" style="font-weight:400;font-size:11px">Drilldown detail below the command layer</span>
+    </div>
     <div id="tag-freshness" style="font-size:11px;color:var(--muted);margin-bottom:8px"></div>
     <div class="section-label">Classification Health</div>
     <div class="grid" id="class-summary"></div>
@@ -471,6 +588,19 @@
 
   <!-- ENR TAB — Enrichment: tier-based quality view (redesigned S262 Phase 2) -->
   <section id="tab-enr" class="tab-panel" style="display:none">
+    <div class="section-label">ENR v2 Triage</div>
+    <div class="section-lineage" id="lineage-v2-enr">Source: loading…</div>
+    <div class="v2-filter-context" id="v2-enr-filters"></div>
+    <div class="v2-command-grid" id="v2-enr-grid"></div>
+    <div class="v2-attention" id="v2-enr-attention" style="margin-top:12px"><span class="muted">Loading…</span></div>
+    <div class="v2-split" style="margin-top:12px">
+      <div class="v2-panel" id="v2-enr-decision"></div>
+      <div class="v2-panel" id="v2-enr-composition"></div>
+    </div>
+    <div class="section-label" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center">
+      <span>ENR Detail Surface</span>
+      <span class="muted" style="font-weight:400;font-size:11px">Drilldown detail below the command layer</span>
+    </div>
     <div id="enr-freshness" style="font-size:11px;color:var(--muted);margin-bottom:8px"></div>
     <div class="section-label" style="display:flex;justify-content:space-between;align-items:center">
       <span>Enrichment Health</span>
@@ -525,6 +655,19 @@
 
   <!-- OUT TAB — Output: consumer repos, stars, Discord -->
   <section id="tab-out" class="tab-panel" style="display:none">
+    <div class="section-label">OUT v2 Triage</div>
+    <div class="section-lineage" id="lineage-v2-out">Source: loading…</div>
+    <div class="v2-filter-context" id="v2-out-filters"></div>
+    <div class="v2-command-grid" id="v2-out-grid"></div>
+    <div class="v2-attention" id="v2-out-attention" style="margin-top:12px"><span class="muted">Loading…</span></div>
+    <div class="v2-split" style="margin-top:12px">
+      <div class="v2-panel" id="v2-out-decision"></div>
+      <div class="v2-panel" id="v2-out-composition"></div>
+    </div>
+    <div class="section-label" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center">
+      <span>OUT Detail Surface</span>
+      <span class="muted" style="font-weight:400;font-size:11px">Drilldown detail below the command layer</span>
+    </div>
     <div id="out-freshness" style="font-size:11px;color:var(--muted);margin-bottom:8px"></div>
     <div class="section-label">Consumer Health</div>
     <div class="grid" id="out-health-cards"></div>
@@ -791,6 +934,21 @@ function age(isoTs) {
   if (mins < 60) return `${mins}m ago`;
   return `${Math.round(mins / 60)}h ago`;
 }
+function v2SourceLabel(file, role, isoTs) {
+  return [file, role, isoTs ? age(isoTs) : null].filter(Boolean).join(' · ');
+}
+function v2SetLineage(id, label) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = `Source: ${label}`;
+}
+function v2RenderFilterContext(tabKey) {
+  const target = document.getElementById(`v2-${tabKey}-filters`);
+  const spec = V2_FILTER_CONTRACT[tabKey];
+  if (!target || !spec) return;
+  target.innerHTML = `<div class="v2-filter-baseline">${spec.baseline}</div>` +
+    spec.groups.map(group => `<div class="v2-filter-row"><span class="v2-filter-label">${group.label}</span>${group.chips.map(([label, state]) => `<span class="v2-pill ${state}">${label}</span>`).join('')}</div>`).join('');
+}
+
 
 function addRow(tableId, cells) {
   const tr = document.createElement('tr');
@@ -815,6 +973,676 @@ function statCard({ icon, label, value, trend, trendDir, sub, valueColor }) {
       ${trend ? `<div class="stat-trend ${trendClass}">${trend}</div>` : ''}
       ${sub   ? `<div class="stat-sub">${sub}</div>` : ''}
     </div>`;
+}
+
+
+const V2_DATA_CONTRACT = Object.freeze({
+  freshness: { owner: 'INF', file: 'jobs-metadata.json', path: 'generated', warnHours: 0.75, criticalHours: 6 },
+  metrics: { owner: 'INF', file: 'metrics/latest.json', path: 'timestamp || generated_at' },
+  poolTotal: { owner: 'AGG', file: 'jobs-metadata.json', path: 'total_jobs' },
+  techUs: { owner: 'ENR', file: 'enrichment-stats.json', path: 'total_tech_us' },
+  classification: { owner: 'TAG', file: 'general-review.json', path: 'summary.us_general_rate' },
+  classificationCompanies: { owner: 'TAG', file: 'general-review.json', path: 'by_company' },
+  titlePatterns: { owner: 'TAG', file: 'general-review.json', path: 'title_patterns' },
+  tenantCandidates: { owner: 'TAG', file: 'general-review.json', path: 'tenant_candidates' },
+  enrichment: { owner: 'ENR', file: 'enrichment-stats.json', path: 'total_enriched / total_tech_us' },
+  tierT3: { owner: 'ENR', file: 'enrichment-stats.json', path: 'tiers.t3 (+ tiers.t4 when present)' },
+  descriptions: { owner: 'ENR', file: 'enrichment-stats.json', path: 'total_has_description / total_tech_us' },
+  reenrichmentQueue: { owner: 'ENR', file: 'enrichment-stats.json', path: '(total_tech_us - total_enriched) + reenrichment_pending' },
+  visaSignals: { owner: 'ENR', file: 'enrichment-stats.json', path: 'by_source[*].any_visa_signal || sponsors_visa' },
+  consumers: { owner: 'OUT', file: 'metrics/latest.json', path: 'repos[*].lastJobsUpdate || workflowLastRun' },
+  stars: { owner: 'OUT', file: 'metrics/latest.json + history.jsonl', path: 'repos[*].stars / history[*].stars' },
+  discord: { owner: 'OUT', file: 'posted_jobs.json', path: 'jobs[*].discordPosts' },
+  traffic: { owner: 'OUT', file: 'traffic-history.jsonl', path: 'latest.repos[*].views' },
+  alert: { owner: 'INF', file: 'pipeline-alert.json', path: 'active/message/warnings/secrets' },
+  zjpMetrics: { owner: 'INF', file: 'zjp-metrics.json', path: 'generated_at + runtime/R2 metrics' },
+  sources: { owner: 'SUP', file: 'jobs-metadata.json', path: 'by_source' },
+  topCompanies: { owner: 'SUP', file: 'jobs-metadata.json', path: 'top_companies' },
+  zeroYield: { owner: 'SUP', file: 'jobs-metadata.json', path: 'zero_yield_companies || zero_yield_sources' }
+});
+const V2_MODULE_CONTRACT = Object.freeze({
+  agg: { label: 'AGG', question: 'Did the latest run produce a healthy pool?', filters: 'experience, region, domain group' },
+  tag: { label: 'TAG', question: 'Is classification leakage controlled?', filters: 'region, domain group' },
+  enr: { label: 'ENR', question: 'Is enrichment quality high enough?', filters: 'source, region, domain group' },
+  sup: { label: 'SUP', question: 'Are sources producing useful supply?', filters: 'ATS/custom only' },
+  out: { label: 'OUT', question: 'Are jobs reaching repos and Discord?', filters: 'global only' },
+  inf: { label: 'INF', question: 'Are services, alerts, and trust signals healthy?', filters: 'global only' }
+});
+const V2_FILTER_CONTRACT = Object.freeze({
+  overview: {
+    baseline: 'Command surface baseline: global health only; investigate in module tabs.',
+    groups: [
+      { label: 'Scope', chips: [['Global', 'active'], ['Not content-sliced', 'blocked']] }
+    ]
+  },
+  agg: {
+    baseline: 'Baseline: Tech-US entry-level + internships. Filters are allowed only when denominator remains honest.',
+    groups: [
+      { label: 'Experience', chips: [['Entry + internship', 'active'], ['Intern', 'ready'], ['New-grad', 'ready'], ['Mid-level', 'ready']] },
+      { label: 'Region', chips: [['Global pool', 'active'], ['US / Non-US requires producer split', 'planned']] },
+      { label: 'Domain', chips: [['All domains', 'active'], ['4 groups ready as single-dimension view', 'ready'], ['No cross-dimension yet', 'blocked']] }
+    ]
+  },
+  tag: {
+    baseline: 'Baseline: US tech classification health. Domain/region filters wait for producer breakdowns.',
+    groups: [
+      { label: 'Region', chips: [['US baseline', 'active'], ['Global requires general_by_region', 'planned']] },
+      { label: 'Domain', chips: [['All tech domains', 'active'], ['4 groups require general_by_domain', 'planned']] },
+      { label: 'Experience', chips: [['Not applied', 'blocked']] }
+    ]
+  },
+  enr: {
+    baseline: 'Baseline: all tech-US enrichment quality. Source is live; domain/region wait for tier breakdowns.',
+    groups: [
+      { label: 'Source', chips: [['All sources', 'active'], ['Legacy source dropdown below', 'ready']] },
+      { label: 'Region', chips: [['Global tech-US', 'active'], ['Requires tiers_by_location', 'planned']] },
+      { label: 'Domain', chips: [['All domains', 'active'], ['Requires tiers_by_domain', 'planned']] }
+    ]
+  },
+  sup: {
+    baseline: 'Baseline: all sources. Only ATS/custom source-type slicing is meaningful here.',
+    groups: [
+      { label: 'Source type', chips: [['All sources', 'active'], ['ATS/custom classification pending', 'planned']] },
+      { label: 'Content filters', chips: [['Experience/region/domain not meaningful', 'blocked']] }
+    ]
+  },
+  out: {
+    baseline: 'Baseline: all consumer repos. Delivery health is global, not content-sliced.',
+    groups: [
+      { label: 'Scope', chips: [['All repos', 'active'], ['No content filters', 'blocked']] }
+    ]
+  },
+  inf: {
+    baseline: 'Baseline: system/control-plane health. No content filters apply.',
+    groups: [
+      { label: 'Scope', chips: [['System global', 'active'], ['No content filters', 'blocked']] }
+    ]
+  }
+});
+function v2Pct(num, den) {
+  if (!den) return null;
+  return Math.round((num / den) * 1000) / 10;
+}
+function v2FreshnessState(isoTs, warnHours, criticalHours) {
+  if (!isoTs) return { label: 'missing', level: 'critical', hours: null };
+  const ms = new Date(isoTs).getTime();
+  if (!Number.isFinite(ms)) return { label: 'invalid', level: 'critical', hours: null };
+  const hours = (Date.now() - ms) / 3600000;
+  return {
+    label: hours < warnHours ? 'live' : hours < criticalHours ? 'delayed' : 'stale',
+    level: hours < warnHours ? 'ok' : hours < criticalHours ? 'warn' : 'critical',
+    hours
+  };
+}
+function v2Card(label, value, sub, level) {
+  const color = level === 'critical' ? 'var(--red)' : level === 'warn' ? 'var(--yellow)' : level === 'ok' ? 'var(--green)' : 'var(--text)';
+  return `<div class="v2-card"><div class="label">${label}</div><div class="value" style="color:${color}">${value}</div><div class="sub">${sub}</div></div>`;
+}
+function v2ModuleCard(key, value, sub, level) {
+  const spec = V2_MODULE_CONTRACT[key];
+  const color = level === 'critical' ? 'var(--red)' : level === 'warn' ? 'var(--yellow)' : level === 'ok' ? 'var(--green)' : 'var(--text)';
+  return `<div class="v2-card v2-module-card" role="button" tabindex="0" data-v2-tab="${key}" title="${spec.question} · Filters: ${spec.filters}"><div class="label">${spec.label}</div><div class="value" style="color:${color}">${value}</div><div class="sub">${sub}</div></div>`;
+}
+function v2Metric(owner, value, level, sub) {
+  return { owner, value, level, sub };
+}
+function v2BuildDashboardData(raw) {
+  const metrics = raw.metrics || {};
+  const metadata = raw.metadata || {};
+  const enrichStats = raw.enrichStats || {};
+  const classSummary = raw.generalReview && raw.generalReview.summary ? raw.generalReview.summary : {};
+  const metricTs = metrics.timestamp || metrics.generated_at || null;
+  const metaTs = metadata.generated || null;
+  const enrichTs = enrichStats.generated || null;
+  const classTs = (raw.generalReview && raw.generalReview.meta && raw.generalReview.meta.generated) || classSummary.generated || null;
+  const sourceTs = metaTs || metricTs;
+  const freshnessContract = V2_DATA_CONTRACT.freshness;
+  const freshness = v2FreshnessState(sourceTs, freshnessContract.warnHours, freshnessContract.criticalHours);
+  const repos = metrics.repos || {};
+  const staleRepos = Object.values(repos).reduce((n, repo) => n + (repo && repo.freshness && repo.freshness.status && repo.freshness.status !== 'fresh' ? 1 : 0), 0);
+  const poolTotal = metadata.total_jobs != null ? metadata.total_jobs : ((metrics.pipeline || {}).pipelineTotal ?? null);
+  const techUs = enrichStats.total_tech_us ?? null;
+  const enriched = enrichStats.total_enriched ?? null;
+  const enrichRate = v2Pct(enriched, techUs);
+  const g1Rate = classSummary.us_general_rate ?? null;
+  const alertActive = !!(raw.pipelineAlert && raw.pipelineAlert.active);
+  const sourceCount = metadata.by_source ? Object.keys(metadata.by_source).length : null;
+  return {
+    sourceTs,
+    metaTs,
+    metricTs,
+    enrichTs,
+    classTs,
+    freshness,
+    alert: {
+      active: alertActive,
+      message: raw.pipelineAlert && raw.pipelineAlert.message ? raw.pipelineAlert.message : 'See INF alert detail'
+    },
+    pool: v2Metric('AGG', poolTotal, freshness.level, techUs ? `${fmt(techUs)} tech-US jobs & internships` : 'tech-US denominator unavailable'),
+    techUs: v2Metric('ENR', techUs, techUs == null ? 'warn' : 'ok', 'Shared denominator with Overview'),
+    classification: v2Metric('TAG', g1Rate, g1Rate == null ? 'warn' : g1Rate <= 10 ? 'ok' : g1Rate <= 15 ? 'warn' : 'critical', 'US general rate; action if leakage rises'),
+    enrichment: v2Metric('ENR', enrichRate, enrichRate == null ? 'warn' : enrichRate >= 95 ? 'ok' : enrichRate >= 85 ? 'warn' : 'critical', enrichStats.tiers && enrichStats.tiers.t3 != null ? `${fmt(enrichStats.tiers.t3)} T3 quality jobs` : 'T3 unavailable'),
+    consumers: v2Metric('OUT', staleRepos, staleRepos ? 'warn' : 'ok', 'Repo/Discord freshness is global, not sliced'),
+    sources: v2Metric('SUP', sourceCount, sourceCount == null ? 'warn' : 'ok', 'Source/supply health → SUP tab')
+  };
+}
+function v2BuildOverviewViewModel(data) {
+  const freshnessValue = data.freshness.hours == null ? 'missing' : age(data.sourceTs);
+  const systemLevel = data.alert.active ? 'critical' : data.freshness.level;
+  const issues = [];
+  if (data.alert.active) issues.push({ title: 'Active pipeline alert', detail: data.alert.message, level: 'critical' });
+  if (data.freshness.level !== 'ok') issues.push({ title: 'Critical data freshness', detail: `${data.freshness.label}: ${freshnessValue}`, level: data.freshness.level });
+  if (data.consumers.value) issues.push({ title: 'Consumer stale drift', detail: `${data.consumers.value} repo(s) not fresh`, level: 'warn' });
+  if (data.enrichment.value != null && data.enrichment.value < 95) issues.push({ title: 'Enrichment below target', detail: `${data.enrichment.value}% enriched vs 95% target`, level: data.enrichment.value < 85 ? 'critical' : 'warn' });
+  return {
+    commandCards: [
+      ['System Health', data.alert.active ? 'ALERT' : data.freshness.label.toUpperCase(), v2SourceLabel(V2_DATA_CONTRACT.freshness.file, 'latest run', data.sourceTs), systemLevel],
+      ['Pool Size', fmt(data.pool.value), data.pool.sub, data.pool.level],
+      ['Classification', data.classification.value == null ? '—' : `${data.classification.value}%`, data.classification.sub, data.classification.level],
+      ['Enrichment', data.enrichment.value == null ? '—' : `${data.enrichment.value}%`, data.enrichment.sub, data.enrichment.level],
+      ['Consumers', data.consumers.value ? `${data.consumers.value} stale` : 'Fresh', data.consumers.sub, data.consumers.level],
+      ['Trust', freshnessValue, 'Oldest critical source cue; stale never renders green', data.freshness.level]
+    ],
+    issues,
+    moduleCards: [
+      ['agg', fmt(data.pool.value), 'Run/pool health → AGG tab', data.pool.level],
+      ['tag', data.classification.value == null ? '—' : `${data.classification.value}% G1`, 'Classification leakage → TAG tab', data.classification.level],
+      ['enr', data.enrichment.value == null ? '—' : `${data.enrichment.value}%`, 'Enrichment/tier health → ENR tab', data.enrichment.level],
+      ['sup', data.sources.value == null ? '—' : `${data.sources.value} sources`, data.sources.sub, data.sources.level],
+      ['out', data.consumers.value ? `${data.consumers.value} stale` : 'Fresh', 'Repo/Discord delivery → OUT tab', data.consumers.level],
+      ['inf', data.alert.active ? 'Alert' : data.freshness.label, 'Services/alerts/trust → INF tab', systemLevel]
+    ],
+    lineage: {
+      command: [v2SourceLabel(V2_DATA_CONTRACT.poolTotal.file, 'pool snapshot', data.metaTs), v2SourceLabel(V2_DATA_CONTRACT.enrichment.file, 'quality snapshot', data.enrichTs), v2SourceLabel(V2_DATA_CONTRACT.classification.file, 'classification snapshot', data.classTs)].join(' | '),
+      attention: [v2SourceLabel(V2_DATA_CONTRACT.alert.file, 'alert state', data.metricTs), v2SourceLabel(V2_DATA_CONTRACT.consumers.file, 'consumer freshness', data.metricTs)].join(' | '),
+      modules: 'Module cards are navigation summaries; module tabs remain commit layer.'
+    }
+  };
+}
+function renderV2Overview(raw) {
+  const command = document.getElementById('v2-command-grid');
+  if (!command) return;
+  v2RenderFilterContext('overview');
+  const vm = v2BuildOverviewViewModel(v2BuildDashboardData(raw));
+  command.innerHTML = vm.commandCards.map(card => v2Card(...card)).join('');
+  const attention = document.getElementById('v2-attention-band');
+  if (attention) {
+    const worst = vm.issues.some(i => i.level === 'critical') ? 'critical' : vm.issues.length ? 'warn' : 'ok';
+    attention.className = `v2-attention ${worst}`;
+    attention.innerHTML = vm.issues.length ? vm.issues.map(i => `<div class="v2-issue"><strong>${i.title}</strong><span style="color:${i.level === 'critical' ? 'var(--red)' : 'var(--yellow)'}">${i.detail}</span></div>`).join('') : '<span style="color:var(--green);font-weight:600">No active issues.</span> <span class="muted">Quiet when healthy; no permanent green wall.</span>';
+  }
+  const modules = document.getElementById('v2-module-grid');
+  if (modules) {
+    modules.innerHTML = vm.moduleCards.map(card => v2ModuleCard(...card)).join('');
+    modules.querySelectorAll('[data-v2-tab]').forEach(card => {
+      const target = document.querySelector(`.tab[data-tab="${card.dataset.v2Tab}"]`);
+      if (!target) return;
+      card.addEventListener('click', () => target.click());
+      card.addEventListener('keydown', event => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          target.click();
+        }
+      });
+    });
+  }
+  v2SetLineage('lineage-v2-command', vm.lineage.command);
+  v2SetLineage('lineage-v2-attention', vm.lineage.attention);
+  v2SetLineage('lineage-v2-modules', vm.lineage.modules);
+}
+function v2Minutes(ms) {
+  if (ms == null) return null;
+  return Math.round(ms / 60000);
+}
+function v2TopEntries(obj, limit) {
+  return Object.entries(obj || {}).filter(([, value]) => value > 0).sort((a, b) => b[1] - a[1]).slice(0, limit);
+}
+function v2MiniRows(rows, total) {
+  return rows.map(([label, value]) => {
+    const pct = total ? Math.round((value / total) * 1000) / 10 : null;
+    return `<div class="v2-mini-row"><span>${esc(label)}</span><span class="v2-mini-bar"><span class="v2-mini-fill" style="width:${pct || 0}%"></span></span><strong>${pct == null ? '—' : pct + '%'}</strong></div>`;
+  }).join('');
+}
+function v2ValueRows(rows) {
+  return rows.map(([label, value]) => `<div class="v2-mini-row"><span>${esc(label)}</span><span class="v2-mini-bar"><span class="v2-mini-fill" style="width:0%"></span></span><strong>${esc(String(value))}</strong></div>`).join('');
+}
+function v2DecisionText(issues, clearLabel, clearSub) {
+  if (!issues.length) return { label: clearLabel, sub: clearSub, level: 'ok' };
+  const first = issues.find(i => i.level === 'critical') || issues[0];
+  return { label: first.title, sub: first.detail, level: first.level };
+}
+function v2BuildAggViewModel(raw) {
+  const data = v2BuildDashboardData(raw);
+  const metadata = raw.metadata || {};
+  const durationMin = v2Minutes(metadata.duration_ms);
+  const senior = metadata.senior_filter_stats || {};
+  const freshness = metadata.freshness || {};
+  const kept = senior.entry_level_jobs ?? null;
+  const input = senior.total_input ?? null;
+  const keptPct = v2Pct(kept, input);
+  const fresh24 = freshness.last_24h ?? null;
+  const byJobType = metadata.by_job_type || {};
+  const domains = (metadata.tag_stats && metadata.tag_stats.domains) || {};
+  const topSources = v2TopEntries(metadata.by_source, 4);
+  const topDomains = v2TopEntries(domains, 4);
+  const durationLevel = durationMin == null ? 'warn' : durationMin <= 25 ? 'ok' : durationMin <= 35 ? 'warn' : 'critical';
+  const keptLevel = keptPct == null ? 'warn' : keptPct >= 25 && keptPct <= 60 ? 'ok' : 'warn';
+  const freshLevel = fresh24 == null ? 'warn' : fresh24 > 0 ? 'ok' : 'critical';
+  const issues = [];
+  if (durationLevel !== 'ok') issues.push({ title: 'Runtime above target', detail: durationMin == null ? 'duration missing' : `${durationMin} min vs ≤25 min target`, level: durationLevel });
+  if (freshLevel !== 'ok') issues.push({ title: 'Pool freshness missing', detail: 'No last-24h freshness count available', level: freshLevel });
+  if (keptLevel !== 'ok') issues.push({ title: 'Senior filter ratio unusual', detail: keptPct == null ? 'filter stats missing' : `${keptPct}% kept from fetched pool`, level: keptPct == null ? 'warn' : keptLevel });
+  const decision = v2DecisionText(issues, 'No AGG action needed', 'Pool/run health is clean; use downstream tabs only if Overview flags quality or delivery issues.');
+  return {
+    cards: [
+      ['Run Freshness', data.freshness.label.toUpperCase(), v2SourceLabel(V2_DATA_CONTRACT.freshness.file, 'latest run', data.sourceTs), data.freshness.level],
+      ['Pool Size', fmt(data.pool.value), data.pool.sub, data.pool.level],
+      ['Runtime', durationMin == null ? '—' : `${durationMin}m`, 'Target ≤25m; investigate sustained drift', durationLevel],
+      ['Fresh 24h', fresh24 == null ? '—' : fmt(fresh24), 'Newly posted jobs in current pool', freshLevel],
+      ['Senior Filter', keptPct == null ? '—' : `${keptPct}% kept`, input == null ? 'filter stats unavailable' : `${fmt(kept)} kept / ${fmt(input)} fetched`, keptLevel],
+      ['Tech-US', data.techUs.value == null ? '—' : fmt(data.techUs.value), data.techUs.sub, data.techUs.level]
+    ],
+    issues,
+    decision,
+    composition: {
+      experience: v2MiniRows(v2TopEntries(byJobType, 4), data.pool.value),
+      domains: v2MiniRows(topDomains, data.pool.value),
+      sources: v2MiniRows(topSources, data.pool.value)
+    },
+    lineage: [v2SourceLabel(V2_DATA_CONTRACT.poolTotal.file, 'pool/runtime/filter/freshness', data.metaTs), v2SourceLabel(V2_DATA_CONTRACT.techUs.file, 'tech-US denominator', data.enrichTs)].join(' | ')
+  };
+}
+function renderV2Agg(raw) {
+  const grid = document.getElementById('v2-agg-grid');
+  if (!grid) return;
+  v2RenderFilterContext('agg');
+  const vm = v2BuildAggViewModel(raw);
+  grid.innerHTML = vm.cards.map(card => v2Card(...card)).join('');
+  const attention = document.getElementById('v2-agg-attention');
+  if (attention) {
+    const worst = vm.issues.some(i => i.level === 'critical') ? 'critical' : vm.issues.length ? 'warn' : 'ok';
+    attention.className = `v2-attention ${worst}`;
+    attention.innerHTML = vm.issues.length ? vm.issues.map(i => `<div class="v2-issue"><strong>${i.title}</strong><span style="color:${i.level === 'critical' ? 'var(--red)' : 'var(--yellow)'}">${i.detail}</span></div>`).join('') : '<span style="color:var(--green);font-weight:600">AGG triage clear.</span> <span class="muted">Detailed charts remain below.</span>';
+  }
+  const decision = document.getElementById('v2-agg-decision');
+  if (decision) {
+    const color = vm.decision.level === 'critical' ? 'var(--red)' : vm.decision.level === 'warn' ? 'var(--yellow)' : 'var(--green)';
+    decision.innerHTML = `<div class="v2-panel-title">Decision Map</div><div class="v2-decision" style="color:${color}">${vm.decision.label}</div><div class="muted" style="font-size:12px;line-height:1.45">${vm.decision.sub}</div>`;
+  }
+  const composition = document.getElementById('v2-agg-composition');
+  if (composition) {
+    composition.innerHTML = `<div class="v2-panel-title">Pool Composition</div><strong style="font-size:12px">Experience</strong>${vm.composition.experience}<strong style="font-size:12px">Top domains</strong>${vm.composition.domains}<strong style="font-size:12px">Top sources</strong>${vm.composition.sources}`;
+  }
+  v2SetLineage('lineage-v2-agg', vm.lineage);
+}
+function v2SumSourceField(bySource, primary, fallback) {
+  if (!bySource) return null;
+  return Object.values(bySource).reduce((sum, source) => sum + (source[primary] ?? source[fallback] ?? 0), 0);
+}
+function v2BuildEnrViewModel(raw) {
+  const data = v2BuildDashboardData(raw);
+  const stats = raw.enrichStats || {};
+  const tiers = stats.tiers || {};
+  const t3Plus = (tiers.t3 || 0) + (tiers.t4 || 0);
+  const tierTotal = (tiers.t0 || 0) + (tiers.t1 || 0) + (tiers.t2 || 0) + t3Plus;
+  const t3Pct = v2Pct(t3Plus, tierTotal);
+  const descPct = v2Pct(stats.total_has_description, stats.total_tech_us);
+  const queueGap = stats.total_tech_us != null && stats.total_enriched != null ? Math.max(0, stats.total_tech_us - stats.total_enriched) : null;
+  const reenrichPending = stats.reenrichment_pending || 0;
+  const totalQueue = queueGap == null ? null : queueGap + reenrichPending;
+  const visaSignals = v2SumSourceField(stats.by_source, 'any_visa_signal', 'sponsors_visa');
+  const visaPct = v2Pct(visaSignals, stats.total_tech_us);
+  const tierRows = [['T3+', t3Plus], ['T2', tiers.t2 || 0], ['T1', tiers.t1 || 0], ['T0', tiers.t0 || 0]].filter(([, value]) => value > 0);
+  const sourceRows = Object.entries(stats.by_source || {}).map(([source, values]) => [source, values.total || values.total_tech_us || values.total_enriched || 0]).filter(([, value]) => value > 0).sort((a, b) => b[1] - a[1]).slice(0, 4);
+  const sourceTotal = sourceRows.reduce((sum, [, value]) => sum + value, 0);
+  const t3Level = t3Pct == null ? 'warn' : t3Pct >= 90 ? 'ok' : t3Pct >= 70 ? 'warn' : 'critical';
+  const descLevel = descPct == null ? 'warn' : descPct >= 95 ? 'ok' : descPct >= 85 ? 'warn' : 'critical';
+  const queueLevel = totalQueue == null ? 'warn' : totalQueue === 0 ? 'ok' : totalQueue <= 1000 ? 'warn' : 'critical';
+  const visaLevel = visaPct == null ? 'warn' : visaPct >= 50 ? 'ok' : visaPct >= 20 ? 'warn' : 'critical';
+  const issues = [];
+  if (data.enrichment.level !== 'ok') issues.push({ title: 'Enrichment coverage below target', detail: data.enrichment.value == null ? 'coverage missing' : `${data.enrichment.value}% enriched vs 95% target`, level: data.enrichment.level });
+  if (t3Level !== 'ok') issues.push({ title: 'T3+ quality below target', detail: t3Pct == null ? 'tier distribution missing' : `${t3Pct}% T3+`, level: t3Level });
+  if (queueLevel !== 'ok') issues.push({ title: 'Enrichment queue not clear', detail: totalQueue == null ? 'queue unknown' : `${fmt(totalQueue)} pending (${fmt(queueGap)} new + ${fmt(reenrichPending)} re-enrich)`, level: queueLevel });
+  if (descLevel !== 'ok') issues.push({ title: 'Description coverage below target', detail: descPct == null ? 'description denominator missing' : `${descPct}% with descriptions`, level: descLevel });
+  const decision = v2DecisionText(issues, 'No ENR action needed', 'Coverage, quality, queue, descriptions, and visa signals are inside operating thresholds.');
+  return {
+    cards: [
+      ['Coverage', data.enrichment.value == null ? '—' : `${data.enrichment.value}%`, `${fmt(stats.total_enriched)} enriched / ${fmt(stats.total_tech_us)} tech-US`, data.enrichment.level],
+      ['T3+ Quality', t3Pct == null ? '—' : `${t3Pct}%`, `${fmt(t3Plus)} of ${fmt(tierTotal)} tiered jobs`, t3Level],
+      ['Descriptions', descPct == null ? '—' : `${descPct}%`, `${fmt(stats.total_has_description)} with descriptions`, descLevel],
+      ['Queue', totalQueue == null ? '—' : fmt(totalQueue), queueGap == null ? 'queue unavailable' : `${fmt(queueGap)} new + ${fmt(reenrichPending)} re-enrich`, queueLevel],
+      ['Visa Signals', visaPct == null ? '—' : `${visaPct}%`, `${fmt(visaSignals)} signal-bearing jobs`, visaLevel],
+      ['Snapshot', data.enrichTs ? age(data.enrichTs) : 'missing', 'ENR source freshness', data.enrichTs ? 'ok' : 'critical']
+    ],
+    issues,
+    decision,
+    composition: {
+      tiers: v2MiniRows(tierRows, tierTotal),
+      sources: v2MiniRows(sourceRows, sourceTotal),
+      queue: v2MiniRows([['New queue', queueGap || 0], ['Re-enrich', reenrichPending]], totalQueue || 1)
+    },
+    lineage: [v2SourceLabel(V2_DATA_CONTRACT.enrichment.file, 'coverage/tier/queue/visa', data.enrichTs)].join(' | ')
+  };
+}
+function renderV2Enr(raw) {
+  const grid = document.getElementById('v2-enr-grid');
+  if (!grid) return;
+  v2RenderFilterContext('enr');
+  const vm = v2BuildEnrViewModel(raw);
+  grid.innerHTML = vm.cards.map(card => v2Card(...card)).join('');
+  const attention = document.getElementById('v2-enr-attention');
+  if (attention) {
+    const worst = vm.issues.some(i => i.level === 'critical') ? 'critical' : vm.issues.length ? 'warn' : 'ok';
+    attention.className = `v2-attention ${worst}`;
+    attention.innerHTML = vm.issues.length ? vm.issues.map(i => `<div class="v2-issue"><strong>${i.title}</strong><span style="color:${i.level === 'critical' ? 'var(--red)' : 'var(--yellow)'}">${i.detail}</span></div>`).join('') : '<span style="color:var(--green);font-weight:600">ENR triage clear.</span> <span class="muted">Source/company detail remains below.</span>';
+  }
+  const decision = document.getElementById('v2-enr-decision');
+  if (decision) {
+    const color = vm.decision.level === 'critical' ? 'var(--red)' : vm.decision.level === 'warn' ? 'var(--yellow)' : 'var(--green)';
+    decision.innerHTML = `<div class="v2-panel-title">Decision Map</div><div class="v2-decision" style="color:${color}">${vm.decision.label}</div><div class="muted" style="font-size:12px;line-height:1.45">${vm.decision.sub}</div>`;
+  }
+  const composition = document.getElementById('v2-enr-composition');
+  if (composition) {
+    composition.innerHTML = `<div class="v2-panel-title">Quality Composition</div><strong style="font-size:12px">Tier mix</strong>${vm.composition.tiers}<strong style="font-size:12px">Top sources</strong>${vm.composition.sources}<strong style="font-size:12px">Queue split</strong>${vm.composition.queue}`;
+  }
+  v2SetLineage('lineage-v2-enr', vm.lineage);
+}
+function v2ClassifiedRate(generalRate) {
+  return generalRate == null ? null : Math.round((100 - generalRate) * 10) / 10;
+}
+function v2BuildTagViewModel(raw) {
+  const data = v2BuildDashboardData(raw);
+  const review = raw.generalReview || {};
+  const summary = review.summary || {};
+  const companies = review.by_company || [];
+  const patterns = review.title_patterns || [];
+  const tenants = review.tenant_candidates || [];
+  const generalRate = summary.us_general_rate ?? null;
+  const classifiedRate = v2ClassifiedRate(generalRate);
+  const generalJobs = summary.us_general ?? null;
+  const usTotal = summary.us_total ?? null;
+  const topCompany = companies.length ? companies.reduce((best, company) => (company.general || 0) > (best.general || 0) ? company : best, companies[0]) : null;
+  const patternJobs = patterns.reduce((sum, pattern) => sum + (pattern.count || 0), 0);
+  const companyRows = companies.slice(0, 4).map(company => [company.name, company.general || 0]);
+  const patternRows = patterns.slice(0, 4).map(pattern => [pattern.title, pattern.count || 0]);
+  const tenantRows = tenants.slice(0, 4).map(tenant => [tenant.name, tenant.general || 0]);
+  const rateLevel = generalRate == null ? 'warn' : generalRate <= 10 ? 'ok' : generalRate <= 15 ? 'warn' : 'critical';
+  const topLevel = topCompany == null ? 'warn' : topCompany.general <= 50 ? 'ok' : topCompany.general <= 100 ? 'warn' : 'critical';
+  const tenantLevel = tenants.length === 0 ? 'ok' : tenants.length <= 10 ? 'warn' : 'critical';
+  const patternLevel = patterns.length === 0 ? 'ok' : patterns.length <= 20 ? 'warn' : 'critical';
+  const issues = [];
+  if (rateLevel !== 'ok') issues.push({ title: 'General leakage above target', detail: generalRate == null ? 'rate missing' : `${generalRate}% general`, level: rateLevel });
+  if (topLevel !== 'ok') issues.push({ title: 'Company leakage concentration', detail: topCompany ? `${topCompany.name}: ${topCompany.general} general jobs` : 'company data unavailable', level: topLevel });
+  if (tenantLevel !== 'ok') issues.push({ title: 'Tenant defaults candidate work', detail: `${tenants.length} candidate compan${tenants.length === 1 ? 'y' : 'ies'}`, level: tenantLevel });
+  const decision = v2DecisionText(issues, 'No TAG action needed', 'Classification leakage is inside thresholds; use the work queue only for proactive taxonomy cleanup.');
+  return {
+    cards: [
+      ['General Rate', generalRate == null ? '—' : `${generalRate}%`, `${fmt(generalJobs)} general / ${fmt(usTotal)} US jobs`, rateLevel],
+      ['Classified US', classifiedRate == null ? '—' : `${classifiedRate}%`, 'Complement of general leakage', rateLevel],
+      ['Top Leakage', topCompany ? topCompany.name : '—', topCompany ? `${fmt(topCompany.general)} general · ${topCompany.source}` : 'company data unavailable', topLevel],
+      ['Title Patterns', fmt(patterns.length), `${fmt(patternJobs)} repeated-title jobs`, patternLevel],
+      ['Tenant Candidates', fmt(tenants.length), 'Potential permanent default mappings', tenantLevel],
+      ['Snapshot', data.classTs ? age(data.classTs) : 'missing', 'TAG review freshness', data.classTs ? 'ok' : 'critical']
+    ],
+    issues,
+    decision,
+    workqueue: {
+      companies: v2MiniRows(companyRows, generalJobs || 1),
+      patterns: v2MiniRows(patternRows, patternJobs || 1),
+      tenants: v2MiniRows(tenantRows, generalJobs || 1)
+    },
+    lineage: [v2SourceLabel(V2_DATA_CONTRACT.classification.file, 'summary/companies/patterns/tenants', data.classTs)].join(' | ')
+  };
+}
+function renderV2Tag(raw) {
+  const grid = document.getElementById('v2-tag-grid');
+  if (!grid) return;
+  v2RenderFilterContext('tag');
+  const vm = v2BuildTagViewModel(raw);
+  grid.innerHTML = vm.cards.map(card => v2Card(...card)).join('');
+  const attention = document.getElementById('v2-tag-attention');
+  if (attention) {
+    const worst = vm.issues.some(i => i.level === 'critical') ? 'critical' : vm.issues.length ? 'warn' : 'ok';
+    attention.className = `v2-attention ${worst}`;
+    attention.innerHTML = vm.issues.length ? vm.issues.map(i => `<div class="v2-issue"><strong>${i.title}</strong><span style="color:${i.level === 'critical' ? 'var(--red)' : 'var(--yellow)'}">${i.detail}</span></div>`).join('') : '<span style="color:var(--green);font-weight:600">TAG triage clear.</span> <span class="muted">Classification detail remains below.</span>';
+  }
+  const decision = document.getElementById('v2-tag-decision');
+  if (decision) {
+    const color = vm.decision.level === 'critical' ? 'var(--red)' : vm.decision.level === 'warn' ? 'var(--yellow)' : 'var(--green)';
+    decision.innerHTML = `<div class="v2-panel-title">Decision Map</div><div class="v2-decision" style="color:${color}">${vm.decision.label}</div><div class="muted" style="font-size:12px;line-height:1.45">${vm.decision.sub}</div>`;
+  }
+  const workqueue = document.getElementById('v2-tag-workqueue');
+  if (workqueue) {
+    workqueue.innerHTML = `<div class="v2-panel-title">Classification Work Queue</div><strong style="font-size:12px">Top leakage companies</strong>${vm.workqueue.companies}<strong style="font-size:12px">Title patterns</strong>${vm.workqueue.patterns}<strong style="font-size:12px">Tenant candidates</strong>${vm.workqueue.tenants}`;
+  }
+  v2SetLineage('lineage-v2-tag', vm.lineage);
+}
+function v2TopSource(bySource) {
+  const entries = Object.entries(bySource || {});
+  if (!entries.length) return null;
+  return entries.reduce((best, entry) => entry[1] > best[1] ? entry : best, entries[0]);
+}
+function v2ZeroYieldList(metadata) {
+  return metadata.zero_yield_companies || metadata.zero_yield_sources || metadata.zero_yield || [];
+}
+function v2BuildSupViewModel(raw) {
+  const data = v2BuildDashboardData(raw);
+  const metadata = raw.metadata || {};
+  const bySource = metadata.by_source || {};
+  const sourceEntries = Object.entries(bySource);
+  const activeSources = sourceEntries.filter(([, count]) => count > 0).length;
+  const topSource = v2TopSource(bySource);
+  const topSourcePct = topSource && data.pool.value ? v2Pct(topSource[1], data.pool.value) : null;
+  const topCompanies = metadata.top_companies || [];
+  const topCompany = topCompanies[0] || null;
+  const zeroYield = v2ZeroYieldList(metadata);
+  const sourceLevel = activeSources >= 5 ? 'ok' : activeSources >= 3 ? 'warn' : 'critical';
+  const concentrationLevel = topSourcePct == null ? 'warn' : topSourcePct <= 60 ? 'ok' : topSourcePct <= 75 ? 'warn' : 'critical';
+  const zeroLevel = zeroYield.length === 0 ? 'ok' : zeroYield.length <= 10 ? 'warn' : 'critical';
+  const issues = [];
+  if (sourceLevel !== 'ok') issues.push({ title: 'Low active source count', detail: `${activeSources} active source${activeSources === 1 ? '' : 's'}`, level: sourceLevel });
+  if (concentrationLevel !== 'ok') issues.push({ title: 'Supply concentration risk', detail: topSource ? `${topSource[0]} contributes ${topSourcePct}%` : 'source data missing', level: concentrationLevel });
+  if (zeroLevel !== 'ok') issues.push({ title: 'Zero-yield source work', detail: `${zeroYield.length} zero-yield item${zeroYield.length === 1 ? '' : 's'}`, level: zeroLevel });
+  const decision = v2DecisionText(issues, 'No SUP action needed', 'Active sources are healthy; review concentration and zero-yield items as normal supply hygiene.');
+  const sourceRows = v2TopEntries(bySource, 4);
+  const sourceTotal = sourceRows.reduce((sum, [, value]) => sum + value, 0);
+  const companyRows = topCompanies.slice(0, 4).map(company => [company.company, company.count || 0]);
+  return {
+    cards: [
+      ['Active Sources', fmt(activeSources), 'Sources returning >0 jobs', sourceLevel],
+      ['Pool Total', fmt(data.pool.value), 'All jobs & internships in current pool', data.pool.level],
+      ['Top Source', topSource ? topSource[0] : '—', topSource ? `${fmt(topSource[1])} jobs · ${topSourcePct}% of pool` : 'source data unavailable', concentrationLevel],
+      ['Tech-US', data.techUs.value == null ? '—' : fmt(data.techUs.value), 'Shared denominator with Overview/ENR', data.techUs.level],
+      ['Top Company', topCompany ? topCompany.company : '—', topCompany ? `${fmt(topCompany.count)} jobs · ${topCompany.domain || 'unknown domain'}` : 'company data unavailable', topCompany ? 'ok' : 'warn'],
+      ['Zero Yield', fmt(zeroYield.length), 'Investigate before pruning sources', zeroLevel]
+    ],
+    issues,
+    decision,
+    composition: {
+      sources: v2MiniRows(sourceRows, sourceTotal),
+      companies: v2MiniRows(companyRows, data.pool.value),
+      zeroYield: v2ValueRows([['Zero-yield items', zeroYield.length], ['Active sources', activeSources]])
+    },
+    lineage: [v2SourceLabel(V2_DATA_CONTRACT.sources.file, 'sources/companies/zero-yield', data.metaTs), v2SourceLabel(V2_DATA_CONTRACT.techUs.file, 'tech-US denominator', data.enrichTs)].join(' | ')
+  };
+}
+function renderV2Sup(raw) {
+  const grid = document.getElementById('v2-sup-grid');
+  if (!grid) return;
+  v2RenderFilterContext('sup');
+  const vm = v2BuildSupViewModel(raw);
+  grid.innerHTML = vm.cards.map(card => v2Card(...card)).join('');
+  const attention = document.getElementById('v2-sup-attention');
+  if (attention) {
+    const worst = vm.issues.some(i => i.level === 'critical') ? 'critical' : vm.issues.length ? 'warn' : 'ok';
+    attention.className = `v2-attention ${worst}`;
+    attention.innerHTML = vm.issues.length ? vm.issues.map(i => `<div class="v2-issue"><strong>${i.title}</strong><span style="color:${i.level === 'critical' ? 'var(--red)' : 'var(--yellow)'}">${i.detail}</span></div>`).join('') : '<span style="color:var(--green);font-weight:600">SUP triage clear.</span> <span class="muted">Source/company detail remains below.</span>';
+  }
+  const decision = document.getElementById('v2-sup-decision');
+  if (decision) {
+    const color = vm.decision.level === 'critical' ? 'var(--red)' : vm.decision.level === 'warn' ? 'var(--yellow)' : 'var(--green)';
+    decision.innerHTML = `<div class="v2-panel-title">Decision Map</div><div class="v2-decision" style="color:${color}">${vm.decision.label}</div><div class="muted" style="font-size:12px;line-height:1.45">${vm.decision.sub}</div>`;
+  }
+  const composition = document.getElementById('v2-sup-composition');
+  if (composition) {
+    composition.innerHTML = `<div class="v2-panel-title">Supply Composition</div><strong style="font-size:12px">Top sources</strong>${vm.composition.sources}<strong style="font-size:12px">Top companies</strong>${vm.composition.companies}<strong style="font-size:12px">Yield hygiene</strong>${vm.composition.zeroYield}`;
+  }
+  v2SetLineage('lineage-v2-sup', vm.lineage);
+}
+function v2RepoUpdateTs(repo) {
+  return repo && (repo.lastJobsUpdate || repo.workflowLastRun) || null;
+}
+function v2ParseJsonl(raw) {
+  return raw ? raw.split('\n').filter(line => line.trim()).map(line => { try { return JSON.parse(line); } catch { return null; } }).filter(Boolean) : [];
+}
+function v2BuildOutViewModel(raw) {
+  const metrics = raw.metrics || {};
+  const repos = metrics.repos || {};
+  const repoEntries = Object.entries(repos);
+  const totalStars = repoEntries.reduce((sum, [, repo]) => sum + (repo.stars || 0), 0);
+  const failedRepos = repoEntries.filter(([, repo]) => repo.workflowStatus && repo.workflowStatus !== 'success').length;
+  let freshRepos = 0;
+  let repoDataCount = 0;
+  repoEntries.forEach(([, repo]) => {
+    const updateTs = v2RepoUpdateTs(repo);
+    if (!updateTs) return;
+    repoDataCount++;
+    if ((Date.now() - new Date(updateTs).getTime()) / 3600000 < 2) freshRepos++;
+  });
+  const freshPct = v2Pct(freshRepos, repoDataCount);
+  const jobTotal = repoEntries.reduce((sum, [, repo]) => sum + (repo.jobCount || 0), 0);
+  const postedJobs = raw.postedJobs && Array.isArray(raw.postedJobs.jobs) ? raw.postedJobs.jobs : [];
+  const discordPostCount = postedJobs.reduce((sum, job) => sum + Object.keys(job.discordPosts || {}).length, 0);
+  const trafficEntries = v2ParseJsonl(raw.trafficRaw);
+  const latestTraffic = trafficEntries.length ? trafficEntries[trafficEntries.length - 1] : null;
+  const repoRows = repoEntries.map(([name, repo]) => [name, repo.jobCount || 0]).filter(([, value]) => value > 0).sort((a, b) => b[1] - a[1]).slice(0, 4);
+  const starRows = repoEntries.map(([name, repo]) => [name, repo.stars || 0]).filter(([, value]) => value > 0).sort((a, b) => b[1] - a[1]).slice(0, 4);
+  const trafficRows = latestTraffic && latestTraffic.repos ? Object.entries(latestTraffic.repos).map(([name, repo]) => [name.replace('New-Grad-', '').replace('-Jobs-2026', ''), repo.views || 0]).filter(([, value]) => value > 0).sort((a, b) => b[1] - a[1]).slice(0, 4) : [];
+  const repoJobTotal = repoRows.reduce((sum, [, value]) => sum + value, 0);
+  const trafficTopTotal = trafficRows.reduce((sum, [, value]) => sum + value, 0);
+  const trafficViews = latestTraffic && latestTraffic.repos ? Object.values(latestTraffic.repos).reduce((sum, repo) => sum + (repo.views || 0), 0) : null;
+  const freshLevel = freshPct == null ? 'warn' : freshPct >= 80 ? 'ok' : freshPct >= 50 ? 'warn' : 'critical';
+  const failedLevel = failedRepos === 0 ? 'ok' : failedRepos <= 1 ? 'warn' : 'critical';
+  const discordLevel = discordPostCount > 0 ? 'ok' : 'warn';
+  const issues = [];
+  if (freshLevel !== 'ok') issues.push({ title: 'Consumer freshness drift', detail: freshPct == null ? 'freshness unavailable' : `${freshRepos}/${repoDataCount} repos fresh`, level: freshLevel });
+  if (failedLevel !== 'ok') issues.push({ title: 'Repo workflow failures', detail: `${failedRepos} failing repo workflow${failedRepos === 1 ? '' : 's'}`, level: failedLevel });
+  if (discordLevel !== 'ok') issues.push({ title: 'Discord delivery missing', detail: 'No Discord posts found in posted_jobs.json', level: discordLevel });
+  const decision = v2DecisionText(issues, 'No OUT action needed', 'Repos, workflows, traffic, and Discord delivery are operating normally.');
+  return {
+    cards: [
+      ['Consumer Freshness', freshPct == null ? '—' : `${freshPct}%`, `${freshRepos}/${repoDataCount} repos updated <2h ago`, freshLevel],
+      ['Repo Jobs', fmt(jobTotal), `${repoEntries.length} consumer repos`, repoEntries.length ? 'ok' : 'warn'],
+      ['Stars', fmt(totalStars), 'Across consumer repos', 'ok'],
+      ['Workflow Failures', fmt(failedRepos), 'Repo workflows not successful', failedLevel],
+      ['Discord Posts', fmt(discordPostCount), `${fmt(postedJobs.length)} source jobs posted`, discordLevel],
+      ['Traffic Views', trafficViews == null ? '—' : fmt(trafficViews), 'Latest GitHub traffic snapshot', trafficViews == null ? 'warn' : 'ok']
+    ],
+    issues,
+    decision,
+    composition: {
+      repos: v2MiniRows(repoRows, repoJobTotal || 1),
+      stars: v2MiniRows(starRows, totalStars || 1),
+      traffic: v2MiniRows(trafficRows, trafficTopTotal || 1)
+    },
+    lineage: [v2SourceLabel(V2_DATA_CONTRACT.consumers.file, 'repos/stars/freshness', metrics.timestamp || metrics.generated_at), v2SourceLabel(V2_DATA_CONTRACT.discord.file, 'discord posts', raw.postedJobs && raw.postedJobs.lastUpdated), v2SourceLabel(V2_DATA_CONTRACT.traffic.file, 'traffic views', latestTraffic && (latestTraffic.timestamp || latestTraffic.date))].join(' | ')
+  };
+}
+function renderV2Out(raw) {
+  const grid = document.getElementById('v2-out-grid');
+  if (!grid) return;
+  v2RenderFilterContext('out');
+  const vm = v2BuildOutViewModel(raw);
+  const decision = document.getElementById('v2-out-decision');
+  if (decision) {
+    const color = vm.decision.level === 'critical' ? 'var(--red)' : vm.decision.level === 'warn' ? 'var(--yellow)' : 'var(--green)';
+    decision.innerHTML = `<div class="v2-panel-title">Decision Map</div><div class="v2-decision" style="color:${color}">${vm.decision.label}</div><div class="muted" style="font-size:12px;line-height:1.45">${vm.decision.sub}</div>`;
+  }
+  const composition = document.getElementById('v2-out-composition');
+  if (composition) {
+    composition.innerHTML = `<div class="v2-panel-title">Delivery Composition</div><strong style="font-size:12px">Repo jobs</strong>${vm.composition.repos}<strong style="font-size:12px">Stars</strong>${vm.composition.stars}<strong style="font-size:12px">Traffic views</strong>${vm.composition.traffic}`;
+  }
+  grid.innerHTML = vm.cards.map(card => v2Card(...card)).join('');
+  const attention = document.getElementById('v2-out-attention');
+  if (attention) {
+    const worst = vm.issues.some(i => i.level === 'critical') ? 'critical' : vm.issues.length ? 'warn' : 'ok';
+    attention.className = `v2-attention ${worst}`;
+    attention.innerHTML = vm.issues.length ? vm.issues.map(i => `<div class="v2-issue"><strong>${i.title}</strong><span style="color:${i.level === 'critical' ? 'var(--red)' : 'var(--yellow)'}">${i.detail}</span></div>`).join('') : '<span style="color:var(--green);font-weight:600">OUT triage clear.</span> <span class="muted">Repo, traffic, and Discord detail remains below.</span>';
+  }
+  v2SetLineage('lineage-v2-out', vm.lineage);
+}
+function v2SoonestSecret(secrets) {
+  if (!Array.isArray(secrets) || !secrets.length) return null;
+  return secrets.reduce((soonest, secret) => {
+    if (secret.days_left == null) return soonest;
+    return !soonest || secret.days_left < soonest.days_left ? secret : soonest;
+  }, null);
+}
+function v2BuildInfViewModel(raw) {
+  const data = v2BuildDashboardData(raw);
+  const metrics = raw.metrics || {};
+  const metadata = raw.metadata || {};
+  const alert = raw.pipelineAlert || {};
+  const zjpMetrics = raw.zjpMetrics || {};
+  const metricTs = zjpMetrics.generated_at || metrics.timestamp || metrics.generated_at || null;
+  const metricFreshness = v2FreshnessState(metricTs, 1, 6);
+  const checkedFreshness = v2FreshnessState(alert.checked_at || null, 1, 6);
+  const durationMin = v2Minutes(metadata.duration_ms);
+  const durationLevel = durationMin == null ? 'warn' : durationMin <= 25 ? 'ok' : durationMin <= 35 ? 'warn' : 'critical';
+  const warningCount = alert.warning_count ?? (Array.isArray(alert.warnings) ? alert.warnings.length : 0);
+  const failures = Array.isArray(alert.failures) ? alert.failures : [];
+  const alertLevel = alert.active || failures.length ? 'critical' : warningCount ? 'warn' : 'ok';
+  const soonestSecret = v2SoonestSecret(alert.secrets);
+  const secretLevel = !soonestSecret ? 'warn' : soonestSecret.days_left <= 14 ? 'critical' : soonestSecret.days_left <= 30 ? 'warn' : 'ok';
+  const issues = [];
+  if (data.freshness.level !== 'ok') issues.push({ title: 'Aggregator freshness degraded', detail: `${data.freshness.label}: ${data.sourceTs ? age(data.sourceTs) : 'missing'}`, level: data.freshness.level });
+  if (metricFreshness.level !== 'ok') issues.push({ title: 'Metrics snapshot stale', detail: `${metricFreshness.label}: ${metricTs ? age(metricTs) : 'missing'}`, level: metricFreshness.level });
+  if (alertLevel !== 'ok') issues.push({ title: alert.active ? 'Pipeline alert active' : 'Pipeline warnings present', detail: alert.active ? (alert.message || `${failures.length} failures`) : `${warningCount} warning${warningCount === 1 ? '' : 's'}`, level: alertLevel });
+  if (secretLevel !== 'ok') issues.push({ title: 'Credential rotation needed', detail: soonestSecret ? `${soonestSecret.secret} in ${soonestSecret.days_left}d` : 'secret expiry data missing', level: secretLevel });
+  const decision = v2DecisionText(issues, 'No INF action needed', 'Control plane, metrics freshness, alerts, credentials, and runtime are inside operating thresholds.');
+  const warningRows = [['Warnings', warningCount], ['Failures', failures.length], ['Secrets tracked', Array.isArray(alert.secrets) ? alert.secrets.length : 0]];
+  const freshnessRows = [['Aggregator age h', data.freshness.hours == null ? 0 : Math.round(data.freshness.hours * 10) / 10], ['Metrics age h', metricFreshness.hours == null ? 0 : Math.round(metricFreshness.hours * 10) / 10], ['Alert age h', checkedFreshness.hours == null ? 0 : Math.round(checkedFreshness.hours * 10) / 10]];
+  return {
+    cards: [
+      ['Aggregator', data.freshness.label.toUpperCase(), data.sourceTs ? age(data.sourceTs) : 'missing', data.freshness.level],
+      ['Metrics', metricFreshness.label.toUpperCase(), metricTs ? age(metricTs) : 'missing', metricFreshness.level],
+      ['Runtime', durationMin == null ? '—' : `${durationMin}m`, 'Aggregator duration target ≤25m', durationLevel],
+      ['Pipeline Alert', alert.active ? 'ACTIVE' : warningCount ? `${warningCount} warn` : 'Clear', alert.checked_at ? `Checked ${age(alert.checked_at)}` : 'check timestamp missing', alertLevel],
+      ['Credential', soonestSecret ? `${soonestSecret.days_left}d` : '—', soonestSecret ? `${soonestSecret.secret} expires ${soonestSecret.expires}` : 'secret expiry data missing', secretLevel],
+      ['Control Data', zjpMetrics.schema || '—', 'zjp-metrics schema / control snapshot', zjpMetrics.schema ? 'ok' : 'warn']
+    ],
+    issues,
+    decision,
+    control: {
+      freshness: v2ValueRows([['Aggregator age', data.sourceTs ? age(data.sourceTs) : 'missing'], ['Metrics age', metricTs ? age(metricTs) : 'missing'], ['Alert age', alert.checked_at ? age(alert.checked_at) : 'missing']]),
+      alerts: v2ValueRows([['Warnings', warningCount], ['Failures', failures.length], ['Secrets tracked', Array.isArray(alert.secrets) ? alert.secrets.length : 0]]),
+      credentials: soonestSecret ? v2ValueRows([[soonestSecret.secret, `${soonestSecret.days_left}d`], ['Expires', soonestSecret.expires]]) : '<span class="muted">No secret expiry data.</span>'
+    },
+    lineage: [v2SourceLabel(V2_DATA_CONTRACT.freshness.file, 'aggregator freshness/runtime', data.metaTs), v2SourceLabel(V2_DATA_CONTRACT.alert.file, 'alerts/secrets', alert.checked_at), v2SourceLabel(V2_DATA_CONTRACT.zjpMetrics.file, 'control metrics', metricTs)].join(' | ')
+  };
+}
+function renderV2Inf(raw) {
+  const grid = document.getElementById('v2-inf-grid');
+  if (!grid) return;
+  v2RenderFilterContext('inf');
+  const vm = v2BuildInfViewModel(raw);
+  grid.innerHTML = vm.cards.map(card => v2Card(...card)).join('');
+  const attention = document.getElementById('v2-inf-attention');
+  if (attention) {
+    const worst = vm.issues.some(i => i.level === 'critical') ? 'critical' : vm.issues.length ? 'warn' : 'ok';
+    attention.className = `v2-attention ${worst}`;
+    attention.innerHTML = vm.issues.length ? vm.issues.map(i => `<div class="v2-issue"><strong>${i.title}</strong><span style="color:${i.level === 'critical' ? 'var(--red)' : 'var(--yellow)'}">${i.detail}</span></div>`).join('') : '<span style="color:var(--green);font-weight:600">INF triage clear.</span> <span class="muted">Alerts, credentials, and architecture remain below.</span>';
+  }
+  const decision = document.getElementById('v2-inf-decision');
+  if (decision) {
+    const color = vm.decision.level === 'critical' ? 'var(--red)' : vm.decision.level === 'warn' ? 'var(--yellow)' : 'var(--green)';
+    decision.innerHTML = `<div class="v2-panel-title">Decision Map</div><div class="v2-decision" style="color:${color}">${vm.decision.label}</div><div class="muted" style="font-size:12px;line-height:1.45">${vm.decision.sub}</div>`;
+  }
+  const control = document.getElementById('v2-inf-control');
+  if (control) {
+    control.innerHTML = `<div class="v2-panel-title">Control Plane</div><strong style="font-size:12px">Freshness hours</strong>${vm.control.freshness}<strong style="font-size:12px">Alerts/secrets</strong>${vm.control.alerts}<strong style="font-size:12px">Credential runway</strong>${vm.control.credentials}`;
+  }
+  v2SetLineage('lineage-v2-inf', vm.lineage);
 }
 
 // Status bar
@@ -3227,6 +4055,13 @@ function renderAll() {
   renderDiscordPostingTrend(postedJobs);
   renderDiscordStats(postedJobs, metadata);
   renderClassification(generalReview);
+  renderV2Overview({ metrics, historyEntries, archiveEntries, enrichStats, enrichHistory, metadata, postedJobs, pipelineAlert, generalReview });
+  renderV2Agg({ metrics, historyEntries, archiveEntries, enrichStats, enrichHistory, metadata, postedJobs, pipelineAlert, generalReview });
+  renderV2Enr({ metrics, historyEntries, archiveEntries, enrichStats, enrichHistory, metadata, postedJobs, pipelineAlert, generalReview });
+  renderV2Tag({ metrics, historyEntries, archiveEntries, enrichStats, enrichHistory, metadata, postedJobs, pipelineAlert, generalReview });
+  renderV2Sup({ metrics, historyEntries, archiveEntries, enrichStats, enrichHistory, metadata, postedJobs, pipelineAlert, generalReview });
+  renderV2Out({ metrics, historyEntries, archiveEntries, enrichStats, enrichHistory, metadata, postedJobs, pipelineAlert, generalReview, trafficRaw, discordVerification });
+  renderV2Inf({ metrics, historyEntries, archiveEntries, enrichStats, enrichHistory, metadata, postedJobs, pipelineAlert, generalReview, trafficRaw, discordVerification, zjpMetrics: _D.zjpMetrics });
   document.getElementById('content').style.display = 'block';
   document.querySelectorAll('#unified-enr-table thead th.sortable').forEach((th, i) => {
     th.removeEventListener('click', th._sortFn);
