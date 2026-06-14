@@ -522,6 +522,13 @@
     .v2-issue:first-child { border-top:none; }
     .v2-split { display:grid; grid-template-columns: 1fr; gap:12px; }
     .v2-panel { background: var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; box-shadow: var(--shadow); }
+    .v2-snapshot-grid { display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap:8px; margin-bottom:10px; }
+    .v2-snapshot-item { border:1px solid var(--border); border-radius:10px; padding:10px; background:rgba(128,128,128,.05); min-height:68px; }
+    .v2-snapshot-item .label { color:var(--muted); font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px; }
+    .v2-snapshot-item .value { font-size:18px; font-weight:800; line-height:1.15; }
+    .v2-snapshot-item .sub { color:var(--muted); font-size:11px; line-height:1.35; margin-top:4px; }
+    .v2-anomaly-row { display:grid; grid-template-columns: minmax(0, 120px) minmax(0, 1fr); gap:10px; align-items:start; padding-top:8px; margin-top:8px; border-top:1px solid var(--border); font-size:12px; }
+    .v2-anomaly-row strong { color:var(--yellow); }
     .v2-panel-title { color: var(--muted); font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; margin-bottom:10px; }
     .v2-decision { font-size:15px; font-weight:700; margin-bottom:8px; }
     .v2-mini-row { display:grid; grid-template-columns: 110px minmax(0,1fr) 58px; gap:8px; align-items:center; font-size:11px; margin:7px 0; }
@@ -551,6 +558,8 @@
     .v2-legacy-details > summary::after { content: 'Show detail'; font-size: 11px; text-transform: none; letter-spacing: 0; color: var(--accent); }
     .v2-legacy-details[open] > summary::after { content: 'Hide detail'; }
     @media (max-width: 1200px) { .v2-command-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } .v2-overview-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .v2-overview-hero { grid-template-columns: 1fr; } }
+    @media (max-width: 1200px) { .v2-snapshot-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 800px) { .v2-snapshot-grid { grid-template-columns: 1fr; } }
     @media (max-width: 800px) { .v2-command-grid, .v2-module-grid, .v2-split, .v2-overview-grid, .v2-overview-hero { grid-template-columns: 1fr; } }
   </style>
 </head>
@@ -661,6 +670,7 @@
     <div class="v2-attention" id="v2-agg-attention" style="margin-top:12px"><span class="muted">Loading…</span></div>
     <div class="v2-split" style="margin-top:12px">
       <div class="v2-panel" id="v2-agg-decision"></div>
+      <div class="v2-panel" id="v2-agg-snapshot"></div>
       <div class="v2-panel" id="v2-agg-composition"></div>
     </div>
     <details class="v2-legacy-details" open>
@@ -1160,22 +1170,31 @@ let C = _buildC();
 const _D = {}; // cached data — populated by fetchAll(), consumed by renderAll()
 
 // Data URLs — function so each loadAll() call gets a fresh cache-busting timestamp (invariant D-2)
+function dataUrl(path, t) {
+  const local = location.hostname === '127.0.0.1' || location.hostname === 'localhost';
+  const base = local
+    ? '.github/data/'
+    : 'https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/';
+  return `${base}${path}?t=${t}`;
+}
 function dataUrls() {
   const t = Date.now();
   return {
-    metrics:    `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/metrics/latest.json?t=${t}`,
-    daily:      `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/daily-stats.json?t=${t}`,
-    history:    `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/history.jsonl?t=${t}`,
-    enrichment: `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/enrichment-stats.json?t=${t}`,
-    enrichHistory: `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/enrichment-history.jsonl?t=${t}`,
-    metadata:      `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/jobs-metadata.json?t=${t}`,
-    postedJobs:    `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/posted_jobs.json?t=${t}`,
-    pipelineAlert: `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/pipeline-alert.json?t=${t}`,
-    historyArchive: `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/history-archive.jsonl?t=${t}`,
-    generalReview: `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/general-review.json?t=${t}`,
-    discordVerification: `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/discord-verification.json?t=${t}`,
-    trafficHistory: `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/traffic-history.jsonl?t=${t}`,
-    zjpMetrics:  `https://raw.githubusercontent.com/zapplyjobs/jobs-data-2026/main/.github/data/zjp-metrics.json?t=${t}`,
+    metrics:    dataUrl('metrics/latest.json', t),
+    daily:      dataUrl('daily-stats.json', t),
+    history:    dataUrl('history.jsonl', t),
+    enrichment: dataUrl('enrichment-stats.json', t),
+    enrichHistory: dataUrl('enrichment-history.jsonl', t),
+    metadata:      dataUrl('jobs-metadata.json', t),
+    postedJobs:    dataUrl('posted_jobs.json', t),
+    pipelineAlert: dataUrl('pipeline-alert.json', t),
+    historyArchive: dataUrl('history-archive.jsonl', t),
+    generalReview: dataUrl('general-review.json', t),
+    discordVerification: dataUrl('discord-verification.json', t),
+    trafficHistory: dataUrl('traffic-history.jsonl', t),
+    zjpMetrics:  dataUrl('zjp-metrics.json', t),
+    aggReview:   dataUrl('agg_improvement_review.json', t),
+    sourceTruth: dataUrl('source_truth_audit.json', t),
   };
 }
 
@@ -1616,9 +1635,44 @@ function v2DecisionText(issues, clearLabel, clearSub) {
   const first = issues.find(i => i.level === 'critical') || issues[0];
   return { label: first.title, sub: first.detail, level: first.level };
 }
+function v2SecondsLabel(seconds) {
+  if (seconds == null || Number.isNaN(Number(seconds))) return '—';
+  const total = Math.round(Number(seconds));
+  const minutes = Math.floor(total / 60);
+  const rest = total % 60;
+  return minutes ? `${minutes}m ${rest}s` : `${rest}s`;
+}
+function v2MinutesLabel(minutes) {
+  if (minutes == null || Number.isNaN(Number(minutes))) return '—';
+  const value = Math.round(Number(minutes) * 10) / 10;
+  return `${value}m`;
+}
+function v2AggSnapshotHtml(review, sourceTruth) {
+  const runtime = (review && review.producer_runtime) || {};
+  const jobs = runtime.jobs || {};
+  const latency = (review && review.stitched_latency) || {};
+  const anomalies = Array.isArray(review && review.source_anomalies) ? review.source_anomalies : [];
+  const sourceRows = Array.isArray(sourceTruth && sourceTruth.rows) ? sourceTruth.rows : [];
+  const sourceLookup = Object.fromEntries(sourceRows.map(row => [row.source, row]));
+  const cards = [
+    ['Producer run', runtime.status || 'missing', runtime.run_id ? `run ${runtime.run_id}` : 'run id unavailable'],
+    ['Wall time', v2SecondsLabel(runtime.total_wall_seconds), `fetch ${v2SecondsLabel(runtime.fetch_total_seconds)} · post ${v2SecondsLabel(runtime.post_fetch_seconds)}`],
+    ['Fetched → pool', jobs.fetched && jobs.pool ? `${fmt(jobs.fetched)} → ${fmt(jobs.pool)}` : '—', jobs.senior_filtered ? `${fmt(jobs.senior_filtered)} senior-filtered before publication` : 'senior-filter basis unavailable'],
+    ['Public latency', v2MinutesLabel(latency.agg_to_public_snapshot_minutes), `consumer avg ${v2MinutesLabel(latency.agg_to_consumers_avg_minutes)} · max ${v2MinutesLabel(latency.agg_to_consumers_max_minutes)}`],
+  ];
+  const anomalyRows = anomalies.length ? anomalies.map(row => {
+    const source = sourceLookup[row.source] || row;
+    const flags = (row.flags || source.flags || []).join(', ') || 'flagged';
+    const basis = `${fmt(row.raw_fetch_total)} raw · ${fmt(row.final_pool_total)} pool · ${fmt(row.final_tech_us_total)} tech-US · ${fmt(row.final_tech_us_internship_total)} internships`;
+    return `<div class="v2-anomaly-row"><strong>${esc(String(row.source || 'source'))}</strong><span>${esc(flags)}<br><span class="muted">${basis}</span></span></div>`;
+  }).join('') : '<div class="muted" style="font-size:12px">No source anomalies flagged by the AGG review artifact.</div>';
+  return `<div class="v2-panel-title">Pipeline Snapshot</div><div class="v2-snapshot-grid">${cards.map(([label, value, sub]) => `<div class="v2-snapshot-item"><div class="label">${esc(label)}</div><div class="value">${esc(String(value))}</div><div class="sub">${esc(String(sub))}</div></div>`).join('')}</div><div class="v2-panel-title" style="margin-top:10px">Source truth drilldown</div>${anomalyRows}`;
+}
 function v2BuildAggViewModel(raw) {
   const data = v2BuildDashboardData(raw);
   const metadata = raw.metadata || {};
+  const aggReview = raw.aggReview || {};
+  const sourceTruth = raw.sourceTruth || {};
   const durationMin = v2Minutes(metadata.duration_ms);
   const senior = metadata.senior_filter_stats || {};
   const freshness = metadata.freshness || {};
@@ -1633,10 +1687,15 @@ function v2BuildAggViewModel(raw) {
   const durationLevel = durationMin == null ? 'warn' : durationMin <= 25 ? 'ok' : durationMin <= 35 ? 'warn' : 'critical';
   const keptLevel = keptPct == null ? 'warn' : keptPct >= 25 && keptPct <= 60 ? 'ok' : 'warn';
   const freshLevel = fresh24 == null ? 'warn' : fresh24 > 0 ? 'ok' : 'critical';
+  const reviewAnomalies = Array.isArray(aggReview.source_anomalies) ? aggReview.source_anomalies : [];
   const issues = [];
   if (durationLevel !== 'ok') issues.push({ title: 'Runtime above target', detail: durationMin == null ? 'duration missing' : `${durationMin} min vs ≤25 min target`, level: durationLevel });
   if (freshLevel !== 'ok') issues.push({ title: 'Pool freshness missing', detail: 'No last-24h freshness count available', level: freshLevel });
   if (keptLevel !== 'ok') issues.push({ title: 'Senior filter ratio unusual', detail: keptPct == null ? 'filter stats missing' : `${keptPct}% kept from fetched pool`, level: keptPct == null ? 'warn' : keptLevel });
+  reviewAnomalies.forEach(row => {
+    const flags = (row.flags || []).join(', ') || 'flagged';
+    issues.push({ title: `Source anomaly: ${row.source}`, detail: `${flags} · ${fmt(row.final_pool_total)} pool / ${fmt(row.final_tech_us_total)} tech-US`, level: 'warn' });
+  });
   const decision = v2DecisionText(issues, 'No AGG action needed', 'Pool/run health is clean; use downstream tabs only if Overview flags quality or delivery issues.');
   return {
     cards: [
@@ -1649,12 +1708,13 @@ function v2BuildAggViewModel(raw) {
     ],
     issues,
     decision,
+    snapshot: v2AggSnapshotHtml(aggReview, sourceTruth),
     composition: {
       experience: v2MiniRows(v2TopEntries(byJobType, 4), data.pool.value),
       domains: v2MiniRows(topDomains, data.pool.value),
       sources: v2MiniRows(topSources, data.pool.value)
     },
-    lineage: [v2SourceLabel(V2_DATA_CONTRACT.poolTotal.file, 'pool/runtime/filter/freshness', data.metaTs), v2SourceLabel(V2_DATA_CONTRACT.techUs.file, 'tech-US denominator', data.enrichTs)].join(' | ')
+    lineage: [v2SourceLabel(V2_DATA_CONTRACT.poolTotal.file, 'pool/runtime/filter/freshness', data.metaTs), v2SourceLabel(V2_DATA_CONTRACT.techUs.file, 'tech-US denominator', data.enrichTs), v2SourceLabel('agg_improvement_review.json', 'runtime/latency/source anomaly synthesis', aggReview.generated_at), v2SourceLabel('source_truth_audit.json', 'source anomaly basis', sourceTruth.generated_at)].join(' | ')
   };
 }
 function renderV2Agg(raw) {
@@ -1669,6 +1729,10 @@ function renderV2Agg(raw) {
   if (decision) {
     const color = vm.decision.level === 'critical' ? 'var(--red)' : vm.decision.level === 'warn' ? 'var(--yellow)' : 'var(--green)';
     decision.innerHTML = `<div class="v2-panel-title">Decision Map</div><div class="v2-decision" style="color:${color}">${vm.decision.label}</div><div class="muted" style="font-size:12px;line-height:1.45">${vm.decision.sub}</div>`;
+  }
+  const snapshot = document.getElementById('v2-agg-snapshot');
+  if (snapshot) {
+    snapshot.innerHTML = vm.snapshot;
   }
   const composition = document.getElementById('v2-agg-composition');
   if (composition) {
@@ -4358,7 +4422,7 @@ async function fetchAll() {
       `<div class="card" style="grid-column:1/-1"><span class="err">Failed to load metrics. Pipeline may be down — try refreshing.</span></div>`;
     return false;
   }
-  const [daily, historyRaw, enrichStats, enrichHistoryRaw, metadata, postedJobs, pipelineAlert, archiveRaw, generalReview, discordVerification, trafficRaw, zjpMetrics] = await Promise.all([
+  const [daily, historyRaw, enrichStats, enrichHistoryRaw, metadata, postedJobs, pipelineAlert, archiveRaw, generalReview, discordVerification, trafficRaw, zjpMetrics, aggReview, sourceTruth] = await Promise.all([
     safeJson(urls.daily),
     fetch(urls.history).then(r => r.ok ? r.text() : null).catch(() => null),
     safeJson(urls.enrichment),
@@ -4371,6 +4435,8 @@ async function fetchAll() {
     safeJson(urls.discordVerification),
     fetch(urls.trafficHistory).then(r => r.ok ? r.text() : null).catch(() => null),
     safeJson(urls.zjpMetrics),
+    safeJson(urls.aggReview),
+    safeJson(urls.sourceTruth),
   ]);
   _D.daily = daily;
   _D.historyRaw = historyRaw;
@@ -4383,6 +4449,8 @@ async function fetchAll() {
   _D.discordVerification = discordVerification;
   _D.trafficRaw = trafficRaw;
   _D.zjpMetrics = zjpMetrics;
+  _D.aggReview = aggReview;
+  _D.sourceTruth = sourceTruth;
   _D.historyEntries = historyRaw
     ? historyRaw.split('\n').filter(l => l.trim()).map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean)
     : null;
@@ -4400,7 +4468,7 @@ async function fetchAll() {
 }
 
 function renderAll() {
-  const { metrics, daily, historyEntries, enrichStats, enrichHistory, metadata, postedJobs, pipelineAlert, archiveEntries, allHistoryMerged, generalReview, discordVerification, trafficRaw } = _D;
+  const { metrics, daily, historyEntries, enrichStats, enrichHistory, metadata, postedJobs, pipelineAlert, archiveEntries, allHistoryMerged, generalReview, discordVerification, trafficRaw, aggReview, sourceTruth } = _D;
   if (!metrics) return;
   const statusTs = (_D.zjpMetrics && _D.zjpMetrics.generated_at) || (metadata && metadata.generated) || metrics.timestamp;
   renderStatusBar(statusTs);
@@ -4443,7 +4511,7 @@ function renderAll() {
   renderDiscordPostingTrend(postedJobs);
   renderDiscordStats(postedJobs, metadata);
   renderClassification(generalReview);
-  renderV2Agg({ metrics, historyEntries, archiveEntries, enrichStats, enrichHistory, metadata, postedJobs, pipelineAlert, generalReview });
+  renderV2Agg({ metrics, historyEntries, archiveEntries, enrichStats, enrichHistory, metadata, postedJobs, pipelineAlert, generalReview, aggReview, sourceTruth });
   renderV2Enr({ metrics, historyEntries, archiveEntries, enrichStats, enrichHistory, metadata, postedJobs, pipelineAlert, generalReview });
   renderV2Tag({ metrics, historyEntries, archiveEntries, enrichStats, enrichHistory, metadata, postedJobs, pipelineAlert, generalReview });
   renderV2Sup({ metrics, historyEntries, archiveEntries, enrichStats, enrichHistory, metadata, postedJobs, pipelineAlert, generalReview });
