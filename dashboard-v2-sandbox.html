@@ -342,6 +342,63 @@
     .v2-pill.blocked { color: var(--muted); border-style:dashed; opacity:.75; }
     .v2-command-grid { display:grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap:12px; }
     .v2-module-grid { display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap:12px; }
+    .v2-overview-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .v2-overview-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(320px, 0.7fr);
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .v2-hero-card {
+      background: linear-gradient(135deg, rgba(38,132,255,0.10), rgba(38,132,255,0.03));
+      border: 1px solid rgba(38,132,255,0.18);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+    .v2-hero-kicker {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .v2-hero-title {
+      font-size: 24px;
+      font-weight: 750;
+      line-height: 1.15;
+      margin-bottom: 8px;
+    }
+    .v2-hero-copy {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .v2-hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .v2-hero-meta .header-chip { font-size: 10px; }
+    .v2-hero-side {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    .v2-note-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+    .v2-note-card strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 6px;
+    }
     .v2-card { background: var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; box-shadow: var(--shadow); min-height:104px; }
     .v2-card .label { color: var(--muted); font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px; }
     .v2-card .value { font-size:24px; font-weight:700; line-height:1.15; }
@@ -400,8 +457,8 @@
     .v2-legacy-details > summary::-webkit-details-marker { display: none; }
     .v2-legacy-details > summary::after { content: 'Show detail'; font-size: 11px; text-transform: none; letter-spacing: 0; color: var(--accent); }
     .v2-legacy-details[open] > summary::after { content: 'Hide detail'; }
-    @media (max-width: 1200px) { .v2-command-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-    @media (max-width: 800px) { .v2-command-grid, .v2-module-grid, .v2-split { grid-template-columns: 1fr; } }
+    @media (max-width: 1200px) { .v2-command-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } .v2-overview-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .v2-overview-hero { grid-template-columns: 1fr; } }
+    @media (max-width: 800px) { .v2-command-grid, .v2-module-grid, .v2-split, .v2-overview-grid, .v2-overview-hero { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -437,8 +494,8 @@
 <div id="app-body">
 <aside id="sidebar">
   <div id="sidebar-label">Modules</div>
-  <button class="tab active" data-tab="agg">AGG</button>
-  <button class="tab" data-tab="overview">Overview</button>
+  <button class="tab active" data-tab="overview">Overview</button>
+  <button class="tab" data-tab="agg">AGG</button>
   <button class="tab" data-tab="tag">TAG</button>
   <button class="tab" data-tab="enr">ENR</button>
   <button class="tab" data-tab="sup">SUP</button>
@@ -449,17 +506,19 @@
 <div id="content-wrap" style="flex:1;min-width:0;overflow-y:auto">
 <main id="content" style="padding: 24px; display:none">
 
-  <section id="tab-overview" class="tab-panel" style="display:none">
-    <div class="section-label">Command Strip</div>
+  <section id="tab-overview" class="tab-panel">
+    <div class="section-label">Operator briefing</div>
     <div class="section-lineage" id="lineage-v2-command">Source: loading…</div>
     <div class="v2-filter-context" id="v2-overview-filters"></div>
-    <div class="v2-command-grid" id="v2-command-grid"></div>
-    <div class="section-label" style="margin-top:24px">Needs Attention</div>
+    <div class="v2-overview-hero" id="v2-overview-hero"></div>
+    <div class="section-label" style="margin-top:24px">Active exceptions</div>
     <div class="section-lineage" id="lineage-v2-attention">Source: loading…</div>
     <div class="v2-attention" id="v2-attention-band"><span class="muted">Loading…</span></div>
-    <div class="section-label" style="margin-top:24px">Module Summary</div>
+    <div class="section-label" style="margin-top:24px">Owned next actions</div>
     <div class="section-lineage" id="lineage-v2-modules">Source: loading…</div>
     <div class="v2-module-grid" id="v2-module-grid"></div>
+    <div class="section-label" style="margin-top:24px">Evidence at a glance</div>
+    <div class="v2-command-grid v2-overview-grid" id="v2-command-grid"></div>
   </section>
 
   <!-- INF TAB — Infrastructure: services, alerts, architecture -->
@@ -493,7 +552,7 @@
   </section>
 
   <!-- AGG TAB — Aggregation: pipeline runs, pool, duration, senior filter -->
-  <section id="tab-agg" class="tab-panel">
+  <section id="tab-agg" class="tab-panel" style="display:none">
     <div class="section-label">AGG v2 Triage</div>
     <div class="section-lineage" id="lineage-v2-agg">Source: loading…</div>
     <div class="v2-filter-context" id="v2-agg-filters"></div>
@@ -1075,14 +1134,19 @@ function v2RenderAttention(id, issues) {
   attention.innerHTML = issues.map(i => `<div class="v2-issue"><strong>${i.title}</strong><span style="color:${i.level === 'critical' ? 'var(--red)' : 'var(--yellow)'}">${i.detail}</span></div>`).join('');
 }
 function v2HydrateOverviewModuleCards(container) {
+  const queue = [];
   container.querySelectorAll('[data-v2-tab]').forEach(card => {
     const tab = document.querySelector(`.tab[data-tab="${card.dataset.v2Tab}"]`);
     if (!tab) return;
-    const sub = card.querySelector('.sub');
-    if (sub && tab.title) sub.textContent = tab.title;
     const level = tab.dataset.level || 'ok';
+    const sub = card.querySelector('.sub');
+    const value = card.querySelector('.value');
+    if (sub && tab.title) sub.textContent = tab.title;
+    if (value) value.textContent = v2DecisionStateLabel(level);
     card.style.borderColor = level === 'critical' ? 'rgba(248,81,73,0.36)' : level === 'warn' ? 'rgba(210,153,34,0.36)' : 'rgba(63,185,80,0.26)';
+    queue.push({ tab: card.dataset.v2Tab, level, note: tab.title || '' });
   });
+  return queue;
 }
 
 
@@ -1222,6 +1286,57 @@ function v2ModuleCard(key, value, sub, level) {
 function v2Metric(owner, value, level, sub) {
   return { owner, value, level, sub };
 }
+function v2DecisionStateLabel(level) {
+  if (level === 'critical') return 'Act now';
+  if (level === 'warn') return 'Watch';
+  return 'Clear';
+}
+function v2OverviewResponse(issues, freshnessValue) {
+  const primary = issues[0] || null;
+  if (!primary) {
+    return {
+      title: 'System looks decision-safe',
+      copy: 'No immediate intervention. Scan the module queue only if you want proactive cleanup.',
+      owner: 'Owner: none',
+      confidence: `Freshest critical source ${freshnessValue}`,
+      trust: 'Stay at overview unless a module dot turns yellow or red.'
+    };
+  }
+  if (primary.title === 'Active pipeline alert') {
+    return {
+      title: 'Open INF now',
+      copy: primary.detail,
+      owner: 'Owner: INF',
+      confidence: `Control-plane interruption · freshest critical source ${freshnessValue}`,
+      trust: 'Treat downstream module numbers as secondary until INF is clear.'
+    };
+  }
+  if (primary.title === 'Critical data freshness') {
+    return {
+      title: 'Check AGG / INF freshness',
+      copy: primary.detail,
+      owner: 'Owner: AGG + INF',
+      confidence: `Page confidence degraded · freshest critical source ${freshnessValue}`,
+      trust: 'Do not trust green module states until freshness recovers.'
+    };
+  }
+  if (primary.title === 'Consumer stale drift') {
+    return {
+      title: 'Open OUT and restore delivery freshness',
+      copy: primary.detail,
+      owner: 'Owner: OUT',
+      confidence: `Delivery risk · freshest critical source ${freshnessValue}`,
+      trust: 'Pipeline may be healthy while consumers lag behind.'
+    };
+  }
+  return {
+    title: 'Open ENR and clear quality risk',
+    copy: primary.detail,
+    owner: 'Owner: ENR',
+    confidence: `Quality risk · freshest critical source ${freshnessValue}`,
+    trust: 'Pool volume may be fine, but downstream usefulness is reduced.'
+  };
+}
 function v2BuildDashboardData(raw) {
   const metrics = raw.metrics || {};
   const metadata = raw.metadata || {};
@@ -1270,28 +1385,35 @@ function v2BuildOverviewViewModel(data) {
   if (data.freshness.level !== 'ok') issues.push({ title: 'Critical data freshness', detail: `${data.freshness.label}: ${freshnessValue}`, level: data.freshness.level });
   if (data.consumers.value) issues.push({ title: 'Consumer stale drift', detail: `${data.consumers.value} repo(s) not fresh`, level: 'warn' });
   if (data.enrichment.value != null && data.enrichment.value < 95) issues.push({ title: 'Enrichment below target', detail: `${data.enrichment.value}% enriched vs 95% target`, level: data.enrichment.value < 85 ? 'critical' : 'warn' });
+  const response = v2OverviewResponse(issues, freshnessValue);
   return {
+    hero: {
+      level: v2IssueLevel(issues),
+      title: response.title,
+      copy: response.copy,
+      owner: response.owner,
+      confidence: response.confidence,
+      trust: response.trust
+    },
     commandCards: [
-      ['System Health', data.alert.active ? 'ALERT' : data.freshness.label.toUpperCase(), v2SourceLabel(V2_DATA_CONTRACT.freshness.file, 'latest run', data.sourceTs), systemLevel],
       ['Pool Size', fmt(data.pool.value), data.pool.sub, data.pool.level],
       ['Classification', data.classification.value == null ? '—' : `${data.classification.value}%`, data.classification.sub, data.classification.level],
       ['Enrichment', data.enrichment.value == null ? '—' : `${data.enrichment.value}%`, data.enrichment.sub, data.enrichment.level],
-      ['Consumers', data.consumers.value ? `${data.consumers.value} stale` : 'Fresh', data.consumers.sub, data.consumers.level],
-      ['Trust', freshnessValue, 'Oldest critical source cue; stale never renders green', data.freshness.level]
+      ['Consumers', data.consumers.value ? `${data.consumers.value} stale` : 'Fresh', data.consumers.sub, data.consumers.level]
     ],
     issues,
     moduleCards: [
-      ['agg', fmt(data.pool.value), 'Run/pool health → AGG tab', data.pool.level],
-      ['tag', data.classification.value == null ? '—' : `${data.classification.value}% G1`, 'Classification leakage → TAG tab', data.classification.level],
-      ['enr', data.enrichment.value == null ? '—' : `${data.enrichment.value}%`, 'Enrichment/tier health → ENR tab', data.enrichment.level],
-      ['sup', data.sources.value == null ? '—' : `${data.sources.value} sources`, data.sources.sub, data.sources.level],
-      ['out', data.consumers.value ? `${data.consumers.value} stale` : 'Fresh', 'Repo/Discord delivery → OUT tab', data.consumers.level],
-      ['inf', data.alert.active ? 'Alert' : data.freshness.label, 'Services/alerts/trust → INF tab', systemLevel]
+      ['agg', v2DecisionStateLabel(data.pool.level), 'Run/pool health status', data.pool.level],
+      ['tag', v2DecisionStateLabel(data.classification.level), 'Classification review status', data.classification.level],
+      ['enr', v2DecisionStateLabel(data.enrichment.level), 'Enrichment quality status', data.enrichment.level],
+      ['sup', v2DecisionStateLabel(data.sources.level), 'Supply health status', data.sources.level],
+      ['out', v2DecisionStateLabel(data.consumers.level), 'Consumer delivery status', data.consumers.level],
+      ['inf', v2DecisionStateLabel(systemLevel), 'Control-plane status', systemLevel]
     ],
     lineage: {
       command: [v2SourceLabel(V2_DATA_CONTRACT.poolTotal.file, 'pool snapshot', data.metaTs), v2SourceLabel(V2_DATA_CONTRACT.enrichment.file, 'quality snapshot', data.enrichTs), v2SourceLabel(V2_DATA_CONTRACT.classification.file, 'classification snapshot', data.classTs)].join(' | '),
       attention: [v2SourceLabel(V2_DATA_CONTRACT.alert.file, 'alert state', data.metricTs), v2SourceLabel(V2_DATA_CONTRACT.consumers.file, 'consumer freshness', data.metricTs)].join(' | '),
-      modules: 'Module cards are navigation summaries; module tabs remain commit layer.'
+      modules: 'Each module card is an owned next action; open the module only when its state is not clear.'
     }
   };
 }
@@ -1303,6 +1425,7 @@ function renderV2Overview(raw) {
   v2SetNavState('overview', v2IssueLevel(vm.issues), vm.issues[0] ? vm.issues[0].title : 'Cross-module summary');
   command.innerHTML = vm.commandCards.map(card => v2Card(...card)).join('');
   v2RenderAttention('v2-attention-band', vm.issues);
+  let queue = [];
   const modules = document.getElementById('v2-module-grid');
   if (modules) {
     modules.innerHTML = vm.moduleCards.map(card => v2ModuleCard(...card)).join('');
@@ -1317,7 +1440,17 @@ function renderV2Overview(raw) {
         }
       });
     });
-    v2HydrateOverviewModuleCards(modules);
+    queue = v2HydrateOverviewModuleCards(modules);
+  }
+  const hero = document.getElementById('v2-overview-hero');
+  if (hero) {
+    const nextModule = queue.find(item => item.level !== 'ok');
+    const heroLevel = nextModule ? nextModule.level : vm.hero.level;
+    const heroTitle = nextModule ? `Open ${nextModule.tab.toUpperCase()} next` : vm.hero.title;
+    const heroCopy = nextModule ? nextModule.note : vm.hero.copy;
+    const heroOwner = nextModule ? `Owner: ${nextModule.tab.toUpperCase()}` : vm.hero.owner;
+    const accent = heroLevel === 'critical' ? 'var(--red)' : heroLevel === 'warn' ? 'var(--yellow)' : 'var(--green)';
+    hero.innerHTML = `<div class="v2-hero-card"><div class="v2-hero-kicker">Current operating call</div><div class="v2-hero-title" style="color:${accent}">${heroTitle}</div><div class="v2-hero-copy">${heroCopy}</div><div class="v2-hero-meta"><span class="header-chip">${heroOwner}</span><span class="header-chip">${vm.hero.confidence}</span></div></div><div class="v2-hero-side"><div class="v2-note-card"><div class="v2-hero-kicker">How to use this page</div><strong>Start here, drill only when needed</strong><div class="v2-hero-copy">${vm.hero.trust}</div></div><div class="v2-note-card"><div class="v2-hero-kicker">Navigation rule</div><strong>Colored module dots own follow-up</strong><div class="v2-hero-copy">Open only yellow/red modules. Leave green modules mentally closed.</div></div></div>`;
   }
   v2SetLineage('lineage-v2-command', vm.lineage.command);
   v2SetLineage('lineage-v2-attention', vm.lineage.attention);
