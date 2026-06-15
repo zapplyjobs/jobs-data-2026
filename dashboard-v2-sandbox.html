@@ -820,39 +820,39 @@
       <span class="muted" style="font-weight:400;font-size:11px">Kept for comparison during sandbox iteration</span>
     </div>
     <div id="tag-freshness" style="font-size:11px;color:var(--muted);margin-bottom:8px"></div>
-    <div class="section-label">Classification Health</div>
+    <div class="section-label">Review Snapshot — Classification Health</div>
     <div class="grid" id="class-summary"></div>
     <div style="margin-top:4px;font-size:11px;color:var(--muted)">
-      <strong>G1 Rate</strong> = % of jobs classified into a domain (not "General"). <strong>Desc%</strong> = jobs with a real description (not just title). Higher is better for both.
+      <strong>Live G1</strong> comes from <code>zjp-metrics.json</code>. Tables below come from <code>general-review.json</code> and are deeper review data, not current TAG health.
     </div>
-    <div class="section-label" style="margin-top:24px">Top Companies by Unclassified Jobs</div>
+    <div class="section-label" style="margin-top:24px">Review Snapshot — Top Companies by Unclassified Jobs</div>
     <div class="card" id="class-companies-card">
       <table id="class-companies-table">
         <tr><th>#</th><th class="sortable">Company</th><th class="sortable">Source</th><th class="sortable">General</th><th class="sortable">Classified</th><th class="sortable">Top Domain</th><th class="sortable">Desc%</th></tr>
       </table>
       <div style="margin-top:8px;font-size:11px;color:var(--muted)">
-        Companies with the most <strong>General</strong> (unclassified) jobs. These are candidates for taxonomy expansion or manual review. Click ⚙ to toggle columns.
+        <code>general-review.json</code> snapshot rows. Use only after checking the snapshot age against live <code>zjp-metrics.json</code>. Click ⚙ to toggle columns.
       </div>
     </div>
     <div class="section-label" style="margin-top:24px">General Rate Trend <span id="general-trend-pills"></span></div>
     <div class="card" id="general-trend-card" style="position:relative;height:200px">
       <canvas id="general-trend-canvas"></canvas>
     </div>
-    <div class="section-label" style="margin-top:24px">Recurring Title Patterns</div>
+    <div class="section-label" style="margin-top:24px">Review Snapshot — Recurring Title Patterns</div>
     <div class="card" id="class-patterns-card">
       <table id="class-patterns-table">
         <tr><th class="sortable">Title Pattern</th><th class="sortable">Count</th><th class="sortable">Companies</th></tr>
       </table>
       <div style="margin-top:8px;font-size:11px;color:var(--muted)">
-        Job titles appearing 3+ times across companies. Patterns suggest taxonomy gaps — candidates for new keywords in <code>tag-engine.js</code>.
+        Job titles appearing 3+ times in the review snapshot. Patterns suggest taxonomy gaps, but are not a live work queue unless the snapshot is current.
       </div>
     </div>
-    <div class="section-label" style="margin-top:24px">Companies with Default Classifications</div>
+    <div class="section-label" style="margin-top:24px">Review Snapshot — Companies with Default Classifications</div>
     <div class="card" id="class-tenants-card">
       <p class="muted" style="text-align:center; padding:20px 0">Loading...</p>
     </div>
     <div style="margin-top:4px;font-size:11px;color:var(--muted)">
-      Companies whose default ATS job category was overridden by TAG classification. These are candidates for permanent tenant defaults in <code>tag-engine.js</code>.
+      Companies whose default ATS job category was overridden in the review snapshot. These are candidates for permanent tenant defaults only when snapshot age is acceptable.
     </div>
     </details>
   </section>
@@ -1321,10 +1321,11 @@ const V2_DATA_CONTRACT = Object.freeze({
   metrics: { owner: 'INF', file: 'metrics/latest.json', path: 'timestamp || generated_at' },
   poolTotal: { owner: 'AGG', file: 'jobs-metadata.json', path: 'total_jobs' },
   techUs: { owner: 'ENR', file: 'enrichment-stats.json', path: 'total_tech_us' },
-  classification: { owner: 'TAG', file: 'general-review.json', path: 'summary.us_general_rate' },
-  classificationCompanies: { owner: 'TAG', file: 'general-review.json', path: 'by_company' },
-  titlePatterns: { owner: 'TAG', file: 'general-review.json', path: 'title_patterns' },
-  tenantCandidates: { owner: 'TAG', file: 'general-review.json', path: 'tenant_candidates' },
+  classification: { owner: 'TAG', file: 'zjp-metrics.json', path: 'pool.g1_us.us_general_rate_pct / us_general / us_total / tech_us_general_rate_pct' },
+  classificationCompanies: { owner: 'TAG', file: 'zjp-metrics.json', path: 'tag.g1_breakdown.by_company_top20' },
+  classificationReview: { owner: 'TAG', file: 'general-review.json', path: 'review snapshot: summary/by_company/title_patterns/tenant_candidates' },
+  titlePatterns: { owner: 'TAG', file: 'general-review.json', path: 'review snapshot title_patterns' },
+  tenantCandidates: { owner: 'TAG', file: 'general-review.json', path: 'review snapshot tenant_candidates' },
   enrichment: { owner: 'ENR', file: 'enrichment-stats.json', path: 'total_enriched / total_tech_us' },
   tierT3: { owner: 'ENR', file: 'enrichment-stats.json', path: 'tiers.t3 (+ tiers.t4 when present)' },
   descriptions: { owner: 'ENR', file: 'enrichment-stats.json', path: 'total_has_description / total_tech_us' },
@@ -1512,10 +1513,13 @@ function v2BuildDashboardData(raw) {
   const metadata = raw.metadata || {};
   const enrichStats = raw.enrichStats || {};
   const classSummary = raw.generalReview && raw.generalReview.summary ? raw.generalReview.summary : {};
+  const zjpMetrics = raw.zjpMetrics || _D.zjpMetrics || {};
+  const liveG1 = zjpMetrics.pool && zjpMetrics.pool.g1_us ? zjpMetrics.pool.g1_us : {};
   const metricTs = metrics.timestamp || metrics.generated_at || null;
   const metaTs = metadata.generated || null;
   const enrichTs = enrichStats.generated || null;
-  const classTs = (raw.generalReview && raw.generalReview.meta && raw.generalReview.meta.generated) || classSummary.generated || null;
+  const classReviewTs = (raw.generalReview && raw.generalReview.meta && raw.generalReview.meta.generated) || classSummary.generated || null;
+  const classTs = zjpMetrics.generated_at || classReviewTs;
   const sourceTs = metaTs || metricTs;
   const freshnessContract = V2_DATA_CONTRACT.freshness;
   const freshness = v2FreshnessState(sourceTs, freshnessContract.warnHours, freshnessContract.criticalHours);
@@ -1525,7 +1529,7 @@ function v2BuildDashboardData(raw) {
   const techUs = enrichStats.total_tech_us ?? null;
   const enriched = enrichStats.total_enriched ?? null;
   const enrichRate = v2Pct(enriched, techUs);
-  const g1Rate = classSummary.us_general_rate ?? null;
+  const g1Rate = liveG1.us_general_rate_pct ?? classSummary.us_general_rate ?? null;
   const alertActive = !!(raw.pipelineAlert && raw.pipelineAlert.active);
   const sourceCount = metadata.by_source ? Object.keys(metadata.by_source).length : null;
   return {
@@ -1581,7 +1585,7 @@ function v2BuildOverviewViewModel(data) {
       ['inf', v2DecisionStateLabel(systemLevel), 'Control-plane status', systemLevel]
     ],
     lineage: {
-      command: [v2SourceLabel(V2_DATA_CONTRACT.poolTotal.file, 'pool snapshot', data.metaTs), v2SourceLabel(V2_DATA_CONTRACT.enrichment.file, 'quality snapshot', data.enrichTs), v2SourceLabel(V2_DATA_CONTRACT.classification.file, 'classification snapshot', data.classTs)].join(' | '),
+      command: [v2SourceLabel(V2_DATA_CONTRACT.poolTotal.file, 'pool snapshot', data.metaTs), v2SourceLabel(V2_DATA_CONTRACT.enrichment.file, 'quality snapshot', data.enrichTs), v2SourceLabel(V2_DATA_CONTRACT.classification.file, 'live classification health', data.classTs)].join(' | '),
       attention: [v2SourceLabel(V2_DATA_CONTRACT.alert.file, 'alert state', data.metricTs), v2SourceLabel(V2_DATA_CONTRACT.consumers.file, 'consumer freshness', data.metricTs)].join(' | '),
       modules: 'Each module card is an owned next action; open the module only when its state is not clear.'
     }
@@ -1850,44 +1854,73 @@ function v2BuildTagViewModel(raw) {
   const data = v2BuildDashboardData(raw);
   const review = raw.generalReview || {};
   const summary = review.summary || {};
-  const companies = review.by_company || [];
+  const zjpMetrics = raw.zjpMetrics || _D.zjpMetrics || {};
+  const liveG1 = zjpMetrics.pool && zjpMetrics.pool.g1_us ? zjpMetrics.pool.g1_us : {};
+  const breakdown = zjpMetrics.tag && zjpMetrics.tag.g1_breakdown ? zjpMetrics.tag.g1_breakdown : {};
+  const liveCompanies = Array.isArray(breakdown.by_company_top20)
+    ? breakdown.by_company_top20.map(row => ({
+        name: row.company || row.name || 'Unknown company',
+        general: row.g1 ?? row.general ?? 0,
+        source: row.source || 'unknown'
+      }))
+    : [];
   const patterns = review.title_patterns || [];
   const tenants = review.tenant_candidates || [];
-  const generalRate = summary.us_general_rate ?? null;
+  const reviewTs = (review.meta && review.meta.generated) || summary.generated || null;
+  const metricsTs = zjpMetrics.generated_at || breakdown.updated || null;
+  const reviewMs = reviewTs ? new Date(reviewTs).getTime() : NaN;
+  const metricsMs = metricsTs ? new Date(metricsTs).getTime() : NaN;
+  const reviewOlderThanMetrics = Number.isFinite(reviewMs) && Number.isFinite(metricsMs) && reviewMs < metricsMs;
+  const reviewLagHours = reviewOlderThanMetrics ? Math.round((metricsMs - reviewMs) / 360000) / 10 : null;
+  const generalRate = liveG1.us_general_rate_pct ?? null;
+  const techGeneralRate = liveG1.tech_us_general_rate_pct ?? null;
+  const generalJobs = liveG1.us_general ?? null;
+  const usTotal = liveG1.us_total ?? null;
   const classifiedRate = v2ClassifiedRate(generalRate);
-  const generalJobs = summary.us_general ?? null;
-  const usTotal = summary.us_total ?? null;
-  const topCompany = companies.length ? companies.reduce((best, company) => (company.general || 0) > (best.general || 0) ? company : best, companies[0]) : null;
+  const topCompany = liveCompanies.length ? liveCompanies[0] : null;
   const patternJobs = patterns.reduce((sum, pattern) => sum + (pattern.count || 0), 0);
-  const companyRows = companies.slice(0, 4).map(company => [company.name, company.general || 0]);
+  const liveCompanyRows = liveCompanies.slice(0, 6).map(company => [company.name, company.general || 0]);
   const patternRows = patterns.slice(0, 4).map(pattern => [pattern.title, pattern.count || 0]);
   const tenantRows = tenants.slice(0, 4).map(tenant => [tenant.name, tenant.general || 0]);
-  const rateLevel = generalRate == null ? 'warn' : generalRate <= 10 ? 'ok' : generalRate <= 15 ? 'warn' : 'critical';
+  const rateLevel = generalRate == null ? 'critical' : generalRate <= 10 ? 'ok' : generalRate <= 15 ? 'warn' : 'critical';
+  const techRateLevel = techGeneralRate == null ? 'warn' : techGeneralRate <= 15 ? 'ok' : techGeneralRate <= 25 ? 'warn' : 'critical';
   const topLevel = topCompany == null ? 'warn' : topCompany.general <= 50 ? 'ok' : topCompany.general <= 100 ? 'warn' : 'critical';
-  const tenantLevel = tenants.length === 0 ? 'ok' : tenants.length <= 10 ? 'warn' : 'critical';
-  const patternLevel = patterns.length === 0 ? 'ok' : patterns.length <= 20 ? 'warn' : 'critical';
+  const snapshotLevel = reviewOlderThanMetrics ? 'warn' : reviewTs ? 'ok' : 'critical';
   const issues = [];
-  if (rateLevel !== 'ok') issues.push({ title: 'General leakage above target', detail: generalRate == null ? 'rate missing' : `${generalRate}% general`, level: rateLevel });
-  if (topLevel !== 'ok') issues.push({ title: 'Company leakage concentration', detail: topCompany ? `${topCompany.name}: ${topCompany.general} general jobs` : 'company data unavailable', level: topLevel });
-  if (tenantLevel !== 'ok') issues.push({ title: 'Tenant defaults candidate work', detail: `${tenants.length} candidate compan${tenants.length === 1 ? 'y' : 'ies'}`, level: tenantLevel });
-  const decision = v2DecisionText(issues, 'No TAG action needed', 'Classification leakage is inside thresholds; use the work queue only for proactive taxonomy cleanup.');
+  if (generalRate == null) {
+    issues.push({ title: 'TAG live metrics missing', detail: 'zjp-metrics.json pool.g1_us is unavailable; do not use review snapshot as current health.', level: 'critical' });
+  } else if (rateLevel !== 'ok') {
+    issues.push({ title: 'Live US G1 leakage above target', detail: `${generalRate}% general · ${fmt(generalJobs)} / ${fmt(usTotal)} US jobs`, level: rateLevel });
+  }
+  if (techRateLevel !== 'ok') issues.push({ title: 'Live Tech-US G1 leakage high', detail: techGeneralRate == null ? 'tech-US live G1 rate missing' : `${techGeneralRate}% Tech-US general`, level: techRateLevel });
+  if (topLevel !== 'ok') issues.push({ title: 'Live company leakage concentration', detail: topCompany ? `${topCompany.name}: ${fmt(topCompany.general)} G1 jobs` : 'zjp-metrics company leakage missing', level: topLevel });
+  if (reviewOlderThanMetrics) issues.push({ title: 'Review snapshot older than live metrics', detail: `general-review.json is ${reviewLagHours}h behind zjp-metrics; use it only for deeper review queues.`, level: 'warn' });
+  const decision = v2DecisionText(issues, 'No TAG action needed', 'Live G1 leakage is inside thresholds; review snapshot queues are supporting evidence only.');
+  const reviewAge = reviewTs ? age(reviewTs) : 'missing';
   return {
     cards: [
-      ['General Rate', generalRate == null ? '—' : `${generalRate}%`, `${fmt(generalJobs)} general / ${fmt(usTotal)} US jobs`, rateLevel],
-      ['Classified US', classifiedRate == null ? '—' : `${classifiedRate}%`, 'Complement of general leakage', rateLevel],
-      ['Top Leakage', topCompany ? topCompany.name : '—', topCompany ? `${fmt(topCompany.general)} general · ${topCompany.source}` : 'company data unavailable', topLevel],
-      ['Title Patterns', fmt(patterns.length), `${fmt(patternJobs)} repeated-title jobs`, patternLevel],
-      ['Tenant Candidates', fmt(tenants.length), 'Potential permanent default mappings', tenantLevel],
-      ['Snapshot', data.classTs ? age(data.classTs) : 'missing', 'TAG review freshness', data.classTs ? 'ok' : 'critical']
+      ['US G1 Live', generalRate == null ? '—' : `${generalRate}%`, `${fmt(generalJobs)} general / ${fmt(usTotal)} US jobs`, rateLevel],
+      ['Tech-US G1 Live', techGeneralRate == null ? '—' : `${techGeneralRate}%`, 'Current tech-US leakage from zjp-metrics.json', techRateLevel],
+      ['Classified US', classifiedRate == null ? '—' : `${classifiedRate}%`, 'Complement of live US G1 leakage', rateLevel],
+      ['Top Live Leakage', topCompany ? topCompany.name : '—', topCompany ? `${fmt(topCompany.general)} G1 · ${topCompany.source}` : 'live company data unavailable', topLevel],
+      ['Title Patterns', fmt(patterns.length), `review snapshot · ${reviewAge} · ${fmt(patternJobs)} repeated-title jobs`, snapshotLevel],
+      ['Tenant Candidates', fmt(tenants.length), `review snapshot · ${reviewAge}`, snapshotLevel]
     ],
     issues,
     decision,
     workqueue: {
-      companies: v2MiniRows(companyRows, generalJobs || 1),
+      liveCompanies: v2MiniRows(liveCompanyRows, generalJobs || 1),
       patterns: v2MiniRows(patternRows, patternJobs || 1),
-      tenants: v2MiniRows(tenantRows, generalJobs || 1)
+      tenants: v2MiniRows(tenantRows, generalJobs || 1),
+      reviewNote: reviewOlderThanMetrics
+        ? `Review snapshot is ${reviewLagHours}h older than live metrics. Treat title and tenant rows as deeper review data, not current TAG health.`
+        : `Review snapshot age: ${reviewAge}.`
     },
-    lineage: [v2SourceLabel(V2_DATA_CONTRACT.classification.file, 'summary/companies/patterns/tenants', data.classTs)].join(' | ')
+    lineage: [
+      v2SourceLabel(V2_DATA_CONTRACT.classification.file, 'live G1 health', metricsTs),
+      v2SourceLabel(V2_DATA_CONTRACT.classificationCompanies.file, 'live company leakage', breakdown.updated || metricsTs),
+      v2SourceLabel(V2_DATA_CONTRACT.classificationReview.file, 'review snapshot/deeper queues', reviewTs)
+    ].join(' | ')
   };
 }
 function renderV2Tag(raw) {
@@ -1905,7 +1938,7 @@ function renderV2Tag(raw) {
   }
   const workqueue = document.getElementById('v2-tag-workqueue');
   if (workqueue) {
-    workqueue.innerHTML = `<div class="v2-panel-title">Classification Work Queue</div><strong style="font-size:12px">Top leakage companies</strong>${vm.workqueue.companies}<strong style="font-size:12px">Title patterns</strong>${vm.workqueue.patterns}<strong style="font-size:12px">Tenant candidates</strong>${vm.workqueue.tenants}`;
+    workqueue.innerHTML = `<div class="v2-panel-title">TAG Work Queue</div><strong style="font-size:12px">Live top company leakage</strong>${vm.workqueue.liveCompanies}<div class="muted" style="font-size:11px;line-height:1.45;margin:8px 0">${esc(vm.workqueue.reviewNote)}</div><strong style="font-size:12px">Review snapshot title patterns</strong>${vm.workqueue.patterns}<strong style="font-size:12px">Review snapshot tenant candidates</strong>${vm.workqueue.tenants}`;
   }
   v2SetLineage('lineage-v2-tag', vm.lineage);
 }
@@ -4394,32 +4427,32 @@ function renderClassification(data) {
     return;
   }
 
-  const s = data.summary;
-  const classifiedRate = (100 - s.us_general_rate).toFixed(1);
   const companyCount = data.by_company ? data.by_company.length : 0;
-  // Staleness check: compare general-review generated time vs zjp-metrics
   const grGenerated = data.meta && data.meta.generated ? new Date(data.meta.generated) : null;
   const zpTime = _D.zjpMetrics && _D.zjpMetrics.generated_at ? new Date(_D.zjpMetrics.generated_at) : null;
   const staleHours = (grGenerated && zpTime) ? (zpTime - grGenerated) / 3600000 : null;
   const zpG1 = _D.zjpMetrics && _D.zjpMetrics.pool && _D.zjpMetrics.pool.g1_us;
-  const descPct = data.descriptions && s.us_general > 0 ? Math.round(data.descriptions.withDesc / s.us_general * 100) : null;
-
-  // Summary cards — 3 cards: all-US G1, tech-US G1 (primary audience), US total (scale)
-  const techG1 = s.tech_us_general_rate != null ? s.tech_us_general_rate : null;
-  const techG1Color = techG1 != null ? (techG1 > 30 ? 'var(--red)' : techG1 > 15 ? 'var(--yellow)' : 'var(--green)') : '';
-  // Staleness banner + live G1 override
-  let staleBanner = '';
-  if (staleHours != null && staleHours > 24) {
-    staleBanner = `<div class="card" style="grid-column:1/-1;padding:8px 12px;margin-bottom:8px;font-size:12px;border-left:3px solid var(--yellow)"><span style="color:var(--yellow);font-weight:600">⚠ Stale data</span> <span style="color:var(--muted)">Classification review is ${Math.round(staleHours/24)}d old. Company-level data may not reflect current state.</span></div>`;
+  const liveRate = zpG1 ? zpG1.us_general_rate_pct : null;
+  const liveGeneral = zpG1 ? zpG1.us_general : null;
+  const liveTotal = zpG1 ? zpG1.us_total : null;
+  const liveTechG1 = zpG1 ? zpG1.tech_us_general_rate_pct : null;
+  const liveClassifiedRate = liveRate == null ? null : (100 - liveRate).toFixed(1);
+  const tagFresh = document.getElementById('tag-freshness');
+  if (tagFresh) {
+    const reviewAge = grGenerated ? age(grGenerated.toISOString()) : 'missing';
+    const metricsAge = zpTime ? age(zpTime.toISOString()) : 'missing';
+    tagFresh.textContent = `Live TAG metrics: ${metricsAge}; review snapshot: ${reviewAge}`;
   }
-  // Use live G1 from zjp-metrics when available and general-review is stale
-  const liveG1 = zpG1 ? zpG1.us_general_rate_pct : null;
-  const g1Display = (staleHours != null && staleHours > 24 && liveG1 != null) ? liveG1 : s.us_general_rate;
-  const liveG1Note = (staleHours != null && staleHours > 24 && liveG1 != null) ? `<span style="font-size:10px;color:var(--info)"> (live: ${liveG1}%)</span>` : '';
+
+  const techG1Color = liveTechG1 != null ? (liveTechG1 > 25 ? 'var(--red)' : liveTechG1 > 15 ? 'var(--yellow)' : 'var(--green)') : 'var(--muted)';
+  let staleBanner = '';
+  if (staleHours != null && staleHours > 0) {
+    staleBanner = `<div class="card" style="grid-column:1/-1;padding:8px 12px;margin-bottom:8px;font-size:12px;border-left:3px solid var(--yellow)"><span style="color:var(--yellow);font-weight:600">Review snapshot older than live metrics</span> <span style="color:var(--muted)">general-review.json is ${Math.round(staleHours * 10) / 10}h behind zjp-metrics.json. Tables below are deeper review data, not current TAG health.</span></div>`;
+  }
   summaryEl.innerHTML = staleBanner +
-    statCard({ icon: '🏷️', label: 'US General Rate', value: `<span style="color:${g1Display > 10 ? 'var(--yellow)' : 'var(--green)'}">${g1Display}%</span>${liveG1Note}`, sub: `All jobs · Target: <40%` }) +
-    statCard({ icon: '🎯', label: 'Tech-US General', value: techG1 != null ? `<span style="color:${techG1Color}">${techG1}%</span>` : '—', sub: techG1 != null ? `Primary audience · ${fmt(s.tech_us_total || 0)} tech jobs` : 'Data not available' }) +
-    statCard({ icon: '📊', label: 'Classification Rate', value: `<span style="color:var(--green)">${classifiedRate}%</span>`, sub: `${fmt(s.us_total - s.us_general)} of ${fmt(s.us_total)} classified · ${companyCount} companies` });
+    statCard({ icon: '🏷️', label: 'US G1 Live', value: liveRate == null ? '<span style="color:var(--red)">missing</span>' : `<span style="color:${liveRate > 15 ? 'var(--red)' : liveRate > 10 ? 'var(--yellow)' : 'var(--green)'}">${liveRate}%</span>`, sub: liveRate == null ? 'zjp-metrics.json pool.g1_us missing' : `${fmt(liveGeneral)} general / ${fmt(liveTotal)} US jobs` }) +
+    statCard({ icon: '🎯', label: 'Tech-US G1 Live', value: liveTechG1 != null ? `<span style="color:${techG1Color}">${liveTechG1}%</span>` : '—', sub: 'Current tech-US leakage from zjp-metrics.json' }) +
+    statCard({ icon: '📊', label: 'Classification Rate', value: liveClassifiedRate == null ? '—' : `<span style="color:var(--green)">${liveClassifiedRate}%</span>`, sub: liveClassifiedRate == null ? 'Live denominator unavailable' : `${fmt(liveTotal - liveGeneral)} of ${fmt(liveTotal)} classified · ${companyCount} review companies` });
 
   // Top companies table
   if (data.by_company && data.by_company.length > 0) {
@@ -4603,7 +4636,7 @@ function renderAll() {
   renderClassification(generalReview);
   renderV2Agg({ metrics, historyEntries, archiveEntries, enrichStats, enrichHistory, metadata, postedJobs, pipelineAlert, generalReview, aggReview, sourceTruth });
   renderV2Enr({ metrics, historyEntries, archiveEntries, enrichStats, enrichHistory, metadata, postedJobs, pipelineAlert, generalReview });
-  renderV2Tag({ metrics, historyEntries, archiveEntries, enrichStats, enrichHistory, metadata, postedJobs, pipelineAlert, generalReview });
+  renderV2Tag({ metrics, historyEntries, archiveEntries, enrichStats, enrichHistory, metadata, postedJobs, pipelineAlert, generalReview, zjpMetrics: _D.zjpMetrics });
   renderV2Sup({ metrics, historyEntries, archiveEntries, enrichStats, enrichHistory, metadata, postedJobs, pipelineAlert, generalReview });
   renderV2Out({ metrics, historyEntries, archiveEntries, enrichStats, enrichHistory, metadata, postedJobs, pipelineAlert, generalReview, trafficRaw, discordVerification, outState });
   renderV2Inf({ metrics, historyEntries, archiveEntries, enrichStats, enrichHistory, metadata, postedJobs, pipelineAlert, generalReview, trafficRaw, discordVerification, zjpMetrics: _D.zjpMetrics });
