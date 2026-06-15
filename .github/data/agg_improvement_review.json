@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-14T21:07:19.488697Z",
+  "generated_at": "2026-06-15T02:17:33.874386Z",
   "basis_standard": {
     "raw_fetch_total": "Current upstream source fetch count.",
     "final_pool_total": "Current all_jobs rows for the source.",
@@ -8,41 +8,26 @@
     "note": "Week-over-week deltas apply to final_pool_total only because history.jsonl persists by-source final-pool counts, not raw fetch or tech-US histories."
   },
   "producer_runtime": {
-    "run_id": "27511901147",
+    "run_id": "27519604132",
     "status": "success",
-    "fetch_total_seconds": 107,
-    "post_fetch_seconds": 201,
-    "total_wall_seconds": 308,
+    "fetch_total_seconds": 124,
+    "post_fetch_seconds": 205,
+    "total_wall_seconds": 329,
     "jobs": {
-      "fetched": "96474",
-      "pool": "54621",
-      "senior_filtered": "41632"
+      "fetched": "101517",
+      "pool": "58233",
+      "senior_filtered": "43053"
     }
   },
   "stitched_latency": {
-    "agg_output_age_minutes": 18.37,
-    "agg_to_public_snapshot_minutes": 15.16,
-    "agg_to_enrichment_minutes": 15.3,
-    "agg_to_consumers_avg_minutes": 12.07,
-    "agg_to_consumers_max_minutes": 12.31
+    "agg_output_age_minutes": 28.41,
+    "agg_to_public_snapshot_minutes": 14.7,
+    "agg_to_enrichment_minutes": 14.23,
+    "agg_to_consumers_avg_minutes": 26.31,
+    "agg_to_consumers_max_minutes": 26.36
   },
-  "source_anomalies": [
-    {
-      "source": "google",
-      "raw_fetch_total": 879,
-      "final_pool_total": 407,
-      "final_pool_7d_ago": null,
-      "final_pool_14d_ago": null,
-      "final_pool_wow_7d_pct": null,
-      "final_pool_wow_14d_pct": null,
-      "final_tech_us_total": 370,
-      "final_tech_us_internship_total": 2,
-      "flags": [
-        "BRAND_EXPECTATION_GAP"
-      ]
-    }
-  ],
+  "source_anomalies": [],
   "improvement_flags": [
-    "source_anomalies:google"
+    "consumer_visibility_latency_hot"
   ]
 }
