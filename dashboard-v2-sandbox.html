@@ -676,7 +676,7 @@
       <div class="v2-panel" id="v2-agg-snapshot"></div>
       <div class="v2-panel" id="v2-agg-composition"></div>
     </div>
-    <details class="v2-legacy-details" open>
+    <details class="v2-legacy-details">
       <summary>AGG primary evidence and drilldown</summary>
     <div class="section-label" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center">
       <span>Legacy AGG Surface</span>
@@ -757,7 +757,7 @@
     </div>
     <div class="grid" id="sup-health-cards"></div>
     <div style="margin-top:4px;font-size:11px;color:var(--muted)">
-      <strong>Active Sources</strong> = ATS sources returning &gt;0 jobs. <strong>Zero-Yield</strong> = companies with 0 jobs across all sources.
+      <strong>Active Sources</strong> = sources returning &gt;0 final-pool jobs. <strong>Raw Zero Fetches</strong> = configured tenants with fetcher health status <code>zero</code>; skipped Workday tenants with cached jobs are excluded.
     </div>
     <div id="sup-freshness" style="font-size:11px;color:var(--muted);margin-bottom:8px"></div>
     <div class="section-label">Jobs & Internships by Source <span style="font-weight:400;font-size:11px;color:var(--muted)">(current pool)</span></div>
@@ -1415,6 +1415,35 @@ function v2FreshnessState(isoTs, warnHours, criticalHours) {
     hours
   };
 }
+function v2HoursSince(isoTs) {
+  if (!isoTs) return null;
+  const ms = new Date(isoTs).getTime();
+  if (!Number.isFinite(ms)) return null;
+  return (Date.now() - ms) / 3600000;
+}
+function v2OutStateStatus(state) {
+  if (!state) {
+    return { usable: false, level: 'critical', missing: ['out_operator_state.json'], stale: false, hours: null };
+  }
+  const missing = [];
+  if (!state.generated_at) missing.push('generated_at');
+  if (!state.health || !state.health.level) missing.push('health.level');
+  if (!state.health || !state.health.label) missing.push('health.label');
+  if (!state.current_problem || !state.current_problem.issue) missing.push('current_problem.issue');
+  if (!state.current_problem || !state.current_problem.owner) missing.push('current_problem.owner');
+  if (!state.current_problem || !state.current_problem.label) missing.push('current_problem.label');
+  if (!state.next_action || !state.next_action.verification_lane) missing.push('next_action.verification_lane');
+  if (!state.next_action || !state.next_action.label) missing.push('next_action.label');
+  const hours = v2HoursSince(state.generated_at);
+  const stale = hours == null || hours > 7 * 24;
+  return {
+    usable: missing.length === 0 && !stale,
+    level: missing.length || stale ? 'critical' : (state.health.level || 'warn'),
+    missing,
+    stale,
+    hours
+  };
+}
 function v2Card(label, value, sub, level) {
   const color = level === 'critical' ? 'var(--red)' : level === 'warn' ? 'var(--yellow)' : level === 'ok' ? 'var(--green)' : 'var(--text)';
   return `<div class="v2-card"><div class="label">${label}</div><div class="value" style="color:${color}">${value}</div><div class="sub">${sub}</div></div>`;
@@ -1692,11 +1721,11 @@ function v2BuildAggViewModel(raw) {
   const topDomains = v2TopEntries(domains, 4);
   const durationLevel = durationMin == null ? 'warn' : durationMin <= 25 ? 'ok' : durationMin <= 35 ? 'warn' : 'critical';
   const keptLevel = keptPct == null ? 'warn' : keptPct >= 25 && keptPct <= 60 ? 'ok' : 'warn';
-  const freshLevel = fresh24 == null ? 'warn' : fresh24 > 0 ? 'ok' : 'critical';
+  const freshLevel = fresh24 == null ? 'critical' : fresh24 <= 0 ? 'critical' : 'warn';
   const reviewAnomalies = Array.isArray(aggReview.source_anomalies) ? aggReview.source_anomalies : [];
   const issues = [];
   if (durationLevel !== 'ok') issues.push({ title: 'Runtime above target', detail: durationMin == null ? 'duration missing' : `${durationMin} min vs ≤25 min target`, level: durationLevel });
-  if (freshLevel !== 'ok') issues.push({ title: 'Pool freshness missing', detail: 'No last-24h freshness count available', level: freshLevel });
+  if (freshLevel !== 'ok') issues.push({ title: fresh24 == null || fresh24 <= 0 ? 'Pool freshness missing' : 'Freshness threshold not calibrated', detail: fresh24 == null ? 'No last-24h freshness count available' : `${fmt(fresh24)} jobs in last 24h; no accepted AGG target yet`, level: freshLevel });
   if (keptLevel !== 'ok') issues.push({ title: 'Senior filter ratio unusual', detail: keptPct == null ? 'filter stats missing' : `${keptPct}% kept from fetched pool`, level: keptPct == null ? 'warn' : keptLevel });
   reviewAnomalies.forEach(row => {
     const flags = (row.flags || []).join(', ') || 'flagged';
@@ -1708,7 +1737,7 @@ function v2BuildAggViewModel(raw) {
       ['Run Freshness', data.freshness.label.toUpperCase(), v2SourceLabel(V2_DATA_CONTRACT.freshness.file, 'latest run', data.sourceTs), data.freshness.level],
       ['Pool Size', fmt(data.pool.value), data.pool.sub, data.pool.level],
       ['Runtime', durationMin == null ? '—' : `${durationMin}m`, 'Target ≤25m; investigate sustained drift', durationLevel],
-      ['Fresh 24h', fresh24 == null ? '—' : fmt(fresh24), 'Newly posted jobs in current pool', freshLevel],
+      ['Fresh 24h', fresh24 == null ? '—' : fmt(fresh24), 'Count only; AGG target not accepted yet', freshLevel],
       ['Senior Filter', keptPct == null ? '—' : `${keptPct}% kept`, input == null ? 'filter stats unavailable' : `${fmt(kept)} kept / ${fmt(input)} fetched`, keptLevel],
       ['Tech-US', data.techUs.value == null ? '—' : fmt(data.techUs.value), data.techUs.sub, data.techUs.level]
     ],
@@ -1886,7 +1915,17 @@ function v2TopSource(bySource) {
   return entries.reduce((best, entry) => entry[1] > best[1] ? entry : best, entries[0]);
 }
 function v2ZeroYieldList(metadata) {
+  const health = metadata.fetcher_health || {};
+  const healthEntries = Object.entries(health);
+  if (healthEntries.length) {
+    return healthEntries
+      .filter(([, info]) => info?.status === 'zero')
+      .map(([name, info]) => `${name} (${info?.source || 'unknown'})`);
+  }
   return metadata.zero_yield_companies || metadata.zero_yield_sources || metadata.zero_yield || [];
+}
+function v2SkippedFetchCount(metadata) {
+  return Object.values(metadata.fetcher_health || {}).filter(info => info?.status === 'skipped_unchanged' || info?.status === 'skipped').length;
 }
 function v2BuildSupViewModel(raw) {
   const data = v2BuildDashboardData(raw);
@@ -1899,14 +1938,15 @@ function v2BuildSupViewModel(raw) {
   const topCompanies = metadata.top_companies || [];
   const topCompany = topCompanies[0] || null;
   const zeroYield = v2ZeroYieldList(metadata);
+  const skippedFetches = v2SkippedFetchCount(metadata);
   const sourceLevel = activeSources >= 5 ? 'ok' : activeSources >= 3 ? 'warn' : 'critical';
   const concentrationLevel = topSourcePct == null ? 'warn' : topSourcePct <= 60 ? 'ok' : topSourcePct <= 75 ? 'warn' : 'critical';
   const zeroLevel = zeroYield.length === 0 ? 'ok' : zeroYield.length <= 10 ? 'warn' : 'critical';
   const issues = [];
   if (sourceLevel !== 'ok') issues.push({ title: 'Low active source count', detail: `${activeSources} active source${activeSources === 1 ? '' : 's'}`, level: sourceLevel });
   if (concentrationLevel !== 'ok') issues.push({ title: 'Supply concentration risk', detail: topSource ? `${topSource[0]} contributes ${topSourcePct}%` : 'source data missing', level: concentrationLevel });
-  if (zeroLevel !== 'ok') issues.push({ title: 'Zero-yield source work', detail: `${zeroYield.length} zero-yield item${zeroYield.length === 1 ? '' : 's'}`, level: zeroLevel });
-  const decision = v2DecisionText(issues, 'No SUP action needed', 'Active sources are healthy; review concentration and zero-yield items as normal supply hygiene.');
+  if (zeroLevel !== 'ok') issues.push({ title: 'Raw zero-fetch review', detail: `${zeroYield.length} tenant${zeroYield.length === 1 ? '' : 's'} with health=zero`, level: zeroLevel });
+  const decision = v2DecisionText(issues, 'No SUP action needed', 'Active sources are healthy; review concentration and raw zero-fetch tenants as normal supply hygiene.');
   const sourceRows = v2TopEntries(bySource, 4);
   const sourceTotal = sourceRows.reduce((sum, [, value]) => sum + value, 0);
   const companyRows = topCompanies.slice(0, 4).map(company => [company.company, company.count || 0]);
@@ -1917,14 +1957,14 @@ function v2BuildSupViewModel(raw) {
       ['Top Source', topSource ? topSource[0] : '—', topSource ? `${fmt(topSource[1])} jobs · ${topSourcePct}% of pool` : 'source data unavailable', concentrationLevel],
       ['Tech-US', data.techUs.value == null ? '—' : fmt(data.techUs.value), 'Shared denominator with Overview/ENR', data.techUs.level],
       ['Top Company', topCompany ? topCompany.company : '—', topCompany ? `${fmt(topCompany.count)} jobs · ${topCompany.domain || 'unknown domain'}` : 'company data unavailable', topCompany ? 'ok' : 'warn'],
-      ['Zero Yield', fmt(zeroYield.length), 'Investigate before pruning sources', zeroLevel]
+      ['Raw Zero Fetches', fmt(zeroYield.length), skippedFetches ? `${fmt(skippedFetches)} cached/skipped tenants excluded` : 'Fetcher health status=zero', zeroLevel]
     ],
     issues,
     decision,
     composition: {
       sources: v2MiniRows(sourceRows, sourceTotal),
       companies: v2MiniRows(companyRows, data.pool.value),
-      zeroYield: v2ValueRows([['Zero-yield items', zeroYield.length], ['Active sources', activeSources]])
+      zeroYield: v2ValueRows([['Raw zero fetches', zeroYield.length], ['Cached/skipped fetches', skippedFetches], ['Active sources', activeSources]])
     },
     lineage: [v2SourceLabel(V2_DATA_CONTRACT.sources.file, 'sources/companies/zero-yield', data.metaTs), v2SourceLabel(V2_DATA_CONTRACT.techUs.file, 'tech-US denominator', data.enrichTs)].join(' | ')
   };
@@ -1988,24 +2028,32 @@ function v2BuildOutViewModel(raw) {
   const failedLevel = failedRepos === 0 ? 'ok' : failedRepos <= 1 ? 'warn' : 'critical';
   const discordLevel = discordPostCount > 0 ? 'ok' : 'warn';
   const outState = raw.outState || null;
+  const outStateStatus = v2OutStateStatus(outState);
   const issues = [];
   if (freshLevel !== 'ok') issues.push({ title: 'Consumer freshness drift', detail: freshPct == null ? 'freshness unavailable' : `${freshRepos}/${repoDataCount} repos fresh`, level: freshLevel });
   if (failedLevel !== 'ok') issues.push({ title: 'Repo workflow failures', detail: `${failedRepos} failing repo workflow${failedRepos === 1 ? '' : 's'}`, level: failedLevel });
   if (discordLevel !== 'ok') issues.push({ title: 'Discord delivery missing', detail: 'No Discord posts found in posted_jobs.json', level: discordLevel });
-  if (outState && outState.current_problem) {
-    issues.push({ title: 'Routed public-board risk', detail: `${outState.current_problem.issue || 'softwarejobs.dev#9'} · ${outState.current_problem.owner || 'external owner'} owns fix`, level: outState.health && outState.health.level === 'critical' ? 'critical' : 'warn' });
+  if (!outStateStatus.usable) {
+    const staleDetail = outStateStatus.stale ? `stale ${outStateStatus.hours == null ? 'unknown age' : Math.round(outStateStatus.hours)}h` : null;
+    const missingDetail = outStateStatus.missing.length ? `missing ${outStateStatus.missing.join(', ')}` : null;
+    issues.push({ title: 'OUT assurance state unusable', detail: [missingDetail, staleDetail].filter(Boolean).join(' · '), level: 'critical' });
+  } else {
+    issues.push({ title: 'Routed public-board risk', detail: `${outState.current_problem.issue} · ${outState.current_problem.owner} owns fix`, level: outStateStatus.level === 'critical' ? 'critical' : 'warn' });
   }
-  const decision = outState
-    ? { level: outState.health && outState.health.level || 'warn', label: outState.health && outState.health.label || 'OUT state needs review', sub: outState.next_action && outState.next_action.label || 'Check OUT assurance state.' }
-    : v2DecisionText(issues, 'No OUT action needed', 'Repos, workflows, traffic, and Discord delivery are operating normally.');
+  const decision = outStateStatus.usable
+    ? { level: outStateStatus.level, label: outState.health.label, sub: outState.next_action.label }
+    : { level: 'critical', label: 'OUT assurance state unusable', sub: 'Fix out_operator_state.json before trusting OUT owner/action guidance.' };
+  const currentIssue = outStateStatus.usable ? outState.current_problem.issue : 'missing';
+  const nextLane = outStateStatus.usable ? outState.next_action.verification_lane : 'missing';
+  const ownerRoute = outStateStatus.usable ? outState.current_problem.owner : 'missing';
   return {
     cards: [
+      ['OUT State', outStateStatus.usable ? outState.health.label : 'UNUSABLE', outStateStatus.usable ? outState.health.detail : 'Assurance artifact missing, partial, or stale', outStateStatus.level],
+      ['Current Issue', currentIssue, 'Must come from out_operator_state.json', outStateStatus.usable ? 'warn' : 'critical'],
+      ['Owner Route', ownerRoute, 'DASH displays; producer owner fixes', outStateStatus.usable ? 'warn' : 'critical'],
+      ['Next OUT Action', nextLane, outStateStatus.usable ? outState.next_action.label : 'No trusted next action loaded', outStateStatus.usable ? 'warn' : 'critical'],
       ['Consumer Freshness', freshPct == null ? '—' : `${freshPct}%`, `${freshRepos}/${repoDataCount} repos updated <2h ago`, freshLevel],
-      ['Repo Jobs', fmt(jobTotal), `${repoEntries.length} consumer repos`, repoEntries.length ? 'ok' : 'warn'],
-      ['Stars', fmt(totalStars), 'Across consumer repos', 'ok'],
-      ['Workflow Failures', fmt(failedRepos), 'Repo workflows not successful', failedLevel],
-      ['Discord Posts', fmt(discordPostCount), `${fmt(postedJobs.length)} source jobs posted`, discordLevel],
-      ['Traffic Views', trafficViews == null ? '—' : fmt(trafficViews), 'Latest GitHub traffic snapshot', trafficViews == null ? 'warn' : 'ok']
+      ['Workflow Failures', fmt(failedRepos), 'Repo workflows not successful', failedLevel]
     ],
     issues,
     decision,
@@ -2013,25 +2061,33 @@ function v2BuildOutViewModel(raw) {
       rows: repoRows
     },
     assurance: outState,
+    assuranceStatus: outStateStatus,
     lineage: [v2SourceLabel(V2_DATA_CONTRACT.consumers.file, 'repos/stars/freshness', metrics.timestamp || metrics.generated_at), v2SourceLabel(V2_DATA_CONTRACT.discord.file, 'discord posts', raw.postedJobs && raw.postedJobs.lastUpdated), v2SourceLabel(V2_DATA_CONTRACT.traffic.file, 'traffic views', latestTraffic && (latestTraffic.timestamp || latestTraffic.date)), outState ? v2SourceLabel(V2_DATA_CONTRACT.outState.file, 'assurance owner route', outState.generated_at) : null].filter(Boolean).join(' | ')
   };
 }
-function v2RenderOutAssurance(el, state) {
+function v2RenderOutAssurance(el, state, status) {
   if (!el) return;
+  const stateStatus = status || v2OutStateStatus(state);
   if (!state) {
-    el.innerHTML = `<div class="v2-panel-title">OUT Assurance State</div><div class="muted" style="font-size:12px">No OUT assurance state artifact loaded.</div>`;
+    el.innerHTML = `<div class="v2-panel-title">OUT Assurance State</div><div class="v2-anomaly-row" style="border-color:rgba(207,64,36,.35);background:rgba(207,64,36,.08)"><strong>Artifact missing</strong><span>No OUT assurance state artifact loaded. Do not trust OUT owner/action guidance.</span></div>`;
     return;
   }
   const blocked = Array.isArray(state.blocked) ? state.blocked : [];
+  const value = (text, color = null) => `<div class="value"${color ? ` style="color:${color}"` : ''}>${text ? esc(text) : 'missing'}</div>`;
+  const sub = (text) => `<div class="sub">${text ? esc(text) : 'missing from out_operator_state.json'}</div>`;
+  const quality = !stateStatus.usable
+    ? `<div class="v2-anomaly-row" style="border-color:rgba(207,64,36,.35);background:rgba(207,64,36,.08)"><strong>State contract problem</strong><span>${stateStatus.missing.length ? `Missing ${stateStatus.missing.join(', ')}` : ''}${stateStatus.stale ? `${stateStatus.missing.length ? ' · ' : ''}Stale ${stateStatus.hours == null ? 'unknown age' : Math.round(stateStatus.hours) + 'h'}` : ''}</span></div>`
+    : '';
   el.innerHTML = `
     <div class="v2-panel-title">OUT Assurance State</div>
+    ${quality}
     <div class="v2-snapshot-grid" style="grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:12px">
-      <div class="v2-snapshot-item"><div class="label">Owned surfaces</div><div class="value" style="color:var(--green)">stable</div><div class="sub">${state.health && state.health.detail || 'README and Discord are stable.'}</div></div>
-      <div class="v2-snapshot-item"><div class="label">Current issue</div><div class="value" style="color:var(--yellow)">${state.current_problem && state.current_problem.issue || 'softwarejobs.dev#9'}</div><div class="sub">${state.current_problem && state.current_problem.label || 'Public-board freshness trust'}</div></div>
-      <div class="v2-snapshot-item"><div class="label">Owner route</div><div class="value">${state.current_problem && state.current_problem.owner || 'public-board/backend'}</div><div class="sub">DASH presents; OUT verifies after fix.</div></div>
-      <div class="v2-snapshot-item"><div class="label">Next OUT action</div><div class="value">${state.next_action && state.next_action.verification_lane || 'OUT-PUBLIC-2'}</div><div class="sub">${state.next_action && state.next_action.label || 'Rerun after owner deploy.'}</div></div>
+      <div class="v2-snapshot-item"><div class="label">Owned surfaces</div>${value(state.health && state.health.label, stateStatus.usable ? 'var(--green)' : 'var(--red)')}${sub(state.health && state.health.detail)}</div>
+      <div class="v2-snapshot-item"><div class="label">Current issue</div>${value(state.current_problem && state.current_problem.issue, stateStatus.usable ? 'var(--yellow)' : 'var(--red)')}${sub(state.current_problem && state.current_problem.label)}</div>
+      <div class="v2-snapshot-item"><div class="label">Owner route</div>${value(state.current_problem && state.current_problem.owner)}<div class="sub">DASH presents; producer owner fixes.</div></div>
+      <div class="v2-snapshot-item"><div class="label">Next OUT action</div>${value(state.next_action && state.next_action.verification_lane)}${sub(state.next_action && state.next_action.label)}</div>
     </div>
-    <div class="v2-anomaly-row"><strong>Blocked / gated</strong><span>${blocked.map(item => `${item.issue || item.label}: ${item.detail}`).join(' · ') || 'None'}</span></div>
+    <div class="v2-anomaly-row"><strong>Blocked / gated</strong><span>${blocked.map(item => `${esc(item.issue || item.label)}: ${esc(item.detail)}`).join(' · ') || 'None'}</span></div>
   `;
 }
 function renderV2Out(raw) {
@@ -2056,7 +2112,7 @@ function renderV2Out(raw) {
   }
   grid.innerHTML = vm.cards.map(card => v2Card(...card)).join('');
   v2RenderAttention('v2-out-attention', vm.issues);
-  v2RenderOutAssurance(document.getElementById('v2-out-assurance'), vm.assurance);
+  v2RenderOutAssurance(document.getElementById('v2-out-assurance'), vm.assurance, vm.assuranceStatus);
   v2SetLineage('lineage-v2-out', vm.lineage);
 }
 function v2SoonestSecret(secrets) {
