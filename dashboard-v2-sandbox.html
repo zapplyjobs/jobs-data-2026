@@ -11,27 +11,29 @@
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
   <style>
     :root {
-      --bg: #fff7f2;
+      --bg: #ffffff;
+      --auth-bg: rgba(255, 94, 60, 0.10);
       --bg-card: #ffffff;
-      --bg-card-hover: #f8f4f1;
-      --border: #eaded8;
-      --text: #201a19;
-      --muted: #7b6b65;
+      --bg-card-hover: #f8f9fb;
+      --border: #e8ecf4;
+      --text: #231f20;
+      --muted: #7c8087;
       --green: #208a4b;
       --yellow: #b86f00;
       --red: #cf4024;
       --accent: #ff5e3c;
-      --accent-strong: #ff6d4d;
-      --accent-soft: #fff0e8;
+      --accent-strong: #ff5e3c;
+      --accent-soft: rgba(255, 94, 60, 0.10);
+      --accent-bg: rgba(255, 94, 60, 0.08);
       --info: #2f6f95;
-      --neutral-track: rgba(32, 26, 25, 0.08);
-      --neutral-fill: rgba(32, 26, 25, 0.42);
-      --status-bar-bg: rgba(255,255,255,0.82);
-      --header-bg: rgba(255,247,242,0.94);
-      --sidebar-bg: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,247,242,0.88));
-      --sidebar-dot-ring: rgba(255,255,255,0.75);
-      --sidebar-shadow: 0 6px 18px rgba(69, 35, 20, 0.05);
-      --shadow: 0px 8px 24px 0px rgba(69, 35, 20, 0.07);
+      --neutral-track: #eef1f5;
+      --neutral-fill: #8c929c;
+      --status-bar-bg: rgba(255,255,255,0.96);
+      --header-bg: rgba(255,255,255,0.96);
+      --sidebar-bg: #ffffff;
+      --sidebar-dot-ring: #ffffff;
+      --sidebar-shadow: none;
+      --shadow: none;
     }
     :root.dark {
       --bg: #171110;
@@ -69,14 +71,14 @@
       display: flex;
       align-items: center;
       gap: 14px;
-      padding: 12px 18px;
+      padding: 12px 40px;
       border-bottom: 1px solid var(--border);
       background: var(--header-bg);
       backdrop-filter: blur(10px);
       position: fixed;
       top: 0; left: 0; right: 0;
       z-index: 10;
-      box-shadow: var(--sidebar-shadow);
+      min-height: 64px;
     }
     .header-brand {
       display: flex;
@@ -85,12 +87,8 @@
       min-width: 0;
     }
     .brand-mark {
-      width: 20px;
+      width: 28px;
       height: 20px;
-      border-radius: 7px 11px 7px 11px;
-      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-      box-shadow: 0 8px 18px rgba(255, 94, 60, 0.22);
-      transform: skewX(-14deg);
       flex-shrink: 0;
     }
     .brand-text {
@@ -98,8 +96,8 @@
       flex-direction: column;
       line-height: 1.1;
     }
-    .brand-text strong { font-size: 18px; font-weight: 800; color: var(--text); }
-    .brand-text span { font-size: 10px; color: var(--muted); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+    .brand-text strong { font-size: 22px; font-weight: 800; color: var(--text); letter-spacing: -0.05em; text-transform: lowercase; }
+    .brand-text span { font-size: 10px; color: var(--muted); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-top: -2px; }
     .header-chip {
       border: 1px solid var(--border);
       border-radius: 999px;
@@ -112,46 +110,45 @@
     .header-spacer { flex: 1; }
     #theme-toggle,
     #refresh-btn {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 6px 10px;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
       cursor: pointer;
       color: var(--text);
       font-size: 14px;
-      box-shadow: var(--shadow);
     }
     #theme-toggle:hover,
-    #refresh-btn:hover { background: var(--bg-card-hover); }
+    #refresh-btn:hover { background: var(--bg-card-hover); border-color: var(--border); }
     #status-bar {
       position: fixed;
-      top: 52px; left: 18px; right: 18px;
+      top: 64px; left: 0; right: 0;
       z-index: 10;
-      padding: 6px 10px;
+      padding: 6px 40px;
       background: var(--status-bar-bg);
-      border: 1px solid var(--border);
-      border-radius: 10px;
+      border-bottom: 1px solid var(--border);
       font-size: 11px;
     }
     #status-bar.warn { background: rgba(210, 153, 34, 0.10); border-color: rgba(210, 153, 34, 0.28); }
     #status-bar.err  { background: rgba(207, 64, 36, 0.10); border-color: rgba(207, 64, 36, 0.32); }
     #app-body {
       display: flex;
-      margin-top: 92px;
-      height: calc(100vh - 92px);
+      margin: 96px 0 0;
+      height: calc(100vh - 96px);
       overflow: hidden;
+      background: #ffffff;
     }
     #sidebar {
       width: 204px;
       flex-shrink: 0;
       background: var(--sidebar-bg);
       border-right: 1px solid var(--border);
-      padding: 14px 10px;
+      padding: 18px 28px;
       overflow-y: auto;
       position: sticky;
       top: 0;
-      height: calc(100vh - 92px);
-      box-shadow: inset -1px 0 0 rgba(255,255,255,0.04);
+      height: calc(100vh - 96px);
     }
     #sidebar-label {
       font-size: 10px;
@@ -179,7 +176,7 @@
       border-radius: 12px;
       text-align: left;
       white-space: nowrap;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
       transition: background .12s ease, border-color .12s ease, color .12s ease;
     }
     .tab::after {
@@ -197,9 +194,9 @@
     .tab:hover { color: var(--text); background: var(--bg-card-hover); border-color: var(--border); }
     .tab.active {
       color: var(--text);
-      background: var(--bg-card);
-      border-color: rgba(255, 94, 60, 0.42);
-      box-shadow: inset 3px 0 0 var(--accent), var(--sidebar-shadow);
+      background: #ffffff;
+      border-color: var(--border);
+      box-shadow: inset 4px 0 0 var(--accent);
       font-weight: 800;
     }
     .tab.active::after { box-shadow: 0 0 0 3px var(--sidebar-dot-ring); }
@@ -239,22 +236,21 @@
       line-height: 1.4;
       margin-bottom: 8px;
     }
-    }
     .grid   { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
     .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
     .card {
       background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: 16px;
       padding: 16px;
-      box-shadow: var(--shadow);
+      box-shadow: none;
     }
     .stat-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: 16px;
       padding: 16px;
-      box-shadow: var(--shadow);
+      box-shadow: none;
     }
     .stat-icon {
       width: 36px; height: 36px;
@@ -314,31 +310,57 @@
     footer { margin-top: 24px; color: var(--muted); font-size: 11px; text-align: center; padding-bottom: 24px; }
     #auth-overlay {
       position: fixed; inset: 0;
-      background: var(--bg);
+      background: var(--auth-bg);
       display: flex; align-items: center; justify-content: center;
       z-index: 999;
     }
     #auth-box {
+      position: relative;
       background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 32px 40px;
-      width: 320px;
-      text-align: center;
+      border-radius: 24px;
+      padding: 56px 420px 56px 56px;
+      width: 860px;
+      min-height: 420px;
+      text-align: left;
+      overflow: hidden;
     }
-    #auth-box h2 { font-size: 15px; margin-bottom: 6px; }
+    #auth-box::after {
+      content: 'zapply';
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      bottom: 16px;
+      width: 340px;
+      border-radius: 20px;
+      background: var(--accent);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+      font-weight: 800;
+      letter-spacing: -0.06em;
+      box-shadow: 0 6px 0 #df4d2e;
+      pointer-events: none;
+    }
+    #auth-box h2 { font-size: 24px; margin-bottom: 6px; letter-spacing: -0.04em; }
     #auth-box p { color: var(--muted); font-size: 12px; margin-bottom: 20px; }
     #auth-input {
-      width: 100%; padding: 9px 12px;
-      background: var(--bg); border: 1px solid var(--border);
-      border-radius: 6px; color: var(--text); font-size: 14px;
+      width: 100%; padding: 13px 14px;
+      background: #ffffff; border: 1px solid var(--border);
+      border-radius: 12px; color: var(--text); font-size: 14px;
       outline: none; margin-bottom: 12px;
     }
     #auth-input:focus { border-color: var(--accent); }
     #auth-btn {
-      width: 100%; padding: 9px;
-      background: var(--accent); border: none; border-radius: 6px;
-      color: #fff; font-size: 14px; font-weight: 600; cursor: pointer;
+      width: 100%; padding: 13px;
+      background: var(--accent); border: none; border-radius: 12px;
+      color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 0 #df4d2e;
+    }
+    @media (max-width: 760px) {
+      #auth-box { width: min(92vw, 360px); min-height: auto; padding: 32px; text-align: center; }
+      #auth-box::after { display: none; }
     }
     #auth-btn:hover { opacity: 0.85; }
     #auth-error { color: var(--red); font-size: 12px; margin-top: 8px; min-height: 16px; }
@@ -399,9 +421,9 @@
     .v2-hero-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: var(--shadow);
+      border-radius: 20px;
+      padding: 22px;
+      box-shadow: none;
     }
     .v2-hero-kicker {
       color: var(--muted);
@@ -437,21 +459,21 @@
     .v2-note-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 16px;
+      border-radius: 20px;
       padding: 16px;
-      box-shadow: var(--shadow);
+      box-shadow: none;
     }
     .v2-note-card strong {
       display: block;
       font-size: 14px;
       margin-bottom: 6px;
     }
-    .v2-card { background: var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:14px; box-shadow: var(--shadow); min-height:104px; }
+    .v2-card { background: var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:14px; box-shadow: none; min-height:104px; }
     .v2-card .label { color: var(--muted); font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px; }
     .v2-card .value { font-size:24px; font-weight:800; line-height:1.15; }
     .v2-card .sub { color: var(--muted); font-size:11px; margin-top:6px; line-height:1.35; }
-    .v2-module-card { cursor:pointer; transition:border-color .12s ease, transform .12s ease, box-shadow .12s ease; }
-    .v2-module-card:hover { border-color: rgba(255, 94, 60, 0.42); transform: translateY(-1px); box-shadow: 0 10px 24px rgba(69, 35, 20, 0.08); }
+    .v2-module-card { cursor:pointer; transition:border-color .12s ease, transform .12s ease; }
+    .v2-module-card:hover { border-color: var(--accent); transform: translateY(-1px); box-shadow: none; }
     .v2-attention {
       border:1px solid var(--border);
       border-radius:12px;
@@ -524,7 +546,7 @@
     .v2-issue { display:flex; justify-content:space-between; gap:16px; padding:6px 0; border-top:1px solid var(--border); font-size:12px; }
     .v2-issue:first-child { border-top:none; }
     .v2-split { display:grid; grid-template-columns: 1fr; gap:12px; }
-    .v2-panel { background: var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; box-shadow: var(--shadow); }
+    .v2-panel { background: var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:14px; box-shadow: none; }
     .v2-snapshot-grid { display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap:8px; margin-bottom:10px; }
     .v2-snapshot-item { border:1px solid var(--border); border-radius:10px; padding:10px; background:rgba(128,128,128,.05); min-height:68px; }
     .v2-snapshot-item .label { color:var(--muted); font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px; }
@@ -584,9 +606,11 @@
 
 <header>
   <div class="header-brand">
-    <span class="brand-mark" aria-hidden="true"></span>
+    <svg class="brand-mark" viewBox="0 0 36 24" aria-hidden="true" focusable="false">
+      <path d="M4 3h24L10 11h18L6 21" fill="none" stroke="var(--accent)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
     <span class="brand-text">
-      <strong>Zapply Ops</strong>
+      <strong>zapply ops</strong>
       <span>Dashboard sandbox</span>
     </span>
   </div>
@@ -1269,16 +1293,17 @@ function v2HydrateOverviewModuleCards(container) {
     const sub = card.querySelector('.sub');
     const value = card.querySelector('.value');
     if (sub && tab.title) sub.textContent = tab.title;
-    if (value) value.textContent = v2DecisionStateLabel(level);
+    if (value) {
+      value.textContent = v2DecisionStateLabel(level);
+      value.style.color = 'var(--text)';
+    }
+    card.style.background = 'var(--bg-card)';
     if (level === 'critical') {
-      card.style.borderColor = 'rgba(207, 64, 36, 0.36)';
-      card.style.background = 'rgba(207, 64, 36, 0.06)';
+      card.style.borderColor = 'rgba(207, 64, 36, 0.42)';
     } else if (level === 'warn') {
-      card.style.borderColor = 'rgba(240,183,91,0.38)';
-      card.style.background = 'rgba(240,183,91,0.08)';
+      card.style.borderColor = 'rgba(184,111,0,0.34)';
     } else {
-      card.style.borderColor = 'rgba(84,200,120,0.22)';
-      card.style.background = 'var(--bg-card)';
+      card.style.borderColor = 'var(--border)';
     }
     queue.push({ tab: card.dataset.v2Tab, level, note: tab.title || '', priority: priority[level] ?? 9 });
   });
@@ -1317,6 +1342,10 @@ function statCard({ icon, label, value, trend, trendDir, sub, valueColor }) {
 }
 
 
+const V2_AGG_FRESH24_TARGET = Object.freeze({
+  okMin: 1,
+  label: 'Target ≥1 producer-dated job in last 24h; volume is context'
+});
 const V2_DATA_CONTRACT = Object.freeze({
   freshness: { owner: 'INF', file: 'jobs-metadata.json', path: 'generated', warnHours: 0.75, criticalHours: 6 },
   metrics: { owner: 'INF', file: 'metrics/latest.json', path: 'timestamp || generated_at' },
@@ -1627,7 +1656,7 @@ function renderV2Overview(raw) {
     const heroCopy = nextModule ? nextModule.note : vm.hero.copy;
     const heroOwner = nextModule ? `Owner: ${nextModule.tab.toUpperCase()}` : vm.hero.owner;
     const accent = heroLevel === 'critical' ? 'var(--red)' : heroLevel === 'warn' ? 'var(--yellow)' : 'var(--green)';
-    hero.innerHTML = `<div class="v2-hero-card"><div class="v2-hero-kicker">Current operating call</div><div class="v2-hero-title" style="color:${accent}">${heroTitle}</div><div class="v2-hero-copy">${heroCopy}</div><div class="v2-hero-meta"><span class="header-chip">${heroOwner}</span><span class="header-chip">${vm.hero.confidence}</span></div></div><div class="v2-hero-side"><div class="v2-note-card"><div class="v2-hero-kicker">How to use this page</div><strong>Start here, drill only when needed</strong><div class="v2-hero-copy">${vm.hero.trust}</div></div><div class="v2-note-card"><div class="v2-hero-kicker">Navigation rule</div><strong>Priority queue beats module order</strong><div class="v2-hero-copy">Act on the first red/amber card first. Green cards are only confirmation.</div></div><div class="v2-note-card"><div class="v2-hero-kicker">Sandbox plan</div><strong>Phase: per-tab action slices</strong><div class="v2-hero-copy">Current sandbox scope is source-truth repair plus small tab slices. Production stays separate until explicit cutover approval.</div></div></div>`;
+    hero.innerHTML = `<div class="v2-hero-card"><div class="v2-hero-kicker">Current operating call</div><div class="v2-hero-title" style="color:var(--text)">${heroTitle}</div><div class="v2-hero-copy">${heroCopy}</div><div class="v2-hero-meta"><span class="header-chip" style="border-color:${accent};color:${accent}">${heroOwner}</span><span class="header-chip">${vm.hero.confidence}</span></div></div><div class="v2-hero-side"><div class="v2-note-card"><div class="v2-hero-kicker">How to use this page</div><strong>Start here, drill only when needed</strong><div class="v2-hero-copy">${vm.hero.trust}</div></div><div class="v2-note-card"><div class="v2-hero-kicker">Navigation rule</div><strong>Priority queue beats module order</strong><div class="v2-hero-copy">Act on the first red/amber card first. Green cards are only confirmation.</div></div><div class="v2-note-card"><div class="v2-hero-kicker">Sandbox plan</div><strong>Phase: per-tab action slices</strong><div class="v2-hero-copy">Current sandbox scope is source-truth repair plus small tab slices. Production stays separate until explicit cutover approval.</div></div></div>`;
   }
   v2SetLineage('lineage-v2-command', vm.lineage.command);
   v2SetLineage('lineage-v2-attention', vm.lineage.attention);
@@ -1726,11 +1755,11 @@ function v2BuildAggViewModel(raw) {
   const topDomains = v2TopEntries(domains, 4);
   const durationLevel = durationMin == null ? 'warn' : durationMin <= 25 ? 'ok' : durationMin <= 35 ? 'warn' : 'critical';
   const keptLevel = keptPct == null ? 'warn' : keptPct >= 25 && keptPct <= 60 ? 'ok' : 'warn';
-  const freshLevel = fresh24 == null ? 'critical' : fresh24 <= 0 ? 'critical' : 'warn';
+  const freshLevel = fresh24 == null ? 'critical' : fresh24 >= V2_AGG_FRESH24_TARGET.okMin ? 'ok' : 'critical';
   const reviewAnomalies = Array.isArray(aggReview.source_anomalies) ? aggReview.source_anomalies : [];
   const issues = [];
   if (durationLevel !== 'ok') issues.push({ title: 'Runtime above target', detail: durationMin == null ? 'duration missing' : `${durationMin} min vs ≤25 min target`, level: durationLevel });
-  if (freshLevel !== 'ok') issues.push({ title: fresh24 == null || fresh24 <= 0 ? 'Pool freshness missing' : 'Freshness threshold not calibrated', detail: fresh24 == null ? 'No last-24h freshness count available' : `${fmt(fresh24)} jobs in last 24h; no accepted AGG target yet`, level: freshLevel });
+  if (freshLevel !== 'ok') issues.push({ title: 'Pool freshness missing', detail: fresh24 == null ? 'No last-24h freshness count available' : `${fmt(fresh24)} jobs in last 24h vs target ≥${fmt(V2_AGG_FRESH24_TARGET.okMin)}`, level: freshLevel });
   if (keptLevel !== 'ok') issues.push({ title: 'Senior filter ratio unusual', detail: keptPct == null ? 'filter stats missing' : `${keptPct}% kept from fetched pool`, level: keptPct == null ? 'warn' : keptLevel });
   reviewAnomalies.forEach(row => {
     const flags = (row.flags || []).join(', ') || 'flagged';
@@ -1742,7 +1771,7 @@ function v2BuildAggViewModel(raw) {
       ['Run Freshness', data.freshness.label.toUpperCase(), v2SourceLabel(V2_DATA_CONTRACT.freshness.file, 'latest run', data.sourceTs), data.freshness.level],
       ['Pool Size', fmt(data.pool.value), data.pool.sub, data.pool.level],
       ['Runtime', durationMin == null ? '—' : `${durationMin}m`, 'Target ≤25m; investigate sustained drift', durationLevel],
-      ['Fresh 24h', fresh24 == null ? '—' : fmt(fresh24), 'Count only; AGG target not accepted yet', freshLevel],
+      ['Fresh 24h', fresh24 == null ? '—' : fmt(fresh24), V2_AGG_FRESH24_TARGET.label, freshLevel],
       ['Senior Filter', keptPct == null ? '—' : `${keptPct}% kept`, input == null ? 'filter stats unavailable' : `${fmt(kept)} kept / ${fmt(input)} fetched`, keptLevel],
       ['Tech-US', data.techUs.value == null ? '—' : fmt(data.techUs.value), data.techUs.sub, data.techUs.level]
     ],
