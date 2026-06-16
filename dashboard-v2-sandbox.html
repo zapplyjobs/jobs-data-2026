@@ -2904,7 +2904,7 @@ function renderZeroYield(metadata) {
     <div style="padding:12px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
         <span style="font-size:20px">⚠️</span>
-        <span style="font-weight:600;color:var(--yellow)">${zyc.length} company${zyc.length > 1 ? 'ies' : 'y'} returning 0 jobs</span>
+        <span style="font-weight:600;color:var(--yellow)">${fmt(zyc.length)} ${zyc.length === 1 ? 'company' : 'companies'} returning 0 jobs</span>
         <span style="color:var(--muted);font-size:11px">— check ATS slug, board status, or API changes</span>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:6px">
