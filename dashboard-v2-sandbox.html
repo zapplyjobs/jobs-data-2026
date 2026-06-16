@@ -2925,10 +2925,11 @@ function renderSupHealth(metadata) {
   const totalSources = Object.keys(bySource).length;
   const atsCount = MASTER_SOURCES.filter(s => ATS_SOURCES.has(s) && bySource[s]).length;
   const customCount = MASTER_SOURCES.filter(s => !ATS_SOURCES.has(s) && bySource[s]).length;
-  const zeroYield = (metadata.zero_yield_companies || []).length;
+  const rawZero = v2ZeroYieldList(metadata || {});
+  const skippedFetches = v2SkippedFetchCount(metadata || {});
   el.innerHTML =
     statCard({ icon: '🏢', label: 'Active Sources', value: `${activeSources}/${totalSources}`, sub: `${atsCount} ATS · ${customCount} custom` }) +
-    statCard({ icon: '⚠️', label: 'Zero-Yield', value: zeroYield, valueColor: zeroYield > 0 ? 'var(--red)' : 'var(--green)', sub: zeroYield > 0 ? 'companies returning 0 jobs' : 'all sources healthy' });
+    statCard({ icon: '⚠️', label: 'Raw Zero Fetches', value: rawZero.length, valueColor: rawZero.length > 0 ? 'var(--red)' : 'var(--green)', sub: rawZero.length > 0 ? `${fmt(skippedFetches)} cached/skipped tenants excluded` : 'all raw fetchers healthy' });
 }
 function renderSupFilterPills() {
   const el = document.getElementById('sup-filter-pills');
