@@ -1597,11 +1597,8 @@ function renderV2Overview(raw) {
   if (!command) return;
   v2RenderFilterContext('overview');
   const vm = v2BuildOverviewViewModel(v2BuildDashboardData(raw));
-  v2SetNavState('overview', v2IssueLevel(vm.issues), vm.issues[0] ? vm.issues[0].title : 'Cross-module summary');
   command.innerHTML = vm.commandCards.map(card => v2Card(...card)).join('');
   const exceptionsWrap = document.getElementById('v2-overview-exceptions-wrap');
-  if (exceptionsWrap) exceptionsWrap.style.display = vm.issues.length ? 'block' : 'none';
-  v2RenderAttention('v2-attention-band', vm.issues);
   let queue = [];
   const modules = document.getElementById('v2-module-grid');
   if (modules) {
@@ -1619,6 +1616,13 @@ function renderV2Overview(raw) {
     });
     queue = v2HydrateOverviewModuleCards(modules);
   }
+  const queueIssues = queue
+    .filter(item => item.level !== 'ok')
+    .map(item => ({ title: `Open ${item.tab.toUpperCase()} next`, detail: item.note, level: item.level }));
+  const overviewIssues = queueIssues.length ? queueIssues : vm.issues;
+  v2SetNavState('overview', v2IssueLevel(overviewIssues), overviewIssues[0] ? overviewIssues[0].title : 'Cross-module summary');
+  if (exceptionsWrap) exceptionsWrap.style.display = overviewIssues.length ? 'block' : 'none';
+  v2RenderAttention('v2-attention-band', overviewIssues);
   const hero = document.getElementById('v2-overview-hero');
   if (hero) {
     const nextModule = queue.find(item => item.level !== 'ok');
