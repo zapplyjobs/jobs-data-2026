@@ -1880,7 +1880,11 @@ function v2BuildTagViewModel(raw) {
   const classifiedRate = v2ClassifiedRate(generalRate);
   const topCompany = liveCompanies.length ? liveCompanies[0] : null;
   const patternJobs = patterns.reduce((sum, pattern) => sum + (pattern.count || 0), 0);
-  const liveCompanyRows = liveCompanies.slice(0, 6).map(company => [company.name, company.general || 0]);
+  const usG1Threshold = 'target ≤10%; watch >10%; critical >15%';
+  const techG1Threshold = 'target ≤15%; watch >15%; critical >25%';
+  const companyThreshold = '≤50 ok / 51-100 watch / >100 critical';
+  const tagOwner = 'Owner: TAG; DASH displays only';
+  const liveCompanyRows = liveCompanies.slice(0, 6).map(company => [`${company.name} (${company.source})`, company.general || 0]);
   const patternRows = patterns.slice(0, 4).map(pattern => [pattern.title, pattern.count || 0]);
   const tenantRows = tenants.slice(0, 4).map(tenant => [tenant.name, tenant.general || 0]);
   const rateLevel = generalRate == null ? 'critical' : generalRate <= 10 ? 'ok' : generalRate <= 15 ? 'warn' : 'critical';
@@ -1891,19 +1895,19 @@ function v2BuildTagViewModel(raw) {
   if (generalRate == null) {
     issues.push({ title: 'TAG live metrics missing', detail: 'zjp-metrics.json pool.g1_us is unavailable; do not use review snapshot as current health.', level: 'critical' });
   } else if (rateLevel !== 'ok') {
-    issues.push({ title: 'Live US G1 leakage above target', detail: `${generalRate}% general · ${fmt(generalJobs)} / ${fmt(usTotal)} US jobs`, level: rateLevel });
+    issues.push({ title: 'TAG triage: US G1 leakage above target', detail: `${generalRate}% general · ${fmt(generalJobs)} / ${fmt(usTotal)} US jobs · ${usG1Threshold} · ${tagOwner}`, level: rateLevel });
   }
-  if (techRateLevel !== 'ok') issues.push({ title: 'Live Tech-US G1 leakage high', detail: techGeneralRate == null ? 'tech-US live G1 rate missing' : `${techGeneralRate}% Tech-US general`, level: techRateLevel });
-  if (topLevel !== 'ok') issues.push({ title: 'Live company leakage concentration', detail: topCompany ? `${topCompany.name}: ${fmt(topCompany.general)} G1 jobs` : 'zjp-metrics company leakage missing', level: topLevel });
+  if (techRateLevel !== 'ok') issues.push({ title: 'TAG watch: Tech-US G1 leakage high', detail: techGeneralRate == null ? 'tech-US live G1 rate missing' : `${techGeneralRate}% vs ≤15% target (critical >25%) · TAG-AUDIT-1 triage`, level: techRateLevel });
+  if (topLevel !== 'ok') issues.push({ title: 'TAG triage: company leakage concentration', detail: topCompany ? `${topCompany.name}: ${fmt(topCompany.general)} G1 · critical >100 · ${topCompany.source} · TAG-AUDIT-1 triage` : 'zjp-metrics company leakage missing', level: topLevel });
   if (reviewOlderThanMetrics) issues.push({ title: 'Review snapshot older than live metrics', detail: `general-review.json is ${reviewLagHours}h behind zjp-metrics; use it only for deeper review queues.`, level: 'warn' });
   const decision = v2DecisionText(issues, 'No TAG action needed', 'Live G1 leakage is inside thresholds; review snapshot queues are supporting evidence only.');
   const reviewAge = reviewTs ? age(reviewTs) : 'missing';
   return {
     cards: [
-      ['US G1 Live', generalRate == null ? '—' : `${generalRate}%`, `${fmt(generalJobs)} general / ${fmt(usTotal)} US jobs`, rateLevel],
-      ['Tech-US G1 Live', techGeneralRate == null ? '—' : `${techGeneralRate}%`, 'Current tech-US leakage from zjp-metrics.json', techRateLevel],
+      ['US G1 Live', generalRate == null ? '—' : `${generalRate}%`, `${fmt(generalJobs)} general / ${fmt(usTotal)} US jobs · ${usG1Threshold}`, rateLevel],
+      ['Tech-US G1 Live', techGeneralRate == null ? '—' : `${techGeneralRate}%`, `≤15% target; critical >25% · ${tagOwner}`, techRateLevel],
       ['Classified US', classifiedRate == null ? '—' : `${classifiedRate}%`, 'Complement of live US G1 leakage', rateLevel],
-      ['Top Live Leakage', topCompany ? topCompany.name : '—', topCompany ? `${fmt(topCompany.general)} G1 · ${topCompany.source}` : 'live company data unavailable', topLevel],
+      ['Top Live Leakage', topCompany ? topCompany.name : '—', topCompany ? `${fmt(topCompany.general)} G1 · critical >100 · ${topCompany.source}` : 'live company data unavailable', topLevel],
       ['Title Patterns', fmt(patterns.length), `review snapshot · ${reviewAge} · ${fmt(patternJobs)} repeated-title jobs`, snapshotLevel],
       ['Tenant Candidates', fmt(tenants.length), `review snapshot · ${reviewAge}`, snapshotLevel]
     ],
@@ -1914,8 +1918,8 @@ function v2BuildTagViewModel(raw) {
       patterns: v2MiniRows(patternRows, patternJobs || 1),
       tenants: v2MiniRows(tenantRows, generalJobs || 1),
       reviewNote: reviewOlderThanMetrics
-        ? `Review snapshot is ${reviewLagHours}h older than live metrics. Treat title and tenant rows as deeper review data, not current TAG health.`
-        : `Review snapshot age: ${reviewAge}.`
+        ? `Live company rows use ${fmt(generalJobs)} current US G1 jobs as denominator; critical threshold is >100 G1 jobs per company. Review snapshot is ${reviewLagHours}h older than live metrics; use it only for deeper queues. TAG-AUDIT-1 owns accept/defer/reject.`
+        : `Live company rows use ${fmt(generalJobs)} current US G1 jobs as denominator; critical threshold is >100 G1 jobs per company. Review snapshot age: ${reviewAge}. TAG-AUDIT-1 owns accept/defer/reject.`
     },
     lineage: [
       v2SourceLabel(V2_DATA_CONTRACT.classification.file, 'live G1 health', metricsTs),
