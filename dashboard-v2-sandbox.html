@@ -1330,7 +1330,7 @@ const V2_DATA_CONTRACT = Object.freeze({
   enrichment: { owner: 'ENR', file: 'enrichment-stats.json', path: 'total_enriched / total_tech_us' },
   tierT3: { owner: 'ENR', file: 'enrichment-stats.json', path: 'tiers.t3 (+ tiers.t4 when present)' },
   descriptions: { owner: 'ENR', file: 'enrichment-stats.json', path: 'total_has_description / total_tech_us' },
-  reenrichmentQueue: { owner: 'ENR', file: 'enrichment-stats.json', path: '(total_tech_us - total_enriched) + reenrichment_pending' },
+  reenrichmentQueue: { owner: 'ENR', file: 'enrichment-stats.json', path: 'new missing = total_tech_us - total_enriched; reenrichment_pending is separate stale-version backlog' },
   visaSignals: { owner: 'ENR', file: 'enrichment-stats.json', path: 'by_source[*].any_visa_signal || sponsors_visa' },
   consumers: { owner: 'OUT', file: 'metrics/latest.json', path: 'repos[*].lastJobsUpdate || workflowLastRun' },
   stars: { owner: 'OUT', file: 'metrics/latest.json + history.jsonl', path: 'repos[*].stars / history[*].stars' },
@@ -1726,11 +1726,11 @@ function v2BuildAggViewModel(raw) {
   const topDomains = v2TopEntries(domains, 4);
   const durationLevel = durationMin == null ? 'warn' : durationMin <= 25 ? 'ok' : durationMin <= 35 ? 'warn' : 'critical';
   const keptLevel = keptPct == null ? 'warn' : keptPct >= 25 && keptPct <= 60 ? 'ok' : 'warn';
-  const freshLevel = fresh24 == null ? 'critical' : fresh24 <= 0 ? 'critical' : 'warn';
+  const freshLevel = fresh24 == null || fresh24 <= 0 ? 'critical' : 'ok';
   const reviewAnomalies = Array.isArray(aggReview.source_anomalies) ? aggReview.source_anomalies : [];
   const issues = [];
   if (durationLevel !== 'ok') issues.push({ title: 'Runtime above target', detail: durationMin == null ? 'duration missing' : `${durationMin} min vs ≤25 min target`, level: durationLevel });
-  if (freshLevel !== 'ok') issues.push({ title: fresh24 == null || fresh24 <= 0 ? 'Pool freshness missing' : 'Freshness threshold not calibrated', detail: fresh24 == null ? 'No last-24h freshness count available' : `${fmt(fresh24)} jobs in last 24h; no accepted AGG target yet`, level: freshLevel });
+  if (freshLevel !== 'ok') issues.push({ title: 'Pool freshness missing', detail: fresh24 == null ? 'No last-24h freshness count available' : '0 jobs in last 24h', level: freshLevel });
   if (keptLevel !== 'ok') issues.push({ title: 'Senior filter ratio unusual', detail: keptPct == null ? 'filter stats missing' : `${keptPct}% kept from fetched pool`, level: keptPct == null ? 'warn' : keptLevel });
   reviewAnomalies.forEach(row => {
     const flags = (row.flags || []).join(', ') || 'flagged';
@@ -1742,7 +1742,7 @@ function v2BuildAggViewModel(raw) {
       ['Run Freshness', data.freshness.label.toUpperCase(), v2SourceLabel(V2_DATA_CONTRACT.freshness.file, 'latest run', data.sourceTs), data.freshness.level],
       ['Pool Size', fmt(data.pool.value), data.pool.sub, data.pool.level],
       ['Runtime', durationMin == null ? '—' : `${durationMin}m`, 'Target ≤25m; investigate sustained drift', durationLevel],
-      ['Fresh 24h', fresh24 == null ? '—' : fmt(fresh24), 'Count only; AGG target not accepted yet', freshLevel],
+      ['Fresh 24h', fresh24 == null ? '—' : fmt(fresh24), 'Count only; no accepted AGG alert threshold', freshLevel],
       ['Senior Filter', keptPct == null ? '—' : `${keptPct}% kept`, input == null ? 'filter stats unavailable' : `${fmt(kept)} kept / ${fmt(input)} fetched`, keptLevel],
       ['Tech-US', data.techUs.value == null ? '—' : fmt(data.techUs.value), data.techUs.sub, data.techUs.level]
     ],
@@ -1792,9 +1792,8 @@ function v2BuildEnrViewModel(raw) {
   const tierTotal = (tiers.t0 || 0) + (tiers.t1 || 0) + (tiers.t2 || 0) + t3Plus;
   const t3Pct = v2Pct(t3Plus, tierTotal);
   const descPct = v2Pct(stats.total_has_description, stats.total_tech_us);
-  const queueGap = stats.total_tech_us != null && stats.total_enriched != null ? Math.max(0, stats.total_tech_us - stats.total_enriched) : null;
+  const newQueue = stats.total_tech_us != null && stats.total_enriched != null ? Math.max(0, stats.total_tech_us - stats.total_enriched) : null;
   const reenrichPending = stats.reenrichment_pending || 0;
-  const totalQueue = queueGap == null ? null : queueGap + reenrichPending;
   const visaSignals = v2SumSourceField(stats.by_source, 'any_visa_signal', 'sponsors_visa');
   const visaPct = v2Pct(visaSignals, stats.total_tech_us);
   const tierRows = [['T3+', t3Plus], ['T2', tiers.t2 || 0], ['T1', tiers.t1 || 0], ['T0', tiers.t0 || 0]].filter(([, value]) => value > 0);
@@ -1802,29 +1801,30 @@ function v2BuildEnrViewModel(raw) {
   const sourceTotal = sourceRows.reduce((sum, [, value]) => sum + value, 0);
   const t3Level = t3Pct == null ? 'warn' : t3Pct >= 90 ? 'ok' : t3Pct >= 70 ? 'warn' : 'critical';
   const descLevel = descPct == null ? 'warn' : descPct >= 95 ? 'ok' : descPct >= 85 ? 'warn' : 'critical';
-  const queueLevel = totalQueue == null ? 'warn' : totalQueue === 0 ? 'ok' : totalQueue <= 1000 ? 'warn' : 'critical';
+  const queueLevel = newQueue == null ? 'warn' : newQueue === 0 ? 'ok' : newQueue <= 1000 ? 'warn' : 'critical';
   const visaLevel = visaPct == null ? 'warn' : visaPct >= 50 ? 'ok' : visaPct >= 20 ? 'warn' : 'critical';
   const issues = [];
   if (data.enrichment.level !== 'ok') issues.push({ title: 'Enrichment coverage below target', detail: data.enrichment.value == null ? 'coverage missing' : `${data.enrichment.value}% enriched vs 95% target`, level: data.enrichment.level });
   if (t3Level !== 'ok') issues.push({ title: 'T3+ quality below target', detail: t3Pct == null ? 'tier distribution missing' : `${t3Pct}% T3+`, level: t3Level });
-  if (queueLevel !== 'ok') issues.push({ title: 'Enrichment queue not clear', detail: totalQueue == null ? 'queue unknown' : `${fmt(totalQueue)} pending (${fmt(queueGap)} new + ${fmt(reenrichPending)} re-enrich)`, level: queueLevel });
+  if (queueLevel !== 'ok') issues.push({ title: 'New enrichment queue not clear', detail: newQueue == null ? 'queue unknown' : `${fmt(newQueue)} current tech-US jobs missing from enriched output`, level: queueLevel });
   if (descLevel !== 'ok') issues.push({ title: 'Description coverage below target', detail: descPct == null ? 'description denominator missing' : `${descPct}% with descriptions`, level: descLevel });
-  const decision = v2DecisionText(issues, 'No ENR action needed', 'Coverage, quality, queue, descriptions, and visa signals are inside operating thresholds.');
+  if (reenrichPending > 0) issues.push({ title: 'Re-enrich backlog present', detail: `${fmt(reenrichPending)} stale-version jobs; do not mix with current missing queue`, level: 'warn' });
+  const decision = v2DecisionText(issues, 'No ENR action needed', 'Coverage, quality, current queue, descriptions, re-enrichment backlog, and visa signals are inside operating thresholds.');
   return {
     cards: [
       ['Coverage', data.enrichment.value == null ? '—' : `${data.enrichment.value}%`, `${fmt(stats.total_enriched)} enriched / ${fmt(stats.total_tech_us)} tech-US`, data.enrichment.level],
       ['T3+ Quality', t3Pct == null ? '—' : `${t3Pct}%`, `${fmt(t3Plus)} of ${fmt(tierTotal)} tiered jobs`, t3Level],
       ['Descriptions', descPct == null ? '—' : `${descPct}%`, `${fmt(stats.total_has_description)} with descriptions`, descLevel],
-      ['Queue', totalQueue == null ? '—' : fmt(totalQueue), queueGap == null ? 'queue unavailable' : `${fmt(queueGap)} new + ${fmt(reenrichPending)} re-enrich`, queueLevel],
-      ['Visa Signals', visaPct == null ? '—' : `${visaPct}%`, `${fmt(visaSignals)} signal-bearing jobs`, visaLevel],
-      ['Snapshot', data.enrichTs ? age(data.enrichTs) : 'missing', 'ENR source freshness', data.enrichTs ? 'ok' : 'critical']
+      ['New Queue', newQueue == null ? '—' : fmt(newQueue), newQueue == null ? 'queue unavailable' : 'current tech-US jobs missing from enriched output', queueLevel],
+      ['Re-enrich Backlog', fmt(reenrichPending), 'stale-version jobs; separate from current queue', reenrichPending > 0 ? 'warn' : 'ok'],
+      ['Visa Signals', visaPct == null ? '—' : `${visaPct}%`, `${fmt(visaSignals)} signal-bearing jobs`, visaLevel]
     ],
     issues,
     decision,
     composition: {
       tiers: v2MiniRows(tierRows, tierTotal),
       sources: v2MiniRows(sourceRows, sourceTotal),
-      queue: v2MiniRows([['New queue', queueGap || 0], ['Re-enrich', reenrichPending]], totalQueue || 1)
+      queue: v2MiniRows([['New queue', newQueue || 0], ['Re-enrich backlog', reenrichPending]], (newQueue || 0) + reenrichPending || 1)
     },
     lineage: [v2SourceLabel(V2_DATA_CONTRACT.enrichment.file, 'coverage/tier/queue/visa', data.enrichTs)].join(' | ')
   };
@@ -1974,11 +1974,11 @@ function v2BuildSupViewModel(raw) {
   const zeroYield = v2ZeroYieldList(metadata);
   const skippedFetches = v2SkippedFetchCount(metadata);
   const sourceLevel = activeSources >= 5 ? 'ok' : activeSources >= 3 ? 'warn' : 'critical';
-  const concentrationLevel = topSourcePct == null ? 'warn' : topSourcePct <= 60 ? 'ok' : topSourcePct <= 75 ? 'warn' : 'critical';
+  const concentrationLevel = topSourcePct == null ? 'warn' : topSourcePct <= 75 ? 'ok' : topSourcePct <= 85 ? 'warn' : 'critical';
   const zeroLevel = zeroYield.length === 0 ? 'ok' : zeroYield.length <= 10 ? 'warn' : 'critical';
   const issues = [];
   if (sourceLevel !== 'ok') issues.push({ title: 'Low active source count', detail: `${activeSources} active source${activeSources === 1 ? '' : 's'}`, level: sourceLevel });
-  if (concentrationLevel !== 'ok') issues.push({ title: 'Supply concentration risk', detail: topSource ? `${topSource[0]} contributes ${topSourcePct}%` : 'source data missing', level: concentrationLevel });
+  if (concentrationLevel !== 'ok') issues.push({ title: 'Source concentration above watch threshold', detail: topSource ? `${topSource[0]} contributes ${topSourcePct}%` : 'source data missing', level: concentrationLevel });
   if (zeroLevel !== 'ok') issues.push({ title: 'Raw zero-fetch review', detail: `${zeroYield.length} tenant${zeroYield.length === 1 ? '' : 's'} with health=zero`, level: zeroLevel });
   const decision = v2DecisionText(issues, 'No SUP action needed', 'Active sources are healthy; review concentration and raw zero-fetch tenants as normal supply hygiene.');
   const sourceRows = v2TopEntries(bySource, 4);
@@ -1996,7 +1996,7 @@ function v2BuildSupViewModel(raw) {
     issues,
     decision,
     composition: {
-      sources: v2MiniRows(sourceRows, sourceTotal),
+      sources: v2MiniRows(sourceRows, data.pool.value),
       companies: v2MiniRows(companyRows, data.pool.value),
       zeroYield: v2ValueRows([['Raw zero fetches', zeroYield.length], ['Cached/skipped fetches', skippedFetches], ['Active sources', activeSources]])
     },
@@ -2063,6 +2063,8 @@ function v2BuildOutViewModel(raw) {
   const discordLevel = discordPostCount > 0 ? 'ok' : 'warn';
   const outState = raw.outState || null;
   const outStateStatus = v2OutStateStatus(outState);
+  const externalOwner = outStateStatus.usable && outState.current_problem.owner && !/^OUT\b/i.test(outState.current_problem.owner);
+  const routedCardLevel = externalOwner ? 'info' : (outStateStatus.usable ? 'warn' : 'critical');
   const issues = [];
   if (freshLevel !== 'ok') issues.push({ title: 'Consumer freshness drift', detail: freshPct == null ? 'freshness unavailable' : `${freshRepos}/${repoDataCount} repos fresh`, level: freshLevel });
   if (failedLevel !== 'ok') issues.push({ title: 'Repo workflow failures', detail: `${failedRepos} failing repo workflow${failedRepos === 1 ? '' : 's'}`, level: failedLevel });
@@ -2072,7 +2074,7 @@ function v2BuildOutViewModel(raw) {
     const missingDetail = outStateStatus.missing.length ? `missing ${outStateStatus.missing.join(', ')}` : null;
     issues.push({ title: 'OUT assurance state unusable', detail: [missingDetail, staleDetail].filter(Boolean).join(' · '), level: 'critical' });
   } else {
-    issues.push({ title: 'Routed public-board risk', detail: `${outState.current_problem.issue} · ${outState.current_problem.owner} owns fix`, level: outStateStatus.level === 'critical' ? 'critical' : 'warn' });
+    issues.push({ title: externalOwner ? 'External public-board risk routed' : 'Routed public-board risk', detail: `${outState.current_problem.issue} · ${outState.current_problem.owner} owns fix`, level: outStateStatus.level === 'critical' ? 'critical' : 'warn' });
   }
   const decision = outStateStatus.usable
     ? { level: outStateStatus.level, label: outState.health.label, sub: outState.next_action.label }
@@ -2084,8 +2086,8 @@ function v2BuildOutViewModel(raw) {
     cards: [
       ['OUT State', outStateStatus.usable ? outState.health.label : 'UNUSABLE', outStateStatus.usable ? outState.health.detail : 'Assurance artifact missing, partial, or stale', outStateStatus.level],
       ['Current Issue', currentIssue, 'Must come from out_operator_state.json', outStateStatus.usable ? 'warn' : 'critical'],
-      ['Owner Route', ownerRoute, 'DASH displays; producer owner fixes', outStateStatus.usable ? 'warn' : 'critical'],
-      ['Next OUT Action', nextLane, outStateStatus.usable ? outState.next_action.label : 'No trusted next action loaded', outStateStatus.usable ? 'warn' : 'critical'],
+      ['Owner Route', ownerRoute, externalOwner ? 'External owner fixes; OUT verifies after deploy' : 'DASH displays; producer owner fixes', routedCardLevel],
+      ['Next OUT Action', nextLane, outStateStatus.usable ? outState.next_action.label : 'No trusted next action loaded', routedCardLevel],
       ['Consumer Freshness', freshPct == null ? '—' : `${freshPct}%`, `${freshRepos}/${repoDataCount} repos updated <2h ago`, freshLevel],
       ['Workflow Failures', fmt(failedRepos), 'Repo workflows not successful', failedLevel]
     ],
@@ -2399,28 +2401,25 @@ function renderGeneralTrendChart(all, days) {
   });
 }
 
-// INF tab — secrets and deadlines (hardcoded known dates — update when rotated)
+// INF tab — credential deadlines from live pipeline alert metadata
 function renderDeadlines() {
   const targets = [document.getElementById('inf-deadlines')].filter(Boolean);
   if (!targets.length) return;
-  const DEADLINES = [
-    { label: 'GH_PAT Expiry', date: '2026-05-30', action: 'Rotate by May 1 (INF-17)' },
-    { label: 'GIT_CRYPT_KEY', date: '2026-07-04', action: 'Rotate by Jul 4 (INF-20)' },
-  ];
-  const now = Date.now();
-  const html = DEADLINES
-    .filter(d => Math.ceil((new Date(d.date).getTime() - now) / 86400000) <= 7)
-    .map(d => {
-      const daysLeft = Math.ceil((new Date(d.date).getTime() - now) / 86400000);
-      return statCard({
-        icon: '🔴',
-        label: d.label,
-        value: `${daysLeft}d`,
-        valueColor: 'var(--red)',
-        sub: `${d.date} — ${d.action}`,
-      });
-    }).join('');
-  targets.forEach(el => { el.innerHTML = html || '<span style="font-size:12px;color:var(--muted)">No upcoming deadlines</span>'; });
+  const secrets = _D.pipelineAlert && Array.isArray(_D.pipelineAlert.secrets) ? _D.pipelineAlert.secrets : [];
+  const upcoming = secrets
+    .filter(secret => secret && secret.days_left != null && secret.days_left <= 30)
+    .sort((a, b) => a.days_left - b.days_left);
+  const html = upcoming.map(secret => {
+    const critical = secret.days_left <= 14;
+    return statCard({
+      icon: critical ? '🔴' : '🟡',
+      label: `${secret.secret} expiry`,
+      value: `${secret.days_left}d`,
+      valueColor: critical ? 'var(--red)' : 'var(--yellow)',
+      sub: `${secret.expires} — from pipeline-alert.json`,
+    });
+  }).join('');
+  targets.forEach(el => { el.innerHTML = html || '<span style="font-size:12px;color:var(--muted)">No upcoming credential deadlines from pipeline-alert.json</span>'; });
 }
 
 // Supply tab — domain distribution bars (moved from Overview)
