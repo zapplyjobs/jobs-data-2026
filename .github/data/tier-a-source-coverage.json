@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-18T23:03:18.549Z",
+  "generated_at": "2026-06-18T23:08:20.915Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -65,13 +65,13 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-18T23:00:54.110Z",
+    "generated_at": "2026-06-18T23:07:16.315Z",
     "source_basis": "us_jobs.json",
     "board_row_count": 8583,
-    "description_entries": 7740,
-    "coverage_pct": 90.2,
+    "description_entries": 7861,
+    "coverage_pct": 91.6,
     "source_breakdown": {
-      "sidecar": 7740,
+      "sidecar": 7861,
       "inline": 0
     },
     "jobs_metadata_generated": "2026-06-18T22:53:24.742Z",
@@ -79,12 +79,16 @@
     "enrichment_version": 86
   },
   "consumer_alert": {
-    "checked_at": "2026-06-18T23:03:15.099Z",
-    "active": false,
-    "message": null,
-    "failures": [],
-    "warnings": [],
-    "warning_count": 0,
+    "checked_at": "2026-06-18T23:08:15.501Z",
+    "active": true,
+    "message": "**Missing sidecar**: descriptions-bytedance.jsonl (157 pool jobs, no sidecar)",
+    "failures": [
+      "**Missing sidecar**: descriptions-bytedance.jsonl (157 pool jobs, no sidecar)"
+    ],
+    "warnings": [
+      "Senior filter FP rate elevated: 10.6% (53/500). May indicate keyword over-matching."
+    ],
+    "warning_count": 1,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -96,11 +100,11 @@
   "rows": [
     {
       "source": "oracle",
-      "pool_rows": 5771,
-      "us_rows": 3588,
-      "tech_us_rows": 388,
+      "pool_rows": 5776,
+      "us_rows": 3586,
+      "tech_us_rows": 386,
       "raw_sidecar_rows": 4445,
-      "sidecar_active_rows": 254,
+      "sidecar_active_rows": 252,
       "supplemental_rows": 25729,
       "supplemental_with_desc": 18478,
       "supplemental_meta": {
@@ -108,12 +112,12 @@
         "lane_name": "oracle",
         "jobs_fetched": 25729
       },
-      "published_rows": 254,
-      "published_pct": 65.5,
-      "enriched_rows": 388,
-      "enriched_pct": 100,
-      "enriched_with_skills": 293,
-      "skills_pct": 75.5,
+      "published_rows": 252,
+      "published_pct": 65.3,
+      "enriched_rows": 385,
+      "enriched_pct": 99.7,
+      "enriched_with_skills": 292,
+      "skills_pct": 75.8,
       "examples": [
         {
           "id": "oracle-grant-thornton-115035",
@@ -166,14 +170,14 @@
       "pool_rows": 64,
       "us_rows": 50,
       "tech_us_rows": 13,
-      "raw_sidecar_rows": 64,
+      "raw_sidecar_rows": 316,
       "sidecar_active_rows": 13,
       "supplemental_rows": 316,
       "supplemental_with_desc": 316,
       "supplemental_meta": {
-        "generated_at": "2026-06-18T22:52:57.690Z",
+        "generated_at": "2026-06-18T23:07:42.927Z",
         "lane_name": "custom",
-        "jobs_fetched": 4248
+        "jobs_fetched": 4251
       },
       "published_rows": 13,
       "published_pct": 100,
@@ -189,60 +193,60 @@
     },
     {
       "source": "workday",
-      "pool_rows": 33776,
-      "us_rows": 17868,
-      "tech_us_rows": 5222,
-      "raw_sidecar_rows": 15887,
-      "sidecar_active_rows": 5010,
+      "pool_rows": 34193,
+      "us_rows": 17979,
+      "tech_us_rows": 5260,
+      "raw_sidecar_rows": 16131,
+      "sidecar_active_rows": 5150,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 5010,
-      "published_pct": 95.9,
-      "enriched_rows": 5150,
-      "enriched_pct": 98.6,
-      "enriched_with_skills": 4664,
-      "skills_pct": 90.6,
+      "published_rows": 5036,
+      "published_pct": 95.7,
+      "enriched_rows": 5200,
+      "enriched_pct": 98.9,
+      "enriched_with_skills": 4693,
+      "skills_pct": 90.3,
       "examples": [
         {
-          "id": "workday-rtx-01853766",
-          "company": "RTX",
-          "title": "Software Engineer II - Embedded Linux (Onsite)"
+          "id": "workday-vanguard-178004",
+          "company": "Vanguard",
+          "title": "Application Security Pentester, Specialist"
         },
         {
-          "id": "workday-rtx-01836508",
-          "company": "RTX",
-          "title": "Electrical Engineer I (Onsite)"
+          "id": "workday-target-R0000441877",
+          "company": "Target",
+          "title": "Engineer -  Engineering Enablement"
         },
         {
-          "id": "workday-snap-Q226SWEB2",
-          "company": "Snap",
-          "title": "Software Engineer, Backend, Level 4"
+          "id": "workday-thermo-fisher-scientific-R-01350019",
+          "company": "Thermo Fisher Scientific",
+          "title": "Quality Engineer, QA  Validation"
         },
         {
-          "id": "workday-northrop-grumman-R10236932",
-          "company": "Northrop Grumman",
-          "title": "Systems Engineer - 3/4"
+          "id": "workday-philips-585893",
+          "company": "Philips",
+          "title": "Field Service Engineer - X-Ray (Rochester/Syracuse/Buffalo, NY)"
         },
         {
-          "id": "workday-northrop-grumman-R10236360",
-          "company": "Northrop Grumman",
-          "title": "Manager Embedded Software Engineer 3"
+          "id": "workday-td-bank-R_1493327",
+          "company": "TD Bank",
+          "title": "Payments & Deposit Operations Representative II"
         },
         {
-          "id": "workday-boeing-JR2026503754",
-          "company": "Boeing",
-          "title": "FPGA Design Engineer (Associate, Experienced, or Senior)"
+          "id": "workday-td-bank-R_1495653",
+          "company": "TD Bank",
+          "title": "2026 Fall Co-op - Global Technology Solutions - Data Engineer"
         },
         {
-          "id": "workday-boeing-JR2026515606",
-          "company": "Boeing",
-          "title": "Hydro-Mechanical Systems Service Engineer (Associate or Experienced)"
+          "id": "workday-td-bank-R_1495659",
+          "company": "TD Bank",
+          "title": "2026 Fall Co-op - Global Technology Solutions - Software Engineer (SWE)"
         },
         {
-          "id": "workday-blue-origin-R63390",
-          "company": "Blue Origin",
-          "title": "mmWave IC Design Engineer - TeraWave"
+          "id": "workday-td-bank-R_1495433",
+          "company": "TD Bank",
+          "title": "2026 Fall Co-op - Global Technology & Solutions - Quality Engineer"
         }
       ],
       "severity": "ok",
@@ -251,21 +255,21 @@
     {
       "source": "microsoft",
       "pool_rows": 334,
-      "us_rows": 157,
-      "tech_us_rows": 64,
+      "us_rows": 156,
+      "tech_us_rows": 66,
       "raw_sidecar_rows": 296,
       "sidecar_active_rows": 62,
       "supplemental_rows": 1447,
-      "supplemental_with_desc": 121,
+      "supplemental_with_desc": 116,
       "supplemental_meta": {
-        "generated_at": "2026-06-18T22:52:57.690Z",
+        "generated_at": "2026-06-18T23:07:42.927Z",
         "lane_name": "custom",
-        "jobs_fetched": 4248
+        "jobs_fetched": 4251
       },
       "published_rows": 62,
-      "published_pct": 96.9,
+      "published_pct": 93.9,
       "enriched_rows": 64,
-      "enriched_pct": 100,
+      "enriched_pct": 97,
       "enriched_with_skills": 64,
       "skills_pct": 100,
       "examples": [
@@ -278,6 +282,16 @@
           "id": "microsoft-200035729",
           "company": "Microsoft",
           "title": "Software Engineer"
+        },
+        {
+          "id": "microsoft-200037703",
+          "company": "Microsoft",
+          "title": "Data Center Technician"
+        },
+        {
+          "id": "microsoft-200039796",
+          "company": "Microsoft",
+          "title": "Solution Engineer - Security"
         }
       ],
       "severity": "ok",
@@ -285,21 +299,27 @@
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 1281,
-      "us_rows": 1280,
-      "tech_us_rows": 263,
+      "pool_rows": 1284,
+      "us_rows": 1283,
+      "tech_us_rows": 264,
       "raw_sidecar_rows": 2719,
       "sidecar_active_rows": 263,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
       "published_rows": 263,
-      "published_pct": 100,
+      "published_pct": 99.6,
       "enriched_rows": 263,
-      "enriched_pct": 100,
+      "enriched_pct": 99.6,
       "enriched_with_skills": 241,
       "skills_pct": 91.6,
-      "examples": [],
+      "examples": [
+        {
+          "id": "sr-AbbVie-3743990013697956",
+          "company": "AbbVie",
+          "title": "Associate Data Scientist I"
+        }
+      ],
       "severity": "ok",
       "flags": []
     },
@@ -310,12 +330,12 @@
       "tech_us_rows": 440,
       "raw_sidecar_rows": 1093,
       "sidecar_active_rows": 440,
-      "supplemental_rows": 1431,
-      "supplemental_with_desc": 1431,
+      "supplemental_rows": 1434,
+      "supplemental_with_desc": 1434,
       "supplemental_meta": {
-        "generated_at": "2026-06-18T22:52:57.690Z",
+        "generated_at": "2026-06-18T23:07:42.927Z",
         "lane_name": "custom",
-        "jobs_fetched": 4248
+        "jobs_fetched": 4251
       },
       "published_rows": 440,
       "published_pct": 100,
