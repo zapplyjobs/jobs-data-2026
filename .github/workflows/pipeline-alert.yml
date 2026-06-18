@@ -48,7 +48,7 @@ jobs:
             const r2 = createR2Client({ prefix: 'data/' });
             const dataDir = '.github/data';
             if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-            const files = ['all_jobs.json', 'jobs-metadata.json', 'enrichment-stats.json', 'zjp-metrics.json'];
+            const files = ['all_jobs.json', 'us_jobs.json', 'enriched_jobs.json', 'jobs-metadata.json', 'zjp-metrics.json', 'softwarejobs-descriptions.json', 'softwarejobs-descriptions-meta.json'];
             const sidecars = await r2.list('descriptions-');
             for (const obj of sidecars) {
               const name = obj.key.replace(/^data\//, '');
@@ -75,6 +75,9 @@ jobs:
 
       - name: Syntax check pipeline-alert.js
         run: node -c .github/scripts/processing/lib/pipeline-alert.js
+      - name: Build Tier A source coverage report
+        run: node .github/scripts/source-coverage-audit.js
+
 
       - name: Run pipeline checks
         env:
@@ -115,6 +118,39 @@ jobs:
             --field content="$LOCAL_CONTENT" \
             --field sha="$REMOTE_SHA" \
             --jq '.commit.sha' 2>/dev/null && echo "Alert status pushed" || echo "Push failed or no change"
+      - name: Push Tier A source coverage report
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REPORT_FILE=".github/data/tier-a-source-coverage.json"
+          if [ ! -f "$REPORT_FILE" ]; then
+            echo "Coverage report not found — skipping push"
+            exit 0
+          fi
+
+          REMOTE_SHA=$(gh api repos/zapplyjobs/jobs-data-2026/contents/$REPORT_FILE --jq '.sha' 2>/dev/null || echo "")
+          REMOTE_CONTENT=$(gh api repos/zapplyjobs/jobs-data-2026/contents/$REPORT_FILE --jq '.content' 2>/dev/null || echo "")
+          LOCAL_CONTENT=$(base64 -w 0 "$REPORT_FILE")
+
+          if [ -n "$REMOTE_SHA" ] && [ "$LOCAL_CONTENT" = "$REMOTE_CONTENT" ]; then
+            echo "Coverage report unchanged — skipping push"
+            exit 0
+          fi
+
+          if [ -z "$REMOTE_SHA" ]; then
+            gh api repos/zapplyjobs/jobs-data-2026/contents/$REPORT_FILE \
+              --method PUT \
+              --field message="chore: publish tier-a coverage report [skip ci]" \
+              --field content="$LOCAL_CONTENT" \
+              --jq '.commit.sha' 2>/dev/null && echo "Coverage report created" || echo "Coverage report create failed"
+          else
+            gh api repos/zapplyjobs/jobs-data-2026/contents/$REPORT_FILE \
+              --method PUT \
+              --field message="chore: publish tier-a coverage report [skip ci]" \
+              --field content="$LOCAL_CONTENT" \
+              --field sha="$REMOTE_SHA" \
+              --jq '.commit.sha' 2>/dev/null && echo "Coverage report updated" || echo "Coverage report update failed"
+          fi
 
       - name: Push zero-yield tracking state
         env:
