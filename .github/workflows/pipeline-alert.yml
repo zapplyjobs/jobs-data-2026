@@ -75,8 +75,6 @@ jobs:
 
       - name: Syntax check pipeline-alert.js
         run: node -c .github/scripts/processing/lib/pipeline-alert.js
-      - name: Build Tier A source coverage report
-        run: node .github/scripts/source-coverage-audit.js
 
 
       - name: Run pipeline checks
@@ -86,6 +84,8 @@ jobs:
           DISCORD_PIPELINE_ALERT_CHANNEL_ID: ${{ secrets.DISCORD_PIPELINE_ALERT_CHANNEL_ID }}
           GH_PAT_EXPIRY_DATE: ${{ vars.GH_PAT_EXPIRY_DATE }}
         run: node .github/scripts/processing/lib/pipeline-alert.js
+      - name: Build Tier A source coverage report
+        run: node .github/scripts/source-coverage-audit.js
 
       - name: Push alert status via API
         env:
