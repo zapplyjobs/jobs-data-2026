@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-18T19:24:28.413Z",
+  "generated_at": "2026-06-18T19:39:38.251Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -61,26 +61,28 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-18T19:21:42.498Z",
+    "generated_at": "2026-06-18T19:36:32.278Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 8614,
-    "description_entries": 7913,
-    "coverage_pct": 91.9,
+    "board_row_count": 8577,
+    "description_entries": 7873,
+    "coverage_pct": 91.8,
     "source_breakdown": {
-      "sidecar": 7913,
+      "sidecar": 7873,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-18T19:12:40.968Z",
+    "jobs_metadata_generated": "2026-06-18T19:28:03.135Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 86
   },
   "consumer_alert": {
-    "checked_at": "2026-06-18T19:24:25.320Z",
+    "checked_at": "2026-06-18T19:39:35.192Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [],
-    "warning_count": 0,
+    "warnings": [
+      "Senior filter FP rate elevated: 10.2% (51/500). May indicate keyword over-matching."
+    ],
+    "warning_count": 1,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -92,17 +94,17 @@
   "rows": [
     {
       "source": "oracle",
-      "pool_rows": 5693,
-      "us_rows": 3530,
-      "tech_us_rows": 381,
-      "raw_sidecar_rows": 4398,
-      "sidecar_active_rows": 253,
-      "published_rows": 253,
-      "published_pct": 66.4,
-      "enriched_rows": 381,
+      "pool_rows": 5700,
+      "us_rows": 3535,
+      "tech_us_rows": 380,
+      "raw_sidecar_rows": 4402,
+      "sidecar_active_rows": 251,
+      "published_rows": 251,
+      "published_pct": 66.1,
+      "enriched_rows": 380,
       "enriched_pct": 100,
       "enriched_with_skills": 287,
-      "skills_pct": 75.3,
+      "skills_pct": 75.5,
       "examples": [
         {
           "id": "oracle-grant-thornton-115035",
@@ -135,14 +137,14 @@
           "title": "Project Controls Specialist"
         },
         {
+          "id": "oracle-wsp-89419",
+          "company": "WSP",
+          "title": "Transmission Line Project Engineer"
+        },
+        {
           "id": "oracle-atlantic-health-30158",
           "company": "Atlantic Health System",
           "title": "Nuclear Medicine Technologist-Atlantic Health Morristown Medical Center-Per Diem"
-        },
-        {
-          "id": "oracle-hormel-foods-34552",
-          "company": "Hormel Foods",
-          "title": "Project Engineer-Atlanta (Tucker, GA)"
         }
       ],
       "severity": "high",
@@ -171,32 +173,27 @@
     },
     {
       "source": "workday",
-      "pool_rows": 33918,
-      "us_rows": 17919,
-      "tech_us_rows": 5260,
-      "raw_sidecar_rows": 16486,
-      "sidecar_active_rows": 5186,
-      "published_rows": 5186,
-      "published_pct": 98.6,
-      "enriched_rows": 5228,
+      "pool_rows": 33892,
+      "us_rows": 18108,
+      "tech_us_rows": 5223,
+      "raw_sidecar_rows": 16439,
+      "sidecar_active_rows": 5147,
+      "published_rows": 5147,
+      "published_pct": 98.5,
+      "enriched_rows": 5190,
       "enriched_pct": 99.4,
-      "enriched_with_skills": 4729,
+      "enriched_with_skills": 4698,
       "skills_pct": 90.5,
       "examples": [
         {
-          "id": "workday-carnegie-mellon-university-2024726",
-          "company": "Carnegie Mellon University",
-          "title": "Team Lead - Applied Network Defense"
+          "id": "workday-applied-materials-R2621779",
+          "company": "Applied Materials",
+          "title": "Business Intelligence Analyst"
         },
         {
           "id": "workday-rtx-01853766",
           "company": "RTX",
           "title": "Software Engineer II - Embedded Linux (Onsite)"
-        },
-        {
-          "id": "workday-northrop-grumman-R10236360",
-          "company": "Northrop Grumman",
-          "title": "Manager Embedded Software Engineer 3"
         },
         {
           "id": "workday-leidos-R-00185731",
@@ -222,6 +219,11 @@
           "id": "workday-leidos-R-00185604",
           "company": "Leidos",
           "title": "Quality Program Manager"
+        },
+        {
+          "id": "workday-johnson-controls-WD30272416",
+          "company": "Johnson Controls",
+          "title": "HVAC Truck Based Controls Service Engineer"
         }
       ],
       "severity": "ok",
@@ -229,7 +231,7 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 331,
+      "pool_rows": 334,
       "us_rows": 154,
       "tech_us_rows": 65,
       "raw_sidecar_rows": 283,
@@ -267,17 +269,17 @@
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 1275,
-      "us_rows": 1274,
-      "tech_us_rows": 264,
-      "raw_sidecar_rows": 2728,
-      "sidecar_active_rows": 264,
-      "published_rows": 264,
+      "pool_rows": 1269,
+      "us_rows": 1268,
+      "tech_us_rows": 261,
+      "raw_sidecar_rows": 2717,
+      "sidecar_active_rows": 261,
+      "published_rows": 261,
       "published_pct": 100,
-      "enriched_rows": 264,
+      "enriched_rows": 261,
       "enriched_pct": 100,
-      "enriched_with_skills": 240,
-      "skills_pct": 90.9,
+      "enriched_with_skills": 239,
+      "skills_pct": 91.6,
       "examples": [],
       "severity": "ok",
       "flags": []
