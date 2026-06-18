@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-18T19:39:38.251Z",
+  "generated_at": "2026-06-18T19:54:26.811Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -61,28 +61,26 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-18T19:36:32.278Z",
+    "generated_at": "2026-06-18T19:51:31.199Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 8577,
-    "description_entries": 7873,
-    "coverage_pct": 91.8,
+    "board_row_count": 8467,
+    "description_entries": 7763,
+    "coverage_pct": 91.7,
     "source_breakdown": {
-      "sidecar": 7873,
+      "sidecar": 7763,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-18T19:28:03.135Z",
+    "jobs_metadata_generated": "2026-06-18T19:42:39.898Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 86
   },
   "consumer_alert": {
-    "checked_at": "2026-06-18T19:39:35.192Z",
+    "checked_at": "2026-06-18T19:54:23.653Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [
-      "Senior filter FP rate elevated: 10.2% (51/500). May indicate keyword over-matching."
-    ],
-    "warning_count": 1,
+    "warnings": [],
+    "warning_count": 0,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -94,17 +92,17 @@
   "rows": [
     {
       "source": "oracle",
-      "pool_rows": 5700,
-      "us_rows": 3535,
-      "tech_us_rows": 380,
-      "raw_sidecar_rows": 4402,
-      "sidecar_active_rows": 251,
-      "published_rows": 251,
-      "published_pct": 66.1,
-      "enriched_rows": 380,
-      "enriched_pct": 100,
-      "enriched_with_skills": 287,
-      "skills_pct": 75.5,
+      "pool_rows": 5710,
+      "us_rows": 3545,
+      "tech_us_rows": 382,
+      "raw_sidecar_rows": 4870,
+      "sidecar_active_rows": 252,
+      "published_rows": 252,
+      "published_pct": 66,
+      "enriched_rows": 381,
+      "enriched_pct": 99.7,
+      "enriched_with_skills": 288,
+      "skills_pct": 75.6,
       "examples": [
         {
           "id": "oracle-grant-thornton-115035",
@@ -115,6 +113,11 @@
           "id": "oracle-jpmorgan-chase-210752970",
           "company": "JPMorgan Chase",
           "title": "Data Analytics Resource Planning - Associate"
+        },
+        {
+          "id": "oracle-texas-instruments-25011260",
+          "company": "Texas Instruments",
+          "title": "Digital IC Design Engineer | DCC DAC"
         },
         {
           "id": "oracle-wsp-89414",
@@ -140,11 +143,6 @@
           "id": "oracle-wsp-89419",
           "company": "WSP",
           "title": "Transmission Line Project Engineer"
-        },
-        {
-          "id": "oracle-atlantic-health-30158",
-          "company": "Atlantic Health System",
-          "title": "Nuclear Medicine Technologist-Atlantic Health Morristown Medical Center-Per Diem"
         }
       ],
       "severity": "high",
@@ -153,11 +151,71 @@
       ]
     },
     {
+      "source": "workday",
+      "pool_rows": 34277,
+      "us_rows": 18087,
+      "tech_us_rows": 5171,
+      "raw_sidecar_rows": 16220,
+      "sidecar_active_rows": 4929,
+      "published_rows": 4938,
+      "published_pct": 95.5,
+      "enriched_rows": 5101,
+      "enriched_pct": 98.6,
+      "enriched_with_skills": 4617,
+      "skills_pct": 90.5,
+      "examples": [
+        {
+          "id": "workday-danaher-R1312576",
+          "company": "Danaher",
+          "title": "Field Service Engineer - Daily Field Travel – Buffalo, NY Territory (necessity to reside within 60 minutes of Buffalo or ability to relocate)"
+        },
+        {
+          "id": "workday-philips-578572",
+          "company": "Philips",
+          "title": "Field Service Engineer, Multimodality Imaging (Travel: Honolulu, HI)"
+        },
+        {
+          "id": "workday-morgan-stanley-PT-JR028816",
+          "company": "Morgan Stanley",
+          "title": "Site Reliability Engineer"
+        },
+        {
+          "id": "workday-rtx-01853766",
+          "company": "RTX",
+          "title": "Software Engineer II - Embedded Linux (Onsite)"
+        },
+        {
+          "id": "workday-motorola-solutions-R64691",
+          "company": "Motorola Solutions",
+          "title": "CAD Systems Manager - Eastern Region"
+        },
+        {
+          "id": "workday-motorola-solutions-R64690",
+          "company": "Motorola Solutions",
+          "title": "RMS System Manager - Hybrid"
+        },
+        {
+          "id": "workday-northrop-grumman-R10236360",
+          "company": "Northrop Grumman",
+          "title": "Manager Embedded Software Engineer 3"
+        },
+        {
+          "id": "workday-northrop-grumman-R10234742",
+          "company": "Northrop Grumman",
+          "title": "Manager Structural Engineering 1"
+        }
+      ],
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
+    },
+    {
       "source": "icims",
-      "pool_rows": 63,
-      "us_rows": 49,
+      "pool_rows": 62,
+      "us_rows": 48,
       "tech_us_rows": 12,
-      "raw_sidecar_rows": 313,
+      "raw_sidecar_rows": 63,
       "sidecar_active_rows": 12,
       "published_rows": 12,
       "published_pct": 100,
@@ -172,70 +230,12 @@
       ]
     },
     {
-      "source": "workday",
-      "pool_rows": 33892,
-      "us_rows": 18108,
-      "tech_us_rows": 5223,
-      "raw_sidecar_rows": 16439,
-      "sidecar_active_rows": 5147,
-      "published_rows": 5147,
-      "published_pct": 98.5,
-      "enriched_rows": 5190,
-      "enriched_pct": 99.4,
-      "enriched_with_skills": 4698,
-      "skills_pct": 90.5,
-      "examples": [
-        {
-          "id": "workday-applied-materials-R2621779",
-          "company": "Applied Materials",
-          "title": "Business Intelligence Analyst"
-        },
-        {
-          "id": "workday-rtx-01853766",
-          "company": "RTX",
-          "title": "Software Engineer II - Embedded Linux (Onsite)"
-        },
-        {
-          "id": "workday-leidos-R-00185731",
-          "company": "Leidos",
-          "title": "Counterintelligence Analyst SME"
-        },
-        {
-          "id": "workday-leidos-R-00185724",
-          "company": "Leidos",
-          "title": "Junior Reliability and Systems Engineer"
-        },
-        {
-          "id": "workday-leidos-R-00175993",
-          "company": "Leidos",
-          "title": "Distribution Planning and Analysis Engineer"
-        },
-        {
-          "id": "workday-leidos-R-00183987",
-          "company": "Leidos",
-          "title": "ICAM Change Manager"
-        },
-        {
-          "id": "workday-leidos-R-00185604",
-          "company": "Leidos",
-          "title": "Quality Program Manager"
-        },
-        {
-          "id": "workday-johnson-controls-WD30272416",
-          "company": "Johnson Controls",
-          "title": "HVAC Truck Based Controls Service Engineer"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
-    },
-    {
       "source": "microsoft",
-      "pool_rows": 334,
-      "us_rows": 154,
+      "pool_rows": 331,
+      "us_rows": 152,
       "tech_us_rows": 65,
-      "raw_sidecar_rows": 283,
-      "sidecar_active_rows": 61,
+      "raw_sidecar_rows": 310,
+      "sidecar_active_rows": 62,
       "published_rows": 61,
       "published_pct": 93.8,
       "enriched_rows": 65,
@@ -269,18 +269,24 @@
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 1269,
-      "us_rows": 1268,
-      "tech_us_rows": 261,
-      "raw_sidecar_rows": 2717,
-      "sidecar_active_rows": 261,
+      "pool_rows": 1270,
+      "us_rows": 1269,
+      "tech_us_rows": 262,
+      "raw_sidecar_rows": 6253,
+      "sidecar_active_rows": 262,
       "published_rows": 261,
-      "published_pct": 100,
+      "published_pct": 99.6,
       "enriched_rows": 261,
-      "enriched_pct": 100,
+      "enriched_pct": 99.6,
       "enriched_with_skills": 239,
       "skills_pct": 91.6,
-      "examples": [],
+      "examples": [
+        {
+          "id": "sr-Intuitive-744000132936109",
+          "company": "Intuitive",
+          "title": "Translational Research Scientist"
+        }
+      ],
       "severity": "ok",
       "flags": []
     },
@@ -289,7 +295,7 @@
       "pool_rows": 1098,
       "us_rows": 1098,
       "tech_us_rows": 440,
-      "raw_sidecar_rows": 1098,
+      "raw_sidecar_rows": 1107,
       "sidecar_active_rows": 440,
       "published_rows": 440,
       "published_pct": 100,
