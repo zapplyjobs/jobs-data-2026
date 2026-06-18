@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-18T18:24:42.866Z",
+  "generated_at": "2026-06-18T18:39:27.260Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -61,26 +61,28 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-18T18:21:50.454Z",
+    "generated_at": "2026-06-18T18:36:33.406Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 8530,
-    "description_entries": 7840,
-    "coverage_pct": 91.9,
+    "board_row_count": 8423,
+    "description_entries": 7731,
+    "coverage_pct": 91.8,
     "source_breakdown": {
-      "sidecar": 7840,
+      "sidecar": 7731,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-18T18:12:00.387Z",
+    "jobs_metadata_generated": "2026-06-18T18:27:35.719Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 86
   },
   "consumer_alert": {
-    "checked_at": "2026-06-18T18:24:39.664Z",
+    "checked_at": "2026-06-18T18:39:24.461Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [],
-    "warning_count": 0,
+    "warnings": [
+      "Senior filter FP rate elevated: 10.8% (54/500). May indicate keyword over-matching."
+    ],
+    "warning_count": 1,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -92,17 +94,17 @@
   "rows": [
     {
       "source": "oracle",
-      "pool_rows": 5645,
-      "us_rows": 3493,
-      "tech_us_rows": 378,
-      "raw_sidecar_rows": 4367,
+      "pool_rows": 5674,
+      "us_rows": 3513,
+      "tech_us_rows": 379,
+      "raw_sidecar_rows": 4388,
       "sidecar_active_rows": 253,
       "published_rows": 253,
-      "published_pct": 66.9,
-      "enriched_rows": 378,
+      "published_pct": 66.8,
+      "enriched_rows": 379,
       "enriched_pct": 100,
-      "enriched_with_skills": 284,
-      "skills_pct": 75.1,
+      "enriched_with_skills": 285,
+      "skills_pct": 75.2,
       "examples": [
         {
           "id": "oracle-jpmorgan-chase-210752970",
@@ -118,6 +120,11 @@
           "id": "oracle-wsp-89415",
           "company": "WSP",
           "title": "Mid-Level Mechanical Engineer (Generation)"
+        },
+        {
+          "id": "oracle-wsp-89418",
+          "company": "WSP",
+          "title": "Project Controls Specialist"
         },
         {
           "id": "oracle-atlantic-health-30158",
@@ -138,11 +145,6 @@
           "id": "oracle-texas-instruments-25011035",
           "company": "Texas Instruments",
           "title": "Manufacturing Photo Process Engineer"
-        },
-        {
-          "id": "oracle-wsp-89231",
-          "company": "WSP",
-          "title": "Intern, Civil Engineering (Overhead Transmission Lines)"
         }
       ],
       "severity": "high",
@@ -171,17 +173,17 @@
     },
     {
       "source": "workday",
-      "pool_rows": 34357,
-      "us_rows": 18155,
-      "tech_us_rows": 5175,
-      "raw_sidecar_rows": 16764,
-      "sidecar_active_rows": 5110,
-      "published_rows": 5110,
+      "pool_rows": 34200,
+      "us_rows": 17795,
+      "tech_us_rows": 5069,
+      "raw_sidecar_rows": 16559,
+      "sidecar_active_rows": 5004,
+      "published_rows": 5004,
       "published_pct": 98.7,
-      "enriched_rows": 5144,
+      "enriched_rows": 5038,
       "enriched_pct": 99.4,
-      "enriched_with_skills": 4675,
-      "skills_pct": 90.9,
+      "enriched_with_skills": 4564,
+      "skills_pct": 90.6,
       "examples": [
         {
           "id": "workday-rtx-01853766",
@@ -192,6 +194,21 @@
           "id": "workday-northrop-grumman-R10236360",
           "company": "Northrop Grumman",
           "title": "Manager Embedded Software Engineer 3"
+        },
+        {
+          "id": "workday-caci-327866",
+          "company": "CACI",
+          "title": "Computer Operator V"
+        },
+        {
+          "id": "workday-booz-allen-hamilton-R0242557",
+          "company": "Booz Allen Hamilton",
+          "title": "DevOps Cloud Engineer"
+        },
+        {
+          "id": "workday-booz-allen-hamilton-R0241988",
+          "company": "Booz Allen Hamilton",
+          "title": "Software Engineer"
         },
         {
           "id": "workday-leidos-R-00185731",
@@ -207,21 +224,6 @@
           "id": "workday-leidos-R-00175993",
           "company": "Leidos",
           "title": "Distribution Planning and Analysis Engineer"
-        },
-        {
-          "id": "workday-leidos-R-00183987",
-          "company": "Leidos",
-          "title": "ICAM Change Manager"
-        },
-        {
-          "id": "workday-leidos-R-00185604",
-          "company": "Leidos",
-          "title": "Quality Program Manager"
-        },
-        {
-          "id": "workday-johnson-controls-WD30272416",
-          "company": "Johnson Controls",
-          "title": "HVAC Truck Based Controls Service Engineer"
         }
       ],
       "severity": "ok",
@@ -229,18 +231,23 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 320,
-      "us_rows": 148,
+      "pool_rows": 329,
+      "us_rows": 151,
       "tech_us_rows": 64,
-      "raw_sidecar_rows": 282,
-      "sidecar_active_rows": 61,
-      "published_rows": 61,
-      "published_pct": 95.3,
+      "raw_sidecar_rows": 281,
+      "sidecar_active_rows": 60,
+      "published_rows": 60,
+      "published_pct": 93.8,
       "enriched_rows": 64,
       "enriched_pct": 100,
       "enriched_with_skills": 64,
       "skills_pct": 100,
       "examples": [
+        {
+          "id": "microsoft-200035729",
+          "company": "Microsoft",
+          "title": "Software Engineer"
+        },
         {
           "id": "microsoft-200037747",
           "company": "Microsoft",
@@ -262,17 +269,17 @@
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 1267,
-      "us_rows": 1266,
-      "tech_us_rows": 263,
-      "raw_sidecar_rows": 2721,
-      "sidecar_active_rows": 263,
-      "published_rows": 263,
+      "pool_rows": 1268,
+      "us_rows": 1267,
+      "tech_us_rows": 262,
+      "raw_sidecar_rows": 2718,
+      "sidecar_active_rows": 262,
+      "published_rows": 262,
       "published_pct": 100,
-      "enriched_rows": 263,
+      "enriched_rows": 262,
       "enriched_pct": 100,
-      "enriched_with_skills": 240,
-      "skills_pct": 91.3,
+      "enriched_with_skills": 239,
+      "skills_pct": 91.2,
       "examples": [],
       "severity": "ok",
       "flags": []
