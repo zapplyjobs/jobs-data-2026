@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-18T15:39:51.925Z",
+  "generated_at": "2026-06-18T15:54:48.305Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -61,26 +61,28 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-18T15:36:39.825Z",
+    "generated_at": "2026-06-18T15:51:47.774Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 8282,
-    "description_entries": 7568,
-    "coverage_pct": 91.4,
+    "board_row_count": 8296,
+    "description_entries": 7601,
+    "coverage_pct": 91.6,
     "source_breakdown": {
-      "sidecar": 7568,
+      "sidecar": 7601,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-18T15:27:30.837Z",
+    "jobs_metadata_generated": "2026-06-18T15:44:46.234Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 86
   },
   "consumer_alert": {
-    "checked_at": "2026-06-18T15:39:49.235Z",
+    "checked_at": "2026-06-18T15:54:44.762Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [],
-    "warning_count": 0,
+    "warnings": [
+      "Senior filter FP rate elevated: 11.6% (58/500). May indicate keyword over-matching."
+    ],
+    "warning_count": 1,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -92,17 +94,17 @@
   "rows": [
     {
       "source": "oracle",
-      "pool_rows": 5605,
-      "us_rows": 3459,
-      "tech_us_rows": 372,
-      "raw_sidecar_rows": 4345,
-      "sidecar_active_rows": 249,
-      "published_rows": 249,
-      "published_pct": 66.9,
-      "enriched_rows": 372,
+      "pool_rows": 5426,
+      "us_rows": 3373,
+      "tech_us_rows": 348,
+      "raw_sidecar_rows": 4175,
+      "sidecar_active_rows": 225,
+      "published_rows": 225,
+      "published_pct": 64.7,
+      "enriched_rows": 348,
       "enriched_pct": 100,
-      "enriched_with_skills": 282,
-      "skills_pct": 75.8,
+      "enriched_with_skills": 264,
+      "skills_pct": 75.9,
       "examples": [
         {
           "id": "oracle-atlantic-health-30158",
@@ -171,16 +173,16 @@
     },
     {
       "source": "workday",
-      "pool_rows": 33604,
-      "us_rows": 17536,
-      "tech_us_rows": 4960,
-      "raw_sidecar_rows": 16846,
-      "sidecar_active_rows": 4867,
-      "published_rows": 4867,
-      "published_pct": 98.1,
-      "enriched_rows": 4934,
+      "pool_rows": 32919,
+      "us_rows": 16925,
+      "tech_us_rows": 4996,
+      "raw_sidecar_rows": 16678,
+      "sidecar_active_rows": 4921,
+      "published_rows": 4921,
+      "published_pct": 98.5,
+      "enriched_rows": 4971,
       "enriched_pct": 99.5,
-      "enriched_with_skills": 4479,
+      "enriched_with_skills": 4512,
       "skills_pct": 90.8,
       "examples": [
         {
@@ -194,19 +196,9 @@
           "title": "Manager Embedded Software Engineer 3"
         },
         {
-          "id": "workday-huntsman-J-019948",
-          "company": "Huntsman",
-          "title": "Zone Maintenance Engineer"
-        },
-        {
-          "id": "workday-boeing-JR2026503754",
-          "company": "Boeing",
-          "title": "FPGA Design Engineer (Associate, Experienced, or Senior)"
-        },
-        {
-          "id": "workday-amentum-R0162440",
-          "company": "Amentum",
-          "title": "HVAC PM Person"
+          "id": "workday-kla-2637350",
+          "company": "KLA",
+          "title": "Engr, Assoc Test 2"
         },
         {
           "id": "workday-guidehouse-40651",
@@ -214,14 +206,24 @@
           "title": "Bioinformatics Scientist"
         },
         {
-          "id": "workday-kla-2637350",
-          "company": "KLA",
-          "title": "Engr, Assoc Test 2"
+          "id": "workday-boeing-JR2026503754",
+          "company": "Boeing",
+          "title": "FPGA Design Engineer (Associate, Experienced, or Senior)"
+        },
+        {
+          "id": "workday-huntsman-J-019948",
+          "company": "Huntsman",
+          "title": "Zone Maintenance Engineer"
         },
         {
           "id": "workday-caci-327866",
           "company": "CACI",
           "title": "Computer Operator V"
+        },
+        {
+          "id": "workday-hitachi-R0133955",
+          "company": "Hitachi",
+          "title": "Quality Engineer Supervisor, Manufacturing Quality"
         }
       ],
       "severity": "ok",
@@ -229,23 +231,18 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 324,
-      "us_rows": 150,
-      "tech_us_rows": 67,
-      "raw_sidecar_rows": 280,
-      "sidecar_active_rows": 65,
-      "published_rows": 65,
-      "published_pct": 97,
-      "enriched_rows": 67,
+      "pool_rows": 326,
+      "us_rows": 151,
+      "tech_us_rows": 68,
+      "raw_sidecar_rows": 284,
+      "sidecar_active_rows": 67,
+      "published_rows": 67,
+      "published_pct": 98.5,
+      "enriched_rows": 68,
       "enriched_pct": 100,
-      "enriched_with_skills": 67,
+      "enriched_with_skills": 68,
       "skills_pct": 100,
       "examples": [
-        {
-          "id": "microsoft-200038817",
-          "company": "Microsoft",
-          "title": "Software Engineer II"
-        },
         {
           "id": "microsoft-200039796",
           "company": "Microsoft",
@@ -257,10 +254,10 @@
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 1270,
-      "us_rows": 1269,
+      "pool_rows": 1267,
+      "us_rows": 1266,
       "tech_us_rows": 257,
-      "raw_sidecar_rows": 2753,
+      "raw_sidecar_rows": 2748,
       "sidecar_active_rows": 257,
       "published_rows": 257,
       "published_pct": 100,
@@ -274,10 +271,10 @@
     },
     {
       "source": "tiktok",
-      "pool_rows": 1103,
-      "us_rows": 1103,
+      "pool_rows": 1101,
+      "us_rows": 1101,
       "tech_us_rows": 440,
-      "raw_sidecar_rows": 1103,
+      "raw_sidecar_rows": 1101,
       "sidecar_active_rows": 440,
       "published_rows": 440,
       "published_pct": 100,
