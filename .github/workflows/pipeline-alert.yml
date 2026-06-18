@@ -48,7 +48,7 @@ jobs:
             const r2 = createR2Client({ prefix: 'data/' });
             const dataDir = '.github/data';
             if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-            const files = ['all_jobs.json', 'us_jobs.json', 'enriched_jobs.json', 'jobs-metadata.json', 'zjp-metrics.json', 'softwarejobs-descriptions.json', 'softwarejobs-descriptions-meta.json'];
+            const files = ['all_jobs.json', 'us_jobs.json', 'enriched_jobs.json', 'jobs-metadata.json', 'zjp-metrics.json', 'softwarejobs-descriptions.json', 'softwarejobs-descriptions-meta.json', 'supplemental-custom-jobs.json', 'supplemental-custom-metadata.json', 'supplemental-oracle-jobs.json', 'supplemental-oracle-metadata.json'];
             const sidecars = await r2.list('descriptions-');
             for (const obj of sidecars) {
               const name = obj.key.replace(/^data\//, '');
