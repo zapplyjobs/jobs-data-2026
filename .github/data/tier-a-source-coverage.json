@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-18T23:23:52.438Z",
+  "generated_at": "2026-06-18T23:38:52.487Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -27,6 +27,7 @@
     "descriptions-amd.jsonl",
     "descriptions-apple.jsonl",
     "descriptions-ashby.jsonl",
+    "descriptions-bytedance.jsonl",
     "descriptions-eightfold.jsonl",
     "descriptions-enriched-1.jsonl",
     "descriptions-enriched-10.jsonl",
@@ -65,31 +66,26 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-18T23:21:18.206Z",
+    "generated_at": "2026-06-18T23:36:23.849Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 8766,
-    "description_entries": 7898,
-    "coverage_pct": 90.1,
+    "board_row_count": 8783,
+    "description_entries": 8066,
+    "coverage_pct": 91.8,
     "source_breakdown": {
-      "sidecar": 7898,
+      "sidecar": 8066,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-18T23:05:07.326Z",
+    "jobs_metadata_generated": "2026-06-18T23:25:19.108Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 86
   },
   "consumer_alert": {
-    "checked_at": "2026-06-18T23:23:48.138Z",
-    "active": true,
-    "message": "**Enrichment skills drop (bytedance)**: 0% have skills (expected >70%) — skills extraction may have broken for this source | **Missing sidecar**: descriptions-bytedance.jsonl (157 pool jobs, no sidecar)",
-    "failures": [
-      "**Enrichment skills drop (bytedance)**: 0% have skills (expected >70%) — skills extraction may have broken for this source",
-      "**Missing sidecar**: descriptions-bytedance.jsonl (157 pool jobs, no sidecar)"
-    ],
-    "warnings": [
-      "Senior filter FP rate elevated: 10.6% (53/500). May indicate keyword over-matching."
-    ],
-    "warning_count": 1,
+    "checked_at": "2026-06-18T23:38:49.175Z",
+    "active": false,
+    "message": null,
+    "failures": [],
+    "warnings": [],
+    "warning_count": 0,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -101,24 +97,24 @@
   "rows": [
     {
       "source": "oracle",
-      "pool_rows": 5776,
-      "us_rows": 3586,
-      "tech_us_rows": 386,
-      "raw_sidecar_rows": 4442,
-      "sidecar_active_rows": 252,
-      "supplemental_rows": 25734,
-      "supplemental_with_desc": 18482,
+      "pool_rows": 5784,
+      "us_rows": 3593,
+      "tech_us_rows": 387,
+      "raw_sidecar_rows": 4459,
+      "sidecar_active_rows": 260,
+      "supplemental_rows": 25732,
+      "supplemental_with_desc": 18479,
       "supplemental_meta": {
-        "generated_at": "2026-06-18T23:14:24.565Z",
+        "generated_at": "2026-06-18T23:28:42.581Z",
         "lane_name": "oracle",
-        "jobs_fetched": 25734
+        "jobs_fetched": 25732
       },
-      "published_rows": 252,
-      "published_pct": 65.3,
-      "enriched_rows": 386,
+      "published_rows": 260,
+      "published_pct": 67.2,
+      "enriched_rows": 387,
       "enriched_pct": 100,
-      "enriched_with_skills": 293,
-      "skills_pct": 75.9,
+      "enriched_with_skills": 294,
+      "skills_pct": 76,
       "examples": [
         {
           "id": "oracle-grant-thornton-115035",
@@ -176,9 +172,9 @@
       "supplemental_rows": 316,
       "supplemental_with_desc": 316,
       "supplemental_meta": {
-        "generated_at": "2026-06-18T23:20:59.042Z",
+        "generated_at": "2026-06-18T23:36:43.720Z",
         "lane_name": "custom",
-        "jobs_fetched": 4251
+        "jobs_fetched": 4250
       },
       "published_rows": 13,
       "published_pct": 100,
@@ -194,21 +190,26 @@
     },
     {
       "source": "workday",
-      "pool_rows": 34193,
-      "us_rows": 17979,
-      "tech_us_rows": 5260,
-      "raw_sidecar_rows": 16405,
-      "sidecar_active_rows": 5169,
+      "pool_rows": 34017,
+      "us_rows": 18305,
+      "tech_us_rows": 5276,
+      "raw_sidecar_rows": 16388,
+      "sidecar_active_rows": 5185,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 5169,
+      "published_rows": 5185,
       "published_pct": 98.3,
-      "enriched_rows": 5220,
+      "enriched_rows": 5235,
       "enriched_pct": 99.2,
-      "enriched_with_skills": 4713,
-      "skills_pct": 90.3,
+      "enriched_with_skills": 4755,
+      "skills_pct": 90.8,
       "examples": [
+        {
+          "id": "workday-hp-inc-3161113",
+          "company": "HP Inc",
+          "title": "Firmware Developer"
+        },
         {
           "id": "workday-guidehouse-40755",
           "company": "Guidehouse",
@@ -220,9 +221,14 @@
           "title": "Bioinformatics Scientist"
         },
         {
-          "id": "workday-northrop-grumman-R10236932",
-          "company": "Northrop Grumman",
-          "title": "Systems Engineer - 3/4"
+          "id": "workday-gdit-RQ222752",
+          "company": "GDIT",
+          "title": "Systems Engineer – IT Capacity"
+        },
+        {
+          "id": "workday-generac-JR14799",
+          "company": "Generac",
+          "title": "Intern Mechanical Engineer"
         },
         {
           "id": "workday-northrop-grumman-R10236360",
@@ -230,24 +236,14 @@
           "title": "Manager Embedded Software Engineer 3"
         },
         {
-          "id": "workday-boeing-JR2026515606",
-          "company": "Boeing",
-          "title": "Hydro-Mechanical Systems Service Engineer (Associate or Experienced)"
+          "id": "workday-northrop-grumman-R10236932",
+          "company": "Northrop Grumman",
+          "title": "Systems Engineer - 3/4"
         },
         {
-          "id": "workday-boeing-JR2026503754",
-          "company": "Boeing",
-          "title": "FPGA Design Engineer (Associate, Experienced, or Senior)"
-        },
-        {
-          "id": "workday-booz-allen-hamilton-R0242557",
-          "company": "Booz Allen Hamilton",
-          "title": "DevOps Cloud Engineer"
-        },
-        {
-          "id": "workday-booz-allen-hamilton-R0241988",
-          "company": "Booz Allen Hamilton",
-          "title": "Software Engineer"
+          "id": "workday-rtx-01853766",
+          "company": "RTX",
+          "title": "Software Engineer II - Embedded Linux (Onsite)"
         }
       ],
       "severity": "ok",
@@ -255,17 +251,17 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 334,
-      "us_rows": 156,
+      "pool_rows": 330,
+      "us_rows": 155,
       "tech_us_rows": 66,
-      "raw_sidecar_rows": 295,
+      "raw_sidecar_rows": 296,
       "sidecar_active_rows": 62,
-      "supplemental_rows": 1444,
-      "supplemental_with_desc": 29,
+      "supplemental_rows": 1445,
+      "supplemental_with_desc": 113,
       "supplemental_meta": {
-        "generated_at": "2026-06-18T23:20:59.042Z",
+        "generated_at": "2026-06-18T23:36:43.720Z",
         "lane_name": "custom",
-        "jobs_fetched": 4251
+        "jobs_fetched": 4250
       },
       "published_rows": 62,
       "published_pct": 93.9,
@@ -300,10 +296,10 @@
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 1284,
-      "us_rows": 1283,
+      "pool_rows": 1286,
+      "us_rows": 1285,
       "tech_us_rows": 264,
-      "raw_sidecar_rows": 2720,
+      "raw_sidecar_rows": 2723,
       "sidecar_active_rows": 264,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
@@ -320,17 +316,17 @@
     },
     {
       "source": "tiktok",
-      "pool_rows": 1093,
-      "us_rows": 1093,
+      "pool_rows": 1094,
+      "us_rows": 1094,
       "tech_us_rows": 440,
-      "raw_sidecar_rows": 1093,
+      "raw_sidecar_rows": 1094,
       "sidecar_active_rows": 440,
-      "supplemental_rows": 1434,
-      "supplemental_with_desc": 1434,
+      "supplemental_rows": 1432,
+      "supplemental_with_desc": 1432,
       "supplemental_meta": {
-        "generated_at": "2026-06-18T23:20:59.042Z",
+        "generated_at": "2026-06-18T23:36:43.720Z",
         "lane_name": "custom",
-        "jobs_fetched": 4251
+        "jobs_fetched": 4250
       },
       "published_rows": 440,
       "published_pct": 100,
