@@ -1,0 +1,314 @@
+{
+  "generated_at": "2026-06-18T10:32:00.906Z",
+  "truth_surfaces": {
+    "producer_pool": "all_jobs.json",
+    "board_input": "us_jobs.json",
+    "raw_sidecars": "descriptions-*.jsonl",
+    "published_board_descriptions": "softwarejobs-descriptions.json",
+    "published_board_meta": "softwarejobs-descriptions-meta.json",
+    "enrichment_output": "enriched_jobs.json",
+    "consumer_alert": "pipeline-alert.json"
+  },
+  "tier_a_sources": [
+    "workday",
+    "oracle",
+    "smartrecruiters",
+    "icims",
+    "microsoft",
+    "tiktok",
+    "apple"
+  ],
+  "sidecar_files_downloaded": [
+    "descriptions-amazon.jsonl",
+    "descriptions-amd.jsonl",
+    "descriptions-apple.jsonl",
+    "descriptions-ashby.jsonl",
+    "descriptions-eightfold.jsonl",
+    "descriptions-enriched-1.jsonl",
+    "descriptions-enriched-10.jsonl",
+    "descriptions-enriched-11.jsonl",
+    "descriptions-enriched-12.jsonl",
+    "descriptions-enriched-13.jsonl",
+    "descriptions-enriched-14.jsonl",
+    "descriptions-enriched-15.jsonl",
+    "descriptions-enriched-16.jsonl",
+    "descriptions-enriched-17.jsonl",
+    "descriptions-enriched-18.jsonl",
+    "descriptions-enriched-19.jsonl",
+    "descriptions-enriched-2.jsonl",
+    "descriptions-enriched-20.jsonl",
+    "descriptions-enriched-3.jsonl",
+    "descriptions-enriched-4.jsonl",
+    "descriptions-enriched-5.jsonl",
+    "descriptions-enriched-6.jsonl",
+    "descriptions-enriched-7.jsonl",
+    "descriptions-enriched-8.jsonl",
+    "descriptions-enriched-9.jsonl",
+    "descriptions-google.jsonl",
+    "descriptions-greenhouse-1.jsonl",
+    "descriptions-greenhouse-2.jsonl",
+    "descriptions-greenhouse-3.jsonl",
+    "descriptions-greenhouse-4.jsonl",
+    "descriptions-greenhouse-5.jsonl",
+    "descriptions-greenhouse.jsonl",
+    "descriptions-icims.jsonl",
+    "descriptions-lever.jsonl",
+    "descriptions-microsoft.jsonl",
+    "descriptions-oracle.jsonl",
+    "descriptions-smartrecruiters.jsonl",
+    "descriptions-tiktok.jsonl",
+    "descriptions-uber.jsonl",
+    "descriptions-workday.jsonl"
+  ],
+  "published_meta": {
+    "generated_at": "2026-06-18T10:22:41.758Z",
+    "source_basis": "us_jobs.json",
+    "board_row_count": 8377,
+    "description_entries": 7727,
+    "coverage_pct": 92.2,
+    "source_breakdown": {
+      "sidecar": 7727,
+      "inline": 0
+    },
+    "jobs_metadata_generated": "2026-06-18T09:57:20.870Z",
+    "enrichment_stats_generated": null,
+    "enrichment_version": 86
+  },
+  "consumer_alert": {
+    "checked_at": "2026-06-18T09:52:31.925Z",
+    "active": true,
+    "message": "**Source drop (microsoft)**: 35 jobs (was 321, dropped 89%)",
+    "failures": [
+      "**Source drop (microsoft)**: 35 jobs (was 321, dropped 89%)"
+    ],
+    "warnings": [
+      "Senior filter FP rate elevated: 10.4% (52/500). May indicate keyword over-matching."
+    ],
+    "warning_count": 1,
+    "secrets": [
+      {
+        "secret": "GH_PAT",
+        "expires": "2026-08-25",
+        "days_left": 67
+      }
+    ]
+  },
+  "rows": [
+    {
+      "source": "oracle",
+      "pool_rows": 5525,
+      "us_rows": 3429,
+      "tech_us_rows": 372,
+      "raw_sidecar_rows": 4278,
+      "sidecar_active_rows": 249,
+      "published_rows": 249,
+      "published_pct": 66.9,
+      "enriched_rows": 372,
+      "enriched_pct": 100,
+      "enriched_with_skills": 281,
+      "skills_pct": 75.5,
+      "examples": [
+        {
+          "id": "oracle-atlantic-health-30158",
+          "company": "Atlantic Health System",
+          "title": "Nuclear Medicine Technologist-Atlantic Health Morristown Medical Center-Per Diem"
+        },
+        {
+          "id": "oracle-hormel-foods-34552",
+          "company": "Hormel Foods",
+          "title": "Project Engineer-Atlanta (Tucker, GA)"
+        },
+        {
+          "id": "oracle-onsemi-2505750",
+          "company": "onsemi",
+          "title": "Engineering Technician"
+        },
+        {
+          "id": "oracle-texas-instruments-25011035",
+          "company": "Texas Instruments",
+          "title": "Manufacturing Photo Process Engineer"
+        },
+        {
+          "id": "oracle-wsp-89231",
+          "company": "WSP",
+          "title": "Intern, Civil Engineering (Overhead Transmission Lines)"
+        },
+        {
+          "id": "oracle-wsp-89344",
+          "company": "WSP",
+          "title": "Cost Controls Specialist"
+        },
+        {
+          "id": "oracle-wsp-89347",
+          "company": "WSP",
+          "title": "Substation Engineer"
+        },
+        {
+          "id": "oracle-cummins-2427766",
+          "company": "Cummins",
+          "title": "Marine Application Engineer"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage"
+      ]
+    },
+    {
+      "source": "icims",
+      "pool_rows": 60,
+      "us_rows": 46,
+      "tech_us_rows": 12,
+      "raw_sidecar_rows": 60,
+      "sidecar_active_rows": 12,
+      "published_rows": 12,
+      "published_pct": 100,
+      "enriched_rows": 12,
+      "enriched_pct": 100,
+      "enriched_with_skills": 8,
+      "skills_pct": 66.7,
+      "examples": [],
+      "severity": "medium",
+      "flags": [
+        "low_skill_fill"
+      ]
+    },
+    {
+      "source": "workday",
+      "pool_rows": 33721,
+      "us_rows": 17384,
+      "tech_us_rows": 5045,
+      "raw_sidecar_rows": 18472,
+      "sidecar_active_rows": 5016,
+      "published_rows": 5016,
+      "published_pct": 99.4,
+      "enriched_rows": 5022,
+      "enriched_pct": 99.5,
+      "enriched_with_skills": 4536,
+      "skills_pct": 90.3,
+      "examples": [
+        {
+          "id": "workday-snap-R0045604",
+          "company": "Snap",
+          "title": "Software Engineer, ML Infrastructure, Level 4"
+        },
+        {
+          "id": "workday-snap-R0045857",
+          "company": "Snap",
+          "title": "Experience Prototyper/Lab Manager, Level 3 (Fixed Term)"
+        },
+        {
+          "id": "workday-snap-R0045840",
+          "company": "Snap",
+          "title": "Manager, Ad Partnerships - Audiences, Identity & Signals"
+        },
+        {
+          "id": "workday-snap-R0045839",
+          "company": "Snap",
+          "title": "Technical Program Manager"
+        },
+        {
+          "id": "workday-snap-R0045811",
+          "company": "Snap",
+          "title": "Software Engineer, Backend, Level 4"
+        },
+        {
+          "id": "workday-onto-innovation-R-6057",
+          "company": "Onto Innovation",
+          "title": "Manager, Quality"
+        },
+        {
+          "id": "workday-snap-R0045802",
+          "company": "Snap",
+          "title": "Manager, Marketing Operations"
+        },
+        {
+          "id": "workday-snap-R0045797",
+          "company": "Snap",
+          "title": "Machine Learning Engineer, Generative ML , Level 5"
+        }
+      ],
+      "severity": "ok",
+      "flags": []
+    },
+    {
+      "source": "microsoft",
+      "pool_rows": 315,
+      "us_rows": 148,
+      "tech_us_rows": 66,
+      "raw_sidecar_rows": 280,
+      "sidecar_active_rows": 64,
+      "published_rows": 64,
+      "published_pct": 97,
+      "enriched_rows": 66,
+      "enriched_pct": 100,
+      "enriched_with_skills": 66,
+      "skills_pct": 100,
+      "examples": [
+        {
+          "id": "microsoft-200040208",
+          "company": "Microsoft",
+          "title": "Critical Environment Mechanical Engineer"
+        },
+        {
+          "id": "microsoft-200039796",
+          "company": "Microsoft",
+          "title": "Solution Engineer - Security"
+        }
+      ],
+      "severity": "ok",
+      "flags": []
+    },
+    {
+      "source": "smartrecruiters",
+      "pool_rows": 1277,
+      "us_rows": 1276,
+      "tech_us_rows": 257,
+      "raw_sidecar_rows": 2787,
+      "sidecar_active_rows": 257,
+      "published_rows": 257,
+      "published_pct": 100,
+      "enriched_rows": 257,
+      "enriched_pct": 100,
+      "enriched_with_skills": 236,
+      "skills_pct": 91.8,
+      "examples": [],
+      "severity": "ok",
+      "flags": []
+    },
+    {
+      "source": "tiktok",
+      "pool_rows": 1103,
+      "us_rows": 1103,
+      "tech_us_rows": 440,
+      "raw_sidecar_rows": 1103,
+      "sidecar_active_rows": 440,
+      "published_rows": 440,
+      "published_pct": 100,
+      "enriched_rows": 440,
+      "enriched_pct": 100,
+      "enriched_with_skills": 440,
+      "skills_pct": 100,
+      "examples": [],
+      "severity": "ok",
+      "flags": []
+    },
+    {
+      "source": "apple",
+      "pool_rows": 22,
+      "us_rows": 22,
+      "tech_us_rows": 10,
+      "raw_sidecar_rows": 22,
+      "sidecar_active_rows": 10,
+      "published_rows": 10,
+      "published_pct": 100,
+      "enriched_rows": 10,
+      "enriched_pct": 100,
+      "enriched_with_skills": 10,
+      "skills_pct": 100,
+      "examples": [],
+      "severity": "ok",
+      "flags": []
+    }
+  ]
+}
