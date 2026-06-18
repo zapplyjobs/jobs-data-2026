@@ -48,7 +48,12 @@ jobs:
             const r2 = createR2Client({ prefix: 'data/' });
             const dataDir = '.github/data';
             if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-            const files = ['all_jobs.json', 'jobs-metadata.json', 'enrichment-stats.json', 'zjp-metrics.json', 'descriptions-tiktok.jsonl'];
+            const files = ['all_jobs.json', 'jobs-metadata.json', 'enrichment-stats.json', 'zjp-metrics.json'];
+            const sidecars = await r2.list('descriptions-');
+            for (const obj of sidecars) {
+              const name = obj.key.replace(/^data\//, '');
+              if (name.endsWith('.jsonl')) files.push(name);
+            }
             for (const file of files) {
               try {
                 const raw = await r2.downloadRaw(file);
