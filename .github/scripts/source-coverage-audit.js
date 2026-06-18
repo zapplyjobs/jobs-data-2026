@@ -67,6 +67,30 @@ function loadSidecars(allJobsById) {
   return { files, activeIdsBySource, rawRowsBySource };
 }
 
+function loadSupplementalLanes() {
+  const rowsBySource = new Map();
+  const metaBySource = new Map();
+
+  const customJobs = readJson(path.join(DATA_DIR, 'supplemental-custom-jobs.json'), []);
+  const customMeta = readJson(path.join(DATA_DIR, 'supplemental-custom-metadata.json'), null);
+  for (const row of customJobs) {
+    const source = sourceOf(row);
+    if (!source) continue;
+    if (!rowsBySource.has(source)) rowsBySource.set(source, []);
+    rowsBySource.get(source).push(row);
+  }
+  if (customMeta?.sources) {
+    for (const source of Object.keys(customMeta.sources)) metaBySource.set(source, customMeta);
+  }
+
+  const oracleJobs = readJson(path.join(DATA_DIR, 'supplemental-oracle-jobs.json'), []);
+  const oracleMeta = readJson(path.join(DATA_DIR, 'supplemental-oracle-metadata.json'), null);
+  if (oracleJobs.length) rowsBySource.set('oracle', oracleJobs);
+  if (oracleMeta) metaBySource.set('oracle', oracleMeta);
+
+  return { rowsBySource, metaBySource };
+}
+
 function classify(row) {
   const flags = [];
   if (row.tech_us_rows === 0) return { severity: 'info', flags };
@@ -75,8 +99,11 @@ function classify(row) {
   if (row.sidecar_active_rows === 0 && row.published_rows === 0) flags.push('no_source_text_surface');
   if (row.enriched_pct < 80) flags.push('low_enrichment_coverage');
   if (row.enriched_rows > 0 && row.skills_pct < 70) flags.push('low_skill_fill');
+  if (row.supplemental_rows > 0 && row.supplemental_with_desc > 0 && row.published_rows < row.tech_us_rows * 0.5) {
+    flags.push('supplemental_stage_gap');
+  }
   let severity = 'ok';
-  if (flags.includes('low_published_coverage') || flags.includes('no_source_text_surface')) severity = 'high';
+  if (flags.includes('low_published_coverage') || flags.includes('no_source_text_surface') || flags.includes('supplemental_stage_gap')) severity = 'high';
   else if (flags.length > 0) severity = 'medium';
   return { severity, flags };
 }
@@ -91,6 +118,7 @@ function main() {
   const allJobsById = new Map(allJobs.map(job => [idOf(job), job]).filter(([id]) => id));
   const sidecars = loadSidecars(allJobsById);
   const enrichedById = new Map(enriched.map(job => [idOf(job), job]).filter(([id]) => id));
+  const supplemental = loadSupplementalLanes();
 
   const rows = SOURCES.map(source => {
     const pool = allJobs.filter(job => sourceOf(job) === source);
@@ -101,6 +129,9 @@ function main() {
     const sideActive = tech.filter(job => sideIds.has(job.id));
     const enr = tech.filter(job => enrichedById.has(job.id));
     const enrSkills = enr.filter(job => ((enrichedById.get(job.id)?.required_skills || enrichedById.get(job.id)?.skills || []).length > 0));
+    const supplementalRows = supplemental.rowsBySource.get(source) || [];
+    const supplementalWithDesc = supplementalRows.filter(job => String(job?.description || '').trim().length >= 50).length;
+    const supplementalMeta = supplemental.metaBySource.get(source) || null;
     const row = {
       source,
       pool_rows: pool.length,
@@ -108,6 +139,13 @@ function main() {
       tech_us_rows: tech.length,
       raw_sidecar_rows: sidecars.rawRowsBySource[source] || 0,
       sidecar_active_rows: sideActive.length,
+      supplemental_rows: supplementalRows.length,
+      supplemental_with_desc: supplementalWithDesc,
+      supplemental_meta: supplementalMeta ? {
+        generated_at: supplementalMeta.generated_at || null,
+        lane_name: supplementalMeta.lane_name || null,
+        jobs_fetched: supplementalMeta.jobs_fetched || supplementalRows.length,
+      } : null,
       published_rows: published.length,
       published_pct: pct(published.length, tech.length),
       enriched_rows: enr.length,
@@ -131,6 +169,7 @@ function main() {
       producer_pool: 'all_jobs.json',
       board_input: 'us_jobs.json',
       raw_sidecars: 'descriptions-*.jsonl',
+      supplemental_lanes: ['supplemental-custom-jobs.json', 'supplemental-oracle-jobs.json'],
       published_board_descriptions: 'softwarejobs-descriptions.json',
       published_board_meta: 'softwarejobs-descriptions-meta.json',
       enrichment_output: 'enriched_jobs.json',
