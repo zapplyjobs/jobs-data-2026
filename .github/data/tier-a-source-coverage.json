@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-19T08:07:18.940Z",
+  "generated_at": "2026-06-19T08:22:37.743Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -66,24 +66,26 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-19T08:04:43.469Z",
+    "generated_at": "2026-06-19T08:19:41.996Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 8649,
-    "description_entries": 7947,
+    "board_row_count": 8672,
+    "description_entries": 7971,
     "coverage_pct": 91.9,
     "source_breakdown": {
-      "sidecar": 7947,
+      "sidecar": 7971,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-19T07:58:23.790Z",
+    "jobs_metadata_generated": "2026-06-19T08:04:57.947Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 86
   },
   "consumer_alert": {
-    "checked_at": "2026-06-19T08:07:14.565Z",
-    "active": false,
-    "message": null,
-    "failures": [],
+    "checked_at": "2026-06-19T08:22:32.138Z",
+    "active": true,
+    "message": "**Submodule bump failed** (run 27813831426, 12 min ago) and live drift remains in 1 target(s): aggregator:jobs-aggregator-private. Check [run log](https://github.com/zapplyjobs/jobs-aggregator-private/actions/runs/27813831426).",
+    "failures": [
+      "**Submodule bump failed** (run 27813831426, 12 min ago) and live drift remains in 1 target(s): aggregator:jobs-aggregator-private. Check [run log](https://github.com/zapplyjobs/jobs-aggregator-private/actions/runs/27813831426)."
+    ],
     "warnings": [],
     "warning_count": 0,
     "secrets": [
@@ -97,24 +99,24 @@
   "rows": [
     {
       "source": "oracle",
-      "pool_rows": 5416,
-      "us_rows": 3352,
-      "tech_us_rows": 364,
-      "raw_sidecar_rows": 4601,
-      "sidecar_active_rows": 255,
-      "supplemental_rows": 24113,
-      "supplemental_with_desc": 17915,
+      "pool_rows": 5435,
+      "us_rows": 3357,
+      "tech_us_rows": 369,
+      "raw_sidecar_rows": 4605,
+      "sidecar_active_rows": 259,
+      "supplemental_rows": 25695,
+      "supplemental_with_desc": 18456,
       "supplemental_meta": {
-        "generated_at": "2026-06-19T07:58:12.362Z",
+        "generated_at": "2026-06-19T08:20:08.920Z",
         "lane_name": "oracle",
-        "jobs_fetched": 24113
+        "jobs_fetched": 25695
       },
-      "published_rows": 255,
-      "published_pct": 70.1,
-      "enriched_rows": 364,
-      "enriched_pct": 100,
-      "enriched_with_skills": 273,
-      "skills_pct": 75,
+      "published_rows": 253,
+      "published_pct": 68.6,
+      "enriched_rows": 359,
+      "enriched_pct": 97.3,
+      "enriched_with_skills": 268,
+      "skills_pct": 74.7,
       "examples": [
         {
           "id": "oracle-onsemi-2505785",
@@ -130,6 +132,11 @@
           "id": "oracle-jpmorgan-chase-210752970",
           "company": "JPMorgan Chase",
           "title": "Data Analytics Resource Planning - Associate"
+        },
+        {
+          "id": "oracle-oracle-337608",
+          "company": "Oracle",
+          "title": "GPU/CPU Systems Engineer"
         },
         {
           "id": "oracle-texas-instruments-25011171",
@@ -150,11 +157,6 @@
           "id": "oracle-wsp-89415",
           "company": "WSP",
           "title": "Mid-Level Mechanical Engineer (Generation)"
-        },
-        {
-          "id": "oracle-wsp-89416",
-          "company": "WSP",
-          "title": "Associate Electrical Engineer"
         }
       ],
       "severity": "high",
@@ -172,9 +174,9 @@
       "supplemental_rows": 316,
       "supplemental_with_desc": 316,
       "supplemental_meta": {
-        "generated_at": "2026-06-19T08:06:32.295Z",
+        "generated_at": "2026-06-19T08:21:36.594Z",
         "lane_name": "custom",
-        "jobs_fetched": 4230
+        "jobs_fetched": 4231
       },
       "published_rows": 11,
       "published_pct": 100,
@@ -190,60 +192,60 @@
     },
     {
       "source": "workday",
-      "pool_rows": 33716,
-      "us_rows": 17416,
-      "tech_us_rows": 5148,
-      "raw_sidecar_rows": 18509,
-      "sidecar_active_rows": 5025,
+      "pool_rows": 33591,
+      "us_rows": 17395,
+      "tech_us_rows": 5103,
+      "raw_sidecar_rows": 18438,
+      "sidecar_active_rows": 4981,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 4952,
-      "published_pct": 96.2,
-      "enriched_rows": 5103,
-      "enriched_pct": 99.1,
-      "enriched_with_skills": 4626,
-      "skills_pct": 90.7,
+      "published_rows": 4853,
+      "published_pct": 95.1,
+      "enriched_rows": 5021,
+      "enriched_pct": 98.4,
+      "enriched_with_skills": 4550,
+      "skills_pct": 90.6,
       "examples": [
         {
-          "id": "workday-danaher-R1312576",
-          "company": "Danaher",
-          "title": "Field Service Engineer - Daily Field Travel – Buffalo, NY Territory (necessity to reside within 60 minutes of Buffalo or ability to relocate)"
+          "id": "workday-general-motors-JR-202612649",
+          "company": "General Motors",
+          "title": "Hardware Simulation Project Manager"
         },
         {
-          "id": "workday-danaher-R1307936",
-          "company": "Danaher",
-          "title": "PMO Analyst (Aerospace, Data Analytics, SAP, Accolade)"
+          "id": "workday-general-motors-JR-202611675",
+          "company": "General Motors",
+          "title": "Branded UI Visual Designer"
         },
         {
-          "id": "workday-citi-26967872",
-          "company": "Citi",
-          "title": "Java-Python Context Engineer"
+          "id": "workday-generac-JR14799",
+          "company": "Generac",
+          "title": "Intern Mechanical Engineer"
         },
         {
-          "id": "workday-citi-26968276",
-          "company": "Citi",
-          "title": "Officer .NET Programmer Analyst"
+          "id": "workday-gdit-RQ222131",
+          "company": "GDIT",
+          "title": "Suicide Prevention Coordinator (SPC)"
         },
         {
-          "id": "workday-citi-26968274",
-          "company": "Citi",
-          "title": "Officer .NET Programmer Analyst"
+          "id": "workday-gdit-RQ222453",
+          "company": "GDIT",
+          "title": "Infrastructure Engineer"
         },
         {
-          "id": "workday-crowdstrike-R27636",
-          "company": "CrowdStrike",
-          "title": "Corporate Sales Engineer (Remote)"
+          "id": "workday-gdit-RQ222542",
+          "company": "GDIT",
+          "title": "VDI Engineer - TS/SCI with Polygraph"
         },
         {
-          "id": "workday-comcast-R438811",
-          "company": "Comcast",
-          "title": "Manager, Enterprise Analytics"
+          "id": "workday-gdit-RQ222752",
+          "company": "GDIT",
+          "title": "Systems Engineer – IT Capacity"
         },
         {
-          "id": "workday-cisco-2011762",
-          "company": "Cisco",
-          "title": "Technical Account Manager - FedRAMP"
+          "id": "workday-vanguard-178004",
+          "company": "Vanguard",
+          "title": "Application Security Pentester, Specialist"
         }
       ],
       "severity": "ok",
@@ -251,27 +253,37 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 336,
-      "us_rows": 154,
-      "tech_us_rows": 64,
-      "raw_sidecar_rows": 350,
-      "sidecar_active_rows": 62,
-      "supplemental_rows": 1442,
-      "supplemental_with_desc": 126,
+      "pool_rows": 337,
+      "us_rows": 158,
+      "tech_us_rows": 67,
+      "raw_sidecar_rows": 351,
+      "sidecar_active_rows": 65,
+      "supplemental_rows": 1443,
+      "supplemental_with_desc": 123,
       "supplemental_meta": {
-        "generated_at": "2026-06-19T08:06:32.295Z",
+        "generated_at": "2026-06-19T08:21:36.594Z",
         "lane_name": "custom",
-        "jobs_fetched": 4230
+        "jobs_fetched": 4231
       },
       "published_rows": 62,
-      "published_pct": 96.9,
+      "published_pct": 92.5,
       "enriched_rows": 64,
-      "enriched_pct": 100,
+      "enriched_pct": 95.5,
       "enriched_with_skills": 64,
       "skills_pct": 100,
       "examples": [
         {
+          "id": "microsoft-200038969",
+          "company": "Microsoft",
+          "title": "Cloud Network Engineer"
+        },
+        {
           "id": "microsoft-200037236",
+          "company": "Microsoft",
+          "title": "Applied Scientist II"
+        },
+        {
+          "id": "microsoft-200040074",
           "company": "Microsoft",
           "title": "Applied Scientist II"
         },
@@ -279,6 +291,11 @@
           "id": "microsoft-200039796",
           "company": "Microsoft",
           "title": "Solution Engineer - Security"
+        },
+        {
+          "id": "microsoft-200033263",
+          "company": "Microsoft",
+          "title": "Cloud Solution Architect - Microsoft 365 Copilot"
         }
       ],
       "severity": "ok",
@@ -289,7 +306,7 @@
       "pool_rows": 1278,
       "us_rows": 1277,
       "tech_us_rows": 263,
-      "raw_sidecar_rows": 6192,
+      "raw_sidecar_rows": 6217,
       "sidecar_active_rows": 263,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
@@ -314,9 +331,9 @@
       "supplemental_rows": 1433,
       "supplemental_with_desc": 1433,
       "supplemental_meta": {
-        "generated_at": "2026-06-19T08:06:32.295Z",
+        "generated_at": "2026-06-19T08:21:36.594Z",
         "lane_name": "custom",
-        "jobs_fetched": 4230
+        "jobs_fetched": 4231
       },
       "published_rows": 441,
       "published_pct": 100,
