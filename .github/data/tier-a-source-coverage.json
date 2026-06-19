@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-19T03:14:43.992Z",
+  "generated_at": "2026-06-19T03:28:40.293Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -66,7 +66,7 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-19T03:11:56.491Z",
+    "generated_at": "2026-06-19T03:21:23.832Z",
     "source_basis": "us_jobs.json",
     "board_row_count": 8819,
     "description_entries": 8106,
@@ -80,12 +80,14 @@
     "enrichment_version": 86
   },
   "consumer_alert": {
-    "checked_at": "2026-06-19T03:14:40.213Z",
+    "checked_at": "2026-06-19T03:28:36.595Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [],
-    "warning_count": 0,
+    "warnings": [
+      "Senior filter FP rate elevated: 10.6% (53/500). May indicate keyword over-matching."
+    ],
+    "warning_count": 1,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -97,11 +99,11 @@
   "rows": [
     {
       "source": "oracle",
-      "pool_rows": 5445,
-      "us_rows": 3387,
-      "tech_us_rows": 367,
+      "pool_rows": 5438,
+      "us_rows": 3383,
+      "tech_us_rows": 363,
       "raw_sidecar_rows": 4174,
-      "sidecar_active_rows": 249,
+      "sidecar_active_rows": 246,
       "supplemental_rows": 22933,
       "supplemental_with_desc": 17178,
       "supplemental_meta": {
@@ -109,12 +111,12 @@
         "lane_name": "oracle",
         "jobs_fetched": 22933
       },
-      "published_rows": 249,
+      "published_rows": 246,
       "published_pct": 67.8,
-      "enriched_rows": 367,
-      "enriched_pct": 100,
-      "enriched_with_skills": 273,
-      "skills_pct": 74.4,
+      "enriched_rows": 357,
+      "enriched_pct": 98.3,
+      "enriched_with_skills": 264,
+      "skills_pct": 73.9,
       "examples": [
         {
           "id": "oracle-onsemi-2505785",
@@ -130,6 +132,11 @@
           "id": "oracle-jpmorgan-chase-210752970",
           "company": "JPMorgan Chase",
           "title": "Data Analytics Resource Planning - Associate"
+        },
+        {
+          "id": "oracle-oracle-337608",
+          "company": "Oracle",
+          "title": "GPU/CPU Systems Engineer"
         },
         {
           "id": "oracle-texas-instruments-25011171",
@@ -150,11 +157,6 @@
           "id": "oracle-wsp-89415",
           "company": "WSP",
           "title": "Mid-Level Mechanical Engineer (Generation)"
-        },
-        {
-          "id": "oracle-wsp-89416",
-          "company": "WSP",
-          "title": "Associate Electrical Engineer"
         }
       ],
       "severity": "high",
@@ -172,9 +174,9 @@
       "supplemental_rows": 315,
       "supplemental_with_desc": 315,
       "supplemental_meta": {
-        "generated_at": "2026-06-19T03:07:46.467Z",
+        "generated_at": "2026-06-19T03:22:51.132Z",
         "lane_name": "custom",
-        "jobs_fetched": 4255
+        "jobs_fetched": 4257
       },
       "published_rows": 11,
       "published_pct": 100,
@@ -190,60 +192,60 @@
     },
     {
       "source": "workday",
-      "pool_rows": 34686,
-      "us_rows": 18263,
-      "tech_us_rows": 5334,
-      "raw_sidecar_rows": 18474,
-      "sidecar_active_rows": 5237,
+      "pool_rows": 34684,
+      "us_rows": 18114,
+      "tech_us_rows": 5247,
+      "raw_sidecar_rows": 18697,
+      "sidecar_active_rows": 5151,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 5237,
-      "published_pct": 98.2,
-      "enriched_rows": 5291,
+      "published_rows": 5023,
+      "published_pct": 95.7,
+      "enriched_rows": 5205,
       "enriched_pct": 99.2,
-      "enriched_with_skills": 4811,
-      "skills_pct": 90.9,
+      "enriched_with_skills": 4728,
+      "skills_pct": 90.8,
       "examples": [
         {
-          "id": "workday-jll-REQ512965",
-          "company": "JLL",
-          "title": "Global Network Inventory Analyst"
+          "id": "workday-fidelity-investments-2131031",
+          "company": "Fidelity Investments",
+          "title": "Consultant, Business Analysis"
         },
         {
-          "id": "workday-jabil-J2453734",
-          "company": "Jabil",
-          "title": "Summer Engineering Intern - Onsite, Part Time in San Jose, CA"
+          "id": "workday-entegris-REQ-12443",
+          "company": "Entegris",
+          "title": "Faclities HVAC Technician, 1st shift, $3k sign on bonus!"
         },
         {
-          "id": "workday-johnson-controls-WD30272416",
-          "company": "Johnson Controls",
-          "title": "HVAC Truck Based Controls Service Engineer"
+          "id": "workday-envista-holdings-R5026581",
+          "company": "Envista Holdings",
+          "title": "Maintenance Engineer"
         },
         {
-          "id": "workday-hp-inc-3161113",
-          "company": "HP Inc",
-          "title": "Firmware Developer"
+          "id": "workday-td-bank-R_1494208",
+          "company": "TD Bank",
+          "title": "IT Solutions Design Specialist (US) - Commercial ACBS"
         },
         {
-          "id": "workday-guidehouse-40755",
-          "company": "Guidehouse",
-          "title": "Microsoft Dynamics and Power Platform Developer"
+          "id": "workday-danaher-R1307936",
+          "company": "Danaher",
+          "title": "PMO Analyst (Aerospace, Data Analytics, SAP, Accolade)"
         },
         {
-          "id": "workday-guidehouse-40651",
-          "company": "Guidehouse",
-          "title": "Bioinformatics Scientist"
+          "id": "workday-danaher-R1312752",
+          "company": "Danaher",
+          "title": "Field Service Engineer-South East Michigan"
         },
         {
-          "id": "workday-icf-R2602147",
-          "company": "ICF",
-          "title": "Full Stack Engineer (Node/React) - Remote USA"
+          "id": "workday-danaher-R1312576",
+          "company": "Danaher",
+          "title": "Field Service Engineer - Daily Field Travel – Buffalo, NY Territory (necessity to reside within 60 minutes of Buffalo or ability to relocate)"
         },
         {
-          "id": "workday-huntsman-J-019948",
-          "company": "Huntsman",
-          "title": "Zone Maintenance Engineer"
+          "id": "workday-rtx-01853766",
+          "company": "RTX",
+          "title": "Software Engineer II - Embedded Linux (Onsite)"
         }
       ],
       "severity": "ok",
@@ -251,30 +253,25 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 344,
-      "us_rows": 162,
-      "tech_us_rows": 68,
+      "pool_rows": 340,
+      "us_rows": 158,
+      "tech_us_rows": 67,
       "raw_sidecar_rows": 302,
       "sidecar_active_rows": 65,
-      "supplemental_rows": 1451,
-      "supplemental_with_desc": 120,
+      "supplemental_rows": 1453,
+      "supplemental_with_desc": 134,
       "supplemental_meta": {
-        "generated_at": "2026-06-19T03:07:46.467Z",
+        "generated_at": "2026-06-19T03:22:51.132Z",
         "lane_name": "custom",
-        "jobs_fetched": 4255
+        "jobs_fetched": 4257
       },
       "published_rows": 65,
-      "published_pct": 95.6,
-      "enriched_rows": 68,
+      "published_pct": 97,
+      "enriched_rows": 67,
       "enriched_pct": 100,
-      "enriched_with_skills": 68,
+      "enriched_with_skills": 67,
       "skills_pct": 100,
       "examples": [
-        {
-          "id": "microsoft-200039413",
-          "company": "Microsoft",
-          "title": "Cloud Solution Architect"
-        },
         {
           "id": "microsoft-200037236",
           "company": "Microsoft",
@@ -319,9 +316,9 @@
       "supplemental_rows": 1432,
       "supplemental_with_desc": 1432,
       "supplemental_meta": {
-        "generated_at": "2026-06-19T03:07:46.467Z",
+        "generated_at": "2026-06-19T03:22:51.132Z",
         "lane_name": "custom",
-        "jobs_fetched": 4255
+        "jobs_fetched": 4257
       },
       "published_rows": 440,
       "published_pct": 100,
