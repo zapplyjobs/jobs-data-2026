@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-19T23:08:10.251Z",
+  "generated_at": "2026-06-19T23:22:15.184Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -66,26 +66,28 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-19T23:05:30.168Z",
+    "generated_at": "2026-06-19T23:20:15.314Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 8796,
-    "description_entries": 8119,
-    "coverage_pct": 92.3,
+    "board_row_count": 8669,
+    "description_entries": 7996,
+    "coverage_pct": 92.2,
     "source_breakdown": {
-      "sidecar": 8119,
+      "sidecar": 7996,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-19T22:51:01.482Z",
+    "jobs_metadata_generated": "2026-06-19T23:06:18.809Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 87
   },
   "consumer_alert": {
-    "checked_at": "2026-06-19T23:08:06.803Z",
+    "checked_at": "2026-06-19T23:22:10.978Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [],
-    "warning_count": 0,
+    "warnings": [
+      "Senior filter FP rate elevated: 10.4% (52/500). May indicate keyword over-matching."
+    ],
+    "warning_count": 1,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -97,24 +99,24 @@
   "rows": [
     {
       "source": "oracle",
-      "pool_rows": 5838,
-      "us_rows": 3647,
+      "pool_rows": 5839,
+      "us_rows": 3646,
       "tech_us_rows": 440,
-      "raw_sidecar_rows": 4988,
+      "raw_sidecar_rows": 4566,
       "sidecar_active_rows": 322,
       "supplemental_rows": 25810,
-      "supplemental_with_desc": 18642,
+      "supplemental_with_desc": 18647,
       "supplemental_meta": {
-        "generated_at": "2026-06-19T23:05:00.663Z",
+        "generated_at": "2026-06-19T23:19:48.337Z",
         "lane_name": "oracle",
         "jobs_fetched": 25810
       },
-      "published_rows": 320,
-      "published_pct": 72.7,
-      "enriched_rows": 438,
-      "enriched_pct": 99.5,
-      "enriched_with_skills": 341,
-      "skills_pct": 77.9,
+      "published_rows": 322,
+      "published_pct": 73.2,
+      "enriched_rows": 440,
+      "enriched_pct": 100,
+      "enriched_with_skills": 342,
+      "skills_pct": 77.7,
       "examples": [
         {
           "id": "oracle-fortive-10061",
@@ -172,7 +174,7 @@
       "supplemental_rows": 316,
       "supplemental_with_desc": 316,
       "supplemental_meta": {
-        "generated_at": "2026-06-19T23:06:38.676Z",
+        "generated_at": "2026-06-19T23:21:19.378Z",
         "lane_name": "custom",
         "jobs_fetched": 4253
       },
@@ -190,60 +192,60 @@
     },
     {
       "source": "workday",
-      "pool_rows": 33479,
-      "us_rows": 17593,
-      "tech_us_rows": 5104,
-      "raw_sidecar_rows": 18384,
-      "sidecar_active_rows": 4987,
+      "pool_rows": 33462,
+      "us_rows": 17397,
+      "tech_us_rows": 5228,
+      "raw_sidecar_rows": 18427,
+      "sidecar_active_rows": 5122,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 4924,
-      "published_pct": 96.5,
-      "enriched_rows": 5034,
-      "enriched_pct": 98.6,
-      "enriched_with_skills": 4582,
-      "skills_pct": 91,
+      "published_rows": 4962,
+      "published_pct": 94.9,
+      "enriched_rows": 5182,
+      "enriched_pct": 99.1,
+      "enriched_with_skills": 4711,
+      "skills_pct": 90.9,
       "examples": [
         {
-          "id": "workday-magna-R00247802",
-          "company": "Magna",
-          "title": "Engineer, Tooling"
+          "id": "workday-danaher-R1312576",
+          "company": "Danaher",
+          "title": "Field Service Engineer - Daily Field Travel – Buffalo, NY Territory (necessity to reside within 60 minutes of Buffalo or ability to relocate)"
         },
         {
-          "id": "workday-marvell-2602858",
-          "company": "Marvell",
-          "title": "Digital Logic + Design Verification Graduate Co-Op Program (US - Fall 2026)"
+          "id": "workday-danaher-R1307936",
+          "company": "Danaher",
+          "title": "PMO Analyst (Aerospace, Data Analytics, SAP, Accolade)"
         },
         {
-          "id": "workday-jll-REQ511562",
-          "company": "JLL",
-          "title": "Maintenance Electrician"
+          "id": "workday-crowdstrike-R27636",
+          "company": "CrowdStrike",
+          "title": "Corporate Sales Engineer (Remote)"
         },
         {
-          "id": "workday-jll-REQ516441",
-          "company": "JLL",
-          "title": "GMP Cleaner"
+          "id": "workday-curtiss-wright-JR12557",
+          "company": "Curtiss-Wright",
+          "title": "Nuclear Sales Operation Specialist"
         },
         {
-          "id": "workday-jll-REQ511187",
-          "company": "JLL",
-          "title": "Building Engineer"
+          "id": "workday-citi-26968276",
+          "company": "Citi",
+          "title": "Officer .NET Programmer Analyst"
         },
         {
-          "id": "workday-jll-REQ514341",
-          "company": "JLL",
-          "title": "Energy and Decarbonization Portfolio Manager"
+          "id": "workday-citi-26968274",
+          "company": "Citi",
+          "title": "Officer .NET Programmer Analyst"
         },
         {
-          "id": "workday-jll-REQ487545",
-          "company": "JLL",
-          "title": "Mech and Robotics Tech"
+          "id": "workday-citi-26967872",
+          "company": "Citi",
+          "title": "Java-Python Context Engineer"
         },
         {
-          "id": "workday-jll-REQ498423",
-          "company": "JLL",
-          "title": "Mech & Robotics Tech"
+          "id": "workday-cigna-26006449",
+          "company": "Cigna",
+          "title": "Data Measurement & Reporting Advisor - Evernorth - Remote"
         }
       ],
       "severity": "ok",
@@ -251,34 +253,29 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 338,
-      "us_rows": 151,
+      "pool_rows": 336,
+      "us_rows": 150,
       "tech_us_rows": 64,
-      "raw_sidecar_rows": 316,
+      "raw_sidecar_rows": 302,
       "sidecar_active_rows": 62,
       "supplemental_rows": 1448,
-      "supplemental_with_desc": 106,
+      "supplemental_with_desc": 133,
       "supplemental_meta": {
-        "generated_at": "2026-06-19T23:06:38.676Z",
+        "generated_at": "2026-06-19T23:21:19.378Z",
         "lane_name": "custom",
         "jobs_fetched": 4253
       },
-      "published_rows": 61,
-      "published_pct": 95.3,
-      "enriched_rows": 62,
-      "enriched_pct": 96.9,
-      "enriched_with_skills": 62,
+      "published_rows": 62,
+      "published_pct": 96.9,
+      "enriched_rows": 64,
+      "enriched_pct": 100,
+      "enriched_with_skills": 64,
       "skills_pct": 100,
       "examples": [
         {
           "id": "microsoft-200035645",
           "company": "Microsoft",
           "title": "Software Engineer - CTJ - Poly"
-        },
-        {
-          "id": "microsoft-200031947",
-          "company": "Microsoft",
-          "title": "Critical Environment Program Manager"
         },
         {
           "id": "microsoft-200039796",
@@ -291,10 +288,10 @@
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 1031,
-      "us_rows": 1030,
+      "pool_rows": 1030,
+      "us_rows": 1029,
       "tech_us_rows": 262,
-      "raw_sidecar_rows": 5709,
+      "raw_sidecar_rows": 2221,
       "sidecar_active_rows": 262,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
@@ -314,12 +311,12 @@
       "pool_rows": 1011,
       "us_rows": 1011,
       "tech_us_rows": 440,
-      "raw_sidecar_rows": 1020,
+      "raw_sidecar_rows": 1011,
       "sidecar_active_rows": 440,
       "supplemental_rows": 1435,
       "supplemental_with_desc": 1435,
       "supplemental_meta": {
-        "generated_at": "2026-06-19T23:06:38.676Z",
+        "generated_at": "2026-06-19T23:21:19.378Z",
         "lane_name": "custom",
         "jobs_fetched": 4253
       },
