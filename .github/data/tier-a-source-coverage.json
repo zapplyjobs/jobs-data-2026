@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-19T04:53:54.283Z",
+  "generated_at": "2026-06-19T05:06:37.935Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -66,25 +66,25 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-19T04:51:02.218Z",
+    "generated_at": "2026-06-19T05:03:55.287Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 8829,
-    "description_entries": 8125,
-    "coverage_pct": 92,
+    "board_row_count": 8684,
+    "description_entries": 8036,
+    "coverage_pct": 92.5,
     "source_breakdown": {
-      "sidecar": 8125,
+      "sidecar": 8036,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-19T04:23:57.179Z",
+    "jobs_metadata_generated": "2026-06-19T04:50:49.696Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 86
   },
   "consumer_alert": {
-    "checked_at": "2026-06-19T04:53:49.583Z",
+    "checked_at": "2026-06-19T05:06:33.245Z",
     "active": true,
-    "message": "**Submodule bump failed** (run 27805349425, 27 min ago) and live drift remains in 1 target(s): aggregator:jobs-aggregator-private. Check [run log](https://github.com/zapplyjobs/jobs-aggregator-private/actions/runs/27805349425).",
+    "message": "**Submodule bump failed** (run 27805349425, 40 min ago) and live drift remains in 1 target(s): aggregator:jobs-aggregator-private. Check [run log](https://github.com/zapplyjobs/jobs-aggregator-private/actions/runs/27805349425).",
     "failures": [
-      "**Submodule bump failed** (run 27805349425, 27 min ago) and live drift remains in 1 target(s): aggregator:jobs-aggregator-private. Check [run log](https://github.com/zapplyjobs/jobs-aggregator-private/actions/runs/27805349425)."
+      "**Submodule bump failed** (run 27805349425, 40 min ago) and live drift remains in 1 target(s): aggregator:jobs-aggregator-private. Check [run log](https://github.com/zapplyjobs/jobs-aggregator-private/actions/runs/27805349425)."
     ],
     "warnings": [],
     "warning_count": 0,
@@ -98,25 +98,112 @@
   },
   "rows": [
     {
+      "source": "icims",
+      "pool_rows": 59,
+      "us_rows": 47,
+      "tech_us_rows": 11,
+      "raw_sidecar_rows": 59,
+      "sidecar_active_rows": 11,
+      "supplemental_rows": 315,
+      "supplemental_with_desc": 315,
+      "supplemental_meta": {
+        "generated_at": "2026-06-19T04:51:31.246Z",
+        "lane_name": "custom",
+        "jobs_fetched": 4254
+      },
+      "published_rows": 11,
+      "published_pct": 100,
+      "enriched_rows": 11,
+      "enriched_pct": 100,
+      "enriched_with_skills": 6,
+      "skills_pct": 54.5,
+      "examples": [],
+      "severity": "medium",
+      "flags": [
+        "low_skill_fill"
+      ]
+    },
+    {
+      "source": "workday",
+      "pool_rows": 34601,
+      "us_rows": 18122,
+      "tech_us_rows": 5260,
+      "raw_sidecar_rows": 19322,
+      "sidecar_active_rows": 5163,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 5163,
+      "published_pct": 98.2,
+      "enriched_rows": 5214,
+      "enriched_pct": 99.1,
+      "enriched_with_skills": 4724,
+      "skills_pct": 90.6,
+      "examples": [
+        {
+          "id": "workday-booz-allen-hamilton-R0242567",
+          "company": "Booz Allen Hamilton",
+          "title": "HUMINT Targeting Specialist"
+        },
+        {
+          "id": "workday-booz-allen-hamilton-R0239889",
+          "company": "Booz Allen Hamilton",
+          "title": "Cybersecurity AI/ML Engineer"
+        },
+        {
+          "id": "workday-booz-allen-hamilton-R0242557",
+          "company": "Booz Allen Hamilton",
+          "title": "DevOps Cloud Engineer"
+        },
+        {
+          "id": "workday-booz-allen-hamilton-R0241988",
+          "company": "Booz Allen Hamilton",
+          "title": "Software Engineer"
+        },
+        {
+          "id": "workday-caci-327957",
+          "company": "CACI",
+          "title": "Administrative Support Officer"
+        },
+        {
+          "id": "workday-caci-327866",
+          "company": "CACI",
+          "title": "Computer Operator V"
+        },
+        {
+          "id": "workday-avis-budget-group-R0188332",
+          "company": "Avis Budget Group",
+          "title": "Deployed Transformation Engineer"
+        },
+        {
+          "id": "workday-avis-budget-group-R0189309",
+          "company": "Avis Budget Group",
+          "title": "Deletion Manager"
+        }
+      ],
+      "severity": "ok",
+      "flags": []
+    },
+    {
       "source": "oracle",
       "pool_rows": 5091,
       "us_rows": 3223,
       "tech_us_rows": 301,
-      "raw_sidecar_rows": 4145,
+      "raw_sidecar_rows": 4060,
       "sidecar_active_rows": 249,
-      "supplemental_rows": 22107,
-      "supplemental_with_desc": 17037,
+      "supplemental_rows": 25702,
+      "supplemental_with_desc": 18454,
       "supplemental_meta": {
-        "generated_at": "2026-06-19T04:43:26.716Z",
+        "generated_at": "2026-06-19T04:59:27.622Z",
         "lane_name": "oracle",
-        "jobs_fetched": 22107
+        "jobs_fetched": 25702
       },
       "published_rows": 249,
       "published_pct": 82.7,
-      "enriched_rows": 295,
-      "enriched_pct": 98,
-      "enriched_with_skills": 205,
-      "skills_pct": 69.5,
+      "enriched_rows": 301,
+      "enriched_pct": 100,
+      "enriched_with_skills": 211,
+      "skills_pct": 70.1,
       "examples": [
         {
           "id": "oracle-onsemi-2505785",
@@ -159,95 +246,6 @@
           "title": "Project Engineer-Atlanta (Tucker, GA)"
         }
       ],
-      "severity": "medium",
-      "flags": [
-        "low_skill_fill"
-      ]
-    },
-    {
-      "source": "icims",
-      "pool_rows": 59,
-      "us_rows": 47,
-      "tech_us_rows": 11,
-      "raw_sidecar_rows": 59,
-      "sidecar_active_rows": 11,
-      "supplemental_rows": 315,
-      "supplemental_with_desc": 315,
-      "supplemental_meta": {
-        "generated_at": "2026-06-19T04:51:31.246Z",
-        "lane_name": "custom",
-        "jobs_fetched": 4254
-      },
-      "published_rows": 11,
-      "published_pct": 100,
-      "enriched_rows": 11,
-      "enriched_pct": 100,
-      "enriched_with_skills": 6,
-      "skills_pct": 54.5,
-      "examples": [],
-      "severity": "medium",
-      "flags": [
-        "low_skill_fill"
-      ]
-    },
-    {
-      "source": "workday",
-      "pool_rows": 34601,
-      "us_rows": 18122,
-      "tech_us_rows": 5260,
-      "raw_sidecar_rows": 19298,
-      "sidecar_active_rows": 5161,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 5040,
-      "published_pct": 95.8,
-      "enriched_rows": 5211,
-      "enriched_pct": 99.1,
-      "enriched_with_skills": 4722,
-      "skills_pct": 90.6,
-      "examples": [
-        {
-          "id": "workday-booz-allen-hamilton-R0242567",
-          "company": "Booz Allen Hamilton",
-          "title": "HUMINT Targeting Specialist"
-        },
-        {
-          "id": "workday-booz-allen-hamilton-R0239889",
-          "company": "Booz Allen Hamilton",
-          "title": "Cybersecurity AI/ML Engineer"
-        },
-        {
-          "id": "workday-booz-allen-hamilton-R0242557",
-          "company": "Booz Allen Hamilton",
-          "title": "DevOps Cloud Engineer"
-        },
-        {
-          "id": "workday-booz-allen-hamilton-R0241988",
-          "company": "Booz Allen Hamilton",
-          "title": "Software Engineer"
-        },
-        {
-          "id": "workday-caci-327927",
-          "company": "CACI",
-          "title": "Full Stack Software Developer/Engineer"
-        },
-        {
-          "id": "workday-caci-327902",
-          "company": "CACI",
-          "title": "Full Stack Developer"
-        },
-        {
-          "id": "workday-caci-326864",
-          "company": "CACI",
-          "title": "AI/ML Engineer"
-        },
-        {
-          "id": "workday-caci-327957",
-          "company": "CACI",
-          "title": "Administrative Support Officer"
-        }
-      ],
       "severity": "ok",
       "flags": []
     },
@@ -256,7 +254,7 @@
       "pool_rows": 338,
       "us_rows": 159,
       "tech_us_rows": 67,
-      "raw_sidecar_rows": 300,
+      "raw_sidecar_rows": 297,
       "sidecar_active_rows": 64,
       "supplemental_rows": 1449,
       "supplemental_with_desc": 131,
