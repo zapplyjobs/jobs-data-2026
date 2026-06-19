@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-19T01:23:57.587Z",
+  "generated_at": "2026-06-19T01:38:31.474Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -66,25 +66,25 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-19T01:21:25.678Z",
+    "generated_at": "2026-06-19T01:36:17.420Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 8695,
-    "description_entries": 7986,
-    "coverage_pct": 91.8,
+    "board_row_count": 8724,
+    "description_entries": 8016,
+    "coverage_pct": 91.9,
     "source_breakdown": {
-      "sidecar": 7986,
+      "sidecar": 8016,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-19T01:15:08.362Z",
+    "jobs_metadata_generated": "2026-06-19T01:26:14.188Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 86
   },
   "consumer_alert": {
-    "checked_at": "2026-06-19T01:23:53.185Z",
+    "checked_at": "2026-06-19T01:38:27.266Z",
     "active": true,
-    "message": "**P-2 submodule drift detected**: shared: 2 different SHAs — jobs-aggregator-private: 3825f80ae499, jobs-data-2026: 3825f80ae499, New-Grad-Software-Engineering-Jobs-2026: 87f4440b4f6c, New-Grad-Data-Science-Jobs-2026: 3825f80ae499, New-Grad-Hardware-Engineering-Jobs-2026: 3825f80ae499, New-Grad-Healthcare-Jobs-2026: 3825f80ae499",
+    "message": "**Submodule bump failed** (run 27799961966, 5 min ago): SHA validation or P-2 verification failed. Check [run log](https://github.com/zapplyjobs/jobs-aggregator-private/actions/runs/27799961966).",
     "failures": [
-      "**P-2 submodule drift detected**: shared: 2 different SHAs — jobs-aggregator-private: 3825f80ae499, jobs-data-2026: 3825f80ae499, New-Grad-Software-Engineering-Jobs-2026: 87f4440b4f6c, New-Grad-Data-Science-Jobs-2026: 3825f80ae499, New-Grad-Hardware-Engineering-Jobs-2026: 3825f80ae499, New-Grad-Healthcare-Jobs-2026: 3825f80ae499"
+      "**Submodule bump failed** (run 27799961966, 5 min ago): SHA validation or P-2 verification failed. Check [run log](https://github.com/zapplyjobs/jobs-aggregator-private/actions/runs/27799961966)."
     ],
     "warnings": [],
     "warning_count": 0,
@@ -99,25 +99,30 @@
   "rows": [
     {
       "source": "oracle",
-      "pool_rows": 5432,
-      "us_rows": 3382,
-      "tech_us_rows": 367,
-      "raw_sidecar_rows": 4137,
-      "sidecar_active_rows": 239,
-      "supplemental_rows": 25774,
-      "supplemental_with_desc": 18522,
+      "pool_rows": 5438,
+      "us_rows": 3386,
+      "tech_us_rows": 369,
+      "raw_sidecar_rows": 4169,
+      "sidecar_active_rows": 252,
+      "supplemental_rows": 25780,
+      "supplemental_with_desc": 18524,
       "supplemental_meta": {
-        "generated_at": "2026-06-19T01:14:59.121Z",
+        "generated_at": "2026-06-19T01:28:31.396Z",
         "lane_name": "oracle",
-        "jobs_fetched": 25774
+        "jobs_fetched": 25780
       },
-      "published_rows": 239,
-      "published_pct": 65.1,
-      "enriched_rows": 353,
-      "enriched_pct": 96.2,
-      "enriched_with_skills": 266,
-      "skills_pct": 75.4,
+      "published_rows": 252,
+      "published_pct": 68.3,
+      "enriched_rows": 366,
+      "enriched_pct": 99.2,
+      "enriched_with_skills": 273,
+      "skills_pct": 74.6,
       "examples": [
+        {
+          "id": "oracle-onsemi-2505785",
+          "company": "onsemi",
+          "title": "Manufacturing Process Engineer"
+        },
         {
           "id": "oracle-grant-thornton-115035",
           "company": "Grant Thornton",
@@ -127,16 +132,6 @@
           "id": "oracle-jpmorgan-chase-210752970",
           "company": "JPMorgan Chase",
           "title": "Data Analytics Resource Planning - Associate"
-        },
-        {
-          "id": "oracle-oracle-335678",
-          "company": "Oracle",
-          "title": "Software Developer 3"
-        },
-        {
-          "id": "oracle-oracle-337608",
-          "company": "Oracle",
-          "title": "GPU/CPU Systems Engineer"
         },
         {
           "id": "oracle-texas-instruments-25011171",
@@ -157,6 +152,11 @@
           "id": "oracle-wsp-89415",
           "company": "WSP",
           "title": "Mid-Level Mechanical Engineer (Generation)"
+        },
+        {
+          "id": "oracle-wsp-89416",
+          "company": "WSP",
+          "title": "Associate Electrical Engineer"
         }
       ],
       "severity": "high",
@@ -169,14 +169,14 @@
       "pool_rows": 59,
       "us_rows": 47,
       "tech_us_rows": 11,
-      "raw_sidecar_rows": 315,
+      "raw_sidecar_rows": 59,
       "sidecar_active_rows": 11,
       "supplemental_rows": 315,
       "supplemental_with_desc": 315,
       "supplemental_meta": {
-        "generated_at": "2026-06-19T01:22:13.436Z",
+        "generated_at": "2026-06-19T01:36:34.966Z",
         "lane_name": "custom",
-        "jobs_fetched": 4253
+        "jobs_fetched": 4254
       },
       "published_rows": 11,
       "published_pct": 100,
@@ -192,45 +192,40 @@
     },
     {
       "source": "workday",
-      "pool_rows": 34481,
-      "us_rows": 18033,
-      "tech_us_rows": 5148,
-      "raw_sidecar_rows": 16557,
-      "sidecar_active_rows": 5052,
+      "pool_rows": 34426,
+      "us_rows": 18102,
+      "tech_us_rows": 5240,
+      "raw_sidecar_rows": 16766,
+      "sidecar_active_rows": 5138,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 5011,
-      "published_pct": 97.3,
-      "enriched_rows": 5106,
-      "enriched_pct": 99.2,
-      "enriched_with_skills": 4621,
-      "skills_pct": 90.5,
+      "published_rows": 5066,
+      "published_pct": 96.7,
+      "enriched_rows": 5194,
+      "enriched_pct": 99.1,
+      "enriched_with_skills": 4691,
+      "skills_pct": 90.3,
       "examples": [
         {
-          "id": "workday-motorola-solutions-R64691",
-          "company": "Motorola Solutions",
-          "title": "CAD Systems Manager - Eastern Region"
+          "id": "workday-hpe-(university)-1207648",
+          "company": "HPE (University)",
+          "title": "Hardware Engineering Program Manager 3"
         },
         {
-          "id": "workday-motorola-solutions-R64690",
-          "company": "Motorola Solutions",
-          "title": "RMS System Manager - Hybrid"
+          "id": "workday-hpe-(university)-1207702",
+          "company": "HPE (University)",
+          "title": "Hardware Engineer 3 – Electrical Validation & Testing"
         },
         {
-          "id": "workday-nelnet-R22763",
-          "company": "Nelnet",
-          "title": "Intern - AI Engineer"
+          "id": "workday-hpe-1207648",
+          "company": "HPE",
+          "title": "Hardware Engineering Program Manager 3"
         },
         {
-          "id": "workday-marvell-2602618",
-          "company": "Marvell",
-          "title": "Program Inventory Ops/Analyst"
-        },
-        {
-          "id": "workday-microchip-technology-R2525-26",
-          "company": "Microchip Technology",
-          "title": "Technician III- Equipment (Implant)"
+          "id": "workday-hpe-1207702",
+          "company": "HPE",
+          "title": "Hardware Engineer 3 – Electrical Validation & Testing"
         },
         {
           "id": "workday-hp-inc-3161113",
@@ -243,9 +238,14 @@
           "title": "Software Firmware Engineer"
         },
         {
-          "id": "workday-applied-materials-R2621779",
-          "company": "Applied Materials",
-          "title": "Business Intelligence Analyst"
+          "id": "workday-hitachi-R0095755",
+          "company": "Hitachi",
+          "title": "Field Service Engineer - AIS"
+        },
+        {
+          "id": "workday-hitachi-R0133483",
+          "company": "Hitachi",
+          "title": "Quality Engineer- (Off Shift)"
         }
       ],
       "severity": "ok",
@@ -253,17 +253,17 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 335,
-      "us_rows": 157,
+      "pool_rows": 334,
+      "us_rows": 160,
       "tech_us_rows": 68,
-      "raw_sidecar_rows": 295,
+      "raw_sidecar_rows": 297,
       "sidecar_active_rows": 65,
-      "supplemental_rows": 1449,
-      "supplemental_with_desc": 120,
+      "supplemental_rows": 1450,
+      "supplemental_with_desc": 127,
       "supplemental_meta": {
-        "generated_at": "2026-06-19T01:22:13.436Z",
+        "generated_at": "2026-06-19T01:36:34.966Z",
         "lane_name": "custom",
-        "jobs_fetched": 4253
+        "jobs_fetched": 4254
       },
       "published_rows": 65,
       "published_pct": 95.6,
@@ -296,7 +296,7 @@
       "pool_rows": 1287,
       "us_rows": 1286,
       "tech_us_rows": 264,
-      "raw_sidecar_rows": 2722,
+      "raw_sidecar_rows": 2721,
       "sidecar_active_rows": 264,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
@@ -321,9 +321,9 @@
       "supplemental_rows": 1432,
       "supplemental_with_desc": 1432,
       "supplemental_meta": {
-        "generated_at": "2026-06-19T01:22:13.436Z",
+        "generated_at": "2026-06-19T01:36:34.966Z",
         "lane_name": "custom",
-        "jobs_fetched": 4253
+        "jobs_fetched": 4254
       },
       "published_rows": 440,
       "published_pct": 100,
