@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-19T04:14:27.447Z",
+  "generated_at": "2026-06-19T04:23:19.172Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -66,7 +66,7 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-19T04:11:48.371Z",
+    "generated_at": "2026-06-19T04:20:32.756Z",
     "source_basis": "us_jobs.json",
     "board_row_count": 8891,
     "description_entries": 8181,
@@ -80,14 +80,14 @@
     "enrichment_version": 86
   },
   "consumer_alert": {
-    "checked_at": "2026-06-19T04:14:24.096Z",
-    "active": false,
-    "message": null,
-    "failures": [],
-    "warnings": [
-      "Senior filter FP rate elevated: 10.6% (53/500). May indicate keyword over-matching."
+    "checked_at": "2026-06-19T04:23:14.538Z",
+    "active": true,
+    "message": "**Submodule bump failed** (run 27803598320, 53 min ago) and live drift remains in 1 target(s): aggregator:jobs-aggregator-private. Check [run log](https://github.com/zapplyjobs/jobs-aggregator-private/actions/runs/27803598320).",
+    "failures": [
+      "**Submodule bump failed** (run 27803598320, 53 min ago) and live drift remains in 1 target(s): aggregator:jobs-aggregator-private. Check [run log](https://github.com/zapplyjobs/jobs-aggregator-private/actions/runs/27803598320)."
     ],
-    "warning_count": 1,
+    "warnings": [],
+    "warning_count": 0,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -99,11 +99,11 @@
   "rows": [
     {
       "source": "oracle",
-      "pool_rows": 5446,
-      "us_rows": 3384,
-      "tech_us_rows": 364,
+      "pool_rows": 5394,
+      "us_rows": 3348,
+      "tech_us_rows": 363,
       "raw_sidecar_rows": 4186,
-      "sidecar_active_rows": 251,
+      "sidecar_active_rows": 247,
       "supplemental_rows": 23529,
       "supplemental_with_desc": 17649,
       "supplemental_meta": {
@@ -111,12 +111,12 @@
         "lane_name": "oracle",
         "jobs_fetched": 23529
       },
-      "published_rows": 251,
-      "published_pct": 69,
-      "enriched_rows": 364,
-      "enriched_pct": 100,
-      "enriched_with_skills": 271,
-      "skills_pct": 74.5,
+      "published_rows": 247,
+      "published_pct": 68,
+      "enriched_rows": 357,
+      "enriched_pct": 98.3,
+      "enriched_with_skills": 265,
+      "skills_pct": 74.2,
       "examples": [
         {
           "id": "oracle-onsemi-2505785",
@@ -132,6 +132,11 @@
           "id": "oracle-jpmorgan-chase-210752970",
           "company": "JPMorgan Chase",
           "title": "Data Analytics Resource Planning - Associate"
+        },
+        {
+          "id": "oracle-oracle-337608",
+          "company": "Oracle",
+          "title": "GPU/CPU Systems Engineer"
         },
         {
           "id": "oracle-texas-instruments-25011171",
@@ -152,11 +157,6 @@
           "id": "oracle-wsp-89415",
           "company": "WSP",
           "title": "Mid-Level Mechanical Engineer (Generation)"
-        },
-        {
-          "id": "oracle-wsp-89416",
-          "company": "WSP",
-          "title": "Associate Electrical Engineer"
         }
       ],
       "severity": "high",
@@ -169,14 +169,14 @@
       "pool_rows": 59,
       "us_rows": 47,
       "tech_us_rows": 11,
-      "raw_sidecar_rows": 59,
+      "raw_sidecar_rows": 315,
       "sidecar_active_rows": 11,
       "supplemental_rows": 315,
       "supplemental_with_desc": 315,
       "supplemental_meta": {
-        "generated_at": "2026-06-19T04:07:37.741Z",
+        "generated_at": "2026-06-19T04:22:45.013Z",
         "lane_name": "custom",
-        "jobs_fetched": 4258
+        "jobs_fetched": 4255
       },
       "published_rows": 11,
       "published_pct": 100,
@@ -192,30 +192,25 @@
     },
     {
       "source": "workday",
-      "pool_rows": 34610,
-      "us_rows": 18293,
-      "tech_us_rows": 5401,
-      "raw_sidecar_rows": 19114,
-      "sidecar_active_rows": 5303,
+      "pool_rows": 34565,
+      "us_rows": 18041,
+      "tech_us_rows": 5255,
+      "raw_sidecar_rows": 19257,
+      "sidecar_active_rows": 5156,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 5303,
-      "published_pct": 98.2,
-      "enriched_rows": 5353,
-      "enriched_pct": 99.1,
-      "enriched_with_skills": 4880,
-      "skills_pct": 91.2,
+      "published_rows": 5004,
+      "published_pct": 95.2,
+      "enriched_rows": 5204,
+      "enriched_pct": 99,
+      "enriched_with_skills": 4724,
+      "skills_pct": 90.8,
       "examples": [
         {
-          "id": "workday-nelnet-R22763",
-          "company": "Nelnet",
-          "title": "Intern - AI Engineer"
-        },
-        {
-          "id": "workday-rtx-01853766",
-          "company": "RTX",
-          "title": "Software Engineer II - Embedded Linux (Onsite)"
+          "id": "workday-northrop-grumman-R10236932",
+          "company": "Northrop Grumman",
+          "title": "Systems Engineer - 3/4"
         },
         {
           "id": "workday-northrop-grumman-R10236360",
@@ -223,29 +218,34 @@
           "title": "Manager Embedded Software Engineer 3"
         },
         {
-          "id": "workday-northrop-grumman-R10236932",
-          "company": "Northrop Grumman",
-          "title": "Systems Engineer - 3/4"
+          "id": "workday-nelnet-R22763",
+          "company": "Nelnet",
+          "title": "Intern - AI Engineer"
         },
         {
-          "id": "workday-guidehouse-40755",
-          "company": "Guidehouse",
-          "title": "Microsoft Dynamics and Power Platform Developer"
+          "id": "workday-microchip-technology-R2525-26",
+          "company": "Microchip Technology",
+          "title": "Technician III- Equipment (Implant)"
         },
         {
-          "id": "workday-guidehouse-40651",
-          "company": "Guidehouse",
-          "title": "Bioinformatics Scientist"
+          "id": "workday-microchip-technology-R322-26",
+          "company": "Microchip Technology",
+          "title": "Engineer I-Software"
         },
         {
-          "id": "workday-johnson-controls-WD30272416",
-          "company": "Johnson Controls",
-          "title": "HVAC Truck Based Controls Service Engineer"
+          "id": "workday-keybank-R-39119",
+          "company": "KeyBank",
+          "title": "Archer GRC BA"
         },
         {
-          "id": "workday-gdit-RQ222752",
-          "company": "GDIT",
-          "title": "Systems Engineer – IT Capacity"
+          "id": "workday-vanguard-179193",
+          "company": "Vanguard",
+          "title": "DevSecOps Specialist"
+        },
+        {
+          "id": "workday-rtx-01853766",
+          "company": "RTX",
+          "title": "Software Engineer II - Embedded Linux (Onsite)"
         }
       ],
       "severity": "ok",
@@ -253,17 +253,17 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 341,
-      "us_rows": 159,
+      "pool_rows": 340,
+      "us_rows": 161,
       "tech_us_rows": 68,
       "raw_sidecar_rows": 298,
       "sidecar_active_rows": 65,
-      "supplemental_rows": 1453,
-      "supplemental_with_desc": 114,
+      "supplemental_rows": 1450,
+      "supplemental_with_desc": 107,
       "supplemental_meta": {
-        "generated_at": "2026-06-19T04:07:37.741Z",
+        "generated_at": "2026-06-19T04:22:45.013Z",
         "lane_name": "custom",
-        "jobs_fetched": 4258
+        "jobs_fetched": 4255
       },
       "published_rows": 65,
       "published_pct": 95.6,
@@ -293,10 +293,10 @@
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 1284,
-      "us_rows": 1283,
+      "pool_rows": 1283,
+      "us_rows": 1282,
       "tech_us_rows": 264,
-      "raw_sidecar_rows": 2714,
+      "raw_sidecar_rows": 2713,
       "sidecar_active_rows": 264,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
@@ -321,9 +321,9 @@
       "supplemental_rows": 1433,
       "supplemental_with_desc": 1433,
       "supplemental_meta": {
-        "generated_at": "2026-06-19T04:07:37.741Z",
+        "generated_at": "2026-06-19T04:22:45.013Z",
         "lane_name": "custom",
-        "jobs_fetched": 4258
+        "jobs_fetched": 4255
       },
       "published_rows": 441,
       "published_pct": 100,
