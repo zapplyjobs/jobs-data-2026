@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-19T03:53:25.810Z",
+  "generated_at": "2026-06-19T03:56:59.901Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -66,25 +66,25 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-19T03:50:55.953Z",
+    "generated_at": "2026-06-19T03:54:26.801Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 8489,
-    "description_entries": 7767,
-    "coverage_pct": 91.5,
+    "board_row_count": 8498,
+    "description_entries": 7828,
+    "coverage_pct": 92.1,
     "source_breakdown": {
-      "sidecar": 7767,
+      "sidecar": 7828,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-19T03:34:58.899Z",
+    "jobs_metadata_generated": "2026-06-19T03:49:58.309Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 86
   },
   "consumer_alert": {
-    "checked_at": "2026-06-19T03:53:21.589Z",
+    "checked_at": "2026-06-19T03:56:55.545Z",
     "active": true,
-    "message": "**Submodule bump failed** (run 27803598320, 23 min ago) and live drift remains in 1 target(s): processing:jobs-data-2026. Check [run log](https://github.com/zapplyjobs/jobs-aggregator-private/actions/runs/27803598320).",
+    "message": "**Submodule bump failed** (run 27803598320, 26 min ago) and live drift remains in 1 target(s): processing:jobs-data-2026. Check [run log](https://github.com/zapplyjobs/jobs-aggregator-private/actions/runs/27803598320).",
     "failures": [
-      "**Submodule bump failed** (run 27803598320, 23 min ago) and live drift remains in 1 target(s): processing:jobs-data-2026. Check [run log](https://github.com/zapplyjobs/jobs-aggregator-private/actions/runs/27803598320)."
+      "**Submodule bump failed** (run 27803598320, 26 min ago) and live drift remains in 1 target(s): processing:jobs-data-2026. Check [run log](https://github.com/zapplyjobs/jobs-aggregator-private/actions/runs/27803598320)."
     ],
     "warnings": [],
     "warning_count": 0,
@@ -98,11 +98,98 @@
   },
   "rows": [
     {
+      "source": "icims",
+      "pool_rows": 59,
+      "us_rows": 47,
+      "tech_us_rows": 11,
+      "raw_sidecar_rows": 59,
+      "sidecar_active_rows": 11,
+      "supplemental_rows": 315,
+      "supplemental_with_desc": 315,
+      "supplemental_meta": {
+        "generated_at": "2026-06-19T03:52:34.415Z",
+        "lane_name": "custom",
+        "jobs_fetched": 4258
+      },
+      "published_rows": 11,
+      "published_pct": 100,
+      "enriched_rows": 11,
+      "enriched_pct": 100,
+      "enriched_with_skills": 6,
+      "skills_pct": 54.5,
+      "examples": [],
+      "severity": "medium",
+      "flags": [
+        "low_skill_fill"
+      ]
+    },
+    {
+      "source": "workday",
+      "pool_rows": 34230,
+      "us_rows": 17723,
+      "tech_us_rows": 5069,
+      "raw_sidecar_rows": 18914,
+      "sidecar_active_rows": 4976,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 4976,
+      "published_pct": 98.2,
+      "enriched_rows": 5027,
+      "enriched_pct": 99.2,
+      "enriched_with_skills": 4546,
+      "skills_pct": 90.4,
+      "examples": [
+        {
+          "id": "workday-applied-materials-R2621779",
+          "company": "Applied Materials",
+          "title": "Business Intelligence Analyst"
+        },
+        {
+          "id": "workday-johnson-controls-WD30272416",
+          "company": "Johnson Controls",
+          "title": "HVAC Truck Based Controls Service Engineer"
+        },
+        {
+          "id": "workday-aerospace-corporation-R015111",
+          "company": "Aerospace Corporation",
+          "title": "Modeling, Simulation, and Analysis Engineer"
+        },
+        {
+          "id": "workday-booz-allen-hamilton-R0242567",
+          "company": "Booz Allen Hamilton",
+          "title": "HUMINT Targeting Specialist"
+        },
+        {
+          "id": "workday-booz-allen-hamilton-R0239889",
+          "company": "Booz Allen Hamilton",
+          "title": "Cybersecurity AI/ML Engineer"
+        },
+        {
+          "id": "workday-booz-allen-hamilton-R0242557",
+          "company": "Booz Allen Hamilton",
+          "title": "DevOps Cloud Engineer"
+        },
+        {
+          "id": "workday-booz-allen-hamilton-R0241988",
+          "company": "Booz Allen Hamilton",
+          "title": "Software Engineer"
+        },
+        {
+          "id": "workday-boeing-JR2026515606",
+          "company": "Boeing",
+          "title": "Hydro-Mechanical Systems Service Engineer (Associate or Experienced)"
+        }
+      ],
+      "severity": "ok",
+      "flags": []
+    },
+    {
       "source": "oracle",
       "pool_rows": 5150,
       "us_rows": 3261,
       "tech_us_rows": 304,
-      "raw_sidecar_rows": 4168,
+      "raw_sidecar_rows": 4092,
       "sidecar_active_rows": 244,
       "supplemental_rows": 22227,
       "supplemental_with_desc": 17128,
@@ -113,10 +200,10 @@
       },
       "published_rows": 244,
       "published_pct": 80.3,
-      "enriched_rows": 298,
-      "enriched_pct": 98,
-      "enriched_with_skills": 207,
-      "skills_pct": 69.5,
+      "enriched_rows": 304,
+      "enriched_pct": 100,
+      "enriched_with_skills": 213,
+      "skills_pct": 70.1,
       "examples": [
         {
           "id": "oracle-jpmorgan-chase-210720893",
@@ -157,95 +244,6 @@
           "id": "oracle-atlantic-health-30158",
           "company": "Atlantic Health System",
           "title": "Nuclear Medicine Technologist-Atlantic Health Morristown Medical Center-Per Diem"
-        }
-      ],
-      "severity": "medium",
-      "flags": [
-        "low_skill_fill"
-      ]
-    },
-    {
-      "source": "icims",
-      "pool_rows": 59,
-      "us_rows": 47,
-      "tech_us_rows": 11,
-      "raw_sidecar_rows": 315,
-      "sidecar_active_rows": 11,
-      "supplemental_rows": 315,
-      "supplemental_with_desc": 315,
-      "supplemental_meta": {
-        "generated_at": "2026-06-19T03:52:34.415Z",
-        "lane_name": "custom",
-        "jobs_fetched": 4258
-      },
-      "published_rows": 11,
-      "published_pct": 100,
-      "enriched_rows": 11,
-      "enriched_pct": 100,
-      "enriched_with_skills": 6,
-      "skills_pct": 54.5,
-      "examples": [],
-      "severity": "medium",
-      "flags": [
-        "low_skill_fill"
-      ]
-    },
-    {
-      "source": "workday",
-      "pool_rows": 34230,
-      "us_rows": 17723,
-      "tech_us_rows": 5069,
-      "raw_sidecar_rows": 18902,
-      "sidecar_active_rows": 4974,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 4779,
-      "published_pct": 94.3,
-      "enriched_rows": 5021,
-      "enriched_pct": 99.1,
-      "enriched_with_skills": 4540,
-      "skills_pct": 90.4,
-      "examples": [
-        {
-          "id": "workday-target-R0000441877",
-          "company": "Target",
-          "title": "Engineer -  Engineering Enablement"
-        },
-        {
-          "id": "workday-td-bank-R_1494208",
-          "company": "TD Bank",
-          "title": "IT Solutions Design Specialist (US) - Commercial ACBS"
-        },
-        {
-          "id": "workday-swbc-R0015005",
-          "company": "SWBC",
-          "title": "Marketing Intelligence Analyst III (Onsite)"
-        },
-        {
-          "id": "workday-philips-585893",
-          "company": "Philips",
-          "title": "Field Service Engineer - X-Ray (Rochester/Syracuse/Buffalo, NY)"
-        },
-        {
-          "id": "workday-applied-materials-R2622264",
-          "company": "Applied Materials",
-          "title": "Market Analyst"
-        },
-        {
-          "id": "workday-applied-materials-R2621779",
-          "company": "Applied Materials",
-          "title": "Business Intelligence Analyst"
-        },
-        {
-          "id": "workday-johnson-controls-WD30272324",
-          "company": "Johnson Controls",
-          "title": "HVAC  Truck Based Journeyman Mechanic (union)"
-        },
-        {
-          "id": "workday-johnson-controls-WD30272255",
-          "company": "Johnson Controls",
-          "title": "Controls Pre-Install Application Eng 3"
         }
       ],
       "severity": "ok",
@@ -307,10 +305,10 @@
       },
       "published_rows": 440,
       "published_pct": 99.8,
-      "enriched_rows": 440,
-      "enriched_pct": 99.8,
+      "enriched_rows": 441,
+      "enriched_pct": 100,
       "enriched_with_skills": 440,
-      "skills_pct": 100,
+      "skills_pct": 99.8,
       "examples": [
         {
           "id": "tiktok-7652727866048448821",
