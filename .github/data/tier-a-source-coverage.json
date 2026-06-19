@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-19T05:06:37.935Z",
+  "generated_at": "2026-06-19T05:15:06.607Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -80,14 +80,16 @@
     "enrichment_version": 86
   },
   "consumer_alert": {
-    "checked_at": "2026-06-19T05:06:33.245Z",
+    "checked_at": "2026-06-19T05:15:02.320Z",
     "active": true,
-    "message": "**Submodule bump failed** (run 27805349425, 40 min ago) and live drift remains in 1 target(s): aggregator:jobs-aggregator-private. Check [run log](https://github.com/zapplyjobs/jobs-aggregator-private/actions/runs/27805349425).",
+    "message": "**Submodule bump failed** (run 27805349425, 49 min ago) and live drift remains in 1 target(s): aggregator:jobs-aggregator-private. Check [run log](https://github.com/zapplyjobs/jobs-aggregator-private/actions/runs/27805349425).",
     "failures": [
-      "**Submodule bump failed** (run 27805349425, 40 min ago) and live drift remains in 1 target(s): aggregator:jobs-aggregator-private. Check [run log](https://github.com/zapplyjobs/jobs-aggregator-private/actions/runs/27805349425)."
+      "**Submodule bump failed** (run 27805349425, 49 min ago) and live drift remains in 1 target(s): aggregator:jobs-aggregator-private. Check [run log](https://github.com/zapplyjobs/jobs-aggregator-private/actions/runs/27805349425)."
     ],
-    "warnings": [],
-    "warning_count": 0,
+    "warnings": [
+      "Senior filter FP rate elevated: 10.2% (51/500). May indicate keyword over-matching."
+    ],
+    "warning_count": 1,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -98,110 +100,23 @@
   },
   "rows": [
     {
-      "source": "icims",
-      "pool_rows": 59,
-      "us_rows": 47,
-      "tech_us_rows": 11,
-      "raw_sidecar_rows": 59,
-      "sidecar_active_rows": 11,
-      "supplemental_rows": 315,
-      "supplemental_with_desc": 315,
-      "supplemental_meta": {
-        "generated_at": "2026-06-19T04:51:31.246Z",
-        "lane_name": "custom",
-        "jobs_fetched": 4254
-      },
-      "published_rows": 11,
-      "published_pct": 100,
-      "enriched_rows": 11,
-      "enriched_pct": 100,
-      "enriched_with_skills": 6,
-      "skills_pct": 54.5,
-      "examples": [],
-      "severity": "medium",
-      "flags": [
-        "low_skill_fill"
-      ]
-    },
-    {
-      "source": "workday",
-      "pool_rows": 34601,
-      "us_rows": 18122,
-      "tech_us_rows": 5260,
-      "raw_sidecar_rows": 19322,
-      "sidecar_active_rows": 5163,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 5163,
-      "published_pct": 98.2,
-      "enriched_rows": 5214,
-      "enriched_pct": 99.1,
-      "enriched_with_skills": 4724,
-      "skills_pct": 90.6,
-      "examples": [
-        {
-          "id": "workday-booz-allen-hamilton-R0242567",
-          "company": "Booz Allen Hamilton",
-          "title": "HUMINT Targeting Specialist"
-        },
-        {
-          "id": "workday-booz-allen-hamilton-R0239889",
-          "company": "Booz Allen Hamilton",
-          "title": "Cybersecurity AI/ML Engineer"
-        },
-        {
-          "id": "workday-booz-allen-hamilton-R0242557",
-          "company": "Booz Allen Hamilton",
-          "title": "DevOps Cloud Engineer"
-        },
-        {
-          "id": "workday-booz-allen-hamilton-R0241988",
-          "company": "Booz Allen Hamilton",
-          "title": "Software Engineer"
-        },
-        {
-          "id": "workday-caci-327957",
-          "company": "CACI",
-          "title": "Administrative Support Officer"
-        },
-        {
-          "id": "workday-caci-327866",
-          "company": "CACI",
-          "title": "Computer Operator V"
-        },
-        {
-          "id": "workday-avis-budget-group-R0188332",
-          "company": "Avis Budget Group",
-          "title": "Deployed Transformation Engineer"
-        },
-        {
-          "id": "workday-avis-budget-group-R0189309",
-          "company": "Avis Budget Group",
-          "title": "Deletion Manager"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
-    },
-    {
       "source": "oracle",
-      "pool_rows": 5091,
-      "us_rows": 3223,
-      "tech_us_rows": 301,
-      "raw_sidecar_rows": 4060,
-      "sidecar_active_rows": 249,
-      "supplemental_rows": 25702,
-      "supplemental_with_desc": 18454,
+      "pool_rows": 5413,
+      "us_rows": 3353,
+      "tech_us_rows": 367,
+      "raw_sidecar_rows": 4564,
+      "sidecar_active_rows": 254,
+      "supplemental_rows": 24742,
+      "supplemental_with_desc": 18177,
       "supplemental_meta": {
-        "generated_at": "2026-06-19T04:59:27.622Z",
+        "generated_at": "2026-06-19T05:14:25.783Z",
         "lane_name": "oracle",
-        "jobs_fetched": 25702
+        "jobs_fetched": 24742
       },
       "published_rows": 249,
-      "published_pct": 82.7,
+      "published_pct": 67.8,
       "enriched_rows": 301,
-      "enriched_pct": 100,
+      "enriched_pct": 82,
       "enriched_with_skills": 211,
       "skills_pct": 70.1,
       "examples": [
@@ -236,14 +151,103 @@
           "title": "Digital IC Design Engineer | DCC DAC"
         },
         {
-          "id": "oracle-atlantic-health-30158",
-          "company": "Atlantic Health System",
-          "title": "Nuclear Medicine Technologist-Atlantic Health Morristown Medical Center-Per Diem"
+          "id": "oracle-wsp-89414",
+          "company": "WSP",
+          "title": "Mechanical Engineer (Generation)"
         },
         {
-          "id": "oracle-hormel-foods-34552",
-          "company": "Hormel Foods",
-          "title": "Project Engineer-Atlanta (Tucker, GA)"
+          "id": "oracle-wsp-89415",
+          "company": "WSP",
+          "title": "Mid-Level Mechanical Engineer (Generation)"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage"
+      ]
+    },
+    {
+      "source": "icims",
+      "pool_rows": 59,
+      "us_rows": 47,
+      "tech_us_rows": 11,
+      "raw_sidecar_rows": 59,
+      "sidecar_active_rows": 11,
+      "supplemental_rows": 315,
+      "supplemental_with_desc": 315,
+      "supplemental_meta": {
+        "generated_at": "2026-06-19T05:06:40.007Z",
+        "lane_name": "custom",
+        "jobs_fetched": 4255
+      },
+      "published_rows": 11,
+      "published_pct": 100,
+      "enriched_rows": 11,
+      "enriched_pct": 100,
+      "enriched_with_skills": 6,
+      "skills_pct": 54.5,
+      "examples": [],
+      "severity": "medium",
+      "flags": [
+        "low_skill_fill"
+      ]
+    },
+    {
+      "source": "workday",
+      "pool_rows": 33949,
+      "us_rows": 17707,
+      "tech_us_rows": 5269,
+      "raw_sidecar_rows": 18823,
+      "sidecar_active_rows": 5168,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 4976,
+      "published_pct": 94.4,
+      "enriched_rows": 5210,
+      "enriched_pct": 98.9,
+      "enriched_with_skills": 4729,
+      "skills_pct": 90.8,
+      "examples": [
+        {
+          "id": "workday-abb-JR00035950",
+          "company": "ABB",
+          "title": "Strategic Segment Proposal Engineer"
+        },
+        {
+          "id": "workday-abb-JR00038220",
+          "company": "ABB",
+          "title": "Business Development Manager – Chemical Oil and Gas Industry (VFDs)"
+        },
+        {
+          "id": "workday-abb-JR00025158",
+          "company": "ABB",
+          "title": "R&D Electrical Engineer"
+        },
+        {
+          "id": "workday-abb-JR00038978",
+          "company": "ABB",
+          "title": "Electrical Controls Technician - 1st Shift"
+        },
+        {
+          "id": "workday-abb-JR00038682",
+          "company": "ABB",
+          "title": "EPM Field Application Engineer"
+        },
+        {
+          "id": "workday-abb-JR00016931",
+          "company": "ABB",
+          "title": "Infrared Field Technician"
+        },
+        {
+          "id": "workday-abb-JR00037217",
+          "company": "ABB",
+          "title": "Associate Project Engineer (Electrical)"
+        },
+        {
+          "id": "workday-abb-JR00037218",
+          "company": "ABB",
+          "title": "Associate Project Engineer (Electrical)"
         }
       ],
       "severity": "ok",
@@ -251,23 +255,23 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 338,
+      "pool_rows": 340,
       "us_rows": 159,
-      "tech_us_rows": 67,
-      "raw_sidecar_rows": 297,
-      "sidecar_active_rows": 64,
-      "supplemental_rows": 1449,
-      "supplemental_with_desc": 131,
+      "tech_us_rows": 66,
+      "raw_sidecar_rows": 302,
+      "sidecar_active_rows": 63,
+      "supplemental_rows": 1450,
+      "supplemental_with_desc": 108,
       "supplemental_meta": {
-        "generated_at": "2026-06-19T04:51:31.246Z",
+        "generated_at": "2026-06-19T05:06:40.007Z",
         "lane_name": "custom",
-        "jobs_fetched": 4254
+        "jobs_fetched": 4255
       },
-      "published_rows": 64,
-      "published_pct": 95.5,
-      "enriched_rows": 67,
-      "enriched_pct": 100,
-      "enriched_with_skills": 67,
+      "published_rows": 62,
+      "published_pct": 93.9,
+      "enriched_rows": 65,
+      "enriched_pct": 98.5,
+      "enriched_with_skills": 65,
       "skills_pct": 100,
       "examples": [
         {
@@ -281,6 +285,11 @@
           "title": "Applied Scientist II"
         },
         {
+          "id": "microsoft-200028735",
+          "company": "Microsoft",
+          "title": "Cloud Solution Architect- Security"
+        },
+        {
           "id": "microsoft-200039796",
           "company": "Microsoft",
           "title": "Solution Engineer - Security"
@@ -291,20 +300,20 @@
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 1281,
-      "us_rows": 1280,
-      "tech_us_rows": 264,
-      "raw_sidecar_rows": 2708,
-      "sidecar_active_rows": 264,
+      "pool_rows": 1279,
+      "us_rows": 1278,
+      "tech_us_rows": 263,
+      "raw_sidecar_rows": 3206,
+      "sidecar_active_rows": 263,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 264,
+      "published_rows": 263,
       "published_pct": 100,
-      "enriched_rows": 264,
+      "enriched_rows": 263,
       "enriched_pct": 100,
-      "enriched_with_skills": 242,
-      "skills_pct": 91.7,
+      "enriched_with_skills": 241,
+      "skills_pct": 91.6,
       "examples": [],
       "severity": "ok",
       "flags": []
@@ -314,14 +323,14 @@
       "pool_rows": 1093,
       "us_rows": 1093,
       "tech_us_rows": 441,
-      "raw_sidecar_rows": 1093,
+      "raw_sidecar_rows": 1102,
       "sidecar_active_rows": 441,
       "supplemental_rows": 1433,
       "supplemental_with_desc": 1433,
       "supplemental_meta": {
-        "generated_at": "2026-06-19T04:51:31.246Z",
+        "generated_at": "2026-06-19T05:06:40.007Z",
         "lane_name": "custom",
-        "jobs_fetched": 4254
+        "jobs_fetched": 4255
       },
       "published_rows": 441,
       "published_pct": 100,
