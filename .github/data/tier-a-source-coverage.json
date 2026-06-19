@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-19T04:06:18.189Z",
+  "generated_at": "2026-06-19T04:14:27.447Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -66,26 +66,28 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-19T04:03:26.360Z",
+    "generated_at": "2026-06-19T04:11:48.371Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 8498,
-    "description_entries": 7828,
-    "coverage_pct": 92.1,
+    "board_row_count": 8891,
+    "description_entries": 8181,
+    "coverage_pct": 92,
     "source_breakdown": {
-      "sidecar": 7828,
+      "sidecar": 8181,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-19T03:49:58.309Z",
+    "jobs_metadata_generated": "2026-06-19T04:06:22.114Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 86
   },
   "consumer_alert": {
-    "checked_at": "2026-06-19T04:06:14.355Z",
+    "checked_at": "2026-06-19T04:14:24.096Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [],
-    "warning_count": 0,
+    "warnings": [
+      "Senior filter FP rate elevated: 10.6% (53/500). May indicate keyword over-matching."
+    ],
+    "warning_count": 1,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -96,6 +98,73 @@
   },
   "rows": [
     {
+      "source": "oracle",
+      "pool_rows": 5446,
+      "us_rows": 3384,
+      "tech_us_rows": 364,
+      "raw_sidecar_rows": 4186,
+      "sidecar_active_rows": 251,
+      "supplemental_rows": 23529,
+      "supplemental_with_desc": 17649,
+      "supplemental_meta": {
+        "generated_at": "2026-06-19T04:13:56.877Z",
+        "lane_name": "oracle",
+        "jobs_fetched": 23529
+      },
+      "published_rows": 251,
+      "published_pct": 69,
+      "enriched_rows": 364,
+      "enriched_pct": 100,
+      "enriched_with_skills": 271,
+      "skills_pct": 74.5,
+      "examples": [
+        {
+          "id": "oracle-onsemi-2505785",
+          "company": "onsemi",
+          "title": "Manufacturing Process Engineer"
+        },
+        {
+          "id": "oracle-grant-thornton-115035",
+          "company": "Grant Thornton",
+          "title": "Transformation - OneStream Solution Architect"
+        },
+        {
+          "id": "oracle-jpmorgan-chase-210752970",
+          "company": "JPMorgan Chase",
+          "title": "Data Analytics Resource Planning - Associate"
+        },
+        {
+          "id": "oracle-texas-instruments-25011171",
+          "company": "Texas Instruments",
+          "title": "Field Applications Engineer | Processor"
+        },
+        {
+          "id": "oracle-texas-instruments-25011260",
+          "company": "Texas Instruments",
+          "title": "Digital IC Design Engineer | DCC DAC"
+        },
+        {
+          "id": "oracle-wsp-89414",
+          "company": "WSP",
+          "title": "Mechanical Engineer (Generation)"
+        },
+        {
+          "id": "oracle-wsp-89415",
+          "company": "WSP",
+          "title": "Mid-Level Mechanical Engineer (Generation)"
+        },
+        {
+          "id": "oracle-wsp-89416",
+          "company": "WSP",
+          "title": "Associate Electrical Engineer"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage"
+      ]
+    },
+    {
       "source": "icims",
       "pool_rows": 59,
       "us_rows": 47,
@@ -105,7 +174,7 @@
       "supplemental_rows": 315,
       "supplemental_with_desc": 315,
       "supplemental_meta": {
-        "generated_at": "2026-06-19T03:52:34.415Z",
+        "generated_at": "2026-06-19T04:07:37.741Z",
         "lane_name": "custom",
         "jobs_fetched": 4258
       },
@@ -123,25 +192,50 @@
     },
     {
       "source": "workday",
-      "pool_rows": 34230,
-      "us_rows": 17723,
-      "tech_us_rows": 5069,
-      "raw_sidecar_rows": 18914,
-      "sidecar_active_rows": 4976,
+      "pool_rows": 34610,
+      "us_rows": 18293,
+      "tech_us_rows": 5401,
+      "raw_sidecar_rows": 19114,
+      "sidecar_active_rows": 5303,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 4976,
+      "published_rows": 5303,
       "published_pct": 98.2,
-      "enriched_rows": 5027,
-      "enriched_pct": 99.2,
-      "enriched_with_skills": 4546,
-      "skills_pct": 90.4,
+      "enriched_rows": 5353,
+      "enriched_pct": 99.1,
+      "enriched_with_skills": 4880,
+      "skills_pct": 91.2,
       "examples": [
         {
-          "id": "workday-applied-materials-R2621779",
-          "company": "Applied Materials",
-          "title": "Business Intelligence Analyst"
+          "id": "workday-nelnet-R22763",
+          "company": "Nelnet",
+          "title": "Intern - AI Engineer"
+        },
+        {
+          "id": "workday-rtx-01853766",
+          "company": "RTX",
+          "title": "Software Engineer II - Embedded Linux (Onsite)"
+        },
+        {
+          "id": "workday-northrop-grumman-R10236360",
+          "company": "Northrop Grumman",
+          "title": "Manager Embedded Software Engineer 3"
+        },
+        {
+          "id": "workday-northrop-grumman-R10236932",
+          "company": "Northrop Grumman",
+          "title": "Systems Engineer - 3/4"
+        },
+        {
+          "id": "workday-guidehouse-40755",
+          "company": "Guidehouse",
+          "title": "Microsoft Dynamics and Power Platform Developer"
+        },
+        {
+          "id": "workday-guidehouse-40651",
+          "company": "Guidehouse",
+          "title": "Bioinformatics Scientist"
         },
         {
           "id": "workday-johnson-controls-WD30272416",
@@ -149,99 +243,9 @@
           "title": "HVAC Truck Based Controls Service Engineer"
         },
         {
-          "id": "workday-aerospace-corporation-R015111",
-          "company": "Aerospace Corporation",
-          "title": "Modeling, Simulation, and Analysis Engineer"
-        },
-        {
-          "id": "workday-booz-allen-hamilton-R0242567",
-          "company": "Booz Allen Hamilton",
-          "title": "HUMINT Targeting Specialist"
-        },
-        {
-          "id": "workday-booz-allen-hamilton-R0239889",
-          "company": "Booz Allen Hamilton",
-          "title": "Cybersecurity AI/ML Engineer"
-        },
-        {
-          "id": "workday-booz-allen-hamilton-R0242557",
-          "company": "Booz Allen Hamilton",
-          "title": "DevOps Cloud Engineer"
-        },
-        {
-          "id": "workday-booz-allen-hamilton-R0241988",
-          "company": "Booz Allen Hamilton",
-          "title": "Software Engineer"
-        },
-        {
-          "id": "workday-boeing-JR2026515606",
-          "company": "Boeing",
-          "title": "Hydro-Mechanical Systems Service Engineer (Associate or Experienced)"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
-    },
-    {
-      "source": "oracle",
-      "pool_rows": 5150,
-      "us_rows": 3261,
-      "tech_us_rows": 304,
-      "raw_sidecar_rows": 4092,
-      "sidecar_active_rows": 244,
-      "supplemental_rows": 23476,
-      "supplemental_with_desc": 17641,
-      "supplemental_meta": {
-        "generated_at": "2026-06-19T03:58:26.951Z",
-        "lane_name": "oracle",
-        "jobs_fetched": 23476
-      },
-      "published_rows": 244,
-      "published_pct": 80.3,
-      "enriched_rows": 304,
-      "enriched_pct": 100,
-      "enriched_with_skills": 213,
-      "skills_pct": 70.1,
-      "examples": [
-        {
-          "id": "oracle-jpmorgan-chase-210720893",
-          "company": "JPMorgan Chase",
-          "title": "Manager of Software Engineering - Trust and Security"
-        },
-        {
-          "id": "oracle-onsemi-2505785",
-          "company": "onsemi",
-          "title": "Manufacturing Process Engineer"
-        },
-        {
-          "id": "oracle-grant-thornton-115035",
-          "company": "Grant Thornton",
-          "title": "Transformation - OneStream Solution Architect"
-        },
-        {
-          "id": "oracle-jpmorgan-chase-210752970",
-          "company": "JPMorgan Chase",
-          "title": "Data Analytics Resource Planning - Associate"
-        },
-        {
-          "id": "oracle-oracle-337623",
-          "company": "Oracle",
-          "title": "Software Developer 5"
-        },
-        {
-          "id": "oracle-texas-instruments-25011171",
-          "company": "Texas Instruments",
-          "title": "Field Applications Engineer | Processor"
-        },
-        {
-          "id": "oracle-texas-instruments-25011260",
-          "company": "Texas Instruments",
-          "title": "Digital IC Design Engineer | DCC DAC"
-        },
-        {
-          "id": "oracle-atlantic-health-30158",
-          "company": "Atlantic Health System",
-          "title": "Nuclear Medicine Technologist-Atlantic Health Morristown Medical Center-Per Diem"
+          "id": "workday-gdit-RQ222752",
+          "company": "GDIT",
+          "title": "Systems Engineer – IT Capacity"
         }
       ],
       "severity": "ok",
@@ -249,15 +253,15 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 344,
-      "us_rows": 163,
+      "pool_rows": 341,
+      "us_rows": 159,
       "tech_us_rows": 68,
       "raw_sidecar_rows": 298,
       "sidecar_active_rows": 65,
       "supplemental_rows": 1453,
-      "supplemental_with_desc": 131,
+      "supplemental_with_desc": 114,
       "supplemental_meta": {
-        "generated_at": "2026-06-19T03:52:34.415Z",
+        "generated_at": "2026-06-19T04:07:37.741Z",
         "lane_name": "custom",
         "jobs_fetched": 4258
       },
@@ -288,41 +292,11 @@
       "flags": []
     },
     {
-      "source": "tiktok",
-      "pool_rows": 1093,
-      "us_rows": 1093,
-      "tech_us_rows": 441,
-      "raw_sidecar_rows": 1092,
-      "sidecar_active_rows": 440,
-      "supplemental_rows": 1433,
-      "supplemental_with_desc": 1433,
-      "supplemental_meta": {
-        "generated_at": "2026-06-19T03:52:34.415Z",
-        "lane_name": "custom",
-        "jobs_fetched": 4258
-      },
-      "published_rows": 440,
-      "published_pct": 99.8,
-      "enriched_rows": 441,
-      "enriched_pct": 100,
-      "enriched_with_skills": 440,
-      "skills_pct": 99.8,
-      "examples": [
-        {
-          "id": "tiktok-7652727866048448821",
-          "company": "TikTok",
-          "title": "Multi-Modal Machine Learning Engineer (all levels) - Trust and Safety"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
-    },
-    {
       "source": "smartrecruiters",
-      "pool_rows": 1286,
-      "us_rows": 1285,
+      "pool_rows": 1284,
+      "us_rows": 1283,
       "tech_us_rows": 264,
-      "raw_sidecar_rows": 2718,
+      "raw_sidecar_rows": 2714,
       "sidecar_active_rows": 264,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
@@ -333,6 +307,30 @@
       "enriched_pct": 100,
       "enriched_with_skills": 242,
       "skills_pct": 91.7,
+      "examples": [],
+      "severity": "ok",
+      "flags": []
+    },
+    {
+      "source": "tiktok",
+      "pool_rows": 1093,
+      "us_rows": 1093,
+      "tech_us_rows": 441,
+      "raw_sidecar_rows": 1093,
+      "sidecar_active_rows": 441,
+      "supplemental_rows": 1433,
+      "supplemental_with_desc": 1433,
+      "supplemental_meta": {
+        "generated_at": "2026-06-19T04:07:37.741Z",
+        "lane_name": "custom",
+        "jobs_fetched": 4258
+      },
+      "published_rows": 441,
+      "published_pct": 100,
+      "enriched_rows": 441,
+      "enriched_pct": 100,
+      "enriched_with_skills": 441,
+      "skills_pct": 100,
       "examples": [],
       "severity": "ok",
       "flags": []
