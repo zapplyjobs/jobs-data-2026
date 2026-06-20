@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-20T09:06:15.172Z",
+  "generated_at": "2026-06-20T09:22:00.726Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -66,26 +66,28 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-20T09:03:42.751Z",
+    "generated_at": "2026-06-20T09:19:35.393Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 8594,
-    "description_entries": 7944,
-    "coverage_pct": 92.4,
+    "board_row_count": 8654,
+    "description_entries": 8002,
+    "coverage_pct": 92.5,
     "source_breakdown": {
-      "sidecar": 7944,
+      "sidecar": 8002,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-20T08:49:04.554Z",
+    "jobs_metadata_generated": "2026-06-20T09:04:25.522Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 87
   },
   "consumer_alert": {
-    "checked_at": "2026-06-20T09:06:12.024Z",
+    "checked_at": "2026-06-20T09:21:57.176Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [],
-    "warning_count": 0,
+    "warnings": [
+      "Senior filter FP rate elevated: 10.2% (51/500). May indicate keyword over-matching."
+    ],
+    "warning_count": 1,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -97,24 +99,24 @@
   "rows": [
     {
       "source": "oracle",
-      "pool_rows": 5808,
-      "us_rows": 3620,
-      "tech_us_rows": 436,
-      "raw_sidecar_rows": 5058,
+      "pool_rows": 5814,
+      "us_rows": 3626,
+      "tech_us_rows": 437,
+      "raw_sidecar_rows": 4631,
       "sidecar_active_rows": 338,
-      "supplemental_rows": 25734,
+      "supplemental_rows": 25733,
       "supplemental_with_desc": 18609,
       "supplemental_meta": {
-        "generated_at": "2026-06-20T09:04:48.579Z",
+        "generated_at": "2026-06-20T09:19:42.495Z",
         "lane_name": "oracle",
-        "jobs_fetched": 25734
+        "jobs_fetched": 25733
       },
-      "published_rows": 332,
-      "published_pct": 76.1,
-      "enriched_rows": 430,
-      "enriched_pct": 98.6,
-      "enriched_with_skills": 327,
-      "skills_pct": 76,
+      "published_rows": 338,
+      "published_pct": 77.3,
+      "enriched_rows": 435,
+      "enriched_pct": 99.5,
+      "enriched_with_skills": 328,
+      "skills_pct": 75.4,
       "examples": [
         {
           "id": "oracle-fortive-10061",
@@ -167,14 +169,14 @@
       "pool_rows": 59,
       "us_rows": 47,
       "tech_us_rows": 11,
-      "raw_sidecar_rows": 316,
-      "sidecar_active_rows": 11,
-      "supplemental_rows": 316,
-      "supplemental_with_desc": 316,
+      "raw_sidecar_rows": 28,
+      "sidecar_active_rows": 4,
+      "supplemental_rows": 28,
+      "supplemental_with_desc": 28,
       "supplemental_meta": {
-        "generated_at": "2026-06-20T08:51:45.128Z",
+        "generated_at": "2026-06-20T09:21:24.072Z",
         "lane_name": "custom",
-        "jobs_fetched": 4219
+        "jobs_fetched": 3931
       },
       "published_rows": 11,
       "published_pct": 100,
@@ -185,65 +187,66 @@
       "examples": [],
       "severity": "medium",
       "flags": [
+        "published_gt_raw_sidecar",
         "low_skill_fill"
       ]
     },
     {
       "source": "workday",
-      "pool_rows": 32861,
-      "us_rows": 17036,
-      "tech_us_rows": 5109,
-      "raw_sidecar_rows": 18217,
-      "sidecar_active_rows": 5039,
+      "pool_rows": 32808,
+      "us_rows": 16984,
+      "tech_us_rows": 5060,
+      "raw_sidecar_rows": 18200,
+      "sidecar_active_rows": 5000,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 4960,
-      "published_pct": 97.1,
-      "enriched_rows": 5014,
-      "enriched_pct": 98.1,
-      "enriched_with_skills": 4531,
+      "published_rows": 4976,
+      "published_pct": 98.3,
+      "enriched_rows": 5016,
+      "enriched_pct": 99.1,
+      "enriched_with_skills": 4532,
       "skills_pct": 90.4,
       "examples": [
         {
-          "id": "workday-schweitzer-engineering-laboratories-2026-20792",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Installation Technician II"
+          "id": "workday-rtx-01849793",
+          "company": "RTX",
+          "title": "Non-Destructive Evaluation Engineer (Onsite)"
         },
         {
-          "id": "workday-schweitzer-engineering-laboratories-2025-18875",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Primary Equipment Technician"
+          "id": "workday-regal-rexnord-R26_02717",
+          "company": "Regal Rexnord",
+          "title": "Continuous Improvement Manager - North America"
         },
         {
-          "id": "workday-schweitzer-engineering-laboratories-2025-18714",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Project Engineer I/II/III - Automation"
+          "id": "workday-salesforce-JR347480",
+          "company": "Salesforce",
+          "title": "Data Engineer (SMTS/LMTS) - Knowledge Graph & AI"
         },
         {
-          "id": "workday-schweitzer-engineering-laboratories-2026-20421",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Project Engineer I/II/III - Commissioning"
+          "id": "workday-symbotic-R7350",
+          "company": "Symbotic",
+          "title": "Site Installation Manager"
         },
         {
-          "id": "workday-schweitzer-engineering-laboratories-2025-18525",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Installation Technician"
+          "id": "workday-boeing-JR2026515697",
+          "company": "Boeing",
+          "title": "Manufacturing Research & Development (MR&D) Engineer"
         },
         {
-          "id": "workday-schweitzer-engineering-laboratories-2026-21234",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Project Engineer - Automation"
+          "id": "workday-carrier-global-30208671",
+          "company": "Carrier Global",
+          "title": "Mechanical Engineer"
         },
         {
-          "id": "workday-schweitzer-engineering-laboratories-2026-21278",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Project Engineer II/III - Automation"
+          "id": "workday-avis-budget-group-R0183590",
+          "company": "Avis Budget Group",
+          "title": "Customer Return Representative - FT"
         },
         {
-          "id": "workday-schweitzer-engineering-laboratories-2026-19558",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Relay Technician"
+          "id": "workday-caci-327122",
+          "company": "CACI",
+          "title": "Mechanical Engineer"
         }
       ],
       "severity": "ok",
@@ -254,17 +257,17 @@
       "pool_rows": 325,
       "us_rows": 141,
       "tech_us_rows": 61,
-      "raw_sidecar_rows": 335,
+      "raw_sidecar_rows": 302,
       "sidecar_active_rows": 60,
       "supplemental_rows": 1418,
-      "supplemental_with_desc": 117,
+      "supplemental_with_desc": 133,
       "supplemental_meta": {
-        "generated_at": "2026-06-20T08:51:45.128Z",
+        "generated_at": "2026-06-20T09:21:24.072Z",
         "lane_name": "custom",
-        "jobs_fetched": 4219
+        "jobs_fetched": 3931
       },
-      "published_rows": 59,
-      "published_pct": 96.7,
+      "published_rows": 60,
+      "published_pct": 98.4,
       "enriched_rows": 61,
       "enriched_pct": 100,
       "enriched_with_skills": 61,
@@ -274,11 +277,6 @@
           "id": "microsoft-200039796",
           "company": "Microsoft",
           "title": "Solution Engineer - Security"
-        },
-        {
-          "id": "microsoft-200038351",
-          "company": "Microsoft",
-          "title": "IMDA-CLT Program: Solution Engineering INTERN"
         }
       ],
       "severity": "ok",
@@ -289,7 +287,7 @@
       "pool_rows": 1025,
       "us_rows": 1024,
       "tech_us_rows": 261,
-      "raw_sidecar_rows": 5973,
+      "raw_sidecar_rows": 2259,
       "sidecar_active_rows": 261,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
@@ -309,14 +307,14 @@
       "pool_rows": 1007,
       "us_rows": 1007,
       "tech_us_rows": 440,
-      "raw_sidecar_rows": 1016,
+      "raw_sidecar_rows": 1007,
       "sidecar_active_rows": 440,
       "supplemental_rows": 1431,
       "supplemental_with_desc": 1431,
       "supplemental_meta": {
-        "generated_at": "2026-06-20T08:51:45.128Z",
+        "generated_at": "2026-06-20T09:21:24.072Z",
         "lane_name": "custom",
-        "jobs_fetched": 4219
+        "jobs_fetched": 3931
       },
       "published_rows": 440,
       "published_pct": 100,
