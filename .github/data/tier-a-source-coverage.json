@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-20T02:38:27.785Z",
+  "generated_at": "2026-06-20T02:50:57.478Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -66,21 +66,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-20T02:35:47.898Z",
+    "generated_at": "2026-06-20T02:48:19.998Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 8458,
-    "description_entries": 7887,
+    "board_row_count": 8374,
+    "description_entries": 7806,
     "coverage_pct": 93.2,
     "source_breakdown": {
-      "sidecar": 7887,
+      "sidecar": 7806,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-20T02:20:14.249Z",
+    "jobs_metadata_generated": "2026-06-20T02:35:00.748Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 87
   },
   "consumer_alert": {
-    "checked_at": "2026-06-20T02:38:24.498Z",
+    "checked_at": "2026-06-20T02:50:53.730Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -96,11 +96,80 @@
   },
   "rows": [
     {
+      "source": "oracle",
+      "pool_rows": 2931,
+      "us_rows": 1721,
+      "tech_us_rows": 234,
+      "raw_sidecar_rows": 3896,
+      "sidecar_active_rows": 132,
+      "supplemental_rows": 15785,
+      "supplemental_with_desc": 10023,
+      "supplemental_meta": {
+        "generated_at": "2026-06-20T02:49:00.673Z",
+        "lane_name": "oracle",
+        "jobs_fetched": 15785
+      },
+      "published_rows": 104,
+      "published_pct": 44.4,
+      "enriched_rows": 111,
+      "enriched_pct": 47.4,
+      "enriched_with_skills": 90,
+      "skills_pct": 81.1,
+      "examples": [
+        {
+          "id": "oracle-berkshire-hathaway-energy-10005270",
+          "company": "Berkshire Hathaway Energy",
+          "title": "Network Engineer 2 or 3"
+        },
+        {
+          "id": "oracle-emerson-electric-26006819",
+          "company": "Emerson Electric",
+          "title": "Application Engineer I"
+        },
+        {
+          "id": "oracle-emerson-electric-26006926",
+          "company": "Emerson Electric",
+          "title": "Industrial Engineering Co op (Fall 2026)"
+        },
+        {
+          "id": "oracle-texas-instruments-25000416",
+          "company": "Texas Instruments",
+          "title": "SRAM Process Development Engineer"
+        },
+        {
+          "id": "oracle-texas-instruments-25009792",
+          "company": "Texas Instruments",
+          "title": "Career Accelerator Program - Analog Design Engineer"
+        },
+        {
+          "id": "oracle-wsp-88858",
+          "company": "WSP",
+          "title": "Temporary Early Career Environmental Scientist"
+        },
+        {
+          "id": "oracle-wsp-89433",
+          "company": "WSP",
+          "title": "Civil Design Engineer-Water"
+        },
+        {
+          "id": "oracle-wsp-89492",
+          "company": "WSP",
+          "title": "Intermediate Professional, Data Science"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage",
+        "low_enrichment_coverage",
+        "supplemental_stage_gap"
+      ]
+    },
+    {
       "source": "icims",
       "pool_rows": 59,
       "us_rows": 47,
       "tech_us_rows": 11,
-      "raw_sidecar_rows": 316,
+      "raw_sidecar_rows": 59,
       "sidecar_active_rows": 11,
       "supplemental_rows": 316,
       "supplemental_with_desc": 316,
@@ -123,120 +192,60 @@
     },
     {
       "source": "workday",
-      "pool_rows": 33444,
-      "us_rows": 17389,
-      "tech_us_rows": 5134,
-      "raw_sidecar_rows": 18551,
-      "sidecar_active_rows": 5076,
+      "pool_rows": 33502,
+      "us_rows": 17531,
+      "tech_us_rows": 5111,
+      "raw_sidecar_rows": 18596,
+      "sidecar_active_rows": 5035,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 5008,
-      "published_pct": 97.5,
-      "enriched_rows": 5092,
-      "enriched_pct": 99.2,
-      "enriched_with_skills": 4612,
-      "skills_pct": 90.6,
+      "published_rows": 4997,
+      "published_pct": 97.8,
+      "enriched_rows": 5046,
+      "enriched_pct": 98.7,
+      "enriched_with_skills": 4567,
+      "skills_pct": 90.5,
       "examples": [
         {
-          "id": "workday-danaher-R1312576",
-          "company": "Danaher",
-          "title": "Field Service Engineer - Daily Field Travel – Buffalo, NY Territory (necessity to reside within 60 minutes of Buffalo or ability to relocate)"
+          "id": "workday-zoom-R18583",
+          "company": "Zoom",
+          "title": "Contact Center Consulting Solutions Engineer"
         },
         {
-          "id": "workday-danaher-R1307936",
-          "company": "Danaher",
-          "title": "PMO Analyst (Aerospace, Data Analytics, SAP, Accolade)"
+          "id": "workday-zendesk-R35000",
+          "company": "Zendesk",
+          "title": "Manager, Services Consulting"
         },
         {
-          "id": "workday-curtiss-wright-JR12557",
-          "company": "Curtiss-Wright",
-          "title": "Nuclear Sales Operation Specialist"
+          "id": "workday-vanguard-178004",
+          "company": "Vanguard",
+          "title": "Application Security Pentester, Specialist"
         },
         {
-          "id": "workday-cigna-26006449",
-          "company": "Cigna",
-          "title": "Data Measurement & Reporting Advisor - Evernorth - Remote"
+          "id": "workday-salesforce-JR347480",
+          "company": "Salesforce",
+          "title": "Data Engineer (SMTS/LMTS) - Knowledge Graph & AI"
         },
         {
-          "id": "workday-citi-26968274",
-          "company": "Citi",
-          "title": "Officer .NET Programmer Analyst"
+          "id": "workday-rtx-01840058",
+          "company": "RTX",
+          "title": "Enterprise Engineering Applications Specialist - Multiple Locations, US"
         },
         {
-          "id": "workday-citi-26967872",
-          "company": "Citi",
-          "title": "Java-Python Context Engineer"
+          "id": "workday-rtx-01852914",
+          "company": "RTX",
+          "title": "Inspector"
         },
         {
-          "id": "workday-citi-26968276",
-          "company": "Citi",
-          "title": "Officer .NET Programmer Analyst"
+          "id": "workday-rtx-01819097",
+          "company": "RTX",
+          "title": "Prin Engineerr, Design Engrg (Onsite)"
         },
         {
-          "id": "workday-comcast-R436476",
-          "company": "Comcast",
-          "title": "Software Engineer - API (Hybrid-Costa Rica)"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
-    },
-    {
-      "source": "oracle",
-      "pool_rows": 1939,
-      "us_rows": 1215,
-      "tech_us_rows": 111,
-      "raw_sidecar_rows": 3509,
-      "sidecar_active_rows": 104,
-      "supplemental_rows": 13251,
-      "supplemental_with_desc": 8080,
-      "supplemental_meta": {
-        "generated_at": "2026-06-20T02:35:42.018Z",
-        "lane_name": "oracle",
-        "jobs_fetched": 13251
-      },
-      "published_rows": 104,
-      "published_pct": 93.7,
-      "enriched_rows": 111,
-      "enriched_pct": 100,
-      "enriched_with_skills": 90,
-      "skills_pct": 81.1,
-      "examples": [
-        {
-          "id": "oracle-grant-thornton-115035",
-          "company": "Grant Thornton",
-          "title": "Transformation - OneStream Solution Architect"
-        },
-        {
-          "id": "oracle-cummins-2428677",
-          "company": "Cummins",
-          "title": "Field Service Supervisor"
-        },
-        {
-          "id": "oracle-honeywell-150274",
-          "company": "Honeywell",
-          "title": "Field Engr II"
-        },
-        {
-          "id": "oracle-grant-thornton-115023",
-          "company": "Grant Thornton",
-          "title": "Transformation - Oracle Solution Architect"
-        },
-        {
-          "id": "oracle-grant-thornton-115025",
-          "company": "Grant Thornton",
-          "title": "Transformation - Oracle Solution Architect - SCM"
-        },
-        {
-          "id": "oracle-grant-thornton-115027",
-          "company": "Grant Thornton",
-          "title": "Transformation - Oracle Solution Architect - HCM"
-        },
-        {
-          "id": "oracle-grant-thornton-115028",
-          "company": "Grant Thornton",
-          "title": "Transformation - Oracle Solution Architect - HCM"
+          "id": "workday-rtx-01849793",
+          "company": "RTX",
+          "title": "Non-Destructive Evaluation Engineer (Onsite)"
         }
       ],
       "severity": "ok",
@@ -244,21 +253,27 @@
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 1208,
-      "us_rows": 1207,
-      "tech_us_rows": 270,
-      "raw_sidecar_rows": 2397,
-      "sidecar_active_rows": 270,
+      "pool_rows": 1215,
+      "us_rows": 1214,
+      "tech_us_rows": 267,
+      "raw_sidecar_rows": 2398,
+      "sidecar_active_rows": 266,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 270,
-      "published_pct": 100,
-      "enriched_rows": 270,
-      "enriched_pct": 100,
-      "enriched_with_skills": 248,
-      "skills_pct": 91.9,
-      "examples": [],
+      "published_rows": 266,
+      "published_pct": 99.6,
+      "enriched_rows": 266,
+      "enriched_pct": 99.6,
+      "enriched_with_skills": 244,
+      "skills_pct": 91.7,
+      "examples": [
+        {
+          "id": "sr-BryceTech-744000132914421",
+          "company": "BryceTech",
+          "title": "Program Manager"
+        }
+      ],
       "severity": "ok",
       "flags": []
     },
@@ -266,8 +281,8 @@
       "source": "microsoft",
       "pool_rows": 338,
       "us_rows": 150,
-      "tech_us_rows": 63,
-      "raw_sidecar_rows": 306,
+      "tech_us_rows": 64,
+      "raw_sidecar_rows": 310,
       "sidecar_active_rows": 63,
       "supplemental_rows": 1450,
       "supplemental_with_desc": 102,
@@ -277,12 +292,18 @@
         "jobs_fetched": 4255
       },
       "published_rows": 63,
-      "published_pct": 100,
+      "published_pct": 98.4,
       "enriched_rows": 63,
-      "enriched_pct": 100,
+      "enriched_pct": 98.4,
       "enriched_with_skills": 63,
       "skills_pct": 100,
-      "examples": [],
+      "examples": [
+        {
+          "id": "microsoft-200039796",
+          "company": "Microsoft",
+          "title": "Solution Engineer - Security"
+        }
+      ],
       "severity": "ok",
       "flags": []
     },
