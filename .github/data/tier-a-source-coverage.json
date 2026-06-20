@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-20T20:36:55.355Z",
+  "generated_at": "2026-06-20T20:52:17.129Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -64,21 +64,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-20T20:34:27.273Z",
+    "generated_at": "2026-06-20T20:49:41.028Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 8770,
-    "description_entries": 8132,
+    "board_row_count": 8780,
+    "description_entries": 8143,
     "coverage_pct": 92.7,
     "source_breakdown": {
-      "sidecar": 8132,
+      "sidecar": 8143,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-20T20:19:48.108Z",
+    "jobs_metadata_generated": "2026-06-20T20:41:12.357Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 88
   },
   "consumer_alert": {
-    "checked_at": "2026-06-20T20:36:51.715Z",
+    "checked_at": "2026-06-20T20:52:13.462Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -95,20 +95,20 @@
   "rows": [
     {
       "source": "oracle",
-      "pool_rows": 5800,
+      "pool_rows": 5801,
       "us_rows": 3618,
       "tech_us_rows": 486,
-      "raw_sidecar_rows": 5038,
-      "sidecar_active_rows": 388,
-      "supplemental_rows": 25690,
-      "supplemental_with_desc": 18567,
+      "raw_sidecar_rows": 5039,
+      "sidecar_active_rows": 387,
+      "supplemental_rows": 24855,
+      "supplemental_with_desc": 18492,
       "supplemental_meta": {
-        "generated_at": "2026-06-20T20:34:41.071Z",
+        "generated_at": "2026-06-20T20:49:57.247Z",
         "lane_name": "oracle",
-        "jobs_fetched": 25690
+        "jobs_fetched": 24855
       },
-      "published_rows": 388,
-      "published_pct": 79.8,
+      "published_rows": 387,
+      "published_pct": 79.6,
       "enriched_rows": 486,
       "enriched_pct": 100,
       "enriched_with_skills": 341,
@@ -161,40 +161,117 @@
       ]
     },
     {
-      "source": "microsoft",
-      "pool_rows": 320,
-      "us_rows": 140,
-      "tech_us_rows": 58,
-      "raw_sidecar_rows": 251,
-      "sidecar_active_rows": 46,
-      "supplemental_rows": 1409,
-      "supplemental_with_desc": 129,
+      "source": "icims",
+      "pool_rows": 59,
+      "us_rows": 47,
+      "tech_us_rows": 11,
+      "raw_sidecar_rows": 316,
+      "sidecar_active_rows": 11,
+      "supplemental_rows": 316,
+      "supplemental_with_desc": 316,
       "supplemental_meta": {
-        "generated_at": "2026-06-20T20:36:18.458Z",
+        "generated_at": "2026-06-20T20:51:20.082Z",
         "lane_name": "custom",
         "jobs_fetched": 4210
       },
-      "published_rows": 46,
-      "published_pct": 79.3,
+      "published_rows": 11,
+      "published_pct": 100,
+      "enriched_rows": 11,
+      "enriched_pct": 100,
+      "enriched_with_skills": 6,
+      "skills_pct": 54.5,
+      "examples": [],
+      "severity": "medium",
+      "flags": [
+        "low_skill_fill"
+      ]
+    },
+    {
+      "source": "workday",
+      "pool_rows": 33250,
+      "us_rows": 17282,
+      "tech_us_rows": 5225,
+      "raw_sidecar_rows": 18454,
+      "sidecar_active_rows": 5180,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 5096,
+      "published_pct": 97.5,
+      "enriched_rows": 5192,
+      "enriched_pct": 99.4,
+      "enriched_with_skills": 4710,
+      "skills_pct": 90.7,
+      "examples": [
+        {
+          "id": "workday-insulet-corporation-REQ-2026-16487",
+          "company": "Insulet Corporation",
+          "title": "Manager, Instrumentation Engineering (Onsite)"
+        },
+        {
+          "id": "workday-granite-construction-R0000007670",
+          "company": "Granite Construction",
+          "title": "Regional Technology Associate"
+        },
+        {
+          "id": "workday-generac-JR14834",
+          "company": "Generac",
+          "title": "Associate Engineer"
+        },
+        {
+          "id": "workday-symbotic-R7350",
+          "company": "Symbotic",
+          "title": "Site Installation Manager"
+        },
+        {
+          "id": "workday-salesforce-JR347480",
+          "company": "Salesforce",
+          "title": "Data Engineer (SMTS/LMTS) - Knowledge Graph & AI"
+        },
+        {
+          "id": "workday-schweitzer-engineering-laboratories-2025-18388",
+          "company": "Schweitzer Engineering Laboratories",
+          "title": "Craftsman I"
+        },
+        {
+          "id": "workday-schweitzer-engineering-laboratories-2026-20986",
+          "company": "Schweitzer Engineering Laboratories",
+          "title": "Electronics Service Supervisor"
+        },
+        {
+          "id": "workday-schweitzer-engineering-laboratories-2026-20929",
+          "company": "Schweitzer Engineering Laboratories",
+          "title": "Project Controller"
+        }
+      ],
+      "severity": "ok",
+      "flags": []
+    },
+    {
+      "source": "microsoft",
+      "pool_rows": 318,
+      "us_rows": 140,
+      "tech_us_rows": 58,
+      "raw_sidecar_rows": 262,
+      "sidecar_active_rows": 48,
+      "supplemental_rows": 1409,
+      "supplemental_with_desc": 118,
+      "supplemental_meta": {
+        "generated_at": "2026-06-20T20:51:20.082Z",
+        "lane_name": "custom",
+        "jobs_fetched": 4210
+      },
+      "published_rows": 48,
+      "published_pct": 82.8,
       "enriched_rows": 58,
       "enriched_pct": 100,
       "enriched_with_skills": 58,
       "skills_pct": 100,
       "examples": [
         {
-          "id": "microsoft-200011284",
-          "company": "Microsoft",
-          "title": "Software Engineer II"
-        },
-        {
           "id": "microsoft-200039867",
           "company": "Microsoft",
           "title": "Cloud Solution Architect - Partner Practice Building & IP Development"
-        },
-        {
-          "id": "microsoft-200039796",
-          "company": "Microsoft",
-          "title": "Solution Engineer - Security"
         },
         {
           "id": "microsoft-200000480",
@@ -220,95 +297,16 @@
           "id": "microsoft-200023988",
           "company": "Microsoft",
           "title": "Cloud Network Engineer"
-        }
-      ],
-      "severity": "high",
-      "flags": [
-        "low_published_coverage"
-      ]
-    },
-    {
-      "source": "icims",
-      "pool_rows": 59,
-      "us_rows": 47,
-      "tech_us_rows": 11,
-      "raw_sidecar_rows": 316,
-      "sidecar_active_rows": 11,
-      "supplemental_rows": 316,
-      "supplemental_with_desc": 316,
-      "supplemental_meta": {
-        "generated_at": "2026-06-20T20:36:18.458Z",
-        "lane_name": "custom",
-        "jobs_fetched": 4210
-      },
-      "published_rows": 11,
-      "published_pct": 100,
-      "enriched_rows": 11,
-      "enriched_pct": 100,
-      "enriched_with_skills": 6,
-      "skills_pct": 54.5,
-      "examples": [],
-      "severity": "medium",
-      "flags": [
-        "low_skill_fill"
-      ]
-    },
-    {
-      "source": "workday",
-      "pool_rows": 33301,
-      "us_rows": 17245,
-      "tech_us_rows": 5237,
-      "raw_sidecar_rows": 18505,
-      "sidecar_active_rows": 5192,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 5080,
-      "published_pct": 97,
-      "enriched_rows": 5164,
-      "enriched_pct": 98.6,
-      "enriched_with_skills": 4679,
-      "skills_pct": 90.6,
-      "examples": [
-        {
-          "id": "workday-gdit-RQ222815",
-          "company": "GDIT",
-          "title": "Psychometrist"
         },
         {
-          "id": "workday-gdit-RQ222816",
-          "company": "GDIT",
-          "title": "Cognitive Performance Specialist"
+          "id": "microsoft-200038965",
+          "company": "Microsoft",
+          "title": "Site Reliability Engineer - CTJ - Secret"
         },
         {
-          "id": "workday-gdit-RQ222808",
-          "company": "GDIT",
-          "title": "Case Manager"
-        },
-        {
-          "id": "workday-gdit-RQ222617",
-          "company": "GDIT",
-          "title": "Help Desk Support Service Specialist – Intermediate (TS/SCI Required)"
-        },
-        {
-          "id": "workday-boeing-JR2026508618",
-          "company": "Boeing",
-          "title": "F-22 Air Vehicle Subsystems Mechanical Engineer (Mid-Level or Senior)"
-        },
-        {
-          "id": "workday-boeing-JR2026498692",
-          "company": "Boeing",
-          "title": "Avionics Systems Service Engineer (Experienced or Senior)"
-        },
-        {
-          "id": "workday-boeing-JR2026515770",
-          "company": "Boeing",
-          "title": "System Safety Engineer (Mid-Level, Senior, or Lead)"
-        },
-        {
-          "id": "workday-boeing-JR2026514318",
-          "company": "Boeing",
-          "title": "Experienced or Senior Airworthiness & Regulatory Engineer"
+          "id": "microsoft-200039707",
+          "company": "Microsoft",
+          "title": "Data Center Critical Environment Mechanical Engineer"
         }
       ],
       "severity": "ok",
@@ -316,10 +314,10 @@
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 1198,
-      "us_rows": 1197,
+      "pool_rows": 1099,
+      "us_rows": 1098,
       "tech_us_rows": 264,
-      "raw_sidecar_rows": 3978,
+      "raw_sidecar_rows": 4876,
       "sidecar_active_rows": 264,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
@@ -344,7 +342,7 @@
       "supplemental_rows": 1431,
       "supplemental_with_desc": 1431,
       "supplemental_meta": {
-        "generated_at": "2026-06-20T20:36:18.458Z",
+        "generated_at": "2026-06-20T20:51:20.082Z",
         "lane_name": "custom",
         "jobs_fetched": 4210
       },
