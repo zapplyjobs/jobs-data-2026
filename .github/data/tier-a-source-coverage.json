@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-20T09:22:00.726Z",
+  "generated_at": "2026-06-20T09:36:08.656Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -66,28 +66,26 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-20T09:19:35.393Z",
+    "generated_at": "2026-06-20T09:33:22.095Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 8654,
-    "description_entries": 8002,
-    "coverage_pct": 92.5,
+    "board_row_count": 8608,
+    "description_entries": 7933,
+    "coverage_pct": 92.2,
     "source_breakdown": {
-      "sidecar": 8002,
+      "sidecar": 7933,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-20T09:04:25.522Z",
+    "jobs_metadata_generated": "2026-06-20T09:18:58.334Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 87
   },
   "consumer_alert": {
-    "checked_at": "2026-06-20T09:21:57.176Z",
+    "checked_at": "2026-06-20T09:36:05.226Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [
-      "Senior filter FP rate elevated: 10.2% (51/500). May indicate keyword over-matching."
-    ],
-    "warning_count": 1,
+    "warnings": [],
+    "warning_count": 0,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -99,24 +97,24 @@
   "rows": [
     {
       "source": "oracle",
-      "pool_rows": 5814,
-      "us_rows": 3626,
-      "tech_us_rows": 437,
-      "raw_sidecar_rows": 4631,
-      "sidecar_active_rows": 338,
-      "supplemental_rows": 25733,
-      "supplemental_with_desc": 18609,
+      "pool_rows": 5813,
+      "us_rows": 3625,
+      "tech_us_rows": 436,
+      "raw_sidecar_rows": 5052,
+      "sidecar_active_rows": 339,
+      "supplemental_rows": 25734,
+      "supplemental_with_desc": 18608,
       "supplemental_meta": {
-        "generated_at": "2026-06-20T09:19:42.495Z",
+        "generated_at": "2026-06-20T09:34:41.943Z",
         "lane_name": "oracle",
-        "jobs_fetched": 25733
+        "jobs_fetched": 25734
       },
-      "published_rows": 338,
+      "published_rows": 337,
       "published_pct": 77.3,
-      "enriched_rows": 435,
-      "enriched_pct": 99.5,
-      "enriched_with_skills": 328,
-      "skills_pct": 75.4,
+      "enriched_rows": 436,
+      "enriched_pct": 100,
+      "enriched_with_skills": 330,
+      "skills_pct": 75.7,
       "examples": [
         {
           "id": "oracle-fortive-10061",
@@ -166,9 +164,9 @@
     },
     {
       "source": "icims",
-      "pool_rows": 59,
-      "us_rows": 47,
-      "tech_us_rows": 11,
+      "pool_rows": 7,
+      "us_rows": 7,
+      "tech_us_rows": 4,
       "raw_sidecar_rows": 28,
       "sidecar_active_rows": 4,
       "supplemental_rows": 28,
@@ -178,75 +176,135 @@
         "lane_name": "custom",
         "jobs_fetched": 3931
       },
-      "published_rows": 11,
+      "published_rows": 4,
       "published_pct": 100,
-      "enriched_rows": 11,
+      "enriched_rows": 4,
       "enriched_pct": 100,
-      "enriched_with_skills": 6,
-      "skills_pct": 54.5,
+      "enriched_with_skills": 0,
+      "skills_pct": 0,
       "examples": [],
       "severity": "medium",
       "flags": [
-        "published_gt_raw_sidecar",
         "low_skill_fill"
       ]
     },
     {
       "source": "workday",
-      "pool_rows": 32808,
-      "us_rows": 16984,
-      "tech_us_rows": 5060,
-      "raw_sidecar_rows": 18200,
-      "sidecar_active_rows": 5000,
+      "pool_rows": 32810,
+      "us_rows": 17013,
+      "tech_us_rows": 5064,
+      "raw_sidecar_rows": 18199,
+      "sidecar_active_rows": 5003,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 4976,
-      "published_pct": 98.3,
-      "enriched_rows": 5016,
+      "published_rows": 4948,
+      "published_pct": 97.7,
+      "enriched_rows": 5019,
       "enriched_pct": 99.1,
-      "enriched_with_skills": 4532,
-      "skills_pct": 90.4,
+      "enriched_with_skills": 4541,
+      "skills_pct": 90.5,
       "examples": [
+        {
+          "id": "workday-oshkosh-corporation-R46972",
+          "company": "Oshkosh Corporation",
+          "title": "Systems Analyst"
+        },
+        {
+          "id": "workday-northrop-grumman-R10233433",
+          "company": "Northrop Grumman",
+          "title": "Power Supply Engineer"
+        },
+        {
+          "id": "workday-northrop-grumman-R10233015",
+          "company": "Northrop Grumman",
+          "title": "PWB Layout Engineer"
+        },
         {
           "id": "workday-rtx-01849793",
           "company": "RTX",
           "title": "Non-Destructive Evaluation Engineer (Onsite)"
         },
         {
-          "id": "workday-regal-rexnord-R26_02717",
-          "company": "Regal Rexnord",
-          "title": "Continuous Improvement Manager - North America"
+          "id": "workday-schweitzer-engineering-laboratories-2025-18388",
+          "company": "Schweitzer Engineering Laboratories",
+          "title": "Craftsman I"
         },
         {
-          "id": "workday-salesforce-JR347480",
-          "company": "Salesforce",
-          "title": "Data Engineer (SMTS/LMTS) - Knowledge Graph & AI"
+          "id": "workday-schweitzer-engineering-laboratories-2026-20986",
+          "company": "Schweitzer Engineering Laboratories",
+          "title": "Electronics Service Supervisor"
         },
         {
-          "id": "workday-symbotic-R7350",
-          "company": "Symbotic",
-          "title": "Site Installation Manager"
+          "id": "workday-schweitzer-engineering-laboratories-2026-20929",
+          "company": "Schweitzer Engineering Laboratories",
+          "title": "Project Controller"
         },
         {
-          "id": "workday-boeing-JR2026515697",
-          "company": "Boeing",
-          "title": "Manufacturing Research & Development (MR&D) Engineer"
+          "id": "workday-rocket-companies-R-083536",
+          "company": "Rocket Companies",
+          "title": "Asset Manager"
+        }
+      ],
+      "severity": "ok",
+      "flags": []
+    },
+    {
+      "source": "smartrecruiters",
+      "pool_rows": 1213,
+      "us_rows": 1212,
+      "tech_us_rows": 270,
+      "raw_sidecar_rows": 2759,
+      "sidecar_active_rows": 261,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 261,
+      "published_pct": 96.7,
+      "enriched_rows": 261,
+      "enriched_pct": 96.7,
+      "enriched_with_skills": 239,
+      "skills_pct": 91.6,
+      "examples": [
+        {
+          "id": "sr-BryceTech-744000132914421",
+          "company": "BryceTech",
+          "title": "Program Manager"
         },
         {
-          "id": "workday-carrier-global-30208671",
-          "company": "Carrier Global",
-          "title": "Mechanical Engineer"
+          "id": "sr-Eurofins-744000132721139",
+          "company": "Eurofins",
+          "title": "GC-MS Scientist"
         },
         {
-          "id": "workday-avis-budget-group-R0183590",
-          "company": "Avis Budget Group",
-          "title": "Customer Return Representative - FT"
+          "id": "sr-Eurofins-744000132517975",
+          "company": "Eurofins",
+          "title": "Business Unit Manager - Eurofins Aerotech Built Environment Testing, Phoenix, AZ"
         },
         {
-          "id": "workday-caci-327122",
-          "company": "CACI",
-          "title": "Mechanical Engineer"
+          "id": "sr-Eurofins-744000132518035",
+          "company": "Eurofins",
+          "title": "Business Unit Manager - Eurofins Aerotech Built Environment Testing, Las Vegas, NV"
+        },
+        {
+          "id": "sr-ServiceNow-744000132516459",
+          "company": "ServiceNow",
+          "title": "Solution Architect-Telco"
+        },
+        {
+          "id": "sr-ServiceNow-744000132514924",
+          "company": "ServiceNow",
+          "title": "Solution Architect-Telco"
+        },
+        {
+          "id": "sr-ServiceNow-744000132290659",
+          "company": "ServiceNow",
+          "title": "Principal Solution Architect, Operations Technology Management (OTM)"
+        },
+        {
+          "id": "sr-Eurofins-744000132228822",
+          "company": "Eurofins",
+          "title": "Environmental Simulation Lab & Reliability Department Manager / SME"
         }
       ],
       "severity": "ok",
@@ -254,10 +312,10 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 325,
+      "pool_rows": 323,
       "us_rows": 141,
       "tech_us_rows": 61,
-      "raw_sidecar_rows": 302,
+      "raw_sidecar_rows": 303,
       "sidecar_active_rows": 60,
       "supplemental_rows": 1418,
       "supplemental_with_desc": 133,
@@ -283,31 +341,11 @@
       "flags": []
     },
     {
-      "source": "smartrecruiters",
-      "pool_rows": 1025,
-      "us_rows": 1024,
-      "tech_us_rows": 261,
-      "raw_sidecar_rows": 2259,
-      "sidecar_active_rows": 261,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 261,
-      "published_pct": 100,
-      "enriched_rows": 261,
-      "enriched_pct": 100,
-      "enriched_with_skills": 239,
-      "skills_pct": 91.6,
-      "examples": [],
-      "severity": "ok",
-      "flags": []
-    },
-    {
       "source": "tiktok",
       "pool_rows": 1007,
       "us_rows": 1007,
       "tech_us_rows": 440,
-      "raw_sidecar_rows": 1007,
+      "raw_sidecar_rows": 1016,
       "sidecar_active_rows": 440,
       "supplemental_rows": 1431,
       "supplemental_with_desc": 1431,
