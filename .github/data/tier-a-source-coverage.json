@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-20T07:36:09.001Z",
+  "generated_at": "2026-06-20T07:50:54.994Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -66,26 +66,28 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-20T07:33:34.387Z",
+    "generated_at": "2026-06-20T07:48:35.556Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 8477,
-    "description_entries": 7821,
-    "coverage_pct": 92.3,
+    "board_row_count": 8764,
+    "description_entries": 8107,
+    "coverage_pct": 92.5,
     "source_breakdown": {
-      "sidecar": 7821,
+      "sidecar": 8107,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-20T07:18:58.787Z",
+    "jobs_metadata_generated": "2026-06-20T07:41:34.063Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 87
   },
   "consumer_alert": {
-    "checked_at": "2026-06-20T07:36:05.574Z",
+    "checked_at": "2026-06-20T07:50:51.384Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [],
-    "warning_count": 0,
+    "warnings": [
+      "Runtime trending up: 9.9 min (warning at 7, alert at 10)"
+    ],
+    "warning_count": 1,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -97,24 +99,24 @@
   "rows": [
     {
       "source": "oracle",
-      "pool_rows": 5814,
-      "us_rows": 3627,
-      "tech_us_rows": 437,
-      "raw_sidecar_rows": 4641,
-      "sidecar_active_rows": 340,
-      "supplemental_rows": 25736,
+      "pool_rows": 5815,
+      "us_rows": 3626,
+      "tech_us_rows": 436,
+      "raw_sidecar_rows": 4640,
+      "sidecar_active_rows": 339,
+      "supplemental_rows": 25737,
       "supplemental_with_desc": 18611,
       "supplemental_meta": {
-        "generated_at": "2026-06-20T07:34:51.988Z",
+        "generated_at": "2026-06-20T07:49:48.181Z",
         "lane_name": "oracle",
-        "jobs_fetched": 25736
+        "jobs_fetched": 25737
       },
-      "published_rows": 340,
+      "published_rows": 339,
       "published_pct": 77.8,
-      "enriched_rows": 437,
+      "enriched_rows": 436,
       "enriched_pct": 100,
       "enriched_with_skills": 330,
-      "skills_pct": 75.5,
+      "skills_pct": 75.7,
       "examples": [
         {
           "id": "oracle-fortive-10061",
@@ -172,7 +174,7 @@
       "supplemental_rows": 316,
       "supplemental_with_desc": 316,
       "supplemental_meta": {
-        "generated_at": "2026-06-20T07:21:29.670Z",
+        "generated_at": "2026-06-20T07:36:39.342Z",
         "lane_name": "custom",
         "jobs_fetched": 4218
       },
@@ -190,25 +192,45 @@
     },
     {
       "source": "workday",
-      "pool_rows": 33233,
-      "us_rows": 17070,
-      "tech_us_rows": 4924,
-      "raw_sidecar_rows": 18320,
-      "sidecar_active_rows": 4862,
+      "pool_rows": 32737,
+      "us_rows": 17329,
+      "tech_us_rows": 5212,
+      "raw_sidecar_rows": 18242,
+      "sidecar_active_rows": 5149,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 4862,
-      "published_pct": 98.7,
-      "enriched_rows": 4878,
+      "published_rows": 5149,
+      "published_pct": 98.8,
+      "enriched_rows": 5164,
       "enriched_pct": 99.1,
-      "enriched_with_skills": 4410,
-      "skills_pct": 90.4,
+      "enriched_with_skills": 4679,
+      "skills_pct": 90.6,
       "examples": [
         {
           "id": "workday-salesforce-JR347480",
           "company": "Salesforce",
           "title": "Data Engineer (SMTS/LMTS) - Knowledge Graph & AI"
+        },
+        {
+          "id": "workday-rtx-01849793",
+          "company": "RTX",
+          "title": "Non-Destructive Evaluation Engineer (Onsite)"
+        },
+        {
+          "id": "workday-gdit-RQ222617",
+          "company": "GDIT",
+          "title": "Help Desk Support Service Specialist – Intermediate (TS/SCI Required)"
+        },
+        {
+          "id": "workday-carrier-global-30208671",
+          "company": "Carrier Global",
+          "title": "Mechanical Engineer"
+        },
+        {
+          "id": "workday-borgwarner-R2026-1819",
+          "company": "BorgWarner",
+          "title": "Manager,  Testing and Test Engineering"
         },
         {
           "id": "workday-jll-REQ515781",
@@ -224,26 +246,6 @@
           "id": "workday-medtronic-R65538",
           "company": "Medtronic",
           "title": "EP Mapping Specialist - CAS,  Paducah, KY"
-        },
-        {
-          "id": "workday-snap-R0045905",
-          "company": "Snap",
-          "title": "Software Engineer, AR, Level 4"
-        },
-        {
-          "id": "workday-snap-Q226SWEB2",
-          "company": "Snap",
-          "title": "Software Engineer, Backend, Level 4"
-        },
-        {
-          "id": "workday-rtx-01849793",
-          "company": "RTX",
-          "title": "Non-Destructive Evaluation Engineer (Onsite)"
-        },
-        {
-          "id": "workday-avis-budget-group-R0183590",
-          "company": "Avis Budget Group",
-          "title": "Customer Return Representative - FT"
         }
       ],
       "severity": "ok",
@@ -251,22 +253,22 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 322,
-      "us_rows": 140,
-      "tech_us_rows": 60,
-      "raw_sidecar_rows": 290,
-      "sidecar_active_rows": 58,
+      "pool_rows": 326,
+      "us_rows": 141,
+      "tech_us_rows": 61,
+      "raw_sidecar_rows": 298,
+      "sidecar_active_rows": 59,
       "supplemental_rows": 1417,
-      "supplemental_with_desc": 126,
+      "supplemental_with_desc": 114,
       "supplemental_meta": {
-        "generated_at": "2026-06-20T07:21:29.670Z",
+        "generated_at": "2026-06-20T07:36:39.342Z",
         "lane_name": "custom",
         "jobs_fetched": 4218
       },
-      "published_rows": 58,
+      "published_rows": 59,
       "published_pct": 96.7,
       "enriched_rows": 60,
-      "enriched_pct": 100,
+      "enriched_pct": 98.4,
       "enriched_with_skills": 60,
       "skills_pct": 100,
       "examples": [
@@ -289,7 +291,7 @@
       "pool_rows": 1025,
       "us_rows": 1024,
       "tech_us_rows": 261,
-      "raw_sidecar_rows": 2277,
+      "raw_sidecar_rows": 2267,
       "sidecar_active_rows": 261,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
@@ -314,7 +316,7 @@
       "supplemental_rows": 1431,
       "supplemental_with_desc": 1431,
       "supplemental_meta": {
-        "generated_at": "2026-06-20T07:21:29.670Z",
+        "generated_at": "2026-06-20T07:36:39.342Z",
         "lane_name": "custom",
         "jobs_fetched": 4218
       },
