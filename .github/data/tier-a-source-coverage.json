@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-21T16:37:06.176Z",
+  "generated_at": "2026-06-21T16:51:08.562Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -64,26 +64,28 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-21T16:34:44.469Z",
+    "generated_at": "2026-06-21T16:48:40.910Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 8986,
-    "description_entries": 8300,
-    "coverage_pct": 92.4,
+    "board_row_count": 8818,
+    "description_entries": 8131,
+    "coverage_pct": 92.2,
     "source_breakdown": {
-      "sidecar": 8300,
+      "sidecar": 8131,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-21T16:19:33.331Z",
+    "jobs_metadata_generated": "2026-06-21T16:34:18.490Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-06-21T16:37:02.714Z",
+    "checked_at": "2026-06-21T16:51:05.013Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [],
-    "warning_count": 0,
+    "warnings": [
+      "Senior filter FP rate elevated: 10.2% (51/500). May indicate keyword over-matching."
+    ],
+    "warning_count": 1,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -95,23 +97,23 @@
   "rows": [
     {
       "source": "oracle",
-      "pool_rows": 5668,
-      "us_rows": 3506,
+      "pool_rows": 5667,
+      "us_rows": 3505,
       "tech_us_rows": 535,
-      "raw_sidecar_rows": 4374,
+      "raw_sidecar_rows": 4784,
       "sidecar_active_rows": 375,
-      "supplemental_rows": 25597,
+      "supplemental_rows": 25596,
       "supplemental_with_desc": 18505,
       "supplemental_meta": {
-        "generated_at": "2026-06-21T16:33:50.257Z",
+        "generated_at": "2026-06-21T16:48:41.202Z",
         "lane_name": "oracle",
-        "jobs_fetched": 25597
+        "jobs_fetched": 25596
       },
       "published_rows": 375,
       "published_pct": 70.1,
-      "enriched_rows": 534,
-      "enriched_pct": 99.8,
-      "enriched_with_skills": 401,
+      "enriched_rows": 535,
+      "enriched_pct": 100,
+      "enriched_with_skills": 402,
       "skills_pct": 75.1,
       "examples": [
         {
@@ -170,7 +172,7 @@
       "supplemental_rows": 316,
       "supplemental_with_desc": 316,
       "supplemental_meta": {
-        "generated_at": "2026-06-21T16:35:44.588Z",
+        "generated_at": "2026-06-21T16:50:37.900Z",
         "lane_name": "custom",
         "jobs_fetched": 4174
       },
@@ -188,90 +190,60 @@
     },
     {
       "source": "workday",
-      "pool_rows": 32993,
-      "us_rows": 16957,
-      "tech_us_rows": 5148,
-      "raw_sidecar_rows": 18283,
-      "sidecar_active_rows": 5119,
+      "pool_rows": 33006,
+      "us_rows": 16955,
+      "tech_us_rows": 5153,
+      "raw_sidecar_rows": 18296,
+      "sidecar_active_rows": 5124,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 5038,
-      "published_pct": 97.9,
-      "enriched_rows": 5123,
-      "enriched_pct": 99.5,
-      "enriched_with_skills": 4646,
+      "published_rows": 5070,
+      "published_pct": 98.4,
+      "enriched_rows": 5116,
+      "enriched_pct": 99.3,
+      "enriched_with_skills": 4639,
       "skills_pct": 90.7,
       "examples": [
         {
-          "id": "workday-schweitzer-engineering-laboratories-2025-18525",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Installation Technician"
+          "id": "workday-kla-2633863",
+          "company": "KLA",
+          "title": "Engineering Change Order (ECO) Analyst (Enovia PLM ERP MES SAP)"
         },
         {
-          "id": "workday-schweitzer-engineering-laboratories-2026-21234",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Project Engineer - Automation"
+          "id": "workday-cvs-health-R0942322",
+          "company": "CVS Health",
+          "title": "Manager, Business Analytics"
         },
         {
-          "id": "workday-schweitzer-engineering-laboratories-2026-21278",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Project Engineer II/III - Automation"
+          "id": "workday-cvs-health-R0942234",
+          "company": "CVS Health",
+          "title": "Data Engineer"
         },
         {
-          "id": "workday-schweitzer-engineering-laboratories-2026-20792",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Installation Technician II"
+          "id": "workday-cvs-health-R0942420",
+          "company": "CVS Health",
+          "title": "Data Engineer"
         },
         {
-          "id": "workday-schweitzer-engineering-laboratories-2026-19558",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Relay Technician"
+          "id": "workday-cvs-health-R0942491",
+          "company": "CVS Health",
+          "title": "Data Engineer"
         },
         {
-          "id": "workday-schweitzer-engineering-laboratories-2025-18875",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Primary Equipment Technician"
+          "id": "workday-cvs-health-R0942464",
+          "company": "CVS Health",
+          "title": "JhingranA@aetna.com"
         },
         {
-          "id": "workday-schweitzer-engineering-laboratories-2025-18714",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Project Engineer I/II/III - Automation"
+          "id": "workday-cvs-health-R0942430",
+          "company": "CVS Health",
+          "title": "Manager,  Business Analytics"
         },
         {
-          "id": "workday-schweitzer-engineering-laboratories-2026-20421",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Project Engineer I/II/III - Commissioning"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
-    },
-    {
-      "source": "microsoft",
-      "pool_rows": 306,
-      "us_rows": 132,
-      "tech_us_rows": 58,
-      "raw_sidecar_rows": 292,
-      "sidecar_active_rows": 57,
-      "supplemental_rows": 1373,
-      "supplemental_with_desc": 120,
-      "supplemental_meta": {
-        "generated_at": "2026-06-21T16:35:44.588Z",
-        "lane_name": "custom",
-        "jobs_fetched": 4174
-      },
-      "published_rows": 57,
-      "published_pct": 98.3,
-      "enriched_rows": 58,
-      "enriched_pct": 100,
-      "enriched_with_skills": 58,
-      "skills_pct": 100,
-      "examples": [
-        {
-          "id": "microsoft-200039796",
-          "company": "Microsoft",
-          "title": "Solution Engineer - Security"
+          "id": "workday-cvs-health-R0942375",
+          "company": "CVS Health",
+          "title": "Manager, Application Dev"
         }
       ],
       "severity": "ok",
@@ -279,21 +251,67 @@
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 1193,
-      "us_rows": 1192,
-      "tech_us_rows": 264,
-      "raw_sidecar_rows": 2469,
-      "sidecar_active_rows": 264,
+      "pool_rows": 1207,
+      "us_rows": 1206,
+      "tech_us_rows": 266,
+      "raw_sidecar_rows": 2976,
+      "sidecar_active_rows": 265,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
       "published_rows": 264,
-      "published_pct": 100,
+      "published_pct": 99.2,
       "enriched_rows": 264,
-      "enriched_pct": 100,
+      "enriched_pct": 99.2,
       "enriched_with_skills": 242,
       "skills_pct": 91.7,
-      "examples": [],
+      "examples": [
+        {
+          "id": "sr-BryceTech-744000132914421",
+          "company": "BryceTech",
+          "title": "Program Manager"
+        },
+        {
+          "id": "sr-Eurofins-744000130890444",
+          "company": "Eurofins",
+          "title": "Environmental Simulation and Performance Lab Manager"
+        }
+      ],
+      "severity": "ok",
+      "flags": []
+    },
+    {
+      "source": "microsoft",
+      "pool_rows": 309,
+      "us_rows": 132,
+      "tech_us_rows": 59,
+      "raw_sidecar_rows": 293,
+      "sidecar_active_rows": 58,
+      "supplemental_rows": 1373,
+      "supplemental_with_desc": 131,
+      "supplemental_meta": {
+        "generated_at": "2026-06-21T16:50:37.900Z",
+        "lane_name": "custom",
+        "jobs_fetched": 4174
+      },
+      "published_rows": 57,
+      "published_pct": 96.6,
+      "enriched_rows": 58,
+      "enriched_pct": 98.3,
+      "enriched_with_skills": 58,
+      "skills_pct": 100,
+      "examples": [
+        {
+          "id": "microsoft-200039796",
+          "company": "Microsoft",
+          "title": "Solution Engineer - Security"
+        },
+        {
+          "id": "microsoft-200038594",
+          "company": "Microsoft",
+          "title": "Critical Environment Field Service Engineer"
+        }
+      ],
       "severity": "ok",
       "flags": []
     },
@@ -302,12 +320,12 @@
       "pool_rows": 1007,
       "us_rows": 1007,
       "tech_us_rows": 440,
-      "raw_sidecar_rows": 1007,
+      "raw_sidecar_rows": 1016,
       "sidecar_active_rows": 440,
       "supplemental_rows": 1431,
       "supplemental_with_desc": 1431,
       "supplemental_meta": {
-        "generated_at": "2026-06-21T16:35:44.588Z",
+        "generated_at": "2026-06-21T16:50:37.900Z",
         "lane_name": "custom",
         "jobs_fetched": 4174
       },
