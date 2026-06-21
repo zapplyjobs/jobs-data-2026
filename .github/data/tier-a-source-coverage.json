@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-21T12:51:38.119Z",
+  "generated_at": "2026-06-21T13:06:19.625Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -64,26 +64,28 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-21T12:48:53.343Z",
+    "generated_at": "2026-06-21T13:03:56.969Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 8797,
-    "description_entries": 8110,
-    "coverage_pct": 92.2,
+    "board_row_count": 8866,
+    "description_entries": 8179,
+    "coverage_pct": 92.3,
     "source_breakdown": {
-      "sidecar": 8110,
+      "sidecar": 8179,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-21T12:34:20.173Z",
+    "jobs_metadata_generated": "2026-06-21T12:49:27.634Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-06-21T12:51:34.537Z",
+    "checked_at": "2026-06-21T13:06:15.804Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [],
-    "warning_count": 0,
+    "warnings": [
+      "Senior filter FP rate elevated: 10.2% (51/500). May indicate keyword over-matching."
+    ],
+    "warning_count": 1,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -95,23 +97,23 @@
   "rows": [
     {
       "source": "oracle",
-      "pool_rows": 5679,
-      "us_rows": 3513,
-      "tech_us_rows": 536,
+      "pool_rows": 5680,
+      "us_rows": 3514,
+      "tech_us_rows": 537,
       "raw_sidecar_rows": 4794,
-      "sidecar_active_rows": 375,
+      "sidecar_active_rows": 377,
       "supplemental_rows": 25619,
       "supplemental_with_desc": 18525,
       "supplemental_meta": {
-        "generated_at": "2026-06-21T12:48:26.542Z",
+        "generated_at": "2026-06-21T13:03:48.375Z",
         "lane_name": "oracle",
         "jobs_fetched": 25619
       },
       "published_rows": 375,
-      "published_pct": 70,
-      "enriched_rows": 536,
-      "enriched_pct": 100,
-      "enriched_with_skills": 402,
+      "published_pct": 69.8,
+      "enriched_rows": 535,
+      "enriched_pct": 99.6,
+      "enriched_with_skills": 401,
       "skills_pct": 75,
       "examples": [
         {
@@ -170,7 +172,7 @@
       "supplemental_rows": 316,
       "supplemental_with_desc": 316,
       "supplemental_meta": {
-        "generated_at": "2026-06-21T12:35:52.397Z",
+        "generated_at": "2026-06-21T13:05:52.568Z",
         "lane_name": "custom",
         "jobs_fetched": 4178
       },
@@ -189,59 +191,59 @@
     {
       "source": "workday",
       "pool_rows": 32976,
-      "us_rows": 16994,
-      "tech_us_rows": 5198,
+      "us_rows": 16951,
+      "tech_us_rows": 5130,
       "raw_sidecar_rows": 18267,
-      "sidecar_active_rows": 5166,
+      "sidecar_active_rows": 5099,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 5051,
-      "published_pct": 97.2,
-      "enriched_rows": 5172,
+      "published_rows": 5058,
+      "published_pct": 98.6,
+      "enriched_rows": 5106,
       "enriched_pct": 99.5,
-      "enriched_with_skills": 4689,
-      "skills_pct": 90.7,
+      "enriched_with_skills": 4627,
+      "skills_pct": 90.6,
       "examples": [
         {
-          "id": "workday-regal-rexnord-R26_02717",
-          "company": "Regal Rexnord",
-          "title": "Continuous Improvement Manager - North America"
+          "id": "workday-amentum-R0163902",
+          "company": "Amentum",
+          "title": "Line Division Supervisor"
         },
         {
-          "id": "workday-oshkosh-corporation-R46972",
-          "company": "Oshkosh Corporation",
-          "title": "Systems Analyst"
+          "id": "workday-allegion-JR36157",
+          "company": "Allegion",
+          "title": "Design Technician 1 (2nd Shift) – Fontana, CA"
         },
         {
-          "id": "workday-gdit-RQ222815",
+          "id": "workday-alliancebernstein-R0019142",
+          "company": "AllianceBernstein",
+          "title": "Developer"
+        },
+        {
+          "id": "workday-abb-JR00037729",
+          "company": "ABB",
+          "title": "Associate Project Manager"
+        },
+        {
+          "id": "workday-pfizer-4959214",
+          "company": "Pfizer",
+          "title": "Plant Engineer I"
+        },
+        {
+          "id": "workday-gdit-RQ222457",
           "company": "GDIT",
-          "title": "Psychometrist"
+          "title": "Help Desk Manager"
         },
         {
-          "id": "workday-gdit-RQ222816",
-          "company": "GDIT",
-          "title": "Cognitive Performance Specialist"
+          "id": "workday-applied-materials-R2622264",
+          "company": "Applied Materials",
+          "title": "Market Analyst"
         },
         {
-          "id": "workday-gdit-RQ222808",
-          "company": "GDIT",
-          "title": "Case Manager"
-        },
-        {
-          "id": "workday-northrop-grumman-R10233433",
-          "company": "Northrop Grumman",
-          "title": "Power Supply Engineer"
-        },
-        {
-          "id": "workday-northrop-grumman-R10233015",
-          "company": "Northrop Grumman",
-          "title": "PWB Layout Engineer"
-        },
-        {
-          "id": "workday-moog-R-26-18500",
-          "company": "Moog",
-          "title": "Mechanical Receiving Inspector - 2nd Shift"
+          "id": "workday-abb-JR00038220",
+          "company": "ABB",
+          "title": "Business Development Manager – Chemical Oil and Gas Industry (VFDs)"
         }
       ],
       "severity": "ok",
@@ -252,12 +254,12 @@
       "pool_rows": 313,
       "us_rows": 134,
       "tech_us_rows": 59,
-      "raw_sidecar_rows": 308,
+      "raw_sidecar_rows": 310,
       "sidecar_active_rows": 58,
       "supplemental_rows": 1377,
-      "supplemental_with_desc": 107,
+      "supplemental_with_desc": 115,
       "supplemental_meta": {
-        "generated_at": "2026-06-21T12:35:52.397Z",
+        "generated_at": "2026-06-21T13:05:52.568Z",
         "lane_name": "custom",
         "jobs_fetched": 4178
       },
@@ -279,10 +281,10 @@
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 1021,
-      "us_rows": 1020,
+      "pool_rows": 1020,
+      "us_rows": 1019,
       "tech_us_rows": 261,
-      "raw_sidecar_rows": 5789,
+      "raw_sidecar_rows": 6058,
       "sidecar_active_rows": 261,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
@@ -307,7 +309,7 @@
       "supplemental_rows": 1431,
       "supplemental_with_desc": 1431,
       "supplemental_meta": {
-        "generated_at": "2026-06-21T12:35:52.397Z",
+        "generated_at": "2026-06-21T13:05:52.568Z",
         "lane_name": "custom",
         "jobs_fetched": 4178
       },
