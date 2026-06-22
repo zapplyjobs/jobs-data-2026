@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-22T20:38:02.358Z",
+  "generated_at": "2026-06-22T20:53:04.720Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -30,7 +30,6 @@
     "descriptions-bytedance.jsonl",
     "descriptions-eightfold.jsonl",
     "descriptions-enriched-1.jsonl",
-    "descriptions-enriched-11.jsonl",
     "descriptions-enriched-12.jsonl",
     "descriptions-enriched-13.jsonl",
     "descriptions-enriched-16.jsonl",
@@ -45,6 +44,7 @@
     "descriptions-enriched-6.jsonl",
     "descriptions-enriched-7.jsonl",
     "descriptions-enriched-8.jsonl",
+    "descriptions-enriched-9.jsonl",
     "descriptions-google.jsonl",
     "descriptions-greenhouse-1.jsonl",
     "descriptions-greenhouse-2.jsonl",
@@ -58,21 +58,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-22T20:36:21.542Z",
+    "generated_at": "2026-06-22T20:51:19.942Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 8612,
-    "description_entries": 7572,
-    "coverage_pct": 87.9,
+    "board_row_count": 8627,
+    "description_entries": 7602,
+    "coverage_pct": 88.1,
     "source_breakdown": {
-      "sidecar": 7572,
+      "sidecar": 7602,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-22T20:21:46.229Z",
+    "jobs_metadata_generated": "2026-06-22T20:36:43.815Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-06-22T20:37:59.230Z",
+    "checked_at": "2026-06-22T20:53:01.799Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -89,25 +89,30 @@
   "rows": [
     {
       "source": "oracle",
-      "pool_rows": 5657,
-      "us_rows": 3488,
-      "tech_us_rows": 524,
-      "raw_sidecar_rows": 4877,
+      "pool_rows": 5674,
+      "us_rows": 3502,
+      "tech_us_rows": 527,
+      "raw_sidecar_rows": 4377,
       "sidecar_active_rows": 370,
-      "supplemental_rows": 25654,
-      "supplemental_with_desc": 18561,
+      "supplemental_rows": 25661,
+      "supplemental_with_desc": 18566,
       "supplemental_meta": {
-        "generated_at": "2026-06-22T20:34:23.359Z",
+        "generated_at": "2026-06-22T20:49:16.133Z",
         "lane_name": "oracle",
-        "jobs_fetched": 25654
+        "jobs_fetched": 25661
       },
       "published_rows": 370,
-      "published_pct": 70.6,
-      "enriched_rows": 524,
-      "enriched_pct": 100,
-      "enriched_with_skills": 398,
-      "skills_pct": 76,
+      "published_pct": 70.2,
+      "enriched_rows": 523,
+      "enriched_pct": 99.2,
+      "enriched_with_skills": 397,
+      "skills_pct": 75.9,
       "examples": [
+        {
+          "id": "oracle-jpmorgan-chase-210734238",
+          "company": "JPMorgan Chase",
+          "title": "Software Engineer III - React/UI/Python"
+        },
         {
           "id": "oracle-jpmorgan-chase-210739359",
           "company": "JPMorgan Chase",
@@ -117,6 +122,11 @@
           "id": "oracle-jpmorgan-chase-210739366",
           "company": "JPMorgan Chase",
           "title": "Software Engineer III - Database"
+        },
+        {
+          "id": "oracle-jpmorgan-chase-210741143",
+          "company": "JPMorgan Chase",
+          "title": "Software Engineer III - Python & Databricks"
         },
         {
           "id": "oracle-onsemi-2504506",
@@ -137,16 +147,6 @@
           "id": "oracle-wsp-77256",
           "company": "WSP",
           "title": "Quality Control Production Analyst"
-        },
-        {
-          "id": "oracle-wsp-77258",
-          "company": "WSP",
-          "title": "Inspection Services Specialist"
-        },
-        {
-          "id": "oracle-wsp-89508",
-          "company": "WSP",
-          "title": "Technician, CADD Design Support"
         }
       ],
       "severity": "high",
@@ -159,14 +159,14 @@
       "pool_rows": 60,
       "us_rows": 48,
       "tech_us_rows": 11,
-      "raw_sidecar_rows": 317,
+      "raw_sidecar_rows": 60,
       "sidecar_active_rows": 11,
       "supplemental_rows": 316,
       "supplemental_with_desc": 316,
       "supplemental_meta": {
-        "generated_at": "2026-06-22T20:36:20.409Z",
+        "generated_at": "2026-06-22T20:51:25.172Z",
         "lane_name": "custom",
-        "jobs_fetched": 4163
+        "jobs_fetched": 4162
       },
       "published_rows": 11,
       "published_pct": 100,
@@ -182,60 +182,60 @@
     },
     {
       "source": "workday",
-      "pool_rows": 33093,
-      "us_rows": 17374,
-      "tech_us_rows": 5015,
-      "raw_sidecar_rows": 15744,
-      "sidecar_active_rows": 4374,
+      "pool_rows": 33120,
+      "us_rows": 17215,
+      "tech_us_rows": 5031,
+      "raw_sidecar_rows": 16440,
+      "sidecar_active_rows": 4638,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 4434,
+      "published_rows": 4446,
       "published_pct": 88.4,
-      "enriched_rows": 4965,
-      "enriched_pct": 99,
-      "enriched_with_skills": 4541,
-      "skills_pct": 91.5,
+      "enriched_rows": 4988,
+      "enriched_pct": 99.1,
+      "enriched_with_skills": 4542,
+      "skills_pct": 91.1,
       "examples": [
         {
-          "id": "workday-cadence-R55227",
-          "company": "Cadence",
-          "title": "Firmware Engineer II"
+          "id": "workday-general-motors-JR-202612722",
+          "company": "General Motors",
+          "title": "Controls Engineer"
         },
         {
-          "id": "workday-cadence-R55225",
-          "company": "Cadence",
-          "title": "Firmware Engineer II"
+          "id": "workday-globalfoundries-JR-2501765",
+          "company": "GlobalFoundries",
+          "title": "Device Modeling & Characterization Engineer (2026 New College Graduate)"
         },
         {
-          "id": "workday-carnegie-mellon-university-2024708",
-          "company": "Carnegie Mellon University",
-          "title": "Cybersecurity Engineer"
+          "id": "workday-gilead-sciences-R0052368",
+          "company": "Gilead Sciences",
+          "title": "Device Engineer III"
         },
         {
-          "id": "workday-carnegie-mellon-university-2024749",
-          "company": "Carnegie Mellon University",
-          "title": "Postdoctoral Research Associate - College of Engineering - Electrical and Computer Engineering"
+          "id": "workday-gdit-RQ222620",
+          "company": "GDIT",
+          "title": "Program/Data Analyst Advisor"
         },
         {
-          "id": "workday-carnegie-mellon-university-2024723",
-          "company": "Carnegie Mellon University",
-          "title": "Financial Assistant - Division of Student Affairs"
+          "id": "workday-gdit-RQ222209",
+          "company": "GDIT",
+          "title": "Next Generation Desktop (NGDE) Systems Administrator - TS/SCI with Poly"
         },
         {
-          "id": "workday-carnegie-mellon-university-2024690",
-          "company": "Carnegie Mellon University",
-          "title": "Summer Research Intern - College of Engineering - Electrical and Computer Engineering"
+          "id": "workday-generac-JR15078",
+          "company": "Generac",
+          "title": "Software Development Engineer III"
         },
         {
-          "id": "workday-carnegie-mellon-university-2024716",
-          "company": "Carnegie Mellon University",
-          "title": "Research Associate - College of Engineering - Materials Science and Engineering"
+          "id": "workday-fiserv-R-10396293",
+          "company": "Fiserv",
+          "title": "Technical Integration Specialist, CardPointe"
         },
         {
-          "id": "workday-booz-allen-hamilton-R0242716",
-          "company": "Booz Allen Hamilton",
-          "title": "Information Assurance Portfolio Specialist"
+          "id": "workday-fiserv-R-10395871",
+          "company": "Fiserv",
+          "title": "API Security Engineer"
         }
       ],
       "severity": "ok",
@@ -245,28 +245,28 @@
       "source": "smartrecruiters",
       "pool_rows": 995,
       "us_rows": 994,
-      "tech_us_rows": 250,
-      "raw_sidecar_rows": 5942,
-      "sidecar_active_rows": 250,
+      "tech_us_rows": 251,
+      "raw_sidecar_rows": 2255,
+      "sidecar_active_rows": 249,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 248,
+      "published_rows": 249,
       "published_pct": 99.2,
-      "enriched_rows": 248,
+      "enriched_rows": 249,
       "enriched_pct": 99.2,
-      "enriched_with_skills": 225,
-      "skills_pct": 90.7,
+      "enriched_with_skills": 226,
+      "skills_pct": 90.8,
       "examples": [
         {
-          "id": "sr-Eurofins-744000133450009",
-          "company": "Eurofins",
-          "title": "Laboratory Analyst I - Eurofins Environment Testing Southeast - Pensacola, FL"
+          "id": "sr-VeoliaEnvironnementSA-744000133451140",
+          "company": "Veolia Environnement SA",
+          "title": "Project Engineer"
         },
         {
-          "id": "sr-Eurofins-744000133448171",
+          "id": "sr-Eurofins-744000133451179",
           "company": "Eurofins",
-          "title": "Analytical Scientist"
+          "title": "Laboratory Analyst, 2nd Shift"
         }
       ],
       "severity": "ok",
@@ -274,53 +274,47 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 299,
-      "us_rows": 123,
-      "tech_us_rows": 56,
-      "raw_sidecar_rows": 334,
+      "pool_rows": 305,
+      "us_rows": 127,
+      "tech_us_rows": 55,
+      "raw_sidecar_rows": 285,
       "sidecar_active_rows": 55,
-      "supplemental_rows": 1384,
-      "supplemental_with_desc": 140,
+      "supplemental_rows": 1383,
+      "supplemental_with_desc": 109,
       "supplemental_meta": {
-        "generated_at": "2026-06-22T20:36:20.409Z",
+        "generated_at": "2026-06-22T20:51:25.172Z",
         "lane_name": "custom",
-        "jobs_fetched": 4163
+        "jobs_fetched": 4162
       },
       "published_rows": 55,
-      "published_pct": 98.2,
+      "published_pct": 100,
       "enriched_rows": 55,
-      "enriched_pct": 98.2,
+      "enriched_pct": 100,
       "enriched_with_skills": 55,
       "skills_pct": 100,
-      "examples": [
-        {
-          "id": "microsoft-200039796",
-          "company": "Microsoft",
-          "title": "Solution Engineer - Security"
-        }
-      ],
+      "examples": [],
       "severity": "ok",
       "flags": []
     },
     {
       "source": "tiktok",
-      "pool_rows": 1005,
-      "us_rows": 1005,
-      "tech_us_rows": 441,
-      "raw_sidecar_rows": 1018,
-      "sidecar_active_rows": 441,
+      "pool_rows": 1004,
+      "us_rows": 1004,
+      "tech_us_rows": 440,
+      "raw_sidecar_rows": 1005,
+      "sidecar_active_rows": 440,
       "supplemental_rows": 1429,
       "supplemental_with_desc": 1429,
       "supplemental_meta": {
-        "generated_at": "2026-06-22T20:36:20.409Z",
+        "generated_at": "2026-06-22T20:51:25.172Z",
         "lane_name": "custom",
-        "jobs_fetched": 4163
+        "jobs_fetched": 4162
       },
-      "published_rows": 441,
+      "published_rows": 440,
       "published_pct": 100,
-      "enriched_rows": 441,
+      "enriched_rows": 440,
       "enriched_pct": 100,
-      "enriched_with_skills": 441,
+      "enriched_with_skills": 440,
       "skills_pct": 100,
       "examples": [],
       "severity": "ok",
