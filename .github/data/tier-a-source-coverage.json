@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-22T15:53:10.884Z",
+  "generated_at": "2026-06-22T16:04:19.092Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -30,11 +30,22 @@
     "descriptions-bytedance.jsonl",
     "descriptions-eightfold.jsonl",
     "descriptions-enriched-1.jsonl",
+    "descriptions-enriched-11.jsonl",
+    "descriptions-enriched-12.jsonl",
+    "descriptions-enriched-13.jsonl",
+    "descriptions-enriched-16.jsonl",
+    "descriptions-enriched-17.jsonl",
+    "descriptions-enriched-18.jsonl",
+    "descriptions-enriched-19.jsonl",
     "descriptions-enriched-2.jsonl",
+    "descriptions-enriched-20.jsonl",
     "descriptions-enriched-3.jsonl",
     "descriptions-enriched-4.jsonl",
     "descriptions-enriched-5.jsonl",
     "descriptions-enriched-6.jsonl",
+    "descriptions-enriched-7.jsonl",
+    "descriptions-enriched-8.jsonl",
+    "descriptions-enriched-9.jsonl",
     "descriptions-google.jsonl",
     "descriptions-greenhouse-1.jsonl",
     "descriptions-greenhouse-2.jsonl",
@@ -62,12 +73,14 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-06-22T15:53:08.439Z",
+    "checked_at": "2026-06-22T16:04:16.374Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [],
-    "warning_count": 0,
+    "warnings": [
+      "Senior filter FP rate elevated: 10.2% (51/500). May indicate keyword over-matching."
+    ],
+    "warning_count": 1,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -79,11 +92,11 @@
   "rows": [
     {
       "source": "oracle",
-      "pool_rows": 5472,
-      "us_rows": 3327,
-      "tech_us_rows": 503,
-      "raw_sidecar_rows": 4219,
-      "sidecar_active_rows": 351,
+      "pool_rows": 5385,
+      "us_rows": 3304,
+      "tech_us_rows": 497,
+      "raw_sidecar_rows": 4686,
+      "sidecar_active_rows": 346,
       "supplemental_rows": 25594,
       "supplemental_with_desc": 18501,
       "supplemental_meta": {
@@ -91,13 +104,23 @@
         "lane_name": "oracle",
         "jobs_fetched": 25594
       },
-      "published_rows": 351,
-      "published_pct": 69.8,
-      "enriched_rows": 503,
-      "enriched_pct": 100,
-      "enriched_with_skills": 385,
-      "skills_pct": 76.5,
+      "published_rows": 341,
+      "published_pct": 68.6,
+      "enriched_rows": 492,
+      "enriched_pct": 99,
+      "enriched_with_skills": 377,
+      "skills_pct": 76.6,
       "examples": [
+        {
+          "id": "oracle-jpmorgan-chase-210742184",
+          "company": "JPMorgan Chase",
+          "title": "Software Engineer II- Test Automation"
+        },
+        {
+          "id": "oracle-nokia-37829",
+          "company": "Nokia",
+          "title": "5G NR & Wi-Fi 6 Convergence Development Engineer"
+        },
         {
           "id": "oracle-onsemi-2504506",
           "company": "onsemi",
@@ -127,16 +150,6 @@
           "id": "oracle-texas-instruments-25011202",
           "company": "Texas Instruments",
           "title": "SM CMP Equipment Engineer"
-        },
-        {
-          "id": "oracle-fortive-10061",
-          "company": "Fortive",
-          "title": "Certification Engineer"
-        },
-        {
-          "id": "oracle-hologic-11897",
-          "company": "Hologic",
-          "title": "Manufacturing Quality Engineer"
         }
       ],
       "severity": "high",
@@ -145,11 +158,74 @@
       ]
     },
     {
+      "source": "workday",
+      "pool_rows": 32593,
+      "us_rows": 16853,
+      "tech_us_rows": 4848,
+      "raw_sidecar_rows": 16530,
+      "sidecar_active_rows": 4554,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 4650,
+      "published_pct": 95.9,
+      "enriched_rows": 4764,
+      "enriched_pct": 98.3,
+      "enriched_with_skills": 4330,
+      "skills_pct": 90.9,
+      "examples": [
+        {
+          "id": "workday-the-travelers-companies-R-51151",
+          "company": "The Travelers Companies",
+          "title": "Major Case Specialist - SRG Claim"
+        },
+        {
+          "id": "workday-stanley-black-&-decker-REQ-1000040899",
+          "company": "Stanley Black & Decker",
+          "title": "Verification and Validation Engineer"
+        },
+        {
+          "id": "workday-northrop-grumman-R10230829",
+          "company": "Northrop Grumman",
+          "title": "Systems Engineer Systems - Level 2/3"
+        },
+        {
+          "id": "workday-ptc-JR112211",
+          "company": "PTC",
+          "title": "Presales Technical Services Engineer"
+        },
+        {
+          "id": "workday-johnson-controls-WD30272554",
+          "company": "Johnson Controls",
+          "title": "Equipment Systems Application Engineer I"
+        },
+        {
+          "id": "workday-general-motors-JR-202609450",
+          "company": "General Motors",
+          "title": "Traction Control (TCS) Calibration Technical Specialist"
+        },
+        {
+          "id": "workday-general-motors-JR-202611771",
+          "company": "General Motors",
+          "title": "Quality Engineer"
+        },
+        {
+          "id": "workday-flir-systems-REQ34938",
+          "company": "FLIR Systems",
+          "title": "Operator (Swing Shift)"
+        }
+      ],
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
+    },
+    {
       "source": "icims",
       "pool_rows": 59,
       "us_rows": 47,
       "tech_us_rows": 11,
-      "raw_sidecar_rows": 319,
+      "raw_sidecar_rows": 59,
       "sidecar_active_rows": 11,
       "supplemental_rows": 319,
       "supplemental_with_desc": 319,
@@ -171,73 +247,12 @@
       ]
     },
     {
-      "source": "workday",
-      "pool_rows": 32524,
-      "us_rows": 16668,
-      "tech_us_rows": 4844,
-      "raw_sidecar_rows": 16282,
-      "sidecar_active_rows": 4793,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 4793,
-      "published_pct": 98.9,
-      "enriched_rows": 4820,
-      "enriched_pct": 99.5,
-      "enriched_with_skills": 4381,
-      "skills_pct": 90.9,
-      "examples": [
-        {
-          "id": "workday-the-travelers-companies-R-51151",
-          "company": "The Travelers Companies",
-          "title": "Major Case Specialist - SRG Claim"
-        },
-        {
-          "id": "workday-snap-R0045905",
-          "company": "Snap",
-          "title": "Software Engineer, AR, Level 4"
-        },
-        {
-          "id": "workday-snap-Q226SWEB2",
-          "company": "Snap",
-          "title": "Software Engineer, Backend, Level 4"
-        },
-        {
-          "id": "workday-leidos-R-00185421",
-          "company": "Leidos",
-          "title": "Database Administrator"
-        },
-        {
-          "id": "workday-leidos-R-00166821",
-          "company": "Leidos",
-          "title": "Data Center System Administrator"
-        },
-        {
-          "id": "workday-leidos-R-00185390",
-          "company": "Leidos",
-          "title": "Targeting Analyst/Instructor (TITFU)"
-        },
-        {
-          "id": "workday-leidos-R-00185399",
-          "company": "Leidos",
-          "title": "Data Scientist"
-        },
-        {
-          "id": "workday-snap-R0045604",
-          "company": "Snap",
-          "title": "Software Engineer, ML Infrastructure, Level 4"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
-    },
-    {
       "source": "microsoft",
       "pool_rows": 302,
-      "us_rows": 121,
-      "tech_us_rows": 55,
-      "raw_sidecar_rows": 284,
-      "sidecar_active_rows": 53,
+      "us_rows": 119,
+      "tech_us_rows": 53,
+      "raw_sidecar_rows": 313,
+      "sidecar_active_rows": 50,
       "supplemental_rows": 1380,
       "supplemental_with_desc": 114,
       "supplemental_meta": {
@@ -245,17 +260,27 @@
         "lane_name": "custom",
         "jobs_fetched": 4167
       },
-      "published_rows": 53,
-      "published_pct": 96.4,
-      "enriched_rows": 55,
-      "enriched_pct": 100,
-      "enriched_with_skills": 55,
+      "published_rows": 49,
+      "published_pct": 92.5,
+      "enriched_rows": 51,
+      "enriched_pct": 96.2,
+      "enriched_with_skills": 51,
       "skills_pct": 100,
       "examples": [
+        {
+          "id": "microsoft-200039513",
+          "company": "Microsoft",
+          "title": "Critical Environment Industrial Controls Systems Engineer"
+        },
         {
           "id": "microsoft-200040417",
           "company": "Microsoft",
           "title": "Software Engineer II"
+        },
+        {
+          "id": "microsoft-200031947",
+          "company": "Microsoft",
+          "title": "Critical Environment Program Manager"
         },
         {
           "id": "microsoft-200039796",
@@ -268,21 +293,27 @@
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 1002,
-      "us_rows": 1001,
-      "tech_us_rows": 256,
-      "raw_sidecar_rows": 1885,
-      "sidecar_active_rows": 256,
+      "pool_rows": 997,
+      "us_rows": 996,
+      "tech_us_rows": 252,
+      "raw_sidecar_rows": 5720,
+      "sidecar_active_rows": 252,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 256,
-      "published_pct": 100,
-      "enriched_rows": 256,
-      "enriched_pct": 100,
-      "enriched_with_skills": 234,
-      "skills_pct": 91.4,
-      "examples": [],
+      "published_rows": 251,
+      "published_pct": 99.6,
+      "enriched_rows": 251,
+      "enriched_pct": 99.6,
+      "enriched_with_skills": 229,
+      "skills_pct": 91.2,
+      "examples": [
+        {
+          "id": "sr-llnl-3743990013724986",
+          "company": "LLNL",
+          "title": "Mechanical Engineer- Generalist, NIF&PS"
+        }
+      ],
       "severity": "ok",
       "flags": []
     },
@@ -291,7 +322,7 @@
       "pool_rows": 1009,
       "us_rows": 1009,
       "tech_us_rows": 441,
-      "raw_sidecar_rows": 1009,
+      "raw_sidecar_rows": 1018,
       "sidecar_active_rows": 441,
       "supplemental_rows": 1432,
       "supplemental_with_desc": 1432,
