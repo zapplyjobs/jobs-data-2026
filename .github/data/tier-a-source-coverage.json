@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-22T18:08:08.985Z",
+  "generated_at": "2026-06-22T18:22:35.375Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -47,26 +47,28 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-22T18:06:31.315Z",
+    "generated_at": "2026-06-22T18:21:11.327Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 8505,
-    "description_entries": 7631,
-    "coverage_pct": 89.7,
+    "board_row_count": 8565,
+    "description_entries": 7675,
+    "coverage_pct": 89.6,
     "source_breakdown": {
-      "sidecar": 7631,
+      "sidecar": 7675,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-22T17:53:10.641Z",
+    "jobs_metadata_generated": "2026-06-22T18:07:29.054Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-06-22T18:08:06.606Z",
+    "checked_at": "2026-06-22T18:22:32.986Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [],
-    "warning_count": 0,
+    "warnings": [
+      "Senior filter FP rate elevated: 10.4% (52/500). May indicate keyword over-matching."
+    ],
+    "warning_count": 1,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -78,24 +80,24 @@
   "rows": [
     {
       "source": "oracle",
-      "pool_rows": 5547,
-      "us_rows": 3385,
-      "tech_us_rows": 505,
-      "raw_sidecar_rows": 4283,
-      "sidecar_active_rows": 356,
-      "supplemental_rows": 25614,
-      "supplemental_with_desc": 18517,
+      "pool_rows": 5554,
+      "us_rows": 3392,
+      "tech_us_rows": 506,
+      "raw_sidecar_rows": 4289,
+      "sidecar_active_rows": 357,
+      "supplemental_rows": 24508,
+      "supplemental_with_desc": 17455,
       "supplemental_meta": {
-        "generated_at": "2026-06-22T18:04:39.419Z",
+        "generated_at": "2026-06-22T18:19:21.455Z",
         "lane_name": "oracle",
-        "jobs_fetched": 25614
+        "jobs_fetched": 24508
       },
-      "published_rows": 356,
-      "published_pct": 70.5,
-      "enriched_rows": 505,
+      "published_rows": 357,
+      "published_pct": 70.6,
+      "enriched_rows": 506,
       "enriched_pct": 100,
-      "enriched_with_skills": 385,
-      "skills_pct": 76.2,
+      "enriched_with_skills": 386,
+      "skills_pct": 76.3,
       "examples": [
         {
           "id": "oracle-jpmorgan-chase-210739366",
@@ -153,9 +155,9 @@
       "supplemental_rows": 316,
       "supplemental_with_desc": 316,
       "supplemental_meta": {
-        "generated_at": "2026-06-22T18:06:40.186Z",
+        "generated_at": "2026-06-22T18:21:20.492Z",
         "lane_name": "custom",
-        "jobs_fetched": 4163
+        "jobs_fetched": 4164
       },
       "published_rows": 11,
       "published_pct": 100,
@@ -171,31 +173,21 @@
     },
     {
       "source": "workday",
-      "pool_rows": 32757,
-      "us_rows": 16939,
-      "tech_us_rows": 4918,
-      "raw_sidecar_rows": 15943,
-      "sidecar_active_rows": 4693,
+      "pool_rows": 32775,
+      "us_rows": 17103,
+      "tech_us_rows": 4981,
+      "raw_sidecar_rows": 15903,
+      "sidecar_active_rows": 4738,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 4693,
-      "published_pct": 95.4,
-      "enriched_rows": 4890,
+      "published_rows": 4738,
+      "published_pct": 95.1,
+      "enriched_rows": 4953,
       "enriched_pct": 99.4,
-      "enriched_with_skills": 4449,
-      "skills_pct": 91,
+      "enriched_with_skills": 4514,
+      "skills_pct": 91.1,
       "examples": [
-        {
-          "id": "workday-snap-R0045910",
-          "company": "Snap",
-          "title": "Enterprise Partner Development Manager"
-        },
-        {
-          "id": "workday-jabil-J2454678",
-          "company": "Jabil",
-          "title": "Industrial Engineer III - Liquid Cooling Server Racks"
-        },
         {
           "id": "workday-carrier-global-30207408",
           "company": "Carrier Global",
@@ -207,60 +199,34 @@
           "title": "Instructional Analyst/Developer"
         },
         {
-          "id": "workday-kla-2637262",
-          "company": "KLA",
-          "title": "Customer Engagement Applications Engineer"
+          "id": "workday-snap-R0045910",
+          "company": "Snap",
+          "title": "Enterprise Partner Development Manager"
         },
         {
-          "id": "workday-micron-JR104642",
-          "company": "Micron",
-          "title": "Diffusion and Implant Shift Process Engineer"
+          "id": "workday-jabil-J2454678",
+          "company": "Jabil",
+          "title": "Industrial Engineer III - Liquid Cooling Server Racks"
         },
         {
-          "id": "workday-micron-technology-JR104642",
-          "company": "Micron Technology",
-          "title": "Diffusion and Implant Shift Process Engineer"
+          "id": "workday-eversource-energy-R-030895",
+          "company": "Eversource Energy",
+          "title": "IT Associate Analyst, Budget - Level 1"
         },
         {
-          "id": "workday-carnegie-mellon-university-2024690",
-          "company": "Carnegie Mellon University",
-          "title": "Summer Research Intern - College of Engineering - Electrical and Computer Engineering"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
-    },
-    {
-      "source": "smartrecruiters",
-      "pool_rows": 990,
-      "us_rows": 989,
-      "tech_us_rows": 252,
-      "raw_sidecar_rows": 1842,
-      "sidecar_active_rows": 249,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 249,
-      "published_pct": 98.8,
-      "enriched_rows": 249,
-      "enriched_pct": 98.8,
-      "enriched_with_skills": 227,
-      "skills_pct": 91.2,
-      "examples": [
-        {
-          "id": "sr-ServiceNow-744000132516459",
-          "company": "ServiceNow",
-          "title": "Solution Architect-Telco"
+          "id": "workday-applied-materials-R2620391",
+          "company": "Applied Materials",
+          "title": "Business Management V"
         },
         {
-          "id": "sr-ServiceNow-744000132514924",
-          "company": "ServiceNow",
-          "title": "Solution Architect-Telco"
+          "id": "workday-applied-materials-R2611980",
+          "company": "Applied Materials",
+          "title": "Machine Learning Engineer (Generative AI)"
         },
         {
-          "id": "sr-ServiceNow-744000132290659",
-          "company": "ServiceNow",
-          "title": "Principal Solution Architect, Operations Technology Management (OTM)"
+          "id": "workday-applied-materials-R2622052",
+          "company": "Applied Materials",
+          "title": "Demand Management Program Management"
         }
       ],
       "severity": "ok",
@@ -268,20 +234,20 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 305,
-      "us_rows": 124,
+      "pool_rows": 311,
+      "us_rows": 126,
       "tech_us_rows": 56,
-      "raw_sidecar_rows": 286,
-      "sidecar_active_rows": 55,
-      "supplemental_rows": 1383,
-      "supplemental_with_desc": 124,
+      "raw_sidecar_rows": 289,
+      "sidecar_active_rows": 54,
+      "supplemental_rows": 1384,
+      "supplemental_with_desc": 139,
       "supplemental_meta": {
-        "generated_at": "2026-06-22T18:06:40.186Z",
+        "generated_at": "2026-06-22T18:21:20.492Z",
         "lane_name": "custom",
-        "jobs_fetched": 4163
+        "jobs_fetched": 4164
       },
-      "published_rows": 55,
-      "published_pct": 98.2,
+      "published_rows": 54,
+      "published_pct": 96.4,
       "enriched_rows": 56,
       "enriched_pct": 100,
       "enriched_with_skills": 56,
@@ -291,8 +257,33 @@
           "id": "microsoft-200020076",
           "company": "Microsoft",
           "title": "Software Engineer II - CoreAI"
+        },
+        {
+          "id": "microsoft-200039796",
+          "company": "Microsoft",
+          "title": "Solution Engineer - Security"
         }
       ],
+      "severity": "ok",
+      "flags": []
+    },
+    {
+      "source": "smartrecruiters",
+      "pool_rows": 989,
+      "us_rows": 988,
+      "tech_us_rows": 249,
+      "raw_sidecar_rows": 1847,
+      "sidecar_active_rows": 249,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 249,
+      "published_pct": 100,
+      "enriched_rows": 249,
+      "enriched_pct": 100,
+      "enriched_with_skills": 227,
+      "skills_pct": 91.2,
+      "examples": [],
       "severity": "ok",
       "flags": []
     },
@@ -306,9 +297,9 @@
       "supplemental_rows": 1430,
       "supplemental_with_desc": 1430,
       "supplemental_meta": {
-        "generated_at": "2026-06-22T18:06:40.186Z",
+        "generated_at": "2026-06-22T18:21:20.492Z",
         "lane_name": "custom",
-        "jobs_fetched": 4163
+        "jobs_fetched": 4164
       },
       "published_rows": 441,
       "published_pct": 100,
