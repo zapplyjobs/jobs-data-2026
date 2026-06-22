@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-22T01:08:56.329Z",
+  "generated_at": "2026-06-22T01:21:47.445Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -64,26 +64,28 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-22T01:04:13.577Z",
+    "generated_at": "2026-06-22T01:19:03.587Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 8775,
-    "description_entries": 8101,
+    "board_row_count": 8784,
+    "description_entries": 8111,
     "coverage_pct": 92.3,
     "source_breakdown": {
-      "sidecar": 8101,
+      "sidecar": 8111,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-22T00:49:13.411Z",
+    "jobs_metadata_generated": "2026-06-22T01:04:45.948Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-06-22T01:08:53.168Z",
+    "checked_at": "2026-06-22T01:21:43.887Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [],
-    "warning_count": 0,
+    "warnings": [
+      "Senior filter FP rate elevated: 10.2% (51/500). May indicate keyword over-matching."
+    ],
+    "warning_count": 1,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -95,24 +97,24 @@
   "rows": [
     {
       "source": "oracle",
-      "pool_rows": 5277,
+      "pool_rows": 5279,
       "us_rows": 3259,
       "tech_us_rows": 495,
-      "raw_sidecar_rows": 4762,
+      "raw_sidecar_rows": 4764,
       "sidecar_active_rows": 350,
-      "supplemental_rows": 25592,
-      "supplemental_with_desc": 18485,
+      "supplemental_rows": 25596,
+      "supplemental_with_desc": 18487,
       "supplemental_meta": {
-        "generated_at": "2026-06-22T01:03:53.109Z",
+        "generated_at": "2026-06-22T01:18:48.780Z",
         "lane_name": "oracle",
-        "jobs_fetched": 25592
+        "jobs_fetched": 25596
       },
-      "published_rows": 344,
-      "published_pct": 69.5,
-      "enriched_rows": 489,
-      "enriched_pct": 98.8,
-      "enriched_with_skills": 367,
-      "skills_pct": 75.1,
+      "published_rows": 350,
+      "published_pct": 70.7,
+      "enriched_rows": 495,
+      "enriched_pct": 100,
+      "enriched_with_skills": 372,
+      "skills_pct": 75.2,
       "examples": [
         {
           "id": "oracle-texas-instruments-25011202",
@@ -170,7 +172,7 @@
       "supplemental_rows": 316,
       "supplemental_with_desc": 316,
       "supplemental_meta": {
-        "generated_at": "2026-06-22T01:06:00.764Z",
+        "generated_at": "2026-06-22T01:20:37.095Z",
         "lane_name": "custom",
         "jobs_fetched": 4168
       },
@@ -188,60 +190,60 @@
     },
     {
       "source": "workday",
-      "pool_rows": 32939,
-      "us_rows": 17071,
-      "tech_us_rows": 5168,
+      "pool_rows": 32938,
+      "us_rows": 17035,
+      "tech_us_rows": 5143,
       "raw_sidecar_rows": 18284,
-      "sidecar_active_rows": 5137,
+      "sidecar_active_rows": 5114,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 5029,
-      "published_pct": 97.3,
-      "enriched_rows": 5142,
+      "published_rows": 5024,
+      "published_pct": 97.7,
+      "enriched_rows": 5119,
       "enriched_pct": 99.5,
-      "enriched_with_skills": 4664,
-      "skills_pct": 90.7,
+      "enriched_with_skills": 4661,
+      "skills_pct": 91.1,
       "examples": [
         {
-          "id": "workday-schweitzer-engineering-laboratories-2025-18525",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Installation Technician"
+          "id": "workday-microchip-technology-R1034-26",
+          "company": "Microchip Technology",
+          "title": "Technician IV - Product/Test"
         },
         {
-          "id": "workday-schweitzer-engineering-laboratories-2026-21234",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Project Engineer - Automation"
+          "id": "workday-ss&c-technologies-R43164",
+          "company": "SS&C Technologies",
+          "title": "Manager, Private Markets"
         },
         {
-          "id": "workday-schweitzer-engineering-laboratories-2026-21278",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Project Engineer II/III - Automation"
+          "id": "workday-ss&c-technologies-R43165",
+          "company": "SS&C Technologies",
+          "title": "Senior Associate, Private Markets"
         },
         {
-          "id": "workday-schweitzer-engineering-laboratories-2026-20792",
+          "id": "workday-schweitzer-engineering-laboratories-2025-18388",
           "company": "Schweitzer Engineering Laboratories",
-          "title": "Installation Technician II"
+          "title": "Craftsman I"
         },
         {
-          "id": "workday-schweitzer-engineering-laboratories-2026-19558",
+          "id": "workday-schweitzer-engineering-laboratories-2026-20986",
           "company": "Schweitzer Engineering Laboratories",
-          "title": "Relay Technician"
+          "title": "Electronics Service Supervisor"
         },
         {
-          "id": "workday-schweitzer-engineering-laboratories-2025-18875",
+          "id": "workday-schweitzer-engineering-laboratories-2026-20929",
           "company": "Schweitzer Engineering Laboratories",
-          "title": "Primary Equipment Technician"
+          "title": "Project Controller"
         },
         {
-          "id": "workday-schweitzer-engineering-laboratories-2025-18714",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Project Engineer I/II/III - Automation"
+          "id": "workday-magna-R00247802",
+          "company": "Magna",
+          "title": "Engineer, Tooling"
         },
         {
-          "id": "workday-schweitzer-engineering-laboratories-2026-20421",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Project Engineer I/II/III - Commissioning"
+          "id": "workday-symbotic-R7350",
+          "company": "Symbotic",
+          "title": "Site Installation Manager"
         }
       ],
       "severity": "ok",
@@ -249,15 +251,15 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 307,
-      "us_rows": 130,
+      "pool_rows": 308,
+      "us_rows": 132,
       "tech_us_rows": 59,
       "raw_sidecar_rows": 299,
       "sidecar_active_rows": 58,
       "supplemental_rows": 1367,
-      "supplemental_with_desc": 90,
+      "supplemental_with_desc": 129,
       "supplemental_meta": {
-        "generated_at": "2026-06-22T01:06:00.764Z",
+        "generated_at": "2026-06-22T01:20:37.095Z",
         "lane_name": "custom",
         "jobs_fetched": 4168
       },
@@ -279,10 +281,10 @@
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 1186,
-      "us_rows": 1185,
+      "pool_rows": 1092,
+      "us_rows": 1091,
       "tech_us_rows": 263,
-      "raw_sidecar_rows": 4455,
+      "raw_sidecar_rows": 4858,
       "sidecar_active_rows": 263,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
@@ -307,7 +309,7 @@
       "supplemental_rows": 1431,
       "supplemental_with_desc": 1431,
       "supplemental_meta": {
-        "generated_at": "2026-06-22T01:06:00.764Z",
+        "generated_at": "2026-06-22T01:20:37.095Z",
         "lane_name": "custom",
         "jobs_fetched": 4168
       },
