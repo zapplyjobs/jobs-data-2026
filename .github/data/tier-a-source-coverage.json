@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-22T18:22:35.375Z",
+  "generated_at": "2026-06-22T18:38:06.903Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -47,28 +47,26 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-22T18:21:11.327Z",
+    "generated_at": "2026-06-22T18:36:31.325Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 8565,
-    "description_entries": 7675,
-    "coverage_pct": 89.6,
+    "board_row_count": 8514,
+    "description_entries": 7617,
+    "coverage_pct": 89.5,
     "source_breakdown": {
-      "sidecar": 7675,
+      "sidecar": 7617,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-22T18:07:29.054Z",
+    "jobs_metadata_generated": "2026-06-22T18:21:53.498Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-06-22T18:22:32.986Z",
+    "checked_at": "2026-06-22T18:38:03.914Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [
-      "Senior filter FP rate elevated: 10.4% (52/500). May indicate keyword over-matching."
-    ],
-    "warning_count": 1,
+    "warnings": [],
+    "warning_count": 0,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -80,25 +78,35 @@
   "rows": [
     {
       "source": "oracle",
-      "pool_rows": 5554,
-      "us_rows": 3392,
-      "tech_us_rows": 506,
-      "raw_sidecar_rows": 4289,
-      "sidecar_active_rows": 357,
-      "supplemental_rows": 24508,
-      "supplemental_with_desc": 17455,
+      "pool_rows": 5457,
+      "us_rows": 3361,
+      "tech_us_rows": 487,
+      "raw_sidecar_rows": 4295,
+      "sidecar_active_rows": 333,
+      "supplemental_rows": 25639,
+      "supplemental_with_desc": 18546,
       "supplemental_meta": {
-        "generated_at": "2026-06-22T18:19:21.455Z",
+        "generated_at": "2026-06-22T18:35:02.398Z",
         "lane_name": "oracle",
-        "jobs_fetched": 24508
+        "jobs_fetched": 25639
       },
-      "published_rows": 357,
-      "published_pct": 70.6,
-      "enriched_rows": 506,
-      "enriched_pct": 100,
-      "enriched_with_skills": 386,
-      "skills_pct": 76.3,
+      "published_rows": 333,
+      "published_pct": 68.4,
+      "enriched_rows": 483,
+      "enriched_pct": 99.2,
+      "enriched_with_skills": 364,
+      "skills_pct": 75.4,
       "examples": [
+        {
+          "id": "oracle-icd-301695",
+          "company": "ICD",
+          "title": "Fixed Income Data Scientist"
+        },
+        {
+          "id": "oracle-jpmorgan-chase-210714076",
+          "company": "JPMorgan Chase",
+          "title": "Manager of Software Engineering - Java/DevOps/AWS"
+        },
         {
           "id": "oracle-jpmorgan-chase-210739366",
           "company": "JPMorgan Chase",
@@ -108,6 +116,11 @@
           "id": "oracle-onsemi-2504506",
           "company": "onsemi",
           "title": "Manufacturing Equipment Technician - Backend"
+        },
+        {
+          "id": "oracle-tradeweb-301695",
+          "company": "Tradeweb",
+          "title": "Fixed Income Data Scientist"
         },
         {
           "id": "oracle-wsp-76899",
@@ -123,21 +136,6 @@
           "id": "oracle-wsp-77258",
           "company": "WSP",
           "title": "Inspection Services Specialist"
-        },
-        {
-          "id": "oracle-wsp-89508",
-          "company": "WSP",
-          "title": "Technician, CADD Design Support"
-        },
-        {
-          "id": "oracle-wsp-89527",
-          "company": "WSP",
-          "title": "Intermediate Consultant- Commissioning"
-        },
-        {
-          "id": "oracle-texas-instruments-25011202",
-          "company": "Texas Instruments",
-          "title": "SM CMP Equipment Engineer"
         }
       ],
       "severity": "high",
@@ -155,9 +153,9 @@
       "supplemental_rows": 316,
       "supplemental_with_desc": 316,
       "supplemental_meta": {
-        "generated_at": "2026-06-22T18:21:20.492Z",
+        "generated_at": "2026-06-22T18:36:59.824Z",
         "lane_name": "custom",
-        "jobs_fetched": 4164
+        "jobs_fetched": 4163
       },
       "published_rows": 11,
       "published_pct": 100,
@@ -173,60 +171,60 @@
     },
     {
       "source": "workday",
-      "pool_rows": 32775,
-      "us_rows": 17103,
-      "tech_us_rows": 4981,
-      "raw_sidecar_rows": 15903,
-      "sidecar_active_rows": 4738,
+      "pool_rows": 32888,
+      "us_rows": 17037,
+      "tech_us_rows": 5039,
+      "raw_sidecar_rows": 15844,
+      "sidecar_active_rows": 4770,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 4738,
-      "published_pct": 95.1,
-      "enriched_rows": 4953,
-      "enriched_pct": 99.4,
-      "enriched_with_skills": 4514,
+      "published_rows": 4541,
+      "published_pct": 90.1,
+      "enriched_rows": 4991,
+      "enriched_pct": 99,
+      "enriched_with_skills": 4547,
       "skills_pct": 91.1,
       "examples": [
         {
-          "id": "workday-carrier-global-30207408",
-          "company": "Carrier Global",
-          "title": "Embedded Firmware Engineer"
+          "id": "workday-microchip-technology-R1034-26",
+          "company": "Microchip Technology",
+          "title": "Technician IV - Product/Test"
         },
         {
-          "id": "workday-amentum-R0164048",
-          "company": "Amentum",
-          "title": "Instructional Analyst/Developer"
+          "id": "workday-leidos-R-00185825",
+          "company": "Leidos",
+          "title": "Project Manager"
         },
         {
-          "id": "workday-snap-R0045910",
-          "company": "Snap",
-          "title": "Enterprise Partner Development Manager"
+          "id": "workday-leidos-R-00185863",
+          "company": "Leidos",
+          "title": "Business Process Manager"
         },
         {
-          "id": "workday-jabil-J2454678",
-          "company": "Jabil",
-          "title": "Industrial Engineer III - Liquid Cooling Server Racks"
+          "id": "workday-leidos-R-00185776",
+          "company": "Leidos",
+          "title": "Airborne Sensor Operator"
         },
         {
-          "id": "workday-eversource-energy-R-030895",
-          "company": "Eversource Energy",
-          "title": "IT Associate Analyst, Budget - Level 1"
+          "id": "workday-leidos-R-00184820",
+          "company": "Leidos",
+          "title": "Cyber Range Software Engineer (SWE-3)"
         },
         {
-          "id": "workday-applied-materials-R2620391",
-          "company": "Applied Materials",
-          "title": "Business Management V"
+          "id": "workday-leidos-R-00185862",
+          "company": "Leidos",
+          "title": "Software Developer"
         },
         {
-          "id": "workday-applied-materials-R2611980",
-          "company": "Applied Materials",
-          "title": "Machine Learning Engineer (Generative AI)"
+          "id": "workday-leidos-R-00185859",
+          "company": "Leidos",
+          "title": "Digital Media Forensics SME"
         },
         {
-          "id": "workday-applied-materials-R2622052",
-          "company": "Applied Materials",
-          "title": "Demand Management Program Management"
+          "id": "workday-leidos-R-00185855",
+          "company": "Leidos",
+          "title": "Deputy Program Manager ( Intelligence Support)"
         }
       ],
       "severity": "ok",
@@ -234,23 +232,23 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 311,
-      "us_rows": 126,
-      "tech_us_rows": 56,
+      "pool_rows": 309,
+      "us_rows": 125,
+      "tech_us_rows": 54,
       "raw_sidecar_rows": 289,
-      "sidecar_active_rows": 54,
-      "supplemental_rows": 1384,
-      "supplemental_with_desc": 139,
+      "sidecar_active_rows": 52,
+      "supplemental_rows": 1383,
+      "supplemental_with_desc": 115,
       "supplemental_meta": {
-        "generated_at": "2026-06-22T18:21:20.492Z",
+        "generated_at": "2026-06-22T18:36:59.824Z",
         "lane_name": "custom",
-        "jobs_fetched": 4164
+        "jobs_fetched": 4163
       },
-      "published_rows": 54,
-      "published_pct": 96.4,
-      "enriched_rows": 56,
+      "published_rows": 52,
+      "published_pct": 96.3,
+      "enriched_rows": 54,
       "enriched_pct": 100,
-      "enriched_with_skills": 56,
+      "enriched_with_skills": 54,
       "skills_pct": 100,
       "examples": [
         {
@@ -269,21 +267,27 @@
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 989,
-      "us_rows": 988,
-      "tech_us_rows": 249,
-      "raw_sidecar_rows": 1847,
-      "sidecar_active_rows": 249,
+      "pool_rows": 988,
+      "us_rows": 987,
+      "tech_us_rows": 244,
+      "raw_sidecar_rows": 1838,
+      "sidecar_active_rows": 243,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 249,
-      "published_pct": 100,
-      "enriched_rows": 249,
-      "enriched_pct": 100,
-      "enriched_with_skills": 227,
-      "skills_pct": 91.2,
-      "examples": [],
+      "published_rows": 243,
+      "published_pct": 99.6,
+      "enriched_rows": 243,
+      "enriched_pct": 99.6,
+      "enriched_with_skills": 221,
+      "skills_pct": 90.9,
+      "examples": [
+        {
+          "id": "sr-BoschGroup-744000133432831",
+          "company": "Bosch Group",
+          "title": "Associate Calibration Engineer"
+        }
+      ],
       "severity": "ok",
       "flags": []
     },
@@ -297,9 +301,9 @@
       "supplemental_rows": 1430,
       "supplemental_with_desc": 1430,
       "supplemental_meta": {
-        "generated_at": "2026-06-22T18:21:20.492Z",
+        "generated_at": "2026-06-22T18:36:59.824Z",
         "lane_name": "custom",
-        "jobs_fetched": 4164
+        "jobs_fetched": 4163
       },
       "published_rows": 441,
       "published_pct": 100,
