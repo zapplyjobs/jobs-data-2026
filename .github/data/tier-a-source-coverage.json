@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-22T22:07:52.353Z",
+  "generated_at": "2026-06-22T22:22:58.954Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -30,10 +30,21 @@
     "descriptions-bytedance.jsonl",
     "descriptions-eightfold.jsonl",
     "descriptions-enriched-1.jsonl",
+    "descriptions-enriched-12.jsonl",
+    "descriptions-enriched-13.jsonl",
+    "descriptions-enriched-16.jsonl",
+    "descriptions-enriched-17.jsonl",
+    "descriptions-enriched-18.jsonl",
+    "descriptions-enriched-19.jsonl",
     "descriptions-enriched-2.jsonl",
+    "descriptions-enriched-20.jsonl",
     "descriptions-enriched-3.jsonl",
     "descriptions-enriched-4.jsonl",
     "descriptions-enriched-5.jsonl",
+    "descriptions-enriched-6.jsonl",
+    "descriptions-enriched-7.jsonl",
+    "descriptions-enriched-8.jsonl",
+    "descriptions-enriched-9.jsonl",
     "descriptions-google.jsonl",
     "descriptions-greenhouse-1.jsonl",
     "descriptions-greenhouse-2.jsonl",
@@ -47,21 +58,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-22T22:06:24.343Z",
+    "generated_at": "2026-06-22T22:21:17.466Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 8725,
-    "description_entries": 7799,
+    "board_row_count": 8788,
+    "description_entries": 7853,
     "coverage_pct": 89.4,
     "source_breakdown": {
-      "sidecar": 7799,
+      "sidecar": 7853,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-22T21:52:07.121Z",
+    "jobs_metadata_generated": "2026-06-22T22:08:01.306Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-06-22T22:07:49.997Z",
+    "checked_at": "2026-06-22T22:22:55.878Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -78,24 +89,24 @@
   "rows": [
     {
       "source": "oracle",
-      "pool_rows": 5373,
-      "us_rows": 3364,
-      "tech_us_rows": 483,
-      "raw_sidecar_rows": 4119,
-      "sidecar_active_rows": 329,
-      "supplemental_rows": 23966,
-      "supplemental_with_desc": 16952,
+      "pool_rows": 5384,
+      "us_rows": 3376,
+      "tech_us_rows": 486,
+      "raw_sidecar_rows": 4864,
+      "sidecar_active_rows": 331,
+      "supplemental_rows": 23968,
+      "supplemental_with_desc": 16955,
       "supplemental_meta": {
-        "generated_at": "2026-06-22T22:04:54.548Z",
+        "generated_at": "2026-06-22T22:19:10.502Z",
         "lane_name": "oracle",
-        "jobs_fetched": 23966
+        "jobs_fetched": 23968
       },
-      "published_rows": 329,
+      "published_rows": 331,
       "published_pct": 68.1,
-      "enriched_rows": 483,
-      "enriched_pct": 100,
-      "enriched_with_skills": 357,
-      "skills_pct": 73.9,
+      "enriched_rows": 485,
+      "enriched_pct": 99.8,
+      "enriched_with_skills": 358,
+      "skills_pct": 73.8,
       "examples": [
         {
           "id": "oracle-jpmorgan-chase-210739359",
@@ -144,18 +155,81 @@
       ]
     },
     {
+      "source": "workday",
+      "pool_rows": 33106,
+      "us_rows": 17437,
+      "tech_us_rows": 5115,
+      "raw_sidecar_rows": 16246,
+      "sidecar_active_rows": 4554,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 4685,
+      "published_pct": 91.6,
+      "enriched_rows": 5067,
+      "enriched_pct": 99.1,
+      "enriched_with_skills": 4638,
+      "skills_pct": 91.5,
+      "examples": [
+        {
+          "id": "workday-hitachi-R0134135",
+          "company": "Hitachi",
+          "title": "Field Service Engineering Specialist Professional"
+        },
+        {
+          "id": "workday-hitachi-R0123518",
+          "company": "Hitachi",
+          "title": "Electrical Test Engineer"
+        },
+        {
+          "id": "workday-hitachi-R0134134",
+          "company": "Hitachi",
+          "title": "Field Service Engineer"
+        },
+        {
+          "id": "workday-hitachi-R0132318",
+          "company": "Hitachi",
+          "title": "Environmental and Employee Health & Safety Professional"
+        },
+        {
+          "id": "workday-globalfoundries-JR-2501765",
+          "company": "GlobalFoundries",
+          "title": "Device Modeling & Characterization Engineer (2026 New College Graduate)"
+        },
+        {
+          "id": "workday-gdit-RQ222209",
+          "company": "GDIT",
+          "title": "Next Generation Desktop (NGDE) Systems Administrator - TS/SCI with Poly"
+        },
+        {
+          "id": "workday-gdit-RQ221034",
+          "company": "GDIT",
+          "title": "Network/System Administrator (Net/Sys Admin) III"
+        },
+        {
+          "id": "workday-gdit-RQ222903",
+          "company": "GDIT",
+          "title": "Cyber Security Analyst Sr"
+        }
+      ],
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
+    },
+    {
       "source": "icims",
       "pool_rows": 60,
       "us_rows": 48,
       "tech_us_rows": 11,
-      "raw_sidecar_rows": 60,
+      "raw_sidecar_rows": 316,
       "sidecar_active_rows": 11,
       "supplemental_rows": 316,
       "supplemental_with_desc": 316,
       "supplemental_meta": {
-        "generated_at": "2026-06-22T22:06:46.834Z",
+        "generated_at": "2026-06-22T22:20:50.918Z",
         "lane_name": "custom",
-        "jobs_fetched": 4158
+        "jobs_fetched": 4156
       },
       "published_rows": 11,
       "published_pct": 100,
@@ -170,82 +244,21 @@
       ]
     },
     {
-      "source": "workday",
-      "pool_rows": 32978,
-      "us_rows": 17054,
-      "tech_us_rows": 5119,
-      "raw_sidecar_rows": 15546,
-      "sidecar_active_rows": 4851,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 4851,
-      "published_pct": 94.8,
-      "enriched_rows": 5090,
-      "enriched_pct": 99.4,
-      "enriched_with_skills": 4649,
-      "skills_pct": 91.3,
-      "examples": [
-        {
-          "id": "workday-zoom-R19181",
-          "company": "Zoom",
-          "title": "Forward Deployment Management - Agentic Search"
-        },
-        {
-          "id": "workday-nvidia-JR2019791",
-          "company": "NVIDIA",
-          "title": "Manager, Firmware"
-        },
-        {
-          "id": "workday-general-motors-JR-202612722",
-          "company": "General Motors",
-          "title": "Controls Engineer"
-        },
-        {
-          "id": "workday-boeing-JR2026514556",
-          "company": "Boeing",
-          "title": "Aircraft Environmental Control Systems (ECS) Design & Analysis Engineer (Associate or Experienced Level)"
-        },
-        {
-          "id": "workday-amentum-R0164040",
-          "company": "Amentum",
-          "title": "Electronic Maintenance III"
-        },
-        {
-          "id": "workday-amentum-R0164048",
-          "company": "Amentum",
-          "title": "Instructional Analyst/Developer"
-        },
-        {
-          "id": "workday-leidos-R-00185855",
-          "company": "Leidos",
-          "title": "Deputy Program Manager ( Intelligence Support)"
-        },
-        {
-          "id": "workday-kla-2637262",
-          "company": "KLA",
-          "title": "Customer Engagement Applications Engineer"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
-    },
-    {
       "source": "smartrecruiters",
-      "pool_rows": 1156,
-      "us_rows": 1155,
-      "tech_us_rows": 261,
-      "raw_sidecar_rows": 1802,
-      "sidecar_active_rows": 252,
+      "pool_rows": 998,
+      "us_rows": 997,
+      "tech_us_rows": 260,
+      "raw_sidecar_rows": 5202,
+      "sidecar_active_rows": 251,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 252,
-      "published_pct": 96.6,
-      "enriched_rows": 258,
-      "enriched_pct": 98.9,
-      "enriched_with_skills": 235,
-      "skills_pct": 91.1,
+      "published_rows": 251,
+      "published_pct": 96.5,
+      "enriched_rows": 257,
+      "enriched_pct": 98.8,
+      "enriched_with_skills": 236,
+      "skills_pct": 91.8,
       "examples": [
         {
           "id": "sr-VeoliaEnvironnementSA-744000133456490",
@@ -293,17 +306,17 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 303,
-      "us_rows": 124,
+      "pool_rows": 307,
+      "us_rows": 127,
       "tech_us_rows": 55,
-      "raw_sidecar_rows": 286,
+      "raw_sidecar_rows": 305,
       "sidecar_active_rows": 54,
-      "supplemental_rows": 1381,
-      "supplemental_with_desc": 124,
+      "supplemental_rows": 1379,
+      "supplemental_with_desc": 146,
       "supplemental_meta": {
-        "generated_at": "2026-06-22T22:06:46.834Z",
+        "generated_at": "2026-06-22T22:20:50.918Z",
         "lane_name": "custom",
-        "jobs_fetched": 4158
+        "jobs_fetched": 4156
       },
       "published_rows": 54,
       "published_pct": 98.2,
@@ -326,14 +339,14 @@
       "pool_rows": 1004,
       "us_rows": 1004,
       "tech_us_rows": 440,
-      "raw_sidecar_rows": 1004,
+      "raw_sidecar_rows": 1014,
       "sidecar_active_rows": 440,
       "supplemental_rows": 1427,
       "supplemental_with_desc": 1427,
       "supplemental_meta": {
-        "generated_at": "2026-06-22T22:06:46.834Z",
+        "generated_at": "2026-06-22T22:20:50.918Z",
         "lane_name": "custom",
-        "jobs_fetched": 4158
+        "jobs_fetched": 4156
       },
       "published_rows": 440,
       "published_pct": 100,
