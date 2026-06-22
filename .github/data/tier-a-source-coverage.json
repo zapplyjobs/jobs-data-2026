@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-22T18:53:14.472Z",
+  "generated_at": "2026-06-22T19:08:01.422Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -30,22 +30,10 @@
     "descriptions-bytedance.jsonl",
     "descriptions-eightfold.jsonl",
     "descriptions-enriched-1.jsonl",
-    "descriptions-enriched-11.jsonl",
-    "descriptions-enriched-12.jsonl",
-    "descriptions-enriched-13.jsonl",
-    "descriptions-enriched-16.jsonl",
-    "descriptions-enriched-17.jsonl",
-    "descriptions-enriched-18.jsonl",
-    "descriptions-enriched-19.jsonl",
     "descriptions-enriched-2.jsonl",
-    "descriptions-enriched-20.jsonl",
     "descriptions-enriched-3.jsonl",
     "descriptions-enriched-4.jsonl",
     "descriptions-enriched-5.jsonl",
-    "descriptions-enriched-6.jsonl",
-    "descriptions-enriched-7.jsonl",
-    "descriptions-enriched-8.jsonl",
-    "descriptions-enriched-9.jsonl",
     "descriptions-google.jsonl",
     "descriptions-greenhouse-1.jsonl",
     "descriptions-greenhouse-2.jsonl",
@@ -59,26 +47,28 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-22T18:51:27.533Z",
+    "generated_at": "2026-06-22T19:06:25.413Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 8607,
-    "description_entries": 7671,
-    "coverage_pct": 89.1,
+    "board_row_count": 8429,
+    "description_entries": 7499,
+    "coverage_pct": 89,
     "source_breakdown": {
-      "sidecar": 7671,
+      "sidecar": 7499,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-22T18:37:19.968Z",
+    "jobs_metadata_generated": "2026-06-22T18:51:39.150Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-06-22T18:53:10.331Z",
+    "checked_at": "2026-06-22T19:07:58.442Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [],
-    "warning_count": 0,
+    "warnings": [
+      "Senior filter FP rate elevated: 10.2% (51/500). May indicate keyword over-matching."
+    ],
+    "warning_count": 1,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -90,34 +80,29 @@
   "rows": [
     {
       "source": "oracle",
-      "pool_rows": 5609,
-      "us_rows": 3445,
-      "tech_us_rows": 514,
-      "raw_sidecar_rows": 4802,
-      "sidecar_active_rows": 363,
-      "supplemental_rows": 25650,
-      "supplemental_with_desc": 18560,
+      "pool_rows": 5619,
+      "us_rows": 3453,
+      "tech_us_rows": 515,
+      "raw_sidecar_rows": 4815,
+      "sidecar_active_rows": 364,
+      "supplemental_rows": 25644,
+      "supplemental_with_desc": 18558,
       "supplemental_meta": {
-        "generated_at": "2026-06-22T18:49:22.959Z",
+        "generated_at": "2026-06-22T19:04:45.019Z",
         "lane_name": "oracle",
-        "jobs_fetched": 25650
+        "jobs_fetched": 25644
       },
-      "published_rows": 335,
-      "published_pct": 65.2,
-      "enriched_rows": 485,
-      "enriched_pct": 94.4,
-      "enriched_with_skills": 365,
-      "skills_pct": 75.3,
+      "published_rows": 362,
+      "published_pct": 70.3,
+      "enriched_rows": 513,
+      "enriched_pct": 99.6,
+      "enriched_with_skills": 390,
+      "skills_pct": 76,
       "examples": [
         {
-          "id": "oracle-jpmorgan-chase-210715977",
+          "id": "oracle-jpmorgan-chase-210731495",
           "company": "JPMorgan Chase",
-          "title": "Software Engineer III -  Java, DevOps  (AWS & Azure)"
-        },
-        {
-          "id": "oracle-jpmorgan-chase-210728838",
-          "company": "JPMorgan Chase",
-          "title": "Software Engineer II - Fullstack - Python/React"
+          "title": "Software Engineer III – AI & Intelligent Workflow Engineering (Monday.com, Fullstack ReactJS, Java, Python, AWS)"
         },
         {
           "id": "oracle-jpmorgan-chase-210739359",
@@ -130,92 +115,34 @@
           "title": "Software Engineer III - Database"
         },
         {
-          "id": "oracle-jpmorgan-chase-210746651",
-          "company": "JPMorgan Chase",
-          "title": "Software Engineer III - IOS Developer"
-        },
-        {
-          "id": "oracle-jpmorgan-chase-210746996",
-          "company": "JPMorgan Chase",
-          "title": "Software Engineer III - IOS Developer"
-        },
-        {
-          "id": "oracle-jpmorgan-chase-210751109",
-          "company": "JPMorgan Chase",
-          "title": "Software Engineer III - Android Developer"
-        },
-        {
           "id": "oracle-onsemi-2504506",
           "company": "onsemi",
           "title": "Manufacturing Equipment Technician - Backend"
+        },
+        {
+          "id": "oracle-wsp-76899",
+          "company": "WSP",
+          "title": "Supervisory Analyst, Inspection Quality Assessment"
+        },
+        {
+          "id": "oracle-wsp-77256",
+          "company": "WSP",
+          "title": "Quality Control Production Analyst"
+        },
+        {
+          "id": "oracle-wsp-77258",
+          "company": "WSP",
+          "title": "Inspection Services Specialist"
+        },
+        {
+          "id": "oracle-wsp-89508",
+          "company": "WSP",
+          "title": "Technician, CADD Design Support"
         }
       ],
       "severity": "high",
       "flags": [
         "low_published_coverage"
-      ]
-    },
-    {
-      "source": "workday",
-      "pool_rows": 31990,
-      "us_rows": 16383,
-      "tech_us_rows": 4835,
-      "raw_sidecar_rows": 15439,
-      "sidecar_active_rows": 4311,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 4411,
-      "published_pct": 91.2,
-      "enriched_rows": 4790,
-      "enriched_pct": 99.1,
-      "enriched_with_skills": 4357,
-      "skills_pct": 91,
-      "examples": [
-        {
-          "id": "workday-fis-JR0306856",
-          "company": "FIS",
-          "title": "Systems Operations Engineer, NLP, LLM"
-        },
-        {
-          "id": "workday-draper-JR002635",
-          "company": "Draper",
-          "title": "ASIC CAD Engineer"
-        },
-        {
-          "id": "workday-draper-JR002627",
-          "company": "Draper",
-          "title": "Program Manager II-Production"
-        },
-        {
-          "id": "workday-draper-JR002626",
-          "company": "Draper",
-          "title": "Entry Level RF Engineer"
-        },
-        {
-          "id": "workday-draper-JR002634",
-          "company": "Draper",
-          "title": "Embedded Software Engineer"
-        },
-        {
-          "id": "workday-crowdstrike-R22012",
-          "company": "CrowdStrike",
-          "title": "Incident Response Analyst - SkillBridge (Remote)"
-        },
-        {
-          "id": "workday-university-system-of-new-hampshire-JR8316",
-          "company": "University System of New Hampshire",
-          "title": "Lecturer"
-        },
-        {
-          "id": "workday-wex-R21763",
-          "company": "Wex",
-          "title": "Employer Services Specialist - Benefits"
-        }
-      ],
-      "severity": "medium",
-      "flags": [
-        "published_gt_raw_sidecar"
       ]
     },
     {
@@ -228,9 +155,9 @@
       "supplemental_rows": 316,
       "supplemental_with_desc": 316,
       "supplemental_meta": {
-        "generated_at": "2026-06-22T18:51:39.210Z",
+        "generated_at": "2026-06-22T19:03:36.167Z",
         "lane_name": "custom",
-        "jobs_fetched": 4159
+        "jobs_fetched": 2898
       },
       "published_rows": 11,
       "published_pct": 100,
@@ -245,40 +172,91 @@
       ]
     },
     {
-      "source": "microsoft",
-      "pool_rows": 308,
-      "us_rows": 126,
-      "tech_us_rows": 56,
-      "raw_sidecar_rows": 329,
-      "sidecar_active_rows": 55,
-      "supplemental_rows": 1380,
-      "supplemental_with_desc": 123,
-      "supplemental_meta": {
-        "generated_at": "2026-06-22T18:51:39.210Z",
-        "lane_name": "custom",
-        "jobs_fetched": 4159
-      },
-      "published_rows": 53,
-      "published_pct": 94.6,
-      "enriched_rows": 54,
-      "enriched_pct": 96.4,
-      "enriched_with_skills": 54,
-      "skills_pct": 100,
+      "source": "workday",
+      "pool_rows": 32879,
+      "us_rows": 17248,
+      "tech_us_rows": 5055,
+      "raw_sidecar_rows": 14521,
+      "sidecar_active_rows": 4111,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 4466,
+      "published_pct": 88.3,
+      "enriched_rows": 4881,
+      "enriched_pct": 96.6,
+      "enriched_with_skills": 4448,
+      "skills_pct": 91.1,
       "examples": [
         {
-          "id": "microsoft-200040074",
-          "company": "Microsoft",
-          "title": "Applied Scientist II"
+          "id": "workday-jll-REQ516104",
+          "company": "JLL",
+          "title": "Graphic Designer"
         },
+        {
+          "id": "workday-hitachi-R0132318",
+          "company": "Hitachi",
+          "title": "Environmental and Employee Health & Safety Professional"
+        },
+        {
+          "id": "workday-hitachi-R0134135",
+          "company": "Hitachi",
+          "title": "Field Service Engineering Specialist Professional"
+        },
+        {
+          "id": "workday-hitachi-R0123518",
+          "company": "Hitachi",
+          "title": "Electrical Test Engineer"
+        },
+        {
+          "id": "workday-jabil-J2454678",
+          "company": "Jabil",
+          "title": "Industrial Engineer III - Liquid Cooling Server Racks"
+        },
+        {
+          "id": "workday-intel-JR0284566",
+          "company": "Intel",
+          "title": "Module Development Engineer (Adv Packaging)"
+        },
+        {
+          "id": "workday-hntb-R-30539",
+          "company": "HNTB",
+          "title": "Project Controls Specialist I"
+        },
+        {
+          "id": "workday-hntb-R-30524",
+          "company": "HNTB",
+          "title": "Project Controls Specialist II"
+        }
+      ],
+      "severity": "ok",
+      "flags": []
+    },
+    {
+      "source": "microsoft",
+      "pool_rows": 308,
+      "us_rows": 128,
+      "tech_us_rows": 56,
+      "raw_sidecar_rows": 331,
+      "sidecar_active_rows": 55,
+      "supplemental_rows": 120,
+      "supplemental_with_desc": 53,
+      "supplemental_meta": {
+        "generated_at": "2026-06-22T19:03:36.167Z",
+        "lane_name": "custom",
+        "jobs_fetched": 2898
+      },
+      "published_rows": 55,
+      "published_pct": 98.2,
+      "enriched_rows": 56,
+      "enriched_pct": 100,
+      "enriched_with_skills": 56,
+      "skills_pct": 100,
+      "examples": [
         {
           "id": "microsoft-200039796",
           "company": "Microsoft",
           "title": "Solution Engineer - Security"
-        },
-        {
-          "id": "microsoft-200040013",
-          "company": "Microsoft",
-          "title": "Researcher Intern"
         }
       ],
       "severity": "ok",
@@ -286,19 +264,19 @@
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 981,
-      "us_rows": 980,
-      "tech_us_rows": 243,
-      "raw_sidecar_rows": 5939,
-      "sidecar_active_rows": 243,
+      "pool_rows": 979,
+      "us_rows": 978,
+      "tech_us_rows": 242,
+      "raw_sidecar_rows": 5520,
+      "sidecar_active_rows": 242,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 243,
+      "published_rows": 242,
       "published_pct": 100,
-      "enriched_rows": 243,
+      "enriched_rows": 242,
       "enriched_pct": 100,
-      "enriched_with_skills": 221,
+      "enriched_with_skills": 220,
       "skills_pct": 90.9,
       "examples": [],
       "severity": "ok",
@@ -311,12 +289,12 @@
       "tech_us_rows": 441,
       "raw_sidecar_rows": 1018,
       "sidecar_active_rows": 441,
-      "supplemental_rows": 1430,
-      "supplemental_with_desc": 1430,
+      "supplemental_rows": 1429,
+      "supplemental_with_desc": 1429,
       "supplemental_meta": {
-        "generated_at": "2026-06-22T18:51:39.210Z",
+        "generated_at": "2026-06-22T19:03:36.167Z",
         "lane_name": "custom",
-        "jobs_fetched": 4159
+        "jobs_fetched": 2898
       },
       "published_rows": 441,
       "published_pct": 100,
