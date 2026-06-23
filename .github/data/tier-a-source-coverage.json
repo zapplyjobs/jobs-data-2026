@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-23T10:19:37.271Z",
+  "generated_at": "2026-06-23T10:34:43.414Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -48,21 +48,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-23T10:18:17.558Z",
+    "generated_at": "2026-06-23T10:33:24.851Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 11558,
-    "description_entries": 8065,
-    "coverage_pct": 69.8,
+    "board_row_count": 12304,
+    "description_entries": 8101,
+    "coverage_pct": 65.8,
     "source_breakdown": {
-      "sidecar": 8073,
+      "sidecar": 8109,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-23T10:05:46.927Z",
+    "jobs_metadata_generated": "2026-06-23T10:21:28.126Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-06-23T10:19:34.498Z",
+    "checked_at": "2026-06-23T10:34:40.688Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -78,18 +78,82 @@
   },
   "rows": [
     {
+      "source": "workday",
+      "pool_rows": 31928,
+      "us_rows": 17818,
+      "tech_us_rows": 6239,
+      "raw_sidecar_rows": 16832,
+      "sidecar_active_rows": 4684,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 4684,
+      "published_pct": 75.1,
+      "enriched_rows": 4711,
+      "enriched_pct": 75.5,
+      "enriched_with_skills": 4368,
+      "skills_pct": 92.7,
+      "examples": [
+        {
+          "id": "workday-general-motors-JR-202612722",
+          "company": "General Motors",
+          "title": "Controls Engineer"
+        },
+        {
+          "id": "workday-gdit-RQ222209",
+          "company": "GDIT",
+          "title": "Next Generation Desktop (NGDE) Systems Administrator - TS/SCI with Poly"
+        },
+        {
+          "id": "workday-nvidia-JR2019791",
+          "company": "NVIDIA",
+          "title": "Manager, Firmware"
+        },
+        {
+          "id": "workday-palo-alto-networks-JR-017900",
+          "company": "Palo Alto Networks",
+          "title": "CSP Channel Business Manager"
+        },
+        {
+          "id": "workday-boeing-JR2026515727",
+          "company": "Boeing",
+          "title": "Facilities Civil-Structural Engineer (Experienced or Senior)"
+        },
+        {
+          "id": "workday-boeing-JR2026514556",
+          "company": "Boeing",
+          "title": "Aircraft Environmental Control Systems (ECS) Design & Analysis Engineer (Associate or Experienced Level)"
+        },
+        {
+          "id": "workday-carrier-global-30207408",
+          "company": "Carrier Global",
+          "title": "Embedded Firmware Engineer"
+        },
+        {
+          "id": "workday-amentum-R0164040",
+          "company": "Amentum",
+          "title": "Electronic Maintenance III"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage",
+        "low_enrichment_coverage"
+      ]
+    },
+    {
       "source": "oracle",
       "pool_rows": 5349,
-      "us_rows": 3707,
+      "us_rows": 3706,
       "tech_us_rows": 939,
-      "raw_sidecar_rows": 4158,
+      "raw_sidecar_rows": 4159,
       "sidecar_active_rows": 358,
-      "supplemental_rows": 25624,
-      "supplemental_with_desc": 18541,
+      "supplemental_rows": 25623,
+      "supplemental_with_desc": 18544,
       "supplemental_meta": {
-        "generated_at": "2026-06-23T10:04:19.021Z",
+        "generated_at": "2026-06-23T10:34:06.934Z",
         "lane_name": "oracle",
-        "jobs_fetched": 25624
+        "jobs_fetched": 25623
       },
       "published_rows": 360,
       "published_pct": 38.3,
@@ -156,7 +220,7 @@
       "supplemental_rows": 1432,
       "supplemental_with_desc": 1432,
       "supplemental_meta": {
-        "generated_at": "2026-06-23T10:06:05.711Z",
+        "generated_at": "2026-06-23T10:20:33.037Z",
         "lane_name": "custom",
         "jobs_fetched": 4132
       },
@@ -216,22 +280,22 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 297,
-      "us_rows": 236,
-      "tech_us_rows": 166,
-      "raw_sidecar_rows": 273,
+      "pool_rows": 304,
+      "us_rows": 235,
+      "tech_us_rows": 164,
+      "raw_sidecar_rows": 274,
       "sidecar_active_rows": 51,
-      "supplemental_rows": 1351,
-      "supplemental_with_desc": 117,
+      "supplemental_rows": 1349,
+      "supplemental_with_desc": 148,
       "supplemental_meta": {
-        "generated_at": "2026-06-23T10:06:05.711Z",
+        "generated_at": "2026-06-23T10:20:33.037Z",
         "lane_name": "custom",
         "jobs_fetched": 4132
       },
       "published_rows": 51,
-      "published_pct": 30.7,
+      "published_pct": 31.1,
       "enriched_rows": 53,
-      "enriched_pct": 31.9,
+      "enriched_pct": 32.3,
       "enriched_with_skills": 53,
       "skills_pct": 100,
       "examples": [
@@ -285,64 +349,65 @@
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 1059,
-      "us_rows": 1214,
+      "pool_rows": 970,
+      "us_rows": 1125,
       "tech_us_rows": 333,
-      "raw_sidecar_rows": 1943,
+      "raw_sidecar_rows": 1854,
       "sidecar_active_rows": 185,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 296,
-      "published_pct": 88.9,
+      "published_rows": 306,
+      "published_pct": 91.9,
       "enriched_rows": 185,
       "enriched_pct": 55.6,
       "enriched_with_skills": 182,
       "skills_pct": 98.4,
       "examples": [
         {
-          "id": "sr-Sandisk-744000133443620",
-          "company": "Sandisk",
-          "title": "Staff Engineer, System Design Engineering"
+          "id": "sr-ServiceNow-744000133504529",
+          "company": "ServiceNow",
+          "title": "Staff Data Platform Software Engineer, Graph — Veza"
         },
         {
-          "id": "sr-Sandisk-744000133429059",
-          "company": "Sandisk",
-          "title": "Senior Technology Development Engineer"
+          "id": "sr-ServiceNow-744000133468069",
+          "company": "ServiceNow",
+          "title": "Sr Software Engineer - LCM - Veza"
         },
         {
-          "id": "sr-Sandisk-744000133422276",
-          "company": "Sandisk",
-          "title": "Product Security Assurance Architect"
+          "id": "sr-ServiceNow-744000133461829",
+          "company": "ServiceNow",
+          "title": "Senior Staff Software Engineer, Integrations (Tech Lead) — Veza"
         },
         {
-          "id": "sr-Sandisk-744000133403644",
-          "company": "Sandisk",
-          "title": "Principal Engineer, Technology Development Engineering"
+          "id": "sr-ServiceNow-744000133457420",
+          "company": "ServiceNow",
+          "title": "Principal Systems Design Engineer"
         },
         {
-          "id": "sr-Sandisk-744000132618764",
-          "company": "Sandisk",
-          "title": "Senior Information Security Analyst, GRC/Responsible AI"
+          "id": "sr-ServiceNow-744000133443190",
+          "company": "ServiceNow",
+          "title": "Staff Software Engineer"
         },
         {
-          "id": "sr-Sandisk-744000132508585",
-          "company": "Sandisk",
-          "title": "Principal Engineer, Product Development Engineering"
+          "id": "sr-ServiceNow-744000133438534",
+          "company": "ServiceNow",
+          "title": "Staff Agentic Search Infrastructure Engineer - Moveworks"
         },
         {
-          "id": "sr-Sandisk-744000132509009",
-          "company": "Sandisk",
-          "title": "Principal Engineer, Product Development Engineering"
+          "id": "sr-ServiceNow-744000132713870",
+          "company": "ServiceNow",
+          "title": "Senior Software Engineer, DevOps - Moveworks"
         },
         {
-          "id": "sr-Sandisk-744000131986799",
-          "company": "Sandisk",
-          "title": "Principal, System Product Engineer"
+          "id": "sr-ServiceNow-744000132705860",
+          "company": "ServiceNow",
+          "title": "Senior Software Engineer, Core Infrastructure - Moveworks"
         }
       ],
       "severity": "medium",
       "flags": [
+        "published_gt_raw_sidecar",
         "low_enrichment_coverage"
       ]
     },
@@ -356,7 +421,7 @@
       "supplemental_rows": 315,
       "supplemental_with_desc": 315,
       "supplemental_meta": {
-        "generated_at": "2026-06-23T10:06:05.711Z",
+        "generated_at": "2026-06-23T10:20:33.037Z",
         "lane_name": "custom",
         "jobs_fetched": 4132
       },
@@ -371,67 +436,6 @@
       "flags": [
         "low_skill_fill"
       ]
-    },
-    {
-      "source": "workday",
-      "pool_rows": 31855,
-      "us_rows": 17161,
-      "tech_us_rows": 5494,
-      "raw_sidecar_rows": 16784,
-      "sidecar_active_rows": 4661,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 4661,
-      "published_pct": 84.8,
-      "enriched_rows": 4687,
-      "enriched_pct": 85.3,
-      "enriched_with_skills": 4348,
-      "skills_pct": 92.8,
-      "examples": [
-        {
-          "id": "workday-amentum-R0164040",
-          "company": "Amentum",
-          "title": "Electronic Maintenance III"
-        },
-        {
-          "id": "workday-amentum-R0164048",
-          "company": "Amentum",
-          "title": "Instructional Analyst/Developer"
-        },
-        {
-          "id": "workday-nvidia-JR2019791",
-          "company": "NVIDIA",
-          "title": "Manager, Firmware"
-        },
-        {
-          "id": "workday-carrier-global-30207408",
-          "company": "Carrier Global",
-          "title": "Embedded Firmware Engineer"
-        },
-        {
-          "id": "workday-general-motors-JR-202612722",
-          "company": "General Motors",
-          "title": "Controls Engineer"
-        },
-        {
-          "id": "workday-the-travelers-companies-R-51151",
-          "company": "The Travelers Companies",
-          "title": "Major Case Specialist - SRG Claim"
-        },
-        {
-          "id": "workday-palo-alto-networks-JR-017900",
-          "company": "Palo Alto Networks",
-          "title": "CSP Channel Business Manager"
-        },
-        {
-          "id": "workday-crowdstrike-R22012",
-          "company": "CrowdStrike",
-          "title": "Incident Response Analyst - SkillBridge (Remote)"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
     },
     {
       "source": "apple",
