@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-24T10:06:17.536Z",
+  "generated_at": "2026-06-24T10:21:44.433Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -48,21 +48,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-24T10:04:49.148Z",
+    "generated_at": "2026-06-24T10:20:17.554Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 11543,
-    "description_entries": 7872,
-    "coverage_pct": 68.2,
+    "board_row_count": 12333,
+    "description_entries": 7946,
+    "coverage_pct": 64.4,
     "source_breakdown": {
-      "sidecar": 7879,
+      "sidecar": 7953,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-24T09:49:51.084Z",
+    "jobs_metadata_generated": "2026-06-24T10:06:23.015Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-06-24T10:06:15.027Z",
+    "checked_at": "2026-06-24T10:21:41.909Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -78,18 +78,82 @@
   },
   "rows": [
     {
+      "source": "workday",
+      "pool_rows": 31994,
+      "us_rows": 17890,
+      "tech_us_rows": 6231,
+      "raw_sidecar_rows": 16686,
+      "sidecar_active_rows": 4598,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 4598,
+      "published_pct": 73.8,
+      "enriched_rows": 4623,
+      "enriched_pct": 74.2,
+      "enriched_with_skills": 4289,
+      "skills_pct": 92.8,
+      "examples": [
+        {
+          "id": "workday-booz-allen-hamilton-R0242080",
+          "company": "Booz Allen Hamilton",
+          "title": "Scrum Master"
+        },
+        {
+          "id": "workday-blue-origin-R62386",
+          "company": "Blue Origin",
+          "title": "Structural Analyst II- Core mechanical Lunar Permanence"
+        },
+        {
+          "id": "workday-blue-origin-R66311",
+          "company": "Blue Origin",
+          "title": "CAD Drafter I – Ground Support Equipment"
+        },
+        {
+          "id": "workday-caci-326752",
+          "company": "CACI",
+          "title": "Full Stack Software Engineer"
+        },
+        {
+          "id": "workday-boston-dynamics-R2862",
+          "company": "Boston Dynamics",
+          "title": "Reinforcement Learning & Controls Research Scientist-  Spot Behavior"
+        },
+        {
+          "id": "workday-rtx-01823459",
+          "company": "RTX",
+          "title": "SkillBridge: Production Control Analyst"
+        },
+        {
+          "id": "workday-micron-JR98593",
+          "company": "Micron",
+          "title": "CAD Engineer"
+        },
+        {
+          "id": "workday-micron-technology-JR86051",
+          "company": "Micron Technology",
+          "title": "New College Graduate - Product Yield Enhancement Engineer, HBM"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage",
+        "low_enrichment_coverage"
+      ]
+    },
+    {
       "source": "oracle",
       "pool_rows": 5297,
       "us_rows": 3672,
       "tech_us_rows": 943,
-      "raw_sidecar_rows": 4077,
+      "raw_sidecar_rows": 4078,
       "sidecar_active_rows": 353,
-      "supplemental_rows": 25644,
-      "supplemental_with_desc": 18566,
+      "supplemental_rows": 25638,
+      "supplemental_with_desc": 18560,
       "supplemental_meta": {
-        "generated_at": "2026-06-24T10:04:16.651Z",
+        "generated_at": "2026-06-24T10:19:44.101Z",
         "lane_name": "oracle",
-        "jobs_fetched": 25644
+        "jobs_fetched": 25638
       },
       "published_rows": 353,
       "published_pct": 37.4,
@@ -156,7 +220,7 @@
       "supplemental_rows": 1431,
       "supplemental_with_desc": 1431,
       "supplemental_meta": {
-        "generated_at": "2026-06-24T09:50:58.169Z",
+        "generated_at": "2026-06-24T10:21:06.171Z",
         "lane_name": "custom",
         "jobs_fetched": 4332
       },
@@ -215,90 +279,31 @@
       ]
     },
     {
-      "source": "smartrecruiters",
-      "pool_rows": 966,
-      "us_rows": 1130,
-      "tech_us_rows": 329,
-      "raw_sidecar_rows": 1891,
-      "sidecar_active_rows": 172,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 172,
-      "published_pct": 52.3,
-      "enriched_rows": 172,
-      "enriched_pct": 52.3,
-      "enriched_with_skills": 168,
-      "skills_pct": 97.7,
-      "examples": [
-        {
-          "id": "sr-AbbVie-3743990013756964",
-          "company": "AbbVie",
-          "title": "Principal Research Scientist I, siRNA Synthesis & Analytical Development"
-        },
-        {
-          "id": "sr-AbbVie-3743990013739226",
-          "company": "AbbVie",
-          "title": "Senior Quality Engineer"
-        },
-        {
-          "id": "sr-AbbVie-3743990013736346",
-          "company": "AbbVie",
-          "title": "Clinical Director I, Data and AI Convergence"
-        },
-        {
-          "id": "sr-AbbVie-3743990013731386",
-          "company": "AbbVie",
-          "title": "Senior Software Engineer, Design Systems"
-        },
-        {
-          "id": "sr-AbbVie-3743990013725776",
-          "company": "AbbVie",
-          "title": "Data Science Program Lead I"
-        },
-        {
-          "id": "sr-AbbVie-3743990013690986",
-          "company": "AbbVie",
-          "title": "Engineering Technical Lead"
-        },
-        {
-          "id": "sr-AbbVie-3743990013686966",
-          "company": "AbbVie",
-          "title": "Principal Research Scientist I Process Development"
-        },
-        {
-          "id": "sr-AbbVie-3743990013686926",
-          "company": "AbbVie",
-          "title": "Senior Project Engineer"
-        }
-      ],
-      "severity": "high",
-      "flags": [
-        "low_published_coverage",
-        "low_enrichment_coverage"
-      ]
-    },
-    {
       "source": "microsoft",
-      "pool_rows": 300,
-      "us_rows": 243,
-      "tech_us_rows": 177,
+      "pool_rows": 303,
+      "us_rows": 242,
+      "tech_us_rows": 176,
       "raw_sidecar_rows": 281,
       "sidecar_active_rows": 57,
-      "supplemental_rows": 1351,
-      "supplemental_with_desc": 113,
+      "supplemental_rows": 1354,
+      "supplemental_with_desc": 107,
       "supplemental_meta": {
-        "generated_at": "2026-06-24T09:50:58.169Z",
+        "generated_at": "2026-06-24T10:21:06.171Z",
         "lane_name": "custom",
         "jobs_fetched": 4332
       },
       "published_rows": 57,
-      "published_pct": 32.2,
-      "enriched_rows": 57,
-      "enriched_pct": 32.2,
-      "enriched_with_skills": 57,
+      "published_pct": 32.4,
+      "enriched_rows": 58,
+      "enriched_pct": 33,
+      "enriched_with_skills": 58,
       "skills_pct": 100,
       "examples": [
+        {
+          "id": "microsoft-200039796",
+          "company": "Microsoft",
+          "title": "Solution Engineer - Security"
+        },
         {
           "id": "microsoft-200026423",
           "company": "Microsoft",
@@ -333,11 +338,6 @@
           "id": "microsoft-200040959",
           "company": "Microsoft",
           "title": "Principal Software Engineer"
-        },
-        {
-          "id": "microsoft-200041331",
-          "company": "Microsoft",
-          "title": "Senior Software Engineer"
         }
       ],
       "severity": "high",
@@ -348,16 +348,80 @@
       ]
     },
     {
+      "source": "smartrecruiters",
+      "pool_rows": 1148,
+      "us_rows": 1296,
+      "tech_us_rows": 325,
+      "raw_sidecar_rows": 2018,
+      "sidecar_active_rows": 184,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 209,
+      "published_pct": 64.3,
+      "enriched_rows": 184,
+      "enriched_pct": 56.6,
+      "enriched_with_skills": 180,
+      "skills_pct": 97.8,
+      "examples": [
+        {
+          "id": "sr-BoschGroup-744000133096545",
+          "company": "Bosch Group",
+          "title": "Senior Controls Engineer"
+        },
+        {
+          "id": "sr-BoschGroup-744000132989075",
+          "company": "Bosch Group",
+          "title": "Senior Principal Engineer- MLOps & AI Machinery, ADAS/AV"
+        },
+        {
+          "id": "sr-BoschGroup-744000132879128",
+          "company": "Bosch Group",
+          "title": "Sr. Software Engineer (Multiple Positions) (REF289267Z)"
+        },
+        {
+          "id": "sr-BoschGroup-744000132739960",
+          "company": "Bosch Group",
+          "title": "Senior Application Engineer"
+        },
+        {
+          "id": "sr-BryceTech-744000133383519",
+          "company": "BryceTech",
+          "title": "Senior Editor"
+        },
+        {
+          "id": "sr-CapTechConsulting-744000133626549",
+          "company": "CapTech Consulting",
+          "title": "dotCMS Architect"
+        },
+        {
+          "id": "sr-CapTechConsulting-744000133624600",
+          "company": "CapTech Consulting",
+          "title": "dotCMS Architect"
+        },
+        {
+          "id": "sr-CapTechConsulting-744000133625989",
+          "company": "CapTech Consulting",
+          "title": "dotCMS Architect"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage",
+        "low_enrichment_coverage"
+      ]
+    },
+    {
       "source": "icims",
       "pool_rows": 58,
       "us_rows": 48,
       "tech_us_rows": 13,
-      "raw_sidecar_rows": 58,
+      "raw_sidecar_rows": 315,
       "sidecar_active_rows": 13,
       "supplemental_rows": 315,
       "supplemental_with_desc": 315,
       "supplemental_meta": {
-        "generated_at": "2026-06-24T09:50:58.169Z",
+        "generated_at": "2026-06-24T10:21:06.171Z",
         "lane_name": "custom",
         "jobs_fetched": 4332
       },
@@ -372,67 +436,6 @@
       "flags": [
         "low_skill_fill"
       ]
-    },
-    {
-      "source": "workday",
-      "pool_rows": 31952,
-      "us_rows": 17255,
-      "tech_us_rows": 5435,
-      "raw_sidecar_rows": 16788,
-      "sidecar_active_rows": 4567,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 4567,
-      "published_pct": 84,
-      "enriched_rows": 4592,
-      "enriched_pct": 84.5,
-      "enriched_with_skills": 4260,
-      "skills_pct": 92.8,
-      "examples": [
-        {
-          "id": "workday-visa-REF083391W",
-          "company": "Visa",
-          "title": "Military Talent Program - Software Engineering Pipeline"
-        },
-        {
-          "id": "workday-intel-JR0282439",
-          "company": "Intel",
-          "title": "AI Software Development Engineer"
-        },
-        {
-          "id": "workday-alliancebernstein-R0019166",
-          "company": "AllianceBernstein",
-          "title": "Quantitative Researcher"
-        },
-        {
-          "id": "workday-micron-technology-JR86051",
-          "company": "Micron Technology",
-          "title": "New College Graduate - Product Yield Enhancement Engineer, HBM"
-        },
-        {
-          "id": "workday-rtx-01823459",
-          "company": "RTX",
-          "title": "SkillBridge: Production Control Analyst"
-        },
-        {
-          "id": "workday-micron-JR98593",
-          "company": "Micron",
-          "title": "CAD Engineer"
-        },
-        {
-          "id": "workday-hpe-(university)-1206644",
-          "company": "HPE (University)",
-          "title": "Engineering Technician 2"
-        },
-        {
-          "id": "workday-gilead-sciences-R0053113",
-          "company": "Gilead Sciences",
-          "title": "Packaging Engineer II"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
     },
     {
       "source": "apple",
