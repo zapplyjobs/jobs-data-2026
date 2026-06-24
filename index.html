@@ -531,6 +531,13 @@
     <div style="margin-top:4px;font-size:11px;color:var(--muted)">
       <strong>Consumer Freshness</strong> = repos updated &lt;2h ago. <strong>Stars</strong> = GitHub repo stars across all job boards. Delta = current vs 7 snapshots back.
     </div>
+    <div class="section-label" style="margin-top:18px">Consumer E2E Freshness <span style="font-weight:400;color:var(--muted)">· all 9 surfaces vs 60min threshold</span></div>
+    <div class="card" id="consumer-e2e-card">
+      <p class="muted" style="text-align:center;padding:20px 0">Loading…</p>
+    </div>
+    <div style="margin-top:4px;font-size:11px;color:var(--muted)">
+      <strong>Consumer E2E Freshness</strong> supersedes the &lt;2h proxy above once INF publishes per-consumer E2E lag (age vs 60min + R2 baseline) into <code>zjp-metrics.json</code>.
+    </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px">
       <div>
         <div class="section-label" style="display:flex;justify-content:space-between;align-items:center">
@@ -1241,6 +1248,121 @@ function renderOutHealth(d, daily, historyEntries) {
   el.innerHTML =
     statCard({ icon: '⭐', label: 'Total Stars', value: fmt(totalStars), sub: starDeltaStr + (starDeltaStr ? ' · ' : '') + repoEntries.length + ' repos' }) +
     statCard({ icon: '🔄', label: 'Consumer Freshness', value: `<span style="color:${freshColor}">${freshPct}%</span>`, sub: freshSub });
+}
+
+// Consumer E2E Freshness — all 9 consumer surfaces vs the 60min staleness threshold.
+// Source: INF inf_consumer_e2e_lag → zjp-metrics.json.consumer_e2e.
+// Screen order (per DASH contract): command → owner queue → evidence → drilldown.
+function renderConsumerE2E() {
+  const el = document.getElementById('consumer-e2e-card');
+  if (!el) return;
+  const e2e = _D.zjpMetrics && _D.zjpMetrics.consumer_e2e;
+
+  // Owner-routed state when INF has not yet published the E2E payload (no false alarm).
+  if (!e2e || !Array.isArray(e2e.consumers)) {
+    el.innerHTML =
+      `<div style="padding:14px 16px">
+         <div style="font-weight:600;color:var(--muted)">⏳ Consumer E2E freshness — awaiting publish</div>
+         <div style="font-size:12px;color:var(--muted);margin-top:6px">
+           Source: INF <code>inf_consumer_e2e_lag</code> → <code>zjp-metrics.json.consumer_e2e</code> (not yet present). Owner: <strong>INF</strong>. Action: publish the 9-consumer E2E lag (per-consumer <code>age_minutes</code> / <code>lag_vs_pipeline_minutes</code> / <code>stale</code> + R2 baseline) into the data plane. No alert raised until data is live; the GitHub-only &lt;2h proxy above covers GitHub boards in the meantime.
+         </div>
+       </div>`;
+    return;
+  }
+
+  const esc = s => String(s == null ? '' : s).replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+  const fmtAge = m => {
+    if (m == null) return '—';
+    if (m < 60) return `${Math.round(m)}m`;
+    const h = m / 60;
+    return h < 24 ? `${h.toFixed(1)}h` : `${(h / 24).toFixed(1)}d`;
+  };
+  const signalLabel = s => s === 'refresh_recency_proxy'
+    ? '<span style="color:var(--muted)" title="GitHub commit-time proxy; negative lag is benign">commit-proxy</span>'
+    : s === 'data_freshness'
+      ? '<span style="color:var(--muted)" title="True write recency vs the pipeline write">write-recency</span>'
+      : esc(s);
+  const ownerOf = k => k === 'gh' ? 'OUT (GitHub board publisher)'
+      : k === 'r2' ? 'INF (R2 publisher)'
+      : k === 'supabase' ? 'OUT (zappy.jobs)'
+      : k === 'discord' ? 'OUT (Discord poster)'
+      : 'INF';
+
+  const thr = e2e.staleness_threshold_minutes || 60;
+  const consumers = e2e.consumers.slice().sort((a, b) => (b.age_minutes || 0) - (a.age_minutes || 0));
+  const s = e2e.summary || {};
+  const measured = s.measured != null ? s.measured : consumers.length;
+  const fresh = s.fresh != null ? s.fresh : consumers.filter(c => !c.stale).length;
+  const staleN = s.stale != null ? s.stale : consumers.filter(c => c.stale).length;
+  const baseline = e2e.baseline || {};
+  const baseAge = baseline.age_minutes;
+  const baseStale = typeof baseAge === 'number' && baseAge > thr;
+  const genAge = e2e.generated_at ? age(e2e.generated_at) : '—';
+
+  // (1) Command — the operating call.
+  let cmd, cmdColor;
+  const staleNames = consumers.filter(c => c.stale).map(c => esc(c.name));
+  if (baseStale) {
+    cmd = `🔴 Pipeline baseline stale — ${esc(baseline.source || 'R2 all_jobs.json')} age ${fmtAge(baseAge)} > ${thr}min (pipeline may be stopped; gh consumers keep re-publishing the same stale data, so green gh rows do not prove the pipeline is alive)`;
+    cmdColor = 'var(--red)';
+  } else if (staleN > 0) {
+    cmd = `🔴 ${staleN} surface${staleN > 1 ? 's' : ''} stale >${thr}min: ${staleNames.join(', ')}`;
+    cmdColor = 'var(--red)';
+  } else {
+    cmd = `✅ All ${measured} consumer surfaces fresh (<${thr}min)`;
+    cmdColor = 'var(--green)';
+  }
+
+  // (2) Owner queue — stale surfaces with owner + action (hidden when none).
+  const queueRows = consumers.filter(c => c.stale).map(c =>
+    `<div style="margin:4px 0">
+       <span style="color:var(--red);font-weight:600">${esc(c.name)}</span>
+       <span style="color:var(--muted)"> · age ${fmtAge(c.age_minutes)} · owner: ${ownerOf(c.kind)} · action: investigate publisher workflow</span>
+     </div>`).join('');
+
+  // (3) Evidence — baseline row + all consumers (age / lag / status).
+  const baseRow =
+    `<tr>
+       <td style="text-align:left;padding:4px 6px"><strong>Pipeline baseline</strong></td>
+       <td style="text-align:center;padding:4px 6px">${esc(baseline.source || 'R2 all_jobs.json')}</td>
+       <td style="text-align:center;padding:4px 6px">${signalLabel('data_freshness')}</td>
+       <td style="text-align:center;padding:4px 6px;color:${baseStale ? 'var(--red)' : 'var(--green)'};font-weight:600">${fmtAge(baseAge)}</td>
+       <td style="text-align:center;padding:4px 6px">—</td>
+       <td style="text-align:center;padding:4px 6px;color:${baseStale ? 'var(--red)' : 'var(--green)'}">${baseStale ? '🔴 stale' : '✅ live'}</td>
+     </tr>`;
+  const consumerRows = consumers.map(c => {
+    const col = c.stale ? 'var(--red)' : 'var(--green)';
+    const lag = c.lag_vs_pipeline_minutes;
+    return `<tr>
+       <td style="text-align:left;padding:4px 6px">${esc(c.name)}</td>
+       <td style="text-align:center;padding:4px 6px">${esc(c.kind)}</td>
+       <td style="text-align:center;padding:4px 6px">${signalLabel(c.signal)}</td>
+       <td style="text-align:center;padding:4px 6px;color:${col};font-weight:600">${fmtAge(c.age_minutes)}</td>
+       <td style="text-align:center;padding:4px 6px">${lag == null ? '—' : `${lag > 0 ? '+' : ''}${lag}m`}</td>
+       <td style="text-align:center;padding:4px 6px;color:${col}">${c.stale ? '🔴 stale' : '✅ fresh'}</td>
+     </tr>`;
+  }).join('');
+
+  // (4) Drilldown — basis / threshold / signal semantics / owner / source.
+  el.innerHTML =
+    `<div style="padding:12px 16px">
+       <div style="font-size:14px;font-weight:600;color:${cmdColor};margin-bottom:8px">${cmd} <span style="font-weight:400;color:var(--muted);font-size:11px">· ${fresh}/${measured} fresh · baseline ${fmtAge(baseAge)} · measured ${genAge}</span></div>
+       ${queueRows ? `<div style="font-size:12px;margin-bottom:8px">${queueRows}</div>` : ''}
+       <table style="width:100%;border-collapse:collapse;font-size:12px" id="consumer-e2e-table">
+         <thead><tr>
+           <th style="text-align:left;padding:4px 6px;border-bottom:1px solid var(--border)">Surface</th>
+           <th style="text-align:center;padding:4px 6px;border-bottom:1px solid var(--border)">Kind / source</th>
+           <th style="text-align:center;padding:4px 6px;border-bottom:1px solid var(--border)">Signal</th>
+           <th style="text-align:center;padding:4px 6px;border-bottom:1px solid var(--border)">Age</th>
+           <th style="text-align:center;padding:4px 6px;border-bottom:1px solid var(--border)">Lag vs pipeline</th>
+           <th style="text-align:center;padding:4px 6px;border-bottom:1px solid var(--border)">Status</th>
+         </tr></thead>
+         <tbody>${baseRow}${consumerRows}</tbody>
+       </table>
+       <div style="margin-top:8px;font-size:11px;color:var(--muted)">
+         <strong>Question:</strong> are all consumer surfaces fresh (&lt;${thr}min)? <strong>Decision:</strong> which surface is stale / the operator's next action. <strong>Threshold:</strong> ${thr}min staleness (INF E2E). <strong>Basis:</strong> per-consumer age vs threshold + <code>${esc(baseline.source || 'all_jobs.json')}</code> baseline. <strong>Baseline</strong> is the only field that catches a pipeline stop — gh consumers keep committing while re-publishing the same stale data, so a green gh row alone does not prove the pipeline is alive. <strong>Signal:</strong> write-recency = true write recency (r2/supabase/discord); commit-proxy = GitHub commit-time proxy (negative lag is benign). Source: INF <code>inf_consumer_e2e_lag</code> → <code>zjp-metrics.json.consumer_e2e</code>. Owner: INF.
+       </div>
+     </div>`;
 }
 
 function renderRepos(d, daily, historyEntries, trafficRaw) {
@@ -3205,6 +3327,7 @@ function renderAll() {
   window._poolTotal = metadata ? metadata.total_jobs : null;
   renderRepos(metrics, daily, allHistoryMerged, trafficRaw);
   renderOutHealth(metrics, daily, allHistoryMerged);
+  renderConsumerE2E();
   const supFresh = document.getElementById('sup-freshness');
   if (supFresh && metadata && metadata.generated) {
     supFresh.textContent = `Data as of ${age(metadata.generated)}`;
