@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-24T20:52:34.710Z",
+  "generated_at": "2026-06-24T21:02:54.553Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -34,6 +34,7 @@
     "descriptions-enriched-3.jsonl",
     "descriptions-enriched-4.jsonl",
     "descriptions-enriched-5.jsonl",
+    "descriptions-enriched-6.jsonl",
     "descriptions-google.jsonl",
     "descriptions-greenhouse-1.jsonl",
     "descriptions-greenhouse-2.jsonl",
@@ -61,12 +62,14 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-06-24T20:52:32.350Z",
+    "checked_at": "2026-06-24T21:02:51.891Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [],
-    "warning_count": 0,
+    "warnings": [
+      "Senior filter FP rate elevated: 11.4% (57/500). May indicate keyword over-matching."
+    ],
+    "warning_count": 1,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -78,60 +81,60 @@
   "rows": [
     {
       "source": "workday",
-      "pool_rows": 32901,
-      "us_rows": 19233,
-      "tech_us_rows": 7069,
-      "raw_sidecar_rows": 14729,
-      "sidecar_active_rows": 4496,
+      "pool_rows": 33082,
+      "us_rows": 19693,
+      "tech_us_rows": 7274,
+      "raw_sidecar_rows": 14697,
+      "sidecar_active_rows": 4311,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 4496,
-      "published_pct": 63.6,
-      "enriched_rows": 4791,
-      "enriched_pct": 67.8,
-      "enriched_with_skills": 4482,
-      "skills_pct": 93.6,
+      "published_rows": 4363,
+      "published_pct": 60,
+      "enriched_rows": 4781,
+      "enriched_pct": 65.7,
+      "enriched_with_skills": 4472,
+      "skills_pct": 93.5,
       "examples": [
         {
-          "id": "workday-philips-585370",
-          "company": "Philips",
-          "title": "Remote Service Engineer"
+          "id": "workday-crane-co.-JR101988",
+          "company": "Crane Co.",
+          "title": "Quality Engineering Co-op"
         },
         {
-          "id": "workday-oshkosh-corporation-R47669",
-          "company": "Oshkosh Corporation",
-          "title": "DT SCADA/MES Systems Analyst  - 3rd Shift"
+          "id": "workday-dow-jones-Job_Req_52180",
+          "company": "Dow Jones",
+          "title": "Manager, eCommerce Operations"
         },
         {
-          "id": "workday-workday-inc-JR-0106915",
-          "company": "Workday Inc",
-          "title": "Engagement Manager"
+          "id": "workday-dow-jones-Job_Req_53752",
+          "company": "Dow Jones",
+          "title": "Senior Associate B2B Performance Marketing"
         },
         {
-          "id": "workday-td-bank-R_1495837",
-          "company": "TD Bank",
-          "title": "Governance and Controls Specialist (US)"
+          "id": "workday-daimler-truck-DT-18529",
+          "company": "Daimler Truck",
+          "title": "Manufacturing Systems Engineering Co-op"
         },
         {
-          "id": "workday-visa-REF083391W",
-          "company": "Visa",
-          "title": "Military Talent Program - Software Engineering Pipeline"
+          "id": "workday-daimler-truck-DT-18526",
+          "company": "Daimler Truck",
+          "title": "Daimler's Portland Truck Plant - Limited Maintenance Electrician - (Portland,OR)"
         },
         {
-          "id": "workday-nvidia-JR2019849",
-          "company": "NVIDIA",
-          "title": "Senior Solutions Architect, AI - Accelerated Physics"
+          "id": "workday-daimler-truck-DT-18509",
+          "company": "Daimler Truck",
+          "title": "Electrician - Maintenance [1st shift Cleveland, NC]"
         },
         {
-          "id": "workday-nvidia-JR2019852",
-          "company": "NVIDIA",
-          "title": "Senior Solutions Architect, Generative AI Research"
+          "id": "workday-citi-26961067",
+          "company": "Citi",
+          "title": "Gen AI Engineer"
         },
         {
-          "id": "workday-rtx-01855368",
-          "company": "RTX",
-          "title": "Prin Systems Engineer - Product Owner"
+          "id": "workday-citi-26969826",
+          "company": "Citi",
+          "title": "Devops Release Engineer"
         }
       ],
       "severity": "high",
@@ -142,11 +145,11 @@
     },
     {
       "source": "oracle",
-      "pool_rows": 5617,
-      "us_rows": 3959,
-      "tech_us_rows": 1029,
-      "raw_sidecar_rows": 4324,
-      "sidecar_active_rows": 376,
+      "pool_rows": 5627,
+      "us_rows": 3968,
+      "tech_us_rows": 1030,
+      "raw_sidecar_rows": 4781,
+      "sidecar_active_rows": 379,
       "supplemental_rows": 25758,
       "supplemental_with_desc": 18637,
       "supplemental_meta": {
@@ -161,6 +164,16 @@
       "enriched_with_skills": 380,
       "skills_pct": 72.2,
       "examples": [
+        {
+          "id": "oracle-oracle-337762",
+          "company": "Oracle",
+          "title": "Consulting Technical Manager, AI Data Engineer"
+        },
+        {
+          "id": "oracle-oracle-337772",
+          "company": "Oracle",
+          "title": "Consulting Technical Manager. AI Data Engineer"
+        },
         {
           "id": "oracle-texas-instruments-25011405",
           "company": "Texas Instruments",
@@ -190,16 +203,6 @@
           "id": "oracle-wsp-89682",
           "company": "WSP",
           "title": "CEI Inspector"
-        },
-        {
-          "id": "oracle-wsp-89686",
-          "company": "WSP",
-          "title": "Intermediate Geotechnical Engineer"
-        },
-        {
-          "id": "oracle-wsp-89690",
-          "company": "WSP",
-          "title": "Assistant Vice President, Plumbing Engineer - Buildings"
         }
       ],
       "severity": "high",
@@ -214,7 +217,7 @@
       "pool_rows": 1001,
       "us_rows": 1175,
       "tech_us_rows": 612,
-      "raw_sidecar_rows": 1001,
+      "raw_sidecar_rows": 1010,
       "sidecar_active_rows": 438,
       "supplemental_rows": 1431,
       "supplemental_with_desc": 1431,
@@ -282,8 +285,8 @@
       "pool_rows": 298,
       "us_rows": 247,
       "tech_us_rows": 176,
-      "raw_sidecar_rows": 279,
-      "sidecar_active_rows": 58,
+      "raw_sidecar_rows": 302,
+      "sidecar_active_rows": 57,
       "supplemental_rows": 1360,
       "supplemental_with_desc": 127,
       "supplemental_meta": {
@@ -291,17 +294,17 @@
         "lane_name": "custom",
         "jobs_fetched": 4334
       },
-      "published_rows": 58,
-      "published_pct": 33,
-      "enriched_rows": 58,
-      "enriched_pct": 33,
-      "enriched_with_skills": 58,
+      "published_rows": 57,
+      "published_pct": 32.4,
+      "enriched_rows": 57,
+      "enriched_pct": 32.4,
+      "enriched_with_skills": 57,
       "skills_pct": 100,
       "examples": [
         {
-          "id": "microsoft-200041117",
+          "id": "microsoft-200041049",
           "company": "Microsoft",
-          "title": "Senior Data Center Technician IT Support"
+          "title": "Data Center Operations Manager"
         },
         {
           "id": "microsoft-200041117",
@@ -319,14 +322,14 @@
           "title": "Senior SoC Performance Verification Engineer"
         },
         {
-          "id": "microsoft-200028479",
-          "company": "Microsoft",
-          "title": "Principal Software Engineer, Experimentation Platform - CoreAI"
-        },
-        {
           "id": "microsoft-200031129",
           "company": "Microsoft",
           "title": "Principal Software Engineer"
+        },
+        {
+          "id": "microsoft-200038162",
+          "company": "Microsoft",
+          "title": "Senior Networking Project Manager - CTJ - TS/SCI"
         },
         {
           "id": "microsoft-200026423",
@@ -348,21 +351,31 @@
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 995,
-      "us_rows": 1153,
-      "tech_us_rows": 326,
-      "raw_sidecar_rows": 1894,
-      "sidecar_active_rows": 161,
+      "pool_rows": 986,
+      "us_rows": 1154,
+      "tech_us_rows": 328,
+      "raw_sidecar_rows": 5308,
+      "sidecar_active_rows": 164,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
       "published_rows": 285,
-      "published_pct": 87.4,
+      "published_pct": 86.9,
       "enriched_rows": 161,
-      "enriched_pct": 49.4,
+      "enriched_pct": 49.1,
       "enriched_with_skills": 157,
       "skills_pct": 97.5,
       "examples": [
+        {
+          "id": "sr-SmithsGroup2-744000134030728",
+          "company": "Smiths Group",
+          "title": "Mechanical Engineer"
+        },
+        {
+          "id": "sr-BoschGroup-744000134029133",
+          "company": "Bosch Group",
+          "title": "Manufacturing Engineering Technician"
+        },
         {
           "id": "sr-ServiceNow-744000134027173",
           "company": "ServiceNow",
@@ -379,29 +392,19 @@
           "title": "Software Engineer (Apps & Firmware)"
         },
         {
-          "id": "sr-SmithsGroup2-744000134017140",
-          "company": "Smiths Group",
-          "title": "Mechanical Engineer"
+          "id": "sr-Intuitive-744000134030139",
+          "company": "Intuitive",
+          "title": "Managing Staff, Clinical Data Science"
         },
         {
-          "id": "sr-ServiceNow-744000133702658",
-          "company": "ServiceNow",
-          "title": "Principal Solution Architect, Operations Technology Management (OTM)"
+          "id": "sr-Sandisk-744000134030409",
+          "company": "Sandisk",
+          "title": "Senior Staff Field Application Engineer"
         },
         {
-          "id": "sr-ServiceNow-744000133702519",
+          "id": "sr-ServiceNow-744000134029129",
           "company": "ServiceNow",
-          "title": "Principal Solution Architect, Operations Technology Management (OTM)"
-        },
-        {
-          "id": "sr-ServiceNow-744000133699745",
-          "company": "ServiceNow",
-          "title": "Principal Solution Architect, Operations Technology Management (OTM)"
-        },
-        {
-          "id": "sr-ServiceNow-744000133700164",
-          "company": "ServiceNow",
-          "title": "Principal Solution Architect, Operations Technology Management (OTM)"
+          "title": "Senior Software Engineer, Agentic AI Systems - Moveworks"
         }
       ],
       "severity": "medium",
@@ -411,10 +414,10 @@
     },
     {
       "source": "icims",
-      "pool_rows": 59,
+      "pool_rows": 58,
       "us_rows": 48,
       "tech_us_rows": 13,
-      "raw_sidecar_rows": 59,
+      "raw_sidecar_rows": 315,
       "sidecar_active_rows": 13,
       "supplemental_rows": 315,
       "supplemental_with_desc": 315,
