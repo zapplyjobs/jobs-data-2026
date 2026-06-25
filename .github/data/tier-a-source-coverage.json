@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-25T01:06:42.908Z",
+  "generated_at": "2026-06-25T01:21:47.120Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -46,21 +46,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-25T01:05:17.529Z",
+    "generated_at": "2026-06-25T01:20:15.398Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 12060,
-    "description_entries": 8204,
-    "coverage_pct": 68,
+    "board_row_count": 12454,
+    "description_entries": 8217,
+    "coverage_pct": 66,
     "source_breakdown": {
-      "sidecar": 8210,
+      "sidecar": 8223,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-25T00:51:18.781Z",
+    "jobs_metadata_generated": "2026-06-25T01:07:47.593Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-06-25T01:06:40.603Z",
+    "checked_at": "2026-06-25T01:21:44.680Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -76,16 +76,79 @@
   },
   "rows": [
     {
+      "source": "workday",
+      "pool_rows": 32040,
+      "us_rows": 17178,
+      "tech_us_rows": 5704,
+      "raw_sidecar_rows": 14192,
+      "sidecar_active_rows": 4450,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 4486,
+      "published_pct": 78.6,
+      "enriched_rows": 4668,
+      "enriched_pct": 81.8,
+      "enriched_with_skills": 4354,
+      "skills_pct": 93.3,
+      "examples": [
+        {
+          "id": "workday-fidelity-investments-2129919",
+          "company": "Fidelity Investments",
+          "title": "Cybersecurity Analyst"
+        },
+        {
+          "id": "workday-fidelity-investments-2131082",
+          "company": "Fidelity Investments",
+          "title": "Manager, Fraud Detection and Data Analytics"
+        },
+        {
+          "id": "workday-danaher-R1312529",
+          "company": "Danaher",
+          "title": "Field Service Engineer- Oklahoma City"
+        },
+        {
+          "id": "workday-danaher-R1313780",
+          "company": "Danaher",
+          "title": "Market Manager - Lithography"
+        },
+        {
+          "id": "workday-danaher-R1312225",
+          "company": "Danaher",
+          "title": "Field Service Engineer - Chicagoland / NW Indiana"
+        },
+        {
+          "id": "workday-nvidia-JR2019849",
+          "company": "NVIDIA",
+          "title": "Senior Solutions Architect, AI - Accelerated Physics"
+        },
+        {
+          "id": "workday-nvidia-JR2019852",
+          "company": "NVIDIA",
+          "title": "Senior Solutions Architect, Generative AI Research"
+        },
+        {
+          "id": "workday-northrop-grumman-R10237637",
+          "company": "Northrop Grumman",
+          "title": "2027 Associate Engineer Electrical / Engineer Electrical"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage"
+      ]
+    },
+    {
       "source": "oracle",
-      "pool_rows": 5280,
-      "us_rows": 3715,
+      "pool_rows": 5284,
+      "us_rows": 3718,
       "tech_us_rows": 948,
-      "raw_sidecar_rows": 4084,
+      "raw_sidecar_rows": 4774,
       "sidecar_active_rows": 362,
       "supplemental_rows": 25777,
       "supplemental_with_desc": 18654,
       "supplemental_meta": {
-        "generated_at": "2026-06-25T01:03:59.891Z",
+        "generated_at": "2026-06-25T01:19:03.087Z",
         "lane_name": "oracle",
         "jobs_fetched": 25777
       },
@@ -149,12 +212,12 @@
       "pool_rows": 1004,
       "us_rows": 1177,
       "tech_us_rows": 613,
-      "raw_sidecar_rows": 1004,
+      "raw_sidecar_rows": 1015,
       "sidecar_active_rows": 440,
       "supplemental_rows": 1428,
       "supplemental_with_desc": 1428,
       "supplemental_meta": {
-        "generated_at": "2026-06-25T01:06:08.038Z",
+        "generated_at": "2026-06-25T01:21:10.886Z",
         "lane_name": "custom",
         "jobs_fetched": 4348
       },
@@ -214,22 +277,22 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 307,
-      "us_rows": 255,
-      "tech_us_rows": 184,
-      "raw_sidecar_rows": 284,
+      "pool_rows": 313,
+      "us_rows": 253,
+      "tech_us_rows": 180,
+      "raw_sidecar_rows": 298,
       "sidecar_active_rows": 61,
       "supplemental_rows": 1380,
-      "supplemental_with_desc": 101,
+      "supplemental_with_desc": 121,
       "supplemental_meta": {
-        "generated_at": "2026-06-25T01:06:08.038Z",
+        "generated_at": "2026-06-25T01:21:10.886Z",
         "lane_name": "custom",
         "jobs_fetched": 4348
       },
       "published_rows": 61,
-      "published_pct": 33.2,
+      "published_pct": 33.9,
       "enriched_rows": 62,
-      "enriched_pct": 33.7,
+      "enriched_pct": 34.4,
       "enriched_with_skills": 62,
       "skills_pct": 100,
       "examples": [
@@ -254,11 +317,6 @@
           "title": "Senior Software Engineer"
         },
         {
-          "id": "microsoft-200040812",
-          "company": "Microsoft",
-          "title": "Principal Silicon Sourcing Engineer"
-        },
-        {
           "id": "microsoft-200028283",
           "company": "Microsoft",
           "title": "Senior Physical Verification CAD Engineer"
@@ -272,6 +330,11 @@
           "id": "microsoft-200040340",
           "company": "Microsoft",
           "title": "Senior Software Engineering"
+        },
+        {
+          "id": "microsoft-200032124",
+          "company": "Microsoft",
+          "title": "Senior Power Engineer"
         }
       ],
       "severity": "high",
@@ -283,60 +346,60 @@
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 1157,
-      "us_rows": 1313,
-      "tech_us_rows": 325,
-      "raw_sidecar_rows": 1950,
-      "sidecar_active_rows": 175,
+      "pool_rows": 1009,
+      "us_rows": 1167,
+      "tech_us_rows": 327,
+      "raw_sidecar_rows": 4932,
+      "sidecar_active_rows": 164,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 273,
-      "published_pct": 84,
+      "published_rows": 288,
+      "published_pct": 88.1,
       "enriched_rows": 175,
-      "enriched_pct": 53.8,
+      "enriched_pct": 53.5,
       "enriched_with_skills": 171,
       "skills_pct": 97.7,
       "examples": [
         {
-          "id": "sr-LinkedIn3-744000132435149",
-          "company": "LinkedIn",
-          "title": "Senior AI Engineer"
+          "id": "sr-RedBull-744000132917069",
+          "company": "Red Bull",
+          "title": "Director, Business Intelligence"
         },
         {
-          "id": "sr-LinkedIn3-744000132289770",
-          "company": "LinkedIn",
-          "title": "Sr. Software Engineer, Systems Infrastructure"
+          "id": "sr-Sandisk-744000134030409",
+          "company": "Sandisk",
+          "title": "Senior Staff Field Application Engineer"
         },
         {
-          "id": "sr-LinkedIn3-744000132248815",
-          "company": "LinkedIn",
-          "title": "Staff Network Engineer"
+          "id": "sr-Sandisk-744000134002920",
+          "company": "Sandisk",
+          "title": "Senior Engineer, Product Development Engineering"
         },
         {
-          "id": "sr-LinkedIn3-744000132241768",
-          "company": "LinkedIn",
-          "title": "Staff Engineer, Data Center"
+          "id": "sr-Sandisk-744000133443620",
+          "company": "Sandisk",
+          "title": "Staff Engineer, System Design Engineering"
         },
         {
-          "id": "sr-LinkedIn3-744000131754029",
-          "company": "LinkedIn",
-          "title": "AI Engineering Manager,  Notifications AI"
+          "id": "sr-Sandisk-744000133429059",
+          "company": "Sandisk",
+          "title": "Senior Technology Development Engineer"
         },
         {
-          "id": "sr-NBCUniversal3-744000134001687",
-          "company": "NBCUniversal",
-          "title": "Sr. Video Streaming DevOps Engineer"
+          "id": "sr-Sandisk-744000133422276",
+          "company": "Sandisk",
+          "title": "Product Security Assurance Architect"
         },
         {
-          "id": "sr-NBCUniversal3-744000133704120",
-          "company": "NBCUniversal",
-          "title": "Staff Engineer, Builder Enablement"
+          "id": "sr-Sandisk-744000133403644",
+          "company": "Sandisk",
+          "title": "Principal Engineer, Technology Development Engineering"
         },
         {
-          "id": "sr-NBCUniversal3-744000132730169",
-          "company": "NBCUniversal",
-          "title": "Engineering Manager, iOS"
+          "id": "sr-Sandisk-744000132618764",
+          "company": "Sandisk",
+          "title": "Senior Information Security Analyst, GRC/Responsible AI"
         }
       ],
       "severity": "medium",
@@ -354,7 +417,7 @@
       "supplemental_rows": 316,
       "supplemental_with_desc": 316,
       "supplemental_meta": {
-        "generated_at": "2026-06-25T01:06:08.038Z",
+        "generated_at": "2026-06-25T01:21:10.886Z",
         "lane_name": "custom",
         "jobs_fetched": 4348
       },
@@ -369,67 +432,6 @@
       "flags": [
         "low_skill_fill"
       ]
-    },
-    {
-      "source": "workday",
-      "pool_rows": 33096,
-      "us_rows": 18227,
-      "tech_us_rows": 5930,
-      "raw_sidecar_rows": 14803,
-      "sidecar_active_rows": 4764,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 4764,
-      "published_pct": 80.3,
-      "enriched_rows": 4829,
-      "enriched_pct": 81.4,
-      "enriched_with_skills": 4512,
-      "skills_pct": 93.4,
-      "examples": [
-        {
-          "id": "workday-leidos-R-00186000",
-          "company": "Leidos",
-          "title": "Desktop Support Manager"
-        },
-        {
-          "id": "workday-jll-REQ508451",
-          "company": "JLL",
-          "title": "Mobile Engineer"
-        },
-        {
-          "id": "workday-jll-REQ517005",
-          "company": "JLL",
-          "title": "Automation Engineer"
-        },
-        {
-          "id": "workday-johnson-controls-WD30272618",
-          "company": "Johnson Controls",
-          "title": "Fire Detection Inspector"
-        },
-        {
-          "id": "workday-workday-inc-JR-0106915",
-          "company": "Workday Inc",
-          "title": "Engagement Manager"
-        },
-        {
-          "id": "workday-nvidia-JR2019849",
-          "company": "NVIDIA",
-          "title": "Senior Solutions Architect, AI - Accelerated Physics"
-        },
-        {
-          "id": "workday-nvidia-JR2019852",
-          "company": "NVIDIA",
-          "title": "Senior Solutions Architect, Generative AI Research"
-        },
-        {
-          "id": "workday-jabil-J2455119",
-          "company": "Jabil",
-          "title": "Product Validation Engineer"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
     },
     {
       "source": "apple",
