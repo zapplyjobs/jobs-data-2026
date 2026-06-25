@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-25T02:21:33.411Z",
+  "generated_at": "2026-06-25T02:36:34.268Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -46,21 +46,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-25T02:20:10.751Z",
+    "generated_at": "2026-06-25T02:35:10.230Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 12202,
-    "description_entries": 8149,
-    "coverage_pct": 66.8,
+    "board_row_count": 12002,
+    "description_entries": 8156,
+    "coverage_pct": 68,
     "source_breakdown": {
-      "sidecar": 8155,
+      "sidecar": 8162,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-25T02:05:20.247Z",
+    "jobs_metadata_generated": "2026-06-25T02:20:41.283Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-06-25T02:21:31.003Z",
+    "checked_at": "2026-06-25T02:36:31.609Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -76,18 +76,82 @@
   },
   "rows": [
     {
+      "source": "workday",
+      "pool_rows": 33507,
+      "us_rows": 18982,
+      "tech_us_rows": 6458,
+      "raw_sidecar_rows": 14505,
+      "sidecar_active_rows": 4607,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 4589,
+      "published_pct": 71.1,
+      "enriched_rows": 4803,
+      "enriched_pct": 74.4,
+      "enriched_with_skills": 4478,
+      "skills_pct": 93.2,
+      "examples": [
+        {
+          "id": "workday-bristol-myers-squibb-R1603785",
+          "company": "Bristol Myers Squibb",
+          "title": "Research Data Coordinator"
+        },
+        {
+          "id": "workday-caci-328170",
+          "company": "CACI",
+          "title": "Project Manager"
+        },
+        {
+          "id": "workday-caci-328123",
+          "company": "CACI",
+          "title": "Program Manger - FEMA NPWS"
+        },
+        {
+          "id": "workday-caci-328168",
+          "company": "CACI",
+          "title": "Field Service Representative"
+        },
+        {
+          "id": "workday-caci-327326",
+          "company": "CACI",
+          "title": "Cloud Engineer"
+        },
+        {
+          "id": "workday-caci-324894",
+          "company": "CACI",
+          "title": "Oracle PeopleSoft Administrator"
+        },
+        {
+          "id": "workday-caci-328105",
+          "company": "CACI",
+          "title": "Linux Systems Administrator"
+        },
+        {
+          "id": "workday-caci-328106",
+          "company": "CACI",
+          "title": "SQL Database Administrator"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage",
+        "low_enrichment_coverage"
+      ]
+    },
+    {
       "source": "oracle",
-      "pool_rows": 5288,
-      "us_rows": 3718,
+      "pool_rows": 5286,
+      "us_rows": 3717,
       "tech_us_rows": 948,
       "raw_sidecar_rows": 4503,
       "sidecar_active_rows": 362,
-      "supplemental_rows": 25777,
-      "supplemental_with_desc": 18655,
+      "supplemental_rows": 25780,
+      "supplemental_with_desc": 18658,
       "supplemental_meta": {
-        "generated_at": "2026-06-25T02:19:02.067Z",
+        "generated_at": "2026-06-25T02:34:19.792Z",
         "lane_name": "oracle",
-        "jobs_fetched": 25777
+        "jobs_fetched": 25780
       },
       "published_rows": 362,
       "published_pct": 38.2,
@@ -154,9 +218,9 @@
       "supplemental_rows": 1428,
       "supplemental_with_desc": 1428,
       "supplemental_meta": {
-        "generated_at": "2026-06-25T02:20:53.354Z",
+        "generated_at": "2026-06-25T02:36:06.778Z",
         "lane_name": "custom",
-        "jobs_fetched": 4348
+        "jobs_fetched": 4346
       },
       "published_rows": 440,
       "published_pct": 71.8,
@@ -213,94 +277,30 @@
       ]
     },
     {
-      "source": "smartrecruiters",
-      "pool_rows": 1168,
-      "us_rows": 1321,
-      "tech_us_rows": 323,
-      "raw_sidecar_rows": 2938,
-      "sidecar_active_rows": 165,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 200,
-      "published_pct": 61.9,
-      "enriched_rows": 178,
-      "enriched_pct": 55.1,
-      "enriched_with_skills": 174,
-      "skills_pct": 97.8,
-      "examples": [
-        {
-          "id": "sr-BoschGroup-744000134011708",
-          "company": "Bosch Group",
-          "title": "Senior Systems Engineer (Multiple Positions) (REF289777D)"
-        },
-        {
-          "id": "sr-BoschGroup-744000133953349",
-          "company": "Bosch Group",
-          "title": "Sr. Calibration Engineer (Project Manager) - Service House"
-        },
-        {
-          "id": "sr-BoschGroup-744000133096545",
-          "company": "Bosch Group",
-          "title": "Senior Controls Engineer"
-        },
-        {
-          "id": "sr-BoschGroup-744000132989075",
-          "company": "Bosch Group",
-          "title": "Senior Principal Engineer- MLOps & AI Machinery, ADAS/AV"
-        },
-        {
-          "id": "sr-BoschGroup-744000132879128",
-          "company": "Bosch Group",
-          "title": "Sr. Software Engineer (Multiple Positions) (REF289267Z)"
-        },
-        {
-          "id": "sr-BoschGroup-744000132739960",
-          "company": "Bosch Group",
-          "title": "Senior Application Engineer"
-        },
-        {
-          "id": "sr-BryceTech-744000133383519",
-          "company": "BryceTech",
-          "title": "Senior Editor"
-        },
-        {
-          "id": "sr-CapTechConsulting-744000133626549",
-          "company": "CapTech Consulting",
-          "title": "dotCMS Architect"
-        }
-      ],
-      "severity": "high",
-      "flags": [
-        "low_published_coverage",
-        "low_enrichment_coverage"
-      ]
-    },
-    {
       "source": "microsoft",
       "pool_rows": 307,
-      "us_rows": 252,
-      "tech_us_rows": 182,
-      "raw_sidecar_rows": 290,
+      "us_rows": 256,
+      "tech_us_rows": 185,
+      "raw_sidecar_rows": 292,
       "sidecar_active_rows": 62,
-      "supplemental_rows": 1380,
-      "supplemental_with_desc": 130,
+      "supplemental_rows": 1378,
+      "supplemental_with_desc": 113,
       "supplemental_meta": {
-        "generated_at": "2026-06-25T02:20:53.354Z",
+        "generated_at": "2026-06-25T02:36:06.778Z",
         "lane_name": "custom",
-        "jobs_fetched": 4348
+        "jobs_fetched": 4346
       },
-      "published_rows": 61,
+      "published_rows": 62,
       "published_pct": 33.5,
       "enriched_rows": 62,
-      "enriched_pct": 34.1,
+      "enriched_pct": 33.5,
       "enriched_with_skills": 62,
       "skills_pct": 100,
       "examples": [
         {
-          "id": "microsoft-200041054",
+          "id": "microsoft-200038019",
           "company": "Microsoft",
-          "title": "Software Engineer II"
+          "title": "Senior Security Researcher"
         },
         {
           "id": "microsoft-200041120",
@@ -323,6 +323,11 @@
           "title": "Senior Physical Verification CAD Engineer"
         },
         {
+          "id": "microsoft-200029733",
+          "company": "Microsoft",
+          "title": "Principal Silicon Engineer - Networking"
+        },
+        {
           "id": "microsoft-200033853",
           "company": "Microsoft",
           "title": "Senior Software Engineer - Network Engineer"
@@ -331,11 +336,6 @@
           "id": "microsoft-200040340",
           "company": "Microsoft",
           "title": "Senior Software Engineering"
-        },
-        {
-          "id": "microsoft-200032124",
-          "company": "Microsoft",
-          "title": "Senior Power Engineer"
         }
       ],
       "severity": "high",
@@ -343,6 +343,70 @@
         "low_published_coverage",
         "low_enrichment_coverage",
         "supplemental_stage_gap"
+      ]
+    },
+    {
+      "source": "smartrecruiters",
+      "pool_rows": 1160,
+      "us_rows": 1314,
+      "tech_us_rows": 323,
+      "raw_sidecar_rows": 3438,
+      "sidecar_active_rows": 165,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 227,
+      "published_pct": 70.3,
+      "enriched_rows": 176,
+      "enriched_pct": 54.5,
+      "enriched_with_skills": 172,
+      "skills_pct": 97.7,
+      "examples": [
+        {
+          "id": "sr-Eurofins-744000133127174",
+          "company": "Eurofins",
+          "title": "Senior Product Safety Engineer"
+        },
+        {
+          "id": "sr-Experian-744000132935639",
+          "company": "Experian",
+          "title": "Senior Data Scientist, Innovation Lab - Remote"
+        },
+        {
+          "id": "sr-Experian-744000132935202",
+          "company": "Experian",
+          "title": "Staff Backend AI Engineer, Remote"
+        },
+        {
+          "id": "sr-Experian-744000132934654",
+          "company": "Experian",
+          "title": "Staff AI Architect, Remote"
+        },
+        {
+          "id": "sr-Experian-744000132734044",
+          "company": "Experian",
+          "title": "Senior Manager, Thought Leadership and Insights"
+        },
+        {
+          "id": "sr-Experian-744000132734739",
+          "company": "Experian",
+          "title": "Director, Thought Leadership and Industry Insights"
+        },
+        {
+          "id": "sr-Experian-744000132637519",
+          "company": "Experian",
+          "title": "Senior Analyst, Analytics Development & Model Governance"
+        },
+        {
+          "id": "sr-Intuitive-744000134036279",
+          "company": "Intuitive",
+          "title": "Sr. Mechanical Design Engineer - MFG Equipment"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage",
+        "low_enrichment_coverage"
       ]
     },
     {
@@ -355,9 +419,9 @@
       "supplemental_rows": 316,
       "supplemental_with_desc": 316,
       "supplemental_meta": {
-        "generated_at": "2026-06-25T02:20:53.354Z",
+        "generated_at": "2026-06-25T02:36:06.778Z",
         "lane_name": "custom",
-        "jobs_fetched": 4348
+        "jobs_fetched": 4346
       },
       "published_rows": 13,
       "published_pct": 100,
@@ -370,67 +434,6 @@
       "flags": [
         "low_skill_fill"
       ]
-    },
-    {
-      "source": "workday",
-      "pool_rows": 33477,
-      "us_rows": 18446,
-      "tech_us_rows": 5870,
-      "raw_sidecar_rows": 14484,
-      "sidecar_active_rows": 4602,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 4700,
-      "published_pct": 80.1,
-      "enriched_rows": 4809,
-      "enriched_pct": 81.9,
-      "enriched_with_skills": 4485,
-      "skills_pct": 93.3,
-      "examples": [
-        {
-          "id": "workday-workday-inc-JR-0106915",
-          "company": "Workday Inc",
-          "title": "Engagement Manager"
-        },
-        {
-          "id": "workday-amentum-R0153103",
-          "company": "Amentum",
-          "title": "Spacecraft Software Development & Verification Engineer"
-        },
-        {
-          "id": "workday-philips-585370",
-          "company": "Philips",
-          "title": "Remote Service Engineer"
-        },
-        {
-          "id": "workday-nvidia-JR2019849",
-          "company": "NVIDIA",
-          "title": "Senior Solutions Architect, AI - Accelerated Physics"
-        },
-        {
-          "id": "workday-nvidia-JR2019852",
-          "company": "NVIDIA",
-          "title": "Senior Solutions Architect, Generative AI Research"
-        },
-        {
-          "id": "workday-salesforce-JR347079",
-          "company": "Salesforce",
-          "title": "Employee Success People Consultant Manager"
-        },
-        {
-          "id": "workday-johnson-controls-WD30272618",
-          "company": "Johnson Controls",
-          "title": "Fire Detection Inspector"
-        },
-        {
-          "id": "workday-johnson-&-johnson-R-084253",
-          "company": "Johnson & Johnson",
-          "title": "Engineer"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
     },
     {
       "source": "apple",
