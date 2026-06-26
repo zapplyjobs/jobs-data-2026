@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-26T15:21:53.053Z",
+  "generated_at": "2026-06-26T15:37:01.105Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -47,26 +47,28 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-26T15:20:29.095Z",
+    "generated_at": "2026-06-26T15:35:34.778Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 14004,
-    "description_entries": 8954,
-    "coverage_pct": 63.9,
+    "board_row_count": 13528,
+    "description_entries": 8972,
+    "coverage_pct": 66.3,
     "source_breakdown": {
-      "sidecar": 8975,
+      "sidecar": 8994,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-26T15:06:58.350Z",
+    "jobs_metadata_generated": "2026-06-26T15:21:36.541Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-06-26T15:21:50.417Z",
+    "checked_at": "2026-06-26T15:36:58.359Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [],
-    "warning_count": 0,
+    "warnings": [
+      "Senior filter FP rate elevated: 10.4% (52/500). May indicate keyword over-matching."
+    ],
+    "warning_count": 1,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -78,60 +80,60 @@
   "rows": [
     {
       "source": "workday",
-      "pool_rows": 38928,
-      "us_rows": 22499,
-      "tech_us_rows": 7491,
-      "raw_sidecar_rows": 15347,
-      "sidecar_active_rows": 5120,
+      "pool_rows": 39025,
+      "us_rows": 21984,
+      "tech_us_rows": 6998,
+      "raw_sidecar_rows": 15368,
+      "sidecar_active_rows": 5132,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 5120,
-      "published_pct": 68.3,
-      "enriched_rows": 5196,
-      "enriched_pct": 69.4,
-      "enriched_with_skills": 4889,
+      "published_rows": 5132,
+      "published_pct": 73.3,
+      "enriched_rows": 5207,
+      "enriched_pct": 74.4,
+      "enriched_with_skills": 4901,
       "skills_pct": 94.1,
       "examples": [
         {
-          "id": "workday-caci-328263",
-          "company": "CACI",
-          "title": "Systems Engineer"
+          "id": "workday-leidos-R-00186189",
+          "company": "Leidos",
+          "title": "Cloud Engineer"
         },
         {
-          "id": "workday-caci-327867",
-          "company": "CACI",
-          "title": "Junior Software Engineer"
+          "id": "workday-leidos-R-00185881",
+          "company": "Leidos",
+          "title": "Avionics Test Engineer"
         },
         {
-          "id": "workday-brown-&-brown-insurance-R26_0000002275",
-          "company": "Brown & Brown Insurance",
-          "title": "Data Engineer"
+          "id": "workday-leidos-R-00183350",
+          "company": "Leidos",
+          "title": "Data Scientist"
         },
         {
-          "id": "workday-booz-allen-hamilton-R0243054",
-          "company": "Booz Allen Hamilton",
-          "title": "Data Security Engineer"
+          "id": "workday-leidos-R-00181896",
+          "company": "Leidos",
+          "title": "Imagery Scientist (SAR)"
         },
         {
-          "id": "workday-booz-allen-hamilton-R0242146",
-          "company": "Booz Allen Hamilton",
-          "title": "OT & Defense Critical Infrastructure Cybersecurity Engineer"
+          "id": "workday-leidos-R-00183359",
+          "company": "Leidos",
+          "title": "Imagery Scientist (SAR)"
+        },
+        {
+          "id": "workday-icf-R2602133",
+          "company": "ICF",
+          "title": "Energy Analyst"
+        },
+        {
+          "id": "workday-unisys-REQ574046",
+          "company": "Unisys",
+          "title": "Level 3 NOC Lead – Network Focus (Team Lead)"
         },
         {
           "id": "workday-thermo-fisher-scientific-R-01357252",
           "company": "Thermo Fisher Scientific",
           "title": "Field Service Engineer"
-        },
-        {
-          "id": "workday-snap-H226TPMES",
-          "company": "Snap",
-          "title": "Technical Partner Manager, Enterprise Solutions"
-        },
-        {
-          "id": "workday-snap-R0045910",
-          "company": "Snap",
-          "title": "Enterprise Partner Development Manager"
         }
       ],
       "severity": "high",
@@ -142,29 +144,39 @@
     },
     {
       "source": "oracle",
-      "pool_rows": 6569,
-      "us_rows": 4428,
-      "tech_us_rows": 1076,
-      "raw_sidecar_rows": 5014,
+      "pool_rows": 6581,
+      "us_rows": 4437,
+      "tech_us_rows": 1078,
+      "raw_sidecar_rows": 5021,
       "sidecar_active_rows": 458,
-      "supplemental_rows": 25765,
-      "supplemental_with_desc": 18573,
+      "supplemental_rows": 25776,
+      "supplemental_with_desc": 18581,
       "supplemental_meta": {
-        "generated_at": "2026-06-26T15:19:26.423Z",
+        "generated_at": "2026-06-26T15:34:48.638Z",
         "lane_name": "oracle",
-        "jobs_fetched": 25765
+        "jobs_fetched": 25776
       },
       "published_rows": 458,
-      "published_pct": 42.6,
-      "enriched_rows": 604,
-      "enriched_pct": 56.1,
-      "enriched_with_skills": 426,
+      "published_pct": 42.5,
+      "enriched_rows": 606,
+      "enriched_pct": 56.2,
+      "enriched_with_skills": 427,
       "skills_pct": 70.5,
       "examples": [
+        {
+          "id": "oracle-oracle-338410",
+          "company": "Oracle",
+          "title": "Software Developer 3"
+        },
         {
           "id": "oracle-texas-instruments-25010637",
           "company": "Texas Instruments",
           "title": "Metrology Process Engineer"
+        },
+        {
+          "id": "oracle-vertiv-20275273",
+          "company": "Vertiv",
+          "title": "Associate Application Engineer, AC Power"
         },
         {
           "id": "oracle-wsp-89838",
@@ -190,16 +202,6 @@
           "id": "oracle-hologic-11933",
           "company": "Hologic",
           "title": "Systems Engineer, R&D Cytology"
-        },
-        {
-          "id": "oracle-texas-instruments-25002265",
-          "company": "Texas Instruments",
-          "title": "Analog IC Design Engineer - Switching Regulators (Phoenix)"
-        },
-        {
-          "id": "oracle-texas-instruments-25010237",
-          "company": "Texas Instruments",
-          "title": "Thin Films Equipment Engineer - DM5"
         }
       ],
       "severity": "high",
@@ -211,17 +213,17 @@
     },
     {
       "source": "tiktok",
-      "pool_rows": 1018,
-      "us_rows": 1192,
+      "pool_rows": 1019,
+      "us_rows": 1193,
       "tech_us_rows": 616,
-      "raw_sidecar_rows": 1018,
+      "raw_sidecar_rows": 1019,
       "sidecar_active_rows": 442,
       "supplemental_rows": 1431,
       "supplemental_with_desc": 1431,
       "supplemental_meta": {
-        "generated_at": "2026-06-26T15:20:51.429Z",
+        "generated_at": "2026-06-26T15:35:32.972Z",
         "lane_name": "custom",
-        "jobs_fetched": 4351
+        "jobs_fetched": 4353
       },
       "published_rows": 442,
       "published_pct": 71.8,
@@ -279,22 +281,22 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 405,
-      "us_rows": 298,
-      "tech_us_rows": 211,
-      "raw_sidecar_rows": 371,
+      "pool_rows": 404,
+      "us_rows": 299,
+      "tech_us_rows": 213,
+      "raw_sidecar_rows": 369,
       "sidecar_active_rows": 86,
-      "supplemental_rows": 1384,
-      "supplemental_with_desc": 127,
+      "supplemental_rows": 1385,
+      "supplemental_with_desc": 122,
       "supplemental_meta": {
-        "generated_at": "2026-06-26T15:20:51.429Z",
+        "generated_at": "2026-06-26T15:35:32.972Z",
         "lane_name": "custom",
-        "jobs_fetched": 4351
+        "jobs_fetched": 4353
       },
       "published_rows": 86,
-      "published_pct": 40.8,
+      "published_pct": 40.4,
       "enriched_rows": 87,
-      "enriched_pct": 41.2,
+      "enriched_pct": 40.8,
       "enriched_with_skills": 87,
       "skills_pct": 100,
       "examples": [
@@ -351,14 +353,14 @@
       "pool_rows": 62,
       "us_rows": 51,
       "tech_us_rows": 13,
-      "raw_sidecar_rows": 315,
-      "sidecar_active_rows": 10,
+      "raw_sidecar_rows": 60,
+      "sidecar_active_rows": 12,
       "supplemental_rows": 315,
       "supplemental_with_desc": 315,
       "supplemental_meta": {
-        "generated_at": "2026-06-26T15:20:51.429Z",
+        "generated_at": "2026-06-26T15:35:32.972Z",
         "lane_name": "custom",
-        "jobs_fetched": 4351
+        "jobs_fetched": 4353
       },
       "published_rows": 12,
       "published_pct": 92.3,
@@ -375,24 +377,23 @@
       ],
       "severity": "medium",
       "flags": [
-        "published_gt_raw_sidecar",
         "low_skill_fill"
       ]
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 1309,
-      "us_rows": 1488,
-      "tech_us_rows": 367,
-      "raw_sidecar_rows": 2581,
+      "pool_rows": 1313,
+      "us_rows": 1494,
+      "tech_us_rows": 369,
+      "raw_sidecar_rows": 2589,
       "sidecar_active_rows": 207,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 367,
+      "published_rows": 369,
       "published_pct": 100,
       "enriched_rows": 206,
-      "enriched_pct": 56.1,
+      "enriched_pct": 55.8,
       "enriched_with_skills": 202,
       "skills_pct": 98.1,
       "examples": [],
