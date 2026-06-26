@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-26T23:49:36.032Z",
+  "generated_at": "2026-06-26T23:51:26.407Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -48,21 +48,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-26T23:35:05.713Z",
+    "generated_at": "2026-06-26T23:50:02.543Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 13574,
-    "description_entries": 9259,
-    "coverage_pct": 68.2,
+    "board_row_count": 13336,
+    "description_entries": 9256,
+    "coverage_pct": 69.4,
     "source_breakdown": {
-      "sidecar": 9281,
+      "sidecar": 9277,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-26T23:19:52.949Z",
+    "jobs_metadata_generated": "2026-06-26T23:35:02.503Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-06-26T23:49:33.177Z",
+    "checked_at": "2026-06-26T23:51:23.699Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -78,11 +78,74 @@
   },
   "rows": [
     {
+      "source": "workday",
+      "pool_rows": 41945,
+      "us_rows": 23546,
+      "tech_us_rows": 6786,
+      "raw_sidecar_rows": 15714,
+      "sidecar_active_rows": 5405,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 5333,
+      "published_pct": 78.6,
+      "enriched_rows": 5469,
+      "enriched_pct": 80.6,
+      "enriched_with_skills": 5135,
+      "skills_pct": 93.9,
+      "examples": [
+        {
+          "id": "workday-caci-311726",
+          "company": "CACI",
+          "title": "Network Launch Support Coordinator"
+        },
+        {
+          "id": "workday-caci-309136",
+          "company": "CACI",
+          "title": "Terrestrial COMSEC Network Engineer"
+        },
+        {
+          "id": "workday-caci-328172",
+          "company": "CACI",
+          "title": "Associate Project Manager"
+        },
+        {
+          "id": "workday-caci-326565",
+          "company": "CACI",
+          "title": "Solutions Architect"
+        },
+        {
+          "id": "workday-caci-328106",
+          "company": "CACI",
+          "title": "SQL Database Administrator"
+        },
+        {
+          "id": "workday-caci-325777",
+          "company": "CACI",
+          "title": "Scrum Master"
+        },
+        {
+          "id": "workday-caci-326616",
+          "company": "CACI",
+          "title": "Data Scientist"
+        },
+        {
+          "id": "workday-caci-328282",
+          "company": "CACI",
+          "title": "Software Engineer"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage"
+      ]
+    },
+    {
       "source": "oracle",
-      "pool_rows": 6890,
-      "us_rows": 4729,
-      "tech_us_rows": 1136,
-      "raw_sidecar_rows": 5232,
+      "pool_rows": 6893,
+      "us_rows": 4735,
+      "tech_us_rows": 1142,
+      "raw_sidecar_rows": 5231,
       "sidecar_active_rows": 473,
       "supplemental_rows": 25919,
       "supplemental_with_desc": 18686,
@@ -92,11 +155,11 @@
         "jobs_fetched": 25919
       },
       "published_rows": 473,
-      "published_pct": 41.6,
-      "enriched_rows": 637,
-      "enriched_pct": 56.1,
-      "enriched_with_skills": 453,
-      "skills_pct": 71.1,
+      "published_pct": 41.4,
+      "enriched_rows": 638,
+      "enriched_pct": 55.9,
+      "enriched_with_skills": 454,
+      "skills_pct": 71.2,
       "examples": [
         {
           "id": "oracle-cummins-2431629",
@@ -148,15 +211,15 @@
     },
     {
       "source": "tiktok",
-      "pool_rows": 1019,
-      "us_rows": 1193,
+      "pool_rows": 1021,
+      "us_rows": 1195,
       "tech_us_rows": 616,
       "raw_sidecar_rows": 1019,
       "sidecar_active_rows": 442,
       "supplemental_rows": 1432,
       "supplemental_with_desc": 1432,
       "supplemental_meta": {
-        "generated_at": "2026-06-26T23:35:32.516Z",
+        "generated_at": "2026-06-26T23:50:49.693Z",
         "lane_name": "custom",
         "jobs_fetched": 4341
       },
@@ -217,17 +280,17 @@
     {
       "source": "smartrecruiters",
       "pool_rows": 1421,
-      "us_rows": 1595,
-      "tech_us_rows": 368,
-      "raw_sidecar_rows": 2891,
-      "sidecar_active_rows": 211,
+      "us_rows": 1594,
+      "tech_us_rows": 367,
+      "raw_sidecar_rows": 2786,
+      "sidecar_active_rows": 212,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
       "published_rows": 212,
-      "published_pct": 57.6,
+      "published_pct": 57.8,
       "enriched_rows": 212,
-      "enriched_pct": 57.6,
+      "enriched_pct": 57.8,
       "enriched_with_skills": 208,
       "skills_pct": 98.1,
       "examples": [
@@ -280,25 +343,30 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 423,
+      "pool_rows": 421,
       "us_rows": 310,
-      "tech_us_rows": 215,
+      "tech_us_rows": 217,
       "raw_sidecar_rows": 382,
       "sidecar_active_rows": 88,
       "supplemental_rows": 1405,
-      "supplemental_with_desc": 150,
+      "supplemental_with_desc": 134,
       "supplemental_meta": {
-        "generated_at": "2026-06-26T23:35:32.516Z",
+        "generated_at": "2026-06-26T23:50:49.693Z",
         "lane_name": "custom",
         "jobs_fetched": 4341
       },
       "published_rows": 88,
-      "published_pct": 40.9,
+      "published_pct": 40.6,
       "enriched_rows": 91,
-      "enriched_pct": 42.3,
+      "enriched_pct": 41.9,
       "enriched_with_skills": 90,
       "skills_pct": 98.9,
       "examples": [
+        {
+          "id": "microsoft-200039404",
+          "company": "Microsoft",
+          "title": "Software Development Engineer II"
+        },
         {
           "id": "microsoft-200041646",
           "company": "Microsoft",
@@ -333,11 +401,6 @@
           "id": "microsoft-200041531",
           "company": "Microsoft",
           "title": "Engineering Manager"
-        },
-        {
-          "id": "microsoft-200037915",
-          "company": "Microsoft",
-          "title": "Principal Data Scientist"
         }
       ],
       "severity": "high",
@@ -357,7 +420,7 @@
       "supplemental_rows": 311,
       "supplemental_with_desc": 311,
       "supplemental_meta": {
-        "generated_at": "2026-06-26T23:35:32.516Z",
+        "generated_at": "2026-06-26T23:50:49.693Z",
         "lane_name": "custom",
         "jobs_fetched": 4341
       },
@@ -389,67 +452,6 @@
         "low_published_coverage",
         "low_skill_fill"
       ]
-    },
-    {
-      "source": "workday",
-      "pool_rows": 41892,
-      "us_rows": 23354,
-      "tech_us_rows": 6608,
-      "raw_sidecar_rows": 15889,
-      "sidecar_active_rows": 5345,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 5363,
-      "published_pct": 81.2,
-      "enriched_rows": 5487,
-      "enriched_pct": 83,
-      "enriched_with_skills": 5162,
-      "skills_pct": 94.1,
-      "examples": [
-        {
-          "id": "workday-citi-26971294",
-          "company": "Citi",
-          "title": "Junior Applications Developer - Programmer Analyst"
-        },
-        {
-          "id": "workday-comcast-R438811",
-          "company": "Comcast",
-          "title": "Manager, Enterprise Analytics"
-        },
-        {
-          "id": "workday-comcast-R434874",
-          "company": "Comcast",
-          "title": "Python Engineer, Agentic AI"
-        },
-        {
-          "id": "workday-carrier-global-30208740",
-          "company": "Carrier Global",
-          "title": "Associate Controls Engineer - Automated Logic - Building Automation (BAS)"
-        },
-        {
-          "id": "workday-caterpillar-R0000378408",
-          "company": "Caterpillar",
-          "title": "Development & Research Engineering Project Team Leader"
-        },
-        {
-          "id": "workday-caterpillar-R0000351141",
-          "company": "Caterpillar",
-          "title": "Control Systems Engineer - Brake Systems"
-        },
-        {
-          "id": "workday-carnegie-mellon-university-2024764",
-          "company": "Carnegie Mellon University",
-          "title": "Postdoctoral Research Associate - College of Engineering - Electrical and Computer Engineering"
-        },
-        {
-          "id": "workday-cboe-R-4501",
-          "company": "Cboe",
-          "title": "Network Engineer - Operations"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
     },
     {
       "source": "apple",
