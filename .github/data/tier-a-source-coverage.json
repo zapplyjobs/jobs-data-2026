@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-27T07:35:15.017Z",
+  "generated_at": "2026-06-27T07:50:26.834Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -48,26 +48,28 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-27T07:33:46.298Z",
+    "generated_at": "2026-06-27T07:49:11.430Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 12650,
-    "description_entries": 9322,
-    "coverage_pct": 73.7,
+    "board_row_count": 12820,
+    "description_entries": 9342,
+    "coverage_pct": 72.9,
     "source_breakdown": {
-      "sidecar": 9340,
+      "sidecar": 9363,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-27T07:19:32.980Z",
+    "jobs_metadata_generated": "2026-06-27T07:39:18.413Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-06-27T07:35:12.058Z",
+    "checked_at": "2026-06-27T07:50:23.502Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [],
-    "warning_count": 0,
+    "warnings": [
+      "Runtime trending up: 7.5 min (warning at 7, alert at 10)"
+    ],
+    "warning_count": 1,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -87,7 +89,7 @@
       "supplemental_rows": 25847,
       "supplemental_with_desc": 18632,
       "supplemental_meta": {
-        "generated_at": "2026-06-27T07:33:49.446Z",
+        "generated_at": "2026-06-27T07:48:49.980Z",
         "lane_name": "oracle",
         "jobs_fetched": 25847
       },
@@ -156,7 +158,7 @@
       "supplemental_rows": 1436,
       "supplemental_with_desc": 1436,
       "supplemental_meta": {
-        "generated_at": "2026-06-27T07:21:04.282Z",
+        "generated_at": "2026-06-27T07:35:25.917Z",
         "lane_name": "custom",
         "jobs_fetched": 4306
       },
@@ -216,23 +218,23 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 425,
-      "us_rows": 306,
-      "tech_us_rows": 211,
-      "raw_sidecar_rows": 369,
-      "sidecar_active_rows": 82,
+      "pool_rows": 422,
+      "us_rows": 303,
+      "tech_us_rows": 209,
+      "raw_sidecar_rows": 370,
+      "sidecar_active_rows": 81,
       "supplemental_rows": 1366,
-      "supplemental_with_desc": 121,
+      "supplemental_with_desc": 147,
       "supplemental_meta": {
-        "generated_at": "2026-06-27T07:21:04.282Z",
+        "generated_at": "2026-06-27T07:35:25.917Z",
         "lane_name": "custom",
         "jobs_fetched": 4306
       },
-      "published_rows": 82,
-      "published_pct": 38.9,
-      "enriched_rows": 92,
-      "enriched_pct": 43.6,
-      "enriched_with_skills": 91,
+      "published_rows": 81,
+      "published_pct": 38.8,
+      "enriched_rows": 91,
+      "enriched_pct": 43.5,
+      "enriched_with_skills": 90,
       "skills_pct": 98.9,
       "examples": [
         {
@@ -284,70 +286,6 @@
       ]
     },
     {
-      "source": "smartrecruiters",
-      "pool_rows": 1424,
-      "us_rows": 1585,
-      "tech_us_rows": 352,
-      "raw_sidecar_rows": 2808,
-      "sidecar_active_rows": 206,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 275,
-      "published_pct": 78.1,
-      "enriched_rows": 206,
-      "enriched_pct": 58.5,
-      "enriched_with_skills": 202,
-      "skills_pct": 98.1,
-      "examples": [
-        {
-          "id": "sr-Eurofins-744000133127174",
-          "company": "Eurofins",
-          "title": "Senior Product Safety Engineer"
-        },
-        {
-          "id": "sr-Intuitive-744000134010309",
-          "company": "Intuitive",
-          "title": "Senior FPGA Design Verification Engineer"
-        },
-        {
-          "id": "sr-Intuitive-744000134004279",
-          "company": "Intuitive",
-          "title": "Senior Software Development Engineer - Equipment  Control"
-        },
-        {
-          "id": "sr-Intuitive-744000133988162",
-          "company": "Intuitive",
-          "title": "Senior Mechanical Design Engineer"
-        },
-        {
-          "id": "sr-Intuitive-744000133700579",
-          "company": "Intuitive",
-          "title": "Senior Mechanical Design Engineer"
-        },
-        {
-          "id": "sr-Intuitive-744000133688869",
-          "company": "Intuitive",
-          "title": "Senior Embedded Software Engineer - Future Forward"
-        },
-        {
-          "id": "sr-Intuitive-744000133672002",
-          "company": "Intuitive",
-          "title": "Sr. Electro Mechanical Systems Engineer"
-        },
-        {
-          "id": "sr-Intuitive-744000133610922",
-          "company": "Intuitive",
-          "title": "Staff Machine Learning Engineer"
-        }
-      ],
-      "severity": "high",
-      "flags": [
-        "low_published_coverage",
-        "low_enrichment_coverage"
-      ]
-    },
-    {
       "source": "icims",
       "pool_rows": 61,
       "us_rows": 50,
@@ -357,7 +295,7 @@
       "supplemental_rows": 311,
       "supplemental_with_desc": 311,
       "supplemental_meta": {
-        "generated_at": "2026-06-27T07:21:04.282Z",
+        "generated_at": "2026-06-27T07:35:25.917Z",
         "lane_name": "custom",
         "jobs_fetched": 4306
       },
@@ -391,26 +329,94 @@
       ]
     },
     {
-      "source": "workday",
-      "pool_rows": 42107,
-      "us_rows": 22660,
-      "tech_us_rows": 5912,
-      "raw_sidecar_rows": 17933,
-      "sidecar_active_rows": 5409,
+      "source": "smartrecruiters",
+      "pool_rows": 1426,
+      "us_rows": 1602,
+      "tech_us_rows": 370,
+      "raw_sidecar_rows": 2812,
+      "sidecar_active_rows": 212,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 5409,
-      "published_pct": 91.5,
-      "enriched_rows": 5486,
-      "enriched_pct": 92.8,
-      "enriched_with_skills": 5151,
+      "published_rows": 297,
+      "published_pct": 80.3,
+      "enriched_rows": 212,
+      "enriched_pct": 57.3,
+      "enriched_with_skills": 208,
+      "skills_pct": 98.1,
+      "examples": [
+        {
+          "id": "sr-llnl-3743990013814486",
+          "company": "LLNL",
+          "title": "Senior Alarms Electronics Technician"
+        },
+        {
+          "id": "sr-llnl-3743990013797411",
+          "company": "LLNL",
+          "title": "Senior Optomechanical  Engineer"
+        },
+        {
+          "id": "sr-llnl-3743990013797124",
+          "company": "LLNL",
+          "title": "Senior Optical Engineer"
+        },
+        {
+          "id": "sr-llnl-3743990013734826",
+          "company": "LLNL",
+          "title": "Lead Design Engineer - Active Clearance Required"
+        },
+        {
+          "id": "sr-llnl-3743990013686806",
+          "company": "LLNL",
+          "title": "Sr. Fire Alarms Electronics Technician - Mid Shift"
+        },
+        {
+          "id": "sr-llnl-3743990013651526",
+          "company": "LLNL",
+          "title": "AI (Artificial Intelligence) Infrastructure Architect"
+        },
+        {
+          "id": "sr-LinkedIn3-744000133995279",
+          "company": "LinkedIn",
+          "title": "Manager, Software Engineering, Development Infrastructure"
+        },
+        {
+          "id": "sr-LinkedIn3-744000133468850",
+          "company": "LinkedIn",
+          "title": "Principal Staff Software Engineer, Development Infrastructure"
+        }
+      ],
+      "severity": "medium",
+      "flags": [
+        "low_enrichment_coverage"
+      ]
+    },
+    {
+      "source": "workday",
+      "pool_rows": 42109,
+      "us_rows": 22878,
+      "tech_us_rows": 6066,
+      "raw_sidecar_rows": 17969,
+      "sidecar_active_rows": 5411,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 5411,
+      "published_pct": 89.2,
+      "enriched_rows": 5488,
+      "enriched_pct": 90.5,
+      "enriched_with_skills": 5153,
       "skills_pct": 93.9,
       "examples": [
         {
           "id": "workday-expedia-group-R-102785",
           "company": "Expedia Group",
           "title": "Software Development Engineer III - AI Engineer"
+        },
+        {
+          "id": "workday-wolters-kluwer-R0056125",
+          "company": "Wolters Kluwer",
+          "title": "Change Manager"
         },
         {
           "id": "workday-carnegie-mellon-university-2024764",
@@ -441,11 +447,6 @@
           "id": "workday-general-motors-JR-202613797",
           "company": "General Motors",
           "title": "Exterior Virtual Design Development and Validation (VDDV) Engineer"
-        },
-        {
-          "id": "workday-boeing-JR2026516797",
-          "company": "Boeing",
-          "title": "Aerodynamics Engineer (Aerodynamic Analysis)(Associate or Mid-level)"
         }
       ],
       "severity": "ok",
