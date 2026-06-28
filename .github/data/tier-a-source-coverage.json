@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-28T08:07:40.816Z",
+  "generated_at": "2026-06-28T08:21:47.991Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -49,26 +49,28 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-28T08:05:19.008Z",
+    "generated_at": "2026-06-28T08:20:11.628Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 12994,
-    "description_entries": 9419,
-    "coverage_pct": 72.5,
+    "board_row_count": 13227,
+    "description_entries": 8910,
+    "coverage_pct": 67.4,
     "source_breakdown": {
-      "sidecar": 9440,
+      "sidecar": 8931,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-28T07:49:38.520Z",
+    "jobs_metadata_generated": "2026-06-28T08:04:06.565Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-06-28T08:07:37.637Z",
+    "checked_at": "2026-06-28T08:21:44.527Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [],
-    "warning_count": 0,
+    "warnings": [
+      "Senior filter FP rate elevated: 10.4% (52/500). May indicate keyword over-matching."
+    ],
+    "warning_count": 1,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -80,22 +82,22 @@
   "rows": [
     {
       "source": "oracle",
-      "pool_rows": 6897,
-      "us_rows": 4737,
-      "tech_us_rows": 1142,
+      "pool_rows": 6886,
+      "us_rows": 4523,
+      "tech_us_rows": 930,
       "raw_sidecar_rows": 5230,
       "sidecar_active_rows": 472,
-      "supplemental_rows": 17821,
-      "supplemental_with_desc": 10804,
+      "supplemental_rows": 25784,
+      "supplemental_with_desc": 18578,
       "supplemental_meta": {
-        "generated_at": "2026-06-28T08:03:04.491Z",
+        "generated_at": "2026-06-28T08:18:50.167Z",
         "lane_name": "oracle",
-        "jobs_fetched": 17821
+        "jobs_fetched": 25784
       },
       "published_rows": 472,
-      "published_pct": 41.3,
+      "published_pct": 50.8,
       "enriched_rows": 637,
-      "enriched_pct": 55.8,
+      "enriched_pct": 68.5,
       "enriched_with_skills": 454,
       "skills_pct": 71.3,
       "examples": [
@@ -143,8 +145,7 @@
       "severity": "high",
       "flags": [
         "low_published_coverage",
-        "low_enrichment_coverage",
-        "supplemental_stage_gap"
+        "low_enrichment_coverage"
       ]
     },
     {
@@ -281,9 +282,9 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 421,
-      "us_rows": 297,
-      "tech_us_rows": 204,
+      "pool_rows": 422,
+      "us_rows": 302,
+      "tech_us_rows": 208,
       "raw_sidecar_rows": 385,
       "sidecar_active_rows": 90,
       "supplemental_rows": 1344,
@@ -294,9 +295,9 @@
         "jobs_fetched": 4283
       },
       "published_rows": 90,
-      "published_pct": 44.1,
+      "published_pct": 43.3,
       "enriched_rows": 91,
-      "enriched_pct": 44.6,
+      "enriched_pct": 43.8,
       "enriched_with_skills": 90,
       "skills_pct": 98.9,
       "examples": [
@@ -393,30 +394,40 @@
     },
     {
       "source": "workday",
-      "pool_rows": 42351,
-      "us_rows": 23379,
-      "tech_us_rows": 6471,
-      "raw_sidecar_rows": 21062,
-      "sidecar_active_rows": 5466,
+      "pool_rows": 42304,
+      "us_rows": 23148,
+      "tech_us_rows": 6282,
+      "raw_sidecar_rows": 21306,
+      "sidecar_active_rows": 5537,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 5397,
-      "published_pct": 83.4,
-      "enriched_rows": 5501,
-      "enriched_pct": 85,
-      "enriched_with_skills": 5173,
-      "skills_pct": 94,
+      "published_rows": 5426,
+      "published_pct": 86.4,
+      "enriched_rows": 5572,
+      "enriched_pct": 88.7,
+      "enriched_with_skills": 5244,
+      "skills_pct": 94.1,
       "examples": [
-        {
-          "id": "workday-boston-dynamics-R2727",
-          "company": "Boston Dynamics",
-          "title": "Atlas Data Operations Annotation Manager"
-        },
         {
           "id": "workday-boeing-JR2026514224",
           "company": "Boeing",
           "title": "Mid-Level Structural Analysis Engineer – Interiors Stress"
+        },
+        {
+          "id": "workday-blackstone-43558",
+          "company": "Blackstone",
+          "title": "Blackstone Energy Transition Partners – Senior Associate"
+        },
+        {
+          "id": "workday-blackstone-34498",
+          "company": "Blackstone",
+          "title": "Blackstone Infrastructure Partners Asset Management Associate"
+        },
+        {
+          "id": "workday-blackstone-26477",
+          "company": "Blackstone",
+          "title": "2023 Blackstone Firmwide Marketing Summer Analyst"
         },
         {
           "id": "workday-snap-R0045979",
@@ -437,16 +448,6 @@
           "id": "workday-boeing-JR2026510328",
           "company": "Boeing",
           "title": "Software Certification Engineer (Associate, Experienced or Senior)"
-        },
-        {
-          "id": "workday-cvs-health-R0908981",
-          "company": "CVS Health",
-          "title": "Data Scientist - Specialty Operations"
-        },
-        {
-          "id": "workday-caci-328291",
-          "company": "CACI",
-          "title": "AI Engineer"
         }
       ],
       "severity": "ok",
