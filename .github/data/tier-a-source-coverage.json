@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-28T08:21:47.991Z",
+  "generated_at": "2026-06-28T08:37:28.884Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -49,28 +49,26 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-28T08:20:11.628Z",
+    "generated_at": "2026-06-28T08:35:06.649Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 13227,
-    "description_entries": 8910,
-    "coverage_pct": 67.4,
+    "board_row_count": 12818,
+    "description_entries": 9385,
+    "coverage_pct": 73.2,
     "source_breakdown": {
-      "sidecar": 8931,
+      "sidecar": 9406,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-28T08:04:06.565Z",
+    "jobs_metadata_generated": "2026-06-28T08:19:09.490Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-06-28T08:21:44.527Z",
+    "checked_at": "2026-06-28T08:37:25.394Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [
-      "Senior filter FP rate elevated: 10.4% (52/500). May indicate keyword over-matching."
-    ],
-    "warning_count": 1,
+    "warnings": [],
+    "warning_count": 0,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -82,22 +80,22 @@
   "rows": [
     {
       "source": "oracle",
-      "pool_rows": 6886,
-      "us_rows": 4523,
-      "tech_us_rows": 930,
-      "raw_sidecar_rows": 5230,
+      "pool_rows": 6898,
+      "us_rows": 4737,
+      "tech_us_rows": 1142,
+      "raw_sidecar_rows": 5219,
       "sidecar_active_rows": 472,
-      "supplemental_rows": 25784,
-      "supplemental_with_desc": 18578,
+      "supplemental_rows": 25786,
+      "supplemental_with_desc": 18580,
       "supplemental_meta": {
-        "generated_at": "2026-06-28T08:18:50.167Z",
+        "generated_at": "2026-06-28T08:33:56.127Z",
         "lane_name": "oracle",
-        "jobs_fetched": 25784
+        "jobs_fetched": 25786
       },
       "published_rows": 472,
-      "published_pct": 50.8,
+      "published_pct": 41.3,
       "enriched_rows": 637,
-      "enriched_pct": 68.5,
+      "enriched_pct": 55.8,
       "enriched_with_skills": 454,
       "skills_pct": 71.3,
       "examples": [
@@ -145,7 +143,8 @@
       "severity": "high",
       "flags": [
         "low_published_coverage",
-        "low_enrichment_coverage"
+        "low_enrichment_coverage",
+        "supplemental_stage_gap"
       ]
     },
     {
@@ -158,7 +157,7 @@
       "supplemental_rows": 1435,
       "supplemental_with_desc": 1435,
       "supplemental_meta": {
-        "generated_at": "2026-06-28T08:05:17.199Z",
+        "generated_at": "2026-06-28T08:35:36.632Z",
         "lane_name": "custom",
         "jobs_fetched": 4283
       },
@@ -282,23 +281,23 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 422,
-      "us_rows": 302,
-      "tech_us_rows": 208,
+      "pool_rows": 421,
+      "us_rows": 298,
+      "tech_us_rows": 205,
       "raw_sidecar_rows": 385,
       "sidecar_active_rows": 90,
       "supplemental_rows": 1344,
-      "supplemental_with_desc": 144,
+      "supplemental_with_desc": 136,
       "supplemental_meta": {
-        "generated_at": "2026-06-28T08:05:17.199Z",
+        "generated_at": "2026-06-28T08:35:36.632Z",
         "lane_name": "custom",
         "jobs_fetched": 4283
       },
       "published_rows": 90,
-      "published_pct": 43.3,
-      "enriched_rows": 91,
-      "enriched_pct": 43.8,
-      "enriched_with_skills": 90,
+      "published_pct": 43.9,
+      "enriched_rows": 92,
+      "enriched_pct": 44.9,
+      "enriched_with_skills": 91,
       "skills_pct": 98.9,
       "examples": [
         {
@@ -317,12 +316,12 @@
           "title": "Senior Data Scientist"
         },
         {
-          "id": "microsoft-200038799",
+          "id": "microsoft-200038893",
           "company": "Microsoft",
           "title": "Principal Silicon Design Verification Engineer"
         },
         {
-          "id": "microsoft-200038893",
+          "id": "microsoft-200038799",
           "company": "Microsoft",
           "title": "Principal Silicon Design Verification Engineer"
         },
@@ -354,12 +353,12 @@
       "pool_rows": 61,
       "us_rows": 50,
       "tech_us_rows": 13,
-      "raw_sidecar_rows": 57,
+      "raw_sidecar_rows": 311,
       "sidecar_active_rows": 10,
       "supplemental_rows": 311,
       "supplemental_with_desc": 311,
       "supplemental_meta": {
-        "generated_at": "2026-06-28T08:05:17.199Z",
+        "generated_at": "2026-06-28T08:35:36.632Z",
         "lane_name": "custom",
         "jobs_fetched": 4283
       },
@@ -394,40 +393,30 @@
     },
     {
       "source": "workday",
-      "pool_rows": 42304,
-      "us_rows": 23148,
-      "tech_us_rows": 6282,
-      "raw_sidecar_rows": 21306,
-      "sidecar_active_rows": 5537,
+      "pool_rows": 42305,
+      "us_rows": 23205,
+      "tech_us_rows": 6351,
+      "raw_sidecar_rows": 21549,
+      "sidecar_active_rows": 5517,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 5426,
-      "published_pct": 86.4,
-      "enriched_rows": 5572,
-      "enriched_pct": 88.7,
-      "enriched_with_skills": 5244,
-      "skills_pct": 94.1,
+      "published_rows": 5459,
+      "published_pct": 86,
+      "enriched_rows": 5552,
+      "enriched_pct": 87.4,
+      "enriched_with_skills": 5214,
+      "skills_pct": 93.9,
       "examples": [
+        {
+          "id": "workday-gdit-RQ222817",
+          "company": "GDIT",
+          "title": "BOE Solution Architect SME"
+        },
         {
           "id": "workday-boeing-JR2026514224",
           "company": "Boeing",
           "title": "Mid-Level Structural Analysis Engineer – Interiors Stress"
-        },
-        {
-          "id": "workday-blackstone-43558",
-          "company": "Blackstone",
-          "title": "Blackstone Energy Transition Partners – Senior Associate"
-        },
-        {
-          "id": "workday-blackstone-34498",
-          "company": "Blackstone",
-          "title": "Blackstone Infrastructure Partners Asset Management Associate"
-        },
-        {
-          "id": "workday-blackstone-26477",
-          "company": "Blackstone",
-          "title": "2023 Blackstone Firmwide Marketing Summer Analyst"
         },
         {
           "id": "workday-snap-R0045979",
@@ -448,6 +437,16 @@
           "id": "workday-boeing-JR2026510328",
           "company": "Boeing",
           "title": "Software Certification Engineer (Associate, Experienced or Senior)"
+        },
+        {
+          "id": "workday-cvs-health-R0908981",
+          "company": "CVS Health",
+          "title": "Data Scientist - Specialty Operations"
+        },
+        {
+          "id": "workday-caci-328291",
+          "company": "CACI",
+          "title": "AI Engineer"
         }
       ],
       "severity": "ok",
