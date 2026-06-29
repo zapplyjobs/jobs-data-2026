@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-29T10:34:57.275Z",
+  "generated_at": "2026-06-29T10:50:31.598Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -51,21 +51,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-29T10:33:28.219Z",
+    "generated_at": "2026-06-29T10:48:48.833Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 13741,
-    "description_entries": 9630,
-    "coverage_pct": 70.1,
+    "board_row_count": 13967,
+    "description_entries": 9752,
+    "coverage_pct": 69.8,
     "source_breakdown": {
-      "sidecar": 9653,
+      "sidecar": 9775,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-29T10:20:51.865Z",
+    "jobs_metadata_generated": "2026-06-29T10:36:02.015Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-06-29T10:34:54.029Z",
+    "checked_at": "2026-06-29T10:50:28.159Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -81,18 +81,82 @@
   },
   "rows": [
     {
+      "source": "workday",
+      "pool_rows": 43622,
+      "us_rows": 24328,
+      "tech_us_rows": 7197,
+      "raw_sidecar_rows": 23072,
+      "sidecar_active_rows": 5695,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 5695,
+      "published_pct": 79.1,
+      "enriched_rows": 5728,
+      "enriched_pct": 79.6,
+      "enriched_with_skills": 5396,
+      "skills_pct": 94.2,
+      "examples": [
+        {
+          "id": "workday-rtx-01850347",
+          "company": "RTX",
+          "title": "Deputy Manager - Industrial Engineering"
+        },
+        {
+          "id": "workday-magna-R00248623",
+          "company": "Magna",
+          "title": "Controls Engineer"
+        },
+        {
+          "id": "workday-snap-R0045980",
+          "company": "Snap",
+          "title": "Technical Program Manager, Level 4"
+        },
+        {
+          "id": "workday-lowe's-JR-02559553",
+          "company": "Lowe's",
+          "title": "Data Scientist"
+        },
+        {
+          "id": "workday-boeing-JR2026510328",
+          "company": "Boeing",
+          "title": "Software Certification Engineer (Associate, Experienced or Senior)"
+        },
+        {
+          "id": "workday-cvs-health-R0908981",
+          "company": "CVS Health",
+          "title": "Data Scientist - Specialty Operations"
+        },
+        {
+          "id": "workday-caci-328291",
+          "company": "CACI",
+          "title": "AI Engineer"
+        },
+        {
+          "id": "workday-caci-328278",
+          "company": "CACI",
+          "title": "Systems Engineer"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage",
+        "low_enrichment_coverage"
+      ]
+    },
+    {
       "source": "oracle",
-      "pool_rows": 7081,
+      "pool_rows": 7093,
       "us_rows": 4746,
       "tech_us_rows": 1123,
-      "raw_sidecar_rows": 5318,
+      "raw_sidecar_rows": 5329,
       "sidecar_active_rows": 477,
-      "supplemental_rows": 26060,
-      "supplemental_with_desc": 18520,
+      "supplemental_rows": 26057,
+      "supplemental_with_desc": 18518,
       "supplemental_meta": {
-        "generated_at": "2026-06-29T10:19:56.017Z",
+        "generated_at": "2026-06-29T10:35:04.374Z",
         "lane_name": "oracle",
-        "jobs_fetched": 26060
+        "jobs_fetched": 26057
       },
       "published_rows": 477,
       "published_pct": 42.5,
@@ -159,9 +223,9 @@
       "supplemental_rows": 1442,
       "supplemental_with_desc": 1442,
       "supplemental_meta": {
-        "generated_at": "2026-06-29T10:21:14.760Z",
+        "generated_at": "2026-06-29T10:37:04.781Z",
         "lane_name": "custom",
-        "jobs_fetched": 4259
+        "jobs_fetched": 4262
       },
       "published_rows": 443,
       "published_pct": 71.8,
@@ -219,22 +283,22 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 429,
-      "us_rows": 294,
-      "tech_us_rows": 202,
-      "raw_sidecar_rows": 390,
+      "pool_rows": 433,
+      "us_rows": 291,
+      "tech_us_rows": 198,
+      "raw_sidecar_rows": 394,
       "sidecar_active_rows": 86,
-      "supplemental_rows": 1334,
-      "supplemental_with_desc": 124,
+      "supplemental_rows": 1335,
+      "supplemental_with_desc": 56,
       "supplemental_meta": {
-        "generated_at": "2026-06-29T10:21:14.760Z",
+        "generated_at": "2026-06-29T10:37:04.781Z",
         "lane_name": "custom",
-        "jobs_fetched": 4259
+        "jobs_fetched": 4262
       },
       "published_rows": 86,
-      "published_pct": 42.6,
+      "published_pct": 43.4,
       "enriched_rows": 87,
-      "enriched_pct": 43.1,
+      "enriched_pct": 43.9,
       "enriched_with_skills": 87,
       "skills_pct": 100,
       "examples": [
@@ -264,11 +328,6 @@
           "title": "Senior Data Scientist"
         },
         {
-          "id": "microsoft-200038893",
-          "company": "Microsoft",
-          "title": "Principal Silicon Design Verification Engineer"
-        },
-        {
           "id": "microsoft-200038799",
           "company": "Microsoft",
           "title": "Principal Silicon Design Verification Engineer"
@@ -277,6 +336,11 @@
           "id": "microsoft-200041531",
           "company": "Microsoft",
           "title": "Engineering Manager"
+        },
+        {
+          "id": "microsoft-200037915",
+          "company": "Microsoft",
+          "title": "Principal Data Scientist"
         }
       ],
       "severity": "high",
@@ -296,9 +360,9 @@
       "supplemental_rows": 311,
       "supplemental_with_desc": 311,
       "supplemental_meta": {
-        "generated_at": "2026-06-29T10:21:14.760Z",
+        "generated_at": "2026-06-29T10:37:04.781Z",
         "lane_name": "custom",
-        "jobs_fetched": 4259
+        "jobs_fetched": 4262
       },
       "published_rows": 10,
       "published_pct": 76.9,
@@ -351,67 +415,6 @@
         "published_gt_raw_sidecar",
         "low_enrichment_coverage"
       ]
-    },
-    {
-      "source": "workday",
-      "pool_rows": 43575,
-      "us_rows": 24100,
-      "tech_us_rows": 6966,
-      "raw_sidecar_rows": 23058,
-      "sidecar_active_rows": 5576,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 5576,
-      "published_pct": 80,
-      "enriched_rows": 5609,
-      "enriched_pct": 80.5,
-      "enriched_with_skills": 5284,
-      "skills_pct": 94.2,
-      "examples": [
-        {
-          "id": "workday-magna-R00248623",
-          "company": "Magna",
-          "title": "Controls Engineer"
-        },
-        {
-          "id": "workday-rtx-01850347",
-          "company": "RTX",
-          "title": "Deputy Manager - Industrial Engineering"
-        },
-        {
-          "id": "workday-snap-R0045980",
-          "company": "Snap",
-          "title": "Technical Program Manager, Level 4"
-        },
-        {
-          "id": "workday-lowe's-JR-02559553",
-          "company": "Lowe's",
-          "title": "Data Scientist"
-        },
-        {
-          "id": "workday-boeing-JR2026510328",
-          "company": "Boeing",
-          "title": "Software Certification Engineer (Associate, Experienced or Senior)"
-        },
-        {
-          "id": "workday-cvs-health-R0908981",
-          "company": "CVS Health",
-          "title": "Data Scientist - Specialty Operations"
-        },
-        {
-          "id": "workday-caci-328291",
-          "company": "CACI",
-          "title": "AI Engineer"
-        },
-        {
-          "id": "workday-caci-328278",
-          "company": "CACI",
-          "title": "Systems Engineer"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
     },
     {
       "source": "apple",
