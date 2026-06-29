@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-29T03:04:55.312Z",
+  "generated_at": "2026-06-29T03:20:16.996Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -51,28 +51,24 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-29T03:03:27.653Z",
+    "generated_at": "2026-06-29T03:18:34.246Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 10720,
-    "description_entries": 9213,
-    "coverage_pct": 85.9,
+    "board_row_count": 14408,
+    "description_entries": 9760,
+    "coverage_pct": 67.7,
     "source_breakdown": {
-      "sidecar": 9213,
+      "sidecar": 9782,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-29T02:59:02.727Z",
+    "jobs_metadata_generated": "2026-06-29T03:06:32.757Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-06-29T03:04:50.860Z",
-    "active": true,
-    "message": "**Aggregator execution time high**: 12.5 min (threshold: 10 min). Queue: 0.0 min. At 25 min execution, 15-min cadence breaks. | **Source fetch failure (amazon)**: 0 jobs fetched this run despite 273 in pool (carry-forward). Fetcher likely timed out or broken. | **Source fetch failure (amd)**: 0 jobs fetched this run despite 101 in pool (carry-forward). Fetcher likely timed out or broken.",
-    "failures": [
-      "**Aggregator execution time high**: 12.5 min (threshold: 10 min). Queue: 0.0 min. At 25 min execution, 15-min cadence breaks.",
-      "**Source fetch failure (amazon)**: 0 jobs fetched this run despite 273 in pool (carry-forward). Fetcher likely timed out or broken.",
-      "**Source fetch failure (amd)**: 0 jobs fetched this run despite 101 in pool (carry-forward). Fetcher likely timed out or broken."
-    ],
+    "checked_at": "2026-06-29T03:20:13.708Z",
+    "active": false,
+    "message": null,
+    "failures": [],
     "warnings": [],
     "warning_count": 0,
     "secrets": [
@@ -85,18 +81,82 @@
   },
   "rows": [
     {
+      "source": "workday",
+      "pool_rows": 42662,
+      "us_rows": 24628,
+      "tech_us_rows": 7678,
+      "raw_sidecar_rows": 22940,
+      "sidecar_active_rows": 5732,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 5732,
+      "published_pct": 74.7,
+      "enriched_rows": 5766,
+      "enriched_pct": 75.1,
+      "enriched_with_skills": 5432,
+      "skills_pct": 94.2,
+      "examples": [
+        {
+          "id": "workday-magna-R00248623",
+          "company": "Magna",
+          "title": "Controls Engineer"
+        },
+        {
+          "id": "workday-boeing-JR2026514224",
+          "company": "Boeing",
+          "title": "Mid-Level Structural Analysis Engineer – Interiors Stress"
+        },
+        {
+          "id": "workday-lowe's-JR-02559553",
+          "company": "Lowe's",
+          "title": "Data Scientist"
+        },
+        {
+          "id": "workday-snap-R0045979",
+          "company": "Snap",
+          "title": "Accounts Receivable Analyst"
+        },
+        {
+          "id": "workday-snap-H226TPMES",
+          "company": "Snap",
+          "title": "Technical Partner Manager, Enterprise Solutions"
+        },
+        {
+          "id": "workday-boeing-JR2026510328",
+          "company": "Boeing",
+          "title": "Software Certification Engineer (Associate, Experienced or Senior)"
+        },
+        {
+          "id": "workday-cvs-health-R0908981",
+          "company": "CVS Health",
+          "title": "Data Scientist - Specialty Operations"
+        },
+        {
+          "id": "workday-caci-328291",
+          "company": "CACI",
+          "title": "AI Engineer"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage",
+        "low_enrichment_coverage"
+      ]
+    },
+    {
       "source": "oracle",
-      "pool_rows": 6906,
-      "us_rows": 4706,
+      "pool_rows": 6909,
+      "us_rows": 4707,
       "tech_us_rows": 1109,
-      "raw_sidecar_rows": 5237,
+      "raw_sidecar_rows": 5240,
       "sidecar_active_rows": 474,
-      "supplemental_rows": 25751,
-      "supplemental_with_desc": 18543,
+      "supplemental_rows": 25748,
+      "supplemental_with_desc": 18541,
       "supplemental_meta": {
-        "generated_at": "2026-06-29T02:49:46.459Z",
+        "generated_at": "2026-06-29T03:19:40.434Z",
         "lane_name": "oracle",
-        "jobs_fetched": 25751
+        "jobs_fetched": 25748
       },
       "published_rows": 474,
       "published_pct": 42.7,
@@ -155,15 +215,15 @@
     },
     {
       "source": "tiktok",
-      "pool_rows": 1027,
-      "us_rows": 1201,
+      "pool_rows": 1028,
+      "us_rows": 1202,
       "tech_us_rows": 616,
-      "raw_sidecar_rows": 1027,
+      "raw_sidecar_rows": 1028,
       "sidecar_active_rows": 442,
       "supplemental_rows": 1441,
       "supplemental_with_desc": 1441,
       "supplemental_meta": {
-        "generated_at": "2026-06-29T02:51:40.480Z",
+        "generated_at": "2026-06-29T03:06:46.248Z",
         "lane_name": "custom",
         "jobs_fetched": 4281
       },
@@ -223,22 +283,22 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 418,
-      "us_rows": 295,
-      "tech_us_rows": 202,
+      "pool_rows": 419,
+      "us_rows": 293,
+      "tech_us_rows": 200,
       "raw_sidecar_rows": 384,
       "sidecar_active_rows": 86,
       "supplemental_rows": 1336,
-      "supplemental_with_desc": 124,
+      "supplemental_with_desc": 113,
       "supplemental_meta": {
-        "generated_at": "2026-06-29T02:51:40.480Z",
+        "generated_at": "2026-06-29T03:06:46.248Z",
         "lane_name": "custom",
         "jobs_fetched": 4281
       },
       "published_rows": 86,
-      "published_pct": 42.6,
+      "published_pct": 43,
       "enriched_rows": 87,
-      "enriched_pct": 43.1,
+      "enriched_pct": 43.5,
       "enriched_with_skills": 87,
       "skills_pct": 100,
       "examples": [
@@ -300,7 +360,7 @@
       "supplemental_rows": 311,
       "supplemental_with_desc": 311,
       "supplemental_meta": {
-        "generated_at": "2026-06-29T02:51:40.480Z",
+        "generated_at": "2026-06-29T03:06:46.248Z",
         "lane_name": "custom",
         "jobs_fetched": 4281
       },
@@ -334,85 +394,27 @@
       ]
     },
     {
-      "source": "workday",
-      "pool_rows": 42566,
-      "us_rows": 22429,
-      "tech_us_rows": 5593,
-      "raw_sidecar_rows": 22871,
-      "sidecar_active_rows": 5512,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 5512,
-      "published_pct": 98.6,
-      "enriched_rows": 5547,
-      "enriched_pct": 99.2,
-      "enriched_with_skills": 5209,
-      "skills_pct": 93.9,
-      "examples": [
-        {
-          "id": "workday-boeing-JR2026514224",
-          "company": "Boeing",
-          "title": "Mid-Level Structural Analysis Engineer – Interiors Stress"
-        },
-        {
-          "id": "workday-magna-R00248623",
-          "company": "Magna",
-          "title": "Controls Engineer"
-        },
-        {
-          "id": "workday-lowe's-JR-02559553",
-          "company": "Lowe's",
-          "title": "Data Scientist"
-        },
-        {
-          "id": "workday-snap-R0045979",
-          "company": "Snap",
-          "title": "Accounts Receivable Analyst"
-        },
-        {
-          "id": "workday-snap-H226TPMES",
-          "company": "Snap",
-          "title": "Technical Partner Manager, Enterprise Solutions"
-        },
-        {
-          "id": "workday-boeing-JR2026510328",
-          "company": "Boeing",
-          "title": "Software Certification Engineer (Associate, Experienced or Senior)"
-        },
-        {
-          "id": "workday-cvs-health-R0908981",
-          "company": "CVS Health",
-          "title": "Data Scientist - Specialty Operations"
-        },
-        {
-          "id": "workday-caci-328291",
-          "company": "CACI",
-          "title": "AI Engineer"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
-    },
-    {
       "source": "smartrecruiters",
-      "pool_rows": 1424,
-      "us_rows": 1424,
-      "tech_us_rows": 176,
-      "raw_sidecar_rows": 2811,
-      "sidecar_active_rows": 176,
+      "pool_rows": 1427,
+      "us_rows": 1606,
+      "tech_us_rows": 373,
+      "raw_sidecar_rows": 2817,
+      "sidecar_active_rows": 212,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 176,
+      "published_rows": 373,
       "published_pct": 100,
-      "enriched_rows": 176,
-      "enriched_pct": 100,
-      "enriched_with_skills": 172,
-      "skills_pct": 97.7,
+      "enriched_rows": 212,
+      "enriched_pct": 56.8,
+      "enriched_with_skills": 208,
+      "skills_pct": 98.1,
       "examples": [],
-      "severity": "ok",
-      "flags": []
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar",
+        "low_enrichment_coverage"
+      ]
     },
     {
       "source": "apple",
