@@ -57,7 +57,7 @@ function main() {
   results.push(check('Duplicate IDs in pool', dupes, 10, 'lt'));
 
   // 4. Consumer output
-  const consumerPath = '/mnt/c/Users/Mahd/Videos/Work/Business/Job_Listings/New-Grad-Jobs-2026/.github/data/current_jobs.json';
+  const consumerPath = process.env.CONSUMER_DATA_PATH || './.github/data/current_jobs.json';
   if (fs.existsSync(consumerPath)) {
     const consumer = JSON.parse(fs.readFileSync(consumerPath, 'utf8'));
     const jobs = Array.isArray(consumer) ? consumer : [];
