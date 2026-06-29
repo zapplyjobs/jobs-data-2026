@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-29T09:34:58.525Z",
+  "generated_at": "2026-06-29T09:50:02.355Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -51,21 +51,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-29T09:33:36.614Z",
+    "generated_at": "2026-06-29T09:48:29.616Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 13680,
-    "description_entries": 9659,
-    "coverage_pct": 70.6,
+    "board_row_count": 13971,
+    "description_entries": 9681,
+    "coverage_pct": 69.3,
     "source_breakdown": {
-      "sidecar": 9683,
+      "sidecar": 9704,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-29T09:21:49.017Z",
+    "jobs_metadata_generated": "2026-06-29T09:37:02.336Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-06-29T09:34:54.424Z",
+    "checked_at": "2026-06-29T09:49:58.730Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -81,21 +81,85 @@
   },
   "rows": [
     {
+      "source": "workday",
+      "pool_rows": 43533,
+      "us_rows": 24334,
+      "tech_us_rows": 7194,
+      "raw_sidecar_rows": 23104,
+      "sidecar_active_rows": 5673,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 5673,
+      "published_pct": 78.9,
+      "enriched_rows": 5706,
+      "enriched_pct": 79.3,
+      "enriched_with_skills": 5367,
+      "skills_pct": 94.1,
+      "examples": [
+        {
+          "id": "workday-rtx-01850347",
+          "company": "RTX",
+          "title": "Deputy Manager - Industrial Engineering"
+        },
+        {
+          "id": "workday-snap-R0045980",
+          "company": "Snap",
+          "title": "Technical Program Manager, Level 4"
+        },
+        {
+          "id": "workday-magna-R00248623",
+          "company": "Magna",
+          "title": "Controls Engineer"
+        },
+        {
+          "id": "workday-lowe's-JR-02559553",
+          "company": "Lowe's",
+          "title": "Data Scientist"
+        },
+        {
+          "id": "workday-boeing-JR2026510328",
+          "company": "Boeing",
+          "title": "Software Certification Engineer (Associate, Experienced or Senior)"
+        },
+        {
+          "id": "workday-cvs-health-R0908981",
+          "company": "CVS Health",
+          "title": "Data Scientist - Specialty Operations"
+        },
+        {
+          "id": "workday-caci-328291",
+          "company": "CACI",
+          "title": "AI Engineer"
+        },
+        {
+          "id": "workday-caci-328278",
+          "company": "CACI",
+          "title": "Systems Engineer"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage",
+        "low_enrichment_coverage"
+      ]
+    },
+    {
       "source": "oracle",
-      "pool_rows": 7068,
-      "us_rows": 4745,
-      "tech_us_rows": 1124,
-      "raw_sidecar_rows": 5305,
-      "sidecar_active_rows": 474,
-      "supplemental_rows": 26053,
-      "supplemental_with_desc": 18517,
+      "pool_rows": 7069,
+      "us_rows": 4744,
+      "tech_us_rows": 1123,
+      "raw_sidecar_rows": 5308,
+      "sidecar_active_rows": 476,
+      "supplemental_rows": 22548,
+      "supplemental_with_desc": 15095,
       "supplemental_meta": {
-        "generated_at": "2026-06-29T09:19:59.327Z",
+        "generated_at": "2026-06-29T09:34:48.386Z",
         "lane_name": "oracle",
-        "jobs_fetched": 26053
+        "jobs_fetched": 22548
       },
-      "published_rows": 474,
-      "published_pct": 42.2,
+      "published_rows": 476,
+      "published_pct": 42.4,
       "enriched_rows": 645,
       "enriched_pct": 57.4,
       "enriched_with_skills": 463,
@@ -105,11 +169,6 @@
           "id": "oracle-citizens-financial-47745",
           "company": "Citizens Financial Group",
           "title": "Data Scientist"
-        },
-        {
-          "id": "oracle-dell-technologies-293927",
-          "company": "Dell Technologies",
-          "title": "Mechanical Engineer 2-Data Center IT Rack Solutions"
         },
         {
           "id": "oracle-cummins-2431629",
@@ -140,6 +199,11 @@
           "id": "oracle-oracle-338410",
           "company": "Oracle",
           "title": "Software Developer 3"
+        },
+        {
+          "id": "oracle-oracle-338450",
+          "company": "Oracle",
+          "title": "Applied Scientist 3"
         }
       ],
       "severity": "high",
@@ -159,9 +223,9 @@
       "supplemental_rows": 1442,
       "supplemental_with_desc": 1442,
       "supplemental_meta": {
-        "generated_at": "2026-06-29T09:21:16.833Z",
+        "generated_at": "2026-06-29T09:36:42.994Z",
         "lane_name": "custom",
-        "jobs_fetched": 4262
+        "jobs_fetched": 4261
       },
       "published_rows": 443,
       "published_pct": 71.8,
@@ -219,29 +283,34 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 424,
-      "us_rows": 290,
-      "tech_us_rows": 199,
-      "raw_sidecar_rows": 385,
-      "sidecar_active_rows": 84,
+      "pool_rows": 429,
+      "us_rows": 295,
+      "tech_us_rows": 202,
+      "raw_sidecar_rows": 390,
+      "sidecar_active_rows": 86,
       "supplemental_rows": 1329,
-      "supplemental_with_desc": 126,
+      "supplemental_with_desc": 123,
       "supplemental_meta": {
-        "generated_at": "2026-06-29T09:21:16.833Z",
+        "generated_at": "2026-06-29T09:36:42.994Z",
         "lane_name": "custom",
-        "jobs_fetched": 4262
+        "jobs_fetched": 4261
       },
-      "published_rows": 84,
-      "published_pct": 42.2,
-      "enriched_rows": 85,
-      "enriched_pct": 42.7,
-      "enriched_with_skills": 85,
+      "published_rows": 86,
+      "published_pct": 42.6,
+      "enriched_rows": 87,
+      "enriched_pct": 43.1,
+      "enriched_with_skills": 87,
       "skills_pct": 100,
       "examples": [
         {
           "id": "microsoft-200041478",
           "company": "Microsoft",
           "title": "Data and AI Solution Architect"
+        },
+        {
+          "id": "microsoft-200025670",
+          "company": "Microsoft",
+          "title": "​​Senior Site Reliability Engineer​"
         },
         {
           "id": "microsoft-200041752",
@@ -272,11 +341,6 @@
           "id": "microsoft-200041531",
           "company": "Microsoft",
           "title": "Engineering Manager"
-        },
-        {
-          "id": "microsoft-200037915",
-          "company": "Microsoft",
-          "title": "Principal Data Scientist"
         }
       ],
       "severity": "high",
@@ -293,12 +357,12 @@
       "tech_us_rows": 13,
       "raw_sidecar_rows": 57,
       "sidecar_active_rows": 10,
-      "supplemental_rows": 312,
-      "supplemental_with_desc": 312,
+      "supplemental_rows": 311,
+      "supplemental_with_desc": 311,
       "supplemental_meta": {
-        "generated_at": "2026-06-29T09:21:16.833Z",
+        "generated_at": "2026-06-29T09:36:42.994Z",
         "lane_name": "custom",
-        "jobs_fetched": 4262
+        "jobs_fetched": 4261
       },
       "published_rows": 10,
       "published_pct": 76.9,
@@ -332,126 +396,65 @@
     {
       "source": "smartrecruiters",
       "pool_rows": 1428,
-      "us_rows": 1604,
-      "tech_us_rows": 370,
+      "us_rows": 1605,
+      "tech_us_rows": 371,
       "raw_sidecar_rows": 2818,
       "sidecar_active_rows": 212,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 312,
-      "published_pct": 84.3,
+      "published_rows": 326,
+      "published_pct": 87.9,
       "enriched_rows": 212,
-      "enriched_pct": 57.3,
+      "enriched_pct": 57.1,
       "enriched_with_skills": 208,
       "skills_pct": 98.1,
       "examples": [
         {
-          "id": "sr-NBCUniversal3-744000134532409",
-          "company": "NBCUniversal",
-          "title": "Sr. Video Streaming DevOps Engineer"
+          "id": "sr-Sandisk-744000134550855",
+          "company": "Sandisk",
+          "title": "Senior Technologist Datapath Design Engineer and Circuit Design Engineer, VLSI Design Engineering"
         },
         {
-          "id": "sr-NBCUniversal3-744000134309919",
-          "company": "NBCUniversal",
-          "title": "Senior Data Scientist"
+          "id": "sr-Sandisk-744000134030409",
+          "company": "Sandisk",
+          "title": "Senior Staff Field Application Engineer"
         },
         {
-          "id": "sr-NBCUniversal3-744000134308379",
-          "company": "NBCUniversal",
-          "title": "Senior Systems Engineer (C++/Python)"
+          "id": "sr-Sandisk-744000134002920",
+          "company": "Sandisk",
+          "title": "Senior Engineer, Product Development Engineering"
         },
         {
-          "id": "sr-NBCUniversal3-744000134289099",
-          "company": "NBCUniversal",
-          "title": "Staff Deep Learning Engineer"
+          "id": "sr-Sandisk-744000133443620",
+          "company": "Sandisk",
+          "title": "Staff Engineer, System Design Engineering"
         },
         {
-          "id": "sr-NBCUniversal3-744000134282690",
-          "company": "NBCUniversal",
-          "title": "Senior Deep Learning Engineer"
+          "id": "sr-Sandisk-744000133429059",
+          "company": "Sandisk",
+          "title": "Senior Technology Development Engineer"
         },
         {
-          "id": "sr-NBCUniversal3-744000134270529",
-          "company": "NBCUniversal",
-          "title": "Staff MLOps Engineer"
+          "id": "sr-Sandisk-744000133422276",
+          "company": "Sandisk",
+          "title": "Product Security Assurance Architect"
         },
         {
-          "id": "sr-NBCUniversal3-744000133704120",
-          "company": "NBCUniversal",
-          "title": "Staff Engineer, Builder Enablement"
+          "id": "sr-Sandisk-744000133403644",
+          "company": "Sandisk",
+          "title": "Principal Engineer, Technology Development Engineering"
         },
         {
-          "id": "sr-NBCUniversal3-744000132730169",
-          "company": "NBCUniversal",
-          "title": "Engineering Manager, iOS"
+          "id": "sr-Sandisk-744000132618764",
+          "company": "Sandisk",
+          "title": "Senior Information Security Analyst, GRC/Responsible AI"
         }
       ],
       "severity": "medium",
       "flags": [
         "low_enrichment_coverage"
       ]
-    },
-    {
-      "source": "workday",
-      "pool_rows": 43460,
-      "us_rows": 23970,
-      "tech_us_rows": 6913,
-      "raw_sidecar_rows": 23062,
-      "sidecar_active_rows": 5673,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 5673,
-      "published_pct": 82.1,
-      "enriched_rows": 5706,
-      "enriched_pct": 82.5,
-      "enriched_with_skills": 5370,
-      "skills_pct": 94.1,
-      "examples": [
-        {
-          "id": "workday-rtx-01850347",
-          "company": "RTX",
-          "title": "Deputy Manager - Industrial Engineering"
-        },
-        {
-          "id": "workday-snap-R0045980",
-          "company": "Snap",
-          "title": "Technical Program Manager, Level 4"
-        },
-        {
-          "id": "workday-magna-R00248623",
-          "company": "Magna",
-          "title": "Controls Engineer"
-        },
-        {
-          "id": "workday-lowe's-JR-02559553",
-          "company": "Lowe's",
-          "title": "Data Scientist"
-        },
-        {
-          "id": "workday-boeing-JR2026510328",
-          "company": "Boeing",
-          "title": "Software Certification Engineer (Associate, Experienced or Senior)"
-        },
-        {
-          "id": "workday-cvs-health-R0908981",
-          "company": "CVS Health",
-          "title": "Data Scientist - Specialty Operations"
-        },
-        {
-          "id": "workday-caci-328291",
-          "company": "CACI",
-          "title": "AI Engineer"
-        },
-        {
-          "id": "workday-caci-328278",
-          "company": "CACI",
-          "title": "Systems Engineer"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
     },
     {
       "source": "apple",
