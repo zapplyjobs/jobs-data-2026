@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-29T23:47:44.398Z",
+  "generated_at": "2026-06-29T23:52:38.486Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -51,21 +51,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-29T23:36:18.034Z",
+    "generated_at": "2026-06-29T23:50:58.425Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 14524,
-    "description_entries": 9800,
-    "coverage_pct": 67.5,
+    "board_row_count": 14280,
+    "description_entries": 10112,
+    "coverage_pct": 70.8,
     "source_breakdown": {
-      "sidecar": 9822,
+      "sidecar": 10135,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-29T23:21:15.559Z",
+    "jobs_metadata_generated": "2026-06-29T23:35:43.624Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-06-29T23:47:40.614Z",
+    "checked_at": "2026-06-29T23:52:34.866Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -81,25 +81,89 @@
   },
   "rows": [
     {
+      "source": "workday",
+      "pool_rows": 48163,
+      "us_rows": 27817,
+      "tech_us_rows": 7901,
+      "raw_sidecar_rows": 23809,
+      "sidecar_active_rows": 6029,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 5944,
+      "published_pct": 75.2,
+      "enriched_rows": 6080,
+      "enriched_pct": 77,
+      "enriched_with_skills": 5719,
+      "skills_pct": 94.1,
+      "examples": [
+        {
+          "id": "workday-moog-R-26-18353",
+          "company": "Moog",
+          "title": "Sales & Proposal Manager"
+        },
+        {
+          "id": "workday-microchip-technology-R2525-26",
+          "company": "Microchip Technology",
+          "title": "Technician III- Equipment (Implant)"
+        },
+        {
+          "id": "workday-micron-technology-JR102420",
+          "company": "Micron Technology",
+          "title": "ENGINEER, DEMQRA AUTOMOTIVE PQRE"
+        },
+        {
+          "id": "workday-micron-technology-JR103799",
+          "company": "Micron Technology",
+          "title": "ENGINEER, DEMQRA AUTOMOTIVE PQRE"
+        },
+        {
+          "id": "workday-micron-JR102420",
+          "company": "Micron",
+          "title": "ENGINEER, DEMQRA AUTOMOTIVE PQRE"
+        },
+        {
+          "id": "workday-micron-JR103799",
+          "company": "Micron",
+          "title": "ENGINEER, DEMQRA AUTOMOTIVE PQRE"
+        },
+        {
+          "id": "workday-hp-inc-3165032",
+          "company": "HP Inc",
+          "title": "AMS 3D Field Service Engineer"
+        },
+        {
+          "id": "workday-ss&c-technologies-R43474",
+          "company": "SS&C Technologies",
+          "title": "IVA Software Engineer PA2026Q2JB011"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage",
+        "low_enrichment_coverage"
+      ]
+    },
+    {
       "source": "oracle",
-      "pool_rows": 7604,
+      "pool_rows": 7605,
       "us_rows": 5152,
       "tech_us_rows": 1209,
-      "raw_sidecar_rows": 5703,
+      "raw_sidecar_rows": 5701,
       "sidecar_active_rows": 502,
-      "supplemental_rows": 26161,
-      "supplemental_with_desc": 18600,
+      "supplemental_rows": 26158,
+      "supplemental_with_desc": 18597,
       "supplemental_meta": {
-        "generated_at": "2026-06-29T23:34:57.226Z",
+        "generated_at": "2026-06-29T23:49:59.047Z",
         "lane_name": "oracle",
-        "jobs_fetched": 26161
+        "jobs_fetched": 26158
       },
       "published_rows": 502,
       "published_pct": 41.5,
-      "enriched_rows": 689,
-      "enriched_pct": 57,
-      "enriched_with_skills": 488,
-      "skills_pct": 70.8,
+      "enriched_rows": 690,
+      "enriched_pct": 57.1,
+      "enriched_with_skills": 489,
+      "skills_pct": 70.9,
       "examples": [
         {
           "id": "oracle-citizens-financial-47745",
@@ -159,9 +223,9 @@
       "supplemental_rows": 1434,
       "supplemental_with_desc": 1434,
       "supplemental_meta": {
-        "generated_at": "2026-06-29T23:38:24.159Z",
+        "generated_at": "2026-06-29T23:51:29.856Z",
         "lane_name": "custom",
-        "jobs_fetched": 4280
+        "jobs_fetched": 4281
       },
       "published_rows": 443,
       "published_pct": 71.8,
@@ -219,26 +283,21 @@
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 1562,
-      "us_rows": 1744,
+      "pool_rows": 1563,
+      "us_rows": 1745,
       "tech_us_rows": 391,
-      "raw_sidecar_rows": 3066,
-      "sidecar_active_rows": 223,
+      "raw_sidecar_rows": 3062,
+      "sidecar_active_rows": 224,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 223,
-      "published_pct": 57,
-      "enriched_rows": 223,
-      "enriched_pct": 57,
-      "enriched_with_skills": 220,
+      "published_rows": 224,
+      "published_pct": 57.3,
+      "enriched_rows": 224,
+      "enriched_pct": 57.3,
+      "enriched_with_skills": 221,
       "skills_pct": 98.7,
       "examples": [
-        {
-          "id": "sr-ServiceNow-744000134894135",
-          "company": "ServiceNow",
-          "title": "Web Experience Manager, Conversion & Growth"
-        },
         {
           "id": "sr-AbbVie-3743990013847326",
           "company": "AbbVie",
@@ -273,6 +332,11 @@
           "id": "sr-AbbVie-3743990013814086",
           "company": "AbbVie",
           "title": "Application & Platform Security Architect"
+        },
+        {
+          "id": "sr-AbbVie-3743990013814046",
+          "company": "AbbVie",
+          "title": "Application & Platform Security Architect"
         }
       ],
       "severity": "high",
@@ -283,22 +347,22 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 451,
-      "us_rows": 310,
-      "tech_us_rows": 212,
+      "pool_rows": 452,
+      "us_rows": 309,
+      "tech_us_rows": 211,
       "raw_sidecar_rows": 409,
       "sidecar_active_rows": 88,
       "supplemental_rows": 1351,
-      "supplemental_with_desc": 105,
+      "supplemental_with_desc": 114,
       "supplemental_meta": {
-        "generated_at": "2026-06-29T23:38:24.159Z",
+        "generated_at": "2026-06-29T23:51:29.856Z",
         "lane_name": "custom",
-        "jobs_fetched": 4280
+        "jobs_fetched": 4281
       },
-      "published_rows": 87,
-      "published_pct": 41,
+      "published_rows": 88,
+      "published_pct": 41.7,
       "enriched_rows": 89,
-      "enriched_pct": 42,
+      "enriched_pct": 42.2,
       "enriched_with_skills": 89,
       "skills_pct": 100,
       "examples": [
@@ -306,11 +370,6 @@
           "id": "microsoft-200041478",
           "company": "Microsoft",
           "title": "Data and AI Solution Architect"
-        },
-        {
-          "id": "microsoft-200040986",
-          "company": "Microsoft",
-          "title": "Critical Environment Program Manager"
         },
         {
           "id": "microsoft-200041048",
@@ -341,6 +400,11 @@
           "id": "microsoft-200035567",
           "company": "Microsoft",
           "title": "Senior Software Engineer - CTJ - Poly"
+        },
+        {
+          "id": "microsoft-200041630",
+          "company": "Microsoft",
+          "title": "(Senior) Software Engineer, Experimentation Platform - CoreAI"
         }
       ],
       "severity": "high",
@@ -355,14 +419,14 @@
       "pool_rows": 78,
       "us_rows": 66,
       "tech_us_rows": 19,
-      "raw_sidecar_rows": 316,
+      "raw_sidecar_rows": 67,
       "sidecar_active_rows": 16,
-      "supplemental_rows": 316,
-      "supplemental_with_desc": 316,
+      "supplemental_rows": 317,
+      "supplemental_with_desc": 317,
       "supplemental_meta": {
-        "generated_at": "2026-06-29T23:38:24.159Z",
+        "generated_at": "2026-06-29T23:51:29.856Z",
         "lane_name": "custom",
-        "jobs_fetched": 4280
+        "jobs_fetched": 4281
       },
       "published_rows": 16,
       "published_pct": 84.2,
@@ -391,67 +455,6 @@
       "flags": [
         "low_skill_fill"
       ]
-    },
-    {
-      "source": "workday",
-      "pool_rows": 48079,
-      "us_rows": 27056,
-      "tech_us_rows": 7260,
-      "raw_sidecar_rows": 23560,
-      "sidecar_active_rows": 6067,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 5963,
-      "published_pct": 82.1,
-      "enriched_rows": 6116,
-      "enriched_pct": 84.2,
-      "enriched_with_skills": 5743,
-      "skills_pct": 93.9,
-      "examples": [
-        {
-          "id": "workday-moog-R-26-18353",
-          "company": "Moog",
-          "title": "Sales & Proposal Manager"
-        },
-        {
-          "id": "workday-northrop-grumman-R10237299",
-          "company": "Northrop Grumman",
-          "title": "Engineering Technician Level 3"
-        },
-        {
-          "id": "workday-rtx-01854414",
-          "company": "RTX",
-          "title": "Embedded Hardware Engineer (Onsite)"
-        },
-        {
-          "id": "workday-rtx-01850347",
-          "company": "RTX",
-          "title": "Deputy Manager - Industrial Engineering"
-        },
-        {
-          "id": "workday-carrier-global-30208321",
-          "company": "Carrier Global",
-          "title": "Product Service Engineer"
-        },
-        {
-          "id": "workday-crowdstrike-R28911",
-          "company": "CrowdStrike",
-          "title": "Retainer Management Team Manager (Remote)"
-        },
-        {
-          "id": "workday-crowdstrike-R25668",
-          "company": "CrowdStrike",
-          "title": "Strategic Advisory Services Consultant (Remote)"
-        },
-        {
-          "id": "workday-crowdstrike-R28535",
-          "company": "CrowdStrike",
-          "title": "Strategic Advisory Services Consultant (Remote)"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
     },
     {
       "source": "apple",
