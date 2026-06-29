@@ -564,6 +564,8 @@
     @media (max-width: 1200px) { .v2-snapshot-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     @media (max-width: 800px) { .v2-snapshot-grid { grid-template-columns: 1fr; } }
     @media (max-width: 800px) { .v2-command-grid, .v2-module-grid, .v2-split, .v2-overview-grid, .v2-overview-hero { grid-template-columns: 1fr; } }
+    /* text-overflow fix: long strings (URLs, issue text) must wrap inside cards/panels, not overflow */
+    .card, .stat-card, .v2-card, .v2-panel, .v2-card .label, .v2-card .value, .v2-card .sub { overflow-wrap: anywhere; word-break: break-word; }
   </style>
 </head>
 <body>
