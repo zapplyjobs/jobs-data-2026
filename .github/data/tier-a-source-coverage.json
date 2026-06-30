@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-30T10:37:36.694Z",
+  "generated_at": "2026-06-30T10:52:34.783Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -52,21 +52,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-30T10:36:00.057Z",
+    "generated_at": "2026-06-30T10:50:59.991Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 13757,
-    "description_entries": 9958,
-    "coverage_pct": 72.4,
+    "board_row_count": 13663,
+    "description_entries": 9952,
+    "coverage_pct": 72.8,
     "source_breakdown": {
-      "sidecar": 9983,
+      "sidecar": 9977,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-30T10:21:08.951Z",
+    "jobs_metadata_generated": "2026-06-30T10:36:26.154Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-06-30T10:37:33.122Z",
+    "checked_at": "2026-06-30T10:52:31.054Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -82,23 +82,86 @@
   },
   "rows": [
     {
+      "source": "workday",
+      "pool_rows": 49444,
+      "us_rows": 27797,
+      "tech_us_rows": 7694,
+      "raw_sidecar_rows": 24650,
+      "sidecar_active_rows": 6224,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 6088,
+      "published_pct": 79.1,
+      "enriched_rows": 6243,
+      "enriched_pct": 81.1,
+      "enriched_with_skills": 5877,
+      "skills_pct": 94.1,
+      "examples": [
+        {
+          "id": "workday-jll-REQ504792",
+          "company": "JLL",
+          "title": "Critical Environments Manager"
+        },
+        {
+          "id": "workday-jll-REQ503707",
+          "company": "JLL",
+          "title": "Mech & Robotics Technician 3rd shift"
+        },
+        {
+          "id": "workday-jll-REQ503704",
+          "company": "JLL",
+          "title": "Mech & Robotics Technician 2nd Shift"
+        },
+        {
+          "id": "workday-intel-JR0284894",
+          "company": "Intel",
+          "title": "Junior Physical Design Engineer (CPU)"
+        },
+        {
+          "id": "workday-hitachi-R0112207",
+          "company": "Hitachi",
+          "title": "Electrical Engineer"
+        },
+        {
+          "id": "workday-state-street-R-790200",
+          "company": "State Street",
+          "title": "Software Engineer Senior Associate"
+        },
+        {
+          "id": "workday-rtx-01854414",
+          "company": "RTX",
+          "title": "Embedded Hardware Engineer (Onsite)"
+        },
+        {
+          "id": "workday-rtx-01854140",
+          "company": "RTX",
+          "title": "Technical Project Manager - Secure Systems"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage"
+      ]
+    },
+    {
       "source": "oracle",
-      "pool_rows": 7731,
-      "us_rows": 5129,
-      "tech_us_rows": 1177,
-      "raw_sidecar_rows": 5880,
+      "pool_rows": 7734,
+      "us_rows": 5122,
+      "tech_us_rows": 1170,
+      "raw_sidecar_rows": 5883,
       "sidecar_active_rows": 504,
-      "supplemental_rows": 25331,
-      "supplemental_with_desc": 18214,
+      "supplemental_rows": 25615,
+      "supplemental_with_desc": 18223,
       "supplemental_meta": {
-        "generated_at": "2026-06-30T10:34:57.312Z",
+        "generated_at": "2026-06-30T10:49:55.518Z",
         "lane_name": "oracle",
-        "jobs_fetched": 25331
+        "jobs_fetched": 25615
       },
       "published_rows": 504,
-      "published_pct": 42.8,
+      "published_pct": 43.1,
       "enriched_rows": 692,
-      "enriched_pct": 58.8,
+      "enriched_pct": 59.1,
       "enriched_with_skills": 489,
       "skills_pct": 70.7,
       "examples": [
@@ -214,67 +277,6 @@
         "published_gt_raw_sidecar",
         "low_enrichment_coverage"
       ]
-    },
-    {
-      "source": "workday",
-      "pool_rows": 49346,
-      "us_rows": 27512,
-      "tech_us_rows": 7411,
-      "raw_sidecar_rows": 24604,
-      "sidecar_active_rows": 6167,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 6070,
-      "published_pct": 81.9,
-      "enriched_rows": 6221,
-      "enriched_pct": 83.9,
-      "enriched_with_skills": 5861,
-      "skills_pct": 94.2,
-      "examples": [
-        {
-          "id": "workday-citi-26973051",
-          "company": "Citi",
-          "title": "Regulatory Loss Forecasting Model Development Analyst"
-        },
-        {
-          "id": "workday-citi-25929505",
-          "company": "Citi",
-          "title": "Data Solutions Engineer, Assistant Vice President"
-        },
-        {
-          "id": "workday-coca-cola-R-142558",
-          "company": "Coca-Cola",
-          "title": "Manager, NA FSOP, Technical Consumer Data Research"
-        },
-        {
-          "id": "workday-coca-cola-R-142560",
-          "company": "Coca-Cola",
-          "title": "Manager, Global Packaging, Technical Consumer Data Research"
-        },
-        {
-          "id": "workday-warner-bros.-discovery-R000096304",
-          "company": "Warner Bros. Discovery",
-          "title": "Cybersecurity Engineer"
-        },
-        {
-          "id": "workday-stanley-black-&-decker-REQ-1000049977",
-          "company": "Stanley Black & Decker",
-          "title": "Talent Acquisition Manager – Power Electronics"
-        },
-        {
-          "id": "workday-state-street-R-789983",
-          "company": "State Street",
-          "title": "Senior Associate - AI Enablement Engineer"
-        },
-        {
-          "id": "workday-state-street-R-789984",
-          "company": "State Street",
-          "title": "Senior Associate - AI Enablement Engineer"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
     },
     {
       "source": "microsoft",
