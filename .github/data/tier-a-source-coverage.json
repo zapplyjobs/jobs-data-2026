@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-30T05:37:37.876Z",
+  "generated_at": "2026-06-30T05:52:29.133Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -51,21 +51,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-30T05:35:56.650Z",
+    "generated_at": "2026-06-30T05:50:59.329Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 14432,
-    "description_entries": 10275,
-    "coverage_pct": 71.2,
+    "board_row_count": 14672,
+    "description_entries": 10268,
+    "coverage_pct": 70,
     "source_breakdown": {
-      "sidecar": 10299,
+      "sidecar": 10292,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-30T05:21:03.312Z",
+    "jobs_metadata_generated": "2026-06-30T05:37:13.593Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-06-30T05:37:34.425Z",
+    "checked_at": "2026-06-30T05:52:25.587Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -81,18 +81,81 @@
   },
   "rows": [
     {
+      "source": "workday",
+      "pool_rows": 48632,
+      "us_rows": 27743,
+      "tech_us_rows": 7681,
+      "raw_sidecar_rows": 24657,
+      "sidecar_active_rows": 6134,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 6134,
+      "published_pct": 79.9,
+      "enriched_rows": 6185,
+      "enriched_pct": 80.5,
+      "enriched_with_skills": 5808,
+      "skills_pct": 93.9,
+      "examples": [
+        {
+          "id": "workday-state-street-R-790200",
+          "company": "State Street",
+          "title": "Software Engineer Senior Associate"
+        },
+        {
+          "id": "workday-stanley-black-&-decker-REQ-1000049977",
+          "company": "Stanley Black & Decker",
+          "title": "Talent Acquisition Manager – Power Electronics"
+        },
+        {
+          "id": "workday-rtx-01854414",
+          "company": "RTX",
+          "title": "Embedded Hardware Engineer (Onsite)"
+        },
+        {
+          "id": "workday-rtx-01850347",
+          "company": "RTX",
+          "title": "Deputy Manager - Industrial Engineering"
+        },
+        {
+          "id": "workday-northrop-grumman-R10237299",
+          "company": "Northrop Grumman",
+          "title": "Engineering Technician Level 3"
+        },
+        {
+          "id": "workday-intel-JR0284894",
+          "company": "Intel",
+          "title": "Junior Physical Design Engineer (CPU)"
+        },
+        {
+          "id": "workday-carrier-global-30208321",
+          "company": "Carrier Global",
+          "title": "Product Service Engineer"
+        },
+        {
+          "id": "workday-hitachi-R0112207",
+          "company": "Hitachi",
+          "title": "Electrical Engineer"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage"
+      ]
+    },
+    {
       "source": "oracle",
-      "pool_rows": 7625,
+      "pool_rows": 7627,
       "us_rows": 5123,
       "tech_us_rows": 1175,
-      "raw_sidecar_rows": 5709,
+      "raw_sidecar_rows": 5711,
       "sidecar_active_rows": 504,
-      "supplemental_rows": 24426,
-      "supplemental_with_desc": 17919,
+      "supplemental_rows": 25662,
+      "supplemental_with_desc": 18265,
       "supplemental_meta": {
-        "generated_at": "2026-06-30T05:35:03.094Z",
+        "generated_at": "2026-06-30T05:49:57.407Z",
         "lane_name": "oracle",
-        "jobs_fetched": 24426
+        "jobs_fetched": 25662
       },
       "published_rows": 504,
       "published_pct": 42.9,
@@ -159,7 +222,7 @@
       "supplemental_rows": 1435,
       "supplemental_with_desc": 1435,
       "supplemental_meta": {
-        "generated_at": "2026-06-30T05:36:01.200Z",
+        "generated_at": "2026-06-30T05:51:21.677Z",
         "lane_name": "custom",
         "jobs_fetched": 4279
       },
@@ -220,21 +283,21 @@
     {
       "source": "microsoft",
       "pool_rows": 453,
-      "us_rows": 303,
-      "tech_us_rows": 204,
-      "raw_sidecar_rows": 414,
+      "us_rows": 306,
+      "tech_us_rows": 207,
+      "raw_sidecar_rows": 416,
       "sidecar_active_rows": 85,
       "supplemental_rows": 1345,
-      "supplemental_with_desc": 58,
+      "supplemental_with_desc": 131,
       "supplemental_meta": {
-        "generated_at": "2026-06-30T05:36:01.200Z",
+        "generated_at": "2026-06-30T05:51:21.677Z",
         "lane_name": "custom",
         "jobs_fetched": 4279
       },
       "published_rows": 85,
-      "published_pct": 41.7,
+      "published_pct": 41.1,
       "enriched_rows": 86,
-      "enriched_pct": 42.2,
+      "enriched_pct": 41.5,
       "enriched_with_skills": 86,
       "skills_pct": 100,
       "examples": [
@@ -289,59 +352,59 @@
     {
       "source": "smartrecruiters",
       "pool_rows": 1572,
-      "us_rows": 1756,
-      "tech_us_rows": 393,
+      "us_rows": 1759,
+      "tech_us_rows": 396,
       "raw_sidecar_rows": 3105,
       "sidecar_active_rows": 224,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 280,
-      "published_pct": 71.2,
+      "published_rows": 301,
+      "published_pct": 76,
       "enriched_rows": 224,
-      "enriched_pct": 57,
+      "enriched_pct": 56.6,
       "enriched_with_skills": 221,
       "skills_pct": 98.7,
       "examples": [
         {
-          "id": "sr-Eurofins-744000133127174",
-          "company": "Eurofins",
-          "title": "Senior Product Safety Engineer"
-        },
-        {
-          "id": "sr-EVERSANA1-744000134275629",
-          "company": "EVERSANA",
-          "title": "Sr. Database Administrator"
-        },
-        {
-          "id": "sr-Experian-744000132935639",
-          "company": "Experian",
-          "title": "Senior Data Scientist, Innovation Lab - Remote"
-        },
-        {
-          "id": "sr-Experian-744000132935202",
-          "company": "Experian",
-          "title": "Staff Backend AI Engineer, Remote"
-        },
-        {
-          "id": "sr-Experian-744000132934654",
-          "company": "Experian",
-          "title": "Staff AI Architect, Remote"
-        },
-        {
-          "id": "sr-Experian-744000132734044",
-          "company": "Experian",
-          "title": "Senior Manager, Thought Leadership and Insights"
-        },
-        {
-          "id": "sr-Experian-744000132637519",
-          "company": "Experian",
-          "title": "Senior Analyst, Analytics Development & Model Governance"
-        },
-        {
-          "id": "sr-Intuitive-744000134886844",
+          "id": "sr-Intuitive-744000133700579",
           "company": "Intuitive",
-          "title": "Sr. Mechanical Design Engineer"
+          "title": "Senior Mechanical Design Engineer"
+        },
+        {
+          "id": "sr-Intuitive-744000133688869",
+          "company": "Intuitive",
+          "title": "Senior Embedded Software Engineer - Future Forward"
+        },
+        {
+          "id": "sr-Intuitive-744000133672002",
+          "company": "Intuitive",
+          "title": "Sr. Electro Mechanical Systems Engineer"
+        },
+        {
+          "id": "sr-Intuitive-744000133610922",
+          "company": "Intuitive",
+          "title": "Staff Machine Learning Engineer"
+        },
+        {
+          "id": "sr-Intuitive-744000133558309",
+          "company": "Intuitive",
+          "title": "Senior Machine Learning Engineer"
+        },
+        {
+          "id": "sr-Intuitive-744000133445100",
+          "company": "Intuitive",
+          "title": "Senior Project Electrical Engineer"
+        },
+        {
+          "id": "sr-Intuitive-744000132923029",
+          "company": "Intuitive",
+          "title": "Senior Systems Analyst"
+        },
+        {
+          "id": "sr-Intuitive-744000132915679",
+          "company": "Intuitive",
+          "title": "Sr. Supplier Process Engineer"
         }
       ],
       "severity": "high",
@@ -360,7 +423,7 @@
       "supplemental_rows": 319,
       "supplemental_with_desc": 319,
       "supplemental_meta": {
-        "generated_at": "2026-06-30T05:36:01.200Z",
+        "generated_at": "2026-06-30T05:51:21.677Z",
         "lane_name": "custom",
         "jobs_fetched": 4279
       },
@@ -391,67 +454,6 @@
       "flags": [
         "low_skill_fill"
       ]
-    },
-    {
-      "source": "workday",
-      "pool_rows": 48605,
-      "us_rows": 27431,
-      "tech_us_rows": 7431,
-      "raw_sidecar_rows": 24639,
-      "sidecar_active_rows": 6146,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 6146,
-      "published_pct": 82.7,
-      "enriched_rows": 6198,
-      "enriched_pct": 83.4,
-      "enriched_with_skills": 5814,
-      "skills_pct": 93.8,
-      "examples": [
-        {
-          "id": "workday-hitachi-R0112207",
-          "company": "Hitachi",
-          "title": "Electrical Engineer"
-        },
-        {
-          "id": "workday-rtx-01854414",
-          "company": "RTX",
-          "title": "Embedded Hardware Engineer (Onsite)"
-        },
-        {
-          "id": "workday-rtx-01850347",
-          "company": "RTX",
-          "title": "Deputy Manager - Industrial Engineering"
-        },
-        {
-          "id": "workday-intel-JR0284894",
-          "company": "Intel",
-          "title": "Junior Physical Design Engineer (CPU)"
-        },
-        {
-          "id": "workday-stanley-black-&-decker-REQ-1000049977",
-          "company": "Stanley Black & Decker",
-          "title": "Talent Acquisition Manager – Power Electronics"
-        },
-        {
-          "id": "workday-state-street-R-790200",
-          "company": "State Street",
-          "title": "Software Engineer Senior Associate"
-        },
-        {
-          "id": "workday-northrop-grumman-R10237299",
-          "company": "Northrop Grumman",
-          "title": "Engineering Technician Level 3"
-        },
-        {
-          "id": "workday-carrier-global-30208321",
-          "company": "Carrier Global",
-          "title": "Product Service Engineer"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
     },
     {
       "source": "apple",
