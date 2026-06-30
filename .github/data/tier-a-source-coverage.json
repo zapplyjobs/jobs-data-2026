@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-30T01:22:40.369Z",
+  "generated_at": "2026-06-30T01:38:08.075Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -51,21 +51,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-30T01:21:01.385Z",
+    "generated_at": "2026-06-30T01:36:17.301Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 14429,
-    "description_entries": 10387,
-    "coverage_pct": 72,
+    "board_row_count": 14246,
+    "description_entries": 10312,
+    "coverage_pct": 72.4,
     "source_breakdown": {
-      "sidecar": 10410,
+      "sidecar": 10335,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-30T01:06:14.032Z",
+    "jobs_metadata_generated": "2026-06-30T01:21:09.666Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-06-30T01:22:36.841Z",
+    "checked_at": "2026-06-30T01:38:04.636Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -81,18 +81,81 @@
   },
   "rows": [
     {
+      "source": "workday",
+      "pool_rows": 48380,
+      "us_rows": 27513,
+      "tech_us_rows": 7518,
+      "raw_sidecar_rows": 23798,
+      "sidecar_active_rows": 6084,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 5991,
+      "published_pct": 79.7,
+      "enriched_rows": 6164,
+      "enriched_pct": 82,
+      "enriched_with_skills": 5792,
+      "skills_pct": 94,
+      "examples": [
+        {
+          "id": "workday-applied-materials-R2611502",
+          "company": "Applied Materials",
+          "title": "2026 Fall Process Engineer Co-op - Adv Degree Gloucester, MA"
+        },
+        {
+          "id": "workday-applied-materials-R2622643",
+          "company": "Applied Materials",
+          "title": "Customer Engineer - Process, Diagnostics, and Control"
+        },
+        {
+          "id": "workday-abb-JR00035578",
+          "company": "ABB",
+          "title": "Electrification Services Application Engineer"
+        },
+        {
+          "id": "workday-abb-JR00037200",
+          "company": "ABB",
+          "title": "Data Center COE Project Manager"
+        },
+        {
+          "id": "workday-abb-JR00033769",
+          "company": "ABB",
+          "title": "Data Center COE Project Specialist"
+        },
+        {
+          "id": "workday-zoom-R18583",
+          "company": "Zoom",
+          "title": "Contact Center Consulting Solutions Engineer"
+        },
+        {
+          "id": "workday-stanley-black-&-decker-REQ-1000049977",
+          "company": "Stanley Black & Decker",
+          "title": "Talent Acquisition Manager – Power Electronics"
+        },
+        {
+          "id": "workday-state-street-R-790200",
+          "company": "State Street",
+          "title": "Software Engineer Senior Associate"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage"
+      ]
+    },
+    {
       "source": "oracle",
       "pool_rows": 7612,
       "us_rows": 5120,
       "tech_us_rows": 1172,
       "raw_sidecar_rows": 5807,
       "sidecar_active_rows": 504,
-      "supplemental_rows": 25985,
+      "supplemental_rows": 25986,
       "supplemental_with_desc": 18463,
       "supplemental_meta": {
-        "generated_at": "2026-06-30T01:19:53.472Z",
+        "generated_at": "2026-06-30T01:34:46.839Z",
         "lane_name": "oracle",
-        "jobs_fetched": 25985
+        "jobs_fetched": 25986
       },
       "published_rows": 504,
       "published_pct": 43,
@@ -156,12 +219,12 @@
       "tech_us_rows": 617,
       "raw_sidecar_rows": 1044,
       "sidecar_active_rows": 443,
-      "supplemental_rows": 1438,
-      "supplemental_with_desc": 1438,
+      "supplemental_rows": 1437,
+      "supplemental_with_desc": 1437,
       "supplemental_meta": {
-        "generated_at": "2026-06-30T01:06:44.186Z",
+        "generated_at": "2026-06-30T01:36:33.800Z",
         "lane_name": "custom",
-        "jobs_fetched": 4287
+        "jobs_fetched": 4285
       },
       "published_rows": 443,
       "published_pct": 71.8,
@@ -220,21 +283,21 @@
     {
       "source": "microsoft",
       "pool_rows": 451,
-      "us_rows": 311,
-      "tech_us_rows": 212,
+      "us_rows": 309,
+      "tech_us_rows": 211,
       "raw_sidecar_rows": 411,
       "sidecar_active_rows": 87,
       "supplemental_rows": 1351,
-      "supplemental_with_desc": 108,
+      "supplemental_with_desc": 107,
       "supplemental_meta": {
-        "generated_at": "2026-06-30T01:06:44.186Z",
+        "generated_at": "2026-06-30T01:36:33.800Z",
         "lane_name": "custom",
-        "jobs_fetched": 4287
+        "jobs_fetched": 4285
       },
       "published_rows": 87,
-      "published_pct": 41,
+      "published_pct": 41.2,
       "enriched_rows": 88,
-      "enriched_pct": 41.5,
+      "enriched_pct": 41.7,
       "enriched_with_skills": 88,
       "skills_pct": 100,
       "examples": [
@@ -289,63 +352,64 @@
     {
       "source": "smartrecruiters",
       "pool_rows": 1570,
-      "us_rows": 1760,
-      "tech_us_rows": 399,
-      "raw_sidecar_rows": 6055,
+      "us_rows": 1762,
+      "tech_us_rows": 401,
+      "raw_sidecar_rows": 6514,
       "sidecar_active_rows": 224,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 341,
-      "published_pct": 85.5,
+      "published_rows": 381,
+      "published_pct": 95,
       "enriched_rows": 224,
-      "enriched_pct": 56.1,
+      "enriched_pct": 55.9,
       "enriched_with_skills": 221,
       "skills_pct": 98.7,
       "examples": [
         {
-          "id": "sr-Sandisk-744000134878091",
-          "company": "Sandisk",
-          "title": "New College Grad, Senior Test Engineer"
+          "id": "sr-solidigm-744000134860899",
+          "company": "Solidigm",
+          "title": "Principal AI Workflow Engineer"
         },
         {
-          "id": "sr-Sandisk-744000134550855",
-          "company": "Sandisk",
-          "title": "Senior Technologist Datapath Design Engineer and Circuit Design Engineer, VLSI Design Engineering"
+          "id": "sr-solidigm-744000134535859",
+          "company": "Solidigm",
+          "title": "Senior Principal Storage Architecture Engineer"
         },
         {
-          "id": "sr-Sandisk-744000134030409",
-          "company": "Sandisk",
-          "title": "Senior Staff Field Application Engineer"
+          "id": "sr-solidigm-744000134325749",
+          "company": "Solidigm",
+          "title": "Validation Architect"
         },
         {
-          "id": "sr-Sandisk-744000134002920",
-          "company": "Sandisk",
-          "title": "Senior Engineer, Product Development Engineering"
+          "id": "sr-VeoliaEnvironnementSA-744000134818630",
+          "company": "Veolia Environnement SA",
+          "title": "Lead Reliability Engineer"
         },
         {
-          "id": "sr-Sandisk-744000133443620",
-          "company": "Sandisk",
-          "title": "Staff Engineer, System Design Engineering"
+          "id": "sr-WellmarkInc-744000134508191",
+          "company": "Wellmark, Inc.",
+          "title": "Senior Software Engineer - Enterprise Data Services"
         },
         {
-          "id": "sr-Sandisk-744000133429059",
-          "company": "Sandisk",
-          "title": "Senior Technology Development Engineer"
+          "id": "sr-WellmarkInc-744000134337649",
+          "company": "Wellmark, Inc.",
+          "title": "Lead Software Engineer - AI Platform Team"
         },
         {
-          "id": "sr-Sandisk-744000133422276",
-          "company": "Sandisk",
-          "title": "Product Security Assurance Architect"
+          "id": "sr-WellmarkInc-744000134286090",
+          "company": "Wellmark, Inc.",
+          "title": "Sr. Software Engineer (Open to hiring at Lead level)"
         },
         {
-          "id": "sr-Sandisk-744000133403644",
-          "company": "Sandisk",
-          "title": "Principal Engineer, Technology Development Engineering"
+          "id": "sr-WellmarkInc-744000133080630",
+          "company": "Wellmark, Inc.",
+          "title": "Senior Software Engineer - Information Products Team"
         }
       ],
       "severity": "medium",
       "flags": [
+        "published_gt_raw_sidecar",
         "low_enrichment_coverage"
       ]
     },
@@ -356,12 +420,12 @@
       "tech_us_rows": 19,
       "raw_sidecar_rows": 318,
       "sidecar_active_rows": 16,
-      "supplemental_rows": 318,
-      "supplemental_with_desc": 318,
+      "supplemental_rows": 317,
+      "supplemental_with_desc": 317,
       "supplemental_meta": {
-        "generated_at": "2026-06-30T01:06:44.186Z",
+        "generated_at": "2026-06-30T01:36:33.800Z",
         "lane_name": "custom",
-        "jobs_fetched": 4287
+        "jobs_fetched": 4285
       },
       "published_rows": 16,
       "published_pct": 84.2,
@@ -390,67 +454,6 @@
       "flags": [
         "low_skill_fill"
       ]
-    },
-    {
-      "source": "workday",
-      "pool_rows": 48325,
-      "us_rows": 27205,
-      "tech_us_rows": 7252,
-      "raw_sidecar_rows": 23799,
-      "sidecar_active_rows": 6066,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 6025,
-      "published_pct": 83.1,
-      "enriched_rows": 6144,
-      "enriched_pct": 84.7,
-      "enriched_with_skills": 5767,
-      "skills_pct": 93.9,
-      "examples": [
-        {
-          "id": "workday-northrop-grumman-R10237299",
-          "company": "Northrop Grumman",
-          "title": "Engineering Technician Level 3"
-        },
-        {
-          "id": "workday-motorola-solutions-R65148",
-          "company": "Motorola Solutions",
-          "title": "System Manager (Integrated Call Control)"
-        },
-        {
-          "id": "workday-state-street-R-790200",
-          "company": "State Street",
-          "title": "Software Engineer Senior Associate"
-        },
-        {
-          "id": "workday-micron-technology-JR102420",
-          "company": "Micron Technology",
-          "title": "ENGINEER, DEMQRA AUTOMOTIVE PQRE"
-        },
-        {
-          "id": "workday-micron-technology-JR103799",
-          "company": "Micron Technology",
-          "title": "ENGINEER, DEMQRA AUTOMOTIVE PQRE"
-        },
-        {
-          "id": "workday-resmed-JR_052159",
-          "company": "ResMed",
-          "title": "Quality Auditor"
-        },
-        {
-          "id": "workday-moog-R-26-18353",
-          "company": "Moog",
-          "title": "Sales & Proposal Manager"
-        },
-        {
-          "id": "workday-moog-R-26-17551",
-          "company": "Moog",
-          "title": "Metrology Electronic Calibration Technician"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
     },
     {
       "source": "apple",
