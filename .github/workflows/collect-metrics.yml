@@ -39,7 +39,7 @@ jobs:
             const r2 = createR2Client({ prefix: 'data/' });
             const dataDir = '.github/data';
             if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-            const files = ['all_jobs.json', 'jobs-metadata.json', 'enrichment-stats.json'];
+            const files = ['all_jobs.json', 'jobs-metadata.json', 'enrichment-stats.json', 'canada-tech-summary.json'];
             for (const file of files) {
               try {
                 const raw = await r2.downloadRaw(file);
@@ -77,7 +77,7 @@ jobs:
         run: |
           git config user.email "bot@zapplyjobs.com"
           git config user.name "Metrics Bot"
-          git add .github/data/metrics/ .github/data/zjp-metrics.json || exit 0
+          git add .github/data/metrics/ .github/data/zjp-metrics.json .github/data/canada-tech-summary.json || exit 0
           git diff --cached --quiet && { echo "No changes to commit"; exit 0; }
           git commit -m "chore: update metrics [skip ci]"
           for i in 1 2 3; do
