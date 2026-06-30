@@ -616,6 +616,7 @@
   <button class="tab" data-tab="out">OUT</button>
   <button class="tab" data-tab="inf">INF</button>
   <button class="tab" data-tab="guide">Guide</button>
+  <button class="tab" data-tab="canada">Canada</button>
 </aside>
 
 <div id="content-wrap" style="flex:1;min-width:0;overflow-y:auto">
@@ -672,6 +673,24 @@
     <div class="section-label" style="margin-top:24px">Where we're headed</div>
     <div class="v2-note-card">
       <div class="v2-hero-copy">The forward direction is building this dashboard into a real platform: (1) a single command center to run and manage all of ZJP; (2) trustworthy metrics that never go stale-vs-live; (3) local scripts runnable from here, backed by GitHub Actions; (4) a self-healing pipeline that auto-fixes or auto-routes problems instead of needing a human each time.</div>
+    </div>
+  </section>
+  <!-- CANADA TAB — launch readiness + what's in the Canada lane -->
+  <section id="tab-canada" class="tab-panel" style="display:none">
+    <div class="section-label">Canada — ready to launch?</div>
+    <div class="section-lineage" id="lineage-v2-canada">Source: loading…</div>
+    <div class="section-lineage" id="canada-fresh"></div>
+    <div class="v2-command-grid v2-overview-grid" id="canada-stats" style="margin-top:16px"></div>
+    <div class="section-label" style="margin-top:24px">What's in it — by field</div>
+    <div id="canada-fields"></div>
+    <div class="section-label" style="margin-top:24px">Top companies</div>
+    <div id="canada-companies"></div>
+    <div class="section-label" style="margin-top:24px">Launch readiness</div>
+    <div class="section-lineage">Curated checklist · last reviewed 2026-06-30</div>
+    <div class="v2-command-grid v2-overview-grid" style="margin-top:12px">
+      <div class="v2-note-card"><div class="v2-hero-kicker">✅ Done</div><div class="v2-hero-copy">Source + tag engine producing Canada jobs · 3 R2 feeds live (jobs / early-career / internships) · 2 repos wired.</div></div>
+      <div class="v2-note-card"><div class="v2-hero-kicker">⏳ You (operator)</div><div class="v2-hero-copy">Flip the 2 repos public · set R2/GitHub secrets · wire Discord posting.</div></div>
+      <div class="v2-note-card"><div class="v2-hero-kicker">⏳ Not started</div><div class="v2-hero-copy">Live on the websites (zapply.jobs / softwarejobs.dev).</div></div>
     </div>
   </section>
 
@@ -1241,6 +1260,7 @@ function dataUrls() {
     outState: dataUrl('out_operator_state.json', t),
     zjpMetrics:  dataUrl('zjp-metrics.json', t),
     aggReview:   dataUrl('agg_improvement_review.json', t),
+    canada:      dataUrl('canada-tech-summary.json', t),
     sourceTruth: dataUrl('source_truth_audit.json', t),
   };
 }
@@ -1633,12 +1653,44 @@ function v2BuildOverviewViewModel(data) {
     }
   };
 }
+function renderV2Canada(raw) {
+  const c = raw && raw.canadaSummary;
+  const stats = document.getElementById('canada-stats');
+  if (!stats) return;
+  if (!c) { stats.innerHTML = '<div class="v2-note-card"><div class="v2-hero-copy"><span class="muted">Canada feed summary not available yet — it refreshes within ~15 min.</span></div></div>'; return; }
+  const tech = c.canada_tech_jobs, interns = c.canada_tech_internships, total = c.canada_jobs;
+  const card = (label, val, sub) => `<div class="v2-note-card"><div class="v2-hero-kicker">${label}</div><strong style="font-size:1.5rem">${val}</strong><div class="v2-hero-copy">${sub}</div></div>`;
+  stats.innerHTML = [
+    card('Canada tech jobs', tech == null ? '—' : fmt(tech), 'all levels · software, hardware, data, AI'),
+    card('Tech internships', interns == null ? '—' : fmt(interns), 'early-career'),
+    card('All Canada jobs (context)', total == null ? '—' : fmt(total), 'includes non-tech roles'),
+  ].join('');
+  const fieldsEl = document.getElementById('canada-fields');
+  if (fieldsEl) {
+    const dom = c.by_domain || {};
+    const labels = { software: 'Software', hardware: 'Hardware', data_science: 'Data', ai: 'AI' };
+    const rows = Object.entries(dom).filter(([, v]) => v > 0).map(([k, v]) => [labels[k] || k, v]);
+    const sum = rows.reduce((n, [, v]) => n + v, 0) || 1;
+    fieldsEl.innerHTML = v2MiniRows(rows, sum) || '<span class="muted">—</span>';
+  }
+  const coEl = document.getElementById('canada-companies');
+  if (coEl) {
+    const cos = (c.top_companies || []).slice(0, 10);
+    const max = cos[0] ? cos[0].count : 1;
+    coEl.innerHTML = cos.map(co => `<div class="v2-mini-row"><span>${esc(co.company_name)}</span><span class="v2-mini-bar"><span class="v2-mini-fill" style="width:${Math.round(co.count / max * 100)}%"></span></span><strong>${fmt(co.count)}</strong></div>`).join('') || '<span class="muted">—</span>';
+  }
+  const fresh = document.getElementById('canada-fresh');
+  if (fresh && c.generated_at) fresh.textContent = 'Feed summary generated ' + age(c.generated_at) + '.';
+  v2SetLineage('lineage-v2-canada', v2SourceLabel('canada-tech-summary.json', 'Canada feed summary', c.generated_at));
+}
+
 function renderV2Overview(raw) {
   const command = document.getElementById('v2-command-grid');
   if (!command) return;
   v2RenderFilterContext('overview');
   const vm = v2BuildOverviewViewModel(v2BuildDashboardData(raw));
   command.innerHTML = vm.commandCards.map(card => v2Card(...card)).join('');
+
   const exceptionsWrap = document.getElementById('v2-overview-exceptions-wrap');
   let queue = [];
   const modules = document.getElementById('v2-module-grid');
@@ -1942,8 +1994,8 @@ function v2BuildTagViewModel(raw) {
   } else if (rateLevel !== 'ok') {
     issues.push({ title: 'TAG triage: US G1 leakage above target', detail: `${generalRate}% general · ${fmt(generalJobs)} / ${fmt(usTotal)} US jobs · ${usG1Threshold} · ${tagOwner}`, level: rateLevel });
   }
-  if (techRateLevel !== 'ok') issues.push({ title: 'TAG watch: Tech-US G1 leakage high', detail: techGeneralRate == null ? 'tech-US live G1 rate missing' : `${techGeneralRate}% vs ≤15% target (critical >25%) · TAG-AUDIT-1 triage`, level: techRateLevel });
-  if (topLevel !== 'ok') issues.push({ title: 'TAG triage: company leakage concentration', detail: topCompany ? `${topCompany.name}: ${fmt(topCompany.general)} G1 · critical >100 · ${topCompany.source} · TAG-AUDIT-1 triage` : 'zjp-metrics company leakage missing', level: topLevel });
+  if (techRateLevel !== 'ok') issues.push({ title: 'TAG watch: many US tech jobs uncategorized (G1)', detail: techGeneralRate == null ? 'live uncategorized rate missing' : `${techGeneralRate}% of US tech jobs uncategorized vs ≤15% target (critical >25%) · decision: accept or reduce via Workday family-mapping`, level: techRateLevel });
+  if (topLevel !== 'ok') issues.push({ title: 'TAG watch: one company dominates uncategorized jobs', detail: topCompany ? `${topCompany.name}: ${fmt(topCompany.general)} uncategorized jobs (G1) · critical >100 · ${topCompany.source} · decision: accept or reduce` : 'zjp-metrics company breakdown missing', level: topLevel });
   if (reviewOlderThanMetrics) issues.push({ title: 'Review snapshot older than live metrics', detail: `general-review.json is ${reviewLagHours}h behind zjp-metrics; use it only for deeper review queues.`, level: 'warn' });
   const decision = v2DecisionText(issues, 'No TAG action needed', 'Live G1 leakage is inside thresholds; review snapshot queues are supporting evidence only.');
   const reviewAge = reviewTs ? age(reviewTs) : 'missing';
@@ -1963,8 +2015,8 @@ function v2BuildTagViewModel(raw) {
       patterns: v2MiniRows(patternRows, patternJobs || 1),
       tenants: v2MiniRows(tenantRows, generalJobs || 1),
       reviewNote: reviewOlderThanMetrics
-        ? `Live company rows use ${fmt(generalJobs)} current US G1 jobs as denominator; critical threshold is >100 G1 jobs per company. Review snapshot is ${reviewLagHours}h older than live metrics; use it only for deeper queues. TAG-AUDIT-1 owns accept/defer/reject.`
-        : `Live company rows use ${fmt(generalJobs)} current US G1 jobs as denominator; critical threshold is >100 G1 jobs per company. Review snapshot age: ${reviewAge}. TAG-AUDIT-1 owns accept/defer/reject.`
+        ? `Live company rows use ${fmt(generalJobs)} current uncategorized (G1) US jobs; critical threshold is >100 per company. Review snapshot is ${reviewLagHours}h older than live metrics; use it only for deeper queues. Decision owner: TAG — accept the current rate or reduce via Workday family-mapping.`
+        : `Live company rows use ${fmt(generalJobs)} current uncategorized (G1) US jobs; critical threshold is >100 per company. Review snapshot age: ${reviewAge}. Decision owner: TAG — accept the current rate or reduce via Workday family-mapping.`
     },
     lineage: [
       v2SourceLabel(V2_DATA_CONTRACT.classification.file, 'live G1 health', metricsTs),
@@ -4626,6 +4678,8 @@ async function fetchAll() {
   _D.zjpMetrics = zjpMetrics;
   _D.aggReview = aggReview;
   _D.sourceTruth = sourceTruth;
+  const canadaSummary = await safeJson(urls.canada);
+  _D.canadaSummary = canadaSummary;
   _D.historyEntries = historyRaw
     ? historyRaw.split('\n').filter(l => l.trim()).map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean)
     : null;
@@ -4693,6 +4747,7 @@ function renderAll() {
   renderV2Out({ metrics, historyEntries, archiveEntries, enrichStats, enrichHistory, metadata, postedJobs, pipelineAlert, generalReview, trafficRaw, discordVerification, outState });
   renderV2Inf({ metrics, historyEntries, archiveEntries, enrichStats, enrichHistory, metadata, postedJobs, pipelineAlert, generalReview, trafficRaw, discordVerification, zjpMetrics: _D.zjpMetrics });
   renderV2Overview({ metrics, historyEntries, archiveEntries, enrichStats, enrichHistory, metadata, postedJobs, pipelineAlert, generalReview });
+  renderV2Canada({ canadaSummary: _D.canadaSummary });
   document.getElementById('content').style.display = 'block';
   document.querySelectorAll('#unified-enr-table thead th.sortable').forEach((th, i) => {
     th.removeEventListener('click', th._sortFn);
