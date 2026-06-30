@@ -685,12 +685,11 @@
     <div id="canada-fields"></div>
     <div class="section-label" style="margin-top:24px">Top companies</div>
     <div id="canada-companies"></div>
-    <div class="section-label" style="margin-top:24px">Launch readiness</div>
-    <div class="section-lineage">Curated checklist · last reviewed 2026-06-30</div>
+    <div class="section-label" style="margin-top:24px">How Canada works</div>
     <div class="v2-command-grid v2-overview-grid" style="margin-top:12px">
-      <div class="v2-note-card"><div class="v2-hero-kicker">✅ Done</div><div class="v2-hero-copy">Source + tag engine producing Canada jobs · 3 R2 feeds live (jobs / early-career / internships) · 2 repos wired.</div></div>
-      <div class="v2-note-card"><div class="v2-hero-kicker">⏳ You (operator)</div><div class="v2-hero-copy">Flip the 2 repos public · set R2/GitHub secrets · wire Discord posting.</div></div>
-      <div class="v2-note-card"><div class="v2-hero-kicker">⏳ Not started</div><div class="v2-hero-copy">Live on the websites (zapply.jobs / softwarejobs.dev).</div></div>
+      <div class="v2-note-card"><div class="v2-hero-kicker">Same pipeline, location filter</div><div class="v2-hero-copy">Canada isn't a separate pipeline — every job with a Canadian location (Toronto, Vancouver, Remote Canada, Workday CA-ON…) is tagged Canada by the tag engine.</div></div>
+      <div class="v2-note-card"><div class="v2-hero-kicker">Mostly incidental today</div><div class="v2-hero-copy">Current Canada jobs come from multinational employers already sourced for the US (Workday, Oracle, Greenhouse…), not from Canadian-specific employers — which is why counts are low.</div></div>
+      <div class="v2-note-card"><div class="v2-hero-kicker">To grow Canada</div><div class="v2-hero-copy">Add Canadian-headquartered employers to the supply (Shopify, RBC / TD / BMO, Telus, Rogers, Bell, OpenText, Cohere…). Location detection + tagging already handle the rest.</div></div>
     </div>
   </section>
 
@@ -1668,7 +1667,7 @@ function renderV2Canada(raw) {
   const fieldsEl = document.getElementById('canada-fields');
   if (fieldsEl) {
     const dom = c.by_domain || {};
-    const labels = { software: 'Software', hardware: 'Hardware', data_science: 'Data', ai: 'AI' };
+    const labels = { software: 'Software', hardware: 'Hardware', data_science: 'Data Science', ai: 'AI' };
     const rows = Object.entries(dom).filter(([, v]) => v > 0).map(([k, v]) => [labels[k] || k, v]);
     const sum = rows.reduce((n, [, v]) => n + v, 0) || 1;
     fieldsEl.innerHTML = v2MiniRows(rows, sum) || '<span class="muted">—</span>';
@@ -1987,7 +1986,7 @@ function v2BuildTagViewModel(raw) {
   const rateLevel = generalRate == null ? 'critical' : generalRate <= 10 ? 'ok' : generalRate <= 15 ? 'warn' : 'critical';
   const techRateLevel = techGeneralRate == null ? 'warn' : techGeneralRate <= 15 ? 'ok' : techGeneralRate <= 25 ? 'warn' : 'critical';
   const topLevel = topCompany == null ? 'warn' : topCompany.general <= 50 ? 'ok' : topCompany.general <= 100 ? 'warn' : 'critical';
-  const snapshotLevel = reviewOlderThanMetrics ? 'warn' : reviewTs ? 'ok' : 'critical';
+  const snapshotLevel = (reviewLagHours != null && reviewLagHours > 30) ? 'warn' : reviewTs ? 'ok' : 'critical';
   const issues = [];
   if (generalRate == null) {
     issues.push({ title: 'TAG live metrics missing', detail: 'zjp-metrics.json pool.g1_us is unavailable; do not use review snapshot as current health.', level: 'critical' });
@@ -1996,7 +1995,7 @@ function v2BuildTagViewModel(raw) {
   }
   if (techRateLevel !== 'ok') issues.push({ title: 'TAG watch: many US tech jobs uncategorized (G1)', detail: techGeneralRate == null ? 'live uncategorized rate missing' : `${techGeneralRate}% of US tech jobs uncategorized vs ≤15% target (critical >25%) · decision: accept or reduce via Workday family-mapping`, level: techRateLevel });
   if (topLevel !== 'ok') issues.push({ title: 'TAG watch: one company dominates uncategorized jobs', detail: topCompany ? `${topCompany.name}: ${fmt(topCompany.general)} uncategorized jobs (G1) · critical >100 · ${topCompany.source} · decision: accept or reduce` : 'zjp-metrics company breakdown missing', level: topLevel });
-  if (reviewOlderThanMetrics) issues.push({ title: 'Review snapshot older than live metrics', detail: `general-review.json is ${reviewLagHours}h behind zjp-metrics; use it only for deeper review queues.`, level: 'warn' });
+  if (reviewLagHours != null && reviewLagHours > 30) issues.push({ title: 'Review snapshot stale — daily review run may have failed', detail: `general-review.json is ${reviewLagHours}h behind live metrics. It regenerates daily, so a small lag is normal — this means the daily run likely failed. Live health still comes from zjp-metrics.`, level: 'warn' });
   const decision = v2DecisionText(issues, 'No TAG action needed', 'Live G1 leakage is inside thresholds; review snapshot queues are supporting evidence only.');
   const reviewAge = reviewTs ? age(reviewTs) : 'missing';
   return {
@@ -2014,9 +2013,7 @@ function v2BuildTagViewModel(raw) {
       liveCompanies: v2MiniRows(liveCompanyRows, generalJobs || 1),
       patterns: v2MiniRows(patternRows, patternJobs || 1),
       tenants: v2MiniRows(tenantRows, generalJobs || 1),
-      reviewNote: reviewOlderThanMetrics
-        ? `Live company rows use ${fmt(generalJobs)} current uncategorized (G1) US jobs; critical threshold is >100 per company. Review snapshot is ${reviewLagHours}h older than live metrics; use it only for deeper queues. Decision owner: TAG — accept the current rate or reduce via Workday family-mapping.`
-        : `Live company rows use ${fmt(generalJobs)} current uncategorized (G1) US jobs; critical threshold is >100 per company. Review snapshot age: ${reviewAge}. Decision owner: TAG — accept the current rate or reduce via Workday family-mapping.`
+      reviewNote: `Live company rows use ${fmt(generalJobs)} current uncategorized (G1) US jobs; critical threshold is >100 per company. Review snapshot (deeper evidence) age: ${reviewAge}. Decision owner: TAG — accept the current rate or reduce via Workday family-mapping.`
     },
     lineage: [
       v2SourceLabel(V2_DATA_CONTRACT.classification.file, 'live G1 health', metricsTs),
@@ -4550,8 +4547,8 @@ function renderClassification(data) {
 
   const techG1Color = liveTechG1 != null ? (liveTechG1 > 25 ? 'var(--red)' : liveTechG1 > 15 ? 'var(--yellow)' : 'var(--green)') : 'var(--muted)';
   let staleBanner = '';
-  if (staleHours != null && staleHours > 0) {
-    staleBanner = `<div class="card" style="grid-column:1/-1;padding:8px 12px;margin-bottom:8px;font-size:12px;border-left:3px solid var(--yellow)"><span style="color:var(--yellow);font-weight:600">Review snapshot older than live metrics</span> <span style="color:var(--muted)">general-review.json is ${Math.round(staleHours * 10) / 10}h behind zjp-metrics.json. Tables below are deeper review data, not current TAG health.</span></div>`;
+  if (staleHours != null && staleHours > 30) {
+    staleBanner = `<div class="card" style="grid-column:1/-1;padding:8px 12px;margin-bottom:8px;font-size:12px;border-left:3px solid var(--yellow)"><span style="color:var(--yellow);font-weight:600">Review snapshot stale — daily review run may have failed</span> <span style="color:var(--muted)">general-review.json is ${Math.round(staleHours * 10) / 10}h behind zjp-metrics.json (it regenerates daily, so a small lag is normal). Tables below are deeper review data, not current TAG health.</span></div>`;
   }
   summaryEl.innerHTML = staleBanner +
     statCard({ icon: '🏷️', label: 'US G1 Live', value: liveRate == null ? '<span style="color:var(--red)">missing</span>' : `<span style="color:${liveRate > 15 ? 'var(--red)' : liveRate > 10 ? 'var(--yellow)' : 'var(--green)'}">${liveRate}%</span>`, sub: liveRate == null ? 'zjp-metrics.json pool.g1_us missing' : `${fmt(liveGeneral)} general / ${fmt(liveTotal)} US jobs` }) +
