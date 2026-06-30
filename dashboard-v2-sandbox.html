@@ -1977,14 +1977,14 @@ function v2BuildTagViewModel(raw) {
   const topCompany = liveCompanies.length ? liveCompanies[0] : null;
   const patternJobs = patterns.reduce((sum, pattern) => sum + (pattern.count || 0), 0);
   const usG1Threshold = 'target ≤10%; watch >10%; critical >15%';
-  const techG1Threshold = 'target ≤15%; watch >15%; critical >25%';
+  const techG1Threshold = 'target ≤20%; watch >20%; critical >27%';
   const companyThreshold = '≤50 ok / 51-100 watch / >100 critical';
   const tagOwner = 'Owner: TAG; DASH displays only';
   const liveCompanyRows = liveCompanies.slice(0, 6).map(company => [`${company.name} (${company.source})`, company.general || 0]);
   const patternRows = patterns.slice(0, 4).map(pattern => [pattern.title, pattern.count || 0]);
   const tenantRows = tenants.slice(0, 4).map(tenant => [tenant.name, tenant.general || 0]);
   const rateLevel = generalRate == null ? 'critical' : generalRate <= 10 ? 'ok' : generalRate <= 15 ? 'warn' : 'critical';
-  const techRateLevel = techGeneralRate == null ? 'warn' : techGeneralRate <= 15 ? 'ok' : techGeneralRate <= 25 ? 'warn' : 'critical';
+  const techRateLevel = techGeneralRate == null ? 'warn' : techGeneralRate <= 20 ? 'ok' : techGeneralRate <= 27 ? 'warn' : 'critical';
   const topLevel = topCompany == null ? 'warn' : topCompany.general <= 50 ? 'ok' : topCompany.general <= 100 ? 'warn' : 'critical';
   const snapshotLevel = (reviewLagHours != null && reviewLagHours > 30) ? 'warn' : reviewTs ? 'ok' : 'critical';
   const issues = [];
@@ -1993,7 +1993,7 @@ function v2BuildTagViewModel(raw) {
   } else if (rateLevel !== 'ok') {
     issues.push({ title: 'TAG triage: US G1 leakage above target', detail: `${generalRate}% general · ${fmt(generalJobs)} / ${fmt(usTotal)} US jobs · ${usG1Threshold} · ${tagOwner}`, level: rateLevel });
   }
-  if (techRateLevel !== 'ok') issues.push({ title: 'TAG watch: many US tech jobs uncategorized (G1)', detail: techGeneralRate == null ? 'live uncategorized rate missing' : `${techGeneralRate}% of US tech jobs uncategorized vs ≤15% target (critical >25%) · decision: accept or reduce via Workday family-mapping`, level: techRateLevel });
+  if (techRateLevel !== 'ok') issues.push({ title: 'TAG watch: many US tech jobs uncategorized (G1)', detail: techGeneralRate == null ? 'live uncategorized rate missing' : `${techGeneralRate}% of US tech jobs uncategorized vs ≤20% target (critical >27%) · ~20% is the realistic floor for this source mix; reduce via department capture (Oracle/Workday) or accept`, level: techRateLevel });
   if (topLevel !== 'ok') issues.push({ title: 'TAG watch: one company dominates uncategorized jobs', detail: topCompany ? `${topCompany.name}: ${fmt(topCompany.general)} uncategorized jobs (G1) · critical >100 · ${topCompany.source} · decision: accept or reduce` : 'zjp-metrics company breakdown missing', level: topLevel });
   if (reviewLagHours != null && reviewLagHours > 30) issues.push({ title: 'Review snapshot stale — daily review run may have failed', detail: `general-review.json is ${reviewLagHours}h behind live metrics. It regenerates daily, so a small lag is normal — this means the daily run likely failed. Live health still comes from zjp-metrics.`, level: 'warn' });
   const decision = v2DecisionText(issues, 'No TAG action needed', 'Live G1 leakage is inside thresholds; review snapshot queues are supporting evidence only.');
@@ -2001,7 +2001,7 @@ function v2BuildTagViewModel(raw) {
   return {
     cards: [
       ['US G1 Live', generalRate == null ? '—' : `${generalRate}%`, `${fmt(generalJobs)} general / ${fmt(usTotal)} US jobs · ${usG1Threshold}`, rateLevel],
-      ['Tech-US G1 Live', techGeneralRate == null ? '—' : `${techGeneralRate}%`, `≤15% target; critical >25% · ${tagOwner}`, techRateLevel],
+      ['Tech-US G1 Live', techGeneralRate == null ? '—' : `${techGeneralRate}%`, `≤20% target; critical >27% · ${tagOwner}`, techRateLevel],
       ['Classified US', classifiedRate == null ? '—' : `${classifiedRate}%`, 'Complement of live US G1 leakage', rateLevel],
       ['Top Live Leakage', topCompany ? topCompany.name : '—', topCompany ? `${fmt(topCompany.general)} G1 · critical >100 · ${topCompany.source}` : 'live company data unavailable', topLevel],
       ['Title Patterns', fmt(patterns.length), `review snapshot · ${reviewAge} · ${fmt(patternJobs)} repeated-title jobs`, snapshotLevel],
@@ -4545,7 +4545,7 @@ function renderClassification(data) {
     tagFresh.textContent = `Live TAG metrics: ${metricsAge}; review snapshot: ${reviewAge}`;
   }
 
-  const techG1Color = liveTechG1 != null ? (liveTechG1 > 25 ? 'var(--red)' : liveTechG1 > 15 ? 'var(--yellow)' : 'var(--green)') : 'var(--muted)';
+  const techG1Color = liveTechG1 != null ? (liveTechG1 > 27 ? 'var(--red)' : liveTechG1 > 20 ? 'var(--yellow)' : 'var(--green)') : 'var(--muted)';
   let staleBanner = '';
   if (staleHours != null && staleHours > 30) {
     staleBanner = `<div class="card" style="grid-column:1/-1;padding:8px 12px;margin-bottom:8px;font-size:12px;border-left:3px solid var(--yellow)"><span style="color:var(--yellow);font-weight:600">Review snapshot stale — daily review run may have failed</span> <span style="color:var(--muted)">general-review.json is ${Math.round(staleHours * 10) / 10}h behind zjp-metrics.json (it regenerates daily, so a small lag is normal). Tables below are deeper review data, not current TAG health.</span></div>`;
