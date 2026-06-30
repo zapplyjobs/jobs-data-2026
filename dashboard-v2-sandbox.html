@@ -615,6 +615,7 @@
   <button class="tab" data-tab="sup">SUP</button>
   <button class="tab" data-tab="out">OUT</button>
   <button class="tab" data-tab="inf">INF</button>
+  <button class="tab" data-tab="guide">Guide</button>
 </aside>
 
 <div id="content-wrap" style="flex:1;min-width:0;overflow-y:auto">
@@ -636,6 +637,44 @@
     <div class="section-label" style="margin-top:24px">Evidence at a glance</div>
     <div class="v2-command-grid v2-overview-grid" id="v2-command-grid"></div>
   </section>
+  <!-- GUIDE TAB — evergreen orientation: what ZJP is, where data lives, how to read this dashboard -->
+  <section id="tab-guide" class="tab-panel" style="display:none">
+    <div class="section-label">Guide — what this is</div>
+    <div class="section-lineage">Curated orientation for operators &amp; handoff · last updated 2026-06-30</div>
+    <div style="display:grid;gap:16px;margin-top:16px">
+      <div class="v2-note-card">
+        <div class="v2-hero-kicker">What ZJP is</div>
+        <div class="v2-hero-copy">Zapply Job Pipeline — the engine behind your job boards. It collects tech (and now Canada) jobs from company career sites, tags them (tech vs not, level, field), enriches them (skills, degree, visa), and publishes them to zapply.jobs, softwarejobs.dev, Discord, and several GitHub job-board repos. It runs automatically every ~15 minutes.</div>
+      </div>
+      <div class="v2-note-card">
+        <div class="v2-hero-kicker">The two halves — remember this</div>
+        <strong>The pipeline is built; the dashboard that tells you whether it's healthy is the project now.</strong>
+        <div class="v2-hero-copy"><strong>Half 1 — the pipeline</strong> (collect → tag → enrich → publish) is mature and mostly at rest. <strong>Half 2 — the dashboard / management / quality layer</strong> is where almost all the real remaining work lives. This dashboard is that second half.</div>
+      </div>
+      <div class="v2-note-card">
+        <div class="v2-hero-kicker">Where the data lives</div>
+        <div class="v2-hero-copy">The pipeline writes everything to <strong>R2</strong> (Cloudflare storage). <strong>zapply.jobs</strong> reads from Supabase — the only surface on Supabase today. <strong>softwarejobs.dev</strong>, the <strong>job-board repos</strong>, and <strong>Discord</strong> all read from R2. Going Supabase-everywhere is the eventual goal, but that move is the dev team's call and is paused.</div>
+      </div>
+    </div>
+    <div class="section-label" style="margin-top:24px">What each module does</div>
+    <div class="v2-command-grid v2-overview-grid">
+      <div class="v2-note-card"><div class="v2-hero-kicker">AGG · Collector</div><div class="v2-hero-copy">Pulls jobs from ~8 company-site sources.</div></div>
+      <div class="v2-note-card"><div class="v2-hero-kicker">TAG · Labeler</div><div class="v2-hero-copy">Tags jobs: tech vs not, level, field.</div></div>
+      <div class="v2-note-card"><div class="v2-hero-kicker">ENR · Detail-adder</div><div class="v2-hero-copy">Adds skills, degree, visa info.</div></div>
+      <div class="v2-note-card"><div class="v2-hero-kicker">SUP · Source manager</div><div class="v2-hero-copy">Manages the list of companies we pull from.</div></div>
+      <div class="v2-note-card"><div class="v2-hero-kicker">OUT · Publisher</div><div class="v2-hero-copy">Pushes jobs to the website, repos, and Discord.</div></div>
+      <div class="v2-note-card"><div class="v2-hero-kicker">INF · Plumbing</div><div class="v2-hero-copy">Pipelines, security, backups — runs every 15 min.</div></div>
+    </div>
+    <div class="section-label" style="margin-top:24px">How to use this dashboard</div>
+    <div class="v2-note-card">
+      <div class="v2-hero-copy"><strong>Start on Overview</strong> — it shows the current operating call and a module priority queue (what to act on first). Drill into a module tab only when Overview flags it. This Guide tab is the <strong>evergreen orientation</strong> (what the system is); Overview is the <strong>live state</strong> (how it's doing right now).</div>
+    </div>
+    <div class="section-label" style="margin-top:24px">Where we're headed</div>
+    <div class="v2-note-card">
+      <div class="v2-hero-copy">The forward direction is building this dashboard into a real platform: (1) a single command center to run and manage all of ZJP; (2) trustworthy metrics that never go stale-vs-live; (3) local scripts runnable from here, backed by GitHub Actions; (4) a self-healing pipeline that auto-fixes or auto-routes problems instead of needing a human each time.</div>
+    </div>
+  </section>
+
 
   <!-- INF TAB — Infrastructure: services, alerts, architecture -->
   <section id="tab-inf" class="tab-panel" style="display:none">
