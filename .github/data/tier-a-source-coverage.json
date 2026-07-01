@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-30T23:53:25.680Z",
+  "generated_at": "2026-07-01T00:07:18.879Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -52,21 +52,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-06-30T23:50:22.054Z",
+    "generated_at": "2026-07-01T00:05:28.545Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 14587,
-    "description_entries": 10317,
-    "coverage_pct": 70.7,
+    "board_row_count": 14222,
+    "description_entries": 10359,
+    "coverage_pct": 72.8,
     "source_breakdown": {
-      "sidecar": 10341,
+      "sidecar": 10385,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-06-30T23:35:35.158Z",
+    "jobs_metadata_generated": "2026-06-30T23:50:35.833Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-06-30T23:53:21.506Z",
+    "checked_at": "2026-07-01T00:07:15.172Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -76,31 +76,94 @@
       {
         "secret": "GH_PAT",
         "expires": "2026-08-25",
-        "days_left": 55
+        "days_left": 54
       }
     ]
   },
   "rows": [
     {
+      "source": "workday",
+      "pool_rows": 53532,
+      "us_rows": 30582,
+      "tech_us_rows": 8238,
+      "raw_sidecar_rows": 25524,
+      "sidecar_active_rows": 6560,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 6517,
+      "published_pct": 79.1,
+      "enriched_rows": 6635,
+      "enriched_pct": 80.5,
+      "enriched_with_skills": 6317,
+      "skills_pct": 95.2,
+      "examples": [
+        {
+          "id": "workday-boeing-JR2026516251",
+          "company": "Boeing",
+          "title": "Manufacturing Technology Analyst - Propulsion South Carolina (Experienced or Senior)"
+        },
+        {
+          "id": "workday-boeing-JR2026512284",
+          "company": "Boeing",
+          "title": "MP&P Engineer -Composite/Interior Composite (Mid-level or Senior)"
+        },
+        {
+          "id": "workday-boeing-JR2026490871",
+          "company": "Boeing",
+          "title": "Flight Test Engineer (Mid-Level, Lead or Senior)"
+        },
+        {
+          "id": "workday-boeing-JR2026512476",
+          "company": "Boeing",
+          "title": "KC-46A Mission Systems Avionics Engineer (Mid-Level, Lead or Senior)"
+        },
+        {
+          "id": "workday-boeing-JR2026510241",
+          "company": "Boeing",
+          "title": "AI Integrator (Mid-Level or Senior)"
+        },
+        {
+          "id": "workday-boeing-JR2026516980",
+          "company": "Boeing",
+          "title": "Systems Engineer - Hydraulics and Fuels (Experienced or Lead)"
+        },
+        {
+          "id": "workday-boeing-JR2026516131",
+          "company": "Boeing",
+          "title": "Low Observable (LO) Design and Integration Engineer (Mid-Level or Senior)"
+        },
+        {
+          "id": "workday-boeing-JR2026516920",
+          "company": "Boeing",
+          "title": "Wire Design & Install Engineer (Experienced, Lead or Senior)"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage"
+      ]
+    },
+    {
       "source": "oracle",
-      "pool_rows": 8240,
-      "us_rows": 5538,
-      "tech_us_rows": 1247,
-      "raw_sidecar_rows": 6234,
+      "pool_rows": 8236,
+      "us_rows": 5499,
+      "tech_us_rows": 1207,
+      "raw_sidecar_rows": 6236,
       "sidecar_active_rows": 524,
-      "supplemental_rows": 25826,
-      "supplemental_with_desc": 18373,
+      "supplemental_rows": 25810,
+      "supplemental_with_desc": 18367,
       "supplemental_meta": {
-        "generated_at": "2026-06-30T23:49:59.064Z",
+        "generated_at": "2026-07-01T00:04:49.042Z",
         "lane_name": "oracle",
-        "jobs_fetched": 25826
+        "jobs_fetched": 25810
       },
-      "published_rows": 524,
-      "published_pct": 42,
-      "enriched_rows": 730,
-      "enriched_pct": 58.5,
-      "enriched_with_skills": 518,
-      "skills_pct": 71,
+      "published_rows": 523,
+      "published_pct": 43.3,
+      "enriched_rows": 729,
+      "enriched_pct": 60.4,
+      "enriched_with_skills": 517,
+      "skills_pct": 70.9,
       "examples": [
         {
           "id": "oracle-citizens-financial-47809",
@@ -123,6 +186,11 @@
           "title": "Software Engineer"
         },
         {
+          "id": "oracle-nokia-33850",
+          "company": "Nokia",
+          "title": "PIC Test Development Engineer"
+        },
+        {
           "id": "oracle-onsemi-2505381",
           "company": "onsemi",
           "title": "Field Applications Engineer - Austin, TX"
@@ -136,11 +204,6 @@
           "id": "oracle-oracle-338732",
           "company": "Oracle",
           "title": "Software Developer 2"
-        },
-        {
-          "id": "oracle-texas-instruments-25006755",
-          "company": "Texas Instruments",
-          "title": "Manufacturing Product Engineer (LFAB)"
         }
       ],
       "severity": "high",
@@ -153,59 +216,59 @@
     {
       "source": "smartrecruiters",
       "pool_rows": 1679,
-      "us_rows": 1869,
-      "tech_us_rows": 417,
-      "raw_sidecar_rows": 3798,
+      "us_rows": 1870,
+      "tech_us_rows": 418,
+      "raw_sidecar_rows": 4297,
       "sidecar_active_rows": 241,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 241,
-      "published_pct": 57.8,
+      "published_rows": 266,
+      "published_pct": 63.6,
       "enriched_rows": 241,
-      "enriched_pct": 57.8,
+      "enriched_pct": 57.7,
       "enriched_with_skills": 235,
       "skills_pct": 97.5,
       "examples": [
         {
-          "id": "sr-AbbVie-3743990013860246",
-          "company": "AbbVie",
-          "title": "Sr. Manager, IT QA- Regulatory Assurance"
+          "id": "sr-atpco1-744000134788111",
+          "company": "ATPCO",
+          "title": "Director, Pricing Engine Solutions"
         },
         {
-          "id": "sr-AbbVie-3743990013859423",
-          "company": "AbbVie",
-          "title": "Sr. Manager, IT QA- Regulatory Assurance"
+          "id": "sr-BoschGroup-744000134922809",
+          "company": "Bosch Group",
+          "title": "Sr. Software Engineer"
         },
         {
-          "id": "sr-AbbVie-3743990013847326",
-          "company": "AbbVie",
-          "title": "Principal Research Scientist II, Analytical Lead, R&D"
+          "id": "sr-BoschGroup-744000134691529",
+          "company": "Bosch Group",
+          "title": "Senior Software Architect - Infotainment"
         },
         {
-          "id": "sr-AbbVie-3743990013841291",
-          "company": "AbbVie",
-          "title": "Principal Research Scientist I"
+          "id": "sr-BoschGroup-744000134011708",
+          "company": "Bosch Group",
+          "title": "Senior Systems Engineer (Multiple Positions) (REF289777D)"
         },
         {
-          "id": "sr-AbbVie-3743990013837546",
-          "company": "AbbVie",
-          "title": "Senior Electrical Engineer, Combination Product Development"
+          "id": "sr-BoschGroup-744000133953349",
+          "company": "Bosch Group",
+          "title": "Sr. Calibration Engineer (Project Manager) - Service House"
         },
         {
-          "id": "sr-AbbVie-3743990013818556",
-          "company": "AbbVie",
-          "title": "Principal Research Scientist I, Multispecifics Engineering"
+          "id": "sr-BoschGroup-744000133096545",
+          "company": "Bosch Group",
+          "title": "Senior Controls Engineer"
         },
         {
-          "id": "sr-AbbVie-3743990013815290",
-          "company": "AbbVie",
-          "title": "Senior ServiceNow Engineer"
+          "id": "sr-BoschGroup-744000132989075",
+          "company": "Bosch Group",
+          "title": "Senior Principal Engineer- MLOps & AI Machinery, ADAS/AV"
         },
         {
-          "id": "sr-AbbVie-3743990013813954",
-          "company": "AbbVie",
-          "title": "Manager - ISRM (Cybersecurity) Organizational Change Management (Hybrid)"
+          "id": "sr-BoschGroup-744000132879128",
+          "company": "Bosch Group",
+          "title": "Sr. Software Engineer (Multiple Positions) (REF289267Z)"
         }
       ],
       "severity": "high",
@@ -255,67 +318,6 @@
       "flags": [
         "low_skill_fill"
       ]
-    },
-    {
-      "source": "workday",
-      "pool_rows": 53477,
-      "us_rows": 30098,
-      "tech_us_rows": 7769,
-      "raw_sidecar_rows": 25529,
-      "sidecar_active_rows": 6596,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 6555,
-      "published_pct": 84.4,
-      "enriched_rows": 6667,
-      "enriched_pct": 85.8,
-      "enriched_with_skills": 6347,
-      "skills_pct": 95.2,
-      "examples": [
-        {
-          "id": "workday-crowdstrike-R29043",
-          "company": "CrowdStrike",
-          "title": "Software Engineer, Cloud/Backend - Policy (Hybrid)"
-        },
-        {
-          "id": "workday-cme-group-34483",
-          "company": "CME Group",
-          "title": "Securities Clearing - Market Risk Consultant"
-        },
-        {
-          "id": "workday-citi-26969293",
-          "company": "Citi",
-          "title": "Java/React Full Stack Developer - Assistant Vice President"
-        },
-        {
-          "id": "workday-salesforce-JR342230",
-          "company": "Salesforce",
-          "title": "Senior Solution Architect, Retail Execution/Trade Promotion Management"
-        },
-        {
-          "id": "workday-cisco-2017122",
-          "company": "Cisco",
-          "title": "Business Systems Analysis Manager - Partner Incentives"
-        },
-        {
-          "id": "workday-cisco-2018241",
-          "company": "Cisco",
-          "title": "ASIC DFT Engineer"
-        },
-        {
-          "id": "workday-philips-586877",
-          "company": "Philips",
-          "title": "Quality Manager - Design Quality Engineering"
-        },
-        {
-          "id": "workday-philips-582349",
-          "company": "Philips",
-          "title": "DevOps Engineer"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
     },
     {
       "source": "microsoft",
