@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-01T00:33:39.797Z",
+  "generated_at": "2026-07-01T00:37:19.149Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -52,21 +52,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-01T00:20:35.242Z",
+    "generated_at": "2026-07-01T00:35:29.955Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 14641,
-    "description_entries": 10397,
-    "coverage_pct": 71,
+    "board_row_count": 14370,
+    "description_entries": 10379,
+    "coverage_pct": 72.2,
     "source_breakdown": {
-      "sidecar": 10421,
+      "sidecar": 10406,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-07-01T00:05:59.705Z",
+    "jobs_metadata_generated": "2026-07-01T00:21:19.556Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-01T00:33:35.491Z",
+    "checked_at": "2026-07-01T00:37:14.099Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -82,18 +82,82 @@
   },
   "rows": [
     {
+      "source": "workday",
+      "pool_rows": 53590,
+      "us_rows": 30791,
+      "tech_us_rows": 8442,
+      "raw_sidecar_rows": 25745,
+      "sidecar_active_rows": 6567,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 6523,
+      "published_pct": 77.3,
+      "enriched_rows": 6650,
+      "enriched_pct": 78.8,
+      "enriched_with_skills": 6330,
+      "skills_pct": 95.2,
+      "examples": [
+        {
+          "id": "workday-becton-dickinson-R-548352",
+          "company": "Becton Dickinson",
+          "title": "R&D Engineer III"
+        },
+        {
+          "id": "workday-becton-dickinson-R-549258",
+          "company": "Becton Dickinson",
+          "title": "Automation Service Engineer - New Brunswick, NJ"
+        },
+        {
+          "id": "workday-baxter-international-JR-204300",
+          "company": "Baxter International",
+          "title": "Project and Improvement Engineer (Mechanical)"
+        },
+        {
+          "id": "workday-boeing-JR2026512284",
+          "company": "Boeing",
+          "title": "MP&P Engineer -Composite/Interior Composite (Mid-level or Senior)"
+        },
+        {
+          "id": "workday-boeing-JR2026490871",
+          "company": "Boeing",
+          "title": "Flight Test Engineer (Mid-Level, Lead or Senior)"
+        },
+        {
+          "id": "workday-boeing-JR2026512476",
+          "company": "Boeing",
+          "title": "KC-46A Mission Systems Avionics Engineer (Mid-Level, Lead or Senior)"
+        },
+        {
+          "id": "workday-boeing-JR2026510241",
+          "company": "Boeing",
+          "title": "AI Integrator (Mid-Level or Senior)"
+        },
+        {
+          "id": "workday-boeing-JR2026516980",
+          "company": "Boeing",
+          "title": "Systems Engineer - Hydraulics and Fuels (Experienced or Lead)"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage",
+        "low_enrichment_coverage"
+      ]
+    },
+    {
       "source": "oracle",
-      "pool_rows": 8242,
+      "pool_rows": 8243,
       "us_rows": 5501,
       "tech_us_rows": 1206,
-      "raw_sidecar_rows": 6240,
+      "raw_sidecar_rows": 6149,
       "sidecar_active_rows": 524,
-      "supplemental_rows": 25805,
-      "supplemental_with_desc": 18359,
+      "supplemental_rows": 25807,
+      "supplemental_with_desc": 18361,
       "supplemental_meta": {
-        "generated_at": "2026-07-01T00:19:44.266Z",
+        "generated_at": "2026-07-01T00:34:32.796Z",
         "lane_name": "oracle",
-        "jobs_fetched": 25805
+        "jobs_fetched": 25807
       },
       "published_rows": 524,
       "published_pct": 43.4,
@@ -153,59 +217,59 @@
     {
       "source": "smartrecruiters",
       "pool_rows": 1680,
-      "us_rows": 1876,
-      "tech_us_rows": 423,
-      "raw_sidecar_rows": 4797,
+      "us_rows": 1879,
+      "tech_us_rows": 426,
+      "raw_sidecar_rows": 3304,
       "sidecar_active_rows": 241,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 305,
-      "published_pct": 72.1,
+      "published_rows": 327,
+      "published_pct": 76.8,
       "enriched_rows": 241,
-      "enriched_pct": 57,
+      "enriched_pct": 56.6,
       "enriched_with_skills": 235,
       "skills_pct": 97.5,
       "examples": [
         {
-          "id": "sr-Eurofins-744000133127174",
-          "company": "Eurofins",
-          "title": "Senior Product Safety Engineer"
+          "id": "sr-Intuitive-744000134270709",
+          "company": "Intuitive",
+          "title": "Senior Software Engineer in Test"
         },
         {
-          "id": "sr-EVERSANA1-744000134506190",
-          "company": "EVERSANA",
-          "title": "EDI Architect"
+          "id": "sr-Intuitive-744000134036279",
+          "company": "Intuitive",
+          "title": "Sr. Mechanical Design Engineer - MFG Equipment"
         },
         {
-          "id": "sr-EVERSANA1-744000134275629",
-          "company": "EVERSANA",
-          "title": "Sr. Database Administrator"
+          "id": "sr-Intuitive-744000134010309",
+          "company": "Intuitive",
+          "title": "Senior FPGA Design Verification Engineer"
         },
         {
-          "id": "sr-Experian-744000132935639",
-          "company": "Experian",
-          "title": "Senior Data Scientist, Innovation Lab - Remote"
+          "id": "sr-Intuitive-744000134004279",
+          "company": "Intuitive",
+          "title": "Senior Software Development Engineer - Equipment  Control"
         },
         {
-          "id": "sr-Experian-744000132935202",
-          "company": "Experian",
-          "title": "Staff Backend AI Engineer, Remote"
+          "id": "sr-Intuitive-744000133988162",
+          "company": "Intuitive",
+          "title": "Senior Mechanical Design Engineer"
         },
         {
-          "id": "sr-Experian-744000132934654",
-          "company": "Experian",
-          "title": "Staff AI Architect, Remote"
+          "id": "sr-Intuitive-744000133700579",
+          "company": "Intuitive",
+          "title": "Senior Mechanical Design Engineer"
         },
         {
-          "id": "sr-Experian-744000132734044",
-          "company": "Experian",
-          "title": "Senior Manager, Thought Leadership and Insights"
+          "id": "sr-Intuitive-744000133691119",
+          "company": "Intuitive",
+          "title": "Salesforce Technical Lead"
         },
         {
-          "id": "sr-Experian-744000132637519",
-          "company": "Experian",
-          "title": "Senior Analyst, Analytics Development & Model Governance"
+          "id": "sr-Intuitive-744000133688869",
+          "company": "Intuitive",
+          "title": "Senior Embedded Software Engineer - Future Forward"
         }
       ],
       "severity": "high",
@@ -255,67 +319,6 @@
       "flags": [
         "low_skill_fill"
       ]
-    },
-    {
-      "source": "workday",
-      "pool_rows": 53527,
-      "us_rows": 30245,
-      "tech_us_rows": 7958,
-      "raw_sidecar_rows": 25525,
-      "sidecar_active_rows": 6549,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 6520,
-      "published_pct": 81.9,
-      "enriched_rows": 6626,
-      "enriched_pct": 83.3,
-      "enriched_with_skills": 6306,
-      "skills_pct": 95.2,
-      "examples": [
-        {
-          "id": "workday-microchip-technology-R2269-25",
-          "company": "Microchip Technology",
-          "title": "Engineer I- Device"
-        },
-        {
-          "id": "workday-microchip-technology-R2525-26",
-          "company": "Microchip Technology",
-          "title": "Technician III- Equipment (Implant)"
-        },
-        {
-          "id": "workday-jll-REQ503707",
-          "company": "JLL",
-          "title": "Mech & Robotics Technician 3rd shift"
-        },
-        {
-          "id": "workday-jll-REQ503704",
-          "company": "JLL",
-          "title": "Mech & Robotics Technician 2nd Shift"
-        },
-        {
-          "id": "workday-jll-REQ504792",
-          "company": "JLL",
-          "title": "Critical Environments Manager"
-        },
-        {
-          "id": "workday-jll-REQ515021",
-          "company": "JLL",
-          "title": "AV Production Engineer"
-        },
-        {
-          "id": "workday-jll-REQ499128",
-          "company": "JLL",
-          "title": "Mobile HVAC/Maintenance Engineer"
-        },
-        {
-          "id": "workday-jll-REQ508664",
-          "company": "JLL",
-          "title": "CAFM CAD Analyst"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
     },
     {
       "source": "microsoft",
