@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-01T12:37:10.223Z",
+  "generated_at": "2026-07-01T12:52:15.319Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -52,21 +52,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-01T12:35:31.540Z",
+    "generated_at": "2026-07-01T12:50:32.600Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 14518,
-    "description_entries": 10563,
-    "coverage_pct": 72.8,
+    "board_row_count": 14787,
+    "description_entries": 10634,
+    "coverage_pct": 71.9,
     "source_breakdown": {
-      "sidecar": 10587,
+      "sidecar": 10660,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-07-01T12:23:00.702Z",
+    "jobs_metadata_generated": "2026-07-01T12:37:46.847Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-01T12:37:05.814Z",
+    "checked_at": "2026-07-01T12:52:11.352Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -82,26 +82,95 @@
   },
   "rows": [
     {
+      "source": "workday",
+      "pool_rows": 55042,
+      "us_rows": 31287,
+      "tech_us_rows": 8614,
+      "raw_sidecar_rows": 27047,
+      "sidecar_active_rows": 6702,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 6628,
+      "published_pct": 76.9,
+      "enriched_rows": 6792,
+      "enriched_pct": 78.8,
+      "enriched_with_skills": 6461,
+      "skills_pct": 95.1,
+      "examples": [
+        {
+          "id": "workday-danaher-R1312399",
+          "company": "Danaher",
+          "title": "Field Service Engineer - Chicagoland Area"
+        },
+        {
+          "id": "workday-danaher-R1312305",
+          "company": "Danaher",
+          "title": "Field Service Engineer - Territory covering North & Central New Jersey"
+        },
+        {
+          "id": "workday-unisys-REQ572125",
+          "company": "Unisys",
+          "title": "Global Transition Operations & Excellence"
+        },
+        {
+          "id": "workday-crane-co.-JR102045",
+          "company": "Crane Co.",
+          "title": "Salesforce Data Analyst"
+        },
+        {
+          "id": "workday-northrop-grumman-R10238272",
+          "company": "Northrop Grumman",
+          "title": "Electrical Engineer 2"
+        },
+        {
+          "id": "workday-rtx-01856212",
+          "company": "RTX",
+          "title": "System Admin - DC"
+        },
+        {
+          "id": "workday-rtx-01856477",
+          "company": "RTX",
+          "title": "Digital Technology Jira Solutions Analyst"
+        },
+        {
+          "id": "workday-leidos-R-00186373",
+          "company": "Leidos",
+          "title": "Wire Shop Technician"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage",
+        "low_enrichment_coverage"
+      ]
+    },
+    {
       "source": "oracle",
-      "pool_rows": 8425,
-      "us_rows": 5528,
-      "tech_us_rows": 1209,
-      "raw_sidecar_rows": 6272,
+      "pool_rows": 8442,
+      "us_rows": 5540,
+      "tech_us_rows": 1212,
+      "raw_sidecar_rows": 6366,
       "sidecar_active_rows": 534,
-      "supplemental_rows": 25833,
-      "supplemental_with_desc": 18360,
+      "supplemental_rows": 25843,
+      "supplemental_with_desc": 18364,
       "supplemental_meta": {
-        "generated_at": "2026-07-01T12:36:21.899Z",
+        "generated_at": "2026-07-01T12:50:25.399Z",
         "lane_name": "oracle",
-        "jobs_fetched": 25833
+        "jobs_fetched": 25843
       },
       "published_rows": 534,
-      "published_pct": 44.2,
-      "enriched_rows": 732,
+      "published_pct": 44.1,
+      "enriched_rows": 733,
       "enriched_pct": 60.5,
-      "enriched_with_skills": 520,
-      "skills_pct": 71,
+      "enriched_with_skills": 521,
+      "skills_pct": 71.1,
       "examples": [
+        {
+          "id": "oracle-wsp-90206",
+          "company": "WSP",
+          "title": "Substation Engineer"
+        },
         {
           "id": "oracle-citizens-financial-47809",
           "company": "Citizens Financial Group",
@@ -136,11 +205,6 @@
           "id": "oracle-oracle-338732",
           "company": "Oracle",
           "title": "Software Developer 2"
-        },
-        {
-          "id": "oracle-texas-instruments-25006755",
-          "company": "Texas Instruments",
-          "title": "Manufacturing Product Engineer (LFAB)"
         }
       ],
       "severity": "high",
@@ -148,70 +212,6 @@
         "low_published_coverage",
         "low_enrichment_coverage",
         "supplemental_stage_gap"
-      ]
-    },
-    {
-      "source": "smartrecruiters",
-      "pool_rows": 1691,
-      "us_rows": 1892,
-      "tech_us_rows": 428,
-      "raw_sidecar_rows": 3337,
-      "sidecar_active_rows": 241,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 411,
-      "published_pct": 96,
-      "enriched_rows": 241,
-      "enriched_pct": 56.3,
-      "enriched_with_skills": 235,
-      "skills_pct": 97.5,
-      "examples": [
-        {
-          "id": "sr-solidigm-744000134860899",
-          "company": "Solidigm",
-          "title": "Principal AI Workflow Engineer"
-        },
-        {
-          "id": "sr-solidigm-744000134535859",
-          "company": "Solidigm",
-          "title": "Senior Principal Storage Architecture Engineer"
-        },
-        {
-          "id": "sr-solidigm-744000134325749",
-          "company": "Solidigm",
-          "title": "Validation Architect"
-        },
-        {
-          "id": "sr-VeoliaEnvironnementSA-744000134818630",
-          "company": "Veolia Environnement SA",
-          "title": "Lead Reliability Engineer"
-        },
-        {
-          "id": "sr-WellmarkInc-744000135125019",
-          "company": "Wellmark, Inc.",
-          "title": "Sr Financial & Data Analyst – Healthcare Economics"
-        },
-        {
-          "id": "sr-WellmarkInc-744000134508191",
-          "company": "Wellmark, Inc.",
-          "title": "Senior Software Engineer - Enterprise Data Services"
-        },
-        {
-          "id": "sr-WellmarkInc-744000134337649",
-          "company": "Wellmark, Inc.",
-          "title": "Lead Software Engineer - AI Platform Team"
-        },
-        {
-          "id": "sr-WellmarkInc-744000134286090",
-          "company": "Wellmark, Inc.",
-          "title": "Sr. Software Engineer (Open to hiring at Lead level)"
-        }
-      ],
-      "severity": "medium",
-      "flags": [
-        "published_gt_raw_sidecar",
-        "low_enrichment_coverage"
       ]
     },
     {
@@ -257,65 +257,33 @@
       ]
     },
     {
-      "source": "workday",
-      "pool_rows": 54938,
-      "us_rows": 30694,
-      "tech_us_rows": 8057,
-      "raw_sidecar_rows": 26847,
-      "sidecar_active_rows": 6652,
+      "source": "smartrecruiters",
+      "pool_rows": 1692,
+      "us_rows": 1891,
+      "tech_us_rows": 427,
+      "raw_sidecar_rows": 6762,
+      "sidecar_active_rows": 242,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 6652,
-      "published_pct": 82.6,
-      "enriched_rows": 6720,
-      "enriched_pct": 83.4,
-      "enriched_with_skills": 6393,
-      "skills_pct": 95.1,
+      "published_rows": 426,
+      "published_pct": 99.8,
+      "enriched_rows": 241,
+      "enriched_pct": 56.4,
+      "enriched_with_skills": 235,
+      "skills_pct": 97.5,
       "examples": [
         {
-          "id": "workday-verizon-R-1097084",
-          "company": "Verizon",
-          "title": "Engineer III Consultant Network Performance"
-        },
-        {
-          "id": "workday-northrop-grumman-R10238272",
-          "company": "Northrop Grumman",
-          "title": "Electrical Engineer 2"
-        },
-        {
-          "id": "workday-kbr-R2125632",
-          "company": "KBR",
-          "title": "Aircraft Systems Analyst Level II"
-        },
-        {
-          "id": "workday-amentum-R0164867",
-          "company": "Amentum",
-          "title": "Identity Intelligence Analyst (Mid-Level)(Deployable)"
-        },
-        {
-          "id": "workday-booz-allen-hamilton-R0243369",
-          "company": "Booz Allen Hamilton",
-          "title": "Computer Vision AI Engineer"
-        },
-        {
-          "id": "workday-booz-allen-hamilton-R0243608",
-          "company": "Booz Allen Hamilton",
-          "title": "All-Source Intelligence Analysis and Production"
-        },
-        {
-          "id": "workday-booz-allen-hamilton-R0243354",
-          "company": "Booz Allen Hamilton",
-          "title": "Technical Project Manager"
-        },
-        {
-          "id": "workday-blue-origin-R66793",
-          "company": "Blue Origin",
-          "title": "Manufacturing Engineer III - Electronics Fabrication"
+          "id": "sr-Eurofins-744000135256389",
+          "company": "Eurofins",
+          "title": "Laboratory Instrument System Administrator"
         }
       ],
-      "severity": "ok",
-      "flags": []
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar",
+        "low_enrichment_coverage"
+      ]
     },
     {
       "source": "microsoft",
