@@ -2202,7 +2202,7 @@ function v2BuildOutViewModel(raw) {
     const staleDetail = outStateStatus.stale ? `stale ${outStateStatus.hours == null ? 'unknown age' : Math.round(outStateStatus.hours)}h` : null;
     const missingDetail = outStateStatus.missing.length ? `missing ${outStateStatus.missing.join(', ')}` : null;
     issues.push({ title: 'OUT assurance state unusable', detail: [missingDetail, staleDetail].filter(Boolean).join(' · '), level: 'critical' });
-  } else {
+  } else if (outStateStatus.level !== 'ok') {
     issues.push({ title: externalOwner ? 'External public-board risk routed' : 'Routed public-board risk', detail: `${outState.current_problem.issue} · ${outState.current_problem.owner} owns fix`, level: outStateStatus.level === 'critical' ? 'critical' : 'warn' });
   }
   const decision = outStateStatus.usable
