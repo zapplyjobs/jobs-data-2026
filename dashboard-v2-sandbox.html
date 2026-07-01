@@ -1263,14 +1263,14 @@ let _guideMermaidRendered = false;
             const container = document.getElementById('webapp-arch-diagram');
             if (!container) return;
             const diagramDef = `graph TB
-  User["Dev Team / Operator"]
-  App["ZJP Dashboard Web App<br/>(Next.js on Cloudflare Workers)"]
-  LiveData["Live Data — React Query<br/>queries R2/Supabase, 60s cache"]
-  Actions["Server Actions<br/>trigger workflows, run checks, evaluate alerts"]
-  R2[("R2 Storage<br/>all_jobs, enriched, metrics")]
-  Supabase[("Supabase<br/>jobs table")]
-  GHActions["GitHub Actions<br/>fetch, enrich, metrics, cleanup"]
-  Consumers["Consumers<br/>sjd, repos, Discord"]
+  User(["👤 Dev Team / Operator"])
+  App["⚡ ZJP Dashboard Web App<br/>Next.js on Cloudflare Workers"]
+  LiveData["🔬 Live Data — React Query<br/>queries R2/Supabase, 60s cache"]
+  Actions["🔧 Server Actions<br/>trigger workflows, run checks, evaluate alerts"]
+  R2[("💾 R2 Storage<br/>all_jobs, enriched, metrics")]
+  Supabase[("💾 Supabase<br/>jobs table")]
+  GHActions(["⏱️ GitHub Actions<br/>fetch, enrich, metrics, cleanup"])
+  Consumers(["🌐 Consumers<br/>sjd, repos, Discord"])
   User -->|uses| App
   App --> LiveData
   App --> Actions
@@ -1279,9 +1279,14 @@ let _guideMermaidRendered = false;
   Actions -->|trigger| GHActions
   GHActions -->|writes| R2
   R2 --> Consumers
-  style App fill:#e1f5fe,stroke:#0288d1
-  style R2 fill:#fff3e0,stroke:#ef6c00
-  style Supabase fill:#e8f5e9,stroke:#388e3c`;
+  style User fill:transparent,stroke:#9b7eff,color:#c4a7ff
+  style App fill:transparent,stroke:#4a9eff,color:#88bbff
+  style LiveData fill:transparent,stroke:#4a9eff,color:#88bbff
+  style Actions fill:transparent,stroke:#4a9eff,color:#88bbff
+  style R2 fill:transparent,stroke:#4aff7e,color:#88ffaa
+  style Supabase fill:transparent,stroke:#4aff7e,color:#88ffaa
+  style GHActions fill:transparent,stroke:#f97316,color:#fdba74,stroke-width:2px
+  style Consumers fill:transparent,stroke:#9b7eff,color:#c4a7ff`;
             const { svg } = await mermaid.render('webapp-arch-svg', diagramDef);
             container.innerHTML = svg;
             _guideMermaidRendered = true;
