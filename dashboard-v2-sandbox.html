@@ -675,6 +675,12 @@
     <div class="v2-note-card">
       <div class="v2-hero-copy">The forward direction is building this dashboard into a real platform: (1) a single command center to run and manage all of ZJP; (2) trustworthy metrics that never go stale-vs-live; (3) local scripts runnable from here, backed by GitHub Actions; (4) a self-healing pipeline that auto-fixes or auto-routes problems instead of needing a human each time.</div>
     </div>
+
+    <div class="section-label" style="margin-top:24px">Target architecture: web app rebuild</div>
+    <div class="section-lineage">Source: target architecture (web-app rebuild plan, session A199)</div>
+    <div class="card" style="overflow-x:auto;margin-top:8px">
+      <div id="webapp-arch-diagram"><span class="muted">Click the Guide tab to render the diagram.</span></div>
+    </div>
   </section>
   <!-- CANADA TAB — launch readiness + what's in the Canada lane -->
   <!-- TOOLS TAB — run diagnostics & maintenance (command center) -->
@@ -1191,6 +1197,7 @@ const DASHBOARD_SECRET = '__DASHBOARD_SECRET__';
 
 // Tab switching
 let _mermaidRendered = false;
+let _guideMermaidRendered = false;
 (function () {
   document.querySelectorAll('.tab').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -1248,6 +1255,37 @@ let _mermaidRendered = false;
             container.innerHTML = svg;
             _mermaidRendered = true;
           } catch(e) { console.warn('mermaid render:', e); }
+        }, 200);
+      }
+      if (btn.dataset.tab === 'guide' && !_guideMermaidRendered) {
+        setTimeout(async () => {
+          try {
+            const container = document.getElementById('webapp-arch-diagram');
+            if (!container) return;
+            const diagramDef = `graph TB
+  User["Dev Team / Operator"]
+  App["ZJP Dashboard Web App<br/>(Next.js on Cloudflare Workers)"]
+  LiveData["Live Data — React Query<br/>queries R2/Supabase, 60s cache"]
+  Actions["Server Actions<br/>trigger workflows, run checks, evaluate alerts"]
+  R2[("R2 Storage<br/>all_jobs, enriched, metrics")]
+  Supabase[("Supabase<br/>jobs table")]
+  GHActions["GitHub Actions<br/>fetch, enrich, metrics, cleanup"]
+  Consumers["Consumers<br/>sjd, repos, Discord"]
+  User -->|uses| App
+  App --> LiveData
+  App --> Actions
+  LiveData -->|live queries| R2
+  LiveData -->|live queries| Supabase
+  Actions -->|trigger| GHActions
+  GHActions -->|writes| R2
+  R2 --> Consumers
+  style App fill:#e1f5fe,stroke:#0288d1
+  style R2 fill:#fff3e0,stroke:#ef6c00
+  style Supabase fill:#e8f5e9,stroke:#388e3c`;
+            const { svg } = await mermaid.render('webapp-arch-svg', diagramDef);
+            container.innerHTML = svg;
+            _guideMermaidRendered = true;
+          } catch(e) { console.warn('guide mermaid render:', e); }
         }, 200);
       }
     });
