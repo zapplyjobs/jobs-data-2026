@@ -617,6 +617,7 @@
   <button class="tab" data-tab="inf">INF</button>
   <button class="tab" data-tab="guide">Guide</button>
   <button class="tab" data-tab="canada">Canada</button>
+  <button class="tab" data-tab="tools">Tools</button>
 </aside>
 
 <div id="content-wrap" style="flex:1;min-width:0;overflow-y:auto">
@@ -676,6 +677,36 @@
     </div>
   </section>
   <!-- CANADA TAB — launch readiness + what's in the Canada lane -->
+  <!-- TOOLS TAB — run diagnostics & maintenance (command center) -->
+  <section id="tab-tools" class="tab-panel" style="display:none">
+    <div class="section-label">Tools — run diagnostics & maintenance</div>
+    <div class="section-lineage">Each tool runs via GitHub Actions (workflow_dispatch). Click "Run →" to open the Actions page and trigger it. Results appear in the repo's Actions tab.</div>
+
+    <div class="section-label" style="margin-top:16px">Health &amp; data ops</div>
+    <div class="v2-command-grid v2-overview-grid">
+      <div class="v2-note-card"><div class="v2-hero-kicker">Collect metrics</div><div class="v2-hero-copy">Refresh the live zjp-metrics (pool counts, G1 rates, freshness).</div><a href="https://github.com/zapplyjobs/jobs-data-2026/actions/workflows/collect-metrics.yml" target="_blank" style="font-size:12px;text-decoration:none">Run →</a></div>
+      <div class="v2-note-card"><div class="v2-hero-kicker">Pipeline alert</div><div class="v2-hero-copy">Check pipeline health + post alerts to Discord.</div><a href="https://github.com/zapplyjobs/jobs-data-2026/actions/workflows/pipeline-alert.yml" target="_blank" style="font-size:12px;text-decoration:none">Run →</a></div>
+      <div class="v2-note-card"><div class="v2-hero-kicker">Refresh public snapshot</div><div class="v2-hero-copy">Rebuild the public-facing data snapshot from R2.</div><a href="https://github.com/zapplyjobs/jobs-data-2026/actions/workflows/refresh-zjp-public-snapshot.yml" target="_blank" style="font-size:12px;text-decoration:none">Run →</a></div>
+      <div class="v2-note-card"><div class="v2-hero-kicker">Enrich jobs</div><div class="v2-hero-copy">Run the enrichment pipeline (skills, degree, visa, descriptions).</div><a href="https://github.com/zapplyjobs/jobs-data-2026/actions/workflows/enrich-jobs.yml" target="_blank" style="font-size:12px;text-decoration:none">Run →</a></div>
+    </div>
+
+    <div class="section-label" style="margin-top:24px">Maintenance</div>
+    <div class="v2-command-grid v2-overview-grid">
+      <div class="v2-note-card"><div class="v2-hero-kicker">Cleanup closed jobs</div><div class="v2-hero-copy">Remove dead/closed jobs from the active pool.</div><a href="https://github.com/zapplyjobs/jobs-data-2026/actions/workflows/cleanup-closed.yml" target="_blank" style="font-size:12px;text-decoration:none">Run →</a></div>
+      <div class="v2-note-card"><div class="v2-hero-kicker">Cleanup Discord posts</div><div class="v2-hero-copy">Remove stale Discord job posts.</div><a href="https://github.com/zapplyjobs/jobs-data-2026/actions/workflows/cleanup-discord-posts.yml" target="_blank" style="font-size:12px;text-decoration:none">Run →</a></div>
+      <div class="v2-note-card"><div class="v2-hero-kicker">Verify Discord</div><div class="v2-hero-copy">Check Discord posting health (posts match R2).</div><a href="https://github.com/zapplyjobs/jobs-data-2026/actions/workflows/verify-discord.yml" target="_blank" style="font-size:12px;text-decoration:none">Run →</a></div>
+    </div>
+
+    <div class="section-label" style="margin-top:24px">Stats &amp; deploy</div>
+    <div class="v2-command-grid v2-overview-grid">
+      <div class="v2-note-card"><div class="v2-hero-kicker">Stats (daily / weekly / monthly)</div><div class="v2-hero-copy">Generate trend statistics.</div><a href="https://github.com/zapplyjobs/jobs-data-2026/actions/workflows/daily-stats.yml" target="_blank" style="font-size:12px;text-decoration:none">Daily →</a> · <a href="https://github.com/zapplyjobs/jobs-data-2026/actions/workflows/weekly-stats.yml" target="_blank" style="font-size:12px;text-decoration:none">Weekly →</a> · <a href="https://github.com/zapplyjobs/jobs-data-2026/actions/workflows/monthly-stats.yml" target="_blank" style="font-size:12px;text-decoration:none">Monthly →</a></div>
+      <div class="v2-note-card"><div class="v2-hero-kicker">Deploy dashboard</div><div class="v2-hero-copy">Rebuild + deploy the GitHub Pages dashboard.</div><a href="https://github.com/zapplyjobs/jobs-data-2026/actions/workflows/deploy-pages.yml" target="_blank" style="font-size:12px;text-decoration:none">Run →</a></div>
+    </div>
+
+    <div class="section-label" style="margin-top:24px">More tools (migrating progressively)</div>
+    <div class="v2-note-card"><div class="v2-hero-copy">~120 scripts exist locally (see <code>zjp_tool_registry_2026_06_29.md</code>): health checks, zero-fetch probes, enrichment diagnostics, TAG verification, consumer checks, R2 access, push helpers. These will be exposed here progressively as they're wrapped in GH Actions workflows.</div></div>
+  </section>
+
   <section id="tab-canada" class="tab-panel" style="display:none">
     <div class="section-label">Canada — ready to launch?</div>
     <div class="section-lineage" id="lineage-v2-canada">Source: loading…</div>
