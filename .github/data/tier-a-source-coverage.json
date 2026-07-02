@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-02T05:08:11.946Z",
+  "generated_at": "2026-07-02T05:23:42.848Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -31,7 +31,6 @@
     "descriptions-deshaw.jsonl",
     "descriptions-eightfold.jsonl",
     "descriptions-enriched-1.jsonl",
-    "descriptions-enriched-10.jsonl",
     "descriptions-enriched-2.jsonl",
     "descriptions-enriched-3.jsonl",
     "descriptions-enriched-4.jsonl",
@@ -53,26 +52,28 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-02T05:06:19.910Z",
+    "generated_at": "2026-07-02T05:21:17.244Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 15155,
-    "description_entries": 10802,
-    "coverage_pct": 71.3,
+    "board_row_count": 15956,
+    "description_entries": 10892,
+    "coverage_pct": 68.3,
     "source_breakdown": {
-      "sidecar": 10835,
+      "sidecar": 10927,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-07-02T04:51:30.305Z",
+    "jobs_metadata_generated": "2026-07-02T05:06:53.168Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-02T05:08:07.457Z",
+    "checked_at": "2026-07-02T05:23:38.357Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [],
-    "warning_count": 0,
+    "warnings": [
+      "Senior filter FP rate elevated: 10.6% (53/500). May indicate keyword over-matching."
+    ],
+    "warning_count": 1,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -84,50 +85,40 @@
   "rows": [
     {
       "source": "workday",
-      "pool_rows": 59183,
-      "us_rows": 34026,
-      "tech_us_rows": 9225,
-      "raw_sidecar_rows": 28948,
-      "sidecar_active_rows": 6556,
+      "pool_rows": 59156,
+      "us_rows": 33363,
+      "tech_us_rows": 8464,
+      "raw_sidecar_rows": 27564,
+      "sidecar_active_rows": 6717,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 6675,
-      "published_pct": 72.4,
-      "enriched_rows": 7325,
-      "enriched_pct": 79.4,
-      "enriched_with_skills": 6971,
-      "skills_pct": 95.2,
+      "published_rows": 6676,
+      "published_pct": 78.9,
+      "enriched_rows": 7288,
+      "enriched_pct": 86.1,
+      "enriched_with_skills": 6933,
+      "skills_pct": 95.1,
       "examples": [
         {
-          "id": "workday-crane-co.-JR102045",
-          "company": "Crane Co.",
-          "title": "Salesforce Data Analyst"
+          "id": "workday-workday-inc-JR-0107771",
+          "company": "Workday Inc",
+          "title": "Content Data Analyst"
         },
         {
-          "id": "workday-citi-26967190",
-          "company": "Citi",
-          "title": "Citi Commercial Bank - Commercial Associate - AVP"
+          "id": "workday-arkansas-children's-R0023729",
+          "company": "Arkansas Children's",
+          "title": "Integration Developer III"
         },
         {
-          "id": "workday-carrier-global-30205468",
-          "company": "Carrier Global",
-          "title": "Program Manager Data Centers"
+          "id": "workday-arkansas-children's-R0023574",
+          "company": "Arkansas Children's",
+          "title": "Systems Analytics Analyst II"
         },
         {
-          "id": "workday-carrier-global-30209200",
-          "company": "Carrier Global",
-          "title": "Manager, Infrastructure Services"
-        },
-        {
-          "id": "workday-carrier-global-30204957",
-          "company": "Carrier Global",
-          "title": "Field Service Engineer - Automated Logic"
-        },
-        {
-          "id": "workday-carrier-global-30204585",
-          "company": "Carrier Global",
-          "title": "Software Engineer (BAS)"
+          "id": "workday-arch-capital-group-R26_627",
+          "company": "Arch Capital Group",
+          "title": "Manager of DevOps Engineering -"
         },
         {
           "id": "workday-nvidia-JR2020276",
@@ -138,27 +129,36 @@
           "id": "workday-salesforce-JR333893",
           "company": "Salesforce",
           "title": "Solution Architect / Senior Solution Architect (Public Sector Industry Experience)"
+        },
+        {
+          "id": "workday-lowe's-JR-02559553",
+          "company": "Lowe's",
+          "title": "Data Scientist"
+        },
+        {
+          "id": "workday-thermo-fisher-scientific-R-01346079",
+          "company": "Thermo Fisher Scientific",
+          "title": "Engineer III, Manufacturing & Electrical"
         }
       ],
       "severity": "high",
       "flags": [
-        "low_published_coverage",
-        "low_enrichment_coverage"
+        "low_published_coverage"
       ]
     },
     {
       "source": "oracle",
-      "pool_rows": 8884,
-      "us_rows": 5945,
+      "pool_rows": 8890,
+      "us_rows": 5949,
       "tech_us_rows": 1299,
-      "raw_sidecar_rows": 6694,
+      "raw_sidecar_rows": 6613,
       "sidecar_active_rows": 566,
-      "supplemental_rows": 25974,
-      "supplemental_with_desc": 18478,
+      "supplemental_rows": 25986,
+      "supplemental_with_desc": 18490,
       "supplemental_meta": {
-        "generated_at": "2026-07-02T05:04:55.002Z",
+        "generated_at": "2026-07-02T05:20:12.407Z",
         "lane_name": "oracle",
-        "jobs_fetched": 25974
+        "jobs_fetched": 25986
       },
       "published_rows": 566,
       "published_pct": 43.6,
@@ -216,70 +216,6 @@
       ]
     },
     {
-      "source": "smartrecruiters",
-      "pool_rows": 1792,
-      "us_rows": 1990,
-      "tech_us_rows": 437,
-      "raw_sidecar_rows": 6860,
-      "sidecar_active_rows": 253,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 420,
-      "published_pct": 96.1,
-      "enriched_rows": 253,
-      "enriched_pct": 57.9,
-      "enriched_with_skills": 247,
-      "skills_pct": 97.6,
-      "examples": [
-        {
-          "id": "sr-VeoliaEnvironnementSA-744000135319379",
-          "company": "Veolia Environnement SA",
-          "title": "Lead Engineer - Customer Application Engineering"
-        },
-        {
-          "id": "sr-VeoliaEnvironnementSA-744000135283036",
-          "company": "Veolia Environnement SA",
-          "title": "Lead Reliability Engineer"
-        },
-        {
-          "id": "sr-WellmarkInc-744000135292154",
-          "company": "Wellmark, Inc.",
-          "title": "Sr Financial & Data Analyst – Healthcare Economics"
-        },
-        {
-          "id": "sr-WellmarkInc-744000134508191",
-          "company": "Wellmark, Inc.",
-          "title": "Senior Software Engineer - Enterprise Data Services"
-        },
-        {
-          "id": "sr-WellmarkInc-744000134337649",
-          "company": "Wellmark, Inc.",
-          "title": "Lead Software Engineer - AI Platform Team"
-        },
-        {
-          "id": "sr-WellmarkInc-744000134286090",
-          "company": "Wellmark, Inc.",
-          "title": "Sr. Software Engineer (Open to hiring at Lead level)"
-        },
-        {
-          "id": "sr-WellmarkInc-744000133080630",
-          "company": "Wellmark, Inc.",
-          "title": "Senior Software Engineer - Information Products Team"
-        },
-        {
-          "id": "sr-WesternDigital-744000134852260",
-          "company": "Western Digital",
-          "title": "Senior Strategic Sourcing Manager – Engineering Software, IP & R&D Services"
-        }
-      ],
-      "severity": "medium",
-      "flags": [
-        "published_gt_raw_sidecar",
-        "low_enrichment_coverage"
-      ]
-    },
-    {
       "source": "icims",
       "pool_rows": 83,
       "us_rows": 66,
@@ -319,6 +255,29 @@
       "severity": "medium",
       "flags": [
         "low_skill_fill"
+      ]
+    },
+    {
+      "source": "smartrecruiters",
+      "pool_rows": 1792,
+      "us_rows": 1990,
+      "tech_us_rows": 437,
+      "raw_sidecar_rows": 3505,
+      "sidecar_active_rows": 253,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 437,
+      "published_pct": 100,
+      "enriched_rows": 253,
+      "enriched_pct": 57.9,
+      "enriched_with_skills": 247,
+      "skills_pct": 97.6,
+      "examples": [],
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar",
+        "low_enrichment_coverage"
       ]
     },
     {
