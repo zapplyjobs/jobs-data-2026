@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-02T04:48:51.601Z",
+  "generated_at": "2026-07-02T04:52:58.921Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -53,21 +53,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-02T04:35:35.372Z",
+    "generated_at": "2026-07-02T04:51:15.240Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 15316,
-    "description_entries": 11242,
-    "coverage_pct": 73.4,
+    "board_row_count": 15180,
+    "description_entries": 10725,
+    "coverage_pct": 70.7,
     "source_breakdown": {
-      "sidecar": 11273,
+      "sidecar": 10760,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-07-02T04:23:36.329Z",
+    "jobs_metadata_generated": "2026-07-02T04:35:32.776Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-02T04:48:46.001Z",
+    "checked_at": "2026-07-02T04:52:53.410Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -83,18 +83,81 @@
   },
   "rows": [
     {
+      "source": "workday",
+      "pool_rows": 59114,
+      "us_rows": 33158,
+      "tech_us_rows": 8425,
+      "raw_sidecar_rows": 28931,
+      "sidecar_active_rows": 6502,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 6640,
+      "published_pct": 78.8,
+      "enriched_rows": 7297,
+      "enriched_pct": 86.6,
+      "enriched_with_skills": 6941,
+      "skills_pct": 95.1,
+      "examples": [
+        {
+          "id": "workday-schweitzer-engineering-laboratories-2026-21234",
+          "company": "Schweitzer Engineering Laboratories",
+          "title": "Project Engineer - Automation"
+        },
+        {
+          "id": "workday-schweitzer-engineering-laboratories-2026-21278",
+          "company": "Schweitzer Engineering Laboratories",
+          "title": "Project Engineer II/III - Automation"
+        },
+        {
+          "id": "workday-schweitzer-engineering-laboratories-2026-20792",
+          "company": "Schweitzer Engineering Laboratories",
+          "title": "Installation Technician II"
+        },
+        {
+          "id": "workday-schweitzer-engineering-laboratories-2026-19558",
+          "company": "Schweitzer Engineering Laboratories",
+          "title": "Relay Technician"
+        },
+        {
+          "id": "workday-schweitzer-engineering-laboratories-2025-18875",
+          "company": "Schweitzer Engineering Laboratories",
+          "title": "Primary Equipment Technician"
+        },
+        {
+          "id": "workday-schweitzer-engineering-laboratories-2026-20421",
+          "company": "Schweitzer Engineering Laboratories",
+          "title": "Project Engineer I/II/III - Commissioning"
+        },
+        {
+          "id": "workday-schweitzer-engineering-laboratories-2026-19767",
+          "company": "Schweitzer Engineering Laboratories",
+          "title": "Engineering Manager I - Project Engineering"
+        },
+        {
+          "id": "workday-schweitzer-engineering-laboratories-2026-22029",
+          "company": "Schweitzer Engineering Laboratories",
+          "title": "Field Service Electronics Technician"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage"
+      ]
+    },
+    {
       "source": "oracle",
       "pool_rows": 8883,
       "us_rows": 5945,
       "tech_us_rows": 1299,
-      "raw_sidecar_rows": 6693,
+      "raw_sidecar_rows": 6694,
       "sidecar_active_rows": 566,
-      "supplemental_rows": 25962,
-      "supplemental_with_desc": 18467,
+      "supplemental_rows": 25963,
+      "supplemental_with_desc": 18466,
       "supplemental_meta": {
-        "generated_at": "2026-07-02T04:35:04.515Z",
+        "generated_at": "2026-07-02T04:49:58.284Z",
         "lane_name": "oracle",
-        "jobs_fetched": 25962
+        "jobs_fetched": 25963
       },
       "published_rows": 566,
       "published_pct": 43.6,
@@ -156,33 +219,18 @@
       "pool_rows": 1792,
       "us_rows": 1988,
       "tech_us_rows": 435,
-      "raw_sidecar_rows": 5994,
+      "raw_sidecar_rows": 6491,
       "sidecar_active_rows": 253,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 375,
-      "published_pct": 86.2,
+      "published_rows": 378,
+      "published_pct": 86.9,
       "enriched_rows": 253,
       "enriched_pct": 58.2,
       "enriched_with_skills": 247,
       "skills_pct": 97.6,
       "examples": [
-        {
-          "id": "sr-NBCUniversal3-744000133704120",
-          "company": "NBCUniversal",
-          "title": "Staff Engineer, Builder Enablement"
-        },
-        {
-          "id": "sr-NBCUniversal3-744000133436269",
-          "company": "NBCUniversal",
-          "title": "Architect, Builder Enablement"
-        },
-        {
-          "id": "sr-RedBull-744000132917069",
-          "company": "Red Bull",
-          "title": "Director, Business Intelligence"
-        },
         {
           "id": "sr-Sandisk-744000134878091",
           "company": "Sandisk",
@@ -207,6 +255,21 @@
           "id": "sr-Sandisk-744000133443620",
           "company": "Sandisk",
           "title": "Staff Engineer, System Design Engineering"
+        },
+        {
+          "id": "sr-Sandisk-744000133429059",
+          "company": "Sandisk",
+          "title": "Senior Technology Development Engineer"
+        },
+        {
+          "id": "sr-Sandisk-744000133422276",
+          "company": "Sandisk",
+          "title": "Product Security Assurance Architect"
+        },
+        {
+          "id": "sr-Sandisk-744000133403644",
+          "company": "Sandisk",
+          "title": "Principal Engineer, Technology Development Engineering"
         }
       ],
       "severity": "medium",
@@ -255,67 +318,6 @@
       "flags": [
         "low_skill_fill"
       ]
-    },
-    {
-      "source": "workday",
-      "pool_rows": 59087,
-      "us_rows": 33258,
-      "tech_us_rows": 8451,
-      "raw_sidecar_rows": 28932,
-      "sidecar_active_rows": 6479,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 7126,
-      "published_pct": 84.3,
-      "enriched_rows": 7273,
-      "enriched_pct": 86.1,
-      "enriched_with_skills": 6915,
-      "skills_pct": 95.1,
-      "examples": [
-        {
-          "id": "workday-arkansas-children's-R0023729",
-          "company": "Arkansas Children's",
-          "title": "Integration Developer III"
-        },
-        {
-          "id": "workday-arkansas-children's-R0023574",
-          "company": "Arkansas Children's",
-          "title": "Systems Analytics Analyst II"
-        },
-        {
-          "id": "workday-applied-materials-R2618305",
-          "company": "Applied Materials",
-          "title": "AIx Field Service Engineer"
-        },
-        {
-          "id": "workday-amentum-R0164902",
-          "company": "Amentum",
-          "title": "Avionics Technician"
-        },
-        {
-          "id": "workday-amentum-R0164874",
-          "company": "Amentum",
-          "title": "Mechanic I Airframer (AM) NAMCE"
-        },
-        {
-          "id": "workday-amentum-R0164862",
-          "company": "Amentum",
-          "title": "Avionics Radiation Hardness Assurance Engineer"
-        },
-        {
-          "id": "workday-amentum-R0164841",
-          "company": "Amentum",
-          "title": "Capture Manager"
-        },
-        {
-          "id": "workday-amentum-R0164288",
-          "company": "Amentum",
-          "title": "Electro-Mech Technician III"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
     },
     {
       "source": "microsoft",
