@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-02T05:23:42.848Z",
+  "generated_at": "2026-07-02T05:37:41.157Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -31,6 +31,7 @@
     "descriptions-deshaw.jsonl",
     "descriptions-eightfold.jsonl",
     "descriptions-enriched-1.jsonl",
+    "descriptions-enriched-10.jsonl",
     "descriptions-enriched-2.jsonl",
     "descriptions-enriched-3.jsonl",
     "descriptions-enriched-4.jsonl",
@@ -52,28 +53,26 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-02T05:21:17.244Z",
+    "generated_at": "2026-07-02T05:35:52.190Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 15956,
-    "description_entries": 10892,
-    "coverage_pct": 68.3,
+    "board_row_count": 15194,
+    "description_entries": 10841,
+    "coverage_pct": 71.4,
     "source_breakdown": {
-      "sidecar": 10927,
+      "sidecar": 10875,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-07-02T05:06:53.168Z",
+    "jobs_metadata_generated": "2026-07-02T05:20:28.893Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-02T05:23:38.357Z",
+    "checked_at": "2026-07-02T05:37:36.922Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [
-      "Senior filter FP rate elevated: 10.6% (53/500). May indicate keyword over-matching."
-    ],
-    "warning_count": 1,
+    "warnings": [],
+    "warning_count": 0,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -84,81 +83,18 @@
   },
   "rows": [
     {
-      "source": "workday",
-      "pool_rows": 59156,
-      "us_rows": 33363,
-      "tech_us_rows": 8464,
-      "raw_sidecar_rows": 27564,
-      "sidecar_active_rows": 6717,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 6676,
-      "published_pct": 78.9,
-      "enriched_rows": 7288,
-      "enriched_pct": 86.1,
-      "enriched_with_skills": 6933,
-      "skills_pct": 95.1,
-      "examples": [
-        {
-          "id": "workday-workday-inc-JR-0107771",
-          "company": "Workday Inc",
-          "title": "Content Data Analyst"
-        },
-        {
-          "id": "workday-arkansas-children's-R0023729",
-          "company": "Arkansas Children's",
-          "title": "Integration Developer III"
-        },
-        {
-          "id": "workday-arkansas-children's-R0023574",
-          "company": "Arkansas Children's",
-          "title": "Systems Analytics Analyst II"
-        },
-        {
-          "id": "workday-arch-capital-group-R26_627",
-          "company": "Arch Capital Group",
-          "title": "Manager of DevOps Engineering -"
-        },
-        {
-          "id": "workday-nvidia-JR2020276",
-          "company": "NVIDIA",
-          "title": "Solutions Architect, Data Center Infrastructure - NVIS"
-        },
-        {
-          "id": "workday-salesforce-JR333893",
-          "company": "Salesforce",
-          "title": "Solution Architect / Senior Solution Architect (Public Sector Industry Experience)"
-        },
-        {
-          "id": "workday-lowe's-JR-02559553",
-          "company": "Lowe's",
-          "title": "Data Scientist"
-        },
-        {
-          "id": "workday-thermo-fisher-scientific-R-01346079",
-          "company": "Thermo Fisher Scientific",
-          "title": "Engineer III, Manufacturing & Electrical"
-        }
-      ],
-      "severity": "high",
-      "flags": [
-        "low_published_coverage"
-      ]
-    },
-    {
       "source": "oracle",
-      "pool_rows": 8890,
+      "pool_rows": 8896,
       "us_rows": 5949,
       "tech_us_rows": 1299,
       "raw_sidecar_rows": 6613,
       "sidecar_active_rows": 566,
-      "supplemental_rows": 25986,
-      "supplemental_with_desc": 18490,
+      "supplemental_rows": 25989,
+      "supplemental_with_desc": 18491,
       "supplemental_meta": {
-        "generated_at": "2026-07-02T05:20:12.407Z",
+        "generated_at": "2026-07-02T05:34:58.474Z",
         "lane_name": "oracle",
-        "jobs_fetched": 25986
+        "jobs_fetched": 25989
       },
       "published_rows": 566,
       "published_pct": 43.6,
@@ -216,6 +152,70 @@
       ]
     },
     {
+      "source": "smartrecruiters",
+      "pool_rows": 1793,
+      "us_rows": 1980,
+      "tech_us_rows": 426,
+      "raw_sidecar_rows": 3506,
+      "sidecar_active_rows": 253,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 253,
+      "published_pct": 59.4,
+      "enriched_rows": 253,
+      "enriched_pct": 59.4,
+      "enriched_with_skills": 247,
+      "skills_pct": 97.6,
+      "examples": [
+        {
+          "id": "sr-AbbVie-3743990013890411",
+          "company": "AbbVie",
+          "title": "Principal Applied AI Engineer (Hybrid)"
+        },
+        {
+          "id": "sr-AbbVie-3743990013889816",
+          "company": "AbbVie",
+          "title": "Project Engineering Manager"
+        },
+        {
+          "id": "sr-AbbVie-3743990013889166",
+          "company": "AbbVie",
+          "title": "Principal Research Scientist I"
+        },
+        {
+          "id": "sr-AbbVie-3743990013860246",
+          "company": "AbbVie",
+          "title": "Sr. Manager, IT QA- Regulatory Assurance"
+        },
+        {
+          "id": "sr-AbbVie-3743990013859423",
+          "company": "AbbVie",
+          "title": "Sr. Manager, IT QA- Regulatory Assurance"
+        },
+        {
+          "id": "sr-AbbVie-3743990013847326",
+          "company": "AbbVie",
+          "title": "Principal Research Scientist II, Analytical Lead, R&D"
+        },
+        {
+          "id": "sr-AbbVie-3743990013841291",
+          "company": "AbbVie",
+          "title": "Principal Research Scientist I"
+        },
+        {
+          "id": "sr-AbbVie-3743990013837546",
+          "company": "AbbVie",
+          "title": "Senior Electrical Engineer, Combination Product Development"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage",
+        "low_enrichment_coverage"
+      ]
+    },
+    {
       "source": "icims",
       "pool_rows": 83,
       "us_rows": 66,
@@ -258,27 +258,65 @@
       ]
     },
     {
-      "source": "smartrecruiters",
-      "pool_rows": 1792,
-      "us_rows": 1990,
-      "tech_us_rows": 437,
-      "raw_sidecar_rows": 3505,
-      "sidecar_active_rows": 253,
+      "source": "workday",
+      "pool_rows": 59191,
+      "us_rows": 33193,
+      "tech_us_rows": 8442,
+      "raw_sidecar_rows": 27796,
+      "sidecar_active_rows": 6760,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 437,
-      "published_pct": 100,
-      "enriched_rows": 253,
-      "enriched_pct": 57.9,
-      "enriched_with_skills": 247,
-      "skills_pct": 97.6,
-      "examples": [],
-      "severity": "medium",
-      "flags": [
-        "published_gt_raw_sidecar",
-        "low_enrichment_coverage"
-      ]
+      "published_rows": 6892,
+      "published_pct": 81.6,
+      "enriched_rows": 7330,
+      "enriched_pct": 86.8,
+      "enriched_with_skills": 6974,
+      "skills_pct": 95.1,
+      "examples": [
+        {
+          "id": "workday-merck-&-co.-R404899",
+          "company": "Merck & Co.",
+          "title": "Scientist, Statistical Programming (Hybrid)"
+        },
+        {
+          "id": "workday-menasha-corporation-R14686",
+          "company": "Menasha Corporation",
+          "title": "Electrical Technician - 2nd Shift"
+        },
+        {
+          "id": "workday-menasha-corporation-R14671",
+          "company": "Menasha Corporation",
+          "title": "Richmond Hiring Event 7/9/26 8am-3:30pm"
+        },
+        {
+          "id": "workday-leidos-R-00186373",
+          "company": "Leidos",
+          "title": "Wire Shop Technician"
+        },
+        {
+          "id": "workday-leidos-R-00186389",
+          "company": "Leidos",
+          "title": "Systems Engineer"
+        },
+        {
+          "id": "workday-leidos-R-00186535",
+          "company": "Leidos",
+          "title": "Technical Project Manager"
+        },
+        {
+          "id": "workday-keybank-R-40673",
+          "company": "KeyBank",
+          "title": "Manager, CMBS Pricing and Agency Execution"
+        },
+        {
+          "id": "workday-kla-2638035",
+          "company": "KLA",
+          "title": "Product Development Engineer"
+        }
+      ],
+      "severity": "ok",
+      "flags": []
     },
     {
       "source": "microsoft",
