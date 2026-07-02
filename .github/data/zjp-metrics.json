@@ -1,6 +1,6 @@
 {
   "schema": "zjp-metrics-v1",
-  "generated_at": "2026-07-02T22:37:35.991Z",
+  "generated_at": "2026-07-02T22:40:22.689Z",
   "pool": {
     "total_jobs": 84910,
     "tech_us": 12614,
@@ -612,7 +612,7 @@
     "engine_version": 72,
     "source": "jobs-metadata.json",
     "g1_breakdown": {
-      "updated": "2026-07-02T22:37:34.475Z",
+      "updated": "2026-07-02T22:40:21.415Z",
       "us_total": 49414,
       "us_g1": 3630,
       "us_g1_rate": 7.3,
@@ -1154,8 +1154,8 @@
     "source": "pipeline-alert.json (local workspace)"
   },
   "pipeline": {
-    "last_aggregator_run": "2026-07-02T22:35:30Z",
-    "last_aggregator_status": "success",
+    "last_aggregator_run": "2026-07-02T22:39:35Z",
+    "last_aggregator_status": "in_progress",
     "last_enrichment_run": null,
     "last_enrichment_status": null,
     "aggregator_runtime_minutes": 0.2,
@@ -1179,7 +1179,7 @@
   },
   "r2": {
     "status": "healthy",
-    "manifest_age_minutes": 0,
+    "manifest_age_minutes": 3,
     "manifest_timestamp": "2026-07-02T22:37:08.338Z",
     "files_uploaded": 43,
     "files_failed": null,
@@ -1280,12 +1280,12 @@
     }
   },
   "consumer_e2e": {
-    "generated_at": "2026-07-02T22:37:36.090Z",
+    "generated_at": "2026-07-02T22:40:22.788Z",
     "staleness_threshold_minutes": 60,
     "baseline": {
       "source": "R2 data/all_jobs.json",
       "last_update": "2026-07-02T22:36:54.000Z",
-      "age_minutes": 0.7
+      "age_minutes": 3.5
     },
     "summary": {
       "measured": 9,
@@ -1299,7 +1299,7 @@
         "kind": "r2",
         "signal": "data_freshness",
         "last_update": "2026-07-02T22:36:51.000Z",
-        "age_minutes": 0.8,
+        "age_minutes": 3.5,
         "lag_vs_pipeline_minutes": 0.1,
         "stale": false
       },
@@ -1308,7 +1308,7 @@
         "kind": "gh",
         "signal": "refresh_recency_proxy",
         "last_update": "2026-07-02T22:30:37.000Z",
-        "age_minutes": 7,
+        "age_minutes": 9.8,
         "lag_vs_pipeline_minutes": 6.3,
         "stale": false
       },
@@ -1317,7 +1317,7 @@
         "kind": "gh",
         "signal": "refresh_recency_proxy",
         "last_update": "2026-07-02T22:30:34.000Z",
-        "age_minutes": 7,
+        "age_minutes": 9.8,
         "lag_vs_pipeline_minutes": 6.3,
         "stale": false
       },
@@ -1326,7 +1326,7 @@
         "kind": "gh",
         "signal": "refresh_recency_proxy",
         "last_update": "2026-07-02T22:30:32.000Z",
-        "age_minutes": 7.1,
+        "age_minutes": 9.8,
         "lag_vs_pipeline_minutes": 6.4,
         "stale": false
       },
@@ -1335,7 +1335,7 @@
         "kind": "gh",
         "signal": "refresh_recency_proxy",
         "last_update": "2026-07-02T22:30:32.000Z",
-        "age_minutes": 7.1,
+        "age_minutes": 9.8,
         "lag_vs_pipeline_minutes": 6.4,
         "stale": false
       },
@@ -1344,7 +1344,7 @@
         "kind": "gh",
         "signal": "refresh_recency_proxy",
         "last_update": "2026-07-02T22:30:39.000Z",
-        "age_minutes": 7,
+        "age_minutes": 9.7,
         "lag_vs_pipeline_minutes": 6.3,
         "stale": false
       },
@@ -1353,7 +1353,7 @@
         "kind": "gh",
         "signal": "refresh_recency_proxy",
         "last_update": "2026-07-02T22:30:34.000Z",
-        "age_minutes": 7,
+        "age_minutes": 9.8,
         "lag_vs_pipeline_minutes": 6.3,
         "stale": false
       },
@@ -1362,7 +1362,7 @@
         "kind": "supabase",
         "signal": "data_freshness",
         "last_update": "2026-07-02T22:36:39.757Z",
-        "age_minutes": 0.9,
+        "age_minutes": 3.7,
         "lag_vs_pipeline_minutes": 0.2,
         "stale": false
       },
@@ -1371,7 +1371,7 @@
         "kind": "discord",
         "signal": "data_freshness",
         "last_update": "2026-07-02T22:30:16.000Z",
-        "age_minutes": 7.3,
+        "age_minutes": 10.1,
         "lag_vs_pipeline_minutes": 6.6,
         "stale": false
       }
@@ -1393,14 +1393,14 @@
   "evergreen": {
     "age_buckets": {
       "fresh_0_3d": 27131,
-      "aging_4_10d": 33059,
-      "evergreen_10_14d": 8759,
+      "aging_4_10d": 33058,
+      "evergreen_10_14d": 8760,
       "beyond_14d": 15961
     },
     "age_buckets_original": {
       "fresh_0_3d": 1272,
-      "aging_4_10d": 2231,
-      "evergreen_10_14d": 642,
+      "aging_4_10d": 2230,
+      "evergreen_10_14d": 643,
       "beyond_14d": 2694,
       "coverage": 6839,
       "coverage_pct": 8
@@ -1409,9 +1409,9 @@
     "first_published_coverage": 8,
     "first_published_evergreen_pct": 39.4,
     "by_source": {
+      "ashby": 551,
       "greenhouse": 2573,
       "workday": 15980,
-      "ashby": 550,
       "uber": 13,
       "smartrecruiters": 803,
       "microsoft": 195,
