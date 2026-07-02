@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-02T16:52:03.560Z",
+  "generated_at": "2026-07-02T17:04:26.296Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -67,12 +67,14 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-02T16:51:59.327Z",
+    "checked_at": "2026-07-02T17:04:21.822Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [],
-    "warning_count": 0,
+    "warnings": [
+      "Runtime trending up: 7.5 min (warning at 7, alert at 10)"
+    ],
+    "warning_count": 1,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -84,60 +86,60 @@
   "rows": [
     {
       "source": "workday",
-      "pool_rows": 61642,
-      "us_rows": 35502,
-      "tech_us_rows": 9807,
-      "raw_sidecar_rows": 28423,
-      "sidecar_active_rows": 7258,
+      "pool_rows": 61791,
+      "us_rows": 35826,
+      "tech_us_rows": 10203,
+      "raw_sidecar_rows": 28162,
+      "sidecar_active_rows": 7299,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 7258,
-      "published_pct": 74,
-      "enriched_rows": 7553,
-      "enriched_pct": 77,
-      "enriched_with_skills": 7188,
+      "published_rows": 7196,
+      "published_pct": 70.5,
+      "enriched_rows": 7594,
+      "enriched_pct": 74.4,
+      "enriched_with_skills": 7227,
       "skills_pct": 95.2,
       "examples": [
         {
-          "id": "workday-schweitzer-engineering-laboratories-2026-19767",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Engineering Manager I - Project Engineering"
+          "id": "workday-proofpoint-R14278",
+          "company": "Proofpoint",
+          "title": "Security Software Engineer"
         },
         {
-          "id": "workday-schweitzer-engineering-laboratories-2026-22029",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Field Service Electronics Technician"
+          "id": "workday-workday-inc-JR-0107771",
+          "company": "Workday Inc",
+          "title": "Content Data Analyst"
         },
         {
-          "id": "workday-snap-R0046038",
-          "company": "Snap",
-          "title": "Software Engineer - Audio, Level 5"
+          "id": "workday-visa-REF081049W",
+          "company": "Visa",
+          "title": "SW Engineer"
         },
         {
-          "id": "workday-snap-R0046024",
-          "company": "Snap",
-          "title": "Product Design Engineer"
+          "id": "workday-trimble-R54135",
+          "company": "Trimble",
+          "title": "Manager, Customer Master / MDM Platform"
+        },
+        {
+          "id": "workday-university-system-of-new-hampshire-JR8473",
+          "company": "University System of New Hampshire",
+          "title": "Manager, Dairy Teaching Research Center"
+        },
+        {
+          "id": "workday-philips-579885",
+          "company": "Philips",
+          "title": "Quality Systems Engineer"
+        },
+        {
+          "id": "workday-rtx-01854677",
+          "company": "RTX",
+          "title": "PDC Quality Engineer (Onsite)"
         },
         {
           "id": "workday-salesforce-JR333893",
           "company": "Salesforce",
           "title": "Solution Architect / Senior Solution Architect (Public Sector Industry Experience)"
-        },
-        {
-          "id": "workday-morgan-stanley-JR033706",
-          "company": "Morgan Stanley",
-          "title": "Associate, Software Engineer"
-        },
-        {
-          "id": "workday-nvidia-JR2020276",
-          "company": "NVIDIA",
-          "title": "Solutions Architect, Data Center Infrastructure - NVIS"
-        },
-        {
-          "id": "workday-northrop-grumman-R10238558",
-          "company": "Northrop Grumman",
-          "title": "2026 Associate Classified Cybersecurity Analyst Pathways Program - Palmdale CA"
         }
       ],
       "severity": "high",
@@ -148,11 +150,11 @@
     },
     {
       "source": "oracle",
-      "pool_rows": 9196,
-      "us_rows": 6075,
-      "tech_us_rows": 1320,
-      "raw_sidecar_rows": 6860,
-      "sidecar_active_rows": 570,
+      "pool_rows": 9225,
+      "us_rows": 6104,
+      "tech_us_rows": 1326,
+      "raw_sidecar_rows": 6963,
+      "sidecar_active_rows": 571,
       "supplemental_rows": 26066,
       "supplemental_with_desc": 18578,
       "supplemental_meta": {
@@ -161,9 +163,9 @@
         "jobs_fetched": 26066
       },
       "published_rows": 570,
-      "published_pct": 43.2,
+      "published_pct": 43,
       "enriched_rows": 786,
-      "enriched_pct": 59.5,
+      "enriched_pct": 59.3,
       "enriched_with_skills": 556,
       "skills_pct": 70.7,
       "examples": [
@@ -193,6 +195,11 @@
           "title": "Software Developer 3"
         },
         {
+          "id": "oracle-vertiv-20274494",
+          "company": "Vertiv",
+          "title": "Supplier Quality Engineer"
+        },
+        {
           "id": "oracle-wsp-86614",
           "company": "WSP",
           "title": "Assistant Resident Engineer"
@@ -201,11 +208,6 @@
           "id": "oracle-wsp-90318",
           "company": "WSP",
           "title": "Finance AI Manager"
-        },
-        {
-          "id": "oracle-atlantic-health-30570",
-          "company": "Atlantic Health System",
-          "title": "Cybersecurity Engineer III"
         }
       ],
       "severity": "high",
@@ -217,21 +219,36 @@
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 1838,
-      "us_rows": 2038,
-      "tech_us_rows": 442,
-      "raw_sidecar_rows": 3632,
-      "sidecar_active_rows": 256,
+      "pool_rows": 1843,
+      "us_rows": 2029,
+      "tech_us_rows": 430,
+      "raw_sidecar_rows": 4125,
+      "sidecar_active_rows": 254,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 256,
-      "published_pct": 57.9,
-      "enriched_rows": 256,
-      "enriched_pct": 57.9,
-      "enriched_with_skills": 250,
-      "skills_pct": 97.7,
+      "published_rows": 254,
+      "published_pct": 59.1,
+      "enriched_rows": 254,
+      "enriched_pct": 59.1,
+      "enriched_with_skills": 248,
+      "skills_pct": 97.6,
       "examples": [
+        {
+          "id": "sr-VeoliaEnvironnementSA-744000135551709",
+          "company": "Veolia Environnement SA",
+          "title": "Data Engineer"
+        },
+        {
+          "id": "sr-llnl-3743990013907505",
+          "company": "LLNL",
+          "title": "Combat Simulation Systems Analyst"
+        },
+        {
+          "id": "sr-NBCUniversal3-744000135548538",
+          "company": "NBCUniversal",
+          "title": "DreamWorks Feature - Crowds Artist"
+        },
         {
           "id": "sr-AbbVie-3743990013901627",
           "company": "AbbVie",
@@ -256,21 +273,6 @@
           "id": "sr-AbbVie-3743990013889166",
           "company": "AbbVie",
           "title": "Principal Research Scientist I"
-        },
-        {
-          "id": "sr-AbbVie-3743990013860246",
-          "company": "AbbVie",
-          "title": "Sr. Manager, IT QA- Regulatory Assurance"
-        },
-        {
-          "id": "sr-AbbVie-3743990013859423",
-          "company": "AbbVie",
-          "title": "Sr. Manager, IT QA- Regulatory Assurance"
-        },
-        {
-          "id": "sr-AbbVie-3743990013847326",
-          "company": "AbbVie",
-          "title": "Principal Research Scientist II, Analytical Lead, R&D"
         }
       ],
       "severity": "high",
