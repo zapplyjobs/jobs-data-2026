@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-02T16:37:53.580Z",
+  "generated_at": "2026-07-02T16:52:03.560Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -53,13 +53,13 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-02T16:35:53.674Z",
+    "generated_at": "2026-07-02T16:50:10.623Z",
     "source_basis": "us_jobs.json",
     "board_row_count": 16619,
-    "description_entries": 11395,
-    "coverage_pct": 68.6,
+    "description_entries": 11211,
+    "coverage_pct": 67.5,
     "source_breakdown": {
-      "sidecar": 11429,
+      "sidecar": 11245,
       "inline": 0
     },
     "jobs_metadata_generated": "2026-07-02T16:22:21.121Z",
@@ -67,12 +67,10 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-02T16:37:46.721Z",
-    "active": true,
-    "message": "**fetch-jobs.yml**: Last run failed (<t:1783009456:R>)",
-    "failures": [
-      "**fetch-jobs.yml**: Last run failed (<t:1783009456:R>)"
-    ],
+    "checked_at": "2026-07-02T16:51:59.327Z",
+    "active": false,
+    "message": null,
+    "failures": [],
     "warnings": [],
     "warning_count": 0,
     "secrets": [
@@ -89,12 +87,12 @@
       "pool_rows": 61642,
       "us_rows": 35502,
       "tech_us_rows": 9807,
-      "raw_sidecar_rows": 28179,
-      "sidecar_active_rows": 7256,
+      "raw_sidecar_rows": 28423,
+      "sidecar_active_rows": 7258,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 7256,
+      "published_rows": 7258,
       "published_pct": 74,
       "enriched_rows": 7553,
       "enriched_pct": 77,
@@ -155,12 +153,12 @@
       "tech_us_rows": 1320,
       "raw_sidecar_rows": 6860,
       "sidecar_active_rows": 570,
-      "supplemental_rows": 26074,
-      "supplemental_with_desc": 18583,
+      "supplemental_rows": 26066,
+      "supplemental_with_desc": 18578,
       "supplemental_meta": {
-        "generated_at": "2026-07-02T16:34:58.625Z",
+        "generated_at": "2026-07-02T16:49:58.843Z",
         "lane_name": "oracle",
-        "jobs_fetched": 26074
+        "jobs_fetched": 26066
       },
       "published_rows": 570,
       "published_pct": 43.2,
@@ -218,6 +216,70 @@
       ]
     },
     {
+      "source": "smartrecruiters",
+      "pool_rows": 1838,
+      "us_rows": 2038,
+      "tech_us_rows": 442,
+      "raw_sidecar_rows": 3632,
+      "sidecar_active_rows": 256,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 256,
+      "published_pct": 57.9,
+      "enriched_rows": 256,
+      "enriched_pct": 57.9,
+      "enriched_with_skills": 250,
+      "skills_pct": 97.7,
+      "examples": [
+        {
+          "id": "sr-AbbVie-3743990013901627",
+          "company": "AbbVie",
+          "title": "Senior Quality Engineer, Medical Device External Quality"
+        },
+        {
+          "id": "sr-AbbVie-3743990013899946",
+          "company": "AbbVie",
+          "title": "Senior Controls Engineer"
+        },
+        {
+          "id": "sr-AbbVie-3743990013890411",
+          "company": "AbbVie",
+          "title": "Principal Applied AI Engineer (Hybrid)"
+        },
+        {
+          "id": "sr-AbbVie-3743990013889816",
+          "company": "AbbVie",
+          "title": "Project Engineering Manager"
+        },
+        {
+          "id": "sr-AbbVie-3743990013889166",
+          "company": "AbbVie",
+          "title": "Principal Research Scientist I"
+        },
+        {
+          "id": "sr-AbbVie-3743990013860246",
+          "company": "AbbVie",
+          "title": "Sr. Manager, IT QA- Regulatory Assurance"
+        },
+        {
+          "id": "sr-AbbVie-3743990013859423",
+          "company": "AbbVie",
+          "title": "Sr. Manager, IT QA- Regulatory Assurance"
+        },
+        {
+          "id": "sr-AbbVie-3743990013847326",
+          "company": "AbbVie",
+          "title": "Principal Research Scientist II, Analytical Lead, R&D"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage",
+        "low_enrichment_coverage"
+      ]
+    },
+    {
       "source": "icims",
       "pool_rows": 83,
       "us_rows": 66,
@@ -257,29 +319,6 @@
       "severity": "medium",
       "flags": [
         "low_skill_fill"
-      ]
-    },
-    {
-      "source": "smartrecruiters",
-      "pool_rows": 1838,
-      "us_rows": 2038,
-      "tech_us_rows": 442,
-      "raw_sidecar_rows": 3632,
-      "sidecar_active_rows": 256,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 442,
-      "published_pct": 100,
-      "enriched_rows": 256,
-      "enriched_pct": 57.9,
-      "enriched_with_skills": 250,
-      "skills_pct": 97.7,
-      "examples": [],
-      "severity": "medium",
-      "flags": [
-        "published_gt_raw_sidecar",
-        "low_enrichment_coverage"
       ]
     },
     {
