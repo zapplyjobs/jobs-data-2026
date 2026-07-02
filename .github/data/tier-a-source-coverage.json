@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-02T01:22:24.516Z",
+  "generated_at": "2026-07-02T01:39:24.633Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -53,21 +53,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-02T01:20:27.695Z",
+    "generated_at": "2026-07-02T01:37:39.012Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 15499,
-    "description_entries": 11095,
-    "coverage_pct": 71.6,
+    "board_row_count": 16280,
+    "description_entries": 11179,
+    "coverage_pct": 68.7,
     "source_breakdown": {
-      "sidecar": 11129,
+      "sidecar": 11212,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-07-02T00:05:43.442Z",
+    "jobs_metadata_generated": "2026-07-02T01:22:51.856Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-02T01:22:19.086Z",
+    "checked_at": "2026-07-02T01:39:19.336Z",
     "active": true,
     "message": "**R2 manifest stale**: 33 min old (threshold: 60 min). Pipeline may not be writing to R2.",
     "failures": [
@@ -85,20 +85,84 @@
   },
   "rows": [
     {
+      "source": "workday",
+      "pool_rows": 58872,
+      "us_rows": 34317,
+      "tech_us_rows": 9582,
+      "raw_sidecar_rows": 28217,
+      "sidecar_active_rows": 7246,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 7246,
+      "published_pct": 75.6,
+      "enriched_rows": 7338,
+      "enriched_pct": 76.6,
+      "enriched_with_skills": 6971,
+      "skills_pct": 95,
+      "examples": [
+        {
+          "id": "workday-morgan-stanley-JR033706",
+          "company": "Morgan Stanley",
+          "title": "Associate, Software Engineer"
+        },
+        {
+          "id": "workday-td-bank-R_1497681",
+          "company": "TD Bank",
+          "title": "Equity Research Associate - Healthcare, Biotechnology"
+        },
+        {
+          "id": "workday-schweitzer-engineering-laboratories-2026-19767",
+          "company": "Schweitzer Engineering Laboratories",
+          "title": "Engineering Manager I - Project Engineering"
+        },
+        {
+          "id": "workday-schweitzer-engineering-laboratories-2026-22029",
+          "company": "Schweitzer Engineering Laboratories",
+          "title": "Field Service Electronics Technician"
+        },
+        {
+          "id": "workday-nvidia-JR2020276",
+          "company": "NVIDIA",
+          "title": "Solutions Architect, Data Center Infrastructure - NVIS"
+        },
+        {
+          "id": "workday-northrop-grumman-R10238558",
+          "company": "Northrop Grumman",
+          "title": "2026 Associate Classified Cybersecurity Analyst Pathways Program - Palmdale CA"
+        },
+        {
+          "id": "workday-lowe's-JR-02559553",
+          "company": "Lowe's",
+          "title": "Data Scientist"
+        },
+        {
+          "id": "workday-micron-JR105299",
+          "company": "Micron",
+          "title": "Idaho Expansion Cost Program Manager"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage",
+        "low_enrichment_coverage"
+      ]
+    },
+    {
       "source": "oracle",
-      "pool_rows": 8856,
-      "us_rows": 5922,
-      "tech_us_rows": 1291,
-      "raw_sidecar_rows": 6590,
-      "sidecar_active_rows": 564,
-      "supplemental_rows": 26004,
-      "supplemental_with_desc": 18494,
+      "pool_rows": 8864,
+      "us_rows": 5927,
+      "tech_us_rows": 1292,
+      "raw_sidecar_rows": 6598,
+      "sidecar_active_rows": 565,
+      "supplemental_rows": 26003,
+      "supplemental_with_desc": 18492,
       "supplemental_meta": {
-        "generated_at": "2026-07-02T01:20:46.445Z",
+        "generated_at": "2026-07-02T01:34:45.900Z",
         "lane_name": "oracle",
-        "jobs_fetched": 26004
+        "jobs_fetched": 26003
       },
-      "published_rows": 564,
+      "published_rows": 565,
       "published_pct": 43.7,
       "enriched_rows": 775,
       "enriched_pct": 60,
@@ -156,59 +220,59 @@
     {
       "source": "smartrecruiters",
       "pool_rows": 1790,
-      "us_rows": 1979,
-      "tech_us_rows": 427,
+      "us_rows": 1977,
+      "tech_us_rows": 425,
       "raw_sidecar_rows": 3503,
       "sidecar_active_rows": 252,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 252,
-      "published_pct": 59,
+      "published_rows": 279,
+      "published_pct": 65.6,
       "enriched_rows": 252,
-      "enriched_pct": 59,
+      "enriched_pct": 59.3,
       "enriched_with_skills": 246,
       "skills_pct": 97.6,
       "examples": [
         {
-          "id": "sr-AbbVie-3743990013890411",
-          "company": "AbbVie",
-          "title": "Principal Applied AI Engineer (Hybrid)"
+          "id": "sr-atpco1-744000134788111",
+          "company": "ATPCO",
+          "title": "Director, Pricing Engine Solutions"
         },
         {
-          "id": "sr-AbbVie-3743990013889816",
-          "company": "AbbVie",
-          "title": "Project Engineering Manager"
+          "id": "sr-BoschGroup-744000135353119",
+          "company": "Bosch Group",
+          "title": "Sr. Field Application Engineer"
         },
         {
-          "id": "sr-AbbVie-3743990013889166",
-          "company": "AbbVie",
-          "title": "Principal Research Scientist I"
+          "id": "sr-BoschGroup-744000135345769",
+          "company": "Bosch Group",
+          "title": "Senior AI Research Scientist- Time-Series Foundational Models"
         },
         {
-          "id": "sr-AbbVie-3743990013860246",
-          "company": "AbbVie",
-          "title": "Sr. Manager, IT QA- Regulatory Assurance"
+          "id": "sr-BoschGroup-744000134922809",
+          "company": "Bosch Group",
+          "title": "Sr. Software Engineer"
         },
         {
-          "id": "sr-AbbVie-3743990013859423",
-          "company": "AbbVie",
-          "title": "Sr. Manager, IT QA- Regulatory Assurance"
+          "id": "sr-BoschGroup-744000134011708",
+          "company": "Bosch Group",
+          "title": "Senior Systems Engineer (Multiple Positions) (REF289777D)"
         },
         {
-          "id": "sr-AbbVie-3743990013847326",
-          "company": "AbbVie",
-          "title": "Principal Research Scientist II, Analytical Lead, R&D"
+          "id": "sr-BoschGroup-744000133953349",
+          "company": "Bosch Group",
+          "title": "Sr. Calibration Engineer (Project Manager) - Service House"
         },
         {
-          "id": "sr-AbbVie-3743990013841291",
-          "company": "AbbVie",
-          "title": "Principal Research Scientist I"
+          "id": "sr-BoschGroup-744000133096545",
+          "company": "Bosch Group",
+          "title": "Senior Controls Engineer"
         },
         {
-          "id": "sr-AbbVie-3743990013837546",
-          "company": "AbbVie",
-          "title": "Senior Electrical Engineer, Combination Product Development"
+          "id": "sr-BoschGroup-744000132989075",
+          "company": "Bosch Group",
+          "title": "Senior Principal Engineer- MLOps & AI Machinery, ADAS/AV"
         }
       ],
       "severity": "high",
@@ -258,67 +322,6 @@
       "flags": [
         "low_skill_fill"
       ]
-    },
-    {
-      "source": "workday",
-      "pool_rows": 58817,
-      "us_rows": 33629,
-      "tech_us_rows": 8808,
-      "raw_sidecar_rows": 28201,
-      "sidecar_active_rows": 7200,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 7200,
-      "published_pct": 81.7,
-      "enriched_rows": 7296,
-      "enriched_pct": 82.8,
-      "enriched_with_skills": 6928,
-      "skills_pct": 95,
-      "examples": [
-        {
-          "id": "workday-amentum-R0164874",
-          "company": "Amentum",
-          "title": "Mechanic I Airframer (AM) NAMCE"
-        },
-        {
-          "id": "workday-amentum-R0164862",
-          "company": "Amentum",
-          "title": "Avionics Radiation Hardness Assurance Engineer"
-        },
-        {
-          "id": "workday-amentum-R0164841",
-          "company": "Amentum",
-          "title": "Capture Manager"
-        },
-        {
-          "id": "workday-nvidia-JR2020276",
-          "company": "NVIDIA",
-          "title": "Solutions Architect, Data Center Infrastructure - NVIS"
-        },
-        {
-          "id": "workday-salesforce-JR333893",
-          "company": "Salesforce",
-          "title": "Solution Architect / Senior Solution Architect (Public Sector Industry Experience)"
-        },
-        {
-          "id": "workday-lowe's-JR-02559553",
-          "company": "Lowe's",
-          "title": "Data Scientist"
-        },
-        {
-          "id": "workday-micron-JR105299",
-          "company": "Micron",
-          "title": "Idaho Expansion Cost Program Manager"
-        },
-        {
-          "id": "workday-carrier-global-30204957",
-          "company": "Carrier Global",
-          "title": "Field Service Engineer - Automated Logic"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
     },
     {
       "source": "microsoft",
