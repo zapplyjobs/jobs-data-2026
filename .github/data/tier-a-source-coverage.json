@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-02T03:05:30.561Z",
+  "generated_at": "2026-07-02T03:12:25.339Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -53,13 +53,13 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-02T02:58:22.605Z",
+    "generated_at": "2026-07-02T03:09:05.391Z",
     "source_basis": "us_jobs.json",
     "board_row_count": 15576,
-    "description_entries": 11147,
-    "coverage_pct": 71.6,
+    "description_entries": 11120,
+    "coverage_pct": 71.4,
     "source_breakdown": {
-      "sidecar": 11177,
+      "sidecar": 11150,
       "inline": 0
     },
     "jobs_metadata_generated": "2026-07-02T02:21:00.607Z",
@@ -67,12 +67,10 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-02T03:05:25.556Z",
-    "active": true,
-    "message": "**Source fetch failure (simplify)**: 0 jobs fetched this run despite 692 in pool (carry-forward). Fetcher likely timed out or broken.",
-    "failures": [
-      "**Source fetch failure (simplify)**: 0 jobs fetched this run despite 692 in pool (carry-forward). Fetcher likely timed out or broken."
-    ],
+    "checked_at": "2026-07-02T03:12:21.075Z",
+    "active": false,
+    "message": null,
+    "failures": [],
     "warnings": [],
     "warning_count": 0,
     "secrets": [
@@ -85,23 +83,87 @@
   },
   "rows": [
     {
+      "source": "workday",
+      "pool_rows": 59009,
+      "us_rows": 34027,
+      "tech_us_rows": 9291,
+      "raw_sidecar_rows": 28961,
+      "sidecar_active_rows": 7259,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 7155,
+      "published_pct": 77,
+      "enriched_rows": 7338,
+      "enriched_pct": 79,
+      "enriched_with_skills": 6977,
+      "skills_pct": 95.1,
+      "examples": [
+        {
+          "id": "workday-jll-REQ515445",
+          "company": "JLL",
+          "title": "Assistant Chief Engineer - Mechanical Team Lead"
+        },
+        {
+          "id": "workday-jll-REQ513332",
+          "company": "JLL",
+          "title": "Physical Security Systems Technician - Critical Environments"
+        },
+        {
+          "id": "workday-jll-REQ513329",
+          "company": "JLL",
+          "title": "Physical Security Systems Engineer - Critical Environments"
+        },
+        {
+          "id": "workday-jll-REQ513326",
+          "company": "JLL",
+          "title": "Site Security Manager - Critical Environments"
+        },
+        {
+          "id": "workday-jll-REQ511783",
+          "company": "JLL",
+          "title": "Control Room Technician – Critical Environments"
+        },
+        {
+          "id": "workday-jll-REQ485323",
+          "company": "JLL",
+          "title": "Fire Alarm Technician (Data Center Facilities)"
+        },
+        {
+          "id": "workday-jll-REQ504886",
+          "company": "JLL",
+          "title": "Mechanical SME - Critical Environments"
+        },
+        {
+          "id": "workday-jll-REQ519363",
+          "company": "JLL",
+          "title": "Controls SME – Critical Environments"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage",
+        "low_enrichment_coverage"
+      ]
+    },
+    {
       "source": "oracle",
-      "pool_rows": 8870,
-      "us_rows": 5934,
-      "tech_us_rows": 1296,
+      "pool_rows": 8880,
+      "us_rows": 5944,
+      "tech_us_rows": 1298,
       "raw_sidecar_rows": 6603,
       "sidecar_active_rows": 566,
-      "supplemental_rows": 26013,
+      "supplemental_rows": 26014,
       "supplemental_with_desc": 18506,
       "supplemental_meta": {
-        "generated_at": "2026-07-02T02:49:41.694Z",
+        "generated_at": "2026-07-02T03:04:48.088Z",
         "lane_name": "oracle",
-        "jobs_fetched": 26013
+        "jobs_fetched": 26014
       },
       "published_rows": 566,
-      "published_pct": 43.7,
+      "published_pct": 43.6,
       "enriched_rows": 777,
-      "enriched_pct": 60,
+      "enriched_pct": 59.9,
       "enriched_with_skills": 551,
       "skills_pct": 70.9,
       "examples": [
@@ -155,60 +217,60 @@
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 1790,
-      "us_rows": 1977,
+      "pool_rows": 1792,
+      "us_rows": 1979,
       "tech_us_rows": 426,
-      "raw_sidecar_rows": 3504,
+      "raw_sidecar_rows": 3503,
       "sidecar_active_rows": 253,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 280,
-      "published_pct": 65.7,
+      "published_rows": 253,
+      "published_pct": 59.4,
       "enriched_rows": 253,
       "enriched_pct": 59.4,
       "enriched_with_skills": 247,
       "skills_pct": 97.6,
       "examples": [
         {
-          "id": "sr-atpco1-744000134788111",
-          "company": "ATPCO",
-          "title": "Director, Pricing Engine Solutions"
+          "id": "sr-AbbVie-3743990013890411",
+          "company": "AbbVie",
+          "title": "Principal Applied AI Engineer (Hybrid)"
         },
         {
-          "id": "sr-BoschGroup-744000135353119",
-          "company": "Bosch Group",
-          "title": "Sr. Field Application Engineer"
+          "id": "sr-AbbVie-3743990013889816",
+          "company": "AbbVie",
+          "title": "Project Engineering Manager"
         },
         {
-          "id": "sr-BoschGroup-744000135345769",
-          "company": "Bosch Group",
-          "title": "Senior AI Research Scientist- Time-Series Foundational Models"
+          "id": "sr-AbbVie-3743990013889166",
+          "company": "AbbVie",
+          "title": "Principal Research Scientist I"
         },
         {
-          "id": "sr-BoschGroup-744000134922809",
-          "company": "Bosch Group",
-          "title": "Sr. Software Engineer"
+          "id": "sr-AbbVie-3743990013860246",
+          "company": "AbbVie",
+          "title": "Sr. Manager, IT QA- Regulatory Assurance"
         },
         {
-          "id": "sr-BoschGroup-744000134011708",
-          "company": "Bosch Group",
-          "title": "Senior Systems Engineer (Multiple Positions) (REF289777D)"
+          "id": "sr-AbbVie-3743990013859423",
+          "company": "AbbVie",
+          "title": "Sr. Manager, IT QA- Regulatory Assurance"
         },
         {
-          "id": "sr-BoschGroup-744000133953349",
-          "company": "Bosch Group",
-          "title": "Sr. Calibration Engineer (Project Manager) - Service House"
+          "id": "sr-AbbVie-3743990013847326",
+          "company": "AbbVie",
+          "title": "Principal Research Scientist II, Analytical Lead, R&D"
         },
         {
-          "id": "sr-BoschGroup-744000133096545",
-          "company": "Bosch Group",
-          "title": "Senior Controls Engineer"
+          "id": "sr-AbbVie-3743990013841291",
+          "company": "AbbVie",
+          "title": "Principal Research Scientist I"
         },
         {
-          "id": "sr-BoschGroup-744000132989075",
-          "company": "Bosch Group",
-          "title": "Senior Principal Engineer- MLOps & AI Machinery, ADAS/AV"
+          "id": "sr-AbbVie-3743990013837546",
+          "company": "AbbVie",
+          "title": "Senior Electrical Engineer, Combination Product Development"
         }
       ],
       "severity": "high",
@@ -258,67 +320,6 @@
       "flags": [
         "low_skill_fill"
       ]
-    },
-    {
-      "source": "workday",
-      "pool_rows": 58931,
-      "us_rows": 33562,
-      "tech_us_rows": 8875,
-      "raw_sidecar_rows": 28694,
-      "sidecar_active_rows": 7207,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 7207,
-      "published_pct": 81.2,
-      "enriched_rows": 7302,
-      "enriched_pct": 82.3,
-      "enriched_with_skills": 6942,
-      "skills_pct": 95.1,
-      "examples": [
-        {
-          "id": "workday-morgan-stanley-JR033706",
-          "company": "Morgan Stanley",
-          "title": "Associate, Software Engineer"
-        },
-        {
-          "id": "workday-nvidia-JR2020276",
-          "company": "NVIDIA",
-          "title": "Solutions Architect, Data Center Infrastructure - NVIS"
-        },
-        {
-          "id": "workday-kla-2638035",
-          "company": "KLA",
-          "title": "Product Development Engineer"
-        },
-        {
-          "id": "workday-kbr-R2125893",
-          "company": "KBR",
-          "title": "Opto-Mechanical Designer - Remote"
-        },
-        {
-          "id": "workday-kbr-R2122560",
-          "company": "KBR",
-          "title": "Intermediate Orbit Analyst"
-        },
-        {
-          "id": "workday-kbr-R2124335",
-          "company": "KBR",
-          "title": "Payload SME"
-        },
-        {
-          "id": "workday-kbr-R2125895",
-          "company": "KBR",
-          "title": "Electrical Engineer II"
-        },
-        {
-          "id": "workday-kbr-R2125818",
-          "company": "KBR",
-          "title": "Operational Requirements Analyst - Business Ops"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
     },
     {
       "source": "microsoft",
