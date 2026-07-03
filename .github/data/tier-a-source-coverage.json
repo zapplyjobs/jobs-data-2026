@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-03T22:51:42.795Z",
+  "generated_at": "2026-07-03T23:06:40.799Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -50,21 +50,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-03T22:50:12.296Z",
+    "generated_at": "2026-07-03T23:05:12.366Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 13677,
-    "description_entries": 9879,
-    "coverage_pct": 72.2,
+    "board_row_count": 13524,
+    "description_entries": 9813,
+    "coverage_pct": 72.6,
     "source_breakdown": {
-      "sidecar": 9882,
+      "sidecar": 9816,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-07-03T22:35:04.523Z",
+    "jobs_metadata_generated": "2026-07-03T22:49:42.960Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-03T22:51:39.612Z",
+    "checked_at": "2026-07-03T23:06:37.556Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -80,18 +80,82 @@
   },
   "rows": [
     {
+      "source": "workday",
+      "pool_rows": 46547,
+      "us_rows": 25004,
+      "tech_us_rows": 7813,
+      "raw_sidecar_rows": 19325,
+      "sidecar_active_rows": 6054,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 5907,
+      "published_pct": 75.6,
+      "enriched_rows": 6193,
+      "enriched_pct": 79.3,
+      "enriched_with_skills": 5904,
+      "skills_pct": 95.3,
+      "examples": [
+        {
+          "id": "workday-caci-328565",
+          "company": "CACI",
+          "title": "Palo Alto Subject Matter Expert"
+        },
+        {
+          "id": "workday-caci-328551",
+          "company": "CACI",
+          "title": "Journeyman Engineer 4"
+        },
+        {
+          "id": "workday-caci-328456",
+          "company": "CACI",
+          "title": "SME Operations Research Analyst"
+        },
+        {
+          "id": "workday-caci-328127",
+          "company": "CACI",
+          "title": "Computer Systems Analyst 4"
+        },
+        {
+          "id": "workday-caci-328325",
+          "company": "CACI",
+          "title": "Information Security Analyst 4"
+        },
+        {
+          "id": "workday-caci-328321",
+          "company": "CACI",
+          "title": "Systems and Software Developer 4"
+        },
+        {
+          "id": "workday-caci-328476",
+          "company": "CACI",
+          "title": "SME Systems Manager II"
+        },
+        {
+          "id": "workday-caci-328438",
+          "company": "CACI",
+          "title": "Computer Hardware Engineer I"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage",
+        "low_enrichment_coverage"
+      ]
+    },
+    {
       "source": "oracle",
       "pool_rows": 8550,
-      "us_rows": 5660,
+      "us_rows": 5661,
       "tech_us_rows": 1251,
-      "raw_sidecar_rows": 6342,
-      "sidecar_active_rows": 498,
-      "supplemental_rows": 26126,
-      "supplemental_with_desc": 18643,
+      "raw_sidecar_rows": 6466,
+      "sidecar_active_rows": 503,
+      "supplemental_rows": 26125,
+      "supplemental_with_desc": 18642,
       "supplemental_meta": {
-        "generated_at": "2026-07-03T22:49:29.412Z",
+        "generated_at": "2026-07-03T23:04:26.108Z",
         "lane_name": "oracle",
-        "jobs_fetched": 26126
+        "jobs_fetched": 26125
       },
       "published_rows": 498,
       "published_pct": 39.8,
@@ -150,21 +214,26 @@
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 1729,
-      "us_rows": 1897,
-      "tech_us_rows": 397,
+      "pool_rows": 1730,
+      "us_rows": 1898,
+      "tech_us_rows": 398,
       "raw_sidecar_rows": 3102,
       "sidecar_active_rows": 232,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
       "published_rows": 232,
-      "published_pct": 58.4,
+      "published_pct": 58.3,
       "enriched_rows": 232,
-      "enriched_pct": 58.4,
+      "enriched_pct": 58.3,
       "enriched_with_skills": 227,
       "skills_pct": 97.8,
       "examples": [
+        {
+          "id": "sr-BoschGroup-744000135786809",
+          "company": "Bosch Group",
+          "title": "Associate Equipment Engineer"
+        },
         {
           "id": "sr-AbbVie-3743990013919276",
           "company": "AbbVie",
@@ -197,11 +266,6 @@
         },
         {
           "id": "sr-AbbVie-3743990013860246",
-          "company": "AbbVie",
-          "title": "Sr. Manager, IT QA- Regulatory Assurance"
-        },
-        {
-          "id": "sr-AbbVie-3743990013859423",
           "company": "AbbVie",
           "title": "Sr. Manager, IT QA- Regulatory Assurance"
         }
@@ -253,67 +317,6 @@
       "flags": [
         "low_skill_fill"
       ]
-    },
-    {
-      "source": "workday",
-      "pool_rows": 46928,
-      "us_rows": 24141,
-      "tech_us_rows": 6973,
-      "raw_sidecar_rows": 19338,
-      "sidecar_active_rows": 5992,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 5936,
-      "published_pct": 85.1,
-      "enriched_rows": 6204,
-      "enriched_pct": 89,
-      "enriched_with_skills": 5915,
-      "skills_pct": 95.3,
-      "examples": [
-        {
-          "id": "workday-rtx-01857057",
-          "company": "RTX",
-          "title": "Manufacturing Automation Tech (Sustainment)"
-        },
-        {
-          "id": "workday-rtx-01855590",
-          "company": "RTX",
-          "title": "Mission Management Scrum Master (Onsite)"
-        },
-        {
-          "id": "workday-schweitzer-engineering-laboratories-2025-18875",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Primary Equipment Technician"
-        },
-        {
-          "id": "workday-schweitzer-engineering-laboratories-2026-20421",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Project Engineer I/II/III - Commissioning"
-        },
-        {
-          "id": "workday-schweitzer-engineering-laboratories-2026-21234",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Project Engineer - Automation"
-        },
-        {
-          "id": "workday-schweitzer-engineering-laboratories-2026-21278",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Project Engineer II/III - Automation"
-        },
-        {
-          "id": "workday-schweitzer-engineering-laboratories-2025-18714",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Project Engineer I/II/III - Automation"
-        },
-        {
-          "id": "workday-schweitzer-engineering-laboratories-2025-18525",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Installation Technician"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
     },
     {
       "source": "microsoft",
