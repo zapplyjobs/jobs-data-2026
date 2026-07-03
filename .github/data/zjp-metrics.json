@@ -1,6 +1,6 @@
 {
   "schema": "zjp-metrics-v1",
-  "generated_at": "2026-07-03T00:09:19.649Z",
+  "generated_at": "2026-07-03T00:11:22.619Z",
   "pool": {
     "total_jobs": 85076,
     "tech_us": 12647,
@@ -612,7 +612,7 @@
     "engine_version": 72,
     "source": "jobs-metadata.json",
     "g1_breakdown": {
-      "updated": "2026-07-03T00:09:17.870Z",
+      "updated": "2026-07-03T00:11:21.372Z",
       "us_total": 49539,
       "us_g1": 3640,
       "us_g1_rate": 7.3,
@@ -1150,14 +1150,14 @@
     "failures": [],
     "warnings": [],
     "warning_count": 0,
-    "last_checked": "2026-07-02T23:52:27.490Z",
+    "last_checked": "2026-07-03T00:09:22.616Z",
     "source": "pipeline-alert.json (local workspace)"
   },
   "pipeline": {
     "last_aggregator_run": "2026-07-03T00:00:14Z",
     "last_aggregator_status": "success",
-    "last_enrichment_run": "2026-07-03T00:00:16Z",
-    "last_enrichment_status": "success",
+    "last_enrichment_run": null,
+    "last_enrichment_status": null,
     "aggregator_runtime_minutes": 4.8,
     "aggregator_queue_minutes": 0,
     "aggregator_execution_minutes": 4.7,
@@ -1179,12 +1179,12 @@
   },
   "r2": {
     "status": "healthy",
-    "manifest_age_minutes": 1,
-    "manifest_timestamp": "2026-07-03T00:08:15.796Z",
-    "files_uploaded": 35,
+    "manifest_age_minutes": 2,
+    "manifest_timestamp": "2026-07-03T00:09:32.714Z",
+    "files_uploaded": 43,
     "files_failed": null,
     "file_count": 65,
-    "total_size_mb": 865
+    "total_size_mb": 863
   },
   "dedupe": {
     "status": "tracked",
@@ -1280,12 +1280,12 @@
     }
   },
   "consumer_e2e": {
-    "generated_at": "2026-07-03T00:09:19.734Z",
+    "generated_at": "2026-07-03T00:11:22.718Z",
     "staleness_threshold_minutes": 60,
     "baseline": {
       "source": "R2 data/all_jobs.json",
       "last_update": "2026-07-03T00:09:15.000Z",
-      "age_minutes": 0.1
+      "age_minutes": 2.1
     },
     "summary": {
       "measured": 9,
@@ -1299,7 +1299,7 @@
         "kind": "r2",
         "signal": "data_freshness",
         "last_update": "2026-07-03T00:09:12.000Z",
-        "age_minutes": 0.1,
+        "age_minutes": 2.2,
         "lag_vs_pipeline_minutes": 0.1,
         "stale": false
       },
@@ -1308,7 +1308,7 @@
         "kind": "gh",
         "signal": "refresh_recency_proxy",
         "last_update": "2026-07-03T00:00:34.000Z",
-        "age_minutes": 8.8,
+        "age_minutes": 10.8,
         "lag_vs_pipeline_minutes": 8.7,
         "stale": false
       },
@@ -1317,7 +1317,7 @@
         "kind": "gh",
         "signal": "refresh_recency_proxy",
         "last_update": "2026-07-03T00:00:32.000Z",
-        "age_minutes": 8.8,
+        "age_minutes": 10.8,
         "lag_vs_pipeline_minutes": 8.7,
         "stale": false
       },
@@ -1326,7 +1326,7 @@
         "kind": "gh",
         "signal": "refresh_recency_proxy",
         "last_update": "2026-07-03T00:00:36.000Z",
-        "age_minutes": 8.7,
+        "age_minutes": 10.8,
         "lag_vs_pipeline_minutes": 8.7,
         "stale": false
       },
@@ -1335,7 +1335,7 @@
         "kind": "gh",
         "signal": "refresh_recency_proxy",
         "last_update": "2026-07-03T00:00:39.000Z",
-        "age_minutes": 8.7,
+        "age_minutes": 10.7,
         "lag_vs_pipeline_minutes": 8.6,
         "stale": false
       },
@@ -1344,7 +1344,7 @@
         "kind": "gh",
         "signal": "refresh_recency_proxy",
         "last_update": "2026-07-03T00:00:36.000Z",
-        "age_minutes": 8.7,
+        "age_minutes": 10.8,
         "lag_vs_pipeline_minutes": 8.7,
         "stale": false
       },
@@ -1353,7 +1353,7 @@
         "kind": "gh",
         "signal": "refresh_recency_proxy",
         "last_update": "2026-07-03T00:00:36.000Z",
-        "age_minutes": 8.7,
+        "age_minutes": 10.8,
         "lag_vs_pipeline_minutes": 8.7,
         "stale": false
       },
@@ -1362,7 +1362,7 @@
         "kind": "supabase",
         "signal": "data_freshness",
         "last_update": "2026-07-03T00:09:04.033Z",
-        "age_minutes": 0.3,
+        "age_minutes": 2.3,
         "lag_vs_pipeline_minutes": 0.2,
         "stale": false
       },
@@ -1371,7 +1371,7 @@
         "kind": "discord",
         "signal": "data_freshness",
         "last_update": "2026-07-03T00:00:15.000Z",
-        "age_minutes": 9.1,
+        "age_minutes": 11.1,
         "lag_vs_pipeline_minutes": 9,
         "stale": false
       }
@@ -1392,16 +1392,16 @@
   },
   "evergreen": {
     "age_buckets": {
-      "fresh_0_3d": 26526,
+      "fresh_0_3d": 26525,
       "aging_4_10d": 33173,
-      "evergreen_10_14d": 8706,
-      "beyond_14d": 16671
+      "evergreen_10_14d": 8705,
+      "beyond_14d": 16673
     },
     "age_buckets_original": {
-      "fresh_0_3d": 1274,
+      "fresh_0_3d": 1273,
       "aging_4_10d": 2237,
-      "evergreen_10_14d": 640,
-      "beyond_14d": 2718,
+      "evergreen_10_14d": 639,
+      "beyond_14d": 2720,
       "coverage": 6869,
       "coverage_pct": 8
     },
@@ -1409,6 +1409,7 @@
     "first_published_coverage": 8,
     "first_published_evergreen_pct": 39.6,
     "by_source": {
+      "ashby": 557,
       "workday": 16012,
       "greenhouse": 2590,
       "smartrecruiters": 810,
@@ -1416,7 +1417,6 @@
       "eightfold": 14,
       "oracle": 4644,
       "icims": 56,
-      "ashby": 556,
       "microsoft": 197,
       "uber": 13,
       "lever": 212,
