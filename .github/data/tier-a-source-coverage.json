@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-03T11:46:06.895Z",
+  "generated_at": "2026-07-03T11:52:42.522Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -53,21 +53,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-03T11:36:06.684Z",
+    "generated_at": "2026-07-03T11:50:58.981Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 15860,
-    "description_entries": 11250,
-    "coverage_pct": 70.9,
+    "board_row_count": 15629,
+    "description_entries": 11278,
+    "coverage_pct": 72.2,
     "source_breakdown": {
-      "sidecar": 11283,
+      "sidecar": 11312,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-07-03T11:20:09.107Z",
+    "jobs_metadata_generated": "2026-07-03T11:36:04.719Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-03T11:46:03.902Z",
+    "checked_at": "2026-07-03T11:52:37.906Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -83,18 +83,81 @@
   },
   "rows": [
     {
+      "source": "workday",
+      "pool_rows": 64565,
+      "us_rows": 36033,
+      "tech_us_rows": 9374,
+      "raw_sidecar_rows": 27921,
+      "sidecar_active_rows": 7077,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 7214,
+      "published_pct": 77,
+      "enriched_rows": 7843,
+      "enriched_pct": 83.7,
+      "enriched_with_skills": 7478,
+      "skills_pct": 95.3,
+      "examples": [
+        {
+          "id": "workday-coca-cola-R-142958",
+          "company": "Coca-Cola",
+          "title": "Maintenance Manager (Overnight, 9p-7:00a)"
+        },
+        {
+          "id": "workday-cisco-2018402",
+          "company": "Cisco",
+          "title": "Systems Quality Assurance Test Automation Engineer I (Full Time) - United States ENG/I&SG ETR"
+        },
+        {
+          "id": "workday-caci-328551",
+          "company": "CACI",
+          "title": "Journeyman Engineer 4"
+        },
+        {
+          "id": "workday-caci-328456",
+          "company": "CACI",
+          "title": "SME Operations Research Analyst"
+        },
+        {
+          "id": "workday-caci-328127",
+          "company": "CACI",
+          "title": "Computer Systems Analyst 4"
+        },
+        {
+          "id": "workday-caci-328325",
+          "company": "CACI",
+          "title": "Information Security Analyst 4"
+        },
+        {
+          "id": "workday-caci-328321",
+          "company": "CACI",
+          "title": "Systems and Software Developer 4"
+        },
+        {
+          "id": "workday-caci-328476",
+          "company": "CACI",
+          "title": "SME Systems Manager II"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage"
+      ]
+    },
+    {
       "source": "oracle",
       "pool_rows": 9558,
       "us_rows": 6248,
       "tech_us_rows": 1311,
       "raw_sidecar_rows": 7143,
       "sidecar_active_rows": 566,
-      "supplemental_rows": 26062,
-      "supplemental_with_desc": 18585,
+      "supplemental_rows": 26066,
+      "supplemental_with_desc": 18587,
       "supplemental_meta": {
-        "generated_at": "2026-07-03T11:34:44.790Z",
+        "generated_at": "2026-07-03T11:49:35.094Z",
         "lane_name": "oracle",
-        "jobs_fetched": 26062
+        "jobs_fetched": 26066
       },
       "published_rows": 566,
       "published_pct": 43.2,
@@ -256,67 +319,6 @@
       "flags": [
         "low_skill_fill"
       ]
-    },
-    {
-      "source": "workday",
-      "pool_rows": 64493,
-      "us_rows": 35418,
-      "tech_us_rows": 8791,
-      "raw_sidecar_rows": 27892,
-      "sidecar_active_rows": 7044,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 7195,
-      "published_pct": 81.8,
-      "enriched_rows": 7827,
-      "enriched_pct": 89,
-      "enriched_with_skills": 7465,
-      "skills_pct": 95.4,
-      "examples": [
-        {
-          "id": "workday-td-bank-R_1498013",
-          "company": "TD Bank",
-          "title": "Cyber Threat Risk Oversight"
-        },
-        {
-          "id": "workday-stanley-black-&-decker-REQ-1000049981",
-          "company": "Stanley Black & Decker",
-          "title": "Engineer III, Electrical Hardware"
-        },
-        {
-          "id": "workday-snap-Q326SWEI6",
-          "company": "Snap",
-          "title": "Software Engineer, iOS, Level 5"
-        },
-        {
-          "id": "workday-snap-Q326SWEI2",
-          "company": "Snap",
-          "title": "Software Engineer, iOS, Level 4"
-        },
-        {
-          "id": "workday-snap-Q326SWEB6",
-          "company": "Snap",
-          "title": "Software Engineer, Backend, Level 5"
-        },
-        {
-          "id": "workday-snap-R0046054",
-          "company": "Snap",
-          "title": "Integrated Circuit Design Verification Engineer"
-        },
-        {
-          "id": "workday-snap-Q326SWEFS2",
-          "company": "Snap",
-          "title": "Software Engineer, Full Stack, Level 4"
-        },
-        {
-          "id": "workday-snap-Q326SWEFS6",
-          "company": "Snap",
-          "title": "Software Engineer, Full Stack, Level 5"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
     },
     {
       "source": "microsoft",
