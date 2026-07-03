@@ -207,6 +207,14 @@ async function main() {
   const snapshot = await buildSnapshot();
   fs.writeFileSync(SNAPSHOT_PATH, JSON.stringify(snapshot, null, 2) + '\n');
   console.log('[generate-public-snapshot] zjp-public-snapshot.json written');
+  // Persist the latest tag_history entry to a JSONL for the dashboard's G1-over-time + experience-level series (g1 + 4 levels). Additive — does not change the snapshot.
+  const tagHist = snapshot.tag_history;
+  const latest = Array.isArray(tagHist) ? tagHist[tagHist.length - 1] : null;
+  if (latest) {
+    const tagHistoryFile = path.join(DATA_DIR, 'tag-history.jsonl');
+    fs.appendFileSync(tagHistoryFile, JSON.stringify(latest) + '\n');
+    console.log('[generate-public-snapshot] tag-history.jsonl appended (g1 + levels)');
+  }
 }
 
 main().catch(err => {
