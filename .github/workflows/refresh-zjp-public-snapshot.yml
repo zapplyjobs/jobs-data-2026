@@ -122,7 +122,7 @@ jobs:
           git config user.email "bot@zapplyjobs.com"
           git config user.name "Data Bot"
           git restore .github/data/all_jobs.json .github/data/jobs-metadata.json || true
-          git add .github/data/zjp-public-snapshot.json
+          git add .github/data/zjp-public-snapshot.json .github/data/tag-history.jsonl
           git commit -m "chore: refresh zjp public snapshot [skip ci]" || exit 0
           for i in 1 2 3; do
             git pull --rebase origin main && git push && break
