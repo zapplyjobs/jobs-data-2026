@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-03T13:22:07.502Z",
+  "generated_at": "2026-07-03T13:32:52.660Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -67,7 +67,7 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-03T13:22:03.151Z",
+    "checked_at": "2026-07-03T13:32:48.733Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -83,11 +83,74 @@
   },
   "rows": [
     {
+      "source": "workday",
+      "pool_rows": 64681,
+      "us_rows": 36022,
+      "tech_us_rows": 9384,
+      "raw_sidecar_rows": 27745,
+      "sidecar_active_rows": 7299,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 7389,
+      "published_pct": 78.7,
+      "enriched_rows": 7844,
+      "enriched_pct": 83.6,
+      "enriched_with_skills": 7482,
+      "skills_pct": 95.4,
+      "examples": [
+        {
+          "id": "workday-stanley-black-&-decker-REQ-1000049981",
+          "company": "Stanley Black & Decker",
+          "title": "Engineer III, Electrical Hardware"
+        },
+        {
+          "id": "workday-sierra-nevada-corporation-R0030225",
+          "company": "Sierra Nevada Corporation",
+          "title": "Avionics Technician II"
+        },
+        {
+          "id": "workday-snap-Q326SWEI6",
+          "company": "Snap",
+          "title": "Software Engineer, iOS, Level 5"
+        },
+        {
+          "id": "workday-snap-Q326SWEI2",
+          "company": "Snap",
+          "title": "Software Engineer, iOS, Level 4"
+        },
+        {
+          "id": "workday-snap-Q326SWEB6",
+          "company": "Snap",
+          "title": "Software Engineer, Backend, Level 5"
+        },
+        {
+          "id": "workday-snap-R0046054",
+          "company": "Snap",
+          "title": "Integrated Circuit Design Verification Engineer"
+        },
+        {
+          "id": "workday-snap-Q326SWEFS2",
+          "company": "Snap",
+          "title": "Software Engineer, Full Stack, Level 4"
+        },
+        {
+          "id": "workday-snap-Q326SWEFS6",
+          "company": "Snap",
+          "title": "Software Engineer, Full Stack, Level 5"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage"
+      ]
+    },
+    {
       "source": "oracle",
-      "pool_rows": 9581,
-      "us_rows": 6256,
-      "tech_us_rows": 1312,
-      "raw_sidecar_rows": 7163,
+      "pool_rows": 9590,
+      "us_rows": 6258,
+      "tech_us_rows": 1313,
+      "raw_sidecar_rows": 7255,
       "sidecar_active_rows": 566,
       "supplemental_rows": 26076,
       "supplemental_with_desc": 18593,
@@ -154,20 +217,25 @@
     {
       "source": "smartrecruiters",
       "pool_rows": 1895,
-      "us_rows": 2079,
-      "tech_us_rows": 432,
-      "raw_sidecar_rows": 3743,
+      "us_rows": 2082,
+      "tech_us_rows": 435,
+      "raw_sidecar_rows": 5809,
       "sidecar_active_rows": 261,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
       "published_rows": 346,
-      "published_pct": 80.1,
+      "published_pct": 79.5,
       "enriched_rows": 261,
-      "enriched_pct": 60.4,
+      "enriched_pct": 60,
       "enriched_with_skills": 255,
       "skills_pct": 97.7,
       "examples": [
+        {
+          "id": "sr-llnl-3743990013894526",
+          "company": "LLNL",
+          "title": "Directorate Operations Program Support Specialist"
+        },
         {
           "id": "sr-llnl-3743990013846906",
           "company": "LLNL",
@@ -189,6 +257,11 @@
           "title": "Senior Optical Engineer"
         },
         {
+          "id": "sr-llnl-3743990013795351",
+          "company": "LLNL",
+          "title": "Senior AI Architect"
+        },
+        {
           "id": "sr-llnl-3743990013734826",
           "company": "LLNL",
           "title": "Lead Design Engineer - Active Clearance Required"
@@ -197,20 +270,11 @@
           "id": "sr-LinkedIn3-744000135601779",
           "company": "LinkedIn",
           "title": "Staff Software Engineer - Systems Infrastructure"
-        },
-        {
-          "id": "sr-LinkedIn3-744000135601649",
-          "company": "LinkedIn",
-          "title": "Senior Software Engineer - Systems and Infrastructure"
-        },
-        {
-          "id": "sr-LinkedIn3-744000135548629",
-          "company": "LinkedIn",
-          "title": "Staff Network Engineer"
         }
       ],
-      "severity": "medium",
+      "severity": "high",
       "flags": [
+        "low_published_coverage",
         "low_enrichment_coverage"
       ]
     },
@@ -255,67 +319,6 @@
       "flags": [
         "low_skill_fill"
       ]
-    },
-    {
-      "source": "workday",
-      "pool_rows": 64643,
-      "us_rows": 36121,
-      "tech_us_rows": 9305,
-      "raw_sidecar_rows": 27554,
-      "sidecar_active_rows": 7461,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 7461,
-      "published_pct": 80.2,
-      "enriched_rows": 7840,
-      "enriched_pct": 84.3,
-      "enriched_with_skills": 7478,
-      "skills_pct": 95.4,
-      "examples": [
-        {
-          "id": "workday-rtx-01854677",
-          "company": "RTX",
-          "title": "PDC Quality Engineer (Onsite)"
-        },
-        {
-          "id": "workday-proofpoint-R14278",
-          "company": "Proofpoint",
-          "title": "Security Software Engineer"
-        },
-        {
-          "id": "workday-leidos-R-00186624",
-          "company": "Leidos",
-          "title": "Distribution Engineer"
-        },
-        {
-          "id": "workday-intel-JR0282877",
-          "company": "Intel",
-          "title": "Packaging Module Process Development Engineer"
-        },
-        {
-          "id": "workday-intel-JR0285341",
-          "company": "Intel",
-          "title": "DTCO Data Engineer Intern"
-        },
-        {
-          "id": "workday-johnson-controls-WD30273578",
-          "company": "Johnson Controls",
-          "title": "Fire Sprinkler Inspector"
-        },
-        {
-          "id": "workday-micron-JR93178",
-          "company": "Micron",
-          "title": "New College Grad - Firmware Engineer"
-        },
-        {
-          "id": "workday-analog-devices-R260500",
-          "company": "Analog Devices",
-          "title": "CMP Process Sustaining Engineer"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
     },
     {
       "source": "microsoft",
