@@ -1,9 +1,9 @@
 {
   "schema": "zjp-metrics-v1",
-  "generated_at": "2026-07-04T23:30:38.126Z",
+  "generated_at": "2026-07-04T23:36:55.171Z",
   "pool": {
     "total_jobs": 48845,
-    "tech_us": 8124,
+    "tech_us": 8093,
     "domains": {
       "data_science": 1768,
       "sales": 5547,
@@ -609,7 +609,7 @@
     "engine_version": 72,
     "source": "jobs-metadata.json",
     "g1_breakdown": {
-      "updated": "2026-07-04T23:30:37.047Z",
+      "updated": "2026-07-04T23:36:54.137Z",
       "us_total": 27615,
       "us_g1": 2223,
       "us_g1_rate": 8,
@@ -850,33 +850,33 @@
     }
   },
   "enrichment": {
-    "total_enriched": 7643,
+    "total_enriched": 7614,
     "enrichment_rate_pct": 94.1,
     "tiers": {
       "t0": 34,
-      "t1": 321,
+      "t1": 316,
       "t2": 71,
-      "t3": 383,
-      "t4": 6834
+      "t3": 387,
+      "t4": 6806
     },
     "enricher_version": 89,
     "reenrichment_pending": 39,
     "description_quality": {
-      "has_description_flag": 7611,
-      "retrievable_description": 7465,
+      "has_description_flag": 7580,
+      "retrievable_description": 7436,
       "retrievable_description_pct": 98,
       "silent_rot_count": 144
     },
     "current_missing": {
-      "total": 481,
+      "total": 479,
       "by_source": {
         "simplify": 426,
-        "workday": 48,
+        "workday": 46,
         "eightfold": 7
       },
       "by_status": {
         "skipped": 433,
-        "unprocessed": 48
+        "unprocessed": 46
       },
       "top_companies": [
         {
@@ -924,11 +924,11 @@
           "count": 5
         },
         {
-          "company": "Goldman Sachs",
+          "company": "GM financial",
           "count": 5
         },
         {
-          "company": "GM financial",
+          "company": "Goldman Sachs",
           "count": 5
         },
         {
@@ -962,19 +962,19 @@
       ]
     },
     "visa_paths": {
-      "actual_job_signal": 2429,
-      "lca_only_signal": 4765,
-      "unresolved_signal": 449,
+      "actual_job_signal": 2407,
+      "lca_only_signal": 4753,
+      "unresolved_signal": 454,
       "unresolved_reasons": {
         "defense_contractor": 26
       },
       "by_source": {
         "workday": {
-          "actual_job_signal": 1044,
-          "actual_job_signal_pct": 24,
-          "lca_only_signal": 3054,
+          "actual_job_signal": 1022,
+          "actual_job_signal_pct": 23,
+          "lca_only_signal": 3042,
           "lca_only_signal_pct": 69,
-          "unresolved_signal": 342,
+          "unresolved_signal": 347,
           "unresolved_signal_pct": 8,
           "unresolved_reasons": {
             "defense_contractor": 26
@@ -1142,17 +1142,17 @@
     "failures": [],
     "warnings": [],
     "warning_count": 0,
-    "last_checked": "2026-07-04T23:21:08.967Z",
+    "last_checked": "2026-07-04T23:36:11.433Z",
     "source": "pipeline-alert.json (local workspace)"
   },
   "pipeline": {
     "last_aggregator_run": "2026-07-04T23:30:12Z",
-    "last_aggregator_status": "in_progress",
+    "last_aggregator_status": "success",
     "last_enrichment_run": "2026-07-04T23:30:15Z",
-    "last_enrichment_status": "in_progress",
-    "aggregator_runtime_minutes": 4,
+    "last_enrichment_status": "success",
+    "aggregator_runtime_minutes": 4.2,
     "aggregator_queue_minutes": 0,
-    "aggregator_execution_minutes": 3.9,
+    "aggregator_execution_minutes": 4.2,
     "aggregator_cancel_count": 0,
     "stage_timings": {
       "step1a_family_cache_ms": 79,
@@ -1167,13 +1167,13 @@
       "step9_write_ms": 37982
     },
     "pipeline_internal_minutes": 2.2,
-    "push_overhead_minutes": 1.8
+    "push_overhead_minutes": 2
   },
   "r2": {
     "status": "healthy",
-    "manifest_age_minutes": 0,
-    "manifest_timestamp": "2026-07-04T23:30:11.596Z",
-    "files_uploaded": 41,
+    "manifest_age_minutes": 2,
+    "manifest_timestamp": "2026-07-04T23:35:25.266Z",
+    "files_uploaded": 31,
     "files_failed": null,
     "file_count": 63,
     "total_size_mb": 583
@@ -1272,12 +1272,12 @@
     }
   },
   "consumer_e2e": {
-    "generated_at": "2026-07-04T23:30:38.228Z",
+    "generated_at": "2026-07-04T23:36:55.276Z",
     "staleness_threshold_minutes": 60,
     "baseline": {
       "source": "R2 data/all_jobs.json",
       "last_update": "2026-07-04T23:29:57.000Z",
-      "age_minutes": 0.7
+      "age_minutes": 7
     },
     "summary": {
       "measured": 9,
@@ -1291,7 +1291,7 @@
         "kind": "r2",
         "signal": "data_freshness",
         "last_update": "2026-07-04T23:29:57.000Z",
-        "age_minutes": 0.7,
+        "age_minutes": 7,
         "lag_vs_pipeline_minutes": 0,
         "stale": false
       },
@@ -1300,7 +1300,7 @@
         "kind": "gh",
         "signal": "refresh_recency_proxy",
         "last_update": "2026-07-04T23:30:32.000Z",
-        "age_minutes": 0.1,
+        "age_minutes": 6.4,
         "lag_vs_pipeline_minutes": -0.6,
         "stale": false
       },
@@ -1309,7 +1309,7 @@
         "kind": "gh",
         "signal": "refresh_recency_proxy",
         "last_update": "2026-07-04T23:30:32.000Z",
-        "age_minutes": 0.1,
+        "age_minutes": 6.4,
         "lag_vs_pipeline_minutes": -0.6,
         "stale": false
       },
@@ -1318,7 +1318,7 @@
         "kind": "gh",
         "signal": "refresh_recency_proxy",
         "last_update": "2026-07-04T23:30:32.000Z",
-        "age_minutes": 0.1,
+        "age_minutes": 6.4,
         "lag_vs_pipeline_minutes": -0.6,
         "stale": false
       },
@@ -1327,7 +1327,7 @@
         "kind": "gh",
         "signal": "refresh_recency_proxy",
         "last_update": "2026-07-04T23:30:33.000Z",
-        "age_minutes": 0.1,
+        "age_minutes": 6.4,
         "lag_vs_pipeline_minutes": -0.6,
         "stale": false
       },
@@ -1336,7 +1336,7 @@
         "kind": "gh",
         "signal": "refresh_recency_proxy",
         "last_update": "2026-07-04T23:30:30.000Z",
-        "age_minutes": 0.1,
+        "age_minutes": 6.4,
         "lag_vs_pipeline_minutes": -0.6,
         "stale": false
       },
@@ -1345,7 +1345,7 @@
         "kind": "gh",
         "signal": "refresh_recency_proxy",
         "last_update": "2026-07-04T23:30:37.000Z",
-        "age_minutes": 0,
+        "age_minutes": 6.3,
         "lag_vs_pipeline_minutes": -0.7,
         "stale": false
       },
@@ -1353,27 +1353,27 @@
         "name": "zapply.jobs (Supabase jobs)",
         "kind": "supabase",
         "signal": "data_freshness",
-        "last_update": "2026-07-04T23:26:09.650Z",
-        "age_minutes": 4.5,
-        "lag_vs_pipeline_minutes": 3.8,
+        "last_update": "2026-07-04T23:36:54.115Z",
+        "age_minutes": 0,
+        "lag_vs_pipeline_minutes": -7,
         "stale": false
       },
       {
         "name": "Discord",
         "kind": "discord",
         "signal": "data_freshness",
-        "last_update": "2026-07-04T23:15:15.000Z",
-        "age_minutes": 15.4,
-        "lag_vs_pipeline_minutes": 14.7,
+        "last_update": "2026-07-04T23:30:14.000Z",
+        "age_minutes": 6.7,
+        "lag_vs_pipeline_minutes": -0.3,
         "stale": false
       }
     ]
   },
   "repos": {
-    "total_mb": 77643,
+    "total_mb": 77636,
     "repos": {
       "jobs-aggregator-private": 29268,
-      "jobs-data-2026": 26522,
+      "jobs-data-2026": 26515,
       "New-Grad-Jobs-2027": 20233,
       "Internships-2027": 938,
       "New-Grad-Software-Engineering-Jobs-2027": 273,
@@ -1384,15 +1384,15 @@
   },
   "evergreen": {
     "age_buckets": {
-      "fresh_0_3d": 11711,
-      "aging_4_10d": 25004,
-      "evergreen_10_14d": 8786,
+      "fresh_0_3d": 11710,
+      "aging_4_10d": 25003,
+      "evergreen_10_14d": 8788,
       "beyond_14d": 3344
     },
     "age_buckets_original": {
-      "fresh_0_3d": 547,
+      "fresh_0_3d": 546,
       "aging_4_10d": 2073,
-      "evergreen_10_14d": 1181,
+      "evergreen_10_14d": 1182,
       "beyond_14d": 644,
       "coverage": 4445,
       "coverage_pct": 9
@@ -1401,11 +1401,11 @@
     "first_published_coverage": 9,
     "first_published_evergreen_pct": 14.5,
     "by_source": {
+      "ashby": 298,
+      "smartrecruiters": 533,
       "greenhouse": 1408,
       "workday": 7309,
-      "smartrecruiters": 532,
       "microsoft": 290,
-      "ashby": 297,
       "lever": 120,
       "amd": 16,
       "amazon": 85,
