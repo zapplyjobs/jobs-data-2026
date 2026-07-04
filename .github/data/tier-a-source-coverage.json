@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-04T21:19:49.344Z",
+  "generated_at": "2026-07-04T21:37:23.012Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -35,9 +35,6 @@
     "descriptions-enriched-3.jsonl",
     "descriptions-enriched-4.jsonl",
     "descriptions-enriched-5.jsonl",
-    "descriptions-enriched-6.jsonl",
-    "descriptions-enriched-7.jsonl",
-    "descriptions-enriched-8.jsonl",
     "descriptions-google.jsonl",
     "descriptions-greenhouse-1.jsonl",
     "descriptions-greenhouse-2.jsonl",
@@ -51,21 +48,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-04T21:18:25.813Z",
+    "generated_at": "2026-07-04T21:36:04.796Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 11315,
-    "description_entries": 7756,
-    "coverage_pct": 68.5,
+    "board_row_count": 10873,
+    "description_entries": 6689,
+    "coverage_pct": 61.5,
     "source_breakdown": {
-      "sidecar": 7759,
+      "sidecar": 6692,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-07-04T21:03:43.096Z",
+    "jobs_metadata_generated": "2026-07-04T21:18:22.979Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-04T21:19:45.985Z",
+    "checked_at": "2026-07-04T21:37:20.567Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -81,16 +78,79 @@
   },
   "rows": [
     {
+      "source": "workday",
+      "pool_rows": 34211,
+      "us_rows": 17664,
+      "tech_us_rows": 4970,
+      "raw_sidecar_rows": 15242,
+      "sidecar_active_rows": 3640,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 3619,
+      "published_pct": 72.8,
+      "enriched_rows": 4446,
+      "enriched_pct": 89.5,
+      "enriched_with_skills": 4263,
+      "skills_pct": 95.9,
+      "examples": [
+        {
+          "id": "workday-nidec-R0016553",
+          "company": "Nidec",
+          "title": "Shipping Team Lead"
+        },
+        {
+          "id": "workday-marvell-2602100",
+          "company": "Marvell",
+          "title": "Executive Administrative Assistant"
+        },
+        {
+          "id": "workday-regal-rexnord-R26_02397",
+          "company": "Regal Rexnord",
+          "title": "Controller / Site Finance Partner"
+        },
+        {
+          "id": "workday-regal-rexnord-R26_03347",
+          "company": "Regal Rexnord",
+          "title": "Cell Associate"
+        },
+        {
+          "id": "workday-nxp-R-10064438",
+          "company": "NXP",
+          "title": "Distribution Business Manager"
+        },
+        {
+          "id": "workday-snap-Q326SWEI2",
+          "company": "Snap",
+          "title": "Software Engineer, iOS, Level 4"
+        },
+        {
+          "id": "workday-snap-Q326SWEB6",
+          "company": "Snap",
+          "title": "Software Engineer, Backend, Level 5"
+        },
+        {
+          "id": "workday-snap-R0046054",
+          "company": "Snap",
+          "title": "Integrated Circuit Design Verification Engineer"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage"
+      ]
+    },
+    {
       "source": "oracle",
-      "pool_rows": 5763,
-      "us_rows": 3944,
-      "tech_us_rows": 1006,
+      "pool_rows": 5764,
+      "us_rows": 3945,
+      "tech_us_rows": 1007,
       "raw_sidecar_rows": 4231,
       "sidecar_active_rows": 316,
       "supplemental_rows": 26015,
       "supplemental_with_desc": 18576,
       "supplemental_meta": {
-        "generated_at": "2026-07-04T21:19:17.094Z",
+        "generated_at": "2026-07-04T21:34:23.135Z",
         "lane_name": "oracle",
         "jobs_fetched": 26015
       },
@@ -101,6 +161,11 @@
       "enriched_with_skills": 345,
       "skills_pct": 75.5,
       "examples": [
+        {
+          "id": "oracle-jpmorgan-chase-210761228",
+          "company": "JPMorgan Chase",
+          "title": "AI/ML Software Engineer II"
+        },
         {
           "id": "oracle-undefined-20131",
           "company": "Fortinet",
@@ -135,11 +200,6 @@
           "id": "oracle-fortive-10095",
           "company": "Fortive",
           "title": "Field Service Engineer"
-        },
-        {
-          "id": "oracle-oracle-338908",
-          "company": "Oracle",
-          "title": "Software Developer 3"
         }
       ],
       "severity": "high",
@@ -147,6 +207,70 @@
         "low_published_coverage",
         "low_enrichment_coverage",
         "supplemental_stage_gap"
+      ]
+    },
+    {
+      "source": "smartrecruiters",
+      "pool_rows": 1352,
+      "us_rows": 1520,
+      "tech_us_rows": 366,
+      "raw_sidecar_rows": 2094,
+      "sidecar_active_rows": 191,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 201,
+      "published_pct": 54.9,
+      "enriched_rows": 191,
+      "enriched_pct": 52.2,
+      "enriched_with_skills": 187,
+      "skills_pct": 97.9,
+      "examples": [
+        {
+          "id": "sr-AbbVie-3743990013919276",
+          "company": "AbbVie",
+          "title": "Architect, Delivery Operations & AI Systems"
+        },
+        {
+          "id": "sr-AbbVie-3743990013901627",
+          "company": "AbbVie",
+          "title": "Senior Quality Engineer, Medical Device External Quality"
+        },
+        {
+          "id": "sr-AbbVie-3743990013899946",
+          "company": "AbbVie",
+          "title": "Senior Controls Engineer"
+        },
+        {
+          "id": "sr-AbbVie-3743990013890411",
+          "company": "AbbVie",
+          "title": "Principal Applied AI Engineer (Hybrid)"
+        },
+        {
+          "id": "sr-AbbVie-3743990013889816",
+          "company": "AbbVie",
+          "title": "Project Engineering Manager"
+        },
+        {
+          "id": "sr-AbbVie-3743990013889166",
+          "company": "AbbVie",
+          "title": "Principal Research Scientist I"
+        },
+        {
+          "id": "sr-AbbVie-3743990013860246",
+          "company": "AbbVie",
+          "title": "Sr. Manager, IT QA- Regulatory Assurance"
+        },
+        {
+          "id": "sr-AbbVie-3743990013859423",
+          "company": "AbbVie",
+          "title": "Sr. Manager, IT QA- Regulatory Assurance"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage",
+        "low_enrichment_coverage"
       ]
     },
     {
@@ -190,90 +314,6 @@
       "flags": [
         "low_skill_fill"
       ]
-    },
-    {
-      "source": "smartrecruiters",
-      "pool_rows": 1185,
-      "us_rows": 1370,
-      "tech_us_rows": 373,
-      "raw_sidecar_rows": 2139,
-      "sidecar_active_rows": 191,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 373,
-      "published_pct": 100,
-      "enriched_rows": 191,
-      "enriched_pct": 51.2,
-      "enriched_with_skills": 187,
-      "skills_pct": 97.9,
-      "examples": [],
-      "severity": "medium",
-      "flags": [
-        "published_gt_raw_sidecar",
-        "low_enrichment_coverage"
-      ]
-    },
-    {
-      "source": "workday",
-      "pool_rows": 34210,
-      "us_rows": 17877,
-      "tech_us_rows": 5165,
-      "raw_sidecar_rows": 17338,
-      "sidecar_active_rows": 3403,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 4398,
-      "published_pct": 85.2,
-      "enriched_rows": 4456,
-      "enriched_pct": 86.3,
-      "enriched_with_skills": 4273,
-      "skills_pct": 95.9,
-      "examples": [
-        {
-          "id": "workday-nidec-R0016553",
-          "company": "Nidec",
-          "title": "Shipping Team Lead"
-        },
-        {
-          "id": "workday-lowe's-JR-02572189",
-          "company": "Lowe's",
-          "title": "Asset Protection Agent"
-        },
-        {
-          "id": "workday-ge-vernova-R5046400",
-          "company": "GE Vernova",
-          "title": "Global Process Engineer - Packaging, Material Transport, Material Handling"
-        },
-        {
-          "id": "workday-regal-rexnord-R26_03052",
-          "company": "Regal Rexnord",
-          "title": "Continuous Improvement Manager"
-        },
-        {
-          "id": "workday-northrop-grumman-R10236391",
-          "company": "Northrop Grumman",
-          "title": "Maintenance Electrician 4"
-        },
-        {
-          "id": "workday-northrop-grumman-R10238785",
-          "company": "Northrop Grumman",
-          "title": "Automation Technician 3/4"
-        },
-        {
-          "id": "workday-rocket-companies-R-083577",
-          "company": "Rocket Companies",
-          "title": "REO Asset Manager"
-        },
-        {
-          "id": "workday-merck-&-co.-R405256",
-          "company": "Merck & Co.",
-          "title": "Specialist, Packaging Engineer"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
     },
     {
       "source": "microsoft",
