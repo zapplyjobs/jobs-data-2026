@@ -1,6 +1,6 @@
 {
   "schema": "zjp-metrics-v1",
-  "generated_at": "2026-07-04T05:06:57.320Z",
+  "generated_at": "2026-07-04T05:19:36.014Z",
   "pool": {
     "total_jobs": 64102,
     "tech_us": 10250,
@@ -609,7 +609,7 @@
     "engine_version": 72,
     "source": "jobs-metadata.json",
     "g1_breakdown": {
-      "updated": "2026-07-04T05:06:56.158Z",
+      "updated": "2026-07-04T05:19:34.728Z",
       "us_total": 36430,
       "us_g1": 2886,
       "us_g1_rate": 7.9,
@@ -1147,17 +1147,17 @@
     "failures": [],
     "warnings": [],
     "warning_count": 0,
-    "last_checked": "2026-07-04T05:05:18.108Z",
+    "last_checked": "2026-07-04T05:15:07.316Z",
     "source": "pipeline-alert.json (local workspace)"
   },
   "pipeline": {
-    "last_aggregator_run": "2026-07-04T05:00:14Z",
+    "last_aggregator_run": "2026-07-04T05:15:15Z",
     "last_aggregator_status": "success",
-    "last_enrichment_run": null,
-    "last_enrichment_status": null,
-    "aggregator_runtime_minutes": 4.4,
+    "last_enrichment_run": "2026-07-04T05:15:17Z",
+    "last_enrichment_status": "in_progress",
+    "aggregator_runtime_minutes": 4.3,
     "aggregator_queue_minutes": 0,
-    "aggregator_execution_minutes": 4.4,
+    "aggregator_execution_minutes": 4.2,
     "aggregator_cancel_count": 0,
     "stage_timings": {
       "step1a_family_cache_ms": 154,
@@ -1172,11 +1172,11 @@
       "step9_write_ms": 54463
     },
     "pipeline_internal_minutes": 3.9,
-    "push_overhead_minutes": 0.5
+    "push_overhead_minutes": 0.4
   },
   "r2": {
     "status": "healthy",
-    "manifest_age_minutes": 0,
+    "manifest_age_minutes": 13,
     "manifest_timestamp": "2026-07-04T05:06:31.551Z",
     "files_uploaded": 42,
     "files_failed": null,
@@ -1248,41 +1248,41 @@
     "p2_status": "PASS"
   },
   "consumers": {
-    "last_update": "2026-07-04T05:00:39Z",
+    "last_update": "2026-07-04T05:15:35Z",
     "repos": {
       "New-Grad-Jobs-2027": {
-        "positions": 16720,
-        "last_commit": "2026-07-04T05:00:36Z"
+        "positions": 17176,
+        "last_commit": "2026-07-04T05:15:35Z"
       },
       "Internships-2027": {
         "positions": 1812,
-        "last_commit": "2026-07-04T05:00:31Z"
+        "last_commit": "2026-07-04T05:15:31Z"
       },
       "New-Grad-Software-Engineering-Jobs-2027": {
-        "positions": 2526,
-        "last_commit": "2026-07-04T05:00:31Z"
+        "positions": 2639,
+        "last_commit": "2026-07-04T05:15:34Z"
       },
       "New-Grad-Data-Science-Jobs-2027": {
-        "positions": 841,
-        "last_commit": "2026-07-04T05:00:31Z"
+        "positions": 846,
+        "last_commit": "2026-07-04T05:15:34Z"
       },
       "New-Grad-Hardware-Engineering-Jobs-2027": {
-        "positions": 1764,
-        "last_commit": "2026-07-04T05:00:32Z"
+        "positions": 1827,
+        "last_commit": "2026-07-04T05:15:33Z"
       },
       "New-Grad-Healthcare-Jobs-2027": {
-        "positions": 1622,
-        "last_commit": "2026-07-04T05:00:39Z"
+        "positions": 1650,
+        "last_commit": "2026-07-04T05:15:34Z"
       }
     }
   },
   "consumer_e2e": {
-    "generated_at": "2026-07-04T05:06:57.426Z",
+    "generated_at": "2026-07-04T05:19:36.120Z",
     "staleness_threshold_minutes": 60,
     "baseline": {
       "source": "R2 data/all_jobs.json",
       "last_update": "2026-07-04T05:06:15.000Z",
-      "age_minutes": 0.7
+      "age_minutes": 13.4
     },
     "summary": {
       "measured": 9,
@@ -1296,7 +1296,7 @@
         "kind": "r2",
         "signal": "data_freshness",
         "last_update": "2026-07-04T05:06:14.000Z",
-        "age_minutes": 0.7,
+        "age_minutes": 13.4,
         "lag_vs_pipeline_minutes": 0,
         "stale": false
       },
@@ -1304,72 +1304,72 @@
         "name": "GitHub: New-Grad-Software-Engineering-Jobs-2027",
         "kind": "gh",
         "signal": "refresh_recency_proxy",
-        "last_update": "2026-07-04T05:00:31.000Z",
-        "age_minutes": 6.4,
-        "lag_vs_pipeline_minutes": 5.7,
+        "last_update": "2026-07-04T05:15:34.000Z",
+        "age_minutes": 4,
+        "lag_vs_pipeline_minutes": -9.3,
         "stale": false
       },
       {
         "name": "GitHub: New-Grad-Data-Science-Jobs-2027",
         "kind": "gh",
         "signal": "refresh_recency_proxy",
-        "last_update": "2026-07-04T05:00:31.000Z",
-        "age_minutes": 6.4,
-        "lag_vs_pipeline_minutes": 5.7,
+        "last_update": "2026-07-04T05:15:34.000Z",
+        "age_minutes": 4,
+        "lag_vs_pipeline_minutes": -9.3,
         "stale": false
       },
       {
         "name": "GitHub: New-Grad-Hardware-Engineering-Jobs-2027",
         "kind": "gh",
         "signal": "refresh_recency_proxy",
-        "last_update": "2026-07-04T05:00:32.000Z",
-        "age_minutes": 6.4,
-        "lag_vs_pipeline_minutes": 5.7,
+        "last_update": "2026-07-04T05:15:33.000Z",
+        "age_minutes": 4.1,
+        "lag_vs_pipeline_minutes": -9.3,
         "stale": false
       },
       {
         "name": "GitHub: New-Grad-Healthcare-Jobs-2027",
         "kind": "gh",
         "signal": "refresh_recency_proxy",
-        "last_update": "2026-07-04T05:00:39.000Z",
-        "age_minutes": 6.3,
-        "lag_vs_pipeline_minutes": 5.6,
+        "last_update": "2026-07-04T05:15:34.000Z",
+        "age_minutes": 4,
+        "lag_vs_pipeline_minutes": -9.3,
         "stale": false
       },
       {
         "name": "GitHub: Internships-2027",
         "kind": "gh",
         "signal": "refresh_recency_proxy",
-        "last_update": "2026-07-04T05:00:31.000Z",
-        "age_minutes": 6.4,
-        "lag_vs_pipeline_minutes": 5.7,
+        "last_update": "2026-07-04T05:15:31.000Z",
+        "age_minutes": 4.1,
+        "lag_vs_pipeline_minutes": -9.3,
         "stale": false
       },
       {
         "name": "GitHub: New-Grad-Jobs-2027",
         "kind": "gh",
         "signal": "refresh_recency_proxy",
-        "last_update": "2026-07-04T05:00:36.000Z",
-        "age_minutes": 6.4,
-        "lag_vs_pipeline_minutes": 5.7,
+        "last_update": "2026-07-04T05:15:35.000Z",
+        "age_minutes": 4,
+        "lag_vs_pipeline_minutes": -9.3,
         "stale": false
       },
       {
         "name": "zapply.jobs (Supabase jobs)",
         "kind": "supabase",
         "signal": "data_freshness",
-        "last_update": "2026-07-04T05:06:32.990Z",
-        "age_minutes": 0.4,
-        "lag_vs_pipeline_minutes": -0.3,
+        "last_update": "2026-07-04T05:16:22.594Z",
+        "age_minutes": 3.2,
+        "lag_vs_pipeline_minutes": -10.1,
         "stale": false
       },
       {
         "name": "Discord",
         "kind": "discord",
         "signal": "data_freshness",
-        "last_update": "2026-07-04T05:00:16.000Z",
-        "age_minutes": 6.7,
-        "lag_vs_pipeline_minutes": 6,
+        "last_update": "2026-07-04T05:15:17.000Z",
+        "age_minutes": 4.3,
+        "lag_vs_pipeline_minutes": -9,
         "stale": false
       }
     ]
@@ -1390,8 +1390,8 @@
   "evergreen": {
     "age_buckets": {
       "fresh_0_3d": 17648,
-      "aging_4_10d": 21987,
-      "evergreen_10_14d": 6016,
+      "aging_4_10d": 21986,
+      "evergreen_10_14d": 6017,
       "beyond_14d": 18451
     },
     "age_buckets_original": {
@@ -1406,10 +1406,10 @@
     "first_published_coverage": 10,
     "first_published_evergreen_pct": 42.9,
     "by_source": {
+      "microsoft": 242,
       "greenhouse": 2867,
       "workday": 14554,
       "ashby": 608,
-      "microsoft": 241,
       "smartrecruiters": 859,
       "amazon": 216,
       "oracle": 4735,
@@ -1455,7 +1455,7 @@
       },
       {
         "company": "Microsoft",
-        "evergreen_count": 241
+        "evergreen_count": 242
       },
       {
         "company": "Takeda",
