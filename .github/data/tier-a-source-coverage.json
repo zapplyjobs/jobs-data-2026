@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-04T07:33:31.956Z",
+  "generated_at": "2026-07-04T07:48:56.922Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -37,7 +37,6 @@
     "descriptions-enriched-5.jsonl",
     "descriptions-enriched-6.jsonl",
     "descriptions-enriched-7.jsonl",
-    "descriptions-enriched-8.jsonl",
     "descriptions-google.jsonl",
     "descriptions-greenhouse-1.jsonl",
     "descriptions-greenhouse-2.jsonl",
@@ -51,24 +50,26 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-04T07:32:02.125Z",
+    "generated_at": "2026-07-04T07:47:31.801Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 12662,
-    "description_entries": 9612,
-    "coverage_pct": 75.9,
+    "board_row_count": 14783,
+    "description_entries": 9611,
+    "coverage_pct": 65,
     "source_breakdown": {
       "sidecar": 9615,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-07-04T07:19:22.386Z",
+    "jobs_metadata_generated": "2026-07-04T07:43:11.172Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-04T07:33:28.670Z",
-    "active": false,
-    "message": null,
-    "failures": [],
+    "checked_at": "2026-07-04T07:48:53.265Z",
+    "active": true,
+    "message": "**Aggregator execution time high**: 11.2 min (threshold: 10 min). Queue: 0.0 min. At 25 min execution, 15-min cadence breaks.",
+    "failures": [
+      "**Aggregator execution time high**: 11.2 min (threshold: 10 min). Queue: 0.0 min. At 25 min execution, 15-min cadence breaks."
+    ],
     "warnings": [],
     "warning_count": 0,
     "secrets": [
@@ -81,6 +82,70 @@
   },
   "rows": [
     {
+      "source": "workday",
+      "pool_rows": 40476,
+      "us_rows": 23384,
+      "tech_us_rows": 8233,
+      "raw_sidecar_rows": 20725,
+      "sidecar_active_rows": 5601,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 5601,
+      "published_pct": 68,
+      "enriched_rows": 5740,
+      "enriched_pct": 69.7,
+      "enriched_with_skills": 5490,
+      "skills_pct": 95.6,
+      "examples": [
+        {
+          "id": "workday-northrop-grumman-R10233692",
+          "company": "Northrop Grumman",
+          "title": "2026 Associate Software Engineer / Software Engineer"
+        },
+        {
+          "id": "workday-snap-Q326SWEI6",
+          "company": "Snap",
+          "title": "Software Engineer, iOS, Level 5"
+        },
+        {
+          "id": "workday-snap-Q326SWEI2",
+          "company": "Snap",
+          "title": "Software Engineer, iOS, Level 4"
+        },
+        {
+          "id": "workday-snap-Q326SWEB6",
+          "company": "Snap",
+          "title": "Software Engineer, Backend, Level 5"
+        },
+        {
+          "id": "workday-snap-R0046054",
+          "company": "Snap",
+          "title": "Integrated Circuit Design Verification Engineer"
+        },
+        {
+          "id": "workday-snap-Q326SWEFS2",
+          "company": "Snap",
+          "title": "Software Engineer, Full Stack, Level 4"
+        },
+        {
+          "id": "workday-snap-Q326SWEFS6",
+          "company": "Snap",
+          "title": "Software Engineer, Full Stack, Level 5"
+        },
+        {
+          "id": "workday-snap-R0046038",
+          "company": "Snap",
+          "title": "Software Engineer - Audio, Level 5"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage",
+        "low_enrichment_coverage"
+      ]
+    },
+    {
       "source": "oracle",
       "pool_rows": 8514,
       "us_rows": 5643,
@@ -90,7 +155,7 @@
       "supplemental_rows": 26039,
       "supplemental_with_desc": 18596,
       "supplemental_meta": {
-        "generated_at": "2026-07-04T07:19:58.162Z",
+        "generated_at": "2026-07-04T07:34:19.733Z",
         "lane_name": "oracle",
         "jobs_fetched": 26039
       },
@@ -150,70 +215,6 @@
       ]
     },
     {
-      "source": "smartrecruiters",
-      "pool_rows": 1575,
-      "us_rows": 1758,
-      "tech_us_rows": 404,
-      "raw_sidecar_rows": 3110,
-      "sidecar_active_rows": 224,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 386,
-      "published_pct": 95.5,
-      "enriched_rows": 224,
-      "enriched_pct": 55.4,
-      "enriched_with_skills": 219,
-      "skills_pct": 97.8,
-      "examples": [
-        {
-          "id": "sr-solidigm-744000135582177",
-          "company": "Solidigm",
-          "title": "VP, Investor Relations"
-        },
-        {
-          "id": "sr-solidigm-744000134860899",
-          "company": "Solidigm",
-          "title": "Principal AI Workflow Engineer"
-        },
-        {
-          "id": "sr-solidigm-744000134535859",
-          "company": "Solidigm",
-          "title": "Senior Principal Storage Architecture Engineer"
-        },
-        {
-          "id": "sr-solidigm-744000134325749",
-          "company": "Solidigm",
-          "title": "Validation Architect"
-        },
-        {
-          "id": "sr-VeoliaEnvironnementSA-744000135584419",
-          "company": "Veolia Environnement SA",
-          "title": "Process Safety Management Lead"
-        },
-        {
-          "id": "sr-VeoliaEnvironnementSA-744000135319379",
-          "company": "Veolia Environnement SA",
-          "title": "Lead Engineer - Customer Application Engineering"
-        },
-        {
-          "id": "sr-VeoliaEnvironnementSA-744000135283036",
-          "company": "Veolia Environnement SA",
-          "title": "Lead Reliability Engineer"
-        },
-        {
-          "id": "sr-WellmarkInc-744000135292154",
-          "company": "Wellmark, Inc.",
-          "title": "Sr Financial & Data Analyst – Healthcare Economics"
-        }
-      ],
-      "severity": "medium",
-      "flags": [
-        "published_gt_raw_sidecar",
-        "low_enrichment_coverage"
-      ]
-    },
-    {
       "source": "icims",
       "pool_rows": 83,
       "us_rows": 66,
@@ -256,65 +257,27 @@
       ]
     },
     {
-      "source": "workday",
-      "pool_rows": 43610,
-      "us_rows": 22342,
-      "tech_us_rows": 6115,
-      "raw_sidecar_rows": 22145,
-      "sidecar_active_rows": 5617,
+      "source": "smartrecruiters",
+      "pool_rows": 1573,
+      "us_rows": 1758,
+      "tech_us_rows": 405,
+      "raw_sidecar_rows": 3108,
+      "sidecar_active_rows": 223,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 5617,
-      "published_pct": 91.9,
-      "enriched_rows": 5759,
-      "enriched_pct": 94.2,
-      "enriched_with_skills": 5511,
-      "skills_pct": 95.7,
-      "examples": [
-        {
-          "id": "workday-snap-Q326SWEI6",
-          "company": "Snap",
-          "title": "Software Engineer, iOS, Level 5"
-        },
-        {
-          "id": "workday-snap-Q326SWEI2",
-          "company": "Snap",
-          "title": "Software Engineer, iOS, Level 4"
-        },
-        {
-          "id": "workday-snap-Q326SWEB6",
-          "company": "Snap",
-          "title": "Software Engineer, Backend, Level 5"
-        },
-        {
-          "id": "workday-snap-R0046054",
-          "company": "Snap",
-          "title": "Integrated Circuit Design Verification Engineer"
-        },
-        {
-          "id": "workday-snap-Q326SWEFS2",
-          "company": "Snap",
-          "title": "Software Engineer, Full Stack, Level 4"
-        },
-        {
-          "id": "workday-snap-Q326SWEFS6",
-          "company": "Snap",
-          "title": "Software Engineer, Full Stack, Level 5"
-        },
-        {
-          "id": "workday-snap-R0046038",
-          "company": "Snap",
-          "title": "Software Engineer - Audio, Level 5"
-        },
-        {
-          "id": "workday-gdit-RQ222032",
-          "company": "GDIT",
-          "title": "Software Engineer - TS/SCI with Polygraph"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
+      "published_rows": 405,
+      "published_pct": 100,
+      "enriched_rows": 223,
+      "enriched_pct": 55.1,
+      "enriched_with_skills": 218,
+      "skills_pct": 97.8,
+      "examples": [],
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar",
+        "low_enrichment_coverage"
+      ]
     },
     {
       "source": "microsoft",
