@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-04T18:34:08.158Z",
+  "generated_at": "2026-07-04T18:47:42.639Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -37,6 +37,7 @@
     "descriptions-enriched-5.jsonl",
     "descriptions-enriched-6.jsonl",
     "descriptions-enriched-7.jsonl",
+    "descriptions-enriched-8.jsonl",
     "descriptions-google.jsonl",
     "descriptions-greenhouse-1.jsonl",
     "descriptions-greenhouse-2.jsonl",
@@ -64,7 +65,7 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-04T18:34:05.107Z",
+    "checked_at": "2026-07-04T18:47:38.328Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -80,18 +81,81 @@
   },
   "rows": [
     {
+      "source": "workday",
+      "pool_rows": 39753,
+      "us_rows": 21727,
+      "tech_us_rows": 6643,
+      "raw_sidecar_rows": 20541,
+      "sidecar_active_rows": 5261,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 5154,
+      "published_pct": 77.6,
+      "enriched_rows": 5351,
+      "enriched_pct": 80.6,
+      "enriched_with_skills": 5117,
+      "skills_pct": 95.6,
+      "examples": [
+        {
+          "id": "workday-pfizer-4959913",
+          "company": "Pfizer",
+          "title": "Senior Associate, Platform Engineer"
+        },
+        {
+          "id": "workday-lowe's-JR-02572189",
+          "company": "Lowe's",
+          "title": "Asset Protection Agent"
+        },
+        {
+          "id": "workday-hpe-(university)-1206120",
+          "company": "HPE (University)",
+          "title": "Hardware Mechanical Engineer"
+        },
+        {
+          "id": "workday-hpe-1206120",
+          "company": "HPE",
+          "title": "Hardware Mechanical Engineer"
+        },
+        {
+          "id": "workday-boeing-JR2026514318",
+          "company": "Boeing",
+          "title": "Experienced or Senior Airworthiness & Regulatory Engineer"
+        },
+        {
+          "id": "workday-nidec-R0016553",
+          "company": "Nidec",
+          "title": "Shipping Team Lead"
+        },
+        {
+          "id": "workday-centific-JR105488",
+          "company": "Centific",
+          "title": "Technical Intern (Masters or PhD)"
+        },
+        {
+          "id": "workday-centific-JR107479",
+          "company": "Centific",
+          "title": "Technical Intern (Masters or PhD)"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage"
+      ]
+    },
+    {
       "source": "oracle",
       "pool_rows": 5764,
       "us_rows": 3943,
       "tech_us_rows": 1005,
-      "raw_sidecar_rows": 4231,
+      "raw_sidecar_rows": 6447,
       "sidecar_active_rows": 316,
-      "supplemental_rows": 26019,
-      "supplemental_with_desc": 18579,
+      "supplemental_rows": 24401,
+      "supplemental_with_desc": 17043,
       "supplemental_meta": {
-        "generated_at": "2026-07-04T18:19:13.788Z",
+        "generated_at": "2026-07-04T18:33:57.779Z",
         "lane_name": "oracle",
-        "jobs_fetched": 26019
+        "jobs_fetched": 24401
       },
       "published_rows": 316,
       "published_pct": 31.4,
@@ -195,7 +259,7 @@
       "pool_rows": 1185,
       "us_rows": 1370,
       "tech_us_rows": 373,
-      "raw_sidecar_rows": 2332,
+      "raw_sidecar_rows": 6165,
       "sidecar_active_rows": 191,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
@@ -212,67 +276,6 @@
         "published_gt_raw_sidecar",
         "low_enrichment_coverage"
       ]
-    },
-    {
-      "source": "workday",
-      "pool_rows": 41684,
-      "us_rows": 21895,
-      "tech_us_rows": 6216,
-      "raw_sidecar_rows": 21484,
-      "sidecar_active_rows": 5469,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 5469,
-      "published_pct": 88,
-      "enriched_rows": 5572,
-      "enriched_pct": 89.6,
-      "enriched_with_skills": 5332,
-      "skills_pct": 95.7,
-      "examples": [
-        {
-          "id": "workday-nidec-R0016553",
-          "company": "Nidec",
-          "title": "Shipping Team Lead"
-        },
-        {
-          "id": "workday-gdit-RQ222032",
-          "company": "GDIT",
-          "title": "Software Engineer - TS/SCI with Polygraph"
-        },
-        {
-          "id": "workday-northrop-grumman-R10233692",
-          "company": "Northrop Grumman",
-          "title": "2026 Associate Software Engineer / Software Engineer"
-        },
-        {
-          "id": "workday-snap-Q326SWEI6",
-          "company": "Snap",
-          "title": "Software Engineer, iOS, Level 5"
-        },
-        {
-          "id": "workday-snap-Q326SWEI2",
-          "company": "Snap",
-          "title": "Software Engineer, iOS, Level 4"
-        },
-        {
-          "id": "workday-snap-Q326SWEB6",
-          "company": "Snap",
-          "title": "Software Engineer, Backend, Level 5"
-        },
-        {
-          "id": "workday-snap-R0046054",
-          "company": "Snap",
-          "title": "Integrated Circuit Design Verification Engineer"
-        },
-        {
-          "id": "workday-snap-Q326SWEFS2",
-          "company": "Snap",
-          "title": "Software Engineer, Full Stack, Level 4"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
     },
     {
       "source": "microsoft",
