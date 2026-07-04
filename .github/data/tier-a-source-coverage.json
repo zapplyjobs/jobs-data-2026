@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-04T08:03:57.248Z",
+  "generated_at": "2026-07-04T08:18:28.755Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -50,28 +50,26 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-04T08:02:33.529Z",
+    "generated_at": "2026-07-04T08:17:09.164Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 13252,
-    "description_entries": 9329,
-    "coverage_pct": 70.4,
+    "board_row_count": 13156,
+    "description_entries": 9460,
+    "coverage_pct": 71.9,
     "source_breakdown": {
-      "sidecar": 9333,
+      "sidecar": 9463,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-07-04T07:50:22.280Z",
+    "jobs_metadata_generated": "2026-07-04T08:04:13.068Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-04T08:03:53.925Z",
+    "checked_at": "2026-07-04T08:18:25.141Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [
-      "Senior filter FP rate elevated: 10.6% (53/500). May indicate keyword over-matching."
-    ],
-    "warning_count": 1,
+    "warnings": [],
+    "warning_count": 0,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -82,69 +80,6 @@
   },
   "rows": [
     {
-      "source": "workday",
-      "pool_rows": 38885,
-      "us_rows": 20959,
-      "tech_us_rows": 6699,
-      "raw_sidecar_rows": 19546,
-      "sidecar_active_rows": 5314,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 5314,
-      "published_pct": 79.3,
-      "enriched_rows": 5454,
-      "enriched_pct": 81.4,
-      "enriched_with_skills": 5237,
-      "skills_pct": 96,
-      "examples": [
-        {
-          "id": "workday-northrop-grumman-R10233692",
-          "company": "Northrop Grumman",
-          "title": "2026 Associate Software Engineer / Software Engineer"
-        },
-        {
-          "id": "workday-snap-Q326SWEI6",
-          "company": "Snap",
-          "title": "Software Engineer, iOS, Level 5"
-        },
-        {
-          "id": "workday-snap-Q326SWEI2",
-          "company": "Snap",
-          "title": "Software Engineer, iOS, Level 4"
-        },
-        {
-          "id": "workday-snap-Q326SWEB6",
-          "company": "Snap",
-          "title": "Software Engineer, Backend, Level 5"
-        },
-        {
-          "id": "workday-snap-R0046054",
-          "company": "Snap",
-          "title": "Integrated Circuit Design Verification Engineer"
-        },
-        {
-          "id": "workday-snap-Q326SWEFS2",
-          "company": "Snap",
-          "title": "Software Engineer, Full Stack, Level 4"
-        },
-        {
-          "id": "workday-snap-Q326SWEFS6",
-          "company": "Snap",
-          "title": "Software Engineer, Full Stack, Level 5"
-        },
-        {
-          "id": "workday-snap-R0046038",
-          "company": "Snap",
-          "title": "Software Engineer - Audio, Level 5"
-        }
-      ],
-      "severity": "high",
-      "flags": [
-        "low_published_coverage"
-      ]
-    },
-    {
       "source": "oracle",
       "pool_rows": 8514,
       "us_rows": 5643,
@@ -154,7 +89,7 @@
       "supplemental_rows": 26039,
       "supplemental_with_desc": 18596,
       "supplemental_meta": {
-        "generated_at": "2026-07-04T07:49:31.845Z",
+        "generated_at": "2026-07-04T08:04:35.152Z",
         "lane_name": "oracle",
         "jobs_fetched": 26039
       },
@@ -277,6 +212,67 @@
         "published_gt_raw_sidecar",
         "low_enrichment_coverage"
       ]
+    },
+    {
+      "source": "workday",
+      "pool_rows": 39083,
+      "us_rows": 21015,
+      "tech_us_rows": 6605,
+      "raw_sidecar_rows": 20035,
+      "sidecar_active_rows": 5446,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 5446,
+      "published_pct": 82.5,
+      "enriched_rows": 5586,
+      "enriched_pct": 84.6,
+      "enriched_with_skills": 5348,
+      "skills_pct": 95.7,
+      "examples": [
+        {
+          "id": "workday-northrop-grumman-R10233692",
+          "company": "Northrop Grumman",
+          "title": "2026 Associate Software Engineer / Software Engineer"
+        },
+        {
+          "id": "workday-snap-Q326SWEI6",
+          "company": "Snap",
+          "title": "Software Engineer, iOS, Level 5"
+        },
+        {
+          "id": "workday-snap-Q326SWEI2",
+          "company": "Snap",
+          "title": "Software Engineer, iOS, Level 4"
+        },
+        {
+          "id": "workday-snap-Q326SWEB6",
+          "company": "Snap",
+          "title": "Software Engineer, Backend, Level 5"
+        },
+        {
+          "id": "workday-snap-R0046054",
+          "company": "Snap",
+          "title": "Integrated Circuit Design Verification Engineer"
+        },
+        {
+          "id": "workday-snap-Q326SWEFS2",
+          "company": "Snap",
+          "title": "Software Engineer, Full Stack, Level 4"
+        },
+        {
+          "id": "workday-snap-Q326SWEFS6",
+          "company": "Snap",
+          "title": "Software Engineer, Full Stack, Level 5"
+        },
+        {
+          "id": "workday-snap-R0046038",
+          "company": "Snap",
+          "title": "Software Engineer - Audio, Level 5"
+        }
+      ],
+      "severity": "ok",
+      "flags": []
     },
     {
       "source": "microsoft",
