@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-04T13:19:22.974Z",
+  "generated_at": "2026-07-04T13:30:07.378Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -37,6 +37,7 @@
     "descriptions-enriched-5.jsonl",
     "descriptions-enriched-6.jsonl",
     "descriptions-enriched-7.jsonl",
+    "descriptions-enriched-8.jsonl",
     "descriptions-google.jsonl",
     "descriptions-greenhouse-1.jsonl",
     "descriptions-greenhouse-2.jsonl",
@@ -64,7 +65,7 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-04T13:19:19.508Z",
+    "checked_at": "2026-07-04T13:30:03.037Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -89,7 +90,7 @@
       "supplemental_rows": 26044,
       "supplemental_with_desc": 18593,
       "supplemental_meta": {
-        "generated_at": "2026-07-04T13:04:21.718Z",
+        "generated_at": "2026-07-04T13:19:14.420Z",
         "lane_name": "oracle",
         "jobs_fetched": 26044
       },
@@ -149,12 +150,77 @@
       ]
     },
     {
+      "source": "icims",
+      "pool_rows": 83,
+      "us_rows": 66,
+      "tech_us_rows": 19,
+      "raw_sidecar_rows": 72,
+      "sidecar_active_rows": 16,
+      "supplemental_rows": 319,
+      "supplemental_with_desc": 319,
+      "supplemental_meta": {
+        "generated_at": "2026-06-30T08:06:13.572Z",
+        "lane_name": "custom",
+        "jobs_fetched": 4225
+      },
+      "published_rows": 16,
+      "published_pct": 84.2,
+      "enriched_rows": 19,
+      "enriched_pct": 100,
+      "enriched_with_skills": 13,
+      "skills_pct": 68.4,
+      "examples": [
+        {
+          "id": "icims-jobs-cesi-11092",
+          "company": "Cole Engineering Services",
+          "title": "Software Engineer"
+        },
+        {
+          "id": "icims-jobs-cesi-11078",
+          "company": "Cole Engineering Services",
+          "title": "NetOps System Administrator"
+        },
+        {
+          "id": "icims-jobs-cesi-10965",
+          "company": "Cole Engineering Services",
+          "title": "AI Intern"
+        }
+      ],
+      "severity": "medium",
+      "flags": [
+        "low_skill_fill"
+      ]
+    },
+    {
+      "source": "smartrecruiters",
+      "pool_rows": 1573,
+      "us_rows": 1758,
+      "tech_us_rows": 405,
+      "raw_sidecar_rows": 6553,
+      "sidecar_active_rows": 223,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 405,
+      "published_pct": 100,
+      "enriched_rows": 223,
+      "enriched_pct": 55.1,
+      "enriched_with_skills": 218,
+      "skills_pct": 97.8,
+      "examples": [],
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar",
+        "low_enrichment_coverage"
+      ]
+    },
+    {
       "source": "workday",
       "pool_rows": 43245,
       "us_rows": 22135,
       "tech_us_rows": 6258,
-      "raw_sidecar_rows": 21392,
-      "sidecar_active_rows": 5612,
+      "raw_sidecar_rows": 21791,
+      "sidecar_active_rows": 5639,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
@@ -206,75 +272,8 @@
           "title": "Software Engineer, iOS, Level 4"
         }
       ],
-      "severity": "medium",
-      "flags": [
-        "published_gt_raw_sidecar"
-      ]
-    },
-    {
-      "source": "icims",
-      "pool_rows": 83,
-      "us_rows": 66,
-      "tech_us_rows": 19,
-      "raw_sidecar_rows": 72,
-      "sidecar_active_rows": 16,
-      "supplemental_rows": 319,
-      "supplemental_with_desc": 319,
-      "supplemental_meta": {
-        "generated_at": "2026-06-30T08:06:13.572Z",
-        "lane_name": "custom",
-        "jobs_fetched": 4225
-      },
-      "published_rows": 16,
-      "published_pct": 84.2,
-      "enriched_rows": 19,
-      "enriched_pct": 100,
-      "enriched_with_skills": 13,
-      "skills_pct": 68.4,
-      "examples": [
-        {
-          "id": "icims-jobs-cesi-11092",
-          "company": "Cole Engineering Services",
-          "title": "Software Engineer"
-        },
-        {
-          "id": "icims-jobs-cesi-11078",
-          "company": "Cole Engineering Services",
-          "title": "NetOps System Administrator"
-        },
-        {
-          "id": "icims-jobs-cesi-10965",
-          "company": "Cole Engineering Services",
-          "title": "AI Intern"
-        }
-      ],
-      "severity": "medium",
-      "flags": [
-        "low_skill_fill"
-      ]
-    },
-    {
-      "source": "smartrecruiters",
-      "pool_rows": 1573,
-      "us_rows": 1758,
-      "tech_us_rows": 405,
-      "raw_sidecar_rows": 6552,
-      "sidecar_active_rows": 223,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 405,
-      "published_pct": 100,
-      "enriched_rows": 223,
-      "enriched_pct": 55.1,
-      "enriched_with_skills": 218,
-      "skills_pct": 97.8,
-      "examples": [],
-      "severity": "medium",
-      "flags": [
-        "published_gt_raw_sidecar",
-        "low_enrichment_coverage"
-      ]
+      "severity": "ok",
+      "flags": []
     },
     {
       "source": "microsoft",
