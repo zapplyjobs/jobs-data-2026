@@ -1,6 +1,6 @@
 {
   "schema": "zjp-metrics-v1",
-  "generated_at": "2026-07-05T12:34:06.798Z",
+  "generated_at": "2026-07-05T12:39:06.160Z",
   "pool": {
     "total_jobs": 48540,
     "tech_us": 8128,
@@ -609,7 +609,7 @@
     "engine_version": 72,
     "source": "jobs-metadata.json",
     "g1_breakdown": {
-      "updated": "2026-07-05T12:34:05.734Z",
+      "updated": "2026-07-05T12:39:05.212Z",
       "us_total": 27398,
       "us_g1": 2213,
       "us_g1_rate": 8.1,
@@ -1142,17 +1142,17 @@
     "failures": [],
     "warnings": [],
     "warning_count": 0,
-    "last_checked": "2026-07-05T12:33:32.208Z",
+    "last_checked": "2026-07-05T12:38:31.781Z",
     "source": "pipeline-alert.json (local workspace)"
   },
   "pipeline": {
     "last_aggregator_run": "2026-07-05T12:30:14Z",
-    "last_aggregator_status": "in_progress",
+    "last_aggregator_status": "success",
     "last_enrichment_run": null,
     "last_enrichment_status": null,
-    "aggregator_runtime_minutes": 3.9,
+    "aggregator_runtime_minutes": 4,
     "aggregator_queue_minutes": 0,
-    "aggregator_execution_minutes": 3.8,
+    "aggregator_execution_minutes": 4,
     "aggregator_cancel_count": 0,
     "stage_timings": {
       "step1a_family_cache_ms": 99,
@@ -1167,11 +1167,11 @@
       "step9_write_ms": 43689
     },
     "pipeline_internal_minutes": 2.4,
-    "push_overhead_minutes": 1.5
+    "push_overhead_minutes": 1.6
   },
   "r2": {
     "status": "healthy",
-    "manifest_age_minutes": 0,
+    "manifest_age_minutes": 5,
     "manifest_timestamp": "2026-07-05T12:33:43.168Z",
     "files_uploaded": 41,
     "files_failed": null,
@@ -1272,12 +1272,12 @@
     }
   },
   "consumer_e2e": {
-    "generated_at": "2026-07-05T12:34:06.895Z",
+    "generated_at": "2026-07-05T12:39:06.260Z",
     "staleness_threshold_minutes": 60,
     "baseline": {
       "source": "R2 data/all_jobs.json",
       "last_update": "2026-07-05T12:33:30.000Z",
-      "age_minutes": 0.6
+      "age_minutes": 5.6
     },
     "summary": {
       "measured": 9,
@@ -1291,7 +1291,7 @@
         "kind": "r2",
         "signal": "data_freshness",
         "last_update": "2026-07-05T12:33:29.000Z",
-        "age_minutes": 0.6,
+        "age_minutes": 5.6,
         "lag_vs_pipeline_minutes": 0,
         "stale": false
       },
@@ -1300,7 +1300,7 @@
         "kind": "gh",
         "signal": "refresh_recency_proxy",
         "last_update": "2026-07-05T12:30:37.000Z",
-        "age_minutes": 3.5,
+        "age_minutes": 8.5,
         "lag_vs_pipeline_minutes": 2.9,
         "stale": false
       },
@@ -1309,7 +1309,7 @@
         "kind": "gh",
         "signal": "refresh_recency_proxy",
         "last_update": "2026-07-05T12:30:32.000Z",
-        "age_minutes": 3.6,
+        "age_minutes": 8.6,
         "lag_vs_pipeline_minutes": 3,
         "stale": false
       },
@@ -1318,7 +1318,7 @@
         "kind": "gh",
         "signal": "refresh_recency_proxy",
         "last_update": "2026-07-05T12:30:31.000Z",
-        "age_minutes": 3.6,
+        "age_minutes": 8.6,
         "lag_vs_pipeline_minutes": 3,
         "stale": false
       },
@@ -1327,7 +1327,7 @@
         "kind": "gh",
         "signal": "refresh_recency_proxy",
         "last_update": "2026-07-05T12:30:34.000Z",
-        "age_minutes": 3.5,
+        "age_minutes": 8.5,
         "lag_vs_pipeline_minutes": 2.9,
         "stale": false
       },
@@ -1336,7 +1336,7 @@
         "kind": "gh",
         "signal": "refresh_recency_proxy",
         "last_update": "2026-07-05T12:30:33.000Z",
-        "age_minutes": 3.6,
+        "age_minutes": 8.6,
         "lag_vs_pipeline_minutes": 3,
         "stale": false
       },
@@ -1345,7 +1345,7 @@
         "kind": "gh",
         "signal": "refresh_recency_proxy",
         "last_update": "2026-07-05T12:30:32.000Z",
-        "age_minutes": 3.6,
+        "age_minutes": 8.6,
         "lag_vs_pipeline_minutes": 3,
         "stale": false
       },
@@ -1353,9 +1353,9 @@
         "name": "zapply.jobs (Supabase jobs)",
         "kind": "supabase",
         "signal": "data_freshness",
-        "last_update": "2026-07-05T12:31:21.131Z",
-        "age_minutes": 2.8,
-        "lag_vs_pipeline_minutes": 2.1,
+        "last_update": "2026-07-05T12:37:22.414Z",
+        "age_minutes": 1.7,
+        "lag_vs_pipeline_minutes": -3.9,
         "stale": false
       },
       {
@@ -1363,7 +1363,7 @@
         "kind": "discord",
         "signal": "data_freshness",
         "last_update": "2026-07-05T12:30:15.000Z",
-        "age_minutes": 3.9,
+        "age_minutes": 8.9,
         "lag_vs_pipeline_minutes": 3.3,
         "stale": false
       }
@@ -1384,16 +1384,16 @@
   },
   "evergreen": {
     "age_buckets": {
-      "fresh_0_3d": 5350,
-      "aging_4_10d": 28466,
+      "fresh_0_3d": 5349,
+      "aging_4_10d": 28465,
       "evergreen_10_14d": 11391,
-      "beyond_14d": 3333
+      "beyond_14d": 3335
     },
     "age_buckets_original": {
       "fresh_0_3d": 457,
       "aging_4_10d": 2044,
-      "evergreen_10_14d": 1303,
-      "beyond_14d": 639,
+      "evergreen_10_14d": 1301,
+      "beyond_14d": 641,
       "coverage": 4443,
       "coverage_pct": 9
     },
@@ -1401,12 +1401,12 @@
     "first_published_coverage": 9,
     "first_published_evergreen_pct": 14.4,
     "by_source": {
+      "smartrecruiters": 483,
+      "microsoft": 305,
       "workday": 9390,
       "greenhouse": 1495,
-      "smartrecruiters": 482,
       "ashby": 326,
       "lever": 121,
-      "microsoft": 304,
       "amd": 17,
       "amazon": 99,
       "eightfold": 6,
@@ -1429,7 +1429,7 @@
       },
       {
         "company": "Microsoft",
-        "evergreen_count": 304
+        "evergreen_count": 305
       },
       {
         "company": "Highmark Health",
