@@ -1,15 +1,15 @@
 {
-  "timestamp": "2026-07-05T22:08:57.856Z",
+  "timestamp": "2026-07-05T22:22:43.180Z",
   "pipeline": {
-    "pipelineTotal": 50295,
-    "prevTotalJobs": 50295,
+    "pipelineTotal": 50234,
+    "prevTotalJobs": 50234,
     "bySource": {
-      "workday": 34487,
+      "workday": 34437,
       "greenhouse": 3445,
       "deshaw": 21,
       "simplify": 341,
-      "ashby": 755,
-      "smartrecruiters": 1134,
+      "ashby": 754,
+      "smartrecruiters": 1124,
       "lever": 257,
       "oracle": 7280,
       "amazon": 222,
@@ -27,7 +27,7 @@
       "greenhouse": 41373,
       "lever": 4996,
       "ashby": 8846,
-      "workday": 18805,
+      "workday": 7671,
       "smartrecruiters": 4778,
       "amazon": 1576,
       "eightfold": 201,
@@ -39,43 +39,38 @@
     },
     "jsearchTotalFetched": null,
     "tagStats": {
-      "usTagged": 28974,
-      "entryLevel": 33694,
-      "internship": 3223,
+      "usTagged": 28717,
+      "entryLevel": 33648,
+      "internship": 3220,
       "domains": {
-        "operations": 9437,
-        "finance": 5663,
-        "legal": 616,
-        "sales": 5436,
-        "general": 5790,
-        "healthcare": 3750,
-        "data_science": 1744,
-        "marketing": 956,
-        "software": 7669,
-        "hardware": 6284,
-        "hr": 694,
-        "manufacturing": 4837,
-        "ai": 925,
-        "logistics": 1030,
+        "general": 5857,
+        "operations": 9363,
+        "hardware": 6249,
+        "retail": 2167,
+        "sales": 5416,
+        "software": 7601,
+        "logistics": 1036,
+        "data_science": 1725,
+        "hr": 692,
+        "finance": 5637,
         "product": 908,
-        "retail": 2179
+        "ai": 925,
+        "healthcare": 3668,
+        "manufacturing": 4831,
+        "legal": 599,
+        "marketing": 928
       }
     },
     "g1Breakdown": {
-      "updated": "2026-07-05T22:08:56.874Z",
-      "us_total": 28677,
-      "us_g1": 2429,
-      "us_g1_rate": 8.5,
+      "updated": "2026-07-05T22:22:42.164Z",
+      "us_total": 28565,
+      "us_g1": 2515,
+      "us_g1_rate": 8.8,
       "by_source": {
         "greenhouse": {
           "g1": 197,
           "total": 2184,
           "rate": 9
-        },
-        "workday": {
-          "g1": 785,
-          "total": 17578,
-          "rate": 4.5
         },
         "deshaw": {
           "g1": 1,
@@ -87,6 +82,11 @@
           "total": 340,
           "rate": 15.9
         },
+        "workday": {
+          "g1": 872,
+          "total": 17477,
+          "rate": 5
+        },
         "oracle": {
           "g1": 638,
           "total": 4439,
@@ -94,13 +94,13 @@
         },
         "ashby": {
           "g1": 48,
-          "total": 508,
-          "rate": 9.4
+          "total": 507,
+          "rate": 9.5
         },
         "smartrecruiters": {
-          "g1": 97,
-          "total": 1134,
-          "rate": 8.6
+          "g1": 96,
+          "total": 1124,
+          "rate": 8.5
         },
         "eightfold": {
           "g1": 2,
@@ -186,9 +186,21 @@
           "has_departments": false
         },
         {
+          "company": "RTX",
+          "g1": 56,
+          "source": "workday",
+          "has_departments": true
+        },
+        {
           "company": "Google",
           "g1": 56,
           "source": "google",
+          "has_departments": false
+        },
+        {
+          "company": "KBR",
+          "g1": 48,
+          "source": "workday",
           "has_departments": false
         },
         {
@@ -204,16 +216,10 @@
           "has_departments": false
         },
         {
-          "company": "AES Corporation",
-          "g1": 39,
+          "company": "Northrop Grumman",
+          "g1": 41,
           "source": "workday",
-          "has_departments": false
-        },
-        {
-          "company": "KBR",
-          "g1": 38,
-          "source": "workday",
-          "has_departments": false
+          "has_departments": true
         },
         {
           "company": "Sherwin-Williams",
@@ -246,14 +252,14 @@
           "has_departments": false
         },
         {
-          "company": "RTX",
-          "g1": 30,
-          "source": "workday",
-          "has_departments": true
-        },
-        {
           "company": "Sanofi",
           "g1": 29,
+          "source": "workday",
+          "has_departments": false
+        },
+        {
+          "company": "AES Corporation",
+          "g1": 28,
           "source": "workday",
           "has_departments": false
         },
@@ -262,21 +268,15 @@
           "g1": 28,
           "source": "oracle",
           "has_departments": false
-        },
-        {
-          "company": "Nokia",
-          "g1": 27,
-          "source": "oracle",
-          "has_departments": false
         }
       ],
       "by_fix_category": {
         "needs_family_mapping": {
-          "count": 626,
+          "count": 674,
           "description": "WD jobs with no departments — needs family cache/path coverage"
         },
         "family_map_gap": {
-          "count": 159,
+          "count": 198,
           "description": "WD jobs with departments but still G1"
         },
         "genuinely_ambiguous": {
@@ -288,45 +288,45 @@
           "description": "Simplify T0 jobs — no description for L4 fallback"
         },
         "other": {
-          "count": 901,
+          "count": 900,
           "description": "Mixed ATS — some keyword gaps, some structural"
         }
       },
       "by_engine_version": {
-        "v72": 2429
+        "v72": 2515
       },
       "by_employment": {
-        "entry_level": 1768,
-        "mid_level": 364,
-        "internship": 297
+        "entry_level": 1837,
+        "mid_level": 378,
+        "internship": 300
       }
     },
-    "duplicatesRemoved": 1757,
-    "generatedAt": "2026-07-05T22:08:02.029Z",
+    "duplicatesRemoved": 1433,
+    "generatedAt": "2026-07-05T22:21:47.575Z",
     "evergreen": {
       "age_buckets": {
-        "fresh_0_3d": 5122,
-        "aging_4_10d": 29483,
-        "evergreen_10_14d": 12260,
-        "beyond_14d": 3430
+        "fresh_0_3d": 5114,
+        "aging_4_10d": 29435,
+        "evergreen_10_14d": 12256,
+        "beyond_14d": 3429
       },
       "age_buckets_original": {
-        "fresh_0_3d": 201,
-        "aging_4_10d": 2064,
-        "evergreen_10_14d": 1538,
+        "fresh_0_3d": 199,
+        "aging_4_10d": 2062,
+        "evergreen_10_14d": 1541,
         "beyond_14d": 638,
-        "coverage": 4441,
+        "coverage": 4440,
         "coverage_pct": 9
       },
       "evergreen_pct": 24.4,
       "first_published_coverage": 9,
       "first_published_evergreen_pct": 14.4,
       "by_source": {
-        "workday": 9406,
-        "greenhouse": 1682,
-        "smartrecruiters": 548,
-        "microsoft": 343,
+        "greenhouse": 1685,
+        "workday": 9403,
         "ashby": 362,
+        "smartrecruiters": 543,
+        "microsoft": 343,
         "amd": 20,
         "tiktok": 9,
         "google": 12,
@@ -436,9 +436,9 @@
         },
         {
           "company": "Comcast",
-          "total": 299,
+          "total": 302,
           "max_copies": 65,
-          "unique_titles": 159
+          "unique_titles": 162
         }
       ]
     }
@@ -446,57 +446,57 @@
   "repos": {
     "New-Grad": {
       "name": "New-Grad",
-      "jobCount": 17587,
-      "lastJobsUpdate": "2026-07-05T22:00:48Z",
+      "jobCount": 17637,
+      "lastJobsUpdate": "2026-07-05T22:15:46Z",
       "workflowStatus": "success",
-      "workflowLastRun": "2026-07-05T22:00:53Z",
+      "workflowLastRun": "2026-07-05T22:15:49Z",
       "stars": 148
     },
     "Internships": {
       "name": "Internships",
-      "jobCount": 1619,
-      "lastJobsUpdate": "2026-07-05T22:00:47Z",
+      "jobCount": 1620,
+      "lastJobsUpdate": "2026-07-05T22:15:46Z",
       "workflowStatus": "success",
-      "workflowLastRun": "2026-07-05T22:00:51Z",
+      "workflowLastRun": "2026-07-05T22:15:50Z",
       "stars": 105
     },
     "Software": {
       "name": "Software",
-      "jobCount": 2571,
-      "lastJobsUpdate": "2026-07-05T22:00:48Z",
+      "jobCount": 2616,
+      "lastJobsUpdate": "2026-07-05T22:15:49Z",
       "workflowStatus": "success",
-      "workflowLastRun": "2026-07-05T22:00:52Z",
+      "workflowLastRun": "2026-07-05T22:15:53Z",
       "stars": 40
     },
     "Data-Science": {
       "name": "Data-Science",
-      "jobCount": 755,
-      "lastJobsUpdate": "2026-07-05T22:00:48Z",
+      "jobCount": 754,
+      "lastJobsUpdate": "2026-07-05T22:15:46Z",
       "workflowStatus": "success",
-      "workflowLastRun": "2026-07-05T22:00:53Z",
+      "workflowLastRun": "2026-07-05T22:15:50Z",
       "stars": 51
     },
     "Hardware": {
       "name": "Hardware",
-      "jobCount": 1696,
-      "lastJobsUpdate": "2026-07-05T22:00:47Z",
+      "jobCount": 1719,
+      "lastJobsUpdate": "2026-07-05T22:15:49Z",
       "workflowStatus": "success",
-      "workflowLastRun": "2026-07-05T22:00:51Z",
+      "workflowLastRun": "2026-07-05T22:15:54Z",
       "stars": 40
     },
     "Healthcare": {
       "name": "Healthcare",
-      "jobCount": 1616,
-      "lastJobsUpdate": "2026-07-05T22:00:48Z",
+      "jobCount": 1643,
+      "lastJobsUpdate": "2026-07-05T22:15:49Z",
       "workflowStatus": "success",
-      "workflowLastRun": "2026-07-05T22:00:54Z",
+      "workflowLastRun": "2026-07-05T22:15:53Z",
       "stars": 15
     }
   },
   "enrichment": {
-    "totalEnriched": 7721,
-    "totalHasDescription": 7698,
-    "totalTechUs": 8021
+    "totalEnriched": 7782,
+    "totalHasDescription": 7759,
+    "totalTechUs": 8082
   },
   "traffic": {
     "date": "2026-07-05",
@@ -551,23 +551,23 @@
     "failedRepos": 0
   },
   "growth": {
-    "compared_to": "2026-06-28T21:53:55.755Z",
-    "total_delta": -9054,
+    "compared_to": "2026-06-28T22:25:42.249Z",
+    "total_delta": -9198,
     "total_delta_pct": -15,
     "by_source_delta": {
-      "workday": -7938,
+      "workday": -8072,
       "greenhouse": -724,
       "simplify": -288,
-      "ashby": -89,
       "tiktok": 6,
       "bytedance": 1,
       "google": 22,
-      "smartrecruiters": -292,
+      "ashby": -90,
+      "smartrecruiters": -302,
       "lever": -58,
       "amazon": -58,
       "oracle": 372,
       "amd": -40,
-      "microsoft": 21,
+      "microsoft": 22,
       "eightfold": -1,
       "icims": 22,
       "uber": -10,
