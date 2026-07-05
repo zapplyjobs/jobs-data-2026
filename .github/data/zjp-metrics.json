@@ -1,9 +1,9 @@
 {
   "schema": "zjp-metrics-v1",
-  "generated_at": "2026-07-05T00:04:37.144Z",
+  "generated_at": "2026-07-05T00:08:24.860Z",
   "pool": {
     "total_jobs": 48826,
-    "tech_us": 8093,
+    "tech_us": 8111,
     "domains": {
       "hardware": 6318,
       "operations": 9328,
@@ -609,7 +609,7 @@
     "engine_version": 72,
     "source": "jobs-metadata.json",
     "g1_breakdown": {
-      "updated": "2026-07-05T00:04:36.066Z",
+      "updated": "2026-07-05T00:08:23.973Z",
       "us_total": 27669,
       "us_g1": 2215,
       "us_g1_rate": 8,
@@ -850,33 +850,33 @@
     }
   },
   "enrichment": {
-    "total_enriched": 7614,
+    "total_enriched": 7632,
     "enrichment_rate_pct": 94.1,
     "tiers": {
-      "t0": 34,
+      "t0": 44,
       "t1": 316,
       "t2": 71,
-      "t3": 387,
+      "t3": 395,
       "t4": 6806
     },
     "enricher_version": 89,
     "reenrichment_pending": 39,
     "description_quality": {
-      "has_description_flag": 7580,
-      "retrievable_description": 7436,
+      "has_description_flag": 7588,
+      "retrievable_description": 7444,
       "retrievable_description_pct": 98,
       "silent_rot_count": 144
     },
     "current_missing": {
       "total": 479,
       "by_source": {
-        "simplify": 426,
         "workday": 46,
+        "simplify": 426,
         "eightfold": 7
       },
       "by_status": {
-        "skipped": 433,
-        "unprocessed": 46
+        "unprocessed": 46,
+        "skipped": 433
       },
       "top_companies": [
         {
@@ -962,26 +962,26 @@
       ]
     },
     "visa_paths": {
-      "actual_job_signal": 2407,
-      "lca_only_signal": 4753,
-      "unresolved_signal": 454,
+      "actual_job_signal": 2406,
+      "lca_only_signal": 4765,
+      "unresolved_signal": 461,
       "unresolved_reasons": {
         "defense_contractor": 26
       },
       "by_source": {
         "workday": {
-          "actual_job_signal": 1022,
+          "actual_job_signal": 1024,
           "actual_job_signal_pct": 23,
-          "lca_only_signal": 3042,
+          "lca_only_signal": 3052,
           "lca_only_signal_pct": 69,
-          "unresolved_signal": 347,
+          "unresolved_signal": 354,
           "unresolved_signal_pct": 8,
           "unresolved_reasons": {
             "defense_contractor": 26
           }
         },
         "greenhouse": {
-          "actual_job_signal": 864,
+          "actual_job_signal": 861,
           "actual_job_signal_pct": 100,
           "lca_only_signal": 0,
           "lca_only_signal_pct": 0,
@@ -1019,7 +1019,7 @@
         "amazon": {
           "actual_job_signal": 1,
           "actual_job_signal_pct": 0,
-          "lca_only_signal": 215,
+          "lca_only_signal": 217,
           "lca_only_signal_pct": 99,
           "unresolved_signal": 1,
           "unresolved_signal_pct": 0,
@@ -1142,14 +1142,14 @@
     "failures": [],
     "warnings": [],
     "warning_count": 0,
-    "last_checked": "2026-07-04T23:51:23.093Z",
+    "last_checked": "2026-07-05T00:06:18.387Z",
     "source": "pipeline-alert.json (local workspace)"
   },
   "pipeline": {
     "last_aggregator_run": "2026-07-05T00:00:14Z",
     "last_aggregator_status": "success",
-    "last_enrichment_run": "2026-07-05T00:00:16Z",
-    "last_enrichment_status": "in_progress",
+    "last_enrichment_run": null,
+    "last_enrichment_status": null,
     "aggregator_runtime_minutes": 4.3,
     "aggregator_queue_minutes": 0,
     "aggregator_execution_minutes": 4.3,
@@ -1171,9 +1171,9 @@
   },
   "r2": {
     "status": "healthy",
-    "manifest_age_minutes": 0,
-    "manifest_timestamp": "2026-07-05T00:04:13.502Z",
-    "files_uploaded": 41,
+    "manifest_age_minutes": 3,
+    "manifest_timestamp": "2026-07-05T00:05:31.062Z",
+    "files_uploaded": 31,
     "files_failed": null,
     "file_count": 63,
     "total_size_mb": 588
@@ -1272,12 +1272,12 @@
     }
   },
   "consumer_e2e": {
-    "generated_at": "2026-07-05T00:04:37.248Z",
+    "generated_at": "2026-07-05T00:08:24.962Z",
     "staleness_threshold_minutes": 60,
     "baseline": {
       "source": "R2 data/all_jobs.json",
       "last_update": "2026-07-05T00:03:59.000Z",
-      "age_minutes": 0.6
+      "age_minutes": 4.4
     },
     "summary": {
       "measured": 9,
@@ -1291,7 +1291,7 @@
         "kind": "r2",
         "signal": "data_freshness",
         "last_update": "2026-07-05T00:03:59.000Z",
-        "age_minutes": 0.6,
+        "age_minutes": 4.4,
         "lag_vs_pipeline_minutes": 0,
         "stale": false
       },
@@ -1300,7 +1300,7 @@
         "kind": "gh",
         "signal": "refresh_recency_proxy",
         "last_update": "2026-07-05T00:00:34.000Z",
-        "age_minutes": 4.1,
+        "age_minutes": 7.8,
         "lag_vs_pipeline_minutes": 3.4,
         "stale": false
       },
@@ -1309,7 +1309,7 @@
         "kind": "gh",
         "signal": "refresh_recency_proxy",
         "last_update": "2026-07-05T00:00:29.000Z",
-        "age_minutes": 4.1,
+        "age_minutes": 7.9,
         "lag_vs_pipeline_minutes": 3.5,
         "stale": false
       },
@@ -1318,7 +1318,7 @@
         "kind": "gh",
         "signal": "refresh_recency_proxy",
         "last_update": "2026-07-05T00:00:33.000Z",
-        "age_minutes": 4.1,
+        "age_minutes": 7.9,
         "lag_vs_pipeline_minutes": 3.4,
         "stale": false
       },
@@ -1327,7 +1327,7 @@
         "kind": "gh",
         "signal": "refresh_recency_proxy",
         "last_update": "2026-07-05T00:00:31.000Z",
-        "age_minutes": 4.1,
+        "age_minutes": 7.9,
         "lag_vs_pipeline_minutes": 3.5,
         "stale": false
       },
@@ -1336,7 +1336,7 @@
         "kind": "gh",
         "signal": "refresh_recency_proxy",
         "last_update": "2026-07-05T00:00:34.000Z",
-        "age_minutes": 4.1,
+        "age_minutes": 7.8,
         "lag_vs_pipeline_minutes": 3.4,
         "stale": false
       },
@@ -1345,7 +1345,7 @@
         "kind": "gh",
         "signal": "refresh_recency_proxy",
         "last_update": "2026-07-05T00:00:31.000Z",
-        "age_minutes": 4.1,
+        "age_minutes": 7.9,
         "lag_vs_pipeline_minutes": 3.5,
         "stale": false
       },
@@ -1353,9 +1353,9 @@
         "name": "zapply.jobs (Supabase jobs)",
         "kind": "supabase",
         "signal": "data_freshness",
-        "last_update": "2026-07-05T00:00:59.583Z",
-        "age_minutes": 3.6,
-        "lag_vs_pipeline_minutes": 3,
+        "last_update": "2026-07-05T00:08:26.382Z",
+        "age_minutes": 0,
+        "lag_vs_pipeline_minutes": -4.5,
         "stale": false
       },
       {
@@ -1363,7 +1363,7 @@
         "kind": "discord",
         "signal": "data_freshness",
         "last_update": "2026-07-05T00:00:15.000Z",
-        "age_minutes": 4.4,
+        "age_minutes": 8.2,
         "lag_vs_pipeline_minutes": 3.7,
         "stale": false
       }
@@ -1385,14 +1385,14 @@
   "evergreen": {
     "age_buckets": {
       "fresh_0_3d": 11090,
-      "aging_4_10d": 25154,
-      "evergreen_10_14d": 9242,
+      "aging_4_10d": 25153,
+      "evergreen_10_14d": 9243,
       "beyond_14d": 3340
     },
     "age_buckets_original": {
       "fresh_0_3d": 540,
-      "aging_4_10d": 2068,
-      "evergreen_10_14d": 1193,
+      "aging_4_10d": 2067,
+      "evergreen_10_14d": 1194,
       "beyond_14d": 644,
       "coverage": 4445,
       "coverage_pct": 9
@@ -1401,10 +1401,10 @@
     "first_published_coverage": 9,
     "first_published_evergreen_pct": 14.5,
     "by_source": {
+      "greenhouse": 1416,
       "microsoft": 291,
       "ashby": 302,
       "workday": 7305,
-      "greenhouse": 1415,
       "amazon": 97,
       "eightfold": 6,
       "oracle": 2411,
