@@ -1,6 +1,6 @@
 {
   "schema": "zjp-metrics-v1",
-  "generated_at": "2026-07-05T15:36:11.858Z",
+  "generated_at": "2026-07-05T15:42:16.452Z",
   "pool": {
     "total_jobs": 48522,
     "tech_us": 8071,
@@ -609,7 +609,7 @@
     "engine_version": 72,
     "source": "jobs-metadata.json",
     "g1_breakdown": {
-      "updated": "2026-07-05T15:36:10.732Z",
+      "updated": "2026-07-05T15:42:15.487Z",
       "us_total": 27394,
       "us_g1": 2200,
       "us_g1_rate": 8,
@@ -1148,8 +1148,8 @@
   "pipeline": {
     "last_aggregator_run": "2026-07-05T15:30:13Z",
     "last_aggregator_status": "success",
-    "last_enrichment_run": "2026-07-05T15:30:14Z",
-    "last_enrichment_status": "success",
+    "last_enrichment_run": null,
+    "last_enrichment_status": null,
     "aggregator_runtime_minutes": 4.1,
     "aggregator_queue_minutes": 0,
     "aggregator_execution_minutes": 4,
@@ -1171,7 +1171,7 @@
   },
   "r2": {
     "status": "healthy",
-    "manifest_age_minutes": 0,
+    "manifest_age_minutes": 7,
     "manifest_timestamp": "2026-07-05T15:35:44.184Z",
     "files_uploaded": 41,
     "files_failed": null,
@@ -1272,12 +1272,12 @@
     }
   },
   "consumer_e2e": {
-    "generated_at": "2026-07-05T15:36:11.962Z",
+    "generated_at": "2026-07-05T15:42:16.562Z",
     "staleness_threshold_minutes": 60,
     "baseline": {
       "source": "R2 data/all_jobs.json",
       "last_update": "2026-07-05T15:35:28.000Z",
-      "age_minutes": 0.7
+      "age_minutes": 6.8
     },
     "summary": {
       "measured": 9,
@@ -1291,7 +1291,7 @@
         "kind": "r2",
         "signal": "data_freshness",
         "last_update": "2026-07-05T15:35:27.000Z",
-        "age_minutes": 0.7,
+        "age_minutes": 6.8,
         "lag_vs_pipeline_minutes": 0,
         "stale": false
       },
@@ -1300,7 +1300,7 @@
         "kind": "gh",
         "signal": "refresh_recency_proxy",
         "last_update": "2026-07-05T15:30:31.000Z",
-        "age_minutes": 5.7,
+        "age_minutes": 11.8,
         "lag_vs_pipeline_minutes": 5,
         "stale": false
       },
@@ -1309,7 +1309,7 @@
         "kind": "gh",
         "signal": "refresh_recency_proxy",
         "last_update": "2026-07-05T15:30:29.000Z",
-        "age_minutes": 5.7,
+        "age_minutes": 11.8,
         "lag_vs_pipeline_minutes": 5,
         "stale": false
       },
@@ -1318,7 +1318,7 @@
         "kind": "gh",
         "signal": "refresh_recency_proxy",
         "last_update": "2026-07-05T15:30:32.000Z",
-        "age_minutes": 5.7,
+        "age_minutes": 11.7,
         "lag_vs_pipeline_minutes": 4.9,
         "stale": false
       },
@@ -1327,7 +1327,7 @@
         "kind": "gh",
         "signal": "refresh_recency_proxy",
         "last_update": "2026-07-05T15:30:33.000Z",
-        "age_minutes": 5.6,
+        "age_minutes": 11.7,
         "lag_vs_pipeline_minutes": 4.9,
         "stale": false
       },
@@ -1336,7 +1336,7 @@
         "kind": "gh",
         "signal": "refresh_recency_proxy",
         "last_update": "2026-07-05T15:30:30.000Z",
-        "age_minutes": 5.7,
+        "age_minutes": 11.8,
         "lag_vs_pipeline_minutes": 5,
         "stale": false
       },
@@ -1345,7 +1345,7 @@
         "kind": "gh",
         "signal": "refresh_recency_proxy",
         "last_update": "2026-07-05T15:30:32.000Z",
-        "age_minutes": 5.7,
+        "age_minutes": 11.7,
         "lag_vs_pipeline_minutes": 4.9,
         "stale": false
       },
@@ -1353,9 +1353,9 @@
         "name": "zapply.jobs (Supabase jobs)",
         "kind": "supabase",
         "signal": "data_freshness",
-        "last_update": "2026-07-05T15:31:17.426Z",
-        "age_minutes": 4.9,
-        "lag_vs_pipeline_minutes": 4.2,
+        "last_update": "2026-07-05T15:41:40.612Z",
+        "age_minutes": 0.6,
+        "lag_vs_pipeline_minutes": -6.2,
         "stale": false
       },
       {
@@ -1363,7 +1363,7 @@
         "kind": "discord",
         "signal": "data_freshness",
         "last_update": "2026-07-05T15:30:14.000Z",
-        "age_minutes": 6,
+        "age_minutes": 12,
         "lag_vs_pipeline_minutes": 5.2,
         "stale": false
       }
@@ -1385,14 +1385,14 @@
   "evergreen": {
     "age_buckets": {
       "fresh_0_3d": 5288,
-      "aging_4_10d": 28449,
-      "evergreen_10_14d": 11460,
+      "aging_4_10d": 28444,
+      "evergreen_10_14d": 11465,
       "beyond_14d": 3325
     },
     "age_buckets_original": {
       "fresh_0_3d": 387,
-      "aging_4_10d": 2054,
-      "evergreen_10_14d": 1359,
+      "aging_4_10d": 2052,
+      "evergreen_10_14d": 1361,
       "beyond_14d": 629,
       "coverage": 4429,
       "coverage_pct": 9
@@ -1401,13 +1401,14 @@
     "first_published_coverage": 9,
     "first_published_evergreen_pct": 14.2,
     "by_source": {
-      "greenhouse": 1532,
+      "greenhouse": 1534,
+      "microsoft": 313,
+      "tiktok": 1,
+      "smartrecruiters": 499,
       "google": 3,
       "workday": 9380,
       "ashby": 333,
-      "smartrecruiters": 498,
       "lever": 123,
-      "microsoft": 312,
       "amd": 17,
       "amazon": 98,
       "eightfold": 6,
@@ -1430,7 +1431,7 @@
       },
       {
         "company": "Microsoft",
-        "evergreen_count": 312
+        "evergreen_count": 313
       },
       {
         "company": "Highmark Health",
