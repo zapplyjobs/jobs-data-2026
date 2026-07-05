@@ -1,16 +1,16 @@
 {
-  "timestamp": "2026-07-05T17:51:42.401Z",
+  "timestamp": "2026-07-05T18:06:24.748Z",
   "pipeline": {
-    "pipelineTotal": 48436,
-    "prevTotalJobs": 48436,
+    "pipelineTotal": 48246,
+    "prevTotalJobs": 48246,
     "bySource": {
-      "workday": 33945,
+      "workday": 33947,
       "greenhouse": 3441,
       "deshaw": 21,
-      "simplify": 593,
+      "simplify": 403,
       "smartrecruiters": 1123,
       "lever": 257,
-      "oracle": 5737,
+      "oracle": 5736,
       "ashby": 741,
       "amazon": 226,
       "eightfold": 13,
@@ -20,61 +20,56 @@
       "google": 535,
       "microsoft": 442,
       "icims": 83,
-      "uber": 3,
+      "uber": 2,
       "apple": 22
     },
     "fetchResults": {
-      "greenhouse": 41565,
+      "greenhouse": 41562,
       "lever": 4850,
       "ashby": 8678,
-      "workday": 9650,
+      "workday": 7121,
       "smartrecruiters": 4778,
       "amazon": 1585,
       "eightfold": 200,
-      "twosigma": 0,
-      "uber": 272,
-      "simplify": 599,
+      "twosigma": 20,
+      "uber": 277,
+      "simplify": 407,
       "amd": 508,
       "deshaw": 24
     },
     "jsearchTotalFetched": null,
     "tagStats": {
-      "usTagged": 27448,
-      "entryLevel": 32086,
-      "internship": 3284,
+      "usTagged": 27183,
+      "entryLevel": 32076,
+      "internship": 3174,
       "domains": {
-        "software": 7527,
-        "hardware": 6205,
-        "finance": 4704,
-        "hr": 691,
-        "healthcare": 3694,
-        "operations": 9309,
-        "general": 5165,
-        "manufacturing": 4824,
-        "legal": 604,
-        "ai": 965,
-        "data_science": 1772,
-        "marketing": 928,
-        "logistics": 1039,
-        "retail": 2170,
-        "sales": 5358,
-        "product": 869
+        "software": 7470,
+        "hardware": 6200,
+        "manufacturing": 4819,
+        "operations": 9290,
+        "sales": 5353,
+        "marketing": 924,
+        "data_science": 1681,
+        "general": 5162,
+        "finance": 4696,
+        "hr": 685,
+        "ai": 911,
+        "legal": 591,
+        "product": 862,
+        "healthcare": 3665,
+        "logistics": 1035,
+        "retail": 2170
       }
     },
     "g1Breakdown": {
-      "updated": "2026-07-05T17:51:41.290Z",
-      "us_total": 27304,
+      "updated": "2026-07-05T18:06:23.360Z",
+      "us_total": 27080,
       "us_g1": 2195,
-      "us_g1_rate": 8,
+      "us_g1_rate": 8.1,
       "by_source": {
-        "workday": {
-          "g1": 794,
-          "total": 17047,
-          "rate": 4.7
-        },
         "greenhouse": {
-          "g1": 197,
-          "total": 2183,
+          "g1": 196,
+          "total": 2184,
           "rate": 9
         },
         "deshaw": {
@@ -83,13 +78,18 @@
           "rate": 4.8
         },
         "simplify": {
-          "g1": 79,
-          "total": 573,
-          "rate": 13.8
+          "g1": 70,
+          "total": 399,
+          "rate": 17.5
+        },
+        "workday": {
+          "g1": 804,
+          "total": 16998,
+          "rate": 4.7
         },
         "oracle": {
           "g1": 372,
-          "total": 3383,
+          "total": 3382,
           "rate": 11
         },
         "ashby": {
@@ -151,7 +151,7 @@
       "by_company_top20": [
         {
           "company": "TikTok",
-          "g1": 403,
+          "g1": 401,
           "source": "tiktok",
           "has_departments": false
         },
@@ -222,6 +222,12 @@
           "has_departments": false
         },
         {
+          "company": "Granite Construction",
+          "g1": 35,
+          "source": "workday",
+          "has_departments": false
+        },
+        {
           "company": "Cummins",
           "g1": 34,
           "source": "oracle",
@@ -231,18 +237,6 @@
           "company": "ByteDance",
           "g1": 32,
           "source": "bytedance",
-          "has_departments": false
-        },
-        {
-          "company": "Granite Construction",
-          "g1": 31,
-          "source": "workday",
-          "has_departments": false
-        },
-        {
-          "company": "Nokia",
-          "g1": 30,
-          "source": "oracle",
           "has_departments": false
         },
         {
@@ -258,33 +252,39 @@
           "has_departments": false
         },
         {
-          "company": "Susquehanna International Group, LLP",
-          "g1": 26,
-          "source": "icims",
+          "company": "Nokia",
+          "g1": 27,
+          "source": "oracle",
           "has_departments": false
         },
         {
           "company": "Brown & Brown Insurance",
-          "g1": 23,
+          "g1": 26,
           "source": "workday",
+          "has_departments": false
+        },
+        {
+          "company": "Susquehanna International Group, LLP",
+          "g1": 26,
+          "source": "icims",
           "has_departments": false
         }
       ],
       "by_fix_category": {
         "needs_family_mapping": {
-          "count": 599,
+          "count": 608,
           "description": "WD jobs with no departments — needs family cache/path coverage"
         },
         "family_map_gap": {
-          "count": 195,
+          "count": 196,
           "description": "WD jobs with departments but still G1"
         },
         "genuinely_ambiguous": {
-          "count": 548,
+          "count": 547,
           "description": "Non-WD/Simplify jobs with no domain signal in title"
         },
         "no_description": {
-          "count": 79,
+          "count": 70,
           "description": "Simplify T0 jobs — no description for L4 fallback"
         },
         "other": {
@@ -296,44 +296,44 @@
         "v72": 2195
       },
       "by_employment": {
-        "entry_level": 1567,
-        "mid_level": 332,
-        "internship": 296
+        "entry_level": 1573,
+        "mid_level": 334,
+        "internship": 288
       }
     },
-    "duplicatesRemoved": 1379,
-    "generatedAt": "2026-07-05T17:50:48.983Z",
+    "duplicatesRemoved": 1337,
+    "generatedAt": "2026-07-05T18:05:11.174Z",
     "evergreen": {
       "age_buckets": {
-        "fresh_0_3d": 5233,
-        "aging_4_10d": 28360,
-        "evergreen_10_14d": 11520,
-        "beyond_14d": 3323
+        "fresh_0_3d": 5043,
+        "aging_4_10d": 28351,
+        "evergreen_10_14d": 11530,
+        "beyond_14d": 3322
       },
       "age_buckets_original": {
-        "fresh_0_3d": 326,
-        "aging_4_10d": 2050,
-        "evergreen_10_14d": 1422,
+        "fresh_0_3d": 325,
+        "aging_4_10d": 2047,
+        "evergreen_10_14d": 1426,
         "beyond_14d": 625,
         "coverage": 4423,
         "coverage_pct": 9
       },
-      "evergreen_pct": 23.8,
+      "evergreen_pct": 23.9,
       "first_published_coverage": 9,
       "first_published_evergreen_pct": 14.1,
       "by_source": {
-        "greenhouse": 1576,
+        "amd": 19,
+        "lever": 127,
+        "greenhouse": 1578,
+        "workday": 9341,
+        "smartrecruiters": 515,
         "ashby": 346,
-        "workday": 9338,
-        "smartrecruiters": 513,
         "microsoft": 330,
         "google": 7,
-        "lever": 125,
-        "amd": 18,
         "tiktok": 1,
         "amazon": 99,
         "eightfold": 6,
-        "oracle": 2401,
+        "oracle": 2400,
         "icims": 61,
         "apple": 22
       },
@@ -364,7 +364,7 @@
         },
         {
           "company": "Oracle",
-          "evergreen_count": 190
+          "evergreen_count": 189
         },
         {
           "company": "WSP",
@@ -406,9 +406,9 @@
         },
         {
           "company": "CVS Health",
-          "total": 361,
+          "total": 356,
           "max_copies": 128,
-          "unique_titles": 78
+          "unique_titles": 76
         },
         {
           "company": "Sherwin-Williams",
@@ -447,56 +447,56 @@
     "New-Grad": {
       "name": "New-Grad",
       "jobCount": 16850,
-      "lastJobsUpdate": "2026-07-05T17:45:37Z",
+      "lastJobsUpdate": "2026-07-05T18:00:30Z",
       "workflowStatus": "success",
-      "workflowLastRun": "2026-07-05T17:45:42Z",
+      "workflowLastRun": "2026-07-05T18:00:34Z",
       "stars": 148
     },
     "Internships": {
       "name": "Internships",
-      "jobCount": 1708,
-      "lastJobsUpdate": "2026-07-05T17:45:32Z",
+      "jobCount": 1690,
+      "lastJobsUpdate": "2026-07-05T18:00:31Z",
       "workflowStatus": "success",
-      "workflowLastRun": "2026-07-05T17:45:35Z",
+      "workflowLastRun": "2026-07-05T18:00:35Z",
       "stars": 105
     },
     "Software": {
       "name": "Software",
       "jobCount": 2639,
-      "lastJobsUpdate": "2026-07-05T17:45:31Z",
+      "lastJobsUpdate": "2026-07-05T18:00:33Z",
       "workflowStatus": "success",
-      "workflowLastRun": "2026-07-05T17:45:35Z",
+      "workflowLastRun": "2026-07-05T18:00:39Z",
       "stars": 40
     },
     "Data-Science": {
       "name": "Data-Science",
       "jobCount": 844,
-      "lastJobsUpdate": "2026-07-05T17:45:32Z",
+      "lastJobsUpdate": "2026-07-05T18:00:29Z",
       "workflowStatus": "success",
-      "workflowLastRun": "2026-07-05T17:45:38Z",
+      "workflowLastRun": "2026-07-05T18:00:34Z",
       "stars": 51
     },
     "Hardware": {
       "name": "Hardware",
       "jobCount": 1695,
-      "lastJobsUpdate": "2026-07-05T17:45:39Z",
+      "lastJobsUpdate": "2026-07-05T18:00:34Z",
       "workflowStatus": "success",
-      "workflowLastRun": "2026-07-05T17:45:45Z",
+      "workflowLastRun": "2026-07-05T18:00:37Z",
       "stars": 40
     },
     "Healthcare": {
       "name": "Healthcare",
       "jobCount": 1617,
-      "lastJobsUpdate": "2026-07-05T17:45:34Z",
+      "lastJobsUpdate": "2026-07-05T18:00:30Z",
       "workflowStatus": "success",
-      "workflowLastRun": "2026-07-05T17:45:38Z",
+      "workflowLastRun": "2026-07-05T18:00:34Z",
       "stars": 15
     }
   },
   "enrichment": {
-    "totalEnriched": 7620,
-    "totalHasDescription": 7587,
-    "totalTechUs": 8097
+    "totalEnriched": 7604,
+    "totalHasDescription": 7570,
+    "totalTechUs": 8080
   },
   "traffic": {
     "date": "2026-07-05",
@@ -552,17 +552,17 @@
   },
   "growth": {
     "compared_to": "2026-06-28T17:55:51.443Z",
-    "total_delta": -10834,
-    "total_delta_pct": -18,
+    "total_delta": -11024,
+    "total_delta_pct": -19,
     "by_source_delta": {
-      "workday": -8434,
+      "workday": -8432,
       "greenhouse": -723,
-      "simplify": -35,
+      "simplify": -225,
       "tiktok": 6,
       "bytedance": 1,
       "google": 22,
       "lever": -58,
-      "oracle": -1172,
+      "oracle": -1173,
       "smartrecruiters": -303,
       "amd": -40,
       "ashby": -101,
@@ -570,7 +570,7 @@
       "amazon": -54,
       "eightfold": -2,
       "icims": 22,
-      "uber": -10,
+      "uber": -11,
       "apple": 0,
       "deshaw": 0
     }
