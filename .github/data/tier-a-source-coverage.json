@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-06T14:39:34.095Z",
+  "generated_at": "2026-07-06T14:54:22.126Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -32,7 +32,8 @@
     "descriptions-eightfold.jsonl",
     "descriptions-enriched-1.jsonl",
     "descriptions-google.jsonl",
-    "descriptions-greenhouse.jsonl",
+    "descriptions-greenhouse-1.jsonl",
+    "descriptions-greenhouse-2.jsonl",
     "descriptions-icims.jsonl",
     "descriptions-lever.jsonl",
     "descriptions-microsoft.jsonl",
@@ -44,21 +45,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-06T14:38:06.957Z",
+    "generated_at": "2026-07-06T14:53:15.492Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 11916,
-    "description_entries": 3251,
-    "coverage_pct": 27.3,
+    "board_row_count": 12471,
+    "description_entries": 3258,
+    "coverage_pct": 26.1,
     "source_breakdown": {
-      "sidecar": 3251,
+      "sidecar": 3258,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-07-06T14:24:15.055Z",
+    "jobs_metadata_generated": "2026-07-06T14:40:00.149Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-06T14:39:31.578Z",
+    "checked_at": "2026-07-06T14:54:19.452Z",
     "active": true,
     "message": "**Low description coverage**: bytedance has 0 sidecar entries for 159 pool jobs (0.0%) | **Low description coverage**: icims has 0 sidecar entries for 83 pool jobs (0.0%)",
     "failures": [
@@ -78,30 +79,40 @@
   "rows": [
     {
       "source": "workday",
-      "pool_rows": 34805,
-      "us_rows": 18940,
-      "tech_us_rows": 6256,
-      "raw_sidecar_rows": 2618,
-      "sidecar_active_rows": 831,
+      "pool_rows": 34128,
+      "us_rows": 19323,
+      "tech_us_rows": 6801,
+      "raw_sidecar_rows": 2866,
+      "sidecar_active_rows": 835,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 831,
-      "published_pct": 13.3,
-      "enriched_rows": 3892,
-      "enriched_pct": 62.2,
-      "enriched_with_skills": 3705,
-      "skills_pct": 95.2,
+      "published_rows": 833,
+      "published_pct": 12.2,
+      "enriched_rows": 3889,
+      "enriched_pct": 57.2,
+      "enriched_with_skills": 3685,
+      "skills_pct": 94.8,
       "examples": [
         {
-          "id": "workday-kla-2638031",
-          "company": "KLA",
-          "title": "Product Install Engineer - Chemical Analysis - >80% travel"
+          "id": "workday-pfizer-4959631",
+          "company": "Pfizer",
+          "title": "Process Engineer/Scientist II"
         },
         {
           "id": "workday-guidehouse-39028",
           "company": "Guidehouse",
           "title": "AI & Data Program Manager"
+        },
+        {
+          "id": "workday-comcast-R439926",
+          "company": "Comcast",
+          "title": "IOS Engineer - Connected Living"
+        },
+        {
+          "id": "workday-kla-2638031",
+          "company": "KLA",
+          "title": "Product Install Engineer - Chemical Analysis - >80% travel"
         },
         {
           "id": "workday-blackstone-43090",
@@ -122,16 +133,6 @@
           "id": "workday-blackstone-41798",
           "company": "Blackstone",
           "title": "Meet Blackstone   2028 Associate Opportunities"
-        },
-        {
-          "id": "workday-blackstone-33217",
-          "company": "Blackstone",
-          "title": "Real Estate - ICS, Associate"
-        },
-        {
-          "id": "workday-blackstone-40149",
-          "company": "Blackstone",
-          "title": "2026 Blackstone BXPE Associate (New York)"
         }
       ],
       "severity": "high",
@@ -142,22 +143,22 @@
     },
     {
       "source": "oracle",
-      "pool_rows": 6843,
-      "us_rows": 4788,
-      "tech_us_rows": 1243,
-      "raw_sidecar_rows": 5219,
+      "pool_rows": 6857,
+      "us_rows": 4801,
+      "tech_us_rows": 1248,
+      "raw_sidecar_rows": 5230,
       "sidecar_active_rows": 359,
       "supplemental_rows": 34324,
-      "supplemental_with_desc": 25342,
+      "supplemental_with_desc": 25348,
       "supplemental_meta": {
-        "generated_at": "2026-07-06T14:35:34.986Z",
+        "generated_at": "2026-07-06T14:50:40.967Z",
         "lane_name": "oracle",
         "jobs_fetched": 34324
       },
       "published_rows": 359,
-      "published_pct": 28.9,
+      "published_pct": 28.8,
       "enriched_rows": 520,
-      "enriched_pct": 41.8,
+      "enriched_pct": 41.7,
       "enriched_with_skills": 381,
       "skills_pct": 73.3,
       "examples": [
@@ -211,19 +212,19 @@
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 1280,
-      "us_rows": 1443,
-      "tech_us_rows": 342,
-      "raw_sidecar_rows": 1784,
-      "sidecar_active_rows": 135,
+      "pool_rows": 1278,
+      "us_rows": 1441,
+      "tech_us_rows": 341,
+      "raw_sidecar_rows": 1779,
+      "sidecar_active_rows": 134,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 135,
-      "published_pct": 39.5,
-      "enriched_rows": 169,
-      "enriched_pct": 49.4,
-      "enriched_with_skills": 166,
+      "published_rows": 134,
+      "published_pct": 39.3,
+      "enriched_rows": 168,
+      "enriched_pct": 49.3,
+      "enriched_with_skills": 165,
       "skills_pct": 98.2,
       "examples": [
         {
