@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-06T00:22:27.078Z",
+  "generated_at": "2026-07-06T00:28:46.707Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -43,6 +43,7 @@
     "descriptions-lever.jsonl",
     "descriptions-microsoft.jsonl",
     "descriptions-oracle.jsonl",
+    "descriptions-simplify.jsonl",
     "descriptions-smartrecruiters.jsonl",
     "descriptions-tiktok.jsonl",
     "descriptions-uber.jsonl",
@@ -63,7 +64,7 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-06T00:22:24.315Z",
+    "checked_at": "2026-07-06T00:28:43.517Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -80,10 +81,10 @@
   "rows": [
     {
       "source": "oracle",
-      "pool_rows": 6728,
-      "us_rows": 4794,
-      "tech_us_rows": 1245,
-      "raw_sidecar_rows": 5148,
+      "pool_rows": 6726,
+      "us_rows": 4793,
+      "tech_us_rows": 1244,
+      "raw_sidecar_rows": 5733,
       "sidecar_active_rows": 358,
       "supplemental_rows": 34413,
       "supplemental_with_desc": 25436,
@@ -94,10 +95,10 @@
       },
       "published_rows": 358,
       "published_pct": 28.8,
-      "enriched_rows": 522,
+      "enriched_rows": 521,
       "enriched_pct": 41.9,
-      "enriched_with_skills": 382,
-      "skills_pct": 73.2,
+      "enriched_with_skills": 381,
+      "skills_pct": 73.1,
       "examples": [
         {
           "id": "oracle-undefined-20131",
@@ -149,21 +150,31 @@
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 1238,
-      "us_rows": 1414,
-      "tech_us_rows": 354,
-      "raw_sidecar_rows": 2292,
+      "pool_rows": 1290,
+      "us_rows": 1458,
+      "tech_us_rows": 348,
+      "raw_sidecar_rows": 2786,
       "sidecar_active_rows": 181,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
       "published_rows": 181,
-      "published_pct": 51.1,
+      "published_pct": 52,
       "enriched_rows": 181,
-      "enriched_pct": 51.1,
+      "enriched_pct": 52,
       "enriched_with_skills": 177,
       "skills_pct": 97.8,
       "examples": [
+        {
+          "id": "sr-EVERSANA1-744000134031911",
+          "company": "EVERSANA",
+          "title": "Program Manager - AI Agency"
+        },
+        {
+          "id": "sr-CapTechConsulting-744000133622879",
+          "company": "CapTech Consulting",
+          "title": "Technical Lead/Solutions Architect"
+        },
         {
           "id": "sr-AbbVie-3743990013919276",
           "company": "AbbVie",
@@ -193,16 +204,6 @@
           "id": "sr-AbbVie-3743990013889166",
           "company": "AbbVie",
           "title": "Principal Research Scientist I"
-        },
-        {
-          "id": "sr-AbbVie-3743990013860246",
-          "company": "AbbVie",
-          "title": "Sr. Manager, IT QA- Regulatory Assurance"
-        },
-        {
-          "id": "sr-AbbVie-3743990013859423",
-          "company": "AbbVie",
-          "title": "Sr. Manager, IT QA- Regulatory Assurance"
         }
       ],
       "severity": "high",
@@ -255,60 +256,60 @@
     },
     {
       "source": "workday",
-      "pool_rows": 34113,
-      "us_rows": 17851,
-      "tech_us_rows": 4974,
-      "raw_sidecar_rows": 19659,
-      "sidecar_active_rows": 4366,
+      "pool_rows": 34155,
+      "us_rows": 18300,
+      "tech_us_rows": 5343,
+      "raw_sidecar_rows": 19587,
+      "sidecar_active_rows": 4377,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 4379,
-      "published_pct": 88,
-      "enriched_rows": 4368,
-      "enriched_pct": 87.8,
-      "enriched_with_skills": 4182,
-      "skills_pct": 95.7,
+      "published_rows": 4330,
+      "published_pct": 81,
+      "enriched_rows": 4387,
+      "enriched_pct": 82.1,
+      "enriched_with_skills": 4207,
+      "skills_pct": 95.9,
       "examples": [
         {
-          "id": "workday-snap-Q326SWEI6",
-          "company": "Snap",
-          "title": "Software Engineer, iOS, Level 5"
+          "id": "workday-cvs-health-R0895940",
+          "company": "CVS Health",
+          "title": "AI Engineer - Microsoft Power Platform"
         },
         {
-          "id": "workday-snap-Q326SWEI2",
-          "company": "Snap",
-          "title": "Software Engineer, iOS, Level 4"
+          "id": "workday-microchip-technology-R1873-26",
+          "company": "Microchip Technology",
+          "title": "Intern-Engineering (Test)"
         },
         {
-          "id": "workday-snap-Q326SWEB6",
-          "company": "Snap",
-          "title": "Software Engineer, Backend, Level 5"
+          "id": "workday-microchip-technology-R2732-26",
+          "company": "Microchip Technology",
+          "title": "Engineer I - Device (Technology Development)"
         },
         {
-          "id": "workday-snap-R0046054",
-          "company": "Snap",
-          "title": "Integrated Circuit Design Verification Engineer"
+          "id": "workday-regal-rexnord-R26_03052",
+          "company": "Regal Rexnord",
+          "title": "Continuous Improvement Manager"
         },
         {
-          "id": "workday-snap-Q326SWEFS2",
-          "company": "Snap",
-          "title": "Software Engineer, Full Stack, Level 4"
+          "id": "workday-rtx-01857057",
+          "company": "RTX",
+          "title": "Manufacturing Automation Tech (Sustainment)"
         },
         {
-          "id": "workday-snap-Q326SWEFS6",
-          "company": "Snap",
-          "title": "Software Engineer, Full Stack, Level 5"
+          "id": "workday-rtx-01855590",
+          "company": "RTX",
+          "title": "Mission Management Scrum Master (Onsite)"
         },
         {
-          "id": "workday-snap-R0046038",
-          "company": "Snap",
-          "title": "Software Engineer - Audio, Level 5"
+          "id": "workday-carrier-global-30203713",
+          "company": "Carrier Global",
+          "title": "Mission Critical BAS/BMS Master Field Engineer - Automated Logic"
         },
         {
-          "id": "workday-snap-R0046024",
-          "company": "Snap",
-          "title": "Product Design Engineer"
+          "id": "workday-carrier-global-30203398",
+          "company": "Carrier Global",
+          "title": "Estimator Specialist"
         }
       ],
       "severity": "ok",
