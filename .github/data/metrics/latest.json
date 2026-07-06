@@ -1,16 +1,16 @@
 {
-  "timestamp": "2026-07-06T03:24:34.550Z",
+  "timestamp": "2026-07-06T03:38:30.282Z",
   "pipeline": {
-    "pipelineTotal": 49659,
-    "prevTotalJobs": 49659,
+    "pipelineTotal": 49650,
+    "prevTotalJobs": 49650,
     "bySource": {
-      "workday": 34430,
-      "greenhouse": 3440,
+      "workday": 34427,
+      "greenhouse": 3438,
       "deshaw": 21,
       "simplify": 347,
-      "oracle": 6727,
-      "ashby": 752,
-      "smartrecruiters": 1124,
+      "oracle": 6725,
+      "ashby": 751,
+      "smartrecruiters": 1123,
       "lever": 257,
       "amazon": 211,
       "eightfold": 13,
@@ -24,10 +24,10 @@
       "apple": 22
     },
     "fetchResults": {
-      "greenhouse": 41367,
+      "greenhouse": 41365,
       "lever": 4996,
-      "ashby": 8845,
-      "workday": 21947,
+      "ashby": 8844,
+      "workday": 14668,
       "smartrecruiters": 4779,
       "amazon": 1569,
       "eightfold": 201,
@@ -39,42 +39,42 @@
     },
     "jsearchTotalFetched": null,
     "tagStats": {
-      "usTagged": 28544,
-      "entryLevel": 33203,
-      "internship": 3222,
+      "usTagged": 28481,
+      "entryLevel": 33183,
+      "internship": 3223,
       "domains": {
-        "general": 5736,
-        "software": 7560,
-        "manufacturing": 4721,
-        "sales": 5351,
-        "hardware": 6186,
-        "operations": 9314,
-        "retail": 2159,
-        "data_science": 1735,
-        "healthcare": 3780,
+        "software": 7548,
+        "data_science": 1730,
+        "sales": 5350,
+        "product": 892,
         "ai": 921,
-        "logistics": 1017,
-        "finance": 5509,
-        "product": 898,
-        "hr": 705,
-        "legal": 599,
-        "marketing": 953
+        "marketing": 926,
+        "operations": 9306,
+        "general": 5772,
+        "logistics": 1014,
+        "retail": 2158,
+        "hardware": 6179,
+        "manufacturing": 4744,
+        "legal": 587,
+        "finance": 5492,
+        "hr": 701,
+        "healthcare": 3708
       }
     },
     "g1Breakdown": {
-      "updated": "2026-07-06T03:24:32.867Z",
-      "us_total": 28272,
-      "us_g1": 2409,
-      "us_g1_rate": 8.5,
+      "updated": "2026-07-06T03:38:29.326Z",
+      "us_total": 28273,
+      "us_g1": 2423,
+      "us_g1_rate": 8.6,
       "by_source": {
         "workday": {
-          "g1": 816,
-          "total": 17563,
-          "rate": 4.6
+          "g1": 831,
+          "total": 17570,
+          "rate": 4.7
         },
         "greenhouse": {
           "g1": 198,
-          "total": 2181,
+          "total": 2179,
           "rate": 9.1
         },
         "deshaw": {
@@ -88,18 +88,18 @@
           "rate": 15.9
         },
         "oracle": {
-          "g1": 586,
-          "total": 4070,
+          "g1": 585,
+          "total": 4068,
           "rate": 14.4
         },
         "ashby": {
           "g1": 48,
-          "total": 508,
-          "rate": 9.4
+          "total": 507,
+          "rate": 9.5
         },
         "smartrecruiters": {
           "g1": 96,
-          "total": 1124,
+          "total": 1123,
           "rate": 8.5
         },
         "eightfold": {
@@ -157,8 +157,14 @@
         },
         {
           "company": "JP Morgan Chase",
-          "g1": 220,
+          "g1": 219,
           "source": "oracle",
+          "has_departments": false
+        },
+        {
+          "company": "Wash U",
+          "g1": 75,
+          "source": "workday",
           "has_departments": false
         },
         {
@@ -174,21 +180,9 @@
           "has_departments": false
         },
         {
-          "company": "RTX",
-          "g1": 56,
-          "source": "workday",
-          "has_departments": true
-        },
-        {
           "company": "Google",
           "g1": 56,
           "source": "google",
-          "has_departments": false
-        },
-        {
-          "company": "Wash U",
-          "g1": 52,
-          "source": "workday",
           "has_departments": false
         },
         {
@@ -258,6 +252,12 @@
           "has_departments": false
         },
         {
+          "company": "RTX",
+          "g1": 30,
+          "source": "workday",
+          "has_departments": true
+        },
+        {
           "company": "Sanofi",
           "g1": 29,
           "source": "workday",
@@ -272,11 +272,11 @@
       ],
       "by_fix_category": {
         "needs_family_mapping": {
-          "count": 602,
+          "count": 630,
           "description": "WD jobs with no departments — needs family cache/path coverage"
         },
         "family_map_gap": {
-          "count": 214,
+          "count": 201,
           "description": "WD jobs with departments but still G1"
         },
         "genuinely_ambiguous": {
@@ -288,44 +288,44 @@
           "description": "Simplify T0 jobs — no description for L4 fallback"
         },
         "other": {
-          "count": 871,
+          "count": 870,
           "description": "Mixed ATS — some keyword gaps, some structural"
         }
       },
       "by_engine_version": {
-        "v72": 2409
+        "v72": 2423
       },
       "by_employment": {
-        "mid_level": 341,
-        "entry_level": 1769,
+        "entry_level": 1761,
+        "mid_level": 363,
         "internship": 299
       }
     },
-    "duplicatesRemoved": 1936,
-    "generatedAt": "2026-07-06T03:23:39.377Z",
+    "duplicatesRemoved": 1748,
+    "generatedAt": "2026-07-06T03:37:21.959Z",
     "evergreen": {
       "age_buckets": {
-        "fresh_0_3d": 4754,
-        "aging_4_10d": 29261,
-        "evergreen_10_14d": 12220,
-        "beyond_14d": 3424
+        "fresh_0_3d": 4767,
+        "aging_4_10d": 29259,
+        "evergreen_10_14d": 12201,
+        "beyond_14d": 3423
       },
       "age_buckets_original": {
         "fresh_0_3d": 163,
         "aging_4_10d": 2063,
-        "evergreen_10_14d": 1574,
+        "evergreen_10_14d": 1571,
         "beyond_14d": 633,
-        "coverage": 4433,
+        "coverage": 4430,
         "coverage_pct": 9
       },
       "evergreen_pct": 24.6,
       "first_published_coverage": 9,
       "first_published_evergreen_pct": 14.3,
       "by_source": {
-        "greenhouse": 1706,
-        "workday": 9270,
-        "smartrecruiters": 548,
-        "ashby": 368,
+        "workday": 9254,
+        "greenhouse": 1704,
+        "smartrecruiters": 547,
+        "ashby": 367,
         "lever": 133,
         "microsoft": 346,
         "amazon": 119,
@@ -383,14 +383,14 @@
         {
           "company": "Verizon",
           "total": 449,
-          "max_copies": 302,
-          "unique_titles": 60
+          "max_copies": 300,
+          "unique_titles": 62
         },
         {
           "company": "T-Mobile",
           "total": 426,
           "max_copies": 175,
-          "unique_titles": 117
+          "unique_titles": 118
         },
         {
           "company": "LabCorp",
@@ -399,16 +399,16 @@
           "unique_titles": 221
         },
         {
-          "company": "CVS Health",
-          "total": 361,
-          "max_copies": 127,
-          "unique_titles": 82
-        },
-        {
           "company": "Fresenius Medical Care",
           "total": 473,
           "max_copies": 127,
           "unique_titles": 154
+        },
+        {
+          "company": "CVS Health",
+          "total": 361,
+          "max_copies": 126,
+          "unique_titles": 82
         },
         {
           "company": "PNC Financial Services",
@@ -431,8 +431,8 @@
         {
           "company": "Target",
           "total": 307,
-          "max_copies": 73,
-          "unique_titles": 183
+          "max_copies": 72,
+          "unique_titles": 184
         },
         {
           "company": "Comcast",
@@ -446,57 +446,57 @@
   "repos": {
     "New-Grad": {
       "name": "New-Grad",
-      "jobCount": 17112,
-      "lastJobsUpdate": "2026-07-06T03:15:46Z",
+      "jobCount": 17181,
+      "lastJobsUpdate": "2026-07-06T03:30:53Z",
       "workflowStatus": "success",
-      "workflowLastRun": "2026-07-06T03:15:49Z",
+      "workflowLastRun": "2026-07-06T03:30:58Z",
       "stars": 148
     },
     "Internships": {
       "name": "Internships",
-      "jobCount": 1623,
-      "lastJobsUpdate": "2026-07-06T03:15:53Z",
+      "jobCount": 1621,
+      "lastJobsUpdate": "2026-07-06T03:30:47Z",
       "workflowStatus": "success",
-      "workflowLastRun": "2026-07-06T03:15:57Z",
+      "workflowLastRun": "2026-07-06T03:30:52Z",
       "stars": 105
     },
     "Software": {
       "name": "Software",
-      "jobCount": 2553,
-      "lastJobsUpdate": "2026-07-06T03:15:45Z",
+      "jobCount": 2558,
+      "lastJobsUpdate": "2026-07-06T03:30:49Z",
       "workflowStatus": "success",
-      "workflowLastRun": "2026-07-06T03:15:48Z",
+      "workflowLastRun": "2026-07-06T03:30:54Z",
       "stars": 40
     },
     "Data-Science": {
       "name": "Data-Science",
-      "jobCount": 744,
-      "lastJobsUpdate": "2026-07-06T03:15:45Z",
+      "jobCount": 743,
+      "lastJobsUpdate": "2026-07-06T03:30:45Z",
       "workflowStatus": "success",
-      "workflowLastRun": "2026-07-06T03:15:48Z",
+      "workflowLastRun": "2026-07-06T03:30:50Z",
       "stars": 51
     },
     "Hardware": {
       "name": "Hardware",
-      "jobCount": 1672,
-      "lastJobsUpdate": "2026-07-06T03:15:46Z",
+      "jobCount": 1679,
+      "lastJobsUpdate": "2026-07-06T03:30:46Z",
       "workflowStatus": "success",
-      "workflowLastRun": "2026-07-06T03:15:49Z",
+      "workflowLastRun": "2026-07-06T03:30:50Z",
       "stars": 40
     },
     "Healthcare": {
       "name": "Healthcare",
-      "jobCount": 1630,
-      "lastJobsUpdate": "2026-07-06T03:15:47Z",
+      "jobCount": 1660,
+      "lastJobsUpdate": "2026-07-06T03:30:46Z",
       "workflowStatus": "success",
-      "workflowLastRun": "2026-07-06T03:15:53Z",
+      "workflowLastRun": "2026-07-06T03:30:49Z",
       "stars": 15
     }
   },
   "enrichment": {
-    "totalEnriched": 7633,
-    "totalHasDescription": 7610,
-    "totalTechUs": 7935
+    "totalEnriched": 7647,
+    "totalHasDescription": 7624,
+    "totalTechUs": 7949
   },
   "traffic": {
     "date": "2026-07-05",
@@ -552,18 +552,18 @@
   },
   "growth": {
     "compared_to": "2026-06-29T03:15:39.192Z",
-    "total_delta": -9942,
+    "total_delta": -9951,
     "total_delta_pct": -17,
     "by_source_delta": {
-      "workday": -8232,
-      "greenhouse": -734,
+      "workday": -8235,
+      "greenhouse": -736,
       "simplify": -282,
       "tiktok": 2,
       "bytedance": 1,
       "google": 22,
-      "ashby": -96,
-      "oracle": -182,
-      "smartrecruiters": -303,
+      "ashby": -97,
+      "oracle": -184,
+      "smartrecruiters": -304,
       "lever": -58,
       "microsoft": 23,
       "amazon": -71,
