@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-07T16:09:28.341Z",
+  "generated_at": "2026-07-07T16:21:28.459Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -58,12 +58,14 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-07T16:09:26.074Z",
+    "checked_at": "2026-07-07T16:21:25.721Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [],
-    "warning_count": 0,
+    "warnings": [
+      "Runtime trending up: 7.2 min (warning at 7, alert at 10)"
+    ],
+    "warning_count": 1,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -74,18 +76,82 @@
   },
   "rows": [
     {
+      "source": "workday",
+      "pool_rows": 34905,
+      "us_rows": 19684,
+      "tech_us_rows": 6810,
+      "raw_sidecar_rows": 38368,
+      "sidecar_active_rows": 3130,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 4597,
+      "published_pct": 67.5,
+      "enriched_rows": 3883,
+      "enriched_pct": 57,
+      "enriched_with_skills": 3684,
+      "skills_pct": 94.9,
+      "examples": [
+        {
+          "id": "workday-arkansas-children's-R0023561",
+          "company": "Arkansas Children's",
+          "title": "Information Security Engineer II"
+        },
+        {
+          "id": "workday-arkansas-children's-R0023574",
+          "company": "Arkansas Children's",
+          "title": "Systems Analytics Analyst II"
+        },
+        {
+          "id": "workday-parsons-R183008",
+          "company": "Parsons",
+          "title": "Workflow Support Specialist"
+        },
+        {
+          "id": "workday-parsons-R180632",
+          "company": "Parsons",
+          "title": "C-UAS Test Engineer"
+        },
+        {
+          "id": "workday-parsons-R179831",
+          "company": "Parsons",
+          "title": "Electronics Tech - Fiber Optics/Radio Control System"
+        },
+        {
+          "id": "workday-parsons-R182447",
+          "company": "Parsons",
+          "title": "Security Technician"
+        },
+        {
+          "id": "workday-parsons-R182837",
+          "company": "Parsons",
+          "title": "Electronic Security Technician"
+        },
+        {
+          "id": "workday-parsons-R180400",
+          "company": "Parsons",
+          "title": "Technician III"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage",
+        "low_enrichment_coverage"
+      ]
+    },
+    {
       "source": "oracle",
-      "pool_rows": 6999,
-      "us_rows": 4963,
+      "pool_rows": 7009,
+      "us_rows": 4972,
       "tech_us_rows": 1231,
-      "raw_sidecar_rows": 5373,
+      "raw_sidecar_rows": 5568,
       "sidecar_active_rows": 343,
-      "supplemental_rows": 34559,
-      "supplemental_with_desc": 25504,
+      "supplemental_rows": 34554,
+      "supplemental_with_desc": 25497,
       "supplemental_meta": {
-        "generated_at": "2026-07-07T16:06:05.222Z",
+        "generated_at": "2026-07-07T16:20:47.441Z",
         "lane_name": "oracle",
-        "jobs_fetched": 34559
+        "jobs_fetched": 34554
       },
       "published_rows": 343,
       "published_pct": 27.9,
@@ -144,11 +210,11 @@
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 1278,
-      "us_rows": 1429,
+      "pool_rows": 1277,
+      "us_rows": 1428,
       "tech_us_rows": 313,
-      "raw_sidecar_rows": 991,
-      "sidecar_active_rows": 103,
+      "raw_sidecar_rows": 995,
+      "sidecar_active_rows": 85,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
@@ -213,9 +279,13 @@
       "tech_us_rows": 68,
       "raw_sidecar_rows": 0,
       "sidecar_active_rows": 0,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
+      "supplemental_rows": 1364,
+      "supplemental_with_desc": 98,
+      "supplemental_meta": {
+        "generated_at": "2026-07-07T16:15:54.909Z",
+        "lane_name": "custom",
+        "jobs_fetched": 4186
+      },
       "published_rows": 0,
       "published_pct": 0,
       "enriched_rows": 68,
@@ -267,70 +337,30 @@
       "severity": "high",
       "flags": [
         "low_published_coverage",
-        "no_source_text_surface"
+        "no_source_text_surface",
+        "supplemental_stage_gap"
       ]
     },
     {
-      "source": "workday",
-      "pool_rows": 34915,
-      "us_rows": 19387,
-      "tech_us_rows": 6713,
-      "raw_sidecar_rows": 12535,
-      "sidecar_active_rows": 3283,
+      "source": "apple",
+      "pool_rows": 22,
+      "us_rows": 22,
+      "tech_us_rows": 10,
+      "raw_sidecar_rows": 0,
+      "sidecar_active_rows": 0,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 5485,
-      "published_pct": 81.7,
-      "enriched_rows": 3879,
-      "enriched_pct": 57.8,
-      "enriched_with_skills": 3676,
-      "skills_pct": 94.8,
-      "examples": [
-        {
-          "id": "workday-wells-fargo-R-534320",
-          "company": "Wells Fargo",
-          "title": "Technology Business Systems Consultant - ServiceNow, AI and Automation"
-        },
-        {
-          "id": "workday-mastercard-R-275823",
-          "company": "Mastercard",
-          "title": "Software Engineer"
-        },
-        {
-          "id": "workday-mastercard-R-279643",
-          "company": "Mastercard",
-          "title": "Software Engineer II - Backend/Platform Agentic AI"
-        },
-        {
-          "id": "workday-mastercard-R-281530",
-          "company": "Mastercard",
-          "title": "Software Engineer II"
-        },
-        {
-          "id": "workday-gdit-RQ223455",
-          "company": "GDIT",
-          "title": "Web Developer   Active Secret clearance"
-        },
-        {
-          "id": "workday-gdit-RQ223669",
-          "company": "GDIT",
-          "title": "Network Technician/Systems Technician"
-        },
-        {
-          "id": "workday-gdit-RQ218479",
-          "company": "GDIT",
-          "title": "Systems Engineer (RF) - TS/SCI with Polygraph"
-        },
-        {
-          "id": "workday-gdit-RQ223665",
-          "company": "GDIT",
-          "title": "Network/System Administrator (Net/Sys Admin) II"
-        }
-      ],
+      "published_rows": 10,
+      "published_pct": 100,
+      "enriched_rows": 10,
+      "enriched_pct": 100,
+      "enriched_with_skills": 10,
+      "skills_pct": 100,
+      "examples": [],
       "severity": "medium",
       "flags": [
-        "low_enrichment_coverage"
+        "published_gt_raw_sidecar"
       ]
     },
     {
@@ -358,7 +388,7 @@
       "pool_rows": 1005,
       "us_rows": 1005,
       "tech_us_rows": 434,
-      "raw_sidecar_rows": 1005,
+      "raw_sidecar_rows": 1013,
       "sidecar_active_rows": 434,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
@@ -368,26 +398,6 @@
       "enriched_rows": 434,
       "enriched_pct": 100,
       "enriched_with_skills": 434,
-      "skills_pct": 100,
-      "examples": [],
-      "severity": "ok",
-      "flags": []
-    },
-    {
-      "source": "apple",
-      "pool_rows": 22,
-      "us_rows": 22,
-      "tech_us_rows": 10,
-      "raw_sidecar_rows": 22,
-      "sidecar_active_rows": 10,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 10,
-      "published_pct": 100,
-      "enriched_rows": 10,
-      "enriched_pct": 100,
-      "enriched_with_skills": 10,
       "skills_pct": 100,
       "examples": [],
       "severity": "ok",
