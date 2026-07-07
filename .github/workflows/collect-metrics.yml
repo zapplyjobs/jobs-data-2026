@@ -59,6 +59,20 @@ jobs:
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
 
+      - name: Append bridge-metrics to history (bridge-metrics-history.jsonl)
+        run: |
+          node -e "
+          const fs=require('fs');
+          const src='.github/data/bridge-metrics.json', hist='.github/data/bridge-metrics-history.jsonl';
+          if(!fs.existsSync(src)){console.log('bridge-metrics.json absent — skip history append');process.exit(0);}
+          let cur; try{cur=JSON.parse(fs.readFileSync(src,'utf8'));}catch(e){console.log('bridge-metrics.json unparseable — skip');process.exit(0);}
+          if(!cur.bridge_run_at){console.log('bridge-metrics.json has no bridge_run_at — skip');process.exit(0);}
+          let last=null;
+          if(fs.existsSync(hist)){const lines=fs.readFileSync(hist,'utf8').trim().split('\n').filter(Boolean);if(lines.length)try{last=JSON.parse(lines[lines.length-1]);}catch(e){}}
+          if(last && last.bridge_run_at===cur.bridge_run_at){console.log('bridge-metrics unchanged since last append (bridge_run_at='+cur.bridge_run_at+') — skip');process.exit(0);}
+          fs.appendFileSync(hist, JSON.stringify(Object.assign({history_appended_at:new Date().toISOString()},cur))+'\n');
+          console.log('bridge-metrics-history.jsonl appended (bridge_run_at='+cur.bridge_run_at+')');
+          "
       - name: Collect metrics
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -77,7 +91,7 @@ jobs:
         run: |
           git config user.email "bot@zapplyjobs.com"
           git config user.name "Metrics Bot"
-          git add .github/data/metrics/ .github/data/zjp-metrics.json .github/data/canada-tech-summary.json .github/data/bridge-metrics.json || exit 0
+          git add .github/data/metrics/ .github/data/zjp-metrics.json .github/data/canada-tech-summary.json .github/data/bridge-metrics.json .github/data/bridge-metrics-history.jsonl || exit 0
           git diff --cached --quiet && { echo "No changes to commit"; exit 0; }
           git commit -m "chore: update metrics [skip ci]"
           for i in 1 2 3; do
