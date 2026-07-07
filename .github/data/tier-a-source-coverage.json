@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-07T19:11:23.183Z",
+  "generated_at": "2026-07-07T19:27:25.336Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -44,24 +44,35 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-07T19:06:13.901Z",
+    "generated_at": "2026-07-07T19:25:54.595Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 12356,
-    "description_entries": 6774,
-    "coverage_pct": 54.8,
+    "board_row_count": 12040,
+    "description_entries": 5342,
+    "coverage_pct": 44.4,
     "source_breakdown": {
-      "sidecar": 6774,
+      "sidecar": 5342,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-07-07T18:54:01.504Z",
+    "jobs_metadata_generated": "2026-07-07T19:14:04.370Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-07T19:11:21.213Z",
-    "active": false,
-    "message": null,
-    "failures": [],
+    "checked_at": "2026-07-07T19:27:22.203Z",
+    "active": true,
+    "message": "**Aggregator execution time high**: 10.6 min (threshold: 10 min). Queue: 0.0 min. At 25 min execution, 15-min cadence breaks. | **Enrichment T3+ rate low**: 63% (4579/7282, expected 75-95%) — schema change may have broken field extraction | **Enrichment T0 rate high**: 32% (2315/7282, expected <10%) — jobs losing descriptions | **Low description coverage**: tiktok has 0 sidecar entries for 997 pool jobs (0.0%) | **Low description coverage**: deshaw has 0 sidecar entries for 22 pool jobs (0.0%) | **Low description coverage**: bytedance has 0 sidecar entries for 163 pool jobs (0.0%) | **Low description coverage**: amd has 0 sidecar entries for 63 pool jobs (0.0%) | **Source fetch failure (amazon)**: 0 jobs fetched this run despite 234 in pool (carry-forward). Fetcher likely timed out or broken. | **Source fetch failure (amd)**: 0 jobs fetched this run despite 63 in pool (carry-forward). Fetcher likely timed out or broken. | **Source fetch failure (tiktok)**: 0 jobs fetched this run despite 997 in pool (carry-forward). Fetcher likely timed out or broken.",
+    "failures": [
+      "**Aggregator execution time high**: 10.6 min (threshold: 10 min). Queue: 0.0 min. At 25 min execution, 15-min cadence breaks.",
+      "**Enrichment T3+ rate low**: 63% (4579/7282, expected 75-95%) — schema change may have broken field extraction",
+      "**Enrichment T0 rate high**: 32% (2315/7282, expected <10%) — jobs losing descriptions",
+      "**Low description coverage**: tiktok has 0 sidecar entries for 997 pool jobs (0.0%)",
+      "**Low description coverage**: deshaw has 0 sidecar entries for 22 pool jobs (0.0%)",
+      "**Low description coverage**: bytedance has 0 sidecar entries for 163 pool jobs (0.0%)",
+      "**Low description coverage**: amd has 0 sidecar entries for 63 pool jobs (0.0%)",
+      "**Source fetch failure (amazon)**: 0 jobs fetched this run despite 234 in pool (carry-forward). Fetcher likely timed out or broken.",
+      "**Source fetch failure (amd)**: 0 jobs fetched this run despite 63 in pool (carry-forward). Fetcher likely timed out or broken.",
+      "**Source fetch failure (tiktok)**: 0 jobs fetched this run despite 997 in pool (carry-forward). Fetcher likely timed out or broken."
+    ],
     "warnings": [],
     "warning_count": 0,
     "secrets": [
@@ -75,20 +86,20 @@
   "rows": [
     {
       "source": "workday",
-      "pool_rows": 36018,
-      "us_rows": 19817,
-      "tech_us_rows": 6535,
-      "raw_sidecar_rows": 15760,
-      "sidecar_active_rows": 3615,
+      "pool_rows": 36301,
+      "us_rows": 20249,
+      "tech_us_rows": 6818,
+      "raw_sidecar_rows": 15468,
+      "sidecar_active_rows": 3351,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 3860,
-      "published_pct": 59.1,
-      "enriched_rows": 4090,
-      "enriched_pct": 62.6,
-      "enriched_with_skills": 3879,
-      "skills_pct": 94.8,
+      "published_rows": 3725,
+      "published_pct": 54.6,
+      "enriched_rows": 4078,
+      "enriched_pct": 59.8,
+      "enriched_with_skills": 3872,
+      "skills_pct": 94.9,
       "examples": [
         {
           "id": "workday-parsons-R182627",
@@ -96,39 +107,39 @@
           "title": "Systems Engineer - TS/SCI required"
         },
         {
-          "id": "workday-blackstone-35640",
-          "company": "Blackstone",
-          "title": "2025 Women Innovators Program"
-        },
-        {
-          "id": "workday-blackstone-29111",
-          "company": "Blackstone",
-          "title": "2024 Blackstone Technology and Innovations - Cybersecurity Operations Analyst"
-        },
-        {
-          "id": "workday-blackstone-29115",
-          "company": "Blackstone",
-          "title": "2024 Blackstone Technology and Innovations - Data Analyst"
-        },
-        {
           "id": "workday-wells-fargo-R-534320",
           "company": "Wells Fargo",
           "title": "Technology Business Systems Consultant - ServiceNow, AI and Automation"
         },
         {
-          "id": "workday-penn-state-university-REQ_0000073900",
-          "company": "Penn State University",
-          "title": "Maritime Systems Research and Development Engineer - Springfield, VA"
+          "id": "workday-the-travelers-companies-R-50514",
+          "company": "The Travelers Companies",
+          "title": "Manager, Accounting - Treasury Banking Operations"
         },
         {
-          "id": "workday-rtx-01857247",
-          "company": "RTX",
-          "title": "Digital Partner - Business Applications"
+          "id": "workday-rocket-companies-R-083532",
+          "company": "Rocket Companies",
+          "title": "Asset Manager"
         },
         {
-          "id": "workday-rtx-01830834",
-          "company": "RTX",
-          "title": "Manager - ServiceNow Technical Development"
+          "id": "workday-hpe-(university)-1207677",
+          "company": "HPE (University)",
+          "title": "Technical Operations Program Manager"
+        },
+        {
+          "id": "workday-generac-JR15219",
+          "company": "Generac",
+          "title": "Controls Engineer I"
+        },
+        {
+          "id": "workday-carrier-global-30208526",
+          "company": "Carrier Global",
+          "title": "Engineer, Modeling & Controls Engineering"
+        },
+        {
+          "id": "workday-cisco-2016436",
+          "company": "Cisco",
+          "title": "Agentic Solutions Architect - Splunk (Remote)"
         }
       ],
       "severity": "high",
@@ -139,29 +150,34 @@
     },
     {
       "source": "oracle",
-      "pool_rows": 6839,
-      "us_rows": 4788,
-      "tech_us_rows": 1053,
-      "raw_sidecar_rows": 5198,
-      "sidecar_active_rows": 299,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
+      "pool_rows": 7179,
+      "us_rows": 5133,
+      "tech_us_rows": 1262,
+      "raw_sidecar_rows": 5511,
+      "sidecar_active_rows": 363,
+      "supplemental_rows": 33284,
+      "supplemental_with_desc": 24255,
       "supplemental_meta": {
-        "generated_at": "2026-07-07T19:02:18.573Z",
+        "generated_at": "2026-07-07T19:20:12.821Z",
         "lane_name": "oracle",
-        "jobs_fetched": 0
+        "jobs_fetched": 33284
       },
-      "published_rows": 299,
-      "published_pct": 28.4,
-      "enriched_rows": 459,
-      "enriched_pct": 43.6,
-      "enriched_with_skills": 337,
-      "skills_pct": 73.4,
+      "published_rows": 363,
+      "published_pct": 28.8,
+      "enriched_rows": 526,
+      "enriched_pct": 41.7,
+      "enriched_with_skills": 382,
+      "skills_pct": 72.6,
       "examples": [
         {
           "id": "oracle-dell-technologies-R288425",
           "company": "Dell Technologies",
           "title": "Automation & AI Platform Engineer (Network Security)"
+        },
+        {
+          "id": "oracle-dell-technologies-294489",
+          "company": "Dell Technologies",
+          "title": "Field Service Engineer 2 - Ellendale, ND"
         },
         {
           "id": "oracle-dell-technologies-294493",
@@ -192,17 +208,77 @@
           "id": "oracle-hologic-11923",
           "company": "Hologic",
           "title": "Quality Engineer 2"
-        },
-        {
-          "id": "oracle-texas-instruments-25011638",
-          "company": "Texas Instruments",
-          "title": "Career Accelerator Program - Digital Design Engineer"
         }
       ],
       "severity": "high",
       "flags": [
         "low_published_coverage",
-        "low_enrichment_coverage"
+        "low_enrichment_coverage",
+        "supplemental_stage_gap"
+      ]
+    },
+    {
+      "source": "tiktok",
+      "pool_rows": 997,
+      "us_rows": 997,
+      "tech_us_rows": 428,
+      "raw_sidecar_rows": 0,
+      "sidecar_active_rows": 0,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 0,
+      "published_pct": 0,
+      "enriched_rows": 428,
+      "enriched_pct": 100,
+      "enriched_with_skills": 428,
+      "skills_pct": 100,
+      "examples": [
+        {
+          "id": "tiktok-7651895578801097013",
+          "company": "TikTok",
+          "title": "AI Infra Engineer - Large Model Training Infrastructure (LLM/VLM /Agent RL)"
+        },
+        {
+          "id": "tiktok-7647015240097630469",
+          "company": "TikTok",
+          "title": "Safety Program Manager (Trust Building), TikTok Platform Responsibility"
+        },
+        {
+          "id": "tiktok-7524555621200267538",
+          "company": "TikTok",
+          "title": "Machine Learning Engineer Manager, TikTok - Trust and Safety"
+        },
+        {
+          "id": "tiktok-7112323775379343623",
+          "company": "TikTok",
+          "title": "Machine Learning Engineer - E-commerce Recommendation"
+        },
+        {
+          "id": "tiktok-7523144222812408071",
+          "company": "TikTok",
+          "title": "Research Scientist Graduate (TikTok Recommendation-Agentic AI) - 2026 Start (PhD)"
+        },
+        {
+          "id": "tiktok-7177066013757638970",
+          "company": "TikTok",
+          "title": "Machine Learning Engineer, Recommendation, E-Commerce Alliance"
+        },
+        {
+          "id": "tiktok-7112323404073847053",
+          "company": "TikTok",
+          "title": "Machine Learning Engineer - E-commerce Recommendation"
+        },
+        {
+          "id": "tiktok-7615352357392697653",
+          "company": "TikTok",
+          "title": "(General Hire) Multi-modal Machine Learning Engineer - Trust and Safety"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage",
+        "no_source_text_surface"
       ]
     },
     {
@@ -210,7 +286,7 @@
       "pool_rows": 1316,
       "us_rows": 1473,
       "tech_us_rows": 319,
-      "raw_sidecar_rows": 991,
+      "raw_sidecar_rows": 992,
       "sidecar_active_rows": 124,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
@@ -270,19 +346,87 @@
       ]
     },
     {
-      "source": "microsoft",
-      "pool_rows": 390,
-      "us_rows": 259,
-      "tech_us_rows": 173,
-      "raw_sidecar_rows": 0,
-      "sidecar_active_rows": 0,
+      "source": "apple",
+      "pool_rows": 316,
+      "us_rows": 285,
+      "tech_us_rows": 188,
+      "raw_sidecar_rows": 72,
+      "sidecar_active_rows": 34,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
+      "published_rows": 34,
+      "published_pct": 18.1,
+      "enriched_rows": 188,
+      "enriched_pct": 100,
+      "enriched_with_skills": 130,
+      "skills_pct": 69.1,
+      "examples": [
+        {
+          "id": "apple-200661978",
+          "company": "Apple",
+          "title": "Data Scientist"
+        },
+        {
+          "id": "apple-200670729",
+          "company": "Apple",
+          "title": "System Software Engineer - Human Interface Devices"
+        },
+        {
+          "id": "apple-200659972",
+          "company": "Apple",
+          "title": "Finance Data Scientist - Enablement"
+        },
+        {
+          "id": "apple-200670521",
+          "company": "Apple",
+          "title": "OS Power and Performance - Software Development Engineer in Test"
+        },
+        {
+          "id": "apple-200670706",
+          "company": "Apple",
+          "title": "Software Engineer - Universal Media"
+        },
+        {
+          "id": "apple-200644291",
+          "company": "Apple",
+          "title": "Machine Learning Scientist - AppleCare WW Demand Planning"
+        },
+        {
+          "id": "apple-200669873",
+          "company": "Apple",
+          "title": "Software Tools and Automation Engineer - Apple Services Engineering"
+        },
+        {
+          "id": "apple-200653959",
+          "company": "Apple",
+          "title": "Engineering Program Manager, App Store Regulatory, Apple Services Engineering"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage",
+        "low_skill_fill"
+      ]
+    },
+    {
+      "source": "microsoft",
+      "pool_rows": 390,
+      "us_rows": 157,
+      "tech_us_rows": 71,
+      "raw_sidecar_rows": 0,
+      "sidecar_active_rows": 0,
+      "supplemental_rows": 500,
+      "supplemental_with_desc": 151,
+      "supplemental_meta": {
+        "generated_at": "2026-07-07T19:25:52.519Z",
+        "lane_name": "custom",
+        "jobs_fetched": 3321
+      },
       "published_rows": 0,
       "published_pct": 0,
       "enriched_rows": 71,
-      "enriched_pct": 41,
+      "enriched_pct": 100,
       "enriched_with_skills": 71,
       "skills_pct": 100,
       "examples": [
@@ -331,70 +475,7 @@
       "flags": [
         "low_published_coverage",
         "no_source_text_surface",
-        "low_enrichment_coverage"
-      ]
-    },
-    {
-      "source": "apple",
-      "pool_rows": 316,
-      "us_rows": 324,
-      "tech_us_rows": 230,
-      "raw_sidecar_rows": 714,
-      "sidecar_active_rows": 191,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 191,
-      "published_pct": 83,
-      "enriched_rows": 191,
-      "enriched_pct": 83,
-      "enriched_with_skills": 131,
-      "skills_pct": 68.6,
-      "examples": [
-        {
-          "id": "apple-200655723",
-          "company": "Apple",
-          "title": "Sr. iOS Software Engineer, Apple Books"
-        },
-        {
-          "id": "apple-200671236",
-          "company": "Apple",
-          "title": "Sr Software Engineer, GenAI Platform & Practice"
-        },
-        {
-          "id": "apple-200671253",
-          "company": "Apple",
-          "title": "Senior Software Engineer - Setup"
-        },
-        {
-          "id": "apple-200670389",
-          "company": "Apple",
-          "title": "Senior Software Engineer - Global Subscriptions and Pricing Infrastructure"
-        },
-        {
-          "id": "apple-200670539",
-          "company": "Apple",
-          "title": "Senior Machine Learning Engineer, Personal Search Intelligence - Proactive"
-        },
-        {
-          "id": "apple-200667330",
-          "company": "Apple",
-          "title": "Machine Learning Manager, Data for Foundation Models - SIML"
-        },
-        {
-          "id": "apple-200670904",
-          "company": "Apple",
-          "title": "Staff ML Engineer - Ads ML Infrastructure"
-        },
-        {
-          "id": "apple-200670751",
-          "company": "Apple",
-          "title": "AirPods Firmware Engineering Manager"
-        }
-      ],
-      "severity": "medium",
-      "flags": [
-        "low_skill_fill"
+        "supplemental_stage_gap"
       ]
     },
     {
@@ -415,26 +496,6 @@
       "skills_pct": 0,
       "examples": [],
       "severity": "info",
-      "flags": []
-    },
-    {
-      "source": "tiktok",
-      "pool_rows": 1004,
-      "us_rows": 1004,
-      "tech_us_rows": 434,
-      "raw_sidecar_rows": 1004,
-      "sidecar_active_rows": 434,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 434,
-      "published_pct": 100,
-      "enriched_rows": 434,
-      "enriched_pct": 100,
-      "enriched_with_skills": 434,
-      "skills_pct": 100,
-      "examples": [],
-      "severity": "ok",
       "flags": []
     }
   ]
