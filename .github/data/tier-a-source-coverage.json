@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-07T10:52:57.362Z",
+  "generated_at": "2026-07-07T11:00:40.938Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -58,7 +58,7 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-07T10:52:55.533Z",
+    "checked_at": "2026-07-07T11:00:38.680Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -75,21 +75,46 @@
   "rows": [
     {
       "source": "workday",
-      "pool_rows": 35067,
-      "us_rows": 17894,
-      "tech_us_rows": 5263,
-      "raw_sidecar_rows": 7645,
-      "sidecar_active_rows": 2041,
+      "pool_rows": 35033,
+      "us_rows": 18498,
+      "tech_us_rows": 5798,
+      "raw_sidecar_rows": 17705,
+      "sidecar_active_rows": 1848,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 2720,
-      "published_pct": 51.7,
-      "enriched_rows": 3767,
-      "enriched_pct": 71.6,
-      "enriched_with_skills": 3561,
-      "skills_pct": 94.5,
+      "published_rows": 2184,
+      "published_pct": 37.7,
+      "enriched_rows": 3766,
+      "enriched_pct": 65,
+      "enriched_with_skills": 3563,
+      "skills_pct": 94.6,
       "examples": [
+        {
+          "id": "workday-vertex-pharmaceuticals-REQ-29442",
+          "company": "Vertex Pharmaceuticals",
+          "title": "Analytics and Insights Manager"
+        },
+        {
+          "id": "workday-vertex-pharmaceuticals-REQ-29412",
+          "company": "Vertex Pharmaceuticals",
+          "title": "Vertex Fall Co-op, IT Workplace Services"
+        },
+        {
+          "id": "workday-vertex-pharmaceuticals-REQ-28615",
+          "company": "Vertex Pharmaceuticals",
+          "title": "Vertex Fall Co-op 2026, AI and Governance"
+        },
+        {
+          "id": "workday-kion-group-JR-0089522",
+          "company": "KION Group",
+          "title": "Electro-Mechanical Tech 3"
+        },
+        {
+          "id": "workday-cisco-2013055",
+          "company": "Cisco",
+          "title": "Kubernetes Platform Engineer – AI Infrastructure"
+        },
         {
           "id": "workday-schweitzer-engineering-laboratories-2026-20901",
           "company": "Schweitzer Engineering Laboratories",
@@ -104,31 +129,6 @@
           "id": "workday-schweitzer-engineering-laboratories-2026-21401",
           "company": "Schweitzer Engineering Laboratories",
           "title": "PE - Protection for Data Center Eng team"
-        },
-        {
-          "id": "workday-schweitzer-engineering-laboratories-2026-19829",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Process Engineer"
-        },
-        {
-          "id": "workday-schweitzer-engineering-laboratories-2026-20401",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Process Engineering Technician (Plastics)"
-        },
-        {
-          "id": "workday-schweitzer-engineering-laboratories-2026-20730",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Designer I"
-        },
-        {
-          "id": "workday-schweitzer-engineering-laboratories-2026-21077",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "IT Analyst - Datacenter"
-        },
-        {
-          "id": "workday-schweitzer-engineering-laboratories-2026-20290",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Process Engineer- Inspection Systems"
         }
       ],
       "severity": "high",
@@ -139,10 +139,10 @@
     },
     {
       "source": "oracle",
-      "pool_rows": 6771,
+      "pool_rows": 6777,
       "us_rows": 4839,
       "tech_us_rows": 1208,
-      "raw_sidecar_rows": 5213,
+      "raw_sidecar_rows": 5392,
       "sidecar_active_rows": 338,
       "supplemental_rows": 34473,
       "supplemental_with_desc": 25462,
@@ -211,8 +211,8 @@
       "pool_rows": 1287,
       "us_rows": 1445,
       "tech_us_rows": 325,
-      "raw_sidecar_rows": 1002,
-      "sidecar_active_rows": 99,
+      "raw_sidecar_rows": 1016,
+      "sidecar_active_rows": 86,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
@@ -272,19 +272,23 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 392,
-      "us_rows": 148,
-      "tech_us_rows": 69,
+      "pool_rows": 398,
+      "us_rows": 251,
+      "tech_us_rows": 172,
       "raw_sidecar_rows": 0,
       "sidecar_active_rows": 0,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
+      "supplemental_rows": 1347,
+      "supplemental_with_desc": 122,
+      "supplemental_meta": {
+        "generated_at": "2026-07-07T10:56:06.927Z",
+        "lane_name": "custom",
+        "jobs_fetched": 4031
+      },
       "published_rows": 0,
       "published_pct": 0,
-      "enriched_rows": 69,
-      "enriched_pct": 100,
-      "enriched_with_skills": 69,
+      "enriched_rows": 70,
+      "enriched_pct": 40.7,
+      "enriched_with_skills": 70,
       "skills_pct": 100,
       "examples": [
         {
@@ -331,7 +335,31 @@
       "severity": "high",
       "flags": [
         "low_published_coverage",
-        "no_source_text_surface"
+        "no_source_text_surface",
+        "low_enrichment_coverage",
+        "supplemental_stage_gap"
+      ]
+    },
+    {
+      "source": "apple",
+      "pool_rows": 22,
+      "us_rows": 22,
+      "tech_us_rows": 10,
+      "raw_sidecar_rows": 58,
+      "sidecar_active_rows": 0,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 10,
+      "published_pct": 100,
+      "enriched_rows": 10,
+      "enriched_pct": 100,
+      "enriched_with_skills": 10,
+      "skills_pct": 100,
+      "examples": [],
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
       ]
     },
     {
@@ -359,7 +387,7 @@
       "pool_rows": 1006,
       "us_rows": 1006,
       "tech_us_rows": 433,
-      "raw_sidecar_rows": 1006,
+      "raw_sidecar_rows": 1014,
       "sidecar_active_rows": 433,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
@@ -369,26 +397,6 @@
       "enriched_rows": 433,
       "enriched_pct": 100,
       "enriched_with_skills": 433,
-      "skills_pct": 100,
-      "examples": [],
-      "severity": "ok",
-      "flags": []
-    },
-    {
-      "source": "apple",
-      "pool_rows": 22,
-      "us_rows": 22,
-      "tech_us_rows": 10,
-      "raw_sidecar_rows": 22,
-      "sidecar_active_rows": 10,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 10,
-      "published_pct": 100,
-      "enriched_rows": 10,
-      "enriched_pct": 100,
-      "enriched_with_skills": 10,
       "skills_pct": 100,
       "examples": [],
       "severity": "ok",
