@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-07T11:08:13.029Z",
+  "generated_at": "2026-07-07T11:23:08.078Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -44,21 +44,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-07T11:07:08.050Z",
+    "generated_at": "2026-07-07T11:22:08.428Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 11565,
-    "description_entries": 6092,
-    "coverage_pct": 52.7,
+    "board_row_count": 11341,
+    "description_entries": 6178,
+    "coverage_pct": 54.5,
     "source_breakdown": {
-      "sidecar": 6092,
+      "sidecar": 6178,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-07-07T10:53:07.916Z",
+    "jobs_metadata_generated": "2026-07-07T11:08:11.989Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-07T11:08:11.538Z",
+    "checked_at": "2026-07-07T11:23:06.157Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -75,21 +75,36 @@
   "rows": [
     {
       "source": "workday",
-      "pool_rows": 35033,
-      "us_rows": 18498,
-      "tech_us_rows": 5798,
-      "raw_sidecar_rows": 7737,
-      "sidecar_active_rows": 2087,
+      "pool_rows": 35043,
+      "us_rows": 18180,
+      "tech_us_rows": 5562,
+      "raw_sidecar_rows": 7979,
+      "sidecar_active_rows": 2132,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 2911,
-      "published_pct": 50.2,
-      "enriched_rows": 3758,
-      "enriched_pct": 64.8,
-      "enriched_with_skills": 3557,
-      "skills_pct": 94.7,
+      "published_rows": 3017,
+      "published_pct": 54.2,
+      "enriched_rows": 3738,
+      "enriched_pct": 67.2,
+      "enriched_with_skills": 3534,
+      "skills_pct": 94.5,
       "examples": [
+        {
+          "id": "workday-boston-dynamics-R1971",
+          "company": "Boston Dynamics",
+          "title": "Research Engineer, Atlas Physics Simulation for RL"
+        },
+        {
+          "id": "workday-red-hat-R-057947",
+          "company": "Red Hat",
+          "title": "Business Development Manager 4 (VIC)"
+        },
+        {
+          "id": "workday-carrier-global-30208526",
+          "company": "Carrier Global",
+          "title": "Engineer, Modeling & Controls Engineering"
+        },
         {
           "id": "workday-vertex-pharmaceuticals-REQ-28223",
           "company": "Vertex Pharmaceuticals",
@@ -114,21 +129,6 @@
           "id": "workday-schweitzer-engineering-laboratories-2026-21401",
           "company": "Schweitzer Engineering Laboratories",
           "title": "PE - Protection for Data Center Eng team"
-        },
-        {
-          "id": "workday-schweitzer-engineering-laboratories-2026-19829",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Process Engineer"
-        },
-        {
-          "id": "workday-schweitzer-engineering-laboratories-2026-20401",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Process Engineering Technician (Plastics)"
-        },
-        {
-          "id": "workday-schweitzer-engineering-laboratories-2026-20730",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Designer I"
         }
       ],
       "severity": "high",
@@ -139,17 +139,17 @@
     },
     {
       "source": "oracle",
-      "pool_rows": 6777,
+      "pool_rows": 6775,
       "us_rows": 4839,
       "tech_us_rows": 1208,
-      "raw_sidecar_rows": 5214,
+      "raw_sidecar_rows": 5212,
       "sidecar_active_rows": 338,
-      "supplemental_rows": 28992,
-      "supplemental_with_desc": 20120,
+      "supplemental_rows": 34479,
+      "supplemental_with_desc": 25466,
       "supplemental_meta": {
-        "generated_at": "2026-07-07T11:04:45.393Z",
+        "generated_at": "2026-07-07T11:20:35.568Z",
         "lane_name": "oracle",
-        "jobs_fetched": 28992
+        "jobs_fetched": 34479
       },
       "published_rows": 338,
       "published_pct": 28,
@@ -272,23 +272,19 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 398,
-      "us_rows": 251,
-      "tech_us_rows": 172,
+      "pool_rows": 397,
+      "us_rows": 249,
+      "tech_us_rows": 170,
       "raw_sidecar_rows": 0,
       "sidecar_active_rows": 0,
-      "supplemental_rows": 1349,
-      "supplemental_with_desc": 122,
-      "supplemental_meta": {
-        "generated_at": "2026-07-07T11:05:55.647Z",
-        "lane_name": "custom",
-        "jobs_fetched": 4033
-      },
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
       "published_rows": 0,
       "published_pct": 0,
-      "enriched_rows": 71,
-      "enriched_pct": 41.3,
-      "enriched_with_skills": 71,
+      "enriched_rows": 68,
+      "enriched_pct": 40,
+      "enriched_with_skills": 68,
       "skills_pct": 100,
       "examples": [
         {
@@ -336,8 +332,7 @@
       "flags": [
         "low_published_coverage",
         "no_source_text_surface",
-        "low_enrichment_coverage",
-        "supplemental_stage_gap"
+        "low_enrichment_coverage"
       ]
     },
     {
