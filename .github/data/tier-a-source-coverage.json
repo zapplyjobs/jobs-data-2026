@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-07T19:57:17.588Z",
+  "generated_at": "2026-07-07T20:10:25.981Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -58,7 +58,7 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-07T19:57:14.553Z",
+    "checked_at": "2026-07-07T20:10:22.896Z",
     "active": true,
     "message": "**Enrichment T0 rate high**: 20% (1432/7311, expected <10%) — jobs losing descriptions | **Low description coverage**: tiktok has 0 sidecar entries for 1004 pool jobs (0.0%) | **Low description coverage**: deshaw has 0 sidecar entries for 22 pool jobs (0.0%) | **Low description coverage**: amd has 0 sidecar entries for 65 pool jobs (0.0%)",
     "failures": [
@@ -149,12 +149,12 @@
       "tech_us_rows": 1202,
       "raw_sidecar_rows": 5462,
       "sidecar_active_rows": 324,
-      "supplemental_rows": 34296,
-      "supplemental_with_desc": 25232,
+      "supplemental_rows": 34588,
+      "supplemental_with_desc": 25512,
       "supplemental_meta": {
-        "generated_at": "2026-07-07T19:50:25.698Z",
+        "generated_at": "2026-07-07T20:05:15.188Z",
         "lane_name": "oracle",
-        "jobs_fetched": 34296
+        "jobs_fetched": 34588
       },
       "published_rows": 324,
       "published_pct": 27,
@@ -344,8 +344,8 @@
       "pool_rows": 298,
       "us_rows": 317,
       "tech_us_rows": 230,
-      "raw_sidecar_rows": 255,
-      "sidecar_active_rows": 109,
+      "raw_sidecar_rows": 292,
+      "sidecar_active_rows": 110,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
@@ -409,9 +409,13 @@
       "tech_us_rows": 49,
       "raw_sidecar_rows": 0,
       "sidecar_active_rows": 0,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
+      "supplemental_rows": 500,
+      "supplemental_with_desc": 127,
+      "supplemental_meta": {
+        "generated_at": "2026-07-07T20:02:44.407Z",
+        "lane_name": "custom",
+        "jobs_fetched": 3324
+      },
       "published_rows": 0,
       "published_pct": 0,
       "enriched_rows": 49,
@@ -463,7 +467,8 @@
       "severity": "high",
       "flags": [
         "low_published_coverage",
-        "no_source_text_surface"
+        "no_source_text_surface",
+        "supplemental_stage_gap"
       ]
     },
     {
