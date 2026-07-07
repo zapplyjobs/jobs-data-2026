@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-07T17:24:21.715Z",
+  "generated_at": "2026-07-07T17:42:34.002Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -44,21 +44,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-07T17:22:58.057Z",
+    "generated_at": "2026-07-07T17:41:06.883Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 12451,
-    "description_entries": 8380,
-    "coverage_pct": 67.3,
+    "board_row_count": 12335,
+    "description_entries": 8213,
+    "coverage_pct": 66.6,
     "source_breakdown": {
-      "sidecar": 8380,
+      "sidecar": 8213,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-07-07T17:11:01.020Z",
+    "jobs_metadata_generated": "2026-07-07T17:24:22.561Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-07T17:24:19.524Z",
+    "checked_at": "2026-07-07T17:42:32.022Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -74,23 +74,87 @@
   },
   "rows": [
     {
+      "source": "workday",
+      "pool_rows": 34601,
+      "us_rows": 19585,
+      "tech_us_rows": 6776,
+      "raw_sidecar_rows": 15556,
+      "sidecar_active_rows": 3342,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 4436,
+      "published_pct": 65.5,
+      "enriched_rows": 3719,
+      "enriched_pct": 54.9,
+      "enriched_with_skills": 3519,
+      "skills_pct": 94.6,
+      "examples": [
+        {
+          "id": "workday-arkansas-children's-R0023561",
+          "company": "Arkansas Children's",
+          "title": "Information Security Engineer II"
+        },
+        {
+          "id": "workday-arkansas-children's-R0023574",
+          "company": "Arkansas Children's",
+          "title": "Systems Analytics Analyst II"
+        },
+        {
+          "id": "workday-parsons-R183008",
+          "company": "Parsons",
+          "title": "Workflow Support Specialist"
+        },
+        {
+          "id": "workday-parsons-R179831",
+          "company": "Parsons",
+          "title": "Electronics Tech - Fiber Optics/Radio Control System"
+        },
+        {
+          "id": "workday-parsons-R182447",
+          "company": "Parsons",
+          "title": "Security Technician"
+        },
+        {
+          "id": "workday-parsons-R182837",
+          "company": "Parsons",
+          "title": "Electronic Security Technician"
+        },
+        {
+          "id": "workday-parsons-R180400",
+          "company": "Parsons",
+          "title": "Technician III"
+        },
+        {
+          "id": "workday-parsons-R182759",
+          "company": "Parsons",
+          "title": "Cloud Routing Developer - Topsecret"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage",
+        "low_enrichment_coverage"
+      ]
+    },
+    {
       "source": "oracle",
-      "pool_rows": 7084,
-      "us_rows": 5038,
-      "tech_us_rows": 1242,
-      "raw_sidecar_rows": 5440,
+      "pool_rows": 7091,
+      "us_rows": 5044,
+      "tech_us_rows": 1245,
+      "raw_sidecar_rows": 5437,
       "sidecar_active_rows": 350,
-      "supplemental_rows": 34546,
-      "supplemental_with_desc": 25486,
+      "supplemental_rows": 34553,
+      "supplemental_with_desc": 25489,
       "supplemental_meta": {
-        "generated_at": "2026-07-07T17:20:59.246Z",
+        "generated_at": "2026-07-07T17:35:27.725Z",
         "lane_name": "oracle",
-        "jobs_fetched": 34546
+        "jobs_fetched": 34553
       },
       "published_rows": 350,
-      "published_pct": 28.2,
+      "published_pct": 28.1,
       "enriched_rows": 504,
-      "enriched_pct": 40.6,
+      "enriched_pct": 40.5,
       "enriched_with_skills": 367,
       "skills_pct": 72.8,
       "examples": [
@@ -103,6 +167,11 @@
           "id": "oracle-hologic-11923",
           "company": "Hologic",
           "title": "Quality Engineer 2"
+        },
+        {
+          "id": "oracle-jpmorgan-chase-210767347",
+          "company": "JPMorgan Chase",
+          "title": "Software Engineer II"
         },
         {
           "id": "oracle-texas-instruments-25011638",
@@ -125,14 +194,9 @@
           "title": "MEP Engineer – Construction Administration (CA)"
         },
         {
-          "id": "oracle-hdhl-REQ2500020J",
-          "company": "Stantec",
-          "title": "Resident Engineer"
-        },
-        {
-          "id": "oracle-hdhl-1006621",
-          "company": "Stantec",
-          "title": "Environmental Project Manager"
+          "id": "oracle-jpmc-210767347",
+          "company": "JP Morgan Chase",
+          "title": "Software Engineer II"
         }
       ],
       "severity": "high",
@@ -144,21 +208,26 @@
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 1296,
-      "us_rows": 1450,
-      "tech_us_rows": 315,
-      "raw_sidecar_rows": 982,
+      "pool_rows": 1300,
+      "us_rows": 1454,
+      "tech_us_rows": 316,
+      "raw_sidecar_rows": 980,
       "sidecar_active_rows": 106,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
       "published_rows": 106,
-      "published_pct": 33.7,
+      "published_pct": 33.5,
       "enriched_rows": 155,
-      "enriched_pct": 49.2,
+      "enriched_pct": 49.1,
       "enriched_with_skills": 152,
       "skills_pct": 98.1,
       "examples": [
+        {
+          "id": "sr-Eurofins-744000136291311",
+          "company": "Eurofins",
+          "title": "Pharmaceutical Manufacturing Support Engineer"
+        },
         {
           "id": "sr-WesternDigital-744000136287409",
           "company": "Western Digital",
@@ -193,11 +262,6 @@
           "id": "sr-CapTechConsulting-744000135097007",
           "company": "CapTech Consulting",
           "title": "Machine Learning / Data Science Engineer"
-        },
-        {
-          "id": "sr-CapTechConsulting-744000135096703",
-          "company": "CapTech Consulting",
-          "title": "Machine Learning / Data Science Engineer"
         }
       ],
       "severity": "high",
@@ -208,25 +272,31 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 407,
-      "us_rows": 158,
-      "tech_us_rows": 71,
+      "pool_rows": 390,
+      "us_rows": 255,
+      "tech_us_rows": 170,
       "raw_sidecar_rows": 0,
       "sidecar_active_rows": 0,
-      "supplemental_rows": 1371,
-      "supplemental_with_desc": 37,
-      "supplemental_meta": {
-        "generated_at": "2026-07-07T17:19:21.724Z",
-        "lane_name": "custom",
-        "jobs_fetched": 5066
-      },
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
       "published_rows": 0,
       "published_pct": 0,
-      "enriched_rows": 71,
-      "enriched_pct": 100,
-      "enriched_with_skills": 71,
+      "enriched_rows": 68,
+      "enriched_pct": 40,
+      "enriched_with_skills": 68,
       "skills_pct": 100,
       "examples": [
+        {
+          "id": "microsoft-200041474",
+          "company": "Microsoft",
+          "title": "Software Engineer II, Data Intelligence"
+        },
+        {
+          "id": "microsoft-200040485",
+          "company": "Microsoft",
+          "title": "Software Engineer II - CTJ - TS/SCI"
+        },
         {
           "id": "microsoft-200041032",
           "company": "Microsoft",
@@ -256,86 +326,80 @@
           "id": "microsoft-200037118",
           "company": "Microsoft",
           "title": "Solution Architect - Data & AI"
-        },
-        {
-          "id": "microsoft-200020076",
-          "company": "Microsoft",
-          "title": "Software Engineer II - CoreAI"
-        },
-        {
-          "id": "microsoft-200042366",
-          "company": "Microsoft",
-          "title": "Data Center Technician (Nightshift)"
         }
       ],
       "severity": "high",
       "flags": [
         "low_published_coverage",
         "no_source_text_surface",
-        "supplemental_stage_gap"
+        "low_enrichment_coverage"
       ]
     },
     {
-      "source": "workday",
-      "pool_rows": 34928,
-      "us_rows": 19480,
-      "tech_us_rows": 6756,
-      "raw_sidecar_rows": 15091,
-      "sidecar_active_rows": 3363,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 5607,
-      "published_pct": 83,
-      "enriched_rows": 3774,
-      "enriched_pct": 55.9,
-      "enriched_with_skills": 3582,
-      "skills_pct": 94.9,
+      "source": "apple",
+      "pool_rows": 314,
+      "us_rows": 323,
+      "tech_us_rows": 231,
+      "raw_sidecar_rows": 379,
+      "sidecar_active_rows": 191,
+      "supplemental_rows": 857,
+      "supplemental_with_desc": 857,
+      "supplemental_meta": {
+        "generated_at": "2026-07-07T17:35:25.846Z",
+        "lane_name": "custom",
+        "jobs_fetched": 3679
+      },
+      "published_rows": 191,
+      "published_pct": 82.7,
+      "enriched_rows": 191,
+      "enriched_pct": 82.7,
+      "enriched_with_skills": 95,
+      "skills_pct": 49.7,
       "examples": [
         {
-          "id": "workday-wells-fargo-R-534320",
-          "company": "Wells Fargo",
-          "title": "Technology Business Systems Consultant - ServiceNow, AI and Automation"
+          "id": "apple-200671236",
+          "company": "Apple",
+          "title": "Sr Software Engineer, GenAI Platform & Practice"
         },
         {
-          "id": "workday-penn-state-university-REQ_0000073900",
-          "company": "Penn State University",
-          "title": "Maritime Systems Research and Development Engineer - Springfield, VA"
+          "id": "apple-200671253",
+          "company": "Apple",
+          "title": "Senior Software Engineer - Setup"
         },
         {
-          "id": "workday-state-street-R-793712",
-          "company": "State Street",
-          "title": "Software Engineering & Development (a/k/a Workday Integrations Specialist)"
+          "id": "apple-200670389",
+          "company": "Apple",
+          "title": "Senior Software Engineer - Global Subscriptions and Pricing Infrastructure"
         },
         {
-          "id": "workday-pfizer-4959924",
-          "company": "Pfizer",
-          "title": "Senior Associate Scientist"
+          "id": "apple-200670539",
+          "company": "Apple",
+          "title": "Senior Machine Learning Engineer, Personal Search Intelligence - Proactive"
         },
         {
-          "id": "workday-micron-technology-JR102253",
-          "company": "Micron Technology",
-          "title": "MTS, DEG Design Verification"
+          "id": "apple-200667330",
+          "company": "Apple",
+          "title": "Machine Learning Manager, Data for Foundation Models - SIML"
         },
         {
-          "id": "workday-micron-technology-JR102236",
-          "company": "Micron Technology",
-          "title": "DRAM Design Engineer"
+          "id": "apple-200670904",
+          "company": "Apple",
+          "title": "Staff ML Engineer - Ads ML Infrastructure"
         },
         {
-          "id": "workday-micron-technology-JR102240",
-          "company": "Micron Technology",
-          "title": "Design Verification Engineer"
+          "id": "apple-200670751",
+          "company": "Apple",
+          "title": "AirPods Firmware Engineering Manager"
         },
         {
-          "id": "workday-micron-technology-JR103405",
-          "company": "Micron Technology",
-          "title": "Product Development Engineer"
+          "id": "apple-200670871",
+          "company": "Apple",
+          "title": "Senior Machine Learning Engineer - Model Inference"
         }
       ],
       "severity": "medium",
       "flags": [
-        "low_enrichment_coverage"
+        "low_skill_fill"
       ]
     },
     {
@@ -373,30 +437,6 @@
       "enriched_rows": 434,
       "enriched_pct": 100,
       "enriched_with_skills": 434,
-      "skills_pct": 100,
-      "examples": [],
-      "severity": "ok",
-      "flags": []
-    },
-    {
-      "source": "apple",
-      "pool_rows": 22,
-      "us_rows": 22,
-      "tech_us_rows": 10,
-      "raw_sidecar_rows": 22,
-      "sidecar_active_rows": 10,
-      "supplemental_rows": 857,
-      "supplemental_with_desc": 857,
-      "supplemental_meta": {
-        "generated_at": "2026-07-07T17:19:21.724Z",
-        "lane_name": "custom",
-        "jobs_fetched": 5066
-      },
-      "published_rows": 10,
-      "published_pct": 100,
-      "enriched_rows": 10,
-      "enriched_pct": 100,
-      "enriched_with_skills": 10,
       "skills_pct": 100,
       "examples": [],
       "severity": "ok",
