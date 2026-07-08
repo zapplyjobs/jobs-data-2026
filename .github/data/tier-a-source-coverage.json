@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-08T14:07:54.118Z",
+  "generated_at": "2026-07-08T14:15:03.127Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -58,12 +58,11 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-08T14:07:51.130Z",
+    "checked_at": "2026-07-08T14:14:59.343Z",
     "active": true,
-    "message": "**update-jobs.yml failed**: New-Grad-Jobs-2027 | **Submodule bump failed** (run 28948466558, 8 min ago) and live drift remains in 1 target(s): processing:jobs-data-2026. Check [run log](https://github.com/zapplyjobs/jobs-aggregator-private/actions/runs/28948466558).",
+    "message": "**update-jobs.yml failed**: New-Grad-Jobs-2027",
     "failures": [
-      "**update-jobs.yml failed**: New-Grad-Jobs-2027",
-      "**Submodule bump failed** (run 28948466558, 8 min ago) and live drift remains in 1 target(s): processing:jobs-data-2026. Check [run log](https://github.com/zapplyjobs/jobs-aggregator-private/actions/runs/28948466558)."
+      "**update-jobs.yml failed**: New-Grad-Jobs-2027"
     ],
     "warnings": [],
     "warning_count": 0,
@@ -78,26 +77,21 @@
   "rows": [
     {
       "source": "workday",
-      "pool_rows": 35451,
-      "us_rows": 19470,
-      "tech_us_rows": 6473,
-      "raw_sidecar_rows": 15654,
-      "sidecar_active_rows": 3419,
+      "pool_rows": 35400,
+      "us_rows": 19634,
+      "tech_us_rows": 6707,
+      "raw_sidecar_rows": 18265,
+      "sidecar_active_rows": 3195,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 3803,
-      "published_pct": 58.8,
-      "enriched_rows": 3750,
-      "enriched_pct": 57.9,
-      "enriched_with_skills": 3544,
-      "skills_pct": 94.5,
+      "published_rows": 3591,
+      "published_pct": 53.5,
+      "enriched_rows": 3747,
+      "enriched_pct": 55.9,
+      "enriched_with_skills": 3531,
+      "skills_pct": 94.2,
       "examples": [
-        {
-          "id": "workday-parsons-R182940",
-          "company": "Parsons",
-          "title": "Data Engineer"
-        },
         {
           "id": "workday-parsons-R179331",
           "company": "Parsons",
@@ -132,6 +126,11 @@
           "id": "workday-parsons-R182594",
           "company": "Parsons",
           "title": "C-UAS Test Analyst"
+        },
+        {
+          "id": "workday-parsons-R182627",
+          "company": "Parsons",
+          "title": "Systems Engineer - TS/SCI required"
         }
       ],
       "severity": "high",
@@ -142,11 +141,11 @@
     },
     {
       "source": "oracle",
-      "pool_rows": 6924,
-      "us_rows": 4856,
-      "tech_us_rows": 1183,
-      "raw_sidecar_rows": 5343,
-      "sidecar_active_rows": 365,
+      "pool_rows": 6715,
+      "us_rows": 4657,
+      "tech_us_rows": 1088,
+      "raw_sidecar_rows": 5324,
+      "sidecar_active_rows": 342,
       "supplemental_rows": 23305,
       "supplemental_with_desc": 16485,
       "supplemental_meta": {
@@ -154,17 +153,32 @@
         "lane_name": "oracle",
         "jobs_fetched": 23305
       },
-      "published_rows": 365,
-      "published_pct": 30.9,
-      "enriched_rows": 507,
-      "enriched_pct": 42.9,
-      "enriched_with_skills": 384,
-      "skills_pct": 75.7,
+      "published_rows": 340,
+      "published_pct": 31.3,
+      "enriched_rows": 481,
+      "enriched_pct": 44.2,
+      "enriched_with_skills": 367,
+      "skills_pct": 76.3,
       "examples": [
         {
           "id": "oracle-dell-technologies-294484",
           "company": "Dell Technologies",
           "title": "Field Service Engineer 2 - Barstow, Texas"
+        },
+        {
+          "id": "oracle-jpmorgan-chase-210760196",
+          "company": "JPMorgan Chase",
+          "title": "QA Analyst Automation and Manual - Software Engineer III"
+        },
+        {
+          "id": "oracle-sherwin-williams-2609908",
+          "company": "Sherwin-Williams",
+          "title": "Building Maintenance Engineer III"
+        },
+        {
+          "id": "oracle-jpmc-210760196",
+          "company": "JP Morgan Chase",
+          "title": "QA Analyst Automation and Manual - Software Engineer III"
         },
         {
           "id": "oracle-hdhl-1006546",
@@ -185,21 +199,6 @@
           "id": "oracle-dell-technologies-294492",
           "company": "Dell Technologies",
           "title": "Field Service Engineer 2 - Dalton, Georgia"
-        },
-        {
-          "id": "oracle-fortive-9979",
-          "company": "Fortive",
-          "title": "Quality Engineer"
-        },
-        {
-          "id": "oracle-hologic-11923",
-          "company": "Hologic",
-          "title": "Quality Engineer 2"
-        },
-        {
-          "id": "oracle-texas-instruments-25011638",
-          "company": "Texas Instruments",
-          "title": "Career Accelerator Program - Digital Design Engineer"
         }
       ],
       "severity": "high",
@@ -211,18 +210,18 @@
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 1316,
-      "us_rows": 1469,
-      "tech_us_rows": 322,
-      "raw_sidecar_rows": 960,
-      "sidecar_active_rows": 123,
+      "pool_rows": 1312,
+      "us_rows": 1465,
+      "tech_us_rows": 321,
+      "raw_sidecar_rows": 978,
+      "sidecar_active_rows": 120,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
       "published_rows": 123,
-      "published_pct": 38.2,
+      "published_pct": 38.3,
       "enriched_rows": 157,
-      "enriched_pct": 48.8,
+      "enriched_pct": 48.9,
       "enriched_with_skills": 154,
       "skills_pct": 98.1,
       "examples": [
@@ -257,14 +256,14 @@
           "title": "Machine Learning Engineer, Agentic Systems - Moveworks"
         },
         {
-          "id": "sr-BoschGroup-744000136327394",
-          "company": "Bosch Group",
-          "title": "Customer Quality Engineer_Steering"
-        },
-        {
           "id": "sr-BoschGroup-744000136327179",
           "company": "Bosch Group",
           "title": "Master Data Analyst"
+        },
+        {
+          "id": "sr-llnl-3743990013968206",
+          "company": "LLNL",
+          "title": "Cyber Security Engineer"
         }
       ],
       "severity": "high",
@@ -275,11 +274,11 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 254,
-      "us_rows": 166,
+      "pool_rows": 246,
+      "us_rows": 165,
       "tech_us_rows": 111,
-      "raw_sidecar_rows": 237,
-      "sidecar_active_rows": 46,
+      "raw_sidecar_rows": 235,
+      "sidecar_active_rows": 45,
       "supplemental_rows": 540,
       "supplemental_with_desc": 155,
       "supplemental_meta": {
@@ -287,27 +286,32 @@
         "lane_name": "custom",
         "jobs_fetched": 3464
       },
-      "published_rows": 46,
-      "published_pct": 41.4,
-      "enriched_rows": 47,
-      "enriched_pct": 42.3,
-      "enriched_with_skills": 47,
+      "published_rows": 45,
+      "published_pct": 40.5,
+      "enriched_rows": 46,
+      "enriched_pct": 41.4,
+      "enriched_with_skills": 46,
       "skills_pct": 100,
       "examples": [
+        {
+          "id": "microsoft-200041555",
+          "company": "Microsoft",
+          "title": "Security Cloud Solution Architect - Leader"
+        },
         {
           "id": "microsoft-200039504",
           "company": "Microsoft",
           "title": "Network Security Service Engineer"
         },
         {
+          "id": "microsoft-200037361",
+          "company": "Microsoft",
+          "title": "Solution Engineer - Cloud & AI Applications"
+        },
+        {
           "id": "microsoft-200041133",
           "company": "Microsoft",
           "title": "Sr Cybersecurity Technology Consultant-CTJ-Poly"
-        },
-        {
-          "id": "microsoft-200042670",
-          "company": "Microsoft",
-          "title": "Senior / Principal Process Design Kit (PDK) Engineer"
         },
         {
           "id": "microsoft-200040082",
@@ -325,14 +329,9 @@
           "title": "Senior Software Engineer - DPU Integrations"
         },
         {
-          "id": "microsoft-200038538",
+          "id": "microsoft-200038443",
           "company": "Microsoft",
-          "title": "Principal Software Engineer - DPU Integrations"
-        },
-        {
-          "id": "microsoft-200027546",
-          "company": "Microsoft",
-          "title": "Senior/Principal Software Engineer - Growth (CoreAI)"
+          "title": "Senior Software Engineer - DPU Integrations"
         }
       ],
       "severity": "high",
@@ -425,7 +424,7 @@
       "pool_rows": 1008,
       "us_rows": 1008,
       "tech_us_rows": 434,
-      "raw_sidecar_rows": 1008,
+      "raw_sidecar_rows": 1016,
       "sidecar_active_rows": 434,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
