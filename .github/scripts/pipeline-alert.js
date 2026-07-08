@@ -130,6 +130,15 @@ async function runChecks() {
     failures.push(`**post-to-discord.yml**: Last run failed (<t:${Math.floor(new Date(discordRun.updated_at).getTime() / 1000)}:R>)`);
   }
 
+  // Check 2b: enrich-jobs.yml run duration (timeliness — ENR-TIMELINESS-1)
+  const enrichRun = await getLastWorkflowRun('zapplyjobs', 'jobs-data-2026', 'enrich-jobs.yml');
+  if (enrichRun?.run_started_at && enrichRun?.updated_at) {
+    const enrichDurationMs = new Date(enrichRun.updated_at).getTime() - new Date(enrichRun.run_started_at).getTime();
+    if (enrichDurationMs > 10 * 60 * 1000) {
+      failures.push(`**Enrichment run duration**: ${Math.round(enrichDurationMs / 60000)} min (threshold: 10 min) — enrichment may be stuck or degraded`);
+    }
+  }
+
   // Check 3: consumer update-jobs.yml failures
   const consumerChecks = await Promise.all(
     CONSUMER_REPOS.map(async repo => {
@@ -287,6 +296,30 @@ async function runChecks() {
           if (enrichRate < 0.70) {
             failures.push(`**Enrichment coverage low**: ${enrichTotal} enriched / ${techTotal} tech jobs = ${Math.round(enrichRate * 100)}% (threshold: 70%)`);
           }
+        }
+        // Check 15b: Per-source T3 regression (ENR-MONITOR-1; oracle added to STRUCTURALLY_LOW = content absence)
+        const STRUCTURALLY_LOW_T3 = new Set(['simplify', 'apple', 'google', 'jsearch', 'eightfold', 'amd', 'oracle']);
+        const tiersBySource = enrichStats.tiers_by_source || {};
+        for (const [src, tiers] of Object.entries(tiersBySource)) {
+          const total = (tiers.t0 || 0) + (tiers.t1 || 0) + (tiers.t2 || 0) + (tiers.t3 || 0) + (tiers.t4 || 0);
+          if (total < 20) continue;
+          if (STRUCTURALLY_LOW_T3.has(src)) continue;
+          const t3Rate = ((tiers.t3 || 0) + (tiers.t4 || 0)) / total;
+          if (t3Rate < 0.50) {
+            failures.push(`**Enrichment T3 regression (${src})**: ${Math.round(t3Rate * 100)}% T3+ (${(tiers.t3||0)+(tiers.t4||0)}/${total}, expected >50%)`);
+          }
+        }
+        // Check 15c: Retrievable description regression (ENR-MONITOR-1 — the metric that hid 66%)
+        if (enrichStats.retrievable_description_pct !== undefined && enrichStats.retrievable_description_pct < 80) {
+          failures.push(`**Retrievable description low**: ${enrichStats.retrievable_description_pct}% (threshold: 80%) — description text missing for many jobs`);
+        }
+        // Check 15d: Silent rot spike (ENR-MONITOR-1)
+        if (enrichStats.silent_rot_count !== undefined && enrichStats.silent_rot_count > 2000) {
+          failures.push(`**Silent rot high**: ${enrichStats.silent_rot_count} jobs flagged has_description but no retrievable text (threshold: 2000)`);
+        }
+        // Check 15e: WCI regression (ENR-MONITOR-1)
+        if (enrichStats.weighted_completeness_index !== undefined && enrichStats.weighted_completeness_index < 70) {
+          failures.push(`**Weighted Completeness low**: ${enrichStats.weighted_completeness_index}/100 (threshold: 70) — listing quality degraded`);
         }
       } catch { /* skip if stats file unreadable */ }
     }
