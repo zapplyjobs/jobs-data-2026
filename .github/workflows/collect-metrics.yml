@@ -91,7 +91,7 @@ jobs:
         run: |
           git config user.email "bot@zapplyjobs.com"
           git config user.name "Metrics Bot"
-          git add .github/data/metrics/ .github/data/zjp-metrics.json .github/data/canada-tech-summary.json .github/data/bridge-metrics.json .github/data/bridge-metrics-history.jsonl || exit 0
+          git add .github/data/metrics/ .github/data/zjp-metrics.json .github/data/bridge-metrics.json .github/data/bridge-metrics-history.jsonl || exit 0
           git diff --cached --quiet && { echo "No changes to commit"; exit 0; }
           git commit -m "chore: update metrics [skip ci]"
           for i in 1 2 3; do
