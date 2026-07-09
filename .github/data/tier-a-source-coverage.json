@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-09T22:04:34.308Z",
+  "generated_at": "2026-07-09T22:10:22.106Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -45,26 +45,27 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-09T21:56:19.416Z",
+    "generated_at": "2026-07-09T22:08:53.248Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 14814,
-    "description_entries": 10235,
-    "coverage_pct": 69.1,
+    "board_row_count": 14889,
+    "description_entries": 10475,
+    "coverage_pct": 70.4,
     "source_breakdown": {
-      "sidecar": 10235,
+      "sidecar": 10475,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-07-09T21:38:24.111Z",
+    "jobs_metadata_generated": "2026-07-09T21:53:38.042Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-09T22:04:29.810Z",
+    "checked_at": "2026-07-09T22:10:18.138Z",
     "active": true,
-    "message": "**Low description coverage**: smartrecruiters has 0 sidecar entries for 1950 pool jobs (0.0%) | **Low description coverage**: uber has 0 sidecar entries for 18 pool jobs (0.0%)",
+    "message": "**Source drop (apple)**: 40 jobs (was 358, dropped 89%) | **Low description coverage**: smartrecruiters has 0 sidecar entries for 1950 pool jobs (0.0%) | **Low description coverage**: uber has 0 sidecar entries for 17 pool jobs (0.0%)",
     "failures": [
+      "**Source drop (apple)**: 40 jobs (was 358, dropped 89%)",
       "**Low description coverage**: smartrecruiters has 0 sidecar entries for 1950 pool jobs (0.0%)",
-      "**Low description coverage**: uber has 0 sidecar entries for 18 pool jobs (0.0%)"
+      "**Low description coverage**: uber has 0 sidecar entries for 17 pool jobs (0.0%)"
     ],
     "warnings": [],
     "warning_count": 0,
@@ -79,30 +80,50 @@
   "rows": [
     {
       "source": "workday",
-      "pool_rows": 53368,
-      "us_rows": 27952,
-      "tech_us_rows": 8968,
-      "raw_sidecar_rows": 17415,
-      "sidecar_active_rows": 4813,
+      "pool_rows": 53243,
+      "us_rows": 27765,
+      "tech_us_rows": 8880,
+      "raw_sidecar_rows": 17617,
+      "sidecar_active_rows": 4965,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 4743,
-      "published_pct": 52.9,
-      "enriched_rows": 4815,
-      "enriched_pct": 53.7,
-      "enriched_with_skills": 4557,
-      "skills_pct": 94.6,
+      "published_rows": 4861,
+      "published_pct": 54.7,
+      "enriched_rows": 4967,
+      "enriched_pct": 55.9,
+      "enriched_with_skills": 4707,
+      "skills_pct": 94.8,
       "examples": [
         {
-          "id": "workday-parsons-R183165",
-          "company": "Parsons",
-          "title": "Electronics Tech - Fiber Optics/Radio Control System"
+          "id": "workday-blackstone-40890",
+          "company": "Blackstone",
+          "title": "Operating Executive, Principal"
         },
         {
-          "id": "workday-parsons-R182835",
-          "company": "Parsons",
-          "title": "Mechanical Electrical Inspector"
+          "id": "workday-blackstone-41487",
+          "company": "Blackstone",
+          "title": "Blackstone Growth Principal"
+        },
+        {
+          "id": "workday-blackstone-40959",
+          "company": "Blackstone",
+          "title": "BXMA - ICS (Coverage), Managing Director"
+        },
+        {
+          "id": "workday-blackstone-41002",
+          "company": "Blackstone",
+          "title": "BXG, Managing Director"
+        },
+        {
+          "id": "workday-blackstone-39855",
+          "company": "Blackstone",
+          "title": "Blackstone Credit & Insurance - CIO Bank Origination, Principal"
+        },
+        {
+          "id": "workday-blackstone-33910",
+          "company": "Blackstone",
+          "title": "Real Estate - ICS (Coverage), Principal"
         },
         {
           "id": "workday-parsons-R182628",
@@ -110,29 +131,9 @@
           "title": "Software Engineer - TS/SCI required"
         },
         {
-          "id": "workday-parsons-R182748",
-          "company": "Parsons",
-          "title": "SCA Maintenance Electrician"
-        },
-        {
-          "id": "workday-parsons-R183012",
-          "company": "Parsons",
-          "title": "Workflow Support Specialist/Senior Staff Officer Support"
-        },
-        {
-          "id": "workday-parsons-R183008",
-          "company": "Parsons",
-          "title": "Workflow Support Specialist"
-        },
-        {
-          "id": "workday-parsons-R182950",
-          "company": "Parsons",
-          "title": "Technical Lead"
-        },
-        {
-          "id": "workday-parsons-R179831",
-          "company": "Parsons",
-          "title": "Electronics Tech - Fiber Optics/Radio Control System"
+          "id": "workday-vertex-pharmaceuticals-REQ-28963",
+          "company": "Vertex Pharmaceuticals",
+          "title": "Executive Director, Biotherapeutics DMPK"
         }
       ],
       "severity": "high",
@@ -143,24 +144,24 @@
     },
     {
       "source": "oracle",
-      "pool_rows": 11013,
-      "us_rows": 6837,
-      "tech_us_rows": 1277,
-      "raw_sidecar_rows": 8683,
-      "sidecar_active_rows": 1004,
-      "supplemental_rows": 33496,
-      "supplemental_with_desc": 24438,
+      "pool_rows": 10661,
+      "us_rows": 6632,
+      "tech_us_rows": 1154,
+      "raw_sidecar_rows": 8682,
+      "sidecar_active_rows": 894,
+      "supplemental_rows": 35024,
+      "supplemental_with_desc": 25890,
       "supplemental_meta": {
-        "generated_at": "2026-07-09T21:50:17.466Z",
+        "generated_at": "2026-07-09T22:05:44.433Z",
         "lane_name": "oracle",
-        "jobs_fetched": 33496
+        "jobs_fetched": 35024
       },
-      "published_rows": 1004,
-      "published_pct": 78.6,
-      "enriched_rows": 1250,
-      "enriched_pct": 97.9,
-      "enriched_with_skills": 879,
-      "skills_pct": 70.3,
+      "published_rows": 894,
+      "published_pct": 77.5,
+      "enriched_rows": 1148,
+      "enriched_pct": 99.5,
+      "enriched_with_skills": 795,
+      "skills_pct": 69.3,
       "examples": [
         {
           "id": "oracle-dell-technologies-R289927",
@@ -205,7 +206,8 @@
       ],
       "severity": "high",
       "flags": [
-        "low_published_coverage"
+        "low_published_coverage",
+        "low_skill_fill"
       ]
     },
     {
@@ -274,11 +276,11 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 515,
-      "us_rows": 294,
-      "tech_us_rows": 131,
-      "raw_sidecar_rows": 468,
-      "sidecar_active_rows": 117,
+      "pool_rows": 503,
+      "us_rows": 283,
+      "tech_us_rows": 129,
+      "raw_sidecar_rows": 466,
+      "sidecar_active_rows": 112,
       "supplemental_rows": 543,
       "supplemental_with_desc": 76,
       "supplemental_meta": {
@@ -286,13 +288,33 @@
         "lane_name": "custom",
         "jobs_fetched": 3338
       },
-      "published_rows": 117,
-      "published_pct": 89.3,
-      "enriched_rows": 130,
-      "enriched_pct": 99.2,
-      "enriched_with_skills": 130,
+      "published_rows": 112,
+      "published_pct": 86.8,
+      "enriched_rows": 125,
+      "enriched_pct": 96.9,
+      "enriched_with_skills": 125,
       "skills_pct": 100,
       "examples": [
+        {
+          "id": "microsoft-200037742",
+          "company": "Microsoft",
+          "title": "Senior Applied Threat Intelligence Analyst - Microsoft Security Threat Response"
+        },
+        {
+          "id": "microsoft-200037260",
+          "company": "Microsoft",
+          "title": "Senior Security Researcher"
+        },
+        {
+          "id": "microsoft-200037736",
+          "company": "Microsoft",
+          "title": "Principal Applied Threat Intelligence Analyst - Microsoft Security Threat Response"
+        },
+        {
+          "id": "microsoft-200037267",
+          "company": "Microsoft",
+          "title": "Principal Security Researcher"
+        },
         {
           "id": "microsoft-200040818",
           "company": "Microsoft",
@@ -312,76 +334,6 @@
           "id": "microsoft-200042334",
           "company": "Microsoft",
           "title": "Principal Security Engineer"
-        },
-        {
-          "id": "microsoft-200038495",
-          "company": "Microsoft",
-          "title": "Principal Software Engineering Lead"
-        },
-        {
-          "id": "microsoft-200041743",
-          "company": "Microsoft",
-          "title": "Senior Research Engineer - AI Security"
-        },
-        {
-          "id": "microsoft-200042662",
-          "company": "Microsoft",
-          "title": "Senior Data Center Technician - PHX East"
-        },
-        {
-          "id": "microsoft-200042073",
-          "company": "Microsoft",
-          "title": "Senior Software Engineer"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
-    },
-    {
-      "source": "apple",
-      "pool_rows": 358,
-      "us_rows": 301,
-      "tech_us_rows": 197,
-      "raw_sidecar_rows": 652,
-      "sidecar_active_rows": 197,
-      "supplemental_rows": 65,
-      "supplemental_with_desc": 65,
-      "supplemental_meta": {
-        "generated_at": "2026-07-09T22:03:10.609Z",
-        "lane_name": "custom",
-        "jobs_fetched": 3338
-      },
-      "published_rows": 192,
-      "published_pct": 97.5,
-      "enriched_rows": 193,
-      "enriched_pct": 98,
-      "enriched_with_skills": 181,
-      "skills_pct": 93.8,
-      "examples": [
-        {
-          "id": "apple-200671605",
-          "company": "Apple",
-          "title": "Senior Software Engineering Manager, Agentic Infrastructure"
-        },
-        {
-          "id": "apple-200653988",
-          "company": "Apple",
-          "title": "Sr. WebKit Performance Engineer"
-        },
-        {
-          "id": "apple-200671782",
-          "company": "Apple",
-          "title": "Machine Learning Engineer - Model Inference"
-        },
-        {
-          "id": "apple-200671748",
-          "company": "Apple",
-          "title": "Power Integrity Engineer - Serial IO Interface"
-        },
-        {
-          "id": "apple-200664414",
-          "company": "Apple",
-          "title": "Hardware Technologies PhD Internships"
         }
       ],
       "severity": "ok",
@@ -423,6 +375,30 @@
       "enriched_pct": 100,
       "enriched_with_skills": 603,
       "skills_pct": 100,
+      "examples": [],
+      "severity": "ok",
+      "flags": []
+    },
+    {
+      "source": "apple",
+      "pool_rows": 40,
+      "us_rows": 33,
+      "tech_us_rows": 16,
+      "raw_sidecar_rows": 389,
+      "sidecar_active_rows": 16,
+      "supplemental_rows": 65,
+      "supplemental_with_desc": 65,
+      "supplemental_meta": {
+        "generated_at": "2026-07-09T22:03:10.609Z",
+        "lane_name": "custom",
+        "jobs_fetched": 3338
+      },
+      "published_rows": 16,
+      "published_pct": 100,
+      "enriched_rows": 16,
+      "enriched_pct": 100,
+      "enriched_with_skills": 15,
+      "skills_pct": 93.8,
       "examples": [],
       "severity": "ok",
       "flags": []
