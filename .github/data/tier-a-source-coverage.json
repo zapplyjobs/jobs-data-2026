@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-09T10:22:24.284Z",
+  "generated_at": "2026-07-09T10:42:20.501Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -32,7 +32,8 @@
     "descriptions-eightfold.jsonl",
     "descriptions-enriched-1.jsonl",
     "descriptions-google.jsonl",
-    "descriptions-greenhouse.jsonl",
+    "descriptions-greenhouse-1.jsonl",
+    "descriptions-greenhouse-2.jsonl",
     "descriptions-icims.jsonl",
     "descriptions-lever.jsonl",
     "descriptions-microsoft.jsonl",
@@ -44,21 +45,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-09T10:21:10.113Z",
+    "generated_at": "2026-07-09T10:41:12.829Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 11435,
-    "description_entries": 6556,
-    "coverage_pct": 57.3,
+    "board_row_count": 10984,
+    "description_entries": 6835,
+    "coverage_pct": 62.2,
     "source_breakdown": {
-      "sidecar": 6556,
+      "sidecar": 6837,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-07-09T10:08:43.514Z",
+    "jobs_metadata_generated": "2026-07-09T10:22:40.425Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-09T10:22:21.879Z",
+    "checked_at": "2026-07-09T10:42:18.539Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -75,30 +76,40 @@
   "rows": [
     {
       "source": "workday",
-      "pool_rows": 35180,
-      "us_rows": 18760,
-      "tech_us_rows": 5807,
-      "raw_sidecar_rows": 14192,
-      "sidecar_active_rows": 3033,
+      "pool_rows": 35123,
+      "us_rows": 18291,
+      "tech_us_rows": 5450,
+      "raw_sidecar_rows": 14114,
+      "sidecar_active_rows": 2947,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 3754,
-      "published_pct": 64.6,
-      "enriched_rows": 3764,
-      "enriched_pct": 64.8,
-      "enriched_with_skills": 3543,
-      "skills_pct": 94.1,
+      "published_rows": 3168,
+      "published_pct": 58.1,
+      "enriched_rows": 3691,
+      "enriched_pct": 67.7,
+      "enriched_with_skills": 3469,
+      "skills_pct": 94,
       "examples": [
-        {
-          "id": "workday-fiserv-R-10394689",
-          "company": "Fiserv",
-          "title": "Client Program Manager"
-        },
         {
           "id": "workday-parsons-R182628",
           "company": "Parsons",
           "title": "Software Engineer - TS/SCI required"
+        },
+        {
+          "id": "workday-parsons-R182748",
+          "company": "Parsons",
+          "title": "SCA Maintenance Electrician"
+        },
+        {
+          "id": "workday-parsons-R183008",
+          "company": "Parsons",
+          "title": "Workflow Support Specialist"
+        },
+        {
+          "id": "workday-parsons-R179831",
+          "company": "Parsons",
+          "title": "Electronics Tech - Fiber Optics/Radio Control System"
         },
         {
           "id": "workday-parsons-R182703",
@@ -106,29 +117,19 @@
           "title": "UAS Integration Engineer"
         },
         {
-          "id": "workday-parsons-R182350",
+          "id": "workday-parsons-R182447",
           "company": "Parsons",
-          "title": "Project Engineer - Roadway"
+          "title": "Security Technician"
         },
         {
-          "id": "workday-parsons-R182788",
+          "id": "workday-parsons-R182837",
           "company": "Parsons",
-          "title": "Software Engineer"
+          "title": "Electronic Security Technician"
         },
         {
-          "id": "workday-parsons-R181905",
+          "id": "workday-parsons-R180400",
           "company": "Parsons",
-          "title": "AI Engineer"
-        },
-        {
-          "id": "workday-parsons-R182615",
-          "company": "Parsons",
-          "title": "Aerospace Systems Engineer"
-        },
-        {
-          "id": "workday-parsons-R182652",
-          "company": "Parsons",
-          "title": "Junior Digital Signal Processing Engineer - TS/SCI"
+          "title": "Technician III"
         }
       ],
       "severity": "high",
@@ -139,22 +140,22 @@
     },
     {
       "source": "oracle",
-      "pool_rows": 6866,
-      "us_rows": 4873,
-      "tech_us_rows": 1138,
-      "raw_sidecar_rows": 5323,
+      "pool_rows": 6881,
+      "us_rows": 4867,
+      "tech_us_rows": 1136,
+      "raw_sidecar_rows": 5326,
       "sidecar_active_rows": 315,
-      "supplemental_rows": 34747,
-      "supplemental_with_desc": 25639,
+      "supplemental_rows": 34745,
+      "supplemental_with_desc": 25638,
       "supplemental_meta": {
-        "generated_at": "2026-07-09T10:20:29.571Z",
+        "generated_at": "2026-07-09T10:35:31.663Z",
         "lane_name": "oracle",
-        "jobs_fetched": 34747
+        "jobs_fetched": 34745
       },
       "published_rows": 315,
       "published_pct": 27.7,
       "enriched_rows": 454,
-      "enriched_pct": 39.9,
+      "enriched_pct": 40,
       "enriched_with_skills": 350,
       "skills_pct": 77.1,
       "examples": [
@@ -274,20 +275,20 @@
       "source": "microsoft",
       "pool_rows": 251,
       "us_rows": 167,
-      "tech_us_rows": 108,
-      "raw_sidecar_rows": 234,
+      "tech_us_rows": 111,
+      "raw_sidecar_rows": 236,
       "sidecar_active_rows": 43,
       "supplemental_rows": 540,
-      "supplemental_with_desc": 150,
+      "supplemental_with_desc": 130,
       "supplemental_meta": {
-        "generated_at": "2026-07-09T10:19:03.388Z",
+        "generated_at": "2026-07-09T10:34:13.893Z",
         "lane_name": "custom",
-        "jobs_fetched": 3450
+        "jobs_fetched": 3449
       },
       "published_rows": 43,
-      "published_pct": 39.8,
+      "published_pct": 38.7,
       "enriched_rows": 44,
-      "enriched_pct": 40.7,
+      "enriched_pct": 39.6,
       "enriched_with_skills": 44,
       "skills_pct": 100,
       "examples": [
@@ -295,6 +296,11 @@
           "id": "microsoft-200041555",
           "company": "Microsoft",
           "title": "Security Cloud Solution Architect - Leader"
+        },
+        {
+          "id": "microsoft-200041970",
+          "company": "Microsoft",
+          "title": "Technical Solutions Manager"
         },
         {
           "id": "microsoft-200042694",
@@ -325,11 +331,6 @@
           "id": "microsoft-200042983",
           "company": "Microsoft",
           "title": "Principal Engineer, Platform Engineering"
-        },
-        {
-          "id": "microsoft-200041743",
-          "company": "Microsoft",
-          "title": "Senior Research Engineer - AI Security"
         }
       ],
       "severity": "high",
@@ -349,35 +350,21 @@
       "supplemental_rows": 64,
       "supplemental_with_desc": 64,
       "supplemental_meta": {
-        "generated_at": "2026-07-09T10:19:03.388Z",
+        "generated_at": "2026-07-09T10:34:13.893Z",
         "lane_name": "custom",
-        "jobs_fetched": 3450
+        "jobs_fetched": 3449
       },
-      "published_rows": 15,
-      "published_pct": 83.3,
+      "published_rows": 18,
+      "published_pct": 100,
       "enriched_rows": 15,
       "enriched_pct": 83.3,
       "enriched_with_skills": 15,
       "skills_pct": 100,
-      "examples": [
-        {
-          "id": "apple-200671460",
-          "company": "Apple",
-          "title": "Senior Tactile Research Engineer - Special Projects (Robotics)"
-        },
-        {
-          "id": "apple-200671459",
-          "company": "Apple",
-          "title": "Senior Tactile Embedded Controls Research Engineer - Special Projects (Robotics)"
-        },
-        {
-          "id": "apple-200671454",
-          "company": "Apple",
-          "title": "Senior Tactile Research Engineer - Special Projects (Robotics)"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
+      "examples": [],
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
     },
     {
       "source": "icims",
