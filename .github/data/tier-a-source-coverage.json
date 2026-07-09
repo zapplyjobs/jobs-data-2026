@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-09T11:07:43.801Z",
+  "generated_at": "2026-07-09T11:27:34.507Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -34,6 +34,7 @@
     "descriptions-google.jsonl",
     "descriptions-greenhouse-1.jsonl",
     "descriptions-greenhouse-2.jsonl",
+    "descriptions-greenhouse-3.jsonl",
     "descriptions-icims.jsonl",
     "descriptions-lever.jsonl",
     "descriptions-microsoft.jsonl",
@@ -45,21 +46,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-09T11:06:20.680Z",
+    "generated_at": "2026-07-09T11:26:25.950Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 10960,
-    "description_entries": 6123,
-    "coverage_pct": 55.9,
+    "board_row_count": 7380,
+    "description_entries": 5907,
+    "coverage_pct": 80,
     "source_breakdown": {
-      "sidecar": 6123,
+      "sidecar": 5907,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-07-09T10:53:00.281Z",
+    "jobs_metadata_generated": "2026-07-09T11:16:22.658Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-09T11:07:41.429Z",
+    "checked_at": "2026-07-09T11:27:32.558Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -76,45 +77,25 @@
   "rows": [
     {
       "source": "workday",
-      "pool_rows": 35246,
-      "us_rows": 18203,
-      "tech_us_rows": 5335,
-      "raw_sidecar_rows": 14625,
-      "sidecar_active_rows": 3433,
+      "pool_rows": 35484,
+      "us_rows": 17442,
+      "tech_us_rows": 4311,
+      "raw_sidecar_rows": 14262,
+      "sidecar_active_rows": 3031,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 3433,
-      "published_pct": 64.3,
-      "enriched_rows": 3684,
-      "enriched_pct": 69.1,
-      "enriched_with_skills": 3463,
-      "skills_pct": 94,
+      "published_rows": 3031,
+      "published_pct": 70.3,
+      "enriched_rows": 3709,
+      "enriched_pct": 86,
+      "enriched_with_skills": 3478,
+      "skills_pct": 93.8,
       "examples": [
         {
           "id": "workday-parsons-R182628",
           "company": "Parsons",
           "title": "Software Engineer - TS/SCI required"
-        },
-        {
-          "id": "workday-parsons-R182953",
-          "company": "Parsons",
-          "title": "Advanced Test Engineer"
-        },
-        {
-          "id": "workday-parsons-R179378",
-          "company": "Parsons",
-          "title": "Systems Engineer, Mid"
-        },
-        {
-          "id": "workday-parsons-R183046",
-          "company": "Parsons",
-          "title": "Chemical Process Engineer"
-        },
-        {
-          "id": "workday-parsons-R183014",
-          "company": "Parsons",
-          "title": "Senior Solutions Architect"
         },
         {
           "id": "workday-parsons-R182940",
@@ -130,34 +111,53 @@
           "id": "workday-parsons-R179331",
           "company": "Parsons",
           "title": "Low Voltage Power Distribution Electrical Engineer"
+        },
+        {
+          "id": "workday-parsons-R182350",
+          "company": "Parsons",
+          "title": "Project Engineer - Roadway"
+        },
+        {
+          "id": "workday-parsons-R182788",
+          "company": "Parsons",
+          "title": "Software Engineer"
+        },
+        {
+          "id": "workday-parsons-R181905",
+          "company": "Parsons",
+          "title": "AI Engineer"
+        },
+        {
+          "id": "workday-parsons-R182615",
+          "company": "Parsons",
+          "title": "Aerospace Systems Engineer"
         }
       ],
       "severity": "high",
       "flags": [
-        "low_published_coverage",
-        "low_enrichment_coverage"
+        "low_published_coverage"
       ]
     },
     {
       "source": "oracle",
-      "pool_rows": 6888,
-      "us_rows": 4865,
-      "tech_us_rows": 1136,
-      "raw_sidecar_rows": 5320,
-      "sidecar_active_rows": 315,
-      "supplemental_rows": 34743,
-      "supplemental_with_desc": 25639,
+      "pool_rows": 6924,
+      "us_rows": 4195,
+      "tech_us_rows": 460,
+      "raw_sidecar_rows": 5368,
+      "sidecar_active_rows": 319,
+      "supplemental_rows": 33080,
+      "supplemental_with_desc": 24252,
       "supplemental_meta": {
-        "generated_at": "2026-07-09T11:05:08.352Z",
+        "generated_at": "2026-07-09T11:25:07.991Z",
         "lane_name": "oracle",
-        "jobs_fetched": 34743
+        "jobs_fetched": 33080
       },
-      "published_rows": 315,
-      "published_pct": 27.7,
-      "enriched_rows": 454,
-      "enriched_pct": 40,
-      "enriched_with_skills": 350,
-      "skills_pct": 77.1,
+      "published_rows": 319,
+      "published_pct": 69.3,
+      "enriched_rows": 460,
+      "enriched_pct": 100,
+      "enriched_with_skills": 356,
+      "skills_pct": 77.4,
       "examples": [
         {
           "id": "oracle-dell-technologies-294422",
@@ -202,183 +202,71 @@
       ],
       "severity": "high",
       "flags": [
-        "low_published_coverage",
-        "low_enrichment_coverage",
-        "supplemental_stage_gap"
+        "low_published_coverage"
       ]
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 1314,
-      "us_rows": 1470,
-      "tech_us_rows": 333,
-      "raw_sidecar_rows": 866,
-      "sidecar_active_rows": 144,
+      "pool_rows": 1339,
+      "us_rows": 1339,
+      "tech_us_rows": 181,
+      "raw_sidecar_rows": 881,
+      "sidecar_active_rows": 140,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 144,
-      "published_pct": 43.2,
-      "enriched_rows": 177,
-      "enriched_pct": 53.2,
-      "enriched_with_skills": 173,
-      "skills_pct": 97.7,
+      "published_rows": 140,
+      "published_pct": 77.3,
+      "enriched_rows": 178,
+      "enriched_pct": 98.3,
+      "enriched_with_skills": 174,
+      "skills_pct": 97.8,
       "examples": [
+        {
+          "id": "sr-VeoliaEnvironnementSA-744000135551709",
+          "company": "Veolia Environnement SA",
+          "title": "Data Engineer"
+        },
+        {
+          "id": "sr-llnl-3743990013907505",
+          "company": "LLNL",
+          "title": "Combat Simulation Systems Analyst"
+        },
+        {
+          "id": "sr-Intuitive-744000135329990",
+          "company": "Intuitive",
+          "title": "Platform automation Engineer"
+        },
+        {
+          "id": "sr-Intuitive-744000135083462",
+          "company": "Intuitive",
+          "title": "Robotic Algorithms & Controls Engineer (Systems Analyst)"
+        },
+        {
+          "id": "sr-Intuitive-744000135060959",
+          "company": "Intuitive",
+          "title": "Field Service Engineer 2 - Wknd Shift"
+        },
+        {
+          "id": "sr-Sandisk-744000134878091",
+          "company": "Sandisk",
+          "title": "New College Grad, Senior Test Engineer"
+        },
+        {
+          "id": "sr-WesternDigital-744000134849379",
+          "company": "Western Digital",
+          "title": "Architecture and System Design Engineer"
+        },
         {
           "id": "sr-Sandisk-744000134505827",
           "company": "Sandisk",
           "title": "Technologist, Firmware Verification Engineering"
-        },
-        {
-          "id": "sr-Intuitive-744000134300920",
-          "company": "Intuitive",
-          "title": "System Test Engineer"
-        },
-        {
-          "id": "sr-llnl-3743990013778996",
-          "company": "LLNL",
-          "title": "Linux Systems Administrator – ACTIVE SECURITY CLEARANCE REQUIRED"
-        },
-        {
-          "id": "sr-llnl-3743990013770802",
-          "company": "LLNL",
-          "title": "Chemical Process Engineer"
-        },
-        {
-          "id": "sr-llnl-3743990013753916",
-          "company": "LLNL",
-          "title": "Electronics Technologist - Target Diagnostic Operator"
-        },
-        {
-          "id": "sr-llnl-3743990013751226",
-          "company": "LLNL",
-          "title": "Associate Criticality Safety Engineer"
-        },
-        {
-          "id": "sr-Intuitive-744000133461559",
-          "company": "Intuitive",
-          "title": "Manager, Systems Analyst (Robotic Algorithms & Controls)"
-        },
-        {
-          "id": "sr-VeoliaEnvironnementSA-744000133456490",
-          "company": "Veolia Environnement SA",
-          "title": "Field Service Engineer"
         }
       ],
       "severity": "high",
       "flags": [
-        "low_published_coverage",
-        "low_enrichment_coverage"
+        "low_published_coverage"
       ]
-    },
-    {
-      "source": "microsoft",
-      "pool_rows": 257,
-      "us_rows": 172,
-      "tech_us_rows": 110,
-      "raw_sidecar_rows": 236,
-      "sidecar_active_rows": 43,
-      "supplemental_rows": 540,
-      "supplemental_with_desc": 139,
-      "supplemental_meta": {
-        "generated_at": "2026-07-09T11:04:04.481Z",
-        "lane_name": "custom",
-        "jobs_fetched": 3454
-      },
-      "published_rows": 43,
-      "published_pct": 39.1,
-      "enriched_rows": 44,
-      "enriched_pct": 40,
-      "enriched_with_skills": 44,
-      "skills_pct": 100,
-      "examples": [
-        {
-          "id": "microsoft-200041555",
-          "company": "Microsoft",
-          "title": "Security Cloud Solution Architect - Leader"
-        },
-        {
-          "id": "microsoft-200042694",
-          "company": "Microsoft",
-          "title": "Senior Security Solution Engineer"
-        },
-        {
-          "id": "microsoft-200036663",
-          "company": "Microsoft",
-          "title": "Principal Software Engineer"
-        },
-        {
-          "id": "microsoft-200032098",
-          "company": "Microsoft",
-          "title": "Sr. Software Engineer - Azure Storage"
-        },
-        {
-          "id": "microsoft-200040011",
-          "company": "Microsoft",
-          "title": "Principal Software Engineer"
-        },
-        {
-          "id": "microsoft-200042158",
-          "company": "Microsoft",
-          "title": "Principal Software Engineer"
-        },
-        {
-          "id": "microsoft-200042983",
-          "company": "Microsoft",
-          "title": "Principal Engineer, Platform Engineering"
-        },
-        {
-          "id": "microsoft-200041743",
-          "company": "Microsoft",
-          "title": "Senior Research Engineer - AI Security"
-        }
-      ],
-      "severity": "high",
-      "flags": [
-        "low_published_coverage",
-        "low_enrichment_coverage",
-        "supplemental_stage_gap"
-      ]
-    },
-    {
-      "source": "apple",
-      "pool_rows": 33,
-      "us_rows": 33,
-      "tech_us_rows": 18,
-      "raw_sidecar_rows": 66,
-      "sidecar_active_rows": 15,
-      "supplemental_rows": 64,
-      "supplemental_with_desc": 64,
-      "supplemental_meta": {
-        "generated_at": "2026-07-09T11:04:04.481Z",
-        "lane_name": "custom",
-        "jobs_fetched": 3454
-      },
-      "published_rows": 15,
-      "published_pct": 83.3,
-      "enriched_rows": 15,
-      "enriched_pct": 83.3,
-      "enriched_with_skills": 15,
-      "skills_pct": 100,
-      "examples": [
-        {
-          "id": "apple-200671460",
-          "company": "Apple",
-          "title": "Senior Tactile Research Engineer - Special Projects (Robotics)"
-        },
-        {
-          "id": "apple-200671459",
-          "company": "Apple",
-          "title": "Senior Tactile Embedded Controls Research Engineer - Special Projects (Robotics)"
-        },
-        {
-          "id": "apple-200671454",
-          "company": "Apple",
-          "title": "Senior Tactile Research Engineer - Special Projects (Robotics)"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
     },
     {
       "source": "icims",
@@ -401,20 +289,68 @@
       "flags": []
     },
     {
+      "source": "microsoft",
+      "pool_rows": 265,
+      "us_rows": 109,
+      "tech_us_rows": 44,
+      "raw_sidecar_rows": 245,
+      "sidecar_active_rows": 44,
+      "supplemental_rows": 540,
+      "supplemental_with_desc": 6,
+      "supplemental_meta": {
+        "generated_at": "2026-07-09T11:22:17.841Z",
+        "lane_name": "custom",
+        "jobs_fetched": 3462
+      },
+      "published_rows": 44,
+      "published_pct": 100,
+      "enriched_rows": 44,
+      "enriched_pct": 100,
+      "enriched_with_skills": 44,
+      "skills_pct": 100,
+      "examples": [],
+      "severity": "ok",
+      "flags": []
+    },
+    {
       "source": "tiktok",
-      "pool_rows": 1021,
-      "us_rows": 1021,
-      "tech_us_rows": 434,
-      "raw_sidecar_rows": 1021,
-      "sidecar_active_rows": 434,
+      "pool_rows": 1024,
+      "us_rows": 1024,
+      "tech_us_rows": 437,
+      "raw_sidecar_rows": 1024,
+      "sidecar_active_rows": 437,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 434,
+      "published_rows": 437,
       "published_pct": 100,
-      "enriched_rows": 434,
+      "enriched_rows": 437,
       "enriched_pct": 100,
-      "enriched_with_skills": 434,
+      "enriched_with_skills": 437,
+      "skills_pct": 100,
+      "examples": [],
+      "severity": "ok",
+      "flags": []
+    },
+    {
+      "source": "apple",
+      "pool_rows": 33,
+      "us_rows": 30,
+      "tech_us_rows": 15,
+      "raw_sidecar_rows": 66,
+      "sidecar_active_rows": 15,
+      "supplemental_rows": 64,
+      "supplemental_with_desc": 64,
+      "supplemental_meta": {
+        "generated_at": "2026-07-09T11:22:17.841Z",
+        "lane_name": "custom",
+        "jobs_fetched": 3462
+      },
+      "published_rows": 15,
+      "published_pct": 100,
+      "enriched_rows": 15,
+      "enriched_pct": 100,
+      "enriched_with_skills": 15,
       "skills_pct": 100,
       "examples": [],
       "severity": "ok",
