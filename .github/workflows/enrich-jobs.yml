@@ -183,10 +183,8 @@ jobs:
           # Only commit tiny dashboard-facing/control-plane files. Big data files (sidecars, enriched_jobs, processed_ids)
           # live in R2 only — INF-BLOAT-5.
           git add .github/data/enrichment-stats.json || exit 0
-          [ -f .github/data/tech-us-truth.json ] && git add .github/data/tech-us-truth.json
           [ -f .github/data/jobs-metadata.json ] && git add .github/data/jobs-metadata.json
           [ -f .github/data/enrichment-history.jsonl ] && git add .github/data/enrichment-history.jsonl
-          [ -f .github/data/desc-fetch-failures.json ] && git add -f .github/data/desc-fetch-failures.json
           git diff --cached --quiet && { echo "No changes to commit"; exit 0; }
           git commit -m "chore: update enrichment stats [skip ci]" || exit 0
           for i in 1 2 3; do
