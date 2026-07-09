@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-09T18:38:02.561Z",
+  "generated_at": "2026-07-09T18:53:14.881Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -45,21 +45,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-09T18:36:44.508Z",
+    "generated_at": "2026-07-09T18:51:54.685Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 7716,
-    "description_entries": 6614,
-    "coverage_pct": 85.7,
+    "board_row_count": 7812,
+    "description_entries": 6555,
+    "coverage_pct": 83.9,
     "source_breakdown": {
-      "sidecar": 6614,
+      "sidecar": 6555,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-07-09T18:25:09.026Z",
+    "jobs_metadata_generated": "2026-07-09T18:41:05.127Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-09T18:38:00.370Z",
+    "checked_at": "2026-07-09T18:53:12.723Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -75,30 +75,98 @@
   },
   "rows": [
     {
-      "source": "oracle",
-      "pool_rows": 6323,
-      "us_rows": 3968,
-      "tech_us_rows": 404,
-      "raw_sidecar_rows": 5023,
-      "sidecar_active_rows": 314,
-      "supplemental_rows": 34740,
-      "supplemental_with_desc": 25623,
-      "supplemental_meta": {
-        "generated_at": "2026-07-09T18:35:38.390Z",
-        "lane_name": "oracle",
-        "jobs_fetched": 34740
-      },
-      "published_rows": 314,
-      "published_pct": 77.7,
-      "enriched_rows": 404,
-      "enriched_pct": 100,
-      "enriched_with_skills": 313,
-      "skills_pct": 77.5,
+      "source": "workday",
+      "pool_rows": 36573,
+      "us_rows": 18426,
+      "tech_us_rows": 4713,
+      "raw_sidecar_rows": 15200,
+      "sidecar_active_rows": 3622,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 3621,
+      "published_pct": 76.8,
+      "enriched_rows": 3958,
+      "enriched_pct": 84,
+      "enriched_with_skills": 3714,
+      "skills_pct": 93.8,
       "examples": [
         {
-          "id": "oracle-jpmorgan-chase-210760876",
-          "company": "JPMorgan Chase",
-          "title": "Corporate Finance – SEC Reporting Analyst"
+          "id": "workday-parsons-R182628",
+          "company": "Parsons",
+          "title": "Software Engineer - TS/SCI required"
+        },
+        {
+          "id": "workday-parsons-R182703",
+          "company": "Parsons",
+          "title": "UAS Integration Engineer"
+        },
+        {
+          "id": "workday-parsons-R182350",
+          "company": "Parsons",
+          "title": "Project Engineer - Roadway"
+        },
+        {
+          "id": "workday-parsons-R182151",
+          "company": "Parsons",
+          "title": "Bridge CAD Designer"
+        },
+        {
+          "id": "workday-parsons-R182788",
+          "company": "Parsons",
+          "title": "Software Engineer"
+        },
+        {
+          "id": "workday-parsons-R181905",
+          "company": "Parsons",
+          "title": "AI Engineer"
+        },
+        {
+          "id": "workday-parsons-R182615",
+          "company": "Parsons",
+          "title": "Aerospace Systems Engineer"
+        },
+        {
+          "id": "workday-parsons-R182652",
+          "company": "Parsons",
+          "title": "Junior Digital Signal Processing Engineer - TS/SCI"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage"
+      ]
+    },
+    {
+      "source": "oracle",
+      "pool_rows": 7207,
+      "us_rows": 4389,
+      "tech_us_rows": 468,
+      "raw_sidecar_rows": 5785,
+      "sidecar_active_rows": 362,
+      "supplemental_rows": 34882,
+      "supplemental_with_desc": 25780,
+      "supplemental_meta": {
+        "generated_at": "2026-07-09T18:50:36.861Z",
+        "lane_name": "oracle",
+        "jobs_fetched": 34882
+      },
+      "published_rows": 362,
+      "published_pct": 77.4,
+      "enriched_rows": 468,
+      "enriched_pct": 100,
+      "enriched_with_skills": 358,
+      "skills_pct": 76.5,
+      "examples": [
+        {
+          "id": "oracle-dell-technologies-R289927",
+          "company": "Dell Technologies",
+          "title": "Technical Program Manager"
+        },
+        {
+          "id": "oracle-dell-technologies-294422",
+          "company": "Dell Technologies",
+          "title": "Technical Support Engineer - Elastic Cloud Storage"
         },
         {
           "id": "oracle-wsp-90759",
@@ -129,11 +197,6 @@
           "id": "oracle-wsp-90853",
           "company": "WSP",
           "title": "Assistant Vice President, Fire and Life Safety Engineering (Mission Critical/Data Center)"
-        },
-        {
-          "id": "oracle-wsp-90859",
-          "company": "WSP",
-          "title": "On Call Emergency Management Specialists, Procurement"
         }
       ],
       "severity": "high",
@@ -143,21 +206,31 @@
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 1364,
-      "us_rows": 1364,
-      "tech_us_rows": 178,
-      "raw_sidecar_rows": 847,
-      "sidecar_active_rows": 139,
+      "pool_rows": 1370,
+      "us_rows": 1370,
+      "tech_us_rows": 180,
+      "raw_sidecar_rows": 840,
+      "sidecar_active_rows": 135,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 139,
-      "published_pct": 78.1,
+      "published_rows": 135,
+      "published_pct": 75,
       "enriched_rows": 169,
-      "enriched_pct": 94.9,
+      "enriched_pct": 93.9,
       "enriched_with_skills": 165,
       "skills_pct": 97.6,
       "examples": [
+        {
+          "id": "sr-RESPECInc-744000136882139",
+          "company": "RE/SPEC Inc.",
+          "title": "Water Treatment Process Engineer"
+        },
+        {
+          "id": "sr-RESPECInc-744000136881349",
+          "company": "RE/SPEC Inc.",
+          "title": "Software Quality Assurance Engineer III (Contractor) ID - 806914"
+        },
         {
           "id": "sr-RESPECInc-744000136878324",
           "company": "RE/SPEC Inc.",
@@ -187,16 +260,6 @@
           "id": "sr-ServiceNow-744000136859780",
           "company": "ServiceNow",
           "title": "Enterprise Account Exec, Cybersecurity (Financial Services)"
-        },
-        {
-          "id": "sr-WesternDigital-744000136852019",
-          "company": "Western Digital",
-          "title": "Technologist, RFIC Design Engineer"
-        },
-        {
-          "id": "sr-Intuitive-744000135060959",
-          "company": "Intuitive",
-          "title": "Field Service Engineer 2 - Wknd Shift"
         }
       ],
       "severity": "high",
@@ -205,97 +268,26 @@
       ]
     },
     {
-      "source": "workday",
-      "pool_rows": 36867,
-      "us_rows": 18565,
-      "tech_us_rows": 4692,
-      "raw_sidecar_rows": 15479,
-      "sidecar_active_rows": 3760,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 3759,
-      "published_pct": 80.1,
-      "enriched_rows": 3904,
-      "enriched_pct": 83.2,
-      "enriched_with_skills": 3669,
-      "skills_pct": 94,
-      "examples": [
-        {
-          "id": "workday-irhythm-JR1549",
-          "company": "iRhythm",
-          "title": "Identity and Access Management Administrator"
-        },
-        {
-          "id": "workday-workday-inc-JR-0108427",
-          "company": "Workday Inc",
-          "title": "Sr Associate Deal Ops Manager, Net New"
-        },
-        {
-          "id": "workday-workday-inc-JR-0107838",
-          "company": "Workday Inc",
-          "title": "Software Development Engineer"
-        },
-        {
-          "id": "workday-citi-26972927",
-          "company": "Citi",
-          "title": "AI/ML Engineer - Engineering Excellence (Full Stack Developer)"
-        },
-        {
-          "id": "workday-zayo-R0016249",
-          "company": "Zayo",
-          "title": "Field Technician II"
-        },
-        {
-          "id": "workday-wells-fargo-R-557129",
-          "company": "Wells Fargo",
-          "title": "Design and Testing Technology Business Systems Consultant"
-        },
-        {
-          "id": "workday-rtx-01847710",
-          "company": "RTX",
-          "title": "Raytheon Full Time 2026 - Power & Analog Design Engineer II"
-        },
-        {
-          "id": "workday-nvidia-JR2018371",
-          "company": "NVIDIA",
-          "title": "System Software Engineer, Engineering Workflow Platform"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
-    },
-    {
       "source": "microsoft",
-      "pool_rows": 255,
-      "us_rows": 114,
-      "tech_us_rows": 48,
-      "raw_sidecar_rows": 243,
-      "sidecar_active_rows": 43,
+      "pool_rows": 259,
+      "us_rows": 116,
+      "tech_us_rows": 50,
+      "raw_sidecar_rows": 255,
+      "sidecar_active_rows": 48,
       "supplemental_rows": 541,
-      "supplemental_with_desc": 137,
+      "supplemental_with_desc": 116,
       "supplemental_meta": {
-        "generated_at": "2026-07-09T18:34:03.901Z",
+        "generated_at": "2026-07-09T18:46:27.546Z",
         "lane_name": "custom",
-        "jobs_fetched": 4151
+        "jobs_fetched": 3330
       },
-      "published_rows": 43,
-      "published_pct": 89.6,
-      "enriched_rows": 48,
+      "published_rows": 48,
+      "published_pct": 96,
+      "enriched_rows": 50,
       "enriched_pct": 100,
-      "enriched_with_skills": 48,
+      "enriched_with_skills": 50,
       "skills_pct": 100,
       "examples": [
-        {
-          "id": "microsoft-200042757",
-          "company": "Microsoft",
-          "title": "Software Engineering - Microsoft Commerce - Offers and Data Model"
-        },
-        {
-          "id": "microsoft-200043092",
-          "company": "Microsoft",
-          "title": "Technical Support Engineering"
-        },
         {
           "id": "microsoft-200042676",
           "company": "Microsoft",
@@ -305,11 +297,6 @@
           "id": "microsoft-200041702",
           "company": "Microsoft",
           "title": "Data Center Technician Manager"
-        },
-        {
-          "id": "microsoft-200042366",
-          "company": "Microsoft",
-          "title": "Data Center Technician (Nightshift)"
         }
       ],
       "severity": "ok",
@@ -360,14 +347,14 @@
       "pool_rows": 32,
       "us_rows": 29,
       "tech_us_rows": 13,
-      "raw_sidecar_rows": 59,
+      "raw_sidecar_rows": 60,
       "sidecar_active_rows": 13,
-      "supplemental_rows": 880,
-      "supplemental_with_desc": 880,
+      "supplemental_rows": 67,
+      "supplemental_with_desc": 67,
       "supplemental_meta": {
-        "generated_at": "2026-07-09T18:34:03.901Z",
+        "generated_at": "2026-07-09T18:46:27.546Z",
         "lane_name": "custom",
-        "jobs_fetched": 4151
+        "jobs_fetched": 3330
       },
       "published_rows": 13,
       "published_pct": 100,
