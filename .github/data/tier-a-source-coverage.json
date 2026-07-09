@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-09T12:22:27.129Z",
+  "generated_at": "2026-07-09T13:14:45.560Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -34,6 +34,7 @@
     "descriptions-google.jsonl",
     "descriptions-greenhouse-1.jsonl",
     "descriptions-greenhouse-2.jsonl",
+    "descriptions-greenhouse-3.jsonl",
     "descriptions-icims.jsonl",
     "descriptions-lever.jsonl",
     "descriptions-microsoft.jsonl",
@@ -45,21 +46,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-09T12:21:13.248Z",
+    "generated_at": "2026-07-09T13:11:32.639Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 7432,
-    "description_entries": 5944,
-    "coverage_pct": 80,
+    "board_row_count": 7630,
+    "description_entries": 6127,
+    "coverage_pct": 80.3,
     "source_breakdown": {
-      "sidecar": 5944,
+      "sidecar": 6127,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-07-09T12:08:00.447Z",
+    "jobs_metadata_generated": "2026-07-09T12:45:06.638Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-09T12:22:25.204Z",
+    "checked_at": "2026-07-09T13:14:43.393Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -76,30 +77,45 @@
   "rows": [
     {
       "source": "workday",
-      "pool_rows": 35711,
-      "us_rows": 17546,
-      "tech_us_rows": 4506,
-      "raw_sidecar_rows": 14425,
-      "sidecar_active_rows": 3161,
+      "pool_rows": 36017,
+      "us_rows": 17899,
+      "tech_us_rows": 4630,
+      "raw_sidecar_rows": 14505,
+      "sidecar_active_rows": 3205,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 3161,
-      "published_pct": 70.2,
-      "enriched_rows": 3855,
-      "enriched_pct": 85.6,
-      "enriched_with_skills": 3621,
-      "skills_pct": 93.9,
+      "published_rows": 3160,
+      "published_pct": 68.3,
+      "enriched_rows": 3895,
+      "enriched_pct": 84.1,
+      "enriched_with_skills": 3661,
+      "skills_pct": 94,
       "examples": [
+        {
+          "id": "workday-parsons-R182835",
+          "company": "Parsons",
+          "title": "Mechanical Electrical Inspector"
+        },
         {
           "id": "workday-parsons-R182628",
           "company": "Parsons",
           "title": "Software Engineer - TS/SCI required"
         },
         {
-          "id": "workday-parsons-R182940",
+          "id": "workday-parsons-R182748",
           "company": "Parsons",
-          "title": "Data Engineer"
+          "title": "SCA Maintenance Electrician"
+        },
+        {
+          "id": "workday-parsons-R183008",
+          "company": "Parsons",
+          "title": "Workflow Support Specialist"
+        },
+        {
+          "id": "workday-parsons-R179831",
+          "company": "Parsons",
+          "title": "Electronics Tech - Fiber Optics/Radio Control System"
         },
         {
           "id": "workday-parsons-R182703",
@@ -107,96 +123,14 @@
           "title": "UAS Integration Engineer"
         },
         {
-          "id": "workday-parsons-R179331",
+          "id": "workday-parsons-R182447",
           "company": "Parsons",
-          "title": "Low Voltage Power Distribution Electrical Engineer"
+          "title": "Security Technician"
         },
         {
-          "id": "workday-parsons-R182350",
+          "id": "workday-parsons-R182837",
           "company": "Parsons",
-          "title": "Project Engineer - Roadway"
-        },
-        {
-          "id": "workday-parsons-R182788",
-          "company": "Parsons",
-          "title": "Software Engineer"
-        },
-        {
-          "id": "workday-parsons-R181905",
-          "company": "Parsons",
-          "title": "AI Engineer"
-        },
-        {
-          "id": "workday-parsons-R182615",
-          "company": "Parsons",
-          "title": "Aerospace Systems Engineer"
-        }
-      ],
-      "severity": "high",
-      "flags": [
-        "low_published_coverage"
-      ]
-    },
-    {
-      "source": "oracle",
-      "pool_rows": 6680,
-      "us_rows": 4090,
-      "tech_us_rows": 424,
-      "raw_sidecar_rows": 5212,
-      "sidecar_active_rows": 332,
-      "supplemental_rows": 32525,
-      "supplemental_with_desc": 24790,
-      "supplemental_meta": {
-        "generated_at": "2026-07-09T12:20:27.044Z",
-        "lane_name": "oracle",
-        "jobs_fetched": 32525
-      },
-      "published_rows": 332,
-      "published_pct": 78.3,
-      "enriched_rows": 424,
-      "enriched_pct": 100,
-      "enriched_with_skills": 327,
-      "skills_pct": 77.1,
-      "examples": [
-        {
-          "id": "oracle-dell-technologies-294422",
-          "company": "Dell Technologies",
-          "title": "Technical Support Engineer - Elastic Cloud Storage"
-        },
-        {
-          "id": "oracle-fortive-10215",
-          "company": "Fortive",
-          "title": "Medical Health Physicist"
-        },
-        {
-          "id": "oracle-wsp-89962",
-          "company": "WSP",
-          "title": "Experienced Substation Structural Engineer"
-        },
-        {
-          "id": "oracle-wsp-89970",
-          "company": "WSP",
-          "title": "Intermediate Substation Structural Designer"
-        },
-        {
-          "id": "oracle-wsp-89971",
-          "company": "WSP",
-          "title": "Experienced Substation Structural Designer"
-        },
-        {
-          "id": "oracle-wsp-90675",
-          "company": "WSP",
-          "title": "CBTC System Safety Manager"
-        },
-        {
-          "id": "oracle-wsp-90746",
-          "company": "WSP",
-          "title": "Substation Specialist Electrical Designer (P&C)"
-        },
-        {
-          "id": "oracle-wsp-90762",
-          "company": "WSP",
-          "title": "Experienced Professional, Geotechnical Engineering"
+          "title": "Electronic Security Technician"
         }
       ],
       "severity": "high",
@@ -209,7 +143,7 @@
       "pool_rows": 1339,
       "us_rows": 1339,
       "tech_us_rows": 181,
-      "raw_sidecar_rows": 885,
+      "raw_sidecar_rows": 878,
       "sidecar_active_rows": 140,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
@@ -268,6 +202,111 @@
       ]
     },
     {
+      "source": "oracle",
+      "pool_rows": 6925,
+      "us_rows": 4188,
+      "tech_us_rows": 453,
+      "raw_sidecar_rows": 5417,
+      "sidecar_active_rows": 364,
+      "supplemental_rows": 32571,
+      "supplemental_with_desc": 23812,
+      "supplemental_meta": {
+        "generated_at": "2026-07-09T13:06:31.907Z",
+        "lane_name": "oracle",
+        "jobs_fetched": 32571
+      },
+      "published_rows": 364,
+      "published_pct": 80.4,
+      "enriched_rows": 453,
+      "enriched_pct": 100,
+      "enriched_with_skills": 346,
+      "skills_pct": 76.4,
+      "examples": [
+        {
+          "id": "oracle-dell-technologies-294422",
+          "company": "Dell Technologies",
+          "title": "Technical Support Engineer - Elastic Cloud Storage"
+        },
+        {
+          "id": "oracle-fortive-10215",
+          "company": "Fortive",
+          "title": "Medical Health Physicist"
+        },
+        {
+          "id": "oracle-wsp-89962",
+          "company": "WSP",
+          "title": "Experienced Substation Structural Engineer"
+        },
+        {
+          "id": "oracle-wsp-89970",
+          "company": "WSP",
+          "title": "Intermediate Substation Structural Designer"
+        },
+        {
+          "id": "oracle-wsp-89971",
+          "company": "WSP",
+          "title": "Experienced Substation Structural Designer"
+        },
+        {
+          "id": "oracle-wsp-90675",
+          "company": "WSP",
+          "title": "CBTC System Safety Manager"
+        },
+        {
+          "id": "oracle-wsp-90746",
+          "company": "WSP",
+          "title": "Substation Specialist Electrical Designer (P&C)"
+        },
+        {
+          "id": "oracle-wsp-90762",
+          "company": "WSP",
+          "title": "Experienced Professional, Geotechnical Engineering"
+        }
+      ],
+      "severity": "ok",
+      "flags": []
+    },
+    {
+      "source": "microsoft",
+      "pool_rows": 270,
+      "us_rows": 109,
+      "tech_us_rows": 44,
+      "raw_sidecar_rows": 262,
+      "sidecar_active_rows": 41,
+      "supplemental_rows": 541,
+      "supplemental_with_desc": 42,
+      "supplemental_meta": {
+        "generated_at": "2026-07-09T13:04:19.486Z",
+        "lane_name": "custom",
+        "jobs_fetched": 3458
+      },
+      "published_rows": 41,
+      "published_pct": 93.2,
+      "enriched_rows": 41,
+      "enriched_pct": 93.2,
+      "enriched_with_skills": 41,
+      "skills_pct": 100,
+      "examples": [
+        {
+          "id": "microsoft-200041555",
+          "company": "Microsoft",
+          "title": "Security Cloud Solution Architect - Leader"
+        },
+        {
+          "id": "microsoft-200039504",
+          "company": "Microsoft",
+          "title": "Network Security Service Engineer"
+        },
+        {
+          "id": "microsoft-200040560",
+          "company": "Microsoft",
+          "title": "Software Engineer - Fabric Platform"
+        }
+      ],
+      "severity": "ok",
+      "flags": []
+    },
+    {
       "source": "icims",
       "pool_rows": 0,
       "us_rows": 0,
@@ -288,35 +327,11 @@
       "flags": []
     },
     {
-      "source": "microsoft",
-      "pool_rows": 271,
-      "us_rows": 111,
-      "tech_us_rows": 45,
-      "raw_sidecar_rows": 264,
-      "sidecar_active_rows": 45,
-      "supplemental_rows": 542,
-      "supplemental_with_desc": 83,
-      "supplemental_meta": {
-        "generated_at": "2026-07-09T12:18:21.017Z",
-        "lane_name": "custom",
-        "jobs_fetched": 3456
-      },
-      "published_rows": 45,
-      "published_pct": 100,
-      "enriched_rows": 45,
-      "enriched_pct": 100,
-      "enriched_with_skills": 45,
-      "skills_pct": 100,
-      "examples": [],
-      "severity": "ok",
-      "flags": []
-    },
-    {
       "source": "tiktok",
-      "pool_rows": 1024,
-      "us_rows": 1024,
+      "pool_rows": 1025,
+      "us_rows": 1025,
       "tech_us_rows": 437,
-      "raw_sidecar_rows": 1024,
+      "raw_sidecar_rows": 1025,
       "sidecar_active_rows": 437,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
@@ -341,9 +356,9 @@
       "supplemental_rows": 64,
       "supplemental_with_desc": 64,
       "supplemental_meta": {
-        "generated_at": "2026-07-09T12:18:21.017Z",
+        "generated_at": "2026-07-09T13:04:19.486Z",
         "lane_name": "custom",
-        "jobs_fetched": 3456
+        "jobs_fetched": 3458
       },
       "published_rows": 15,
       "published_pct": 100,
