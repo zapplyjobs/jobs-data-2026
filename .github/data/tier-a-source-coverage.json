@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-10T21:23:22.880Z",
+  "generated_at": "2026-07-10T21:42:10.806Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -45,21 +45,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-10T21:21:12.198Z",
+    "generated_at": "2026-07-10T21:40:40.584Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 14517,
-    "description_entries": 12408,
-    "coverage_pct": 85.5,
+    "board_row_count": 14886,
+    "description_entries": 12664,
+    "coverage_pct": 85.1,
     "source_breakdown": {
-      "sidecar": 12408,
+      "sidecar": 12664,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-07-10T21:08:33.528Z",
+    "jobs_metadata_generated": "2026-07-10T21:23:19.303Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-10T21:23:19.121Z",
+    "checked_at": "2026-07-10T21:42:07.394Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -75,25 +75,88 @@
   },
   "rows": [
     {
+      "source": "workday",
+      "pool_rows": 52143,
+      "us_rows": 27323,
+      "tech_us_rows": 9072,
+      "raw_sidecar_rows": 27870,
+      "sidecar_active_rows": 7205,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 7032,
+      "published_pct": 77.5,
+      "enriched_rows": 7828,
+      "enriched_pct": 86.3,
+      "enriched_with_skills": 7559,
+      "skills_pct": 96.6,
+      "examples": [
+        {
+          "id": "workday-parsons-R183217",
+          "company": "Parsons",
+          "title": "Junior Software Developer"
+        },
+        {
+          "id": "workday-parsons-R182628",
+          "company": "Parsons",
+          "title": "Software Engineer - TS/SCI required"
+        },
+        {
+          "id": "workday-boston-dynamics-R2296",
+          "company": "Boston Dynamics",
+          "title": "Senior Staff Manufacturing Test Engineer"
+        },
+        {
+          "id": "workday-boston-dynamics-R2698",
+          "company": "Boston Dynamics",
+          "title": "Senior Staff NPI Sourcing Manager"
+        },
+        {
+          "id": "workday-boston-dynamics-R2727",
+          "company": "Boston Dynamics",
+          "title": "Atlas Data Operations Annotation Manager"
+        },
+        {
+          "id": "workday-boston-dynamics-R2728",
+          "company": "Boston Dynamics",
+          "title": "Atlas Associate Director of Systems Development"
+        },
+        {
+          "id": "workday-jll-REQ498137",
+          "company": "JLL",
+          "title": "Electrical Engineering Manager (High Voltage)"
+        },
+        {
+          "id": "workday-jll-REQ521550",
+          "company": "JLL",
+          "title": "Mechatronics and Robotics Apprentice"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage"
+      ]
+    },
+    {
       "source": "oracle",
-      "pool_rows": 11111,
-      "us_rows": 6882,
-      "tech_us_rows": 1271,
-      "raw_sidecar_rows": 8880,
+      "pool_rows": 11137,
+      "us_rows": 6908,
+      "tech_us_rows": 1273,
+      "raw_sidecar_rows": 8898,
       "sidecar_active_rows": 1007,
-      "supplemental_rows": 35098,
-      "supplemental_with_desc": 25931,
+      "supplemental_rows": 26097,
+      "supplemental_with_desc": 17424,
       "supplemental_meta": {
-        "generated_at": "2026-07-10T21:20:17.067Z",
+        "generated_at": "2026-07-10T21:34:15.007Z",
         "lane_name": "oracle",
-        "jobs_fetched": 35098
+        "jobs_fetched": 26097
       },
       "published_rows": 1007,
-      "published_pct": 79.2,
-      "enriched_rows": 1271,
-      "enriched_pct": 100,
-      "enriched_with_skills": 949,
-      "skills_pct": 74.7,
+      "published_pct": 79.1,
+      "enriched_rows": 1272,
+      "enriched_pct": 99.9,
+      "enriched_with_skills": 948,
+      "skills_pct": 74.5,
       "examples": [
         {
           "id": "oracle-citizens-financial-46690",
@@ -143,21 +206,26 @@
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 1991,
-      "us_rows": 1990,
+      "pool_rows": 1993,
+      "us_rows": 1992,
       "tech_us_rows": 338,
       "raw_sidecar_rows": 671,
-      "sidecar_active_rows": 218,
+      "sidecar_active_rows": 217,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 218,
-      "published_pct": 64.5,
-      "enriched_rows": 256,
-      "enriched_pct": 75.7,
-      "enriched_with_skills": 252,
+      "published_rows": 217,
+      "published_pct": 64.2,
+      "enriched_rows": 255,
+      "enriched_pct": 75.4,
+      "enriched_with_skills": 251,
       "skills_pct": 98.4,
       "examples": [
+        {
+          "id": "sr-llnl-3743990014044886",
+          "company": "LLNL",
+          "title": "Application Infrastructure Engineer"
+        },
         {
           "id": "sr-ServiceNow-744000137214359",
           "company": "ServiceNow",
@@ -192,11 +260,6 @@
           "id": "sr-ServiceNow-744000136116489",
           "company": "ServiceNow",
           "title": "Senior Database Engineer"
-        },
-        {
-          "id": "sr-ServiceNow-744000136116309",
-          "company": "ServiceNow",
-          "title": "Senior Database Engineer"
         }
       ],
       "severity": "high",
@@ -206,91 +269,55 @@
       ]
     },
     {
-      "source": "workday",
-      "pool_rows": 51378,
-      "us_rows": 27243,
-      "tech_us_rows": 8813,
-      "raw_sidecar_rows": 27446,
-      "sidecar_active_rows": 7116,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 7113,
-      "published_pct": 80.7,
-      "enriched_rows": 7705,
-      "enriched_pct": 87.4,
-      "enriched_with_skills": 7439,
-      "skills_pct": 96.5,
-      "examples": [
-        {
-          "id": "workday-parsons-R182628",
-          "company": "Parsons",
-          "title": "Software Engineer - TS/SCI required"
-        },
-        {
-          "id": "workday-teledyne-REQ35674",
-          "company": "Teledyne",
-          "title": "Manufacturing Process Engineer"
-        },
-        {
-          "id": "workday-wells-fargo-R-546740",
-          "company": "Wells Fargo",
-          "title": "Lead Network Automation Engineer"
-        },
-        {
-          "id": "workday-wells-fargo-R-552156",
-          "company": "Wells Fargo",
-          "title": "Lead Network Automation Engineer"
-        },
-        {
-          "id": "workday-wells-fargo-R-555762",
-          "company": "Wells Fargo",
-          "title": "Lead Software Engineer - Observability Events Management"
-        },
-        {
-          "id": "workday-wells-fargo-R-520285",
-          "company": "Wells Fargo",
-          "title": "Senior Specialty Protocol Engineer"
-        },
-        {
-          "id": "workday-wells-fargo-R-540248",
-          "company": "Wells Fargo",
-          "title": "Lead Information Security Engineer"
-        },
-        {
-          "id": "workday-wells-fargo-R-544501",
-          "company": "Wells Fargo",
-          "title": "CPG Tech Lead Software Engineer S/4 HANA - RE-FX, EPPM"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
-    },
-    {
       "source": "microsoft",
-      "pool_rows": 503,
-      "us_rows": 317,
-      "tech_us_rows": 148,
-      "raw_sidecar_rows": 489,
-      "sidecar_active_rows": 140,
+      "pool_rows": 509,
+      "us_rows": 325,
+      "tech_us_rows": 150,
+      "raw_sidecar_rows": 451,
+      "sidecar_active_rows": 133,
       "supplemental_rows": 542,
-      "supplemental_with_desc": 35,
+      "supplemental_with_desc": 96,
       "supplemental_meta": {
-        "generated_at": "2026-07-10T21:17:28.457Z",
+        "generated_at": "2026-07-10T21:34:42.393Z",
         "lane_name": "custom",
-        "jobs_fetched": 3315
+        "jobs_fetched": 4126
       },
-      "published_rows": 140,
-      "published_pct": 94.6,
-      "enriched_rows": 148,
-      "enriched_pct": 100,
-      "enriched_with_skills": 148,
+      "published_rows": 133,
+      "published_pct": 88.7,
+      "enriched_rows": 138,
+      "enriched_pct": 92,
+      "enriched_with_skills": 138,
       "skills_pct": 100,
       "examples": [
+        {
+          "id": "microsoft-200017828",
+          "company": "Microsoft",
+          "title": "Applied Scientist II / Senior Applied Scientist - Responsible AI (CoreAI)"
+        },
+        {
+          "id": "microsoft-200026406",
+          "company": "Microsoft",
+          "title": "Principal Software Engineer - Responsible AI (CoreAI)"
+        },
+        {
+          "id": "microsoft-200035405",
+          "company": "Microsoft",
+          "title": "Senior Software Engineer - Responsible AI (CoreAI)"
+        },
         {
           "id": "microsoft-200042177",
           "company": "Microsoft",
           "title": "Principal Software Engineering Manager"
+        },
+        {
+          "id": "microsoft-200042763",
+          "company": "Microsoft",
+          "title": "Senior Site Reliability Engineer - Azure Storage"
+        },
+        {
+          "id": "microsoft-200031807",
+          "company": "Microsoft",
+          "title": "Software Engineer II | Azure Resource Graph"
         },
         {
           "id": "microsoft-200035488",
@@ -298,34 +325,9 @@
           "title": "Principal Product Manager, Data Science & Market Research"
         },
         {
-          "id": "microsoft-200043008",
+          "id": "microsoft-200029014",
           "company": "Microsoft",
-          "title": "Senior CAD Engineer"
-        },
-        {
-          "id": "microsoft-200042334",
-          "company": "Microsoft",
-          "title": "Principal Security Engineer"
-        },
-        {
-          "id": "microsoft-200042753",
-          "company": "Microsoft",
-          "title": "Software Engineer"
-        },
-        {
-          "id": "microsoft-200042545",
-          "company": "Microsoft",
-          "title": "Data Center Technician Manager"
-        },
-        {
-          "id": "microsoft-200042712",
-          "company": "Microsoft",
-          "title": "Principal Software Architect, Platform Engineering"
-        },
-        {
-          "id": "microsoft-200040505",
-          "company": "Microsoft",
-          "title": "Sr. Cloud Solution Architect - CTJ - TS/SCI"
+          "title": "Senior Security Researcher"
         }
       ],
       "severity": "ok",
@@ -375,21 +377,21 @@
       "source": "apple",
       "pool_rows": 41,
       "us_rows": 34,
-      "tech_us_rows": 21,
-      "raw_sidecar_rows": 80,
-      "sidecar_active_rows": 21,
-      "supplemental_rows": 65,
-      "supplemental_with_desc": 65,
+      "tech_us_rows": 20,
+      "raw_sidecar_rows": 416,
+      "sidecar_active_rows": 20,
+      "supplemental_rows": 877,
+      "supplemental_with_desc": 877,
       "supplemental_meta": {
-        "generated_at": "2026-07-10T21:17:28.457Z",
+        "generated_at": "2026-07-10T21:34:42.393Z",
         "lane_name": "custom",
-        "jobs_fetched": 3315
+        "jobs_fetched": 4126
       },
-      "published_rows": 21,
+      "published_rows": 20,
       "published_pct": 100,
-      "enriched_rows": 21,
+      "enriched_rows": 20,
       "enriched_pct": 100,
-      "enriched_with_skills": 21,
+      "enriched_with_skills": 20,
       "skills_pct": 100,
       "examples": [],
       "severity": "ok",
