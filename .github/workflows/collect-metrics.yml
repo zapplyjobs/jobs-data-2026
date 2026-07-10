@@ -39,7 +39,7 @@ jobs:
             const r2 = createR2Client({ prefix: 'data/' });
             const dataDir = '.github/data';
             if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-            const files = ['all_jobs.json', 'jobs-metadata.json', 'enrichment-stats.json', 'canada-tech-summary.json', 'bridge-metrics.json'];
+            const files = ['all_jobs.json', 'jobs-metadata.json', 'enrichment-stats.json', 'canada-tech-summary.json', 'bridge-metrics.json', 'traffic-history.jsonl'];
             for (const file of files) {
               try {
                 const raw = await r2.downloadRaw(file);
