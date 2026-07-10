@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-10T23:19:23.194Z",
+  "generated_at": "2026-07-10T23:23:07.037Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -45,21 +45,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-10T23:06:00.031Z",
+    "generated_at": "2026-07-10T23:21:23.489Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 14674,
-    "description_entries": 12518,
-    "coverage_pct": 85.3,
+    "board_row_count": 14874,
+    "description_entries": 12698,
+    "coverage_pct": 85.4,
     "source_breakdown": {
-      "sidecar": 12518,
+      "sidecar": 12698,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-07-10T22:22:08.685Z",
+    "jobs_metadata_generated": "2026-07-10T23:07:42.944Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-10T23:19:20.047Z",
+    "checked_at": "2026-07-10T23:23:03.917Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -75,30 +75,98 @@
   },
   "rows": [
     {
+      "source": "workday",
+      "pool_rows": 52954,
+      "us_rows": 27680,
+      "tech_us_rows": 8953,
+      "raw_sidecar_rows": 29408,
+      "sidecar_active_rows": 6788,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 7073,
+      "published_pct": 79,
+      "enriched_rows": 7661,
+      "enriched_pct": 85.6,
+      "enriched_with_skills": 7407,
+      "skills_pct": 96.7,
+      "examples": [
+        {
+          "id": "workday-parsons-R183217",
+          "company": "Parsons",
+          "title": "Junior Software Developer"
+        },
+        {
+          "id": "workday-parsons-R182748",
+          "company": "Parsons",
+          "title": "SCA Maintenance Electrician"
+        },
+        {
+          "id": "workday-parsons-R183165",
+          "company": "Parsons",
+          "title": "Electronics Tech - Fiber Optics/Radio Control System"
+        },
+        {
+          "id": "workday-parsons-R182835",
+          "company": "Parsons",
+          "title": "Mechanical Electrical Inspector"
+        },
+        {
+          "id": "workday-parsons-R182628",
+          "company": "Parsons",
+          "title": "Software Engineer - TS/SCI required"
+        },
+        {
+          "id": "workday-parsons-R183012",
+          "company": "Parsons",
+          "title": "Workflow Support Specialist/Senior Staff Officer Support"
+        },
+        {
+          "id": "workday-parsons-R183008",
+          "company": "Parsons",
+          "title": "Workflow Support Specialist"
+        },
+        {
+          "id": "workday-parsons-R182950",
+          "company": "Parsons",
+          "title": "Technical Lead"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage"
+      ]
+    },
+    {
       "source": "oracle",
-      "pool_rows": 11167,
-      "us_rows": 6957,
-      "tech_us_rows": 1265,
-      "raw_sidecar_rows": 9039,
-      "sidecar_active_rows": 996,
-      "supplemental_rows": 35154,
-      "supplemental_with_desc": 25980,
+      "pool_rows": 11216,
+      "us_rows": 6982,
+      "tech_us_rows": 1286,
+      "raw_sidecar_rows": 9084,
+      "sidecar_active_rows": 1015,
+      "supplemental_rows": 32128,
+      "supplemental_with_desc": 23037,
       "supplemental_meta": {
-        "generated_at": "2026-07-10T23:04:58.722Z",
+        "generated_at": "2026-07-10T23:20:01.679Z",
         "lane_name": "oracle",
-        "jobs_fetched": 35154
+        "jobs_fetched": 32128
       },
-      "published_rows": 767,
-      "published_pct": 60.6,
-      "enriched_rows": 1264,
-      "enriched_pct": 99.9,
-      "enriched_with_skills": 1025,
+      "published_rows": 996,
+      "published_pct": 77.4,
+      "enriched_rows": 1265,
+      "enriched_pct": 98.4,
+      "enriched_with_skills": 1026,
       "skills_pct": 81.1,
       "examples": [
         {
           "id": "oracle-citizens-financial-46690",
           "company": "Citizens Financial Group",
           "title": "Equity Research Analyst -(Westwood, MA; Boston, MA; Johnston, RI)"
+        },
+        {
+          "id": "oracle-citizens-financial-47613",
+          "company": "Citizens Financial Group",
+          "title": "Principal Data Analyst"
         },
         {
           "id": "oracle-citizens-financial-47699",
@@ -129,11 +197,6 @@
           "id": "oracle-dell-technologies-R286249",
           "company": "Dell Technologies",
           "title": "AI Security Engineer- Senior Advisor"
-        },
-        {
-          "id": "oracle-dell-technologies-R288065",
-          "company": "Dell Technologies",
-          "title": "Senior Principal Mechanical Engineer - Mechanical Engineering Center of Excellence"
         }
       ],
       "severity": "high",
@@ -142,91 +205,27 @@
       ]
     },
     {
-      "source": "apple",
-      "pool_rows": 380,
-      "us_rows": 317,
-      "tech_us_rows": 207,
-      "raw_sidecar_rows": 755,
-      "sidecar_active_rows": 207,
-      "supplemental_rows": 68,
-      "supplemental_with_desc": 68,
-      "supplemental_meta": {
-        "generated_at": "2026-07-10T23:02:11.258Z",
-        "lane_name": "custom",
-        "jobs_fetched": 3308
-      },
-      "published_rows": 20,
-      "published_pct": 9.7,
-      "enriched_rows": 20,
-      "enriched_pct": 9.7,
-      "enriched_with_skills": 20,
-      "skills_pct": 100,
-      "examples": [
-        {
-          "id": "apple-200671986",
-          "company": "Apple",
-          "title": "Software Engineer, AIML Evaluation"
-        },
-        {
-          "id": "apple-200671913",
-          "company": "Apple",
-          "title": "UX Software Engineer - Special Projects"
-        },
-        {
-          "id": "apple-200671949",
-          "company": "Apple",
-          "title": "WPC Apple Card Data Scientist"
-        },
-        {
-          "id": "apple-200671587",
-          "company": "Apple",
-          "title": "RFIC - PLL Design Engineer"
-        },
-        {
-          "id": "apple-200671937",
-          "company": "Apple",
-          "title": "Engineering Program Manager - Wireless"
-        },
-        {
-          "id": "apple-200671767",
-          "company": "Apple",
-          "title": "Software Engineer, Trusted Execution"
-        },
-        {
-          "id": "apple-200671933",
-          "company": "Apple",
-          "title": "Agentic AI Product Manager, Platform - Sales"
-        },
-        {
-          "id": "apple-200670503",
-          "company": "Apple",
-          "title": "Input Engineering Lead (Electrical Engineer)"
-        }
-      ],
-      "severity": "high",
-      "flags": [
-        "low_published_coverage",
-        "low_enrichment_coverage",
-        "supplemental_stage_gap"
-      ]
-    },
-    {
       "source": "smartrecruiters",
-      "pool_rows": 1993,
-      "us_rows": 1992,
+      "pool_rows": 1992,
+      "us_rows": 1991,
       "tech_us_rows": 342,
-      "raw_sidecar_rows": 676,
-      "sidecar_active_rows": 217,
+      "raw_sidecar_rows": 675,
+      "sidecar_active_rows": 216,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 218,
-      "published_pct": 63.7,
-      "enriched_rows": 255,
-      "enriched_pct": 74.6,
-      "enriched_with_skills": 251,
+      "published_rows": 216,
+      "published_pct": 63.2,
+      "enriched_rows": 254,
+      "enriched_pct": 74.3,
+      "enriched_with_skills": 250,
       "skills_pct": 98.4,
       "examples": [
+        {
+          "id": "sr-llnl-3743990014046446",
+          "company": "LLNL",
+          "title": "C++ Software Developer"
+        },
         {
           "id": "sr-WesternDigital-744000137223984",
           "company": "Western Digital",
@@ -261,11 +260,6 @@
           "id": "sr-WellmarkInc-744000137213939",
           "company": "Wellmark, Inc.",
           "title": "Sr. UX Engineer"
-        },
-        {
-          "id": "sr-Intuitive-744000136264964",
-          "company": "Intuitive",
-          "title": "Sr Mechanical Design Engineer"
         }
       ],
       "severity": "high",
@@ -275,111 +269,35 @@
       ]
     },
     {
-      "source": "workday",
-      "pool_rows": 52824,
-      "us_rows": 27806,
-      "tech_us_rows": 8968,
-      "raw_sidecar_rows": 28629,
-      "sidecar_active_rows": 6971,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 7348,
-      "published_pct": 81.9,
-      "enriched_rows": 7668,
-      "enriched_pct": 85.5,
-      "enriched_with_skills": 7418,
-      "skills_pct": 96.7,
-      "examples": [
-        {
-          "id": "workday-target-R0000437894",
-          "company": "Target",
-          "title": "Sr Data Analyst - Digital and Ecommerce (Experimentation, Math/Stats, A/B testing, ML)"
-        },
-        {
-          "id": "workday-target-R0000441114",
-          "company": "Target",
-          "title": "Lead Applied Data Scientist - Digital Item RecSys (applied ML, deep learning)"
-        },
-        {
-          "id": "workday-arrow-electronics-R246133",
-          "company": "Arrow Electronics",
-          "title": "Market Development Engineer"
-        },
-        {
-          "id": "workday-the-hartford-R2626061",
-          "company": "The Hartford",
-          "title": "Statutory Senior Implementation Consultant"
-        },
-        {
-          "id": "workday-snap-R0045924",
-          "company": "Snap",
-          "title": "Senior Data Scientist, Core, Level 5"
-        },
-        {
-          "id": "workday-wells-fargo-R-555762",
-          "company": "Wells Fargo",
-          "title": "Lead Software Engineer - Observability Events Management"
-        },
-        {
-          "id": "workday-wells-fargo-R-520285",
-          "company": "Wells Fargo",
-          "title": "Senior Specialty Protocol Engineer"
-        },
-        {
-          "id": "workday-wells-fargo-R-540248",
-          "company": "Wells Fargo",
-          "title": "Lead Information Security Engineer"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
-    },
-    {
       "source": "microsoft",
-      "pool_rows": 507,
-      "us_rows": 326,
-      "tech_us_rows": 154,
-      "raw_sidecar_rows": 501,
-      "sidecar_active_rows": 152,
-      "supplemental_rows": 542,
-      "supplemental_with_desc": 45,
+      "pool_rows": 513,
+      "us_rows": 330,
+      "tech_us_rows": 157,
+      "raw_sidecar_rows": 508,
+      "sidecar_active_rows": 154,
+      "supplemental_rows": 543,
+      "supplemental_with_desc": 31,
       "supplemental_meta": {
-        "generated_at": "2026-07-10T23:02:11.258Z",
+        "generated_at": "2026-07-10T23:20:02.104Z",
         "lane_name": "custom",
-        "jobs_fetched": 3308
+        "jobs_fetched": 4118
       },
-      "published_rows": 147,
-      "published_pct": 95.5,
-      "enriched_rows": 151,
-      "enriched_pct": 98.1,
-      "enriched_with_skills": 151,
+      "published_rows": 151,
+      "published_pct": 96.2,
+      "enriched_rows": 153,
+      "enriched_pct": 97.5,
+      "enriched_with_skills": 153,
       "skills_pct": 100,
       "examples": [
         {
-          "id": "microsoft-200043246",
+          "id": "microsoft-200042031",
           "company": "Microsoft",
-          "title": "Principal AI Network HW Systems Engineer"
+          "title": "Software Engineer II"
         },
         {
-          "id": "microsoft-200042042",
+          "id": "microsoft-200041743",
           "company": "Microsoft",
-          "title": "Senior Software Engineer"
-        },
-        {
-          "id": "microsoft-200042041",
-          "company": "Microsoft",
-          "title": "Principal Software Engineer"
-        },
-        {
-          "id": "microsoft-200039991",
-          "company": "Microsoft",
-          "title": "Senior Security Engineer - Red Team"
-        },
-        {
-          "id": "microsoft-200041981",
-          "company": "Microsoft",
-          "title": "Solutions Architect - CTJ - POLY"
+          "title": "Senior Research Engineer - AI Security"
         },
         {
           "id": "microsoft-200029336",
@@ -387,9 +305,19 @@
           "title": "Senior SoC Performance Verification Engineer"
         },
         {
+          "id": "microsoft-200033241",
+          "company": "Microsoft",
+          "title": "Principal Applied Scientist - Auction & Bidding"
+        },
+        {
           "id": "microsoft-200026149",
           "company": "Microsoft",
           "title": "Senior Software Engineer - Azure Storage"
+        },
+        {
+          "id": "microsoft-200039895",
+          "company": "Microsoft",
+          "title": "Senior Software Engineer - CTJ - Poly"
         }
       ],
       "severity": "ok",
@@ -430,6 +358,30 @@
       "enriched_rows": 602,
       "enriched_pct": 100,
       "enriched_with_skills": 602,
+      "skills_pct": 100,
+      "examples": [],
+      "severity": "ok",
+      "flags": []
+    },
+    {
+      "source": "apple",
+      "pool_rows": 44,
+      "us_rows": 36,
+      "tech_us_rows": 20,
+      "raw_sidecar_rows": 83,
+      "sidecar_active_rows": 20,
+      "supplemental_rows": 877,
+      "supplemental_with_desc": 877,
+      "supplemental_meta": {
+        "generated_at": "2026-07-10T23:20:02.104Z",
+        "lane_name": "custom",
+        "jobs_fetched": 4118
+      },
+      "published_rows": 20,
+      "published_pct": 100,
+      "enriched_rows": 20,
+      "enriched_pct": 100,
+      "enriched_with_skills": 20,
       "skills_pct": 100,
       "examples": [],
       "severity": "ok",
