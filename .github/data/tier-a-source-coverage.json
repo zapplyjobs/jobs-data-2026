@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-10T17:37:37.026Z",
+  "generated_at": "2026-07-10T17:56:47.784Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -45,21 +45,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-10T17:36:02.592Z",
+    "generated_at": "2026-07-10T17:55:15.221Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 13909,
-    "description_entries": 12216,
-    "coverage_pct": 87.8,
+    "board_row_count": 14266,
+    "description_entries": 12394,
+    "coverage_pct": 86.9,
     "source_breakdown": {
-      "sidecar": 12216,
+      "sidecar": 12394,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-07-10T17:23:44.656Z",
+    "jobs_metadata_generated": "2026-07-10T17:39:38.084Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-10T17:37:33.795Z",
+    "checked_at": "2026-07-10T17:56:44.683Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -75,22 +75,163 @@
   },
   "rows": [
     {
-      "source": "smartrecruiters",
-      "pool_rows": 1958,
-      "us_rows": 1957,
-      "tech_us_rows": 331,
-      "raw_sidecar_rows": 631,
-      "sidecar_active_rows": 187,
+      "source": "workday",
+      "pool_rows": 51201,
+      "us_rows": 26647,
+      "tech_us_rows": 8513,
+      "raw_sidecar_rows": 27517,
+      "sidecar_active_rows": 6758,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 187,
-      "published_pct": 56.5,
-      "enriched_rows": 233,
-      "enriched_pct": 70.4,
-      "enriched_with_skills": 229,
+      "published_rows": 6582,
+      "published_pct": 77.3,
+      "enriched_rows": 7241,
+      "enriched_pct": 85.1,
+      "enriched_with_skills": 7015,
+      "skills_pct": 96.9,
+      "examples": [
+        {
+          "id": "workday-parsons-R183216",
+          "company": "Parsons",
+          "title": "Cyber Systems Specialist"
+        },
+        {
+          "id": "workday-parsons-R182748",
+          "company": "Parsons",
+          "title": "SCA Maintenance Electrician"
+        },
+        {
+          "id": "workday-parsons-R183165",
+          "company": "Parsons",
+          "title": "Electronics Tech - Fiber Optics/Radio Control System"
+        },
+        {
+          "id": "workday-parsons-R182835",
+          "company": "Parsons",
+          "title": "Mechanical Electrical Inspector"
+        },
+        {
+          "id": "workday-parsons-R182628",
+          "company": "Parsons",
+          "title": "Software Engineer - TS/SCI required"
+        },
+        {
+          "id": "workday-parsons-R183012",
+          "company": "Parsons",
+          "title": "Workflow Support Specialist/Senior Staff Officer Support"
+        },
+        {
+          "id": "workday-parsons-R183008",
+          "company": "Parsons",
+          "title": "Workflow Support Specialist"
+        },
+        {
+          "id": "workday-parsons-R182950",
+          "company": "Parsons",
+          "title": "Technical Lead"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage"
+      ]
+    },
+    {
+      "source": "oracle",
+      "pool_rows": 10771,
+      "us_rows": 6596,
+      "tech_us_rows": 1220,
+      "raw_sidecar_rows": 8467,
+      "sidecar_active_rows": 957,
+      "supplemental_rows": 26527,
+      "supplemental_with_desc": 17630,
+      "supplemental_meta": {
+        "generated_at": "2026-07-10T17:49:05.775Z",
+        "lane_name": "oracle",
+        "jobs_fetched": 26527
+      },
+      "published_rows": 957,
+      "published_pct": 78.4,
+      "enriched_rows": 1190,
+      "enriched_pct": 97.5,
+      "enriched_with_skills": 793,
+      "skills_pct": 66.6,
+      "examples": [
+        {
+          "id": "oracle-citizens-financial-46690",
+          "company": "Citizens Financial Group",
+          "title": "Equity Research Analyst"
+        },
+        {
+          "id": "oracle-citizens-financial-47699",
+          "company": "Citizens Financial Group",
+          "title": "Program Manager - AI Engineering"
+        },
+        {
+          "id": "oracle-cummins-2428332",
+          "company": "Cummins",
+          "title": "Senior Sales Application Engineer"
+        },
+        {
+          "id": "oracle-cummins-2431539",
+          "company": "Cummins",
+          "title": "Controls Engineer"
+        },
+        {
+          "id": "oracle-cummins-2432881",
+          "company": "Cummins",
+          "title": "Embedded Software Architect"
+        },
+        {
+          "id": "oracle-cummins-2432905",
+          "company": "Cummins",
+          "title": "Software Calibration & Validation Specialist"
+        },
+        {
+          "id": "oracle-dell-technologies-R286249",
+          "company": "Dell Technologies",
+          "title": "AI Security Engineer- Senior Advisor"
+        },
+        {
+          "id": "oracle-dell-technologies-R288065",
+          "company": "Dell Technologies",
+          "title": "Senior Principal Mechanical Engineer - Mechanical Engineering Center of Excellence"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage",
+        "low_skill_fill"
+      ]
+    },
+    {
+      "source": "smartrecruiters",
+      "pool_rows": 1963,
+      "us_rows": 1962,
+      "tech_us_rows": 332,
+      "raw_sidecar_rows": 630,
+      "sidecar_active_rows": 185,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 185,
+      "published_pct": 55.7,
+      "enriched_rows": 232,
+      "enriched_pct": 69.9,
+      "enriched_with_skills": 228,
       "skills_pct": 98.3,
       "examples": [
+        {
+          "id": "sr-SmithsGroup2-744000137186342",
+          "company": "Smiths Group",
+          "title": "Mechanical Engineer"
+        },
+        {
+          "id": "sr-ServiceNow-744000137186699",
+          "company": "ServiceNow",
+          "title": "Senior Staff Product Security Engineer   Product Security Incident Response Team (PSIRT)"
+        },
         {
           "id": "sr-ServiceNow-744000137181029",
           "company": "ServiceNow",
@@ -120,16 +261,6 @@
           "id": "sr-ServiceNow-744000137179009",
           "company": "ServiceNow",
           "title": "Sr Enterprise Account Exec, Cybersecurity (SLED)"
-        },
-        {
-          "id": "sr-solidigm-744000137178949",
-          "company": "Solidigm",
-          "title": "DCE SPD Systems Integration Leader"
-        },
-        {
-          "id": "sr-ServiceNow-744000137178849",
-          "company": "ServiceNow",
-          "title": "Sr Enterprise Account Exec, Cybersecurity (SLED)"
         }
       ],
       "severity": "high",
@@ -139,168 +270,95 @@
       ]
     },
     {
-      "source": "oracle",
-      "pool_rows": 10170,
-      "us_rows": 6410,
-      "tech_us_rows": 1104,
-      "raw_sidecar_rows": 8369,
-      "sidecar_active_rows": 957,
-      "supplemental_rows": 33770,
-      "supplemental_with_desc": 24826,
+      "source": "microsoft",
+      "pool_rows": 497,
+      "us_rows": 292,
+      "tech_us_rows": 134,
+      "raw_sidecar_rows": 501,
+      "sidecar_active_rows": 127,
+      "supplemental_rows": 542,
+      "supplemental_with_desc": 48,
       "supplemental_meta": {
-        "generated_at": "2026-07-10T17:35:32.655Z",
-        "lane_name": "oracle",
-        "jobs_fetched": 33770
+        "generated_at": "2026-07-10T17:47:07.594Z",
+        "lane_name": "custom",
+        "jobs_fetched": 3342
       },
-      "published_rows": 957,
-      "published_pct": 86.7,
-      "enriched_rows": 1104,
-      "enriched_pct": 100,
-      "enriched_with_skills": 715,
-      "skills_pct": 64.8,
+      "published_rows": 127,
+      "published_pct": 94.8,
+      "enriched_rows": 127,
+      "enriched_pct": 94.8,
+      "enriched_with_skills": 127,
+      "skills_pct": 100,
       "examples": [
         {
-          "id": "oracle-citizens-financial-46690",
-          "company": "Citizens Financial Group",
-          "title": "Equity Research Analyst"
+          "id": "microsoft-200015425",
+          "company": "Microsoft",
+          "title": "Mechanical Engineer"
         },
         {
-          "id": "oracle-cummins-2428332",
-          "company": "Cummins",
-          "title": "Senior Sales Application Engineer"
+          "id": "microsoft-200041636",
+          "company": "Microsoft",
+          "title": "Senior/Principal Software Engineer"
         },
         {
-          "id": "oracle-cummins-2431539",
-          "company": "Cummins",
-          "title": "Controls Engineer"
+          "id": "microsoft-200035488",
+          "company": "Microsoft",
+          "title": "Principal Product Manager, Data Science & Market Research"
         },
         {
-          "id": "oracle-dell-technologies-R286249",
-          "company": "Dell Technologies",
-          "title": "AI Security Engineer- Senior Advisor"
+          "id": "microsoft-200043155",
+          "company": "Microsoft",
+          "title": "Critical Environment Electrical Engineer"
         },
         {
-          "id": "oracle-dell-technologies-R288065",
-          "company": "Dell Technologies",
-          "title": "Senior Principal Mechanical Engineer - Mechanical Engineering Center of Excellence"
+          "id": "microsoft-200041981",
+          "company": "Microsoft",
+          "title": "Solutions Architect - CTJ - POLY"
         },
         {
-          "id": "oracle-dell-technologies-293513",
-          "company": "Dell Technologies",
-          "title": "Cybersecurity Senior Advisor - Security Data Management (SDM)"
+          "id": "microsoft-200042373",
+          "company": "Microsoft",
+          "title": "Technical Support Engineer"
         },
         {
-          "id": "oracle-dell-technologies-294268",
-          "company": "Dell Technologies",
-          "title": "Systems Development Engineer 1"
-        },
-        {
-          "id": "oracle-grant-thornton-115193",
-          "company": "Grant Thornton",
-          "title": "Transformation - Oracle Solution Architect"
-        }
-      ],
-      "severity": "medium",
-      "flags": [
-        "low_skill_fill"
-      ]
-    },
-    {
-      "source": "workday",
-      "pool_rows": 51001,
-      "us_rows": 26312,
-      "tech_us_rows": 8399,
-      "raw_sidecar_rows": 27508,
-      "sidecar_active_rows": 7016,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 7016,
-      "published_pct": 83.5,
-      "enriched_rows": 7492,
-      "enriched_pct": 89.2,
-      "enriched_with_skills": 7176,
-      "skills_pct": 95.8,
-      "examples": [
-        {
-          "id": "workday-snap-R0045762",
-          "company": "Snap",
-          "title": "Manager, Software Engineering,  Ads Data Infra"
-        },
-        {
-          "id": "workday-wells-fargo-R-555762",
-          "company": "Wells Fargo",
-          "title": "Lead Software Engineer - Observability Events Management"
-        },
-        {
-          "id": "workday-wells-fargo-R-520285",
-          "company": "Wells Fargo",
-          "title": "Senior Specialty Protocol Engineer"
-        },
-        {
-          "id": "workday-wells-fargo-R-540248",
-          "company": "Wells Fargo",
-          "title": "Lead Information Security Engineer"
-        },
-        {
-          "id": "workday-wells-fargo-R-551337",
-          "company": "Wells Fargo",
-          "title": "Lead Systems Operations Engineer - IT Capacity Governance"
-        },
-        {
-          "id": "workday-thermo-fisher-scientific-R-01358101",
-          "company": "Thermo Fisher Scientific",
-          "title": "Automation Engineer III"
-        },
-        {
-          "id": "workday-verizon-R-1096850",
-          "company": "Verizon",
-          "title": "Sr Mgr Rtl SMB-Business Sales"
-        },
-        {
-          "id": "workday-marvell-2600363",
-          "company": "Marvell",
-          "title": "Staff DFT Engineer"
+          "id": "microsoft-200037953",
+          "company": "Microsoft",
+          "title": "Principal Group Software Engineering Manager"
         }
       ],
       "severity": "ok",
       "flags": []
     },
     {
-      "source": "microsoft",
-      "pool_rows": 516,
-      "us_rows": 302,
-      "tech_us_rows": 137,
-      "raw_sidecar_rows": 504,
-      "sidecar_active_rows": 134,
-      "supplemental_rows": 543,
-      "supplemental_with_desc": 27,
+      "source": "apple",
+      "pool_rows": 378,
+      "us_rows": 319,
+      "tech_us_rows": 206,
+      "raw_sidecar_rows": 514,
+      "sidecar_active_rows": 204,
+      "supplemental_rows": 67,
+      "supplemental_with_desc": 67,
       "supplemental_meta": {
-        "generated_at": "2026-07-10T17:33:45.737Z",
+        "generated_at": "2026-07-10T17:47:07.594Z",
         "lane_name": "custom",
-        "jobs_fetched": 4153
+        "jobs_fetched": 3342
       },
-      "published_rows": 134,
-      "published_pct": 97.8,
-      "enriched_rows": 137,
-      "enriched_pct": 100,
-      "enriched_with_skills": 137,
-      "skills_pct": 100,
+      "published_rows": 204,
+      "published_pct": 99,
+      "enriched_rows": 185,
+      "enriched_pct": 89.8,
+      "enriched_with_skills": 144,
+      "skills_pct": 77.8,
       "examples": [
         {
-          "id": "microsoft-200039247",
-          "company": "Microsoft",
-          "title": "Software Engineering Manager"
+          "id": "apple-200671928",
+          "company": "Apple",
+          "title": "Compute Runtime Software Engineer"
         },
         {
-          "id": "microsoft-200041743",
-          "company": "Microsoft",
-          "title": "Senior Research Engineer - AI Security"
-        },
-        {
-          "id": "microsoft-200041596",
-          "company": "Microsoft",
-          "title": "Software Engineer - Commercial Engineering & AI (CEAI)"
+          "id": "apple-200671378",
+          "company": "Apple",
+          "title": "Staff Machine Learning Research Engineer, App Store Search"
         }
       ],
       "severity": "ok",
@@ -341,30 +399,6 @@
       "enriched_rows": 602,
       "enriched_pct": 100,
       "enriched_with_skills": 602,
-      "skills_pct": 100,
-      "examples": [],
-      "severity": "ok",
-      "flags": []
-    },
-    {
-      "source": "apple",
-      "pool_rows": 42,
-      "us_rows": 34,
-      "tech_us_rows": 17,
-      "raw_sidecar_rows": 83,
-      "sidecar_active_rows": 17,
-      "supplemental_rows": 877,
-      "supplemental_with_desc": 877,
-      "supplemental_meta": {
-        "generated_at": "2026-07-10T17:33:45.737Z",
-        "lane_name": "custom",
-        "jobs_fetched": 4153
-      },
-      "published_rows": 17,
-      "published_pct": 100,
-      "enriched_rows": 17,
-      "enriched_pct": 100,
-      "enriched_with_skills": 17,
       "skills_pct": 100,
       "examples": [],
       "severity": "ok",
