@@ -193,6 +193,15 @@ jobs:
             echo "Push attempt $i failed, retrying in 5s..."
             sleep 5
           done
+      - name: Upload dashboard data to R2 (INF-R2-GITCUTOVER-1)
+        if: success()
+        continue-on-error: true
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: node scripts/upload-dashboard-data-to-r2.js enrichment-stats.json jobs-metadata.json enrichment-history.jsonl
 
       - name: Trigger pipeline alert
         if: success()
