@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-10T19:07:46.377Z",
+  "generated_at": "2026-07-10T19:22:53.981Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -45,21 +45,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-10T19:06:00.467Z",
+    "generated_at": "2026-07-10T19:21:02.866Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 14450,
-    "description_entries": 12411,
-    "coverage_pct": 85.9,
+    "board_row_count": 14443,
+    "description_entries": 12158,
+    "coverage_pct": 84.2,
     "source_breakdown": {
-      "sidecar": 12411,
+      "sidecar": 12158,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-07-10T18:54:40.599Z",
+    "jobs_metadata_generated": "2026-07-10T19:08:19.833Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-10T19:07:42.457Z",
+    "checked_at": "2026-07-10T19:22:50.603Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -75,25 +75,88 @@
   },
   "rows": [
     {
+      "source": "workday",
+      "pool_rows": 52381,
+      "us_rows": 27458,
+      "tech_us_rows": 8887,
+      "raw_sidecar_rows": 27501,
+      "sidecar_active_rows": 7015,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 7013,
+      "published_pct": 78.9,
+      "enriched_rows": 7363,
+      "enriched_pct": 82.9,
+      "enriched_with_skills": 7131,
+      "skills_pct": 96.8,
+      "examples": [
+        {
+          "id": "workday-parsons-R182628",
+          "company": "Parsons",
+          "title": "Software Engineer - TS/SCI required"
+        },
+        {
+          "id": "workday-nxp-R-10064843",
+          "company": "NXP",
+          "title": "ECHO EQUIPMENT ENGINEER"
+        },
+        {
+          "id": "workday-nxp-R-10064840",
+          "company": "NXP",
+          "title": "Plasma ETCH Process Engineer"
+        },
+        {
+          "id": "workday-wells-fargo-R-556844",
+          "company": "Wells Fargo",
+          "title": "Senior Lead Product Manager - Agentic AI & Automation (HR)"
+        },
+        {
+          "id": "workday-wells-fargo-R-546740",
+          "company": "Wells Fargo",
+          "title": "Lead Network Automation Engineer"
+        },
+        {
+          "id": "workday-wells-fargo-R-552156",
+          "company": "Wells Fargo",
+          "title": "Lead Network Automation Engineer"
+        },
+        {
+          "id": "workday-wells-fargo-R-555762",
+          "company": "Wells Fargo",
+          "title": "Lead Software Engineer - Observability Events Management"
+        },
+        {
+          "id": "workday-wells-fargo-R-520285",
+          "company": "Wells Fargo",
+          "title": "Senior Specialty Protocol Engineer"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage"
+      ]
+    },
+    {
       "source": "oracle",
-      "pool_rows": 10824,
-      "us_rows": 6667,
-      "tech_us_rows": 1235,
-      "raw_sidecar_rows": 8656,
-      "sidecar_active_rows": 985,
-      "supplemental_rows": 35060,
-      "supplemental_with_desc": 25891,
+      "pool_rows": 10118,
+      "us_rows": 6173,
+      "tech_us_rows": 1138,
+      "raw_sidecar_rows": 7943,
+      "sidecar_active_rows": 886,
+      "supplemental_rows": 26522,
+      "supplemental_with_desc": 17800,
       "supplemental_meta": {
-        "generated_at": "2026-07-10T19:05:40.418Z",
+        "generated_at": "2026-07-10T19:19:17.349Z",
         "lane_name": "oracle",
-        "jobs_fetched": 35060
+        "jobs_fetched": 26522
       },
-      "published_rows": 985,
-      "published_pct": 79.8,
-      "enriched_rows": 1235,
+      "published_rows": 886,
+      "published_pct": 77.9,
+      "enriched_rows": 1138,
       "enriched_pct": 100,
-      "enriched_with_skills": 880,
-      "skills_pct": 71.3,
+      "enriched_with_skills": 835,
+      "skills_pct": 73.4,
       "examples": [
         {
           "id": "oracle-citizens-financial-46690",
@@ -143,18 +206,18 @@
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 1971,
-      "us_rows": 1970,
-      "tech_us_rows": 338,
-      "raw_sidecar_rows": 646,
-      "sidecar_active_rows": 199,
+      "pool_rows": 1967,
+      "us_rows": 1966,
+      "tech_us_rows": 337,
+      "raw_sidecar_rows": 641,
+      "sidecar_active_rows": 196,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 199,
-      "published_pct": 58.9,
+      "published_rows": 196,
+      "published_pct": 58.2,
       "enriched_rows": 234,
-      "enriched_pct": 69.2,
+      "enriched_pct": 69.4,
       "enriched_with_skills": 230,
       "skills_pct": 98.3,
       "examples": [
@@ -206,61 +269,40 @@
       ]
     },
     {
-      "source": "workday",
-      "pool_rows": 51802,
-      "us_rows": 27131,
-      "tech_us_rows": 8799,
-      "raw_sidecar_rows": 27475,
-      "sidecar_active_rows": 7167,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 7166,
-      "published_pct": 81.4,
-      "enriched_rows": 7317,
-      "enriched_pct": 83.2,
-      "enriched_with_skills": 7077,
-      "skills_pct": 96.7,
+      "source": "microsoft",
+      "pool_rows": 508,
+      "us_rows": 308,
+      "tech_us_rows": 141,
+      "raw_sidecar_rows": 497,
+      "sidecar_active_rows": 138,
+      "supplemental_rows": 543,
+      "supplemental_with_desc": 36,
+      "supplemental_meta": {
+        "generated_at": "2026-07-10T19:17:24.336Z",
+        "lane_name": "custom",
+        "jobs_fetched": 3339
+      },
+      "published_rows": 138,
+      "published_pct": 97.9,
+      "enriched_rows": 141,
+      "enriched_pct": 100,
+      "enriched_with_skills": 141,
+      "skills_pct": 100,
       "examples": [
         {
-          "id": "workday-parsons-R182628",
-          "company": "Parsons",
-          "title": "Software Engineer - TS/SCI required"
+          "id": "microsoft-200039247",
+          "company": "Microsoft",
+          "title": "Software Engineering Manager"
         },
         {
-          "id": "workday-snap-R0045762",
-          "company": "Snap",
-          "title": "Manager, Software Engineering,  Ads Data Infra"
+          "id": "microsoft-200033241",
+          "company": "Microsoft",
+          "title": "Principal Applied Scientist - Auction & Bidding"
         },
         {
-          "id": "workday-marvell-2600363",
-          "company": "Marvell",
-          "title": "Staff DFT Engineer"
-        },
-        {
-          "id": "workday-marvell-2600364",
-          "company": "Marvell",
-          "title": "Senior Staff DFT Engineer"
-        },
-        {
-          "id": "workday-wells-fargo-R-540248",
-          "company": "Wells Fargo",
-          "title": "Lead Information Security Engineer"
-        },
-        {
-          "id": "workday-wells-fargo-R-546740",
-          "company": "Wells Fargo",
-          "title": "Lead Network Automation Engineer"
-        },
-        {
-          "id": "workday-wells-fargo-R-555762",
-          "company": "Wells Fargo",
-          "title": "Lead Software Engineer - Observability Events Management"
-        },
-        {
-          "id": "workday-wells-fargo-R-520285",
-          "company": "Wells Fargo",
-          "title": "Senior Specialty Protocol Engineer"
+          "id": "microsoft-200042414",
+          "company": "Microsoft",
+          "title": "Software Engineering IC4"
         }
       ],
       "severity": "ok",
@@ -284,30 +326,6 @@
       "skills_pct": 0,
       "examples": [],
       "severity": "info",
-      "flags": []
-    },
-    {
-      "source": "microsoft",
-      "pool_rows": 501,
-      "us_rows": 303,
-      "tech_us_rows": 139,
-      "raw_sidecar_rows": 501,
-      "sidecar_active_rows": 139,
-      "supplemental_rows": 542,
-      "supplemental_with_desc": 44,
-      "supplemental_meta": {
-        "generated_at": "2026-07-10T19:03:56.824Z",
-        "lane_name": "custom",
-        "jobs_fetched": 4149
-      },
-      "published_rows": 139,
-      "published_pct": 100,
-      "enriched_rows": 139,
-      "enriched_pct": 100,
-      "enriched_with_skills": 139,
-      "skills_pct": 100,
-      "examples": [],
-      "severity": "ok",
       "flags": []
     },
     {
@@ -335,14 +353,14 @@
       "pool_rows": 43,
       "us_rows": 35,
       "tech_us_rows": 19,
-      "raw_sidecar_rows": 86,
+      "raw_sidecar_rows": 84,
       "sidecar_active_rows": 19,
-      "supplemental_rows": 876,
-      "supplemental_with_desc": 876,
+      "supplemental_rows": 65,
+      "supplemental_with_desc": 65,
       "supplemental_meta": {
-        "generated_at": "2026-07-10T19:03:56.824Z",
+        "generated_at": "2026-07-10T19:17:24.336Z",
         "lane_name": "custom",
-        "jobs_fetched": 4149
+        "jobs_fetched": 3339
       },
       "published_rows": 19,
       "published_pct": 100,
