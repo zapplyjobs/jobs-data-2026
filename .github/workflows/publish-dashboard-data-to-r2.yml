@@ -4,8 +4,10 @@ name: Publish dashboard data to R2
 # from the checkout + uploads to R2 every 15 min. Once the producer workflows upload directly
 # (steady state) + the files are untracked, this workflow is retired.
 on:
-  schedule:
-    - cron: '*/15 * * * *'
+  # schedule REMOVED 2026-07-10: all 12 dashboard data files are now untracked + producers
+  # (collect-metrics/enrich-jobs/daily-stats/pipeline-alert/verify-discord + the general-review
+  # generator in jobs-aggregator-private) upload directly to R2. This bridge was the interim
+  # git→R2 mirror; it's now a no-op. Kept workflow_dispatch as a manual one-shot fallback.
   workflow_dispatch:
 permissions:
   contents: read
