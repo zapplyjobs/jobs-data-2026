@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-10T18:26:37.951Z",
+  "generated_at": "2026-07-10T18:42:24.664Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -45,13 +45,13 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-10T18:25:11.517Z",
+    "generated_at": "2026-07-10T18:40:45.167Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 14185,
-    "description_entries": 12058,
-    "coverage_pct": 85,
+    "board_row_count": 14460,
+    "description_entries": 12367,
+    "coverage_pct": 85.5,
     "source_breakdown": {
-      "sidecar": 12058,
+      "sidecar": 12367,
       "inline": 0
     },
     "jobs_metadata_generated": "2026-07-10T17:39:38.084Z",
@@ -59,7 +59,7 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-10T18:26:34.312Z",
+    "checked_at": "2026-07-10T18:42:21.156Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -75,24 +75,87 @@
   },
   "rows": [
     {
+      "source": "workday",
+      "pool_rows": 52019,
+      "us_rows": 27436,
+      "tech_us_rows": 8797,
+      "raw_sidecar_rows": 27417,
+      "sidecar_active_rows": 7068,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 6886,
+      "published_pct": 78.3,
+      "enriched_rows": 7286,
+      "enriched_pct": 82.8,
+      "enriched_with_skills": 7049,
+      "skills_pct": 96.7,
+      "examples": [
+        {
+          "id": "workday-arkansas-children's-R0023561",
+          "company": "Arkansas Children's",
+          "title": "Information Security Engineer II"
+        },
+        {
+          "id": "workday-arkansas-children's-R0023574",
+          "company": "Arkansas Children's",
+          "title": "Systems Analytics Analyst II"
+        },
+        {
+          "id": "workday-citi-26973551",
+          "company": "Citi",
+          "title": "Application Development Technology Lead -Senior Java Developer"
+        },
+        {
+          "id": "workday-citi-26961264",
+          "company": "Citi",
+          "title": "VP Java Applications Development Sr. Tech Lead"
+        },
+        {
+          "id": "workday-citi-26966419",
+          "company": "Citi",
+          "title": "Apps Development Sr Manager - C13 - TAMPA"
+        },
+        {
+          "id": "workday-booz-allen-hamilton-R0244142",
+          "company": "Booz Allen Hamilton",
+          "title": "Security Administrator"
+        },
+        {
+          "id": "workday-booz-allen-hamilton-R0237805",
+          "company": "Booz Allen Hamilton",
+          "title": "Cloud Security Engineer"
+        },
+        {
+          "id": "workday-booz-allen-hamilton-R0244130",
+          "company": "Booz Allen Hamilton",
+          "title": "Engineering Project Officer"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage"
+      ]
+    },
+    {
       "source": "oracle",
-      "pool_rows": 10294,
-      "us_rows": 6311,
-      "tech_us_rows": 1069,
-      "raw_sidecar_rows": 8252,
-      "sidecar_active_rows": 820,
-      "supplemental_rows": 34715,
-      "supplemental_with_desc": 25556,
+      "pool_rows": 10856,
+      "us_rows": 6661,
+      "tech_us_rows": 1217,
+      "raw_sidecar_rows": 8148,
+      "sidecar_active_rows": 819,
+      "supplemental_rows": 32203,
+      "supplemental_with_desc": 23260,
       "supplemental_meta": {
-        "generated_at": "2026-07-10T18:20:24.631Z",
+        "generated_at": "2026-07-10T18:34:49.597Z",
         "lane_name": "oracle",
-        "jobs_fetched": 34715
+        "jobs_fetched": 32203
       },
-      "published_rows": 561,
-      "published_pct": 52.5,
-      "enriched_rows": 1058,
-      "enriched_pct": 99,
-      "enriched_with_skills": 715,
+      "published_rows": 819,
+      "published_pct": 67.3,
+      "enriched_rows": 1068,
+      "enriched_pct": 87.8,
+      "enriched_with_skills": 722,
       "skills_pct": 67.6,
       "examples": [
         {
@@ -143,99 +206,36 @@
       ]
     },
     {
-      "source": "apple",
-      "pool_rows": 375,
-      "us_rows": 316,
-      "tech_us_rows": 203,
-      "raw_sidecar_rows": 610,
-      "sidecar_active_rows": 203,
-      "supplemental_rows": 878,
-      "supplemental_with_desc": 878,
-      "supplemental_meta": {
-        "generated_at": "2026-07-10T18:18:42.176Z",
-        "lane_name": "custom",
-        "jobs_fetched": 4148
-      },
-      "published_rows": 19,
-      "published_pct": 9.4,
-      "enriched_rows": 202,
-      "enriched_pct": 99.5,
-      "enriched_with_skills": 201,
-      "skills_pct": 99.5,
-      "examples": [
-        {
-          "id": "apple-200671933",
-          "company": "Apple",
-          "title": "Agentic AI Product Manager, Platform - Sales"
-        },
-        {
-          "id": "apple-200671837",
-          "company": "Apple",
-          "title": "Engineering Manager - Ads Recommendations"
-        },
-        {
-          "id": "apple-200658882",
-          "company": "Apple",
-          "title": "Data Center Analog/Mixed-Signal IP Engineering Program Manager"
-        },
-        {
-          "id": "apple-200635007",
-          "company": "Apple",
-          "title": "Software Engineer (Full Stack), eBusiness Services"
-        },
-        {
-          "id": "apple-200671634",
-          "company": "Apple",
-          "title": "Software Engineer - Model Performance - Special Projects"
-        },
-        {
-          "id": "apple-200643348",
-          "company": "Apple",
-          "title": "Swift Software Engineer - Agentic OS Experiences"
-        },
-        {
-          "id": "apple-200643345",
-          "company": "Apple",
-          "title": "Senior Swift Software Engineer - Agentic OS Experiences"
-        },
-        {
-          "id": "apple-200671605",
-          "company": "Apple",
-          "title": "Senior Software Engineering Manager, Agentic Infrastructure"
-        }
-      ],
-      "severity": "high",
-      "flags": [
-        "low_published_coverage",
-        "supplemental_stage_gap"
-      ]
-    },
-    {
       "source": "smartrecruiters",
       "pool_rows": 1962,
       "us_rows": 1961,
-      "tech_us_rows": 333,
-      "raw_sidecar_rows": 638,
-      "sidecar_active_rows": 191,
+      "tech_us_rows": 335,
+      "raw_sidecar_rows": 637,
+      "sidecar_active_rows": 193,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 199,
-      "published_pct": 59.8,
-      "enriched_rows": 230,
-      "enriched_pct": 69.1,
-      "enriched_with_skills": 226,
+      "published_rows": 193,
+      "published_pct": 57.6,
+      "enriched_rows": 231,
+      "enriched_pct": 69,
+      "enriched_with_skills": 227,
       "skills_pct": 98.3,
       "examples": [
+        {
+          "id": "sr-AbbVie-3743990014039731",
+          "company": "AbbVie",
+          "title": "Associate Director, Utilities Engineering"
+        },
+        {
+          "id": "sr-AbbVie-3743990014040026",
+          "company": "AbbVie",
+          "title": "Senior Design Verification Engineer I"
+        },
         {
           "id": "sr-Sandisk-744000137191590",
           "company": "Sandisk",
           "title": "New College Grad, SSD Firmware Engineer"
-        },
-        {
-          "id": "sr-AbbVie-3743990014039126",
-          "company": "AbbVie",
-          "title": "Data Science Program Lead I - Hybrid"
         },
         {
           "id": "sr-VeoliaEnvironnementSA-744000137191029",
@@ -261,11 +261,6 @@
           "id": "sr-ServiceNow-744000137180889",
           "company": "ServiceNow",
           "title": "Enterprise Account Exec, Commercial (Cybersecurity, Financial Services)"
-        },
-        {
-          "id": "sr-ServiceNow-744000137179629",
-          "company": "ServiceNow",
-          "title": "Sr Enterprise Account Exec, Cybersecurity (SLED)"
         }
       ],
       "severity": "high",
@@ -275,112 +270,26 @@
       ]
     },
     {
-      "source": "workday",
-      "pool_rows": 52020,
-      "us_rows": 27152,
-      "tech_us_rows": 8809,
-      "raw_sidecar_rows": 28037,
-      "sidecar_active_rows": 6896,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 7065,
-      "published_pct": 80.2,
-      "enriched_rows": 7268,
-      "enriched_pct": 82.5,
-      "enriched_with_skills": 7029,
-      "skills_pct": 96.7,
-      "examples": [
-        {
-          "id": "workday-schweitzer-engineering-laboratories-2026-20329",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Senior Engineering Technician"
-        },
-        {
-          "id": "workday-schweitzer-engineering-laboratories-2026-21555",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Hardware Engineer – VHDL RTL Digital Logic"
-        },
-        {
-          "id": "workday-schweitzer-engineering-laboratories-2025-18714",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Project Engineer I/II/III - Automation"
-        },
-        {
-          "id": "workday-schweitzer-engineering-laboratories-2025-18525",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Installation Technician"
-        },
-        {
-          "id": "workday-schweitzer-engineering-laboratories-2026-19558",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Relay Technician"
-        },
-        {
-          "id": "workday-schweitzer-engineering-laboratories-2025-18875",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Primary Equipment Technician"
-        },
-        {
-          "id": "workday-schweitzer-engineering-laboratories-2026-20421",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Project Engineer I/II/III - Commissioning"
-        },
-        {
-          "id": "workday-schweitzer-engineering-laboratories-2026-21278",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Project Engineer II/III - Automation"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
-    },
-    {
       "source": "microsoft",
       "pool_rows": 516,
       "us_rows": 305,
-      "tech_us_rows": 140,
-      "raw_sidecar_rows": 495,
-      "sidecar_active_rows": 134,
-      "supplemental_rows": 542,
-      "supplemental_with_desc": 55,
+      "tech_us_rows": 139,
+      "raw_sidecar_rows": 493,
+      "sidecar_active_rows": 133,
+      "supplemental_rows": 543,
+      "supplemental_with_desc": 56,
       "supplemental_meta": {
-        "generated_at": "2026-07-10T18:18:42.176Z",
+        "generated_at": "2026-07-10T18:38:52.657Z",
         "lane_name": "custom",
-        "jobs_fetched": 4148
+        "jobs_fetched": 3341
       },
-      "published_rows": 125,
-      "published_pct": 89.3,
-      "enriched_rows": 134,
-      "enriched_pct": 95.7,
-      "enriched_with_skills": 134,
+      "published_rows": 133,
+      "published_pct": 95.7,
+      "enriched_rows": 139,
+      "enriched_pct": 100,
+      "enriched_with_skills": 139,
       "skills_pct": 100,
       "examples": [
-        {
-          "id": "microsoft-200018305",
-          "company": "Microsoft",
-          "title": "Multidisciplinary Manager, Industry Solutions Engineering (ISE) / Data Science"
-        },
-        {
-          "id": "microsoft-200015425",
-          "company": "Microsoft",
-          "title": "Mechanical Engineer"
-        },
-        {
-          "id": "microsoft-200041636",
-          "company": "Microsoft",
-          "title": "Senior/Principal Software Engineer"
-        },
-        {
-          "id": "microsoft-200035488",
-          "company": "Microsoft",
-          "title": "Principal Product Manager, Data Science & Market Research"
-        },
-        {
-          "id": "microsoft-200042636",
-          "company": "Microsoft",
-          "title": "Sourcing Engineer"
-        },
         {
           "id": "microsoft-200043155",
           "company": "Microsoft",
@@ -392,9 +301,24 @@
           "title": "Solutions Architect - CTJ - POLY"
         },
         {
-          "id": "microsoft-200042373",
+          "id": "microsoft-200042198",
           "company": "Microsoft",
-          "title": "Technical Support Engineer"
+          "title": "Software Engineer II - Compromise & Fraud Protection"
+        },
+        {
+          "id": "microsoft-200041407",
+          "company": "Microsoft",
+          "title": "Senior Azure Customer Engineer (ACE)"
+        },
+        {
+          "id": "microsoft-200040505",
+          "company": "Microsoft",
+          "title": "Sr. Cloud Solution Architect - CTJ - TS/SCI"
+        },
+        {
+          "id": "microsoft-200009282",
+          "company": "Microsoft",
+          "title": "Senior Software Engineering"
         }
       ],
       "severity": "ok",
@@ -436,6 +360,30 @@
       "enriched_pct": 100,
       "enriched_with_skills": 602,
       "skills_pct": 100,
+      "examples": [],
+      "severity": "ok",
+      "flags": []
+    },
+    {
+      "source": "apple",
+      "pool_rows": 376,
+      "us_rows": 316,
+      "tech_us_rows": 203,
+      "raw_sidecar_rows": 698,
+      "sidecar_active_rows": 203,
+      "supplemental_rows": 67,
+      "supplemental_with_desc": 67,
+      "supplemental_meta": {
+        "generated_at": "2026-07-10T18:38:52.657Z",
+        "lane_name": "custom",
+        "jobs_fetched": 3341
+      },
+      "published_rows": 203,
+      "published_pct": 100,
+      "enriched_rows": 203,
+      "enriched_pct": 100,
+      "enriched_with_skills": 202,
+      "skills_pct": 99.5,
       "examples": [],
       "severity": "ok",
       "flags": []
