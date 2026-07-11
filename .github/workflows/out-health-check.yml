@@ -27,9 +27,13 @@ jobs:
       id: checks
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+        R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+        R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
       run: |
         python3 - <<'PYEOF'
-        import json, urllib.request, datetime, sys, os, time
+        import json, urllib.request, datetime, sys, os, time, subprocess
         gh_token = os.environ.get("GH_TOKEN", "")
 
         now = datetime.datetime.now(datetime.timezone.utc)
@@ -266,6 +270,24 @@ jobs:
             f.write("\n".join(summary_lines) + "\n")
 
         print("\n".join(summary_lines))
+
+        # Phase 4: persist results to R2 for dashboard consumption
+        try:
+            subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'boto3', '-q'], stderr=subprocess.DEVNULL)
+            import boto3
+            s3 = boto3.client('s3',
+                endpoint_url=os.environ.get('R2_ENDPOINT', ''),
+                aws_access_key_id=os.environ.get('R2_ACCESS_KEY_ID', ''),
+                aws_secret_access_key=os.environ.get('R2_SECRET_ACCESS_KEY', ''),
+                region_name='auto')
+            s3.put_object(
+                Bucket=os.environ.get('R2_BUCKET_NAME', 'zjp-data'),
+                Key='data/out-health-check.json',
+                Body=json.dumps(results, indent=2),
+                ContentType='application/json')
+            print("Results uploaded to R2: data/out-health-check.json")
+        except Exception as e:
+            print(f"R2 upload skipped: {e}")
 
         if issues:
             sys.exit(1)
