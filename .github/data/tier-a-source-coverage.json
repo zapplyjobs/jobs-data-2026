@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-11T21:45:32.881Z",
+  "generated_at": "2026-07-11T22:15:58.479Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -47,21 +47,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-11T21:36:36.777Z",
+    "generated_at": "2026-07-11T22:06:25.180Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 14668,
-    "description_entries": 14200,
-    "coverage_pct": 96.8,
+    "board_row_count": 14704,
+    "description_entries": 14243,
+    "coverage_pct": 96.9,
     "source_breakdown": {
-      "sidecar": 14200,
+      "sidecar": 14243,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-07-11T21:21:12.164Z",
+    "jobs_metadata_generated": "2026-07-11T21:50:28.246Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-11T21:45:29.746Z",
+    "checked_at": "2026-07-11T22:15:55.008Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -78,17 +78,17 @@
   "rows": [
     {
       "source": "oracle",
-      "pool_rows": 11112,
-      "us_rows": 6947,
+      "pool_rows": 11164,
+      "us_rows": 6957,
       "tech_us_rows": 1279,
       "raw_sidecar_rows": 8573,
       "sidecar_active_rows": 985,
-      "supplemental_rows": 35034,
-      "supplemental_with_desc": 25893,
+      "supplemental_rows": 32978,
+      "supplemental_with_desc": 24195,
       "supplemental_meta": {
-        "generated_at": "2026-07-11T21:35:02.400Z",
+        "generated_at": "2026-07-11T22:04:57.180Z",
         "lane_name": "oracle",
-        "jobs_fetched": 35034
+        "jobs_fetched": 32978
       },
       "published_rows": 985,
       "published_pct": 77,
@@ -145,21 +145,26 @@
     },
     {
       "source": "workday",
-      "pool_rows": 52821,
-      "us_rows": 27518,
-      "tech_us_rows": 8853,
-      "raw_sidecar_rows": 32113,
-      "sidecar_active_rows": 8747,
+      "pool_rows": 52795,
+      "us_rows": 27722,
+      "tech_us_rows": 8923,
+      "raw_sidecar_rows": 27649,
+      "sidecar_active_rows": 6606,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 8695,
-      "published_pct": 98.2,
-      "enriched_rows": 8772,
-      "enriched_pct": 99.1,
-      "enriched_with_skills": 8449,
+      "published_rows": 8668,
+      "published_pct": 97.1,
+      "enriched_rows": 8825,
+      "enriched_pct": 98.9,
+      "enriched_with_skills": 8502,
       "skills_pct": 96.3,
       "examples": [
+        {
+          "id": "workday-usaa-R0117624",
+          "company": "USAA",
+          "title": "AVP, Application Development - USAA Investment Services Company (ISCO)"
+        },
         {
           "id": "workday-boston-dynamics-R2296",
           "company": "Boston Dynamics",
@@ -171,38 +176,57 @@
           "title": "Software Engineer - TS/SCI required"
         },
         {
-          "id": "workday-aerovironment-8085",
-          "company": "AeroVironment",
-          "title": "Avionics Tech II"
+          "id": "workday-microchip-technology-R2922-26",
+          "company": "Microchip Technology",
+          "title": "Senior Engineer II-Applications"
         },
         {
-          "id": "workday-pfizer-4954072",
-          "company": "Pfizer",
-          "title": "AI/ML Engineer - Vaccines Modeling and Antigen Discovery"
+          "id": "workday-microchip-technology-R3052-26",
+          "company": "Microchip Technology",
+          "title": "Senior Engineer II - Validation"
         },
         {
-          "id": "workday-thermo-fisher-scientific-R-01360601",
-          "company": "Thermo Fisher Scientific",
-          "title": "Research Technician- Screening"
+          "id": "workday-microchip-technology-R2120-26",
+          "company": "Microchip Technology",
+          "title": "Engineer II-Test"
         },
         {
-          "id": "workday-transunion-19041202",
-          "company": "TransUnion",
-          "title": "International Platform Strategy Advisor"
+          "id": "workday-guidehouse-40775",
+          "company": "Guidehouse",
+          "title": "Kubernetes Administrator"
         },
         {
-          "id": "workday-semtech-REQ3354",
-          "company": "Semtech",
-          "title": "Senior Staff Failure Analysis Engineer"
-        },
-        {
-          "id": "workday-tel-R26-01071",
-          "company": "TEL",
-          "title": "Technical Support Engineer - CT"
+          "id": "workday-micron-JR102420",
+          "company": "Micron",
+          "title": "ENGINEER, DEMQRA AUTOMOTIVE PQRE"
         }
       ],
-      "severity": "ok",
-      "flags": []
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
+    },
+    {
+      "source": "smartrecruiters",
+      "pool_rows": 1986,
+      "us_rows": 1985,
+      "tech_us_rows": 346,
+      "raw_sidecar_rows": 1143,
+      "sidecar_active_rows": 301,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 346,
+      "published_pct": 100,
+      "enriched_rows": 346,
+      "enriched_pct": 100,
+      "enriched_with_skills": 341,
+      "skills_pct": 98.6,
+      "examples": [],
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
     },
     {
       "source": "microsoft",
@@ -212,9 +236,9 @@
       "raw_sidecar_rows": 500,
       "sidecar_active_rows": 160,
       "supplemental_rows": 535,
-      "supplemental_with_desc": 30,
+      "supplemental_with_desc": 26,
       "supplemental_meta": {
-        "generated_at": "2026-07-11T21:32:35.416Z",
+        "generated_at": "2026-07-11T22:02:40.450Z",
         "lane_name": "custom",
         "jobs_fetched": 3306
       },
@@ -244,8 +268,8 @@
       "pool_rows": 1451,
       "us_rows": 1451,
       "tech_us_rows": 601,
-      "raw_sidecar_rows": 1449,
-      "sidecar_active_rows": 600,
+      "raw_sidecar_rows": 1451,
+      "sidecar_active_rows": 601,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
@@ -262,26 +286,6 @@
           "title": "Research Scientist Intern (TikTok Recommendation-LLMs, RL, GenAI) - 2026 Start (PhD)"
         }
       ],
-      "severity": "ok",
-      "flags": []
-    },
-    {
-      "source": "smartrecruiters",
-      "pool_rows": 1986,
-      "us_rows": 1985,
-      "tech_us_rows": 346,
-      "raw_sidecar_rows": 1199,
-      "sidecar_active_rows": 346,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 346,
-      "published_pct": 100,
-      "enriched_rows": 346,
-      "enriched_pct": 100,
-      "enriched_with_skills": 341,
-      "skills_pct": 98.6,
-      "examples": [],
       "severity": "ok",
       "flags": []
     },
@@ -315,7 +319,7 @@
       "supplemental_rows": 67,
       "supplemental_with_desc": 67,
       "supplemental_meta": {
-        "generated_at": "2026-07-11T21:32:35.416Z",
+        "generated_at": "2026-07-11T22:02:40.450Z",
         "lane_name": "custom",
         "jobs_fetched": 3306
       },
