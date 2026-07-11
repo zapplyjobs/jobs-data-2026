@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-11T15:20:50.508Z",
+  "generated_at": "2026-07-11T15:22:53.789Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -45,13 +45,13 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-11T15:06:24.782Z",
+    "generated_at": "2026-07-11T15:21:28.483Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 14614,
-    "description_entries": 11794,
-    "coverage_pct": 80.7,
+    "board_row_count": 14567,
+    "description_entries": 11986,
+    "coverage_pct": 82.3,
     "source_breakdown": {
-      "sidecar": 11794,
+      "sidecar": 11986,
       "inline": 0
     },
     "jobs_metadata_generated": "2026-07-11T14:07:08.275Z",
@@ -59,7 +59,7 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-11T15:20:46.586Z",
+    "checked_at": "2026-07-11T15:22:50.382Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -76,25 +76,50 @@
   "rows": [
     {
       "source": "workday",
-      "pool_rows": 52328,
-      "us_rows": 27123,
-      "tech_us_rows": 8827,
-      "raw_sidecar_rows": 26185,
-      "sidecar_active_rows": 6383,
+      "pool_rows": 52330,
+      "us_rows": 27243,
+      "tech_us_rows": 8884,
+      "raw_sidecar_rows": 26094,
+      "sidecar_active_rows": 6694,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 6332,
-      "published_pct": 71.7,
-      "enriched_rows": 8155,
+      "published_rows": 6573,
+      "published_pct": 74,
+      "enriched_rows": 8213,
       "enriched_pct": 92.4,
-      "enriched_with_skills": 7821,
-      "skills_pct": 95.9,
+      "enriched_with_skills": 7881,
+      "skills_pct": 96,
       "examples": [
+        {
+          "id": "workday-boston-dynamics-R2296",
+          "company": "Boston Dynamics",
+          "title": "Senior Staff Manufacturing Test Engineer"
+        },
+        {
+          "id": "workday-boston-dynamics-R2698",
+          "company": "Boston Dynamics",
+          "title": "Senior Staff NPI Sourcing Manager"
+        },
+        {
+          "id": "workday-boston-dynamics-R2727",
+          "company": "Boston Dynamics",
+          "title": "Atlas Data Operations Annotation Manager"
+        },
+        {
+          "id": "workday-boston-dynamics-R2728",
+          "company": "Boston Dynamics",
+          "title": "Atlas Associate Director of Systems Development"
+        },
         {
           "id": "workday-nvidia-JR2000169",
           "company": "NVIDIA",
           "title": "Senior Solutions Architect"
+        },
+        {
+          "id": "workday-rtx-01858711",
+          "company": "RTX",
+          "title": "Sr. Principal Systems Engineer"
         },
         {
           "id": "workday-parsons-R182628",
@@ -102,34 +127,9 @@
           "title": "Software Engineer - TS/SCI required"
         },
         {
-          "id": "workday-parsons-R182875",
-          "company": "Parsons",
-          "title": "Principal Roadway Engineer"
-        },
-        {
           "id": "workday-intel-JR0285313",
           "company": "Intel",
           "title": "Module Engineering Undergraduate Intern"
-        },
-        {
-          "id": "workday-boston-dynamics-R2296",
-          "company": "Boston Dynamics",
-          "title": "Senior Staff Manufacturing Test Engineer"
-        },
-        {
-          "id": "workday-ge-vernova-R5035695",
-          "company": "GE Vernova",
-          "title": "Lead P&C Engineer"
-        },
-        {
-          "id": "workday-target-R0000441114",
-          "company": "Target",
-          "title": "Lead Applied Data Scientist - Digital Item RecSys (applied ML, deep learning)"
-        },
-        {
-          "id": "workday-cigna-26006986",
-          "company": "Cigna",
-          "title": "Information Protection Advisor"
         }
       ],
       "severity": "high",
@@ -139,10 +139,10 @@
     },
     {
       "source": "oracle",
-      "pool_rows": 11033,
-      "us_rows": 6898,
-      "tech_us_rows": 1269,
-      "raw_sidecar_rows": 8833,
+      "pool_rows": 11165,
+      "us_rows": 6948,
+      "tech_us_rows": 1274,
+      "raw_sidecar_rows": 8745,
       "sidecar_active_rows": 993,
       "supplemental_rows": 34599,
       "supplemental_with_desc": 25543,
@@ -152,11 +152,11 @@
         "jobs_fetched": 34599
       },
       "published_rows": 993,
-      "published_pct": 78.3,
-      "enriched_rows": 1263,
-      "enriched_pct": 99.5,
-      "enriched_with_skills": 887,
-      "skills_pct": 70.2,
+      "published_pct": 77.9,
+      "enriched_rows": 1269,
+      "enriched_pct": 99.6,
+      "enriched_with_skills": 893,
+      "skills_pct": 70.4,
       "examples": [
         {
           "id": "oracle-cummins-2431553",
@@ -205,27 +205,91 @@
       ]
     },
     {
+      "source": "apple",
+      "pool_rows": 382,
+      "us_rows": 318,
+      "tech_us_rows": 209,
+      "raw_sidecar_rows": 88,
+      "sidecar_active_rows": 20,
+      "supplemental_rows": 68,
+      "supplemental_with_desc": 68,
+      "supplemental_meta": {
+        "generated_at": "2026-07-11T15:17:30.259Z",
+        "lane_name": "custom",
+        "jobs_fetched": 3308
+      },
+      "published_rows": 20,
+      "published_pct": 9.6,
+      "enriched_rows": 20,
+      "enriched_pct": 9.6,
+      "enriched_with_skills": 20,
+      "skills_pct": 100,
+      "examples": [
+        {
+          "id": "apple-200671637",
+          "company": "Apple",
+          "title": "Machine Learning Systems Engineer – Video Computer Vision"
+        },
+        {
+          "id": "apple-200671989",
+          "company": "Apple",
+          "title": "Software Development Engineer - Test"
+        },
+        {
+          "id": "apple-200672068",
+          "company": "Apple",
+          "title": "Machine Learning Systems Engineer – Video Computer Vision"
+        },
+        {
+          "id": "apple-200672069",
+          "company": "Apple",
+          "title": "Software Development Engineer - Test"
+        },
+        {
+          "id": "apple-200671826",
+          "company": "Apple",
+          "title": "Optical Design Engineer"
+        },
+        {
+          "id": "apple-200660259",
+          "company": "Apple",
+          "title": "HID Interaction Algorithm Engineer"
+        },
+        {
+          "id": "apple-200671798",
+          "company": "Apple",
+          "title": "Sr. Video Software Engineer, Camera & Photos"
+        },
+        {
+          "id": "apple-200659802",
+          "company": "Apple",
+          "title": "Engineering Program Manager - HomeKit"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage",
+        "low_enrichment_coverage",
+        "supplemental_stage_gap"
+      ]
+    },
+    {
       "source": "smartrecruiters",
       "pool_rows": 1986,
       "us_rows": 1985,
       "tech_us_rows": 342,
-      "raw_sidecar_rows": 714,
-      "sidecar_active_rows": 257,
+      "raw_sidecar_rows": 715,
+      "sidecar_active_rows": 258,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 257,
-      "published_pct": 75.1,
+      "published_rows": 258,
+      "published_pct": 75.4,
       "enriched_rows": 295,
       "enriched_pct": 86.3,
       "enriched_with_skills": 290,
       "skills_pct": 98.3,
       "examples": [
-        {
-          "id": "sr-WellmarkInc-744000136512919",
-          "company": "Wellmark, Inc.",
-          "title": "Software Engineer"
-        },
         {
           "id": "sr-Intuitive-744000136107169",
           "company": "Intuitive",
@@ -260,6 +324,11 @@
           "id": "sr-Intuitive-744000135114287",
           "company": "Intuitive",
           "title": "Senior Clinical Development Engineer- SP, I&A"
+        },
+        {
+          "id": "sr-Intuitive-744000135108429",
+          "company": "Intuitive",
+          "title": "Sr. Manager, Clinical Research Engineering"
         }
       ],
       "severity": "high",
@@ -326,30 +395,6 @@
       "enriched_rows": 601,
       "enriched_pct": 100,
       "enriched_with_skills": 601,
-      "skills_pct": 100,
-      "examples": [],
-      "severity": "ok",
-      "flags": []
-    },
-    {
-      "source": "apple",
-      "pool_rows": 44,
-      "us_rows": 36,
-      "tech_us_rows": 20,
-      "raw_sidecar_rows": 116,
-      "sidecar_active_rows": 20,
-      "supplemental_rows": 68,
-      "supplemental_with_desc": 68,
-      "supplemental_meta": {
-        "generated_at": "2026-07-11T15:17:30.259Z",
-        "lane_name": "custom",
-        "jobs_fetched": 3308
-      },
-      "published_rows": 20,
-      "published_pct": 100,
-      "enriched_rows": 20,
-      "enriched_pct": 100,
-      "enriched_with_skills": 20,
       "skills_pct": 100,
       "examples": [],
       "severity": "ok",
