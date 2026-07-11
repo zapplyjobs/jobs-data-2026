@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-11T14:03:37.359Z",
+  "generated_at": "2026-07-11T14:07:57.181Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -45,13 +45,13 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-11T13:51:16.574Z",
+    "generated_at": "2026-07-11T14:06:32.868Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 14615,
-    "description_entries": 13315,
-    "coverage_pct": 91.1,
+    "board_row_count": 14607,
+    "description_entries": 13541,
+    "coverage_pct": 92.7,
     "source_breakdown": {
-      "sidecar": 13315,
+      "sidecar": 13541,
       "inline": 0
     },
     "jobs_metadata_generated": "2026-07-11T08:36:28.814Z",
@@ -59,7 +59,7 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-11T14:03:34.161Z",
+    "checked_at": "2026-07-11T14:07:54.014Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -76,17 +76,17 @@
   "rows": [
     {
       "source": "oracle",
-      "pool_rows": 11162,
-      "us_rows": 6945,
+      "pool_rows": 11130,
+      "us_rows": 6941,
       "tech_us_rows": 1273,
-      "raw_sidecar_rows": 8063,
-      "sidecar_active_rows": 990,
-      "supplemental_rows": 34600,
-      "supplemental_with_desc": 25543,
+      "raw_sidecar_rows": 9036,
+      "sidecar_active_rows": 1001,
+      "supplemental_rows": 35053,
+      "supplemental_with_desc": 25906,
       "supplemental_meta": {
-        "generated_at": "2026-07-11T13:50:03.256Z",
+        "generated_at": "2026-07-11T14:05:17.935Z",
         "lane_name": "oracle",
-        "jobs_fetched": 34600
+        "jobs_fetched": 35053
       },
       "published_rows": 990,
       "published_pct": 77.8,
@@ -142,17 +142,80 @@
       ]
     },
     {
+      "source": "workday",
+      "pool_rows": 52821,
+      "us_rows": 27578,
+      "tech_us_rows": 8898,
+      "raw_sidecar_rows": 26640,
+      "sidecar_active_rows": 6324,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 8120,
+      "published_pct": 91.3,
+      "enriched_rows": 8216,
+      "enriched_pct": 92.3,
+      "enriched_with_skills": 7883,
+      "skills_pct": 95.9,
+      "examples": [
+        {
+          "id": "workday-nvidia-JR2000169",
+          "company": "NVIDIA",
+          "title": "Senior Solutions Architect"
+        },
+        {
+          "id": "workday-caterpillar-R0000382034",
+          "company": "Caterpillar",
+          "title": "Maintenance Support Specialist - 1st, 2nd, 3rd & Weekend Shifts"
+        },
+        {
+          "id": "workday-boston-dynamics-R2296",
+          "company": "Boston Dynamics",
+          "title": "Senior Staff Manufacturing Test Engineer"
+        },
+        {
+          "id": "workday-parsons-R182628",
+          "company": "Parsons",
+          "title": "Software Engineer - TS/SCI required"
+        },
+        {
+          "id": "workday-abb-JR00041182",
+          "company": "ABB",
+          "title": "Associate Project Manager"
+        },
+        {
+          "id": "workday-abb-JR00029965",
+          "company": "ABB",
+          "title": "Quality Packaging Specialist"
+        },
+        {
+          "id": "workday-abb-JR00031276",
+          "company": "ABB",
+          "title": "Senior Field Service Technican"
+        },
+        {
+          "id": "workday-abb-JR00032784",
+          "company": "ABB",
+          "title": "Protection and Control Engineer"
+        }
+      ],
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
+    },
+    {
       "source": "smartrecruiters",
       "pool_rows": 1986,
       "us_rows": 1985,
       "tech_us_rows": 342,
-      "raw_sidecar_rows": 719,
-      "sidecar_active_rows": 262,
+      "raw_sidecar_rows": 714,
+      "sidecar_active_rows": 254,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 262,
-      "published_pct": 76.6,
+      "published_rows": 295,
+      "published_pct": 86.3,
       "enriched_rows": 295,
       "enriched_pct": 86.3,
       "enriched_with_skills": 290,
@@ -199,69 +262,6 @@
           "title": "Data Architect (AWS, Azure, GCP)"
         }
       ],
-      "severity": "high",
-      "flags": [
-        "low_published_coverage"
-      ]
-    },
-    {
-      "source": "workday",
-      "pool_rows": 52825,
-      "us_rows": 27459,
-      "tech_us_rows": 8865,
-      "raw_sidecar_rows": 27691,
-      "sidecar_active_rows": 7967,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 7930,
-      "published_pct": 89.5,
-      "enriched_rows": 8073,
-      "enriched_pct": 91.1,
-      "enriched_with_skills": 7742,
-      "skills_pct": 95.9,
-      "examples": [
-        {
-          "id": "workday-schweitzer-engineering-laboratories-2026-20929",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Project Controller"
-        },
-        {
-          "id": "workday-schweitzer-engineering-laboratories-2026-21074",
-          "company": "Schweitzer Engineering Laboratories",
-          "title": "Lead Product Engineer (DCS)"
-        },
-        {
-          "id": "workday-boston-dynamics-R2296",
-          "company": "Boston Dynamics",
-          "title": "Senior Staff Manufacturing Test Engineer"
-        },
-        {
-          "id": "workday-parsons-R182628",
-          "company": "Parsons",
-          "title": "Software Engineer - TS/SCI required"
-        },
-        {
-          "id": "workday-wells-fargo-R-546740",
-          "company": "Wells Fargo",
-          "title": "Lead Network Automation Engineer"
-        },
-        {
-          "id": "workday-wells-fargo-R-552156",
-          "company": "Wells Fargo",
-          "title": "Lead Network Automation Engineer"
-        },
-        {
-          "id": "workday-wells-fargo-R-547817",
-          "company": "Wells Fargo",
-          "title": "Specialty Software Engineering Senior Manager FICC (Fixed Income, Currencies, and Commodities)"
-        },
-        {
-          "id": "workday-wells-fargo-R-559916",
-          "company": "Wells Fargo",
-          "title": "Specialty Software Engineering Senior Manager FICC (Fixed Income, Currencies, and Commodities)"
-        }
-      ],
       "severity": "ok",
       "flags": []
     },
@@ -270,12 +270,12 @@
       "pool_rows": 512,
       "us_rows": 333,
       "tech_us_rows": 162,
-      "raw_sidecar_rows": 511,
-      "sidecar_active_rows": 161,
+      "raw_sidecar_rows": 514,
+      "sidecar_active_rows": 162,
       "supplemental_rows": 537,
-      "supplemental_with_desc": 24,
+      "supplemental_with_desc": 20,
       "supplemental_meta": {
-        "generated_at": "2026-07-11T13:47:28.622Z",
+        "generated_at": "2026-07-11T14:06:00.299Z",
         "lane_name": "custom",
         "jobs_fetched": 3307
       },
@@ -345,7 +345,7 @@
       "supplemental_rows": 68,
       "supplemental_with_desc": 68,
       "supplemental_meta": {
-        "generated_at": "2026-07-11T13:47:28.622Z",
+        "generated_at": "2026-07-11T14:06:00.299Z",
         "lane_name": "custom",
         "jobs_fetched": 3307
       },
