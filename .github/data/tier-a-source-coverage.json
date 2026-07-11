@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-11T12:16:45.881Z",
+  "generated_at": "2026-07-11T12:22:53.897Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -45,13 +45,13 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-11T12:06:23.619Z",
+    "generated_at": "2026-07-11T12:21:23.332Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 14315,
-    "description_entries": 13436,
-    "coverage_pct": 93.9,
+    "board_row_count": 14439,
+    "description_entries": 11759,
+    "coverage_pct": 81.4,
     "source_breakdown": {
-      "sidecar": 13436,
+      "sidecar": 11759,
       "inline": 0
     },
     "jobs_metadata_generated": "2026-07-11T08:36:28.814Z",
@@ -59,7 +59,7 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-11T12:16:42.726Z",
+    "checked_at": "2026-07-11T12:22:50.805Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -75,24 +75,87 @@
   },
   "rows": [
     {
+      "source": "workday",
+      "pool_rows": 52398,
+      "us_rows": 27328,
+      "tech_us_rows": 8745,
+      "raw_sidecar_rows": 25896,
+      "sidecar_active_rows": 6458,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 6359,
+      "published_pct": 72.7,
+      "enriched_rows": 8133,
+      "enriched_pct": 93,
+      "enriched_with_skills": 7800,
+      "skills_pct": 95.9,
+      "examples": [
+        {
+          "id": "workday-parsons-R182628",
+          "company": "Parsons",
+          "title": "Software Engineer - TS/SCI required"
+        },
+        {
+          "id": "workday-caterpillar-R0000381823",
+          "company": "Caterpillar",
+          "title": "Facilities Engineer- (Planning/ Scheduler)"
+        },
+        {
+          "id": "workday-boston-dynamics-R2296",
+          "company": "Boston Dynamics",
+          "title": "Senior Staff Manufacturing Test Engineer"
+        },
+        {
+          "id": "workday-leidos-R-00187091",
+          "company": "Leidos",
+          "title": "Release Train Engineer"
+        },
+        {
+          "id": "workday-leidos-R-00186954",
+          "company": "Leidos",
+          "title": "Master Production Scheduler"
+        },
+        {
+          "id": "workday-palo-alto-networks-JR-016029",
+          "company": "Palo Alto Networks",
+          "title": "Principal Engineer Software, Security (Chronosphere)"
+        },
+        {
+          "id": "workday-citi-26960571",
+          "company": "Citi",
+          "title": "AVP Senior Hadoop Data Developer"
+        },
+        {
+          "id": "workday-citi-26977281",
+          "company": "Citi",
+          "title": "Engineering Architect"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage"
+      ]
+    },
+    {
       "source": "oracle",
-      "pool_rows": 11161,
+      "pool_rows": 11160,
       "us_rows": 6942,
       "tech_us_rows": 1272,
       "raw_sidecar_rows": 8070,
       "sidecar_active_rows": 990,
-      "supplemental_rows": 35055,
-      "supplemental_with_desc": 25909,
+      "supplemental_rows": 34065,
+      "supplemental_with_desc": 25626,
       "supplemental_meta": {
-        "generated_at": "2026-07-11T12:05:17.588Z",
+        "generated_at": "2026-07-11T12:19:43.206Z",
         "lane_name": "oracle",
-        "jobs_fetched": 35055
+        "jobs_fetched": 34065
       },
       "published_rows": 990,
       "published_pct": 77.8,
-      "enriched_rows": 1267,
-      "enriched_pct": 99.6,
-      "enriched_with_skills": 888,
+      "enriched_rows": 1272,
+      "enriched_pct": 100,
+      "enriched_with_skills": 892,
       "skills_pct": 70.1,
       "examples": [
         {
@@ -142,128 +205,67 @@
       ]
     },
     {
-      "source": "workday",
-      "pool_rows": 52398,
-      "us_rows": 27191,
-      "tech_us_rows": 8699,
-      "raw_sidecar_rows": 26512,
-      "sidecar_active_rows": 6150,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 8005,
-      "published_pct": 92,
-      "enriched_rows": 8085,
-      "enriched_pct": 92.9,
-      "enriched_with_skills": 7753,
-      "skills_pct": 95.9,
-      "examples": [
-        {
-          "id": "workday-parsons-R182628",
-          "company": "Parsons",
-          "title": "Software Engineer - TS/SCI required"
-        },
-        {
-          "id": "workday-parsons-R182875",
-          "company": "Parsons",
-          "title": "Principal Roadway Engineer"
-        },
-        {
-          "id": "workday-boston-dynamics-R2296",
-          "company": "Boston Dynamics",
-          "title": "Senior Staff Manufacturing Test Engineer"
-        },
-        {
-          "id": "workday-target-R0000441114",
-          "company": "Target",
-          "title": "Lead Applied Data Scientist - Digital Item RecSys (applied ML, deep learning)"
-        },
-        {
-          "id": "workday-ge-vernova-R5035695",
-          "company": "GE Vernova",
-          "title": "Lead P&C Engineer"
-        },
-        {
-          "id": "workday-blue-origin-R68479",
-          "company": "Blue Origin",
-          "title": "Technician - Test & Launch Ops   All Levels All Shifts"
-        },
-        {
-          "id": "workday-rtx-01851532",
-          "company": "RTX",
-          "title": "Mechanical Engineer II, Avionics Test Engineering"
-        },
-        {
-          "id": "workday-daimler-truck-DT-17419",
-          "company": "Daimler Truck",
-          "title": "Sr. Application Architect – Contract Funding"
-        }
-      ],
-      "severity": "medium",
-      "flags": [
-        "published_gt_raw_sidecar"
-      ]
-    },
-    {
       "source": "smartrecruiters",
       "pool_rows": 1986,
       "us_rows": 1985,
       "tech_us_rows": 342,
-      "raw_sidecar_rows": 700,
-      "sidecar_active_rows": 243,
+      "raw_sidecar_rows": 703,
+      "sidecar_active_rows": 246,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 295,
-      "published_pct": 86.3,
+      "published_rows": 246,
+      "published_pct": 71.9,
       "enriched_rows": 295,
       "enriched_pct": 86.3,
       "enriched_with_skills": 290,
       "skills_pct": 98.3,
       "examples": [
         {
-          "id": "sr-ServiceNow-744000135168359",
-          "company": "ServiceNow",
-          "title": "Senior Staff Software Engineer - AI/ML - Veza"
+          "id": "sr-WellmarkInc-744000136512919",
+          "company": "Wellmark, Inc.",
+          "title": "Software Engineer"
         },
         {
-          "id": "sr-ServiceNow-744000135126544",
-          "company": "ServiceNow",
-          "title": "Senior Staff Software Engineer, Performance (Tech Lead)"
-        },
-        {
-          "id": "sr-Intuitive-744000135114287",
+          "id": "sr-Intuitive-744000136107169",
           "company": "Intuitive",
-          "title": "Senior Clinical Development Engineer- SP, I&A"
+          "title": "Sr Human Factors Design Engineer"
         },
         {
-          "id": "sr-Intuitive-744000135108429",
+          "id": "sr-VeoliaEnvironnementSA-744000135551709",
+          "company": "Veolia Environnement SA",
+          "title": "Data Engineer"
+        },
+        {
+          "id": "sr-llnl-3743990013907505",
+          "company": "LLNL",
+          "title": "Combat Simulation Systems Analyst"
+        },
+        {
+          "id": "sr-BoschGroup-744000135353119",
+          "company": "Bosch Group",
+          "title": "Sr. Field Application Engineer"
+        },
+        {
+          "id": "sr-BoschGroup-744000135345769",
+          "company": "Bosch Group",
+          "title": "Senior AI Research Scientist- Time-Series Foundational Models"
+        },
+        {
+          "id": "sr-Intuitive-744000135344159",
           "company": "Intuitive",
-          "title": "Sr. Manager, Clinical Research Engineering"
+          "title": "Senior Embedded Software Engineer"
         },
         {
-          "id": "sr-Intuitive-744000135098179",
+          "id": "sr-Intuitive-744000135329990",
           "company": "Intuitive",
-          "title": "Staff Quality Engineer - New Product Development"
-        },
-        {
-          "id": "sr-CapTechConsulting-744000135097949",
-          "company": "CapTech Consulting",
-          "title": "Senior Data Architect (AWS, Azure, GCP)"
-        },
-        {
-          "id": "sr-CapTechConsulting-744000135097829",
-          "company": "CapTech Consulting",
-          "title": "Senior Data Architect (AWS, Azure, GCP)"
-        },
-        {
-          "id": "sr-CapTechConsulting-744000135097213",
-          "company": "CapTech Consulting",
-          "title": "Data Architect (AWS, Azure, GCP)"
+          "title": "Platform automation Engineer"
         }
       ],
-      "severity": "ok",
-      "flags": []
+      "severity": "high",
+      "flags": [
+        "low_published_coverage"
+      ]
     },
     {
       "source": "microsoft",
@@ -273,9 +275,9 @@
       "raw_sidecar_rows": 511,
       "sidecar_active_rows": 161,
       "supplemental_rows": 537,
-      "supplemental_with_desc": 26,
+      "supplemental_with_desc": 24,
       "supplemental_meta": {
-        "generated_at": "2026-07-11T12:02:31.616Z",
+        "generated_at": "2026-07-11T12:17:29.284Z",
         "lane_name": "custom",
         "jobs_fetched": 3307
       },
@@ -345,7 +347,7 @@
       "supplemental_rows": 68,
       "supplemental_with_desc": 68,
       "supplemental_meta": {
-        "generated_at": "2026-07-11T12:02:31.616Z",
+        "generated_at": "2026-07-11T12:17:29.284Z",
         "lane_name": "custom",
         "jobs_fetched": 3307
       },
