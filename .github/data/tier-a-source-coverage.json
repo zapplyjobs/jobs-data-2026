@@ -1,0 +1,332 @@
+{
+  "generated_at": "2026-07-11T20:17:02.529Z",
+  "truth_surfaces": {
+    "producer_pool": "all_jobs.json",
+    "board_input": "us_jobs.json",
+    "raw_sidecars": "descriptions-*.jsonl",
+    "supplemental_lanes": [
+      "supplemental-custom-jobs.json",
+      "supplemental-oracle-jobs.json"
+    ],
+    "published_board_descriptions": "softwarejobs-descriptions.json",
+    "published_board_meta": "softwarejobs-descriptions-meta.json",
+    "enrichment_output": "enriched_jobs.json",
+    "consumer_alert": "pipeline-alert.json"
+  },
+  "tier_a_sources": [
+    "workday",
+    "oracle",
+    "smartrecruiters",
+    "icims",
+    "microsoft",
+    "tiktok",
+    "apple"
+  ],
+  "sidecar_files_downloaded": [
+    "descriptions-amazon.jsonl",
+    "descriptions-amd.jsonl",
+    "descriptions-apple.jsonl",
+    "descriptions-ashby.jsonl",
+    "descriptions-bytedance.jsonl",
+    "descriptions-deshaw.jsonl",
+    "descriptions-eightfold.jsonl",
+    "descriptions-enriched-1.jsonl",
+    "descriptions-enriched-2.jsonl",
+    "descriptions-google.jsonl",
+    "descriptions-greenhouse-1.jsonl",
+    "descriptions-greenhouse-2.jsonl",
+    "descriptions-icims.jsonl",
+    "descriptions-lever.jsonl",
+    "descriptions-microsoft.jsonl",
+    "descriptions-oracle.jsonl",
+    "descriptions-simplify.jsonl",
+    "descriptions-smartrecruiters.jsonl",
+    "descriptions-tiktok.jsonl",
+    "descriptions-uber.jsonl",
+    "descriptions-workday.jsonl"
+  ],
+  "published_meta": {
+    "generated_at": "2026-07-11T20:06:38.872Z",
+    "source_basis": "us_jobs.json",
+    "board_row_count": 14539,
+    "description_entries": 14103,
+    "coverage_pct": 97,
+    "source_breakdown": {
+      "sidecar": 14103,
+      "inline": 0
+    },
+    "jobs_metadata_generated": "2026-07-11T14:07:08.275Z",
+    "enrichment_stats_generated": null,
+    "enrichment_version": 89
+  },
+  "consumer_alert": {
+    "checked_at": "2026-07-11T20:16:58.812Z",
+    "active": false,
+    "message": null,
+    "failures": [],
+    "warnings": [],
+    "warning_count": 0,
+    "secrets": [
+      {
+        "secret": "GH_PAT",
+        "expires": "2026-08-25",
+        "days_left": 44
+      }
+    ]
+  },
+  "rows": [
+    {
+      "source": "oracle",
+      "pool_rows": 10927,
+      "us_rows": 6844,
+      "tech_us_rows": 1249,
+      "raw_sidecar_rows": 8611,
+      "sidecar_active_rows": 985,
+      "supplemental_rows": 34676,
+      "supplemental_with_desc": 25884,
+      "supplemental_meta": {
+        "generated_at": "2026-07-11T20:05:18.705Z",
+        "lane_name": "oracle",
+        "jobs_fetched": 34676
+      },
+      "published_rows": 985,
+      "published_pct": 78.9,
+      "enriched_rows": 1249,
+      "enriched_pct": 100,
+      "enriched_with_skills": 875,
+      "skills_pct": 70.1,
+      "examples": [
+        {
+          "id": "oracle-cummins-2431553",
+          "company": "Cummins",
+          "title": "Mechatronics Engineer – Chassis Systems"
+        },
+        {
+          "id": "oracle-oracle-338624",
+          "company": "Oracle",
+          "title": "Senior Platform Software Engineer"
+        },
+        {
+          "id": "oracle-citizens-financial-46690",
+          "company": "Citizens Financial Group",
+          "title": "Equity Research Analyst -(Westwood, MA; Boston, MA; Johnston, RI)"
+        },
+        {
+          "id": "oracle-citizens-financial-47613",
+          "company": "Citizens Financial Group",
+          "title": "Principal Data Analyst"
+        },
+        {
+          "id": "oracle-citizens-financial-47699",
+          "company": "Citizens Financial Group",
+          "title": "Program Manager - AI Engineering"
+        },
+        {
+          "id": "oracle-cummins-2428332",
+          "company": "Cummins",
+          "title": "Senior Sales Application Engineer"
+        },
+        {
+          "id": "oracle-cummins-2431539",
+          "company": "Cummins",
+          "title": "Controls Engineer"
+        },
+        {
+          "id": "oracle-cummins-2432881",
+          "company": "Cummins",
+          "title": "Embedded Software Architect"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage"
+      ]
+    },
+    {
+      "source": "workday",
+      "pool_rows": 52824,
+      "us_rows": 27469,
+      "tech_us_rows": 8814,
+      "raw_sidecar_rows": 30733,
+      "sidecar_active_rows": 8710,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 8620,
+      "published_pct": 97.8,
+      "enriched_rows": 8723,
+      "enriched_pct": 99,
+      "enriched_with_skills": 8400,
+      "skills_pct": 96.3,
+      "examples": [
+        {
+          "id": "workday-parsons-R182748",
+          "company": "Parsons",
+          "title": "SCA Maintenance Electrician"
+        },
+        {
+          "id": "workday-parsons-R183165",
+          "company": "Parsons",
+          "title": "Electronics Tech - Fiber Optics/Radio Control System"
+        },
+        {
+          "id": "workday-parsons-R182835",
+          "company": "Parsons",
+          "title": "Mechanical Electrical Inspector"
+        },
+        {
+          "id": "workday-parsons-R182628",
+          "company": "Parsons",
+          "title": "Software Engineer - TS/SCI required"
+        },
+        {
+          "id": "workday-parsons-R183012",
+          "company": "Parsons",
+          "title": "Workflow Support Specialist/Senior Staff Officer Support"
+        },
+        {
+          "id": "workday-parsons-R183008",
+          "company": "Parsons",
+          "title": "Workflow Support Specialist"
+        },
+        {
+          "id": "workday-parsons-R182950",
+          "company": "Parsons",
+          "title": "Technical Lead"
+        },
+        {
+          "id": "workday-parsons-R179831",
+          "company": "Parsons",
+          "title": "Electronics Tech - Fiber Optics/Radio Control System"
+        }
+      ],
+      "severity": "ok",
+      "flags": []
+    },
+    {
+      "source": "microsoft",
+      "pool_rows": 509,
+      "us_rows": 334,
+      "tech_us_rows": 162,
+      "raw_sidecar_rows": 501,
+      "sidecar_active_rows": 160,
+      "supplemental_rows": 535,
+      "supplemental_with_desc": 30,
+      "supplemental_meta": {
+        "generated_at": "2026-07-11T20:03:39.932Z",
+        "lane_name": "custom",
+        "jobs_fetched": 3305
+      },
+      "published_rows": 160,
+      "published_pct": 98.8,
+      "enriched_rows": 162,
+      "enriched_pct": 100,
+      "enriched_with_skills": 162,
+      "skills_pct": 100,
+      "examples": [
+        {
+          "id": "microsoft-200041555",
+          "company": "Microsoft",
+          "title": "Security Cloud Solution Architect - Leader"
+        },
+        {
+          "id": "microsoft-200042073",
+          "company": "Microsoft",
+          "title": "Senior Software Engineer"
+        }
+      ],
+      "severity": "ok",
+      "flags": []
+    },
+    {
+      "source": "tiktok",
+      "pool_rows": 1451,
+      "us_rows": 1451,
+      "tech_us_rows": 601,
+      "raw_sidecar_rows": 1449,
+      "sidecar_active_rows": 600,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 600,
+      "published_pct": 99.8,
+      "enriched_rows": 600,
+      "enriched_pct": 99.8,
+      "enriched_with_skills": 600,
+      "skills_pct": 100,
+      "examples": [
+        {
+          "id": "tiktok-7519766495683053832",
+          "company": "TikTok",
+          "title": "Research Scientist Intern (TikTok Recommendation-LLMs, RL, GenAI) - 2026 Start (PhD)"
+        }
+      ],
+      "severity": "ok",
+      "flags": []
+    },
+    {
+      "source": "smartrecruiters",
+      "pool_rows": 1986,
+      "us_rows": 1985,
+      "tech_us_rows": 345,
+      "raw_sidecar_rows": 1093,
+      "sidecar_active_rows": 345,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 345,
+      "published_pct": 100,
+      "enriched_rows": 345,
+      "enriched_pct": 100,
+      "enriched_with_skills": 340,
+      "skills_pct": 98.6,
+      "examples": [],
+      "severity": "ok",
+      "flags": []
+    },
+    {
+      "source": "icims",
+      "pool_rows": 0,
+      "us_rows": 0,
+      "tech_us_rows": 0,
+      "raw_sidecar_rows": 0,
+      "sidecar_active_rows": 0,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 0,
+      "published_pct": 0,
+      "enriched_rows": 0,
+      "enriched_pct": 0,
+      "enriched_with_skills": 0,
+      "skills_pct": 0,
+      "examples": [],
+      "severity": "info",
+      "flags": []
+    },
+    {
+      "source": "apple",
+      "pool_rows": 43,
+      "us_rows": 35,
+      "tech_us_rows": 19,
+      "raw_sidecar_rows": 86,
+      "sidecar_active_rows": 19,
+      "supplemental_rows": 67,
+      "supplemental_with_desc": 67,
+      "supplemental_meta": {
+        "generated_at": "2026-07-11T20:03:39.932Z",
+        "lane_name": "custom",
+        "jobs_fetched": 3305
+      },
+      "published_rows": 19,
+      "published_pct": 100,
+      "enriched_rows": 19,
+      "enriched_pct": 100,
+      "enriched_with_skills": 19,
+      "skills_pct": 100,
+      "examples": [],
+      "severity": "ok",
+      "flags": []
+    }
+  ]
+}
