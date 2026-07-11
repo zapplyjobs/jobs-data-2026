@@ -108,6 +108,7 @@ jobs:
                 wiki = info.get("has_wiki")
                 homepage = info.get("homepage", "")
                 topics = len(info.get("topics", []))
+                pushed_at = info.get("pushed_at", "")
                 if disc is not True:
                     r["issues"].append(f"discussions={disc} (should be true)")
                 if wiki is True:
@@ -132,6 +133,40 @@ jobs:
                     r["issues"].append(f"EXPOSED SECRETS: {hits}")
             except Exception:
                 pass  # README fetch failure is not critical
+
+            # README freshness — flag pipeline repos with stale pushes (>6h)
+            pipeline_repos = repo in ("New-Grad-Jobs-2027", "Internships-2027",
+                "New-Grad-Software-Engineering-Jobs-2027", "New-Grad-Data-Science-Jobs-2027",
+                "New-Grad-Hardware-Engineering-Jobs-2027", "New-Grad-Healthcare-Jobs-2027",
+                "Canada-Jobs-2027", "Canada-Internships-2027")
+            if pushed_at and pipeline_repos:
+                try:
+                    push_dt = datetime.datetime.fromisoformat(pushed_at.replace("Z", "+00:00"))
+                    push_age_h = (now - push_dt).total_seconds() / 3600
+                    r["last_push_age_h"] = round(push_age_h, 1)
+                    if push_age_h > 6:
+                        r["issues"].append(f"README stale: last push {push_age_h:.1f}h ago (>6h threshold)")
+                except (ValueError, TypeError):
+                    pass
+
+            # Workflow status — last run pass/fail (pipeline repos only)
+            if pipeline_repos:
+                try:
+                    req = urllib.request.Request(
+                        f"https://api.github.com/repos/zapplyjobs/{repo}/actions/runs?per_page=1",
+                        headers={"User-Agent": "out-health-check/1.0", "Accept": "application/vnd.github+json"}
+                    )
+                    with urllib.request.urlopen(req, timeout=10) as resp:
+                        runs = json.loads(resp.read())
+                    if runs.get("workflow_runs"):
+                        last_run = runs["workflow_runs"][0]
+                        conclusion = last_run.get("conclusion", "unknown")
+                        r["last_workflow_status"] = conclusion
+                        if conclusion == "failure":
+                            wf_name = last_run.get("name", "?")
+                            r["issues"].append(f"workflow '{wf_name}' FAILING")
+                except Exception:
+                    pass
 
             if r["issues"]:
                 r["verdict"] = "FAIL"
