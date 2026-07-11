@@ -78,3 +78,8 @@ setup-*.sh
 .github/data/discord-verification.json
 .github/data/general-review.json
 
+
+# INF-REPOCLEANUP-1: data files belong in R2, not git. .github/data/ is a runtime
+# scratch directory for workflows — files are generated fresh each run + uploaded to R2.
+.github/data/*
+!.github/data/.gitkeep
