@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-11T10:07:03.631Z",
+  "generated_at": "2026-07-11T10:22:04.761Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -45,13 +45,13 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-11T10:05:39.547Z",
+    "generated_at": "2026-07-11T10:20:43.708Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 13593,
-    "description_entries": 12018,
-    "coverage_pct": 88.4,
+    "board_row_count": 13567,
+    "description_entries": 11666,
+    "coverage_pct": 86,
     "source_breakdown": {
-      "sidecar": 12018,
+      "sidecar": 11666,
       "inline": 0
     },
     "jobs_metadata_generated": "2026-07-11T08:36:28.814Z",
@@ -59,7 +59,7 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-11T10:07:00.675Z",
+    "checked_at": "2026-07-11T10:22:01.826Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -75,16 +75,79 @@
   },
   "rows": [
     {
+      "source": "workday",
+      "pool_rows": 49999,
+      "us_rows": 25664,
+      "tech_us_rows": 8266,
+      "raw_sidecar_rows": 25802,
+      "sidecar_active_rows": 6357,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 6212,
+      "published_pct": 75.2,
+      "enriched_rows": 6905,
+      "enriched_pct": 83.5,
+      "enriched_with_skills": 6655,
+      "skills_pct": 96.4,
+      "examples": [
+        {
+          "id": "workday-blackstone-42443",
+          "company": "Blackstone",
+          "title": "Talent Partner, VP"
+        },
+        {
+          "id": "workday-blackstone-43558",
+          "company": "Blackstone",
+          "title": "Blackstone Energy Transition Partners – Senior Associate"
+        },
+        {
+          "id": "workday-blackstone-43556",
+          "company": "Blackstone",
+          "title": "Blackstone Harvest – Vice President"
+        },
+        {
+          "id": "workday-blackstone-41936",
+          "company": "Blackstone",
+          "title": "Blackstone Credit & Insurance(BXCI) Investment Operations - Senior Vice President"
+        },
+        {
+          "id": "workday-blackstone-34498",
+          "company": "Blackstone",
+          "title": "Blackstone Infrastructure Partners Asset Management Associate"
+        },
+        {
+          "id": "workday-blackstone-40908",
+          "company": "Blackstone",
+          "title": "BXMA - Client Investment Strategy, Principal"
+        },
+        {
+          "id": "workday-blackstone-34974",
+          "company": "Blackstone",
+          "title": "Real Estate - ICS (Product), Principal"
+        },
+        {
+          "id": "workday-blackstone-26477",
+          "company": "Blackstone",
+          "title": "2023 Blackstone Firmwide Marketing Summer Analyst"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage"
+      ]
+    },
+    {
       "source": "oracle",
       "pool_rows": 11161,
       "us_rows": 6941,
       "tech_us_rows": 1271,
-      "raw_sidecar_rows": 9049,
+      "raw_sidecar_rows": 8923,
       "sidecar_active_rows": 1000,
       "supplemental_rows": 35057,
       "supplemental_with_desc": 25910,
       "supplemental_meta": {
-        "generated_at": "2026-07-11T10:04:36.920Z",
+        "generated_at": "2026-07-11T10:19:19.953Z",
         "lane_name": "oracle",
         "jobs_fetched": 35057
       },
@@ -148,17 +211,27 @@
       "us_rows": 1985,
       "tech_us_rows": 345,
       "raw_sidecar_rows": 682,
-      "sidecar_active_rows": 225,
+      "sidecar_active_rows": 228,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 230,
-      "published_pct": 66.7,
+      "published_rows": 228,
+      "published_pct": 66.1,
       "enriched_rows": 266,
       "enriched_pct": 77.1,
       "enriched_with_skills": 262,
       "skills_pct": 98.5,
       "examples": [
+        {
+          "id": "sr-WellmarkInc-744000136512919",
+          "company": "Wellmark, Inc.",
+          "title": "Software Engineer"
+        },
+        {
+          "id": "sr-Intuitive-744000136264964",
+          "company": "Intuitive",
+          "title": "Sr Mechanical Design Engineer"
+        },
         {
           "id": "sr-BoschGroup-744000136130529",
           "company": "Bosch Group",
@@ -188,16 +261,6 @@
           "id": "sr-Intuitive-744000136107169",
           "company": "Intuitive",
           "title": "Sr Human Factors Design Engineer"
-        },
-        {
-          "id": "sr-llnl-3743990013947696",
-          "company": "LLNL",
-          "title": "Senior Electronics Technologist"
-        },
-        {
-          "id": "sr-Intuitive-744000136078919",
-          "company": "Intuitive",
-          "title": "Senior Mechanical Engineer"
         }
       ],
       "severity": "high",
@@ -205,67 +268,6 @@
         "low_published_coverage",
         "low_enrichment_coverage"
       ]
-    },
-    {
-      "source": "workday",
-      "pool_rows": 49080,
-      "us_rows": 25043,
-      "tech_us_rows": 7825,
-      "raw_sidecar_rows": 26346,
-      "sidecar_active_rows": 6081,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 6551,
-      "published_pct": 83.7,
-      "enriched_rows": 6847,
-      "enriched_pct": 87.5,
-      "enriched_with_skills": 6622,
-      "skills_pct": 96.7,
-      "examples": [
-        {
-          "id": "workday-arkansas-children's-R0023561",
-          "company": "Arkansas Children's",
-          "title": "Information Security Engineer II"
-        },
-        {
-          "id": "workday-arkansas-children's-R0023574",
-          "company": "Arkansas Children's",
-          "title": "Systems Analytics Analyst II"
-        },
-        {
-          "id": "workday-boston-dynamics-R2296",
-          "company": "Boston Dynamics",
-          "title": "Senior Staff Manufacturing Test Engineer"
-        },
-        {
-          "id": "workday-parsons-R182628",
-          "company": "Parsons",
-          "title": "Software Engineer - TS/SCI required"
-        },
-        {
-          "id": "workday-arrow-electronics-R246133",
-          "company": "Arrow Electronics",
-          "title": "Market Development Engineer"
-        },
-        {
-          "id": "workday-amentum-R0165643",
-          "company": "Amentum",
-          "title": "I&C Technician/Munitions Handler"
-        },
-        {
-          "id": "workday-aerovironment-8085",
-          "company": "AeroVironment",
-          "title": "Avionics Tech II"
-        },
-        {
-          "id": "workday-medtronic-R68935",
-          "company": "Medtronic",
-          "title": "Principal Process Engineer - On-site"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
     },
     {
       "source": "icims",
@@ -297,7 +299,7 @@
       "supplemental_rows": 537,
       "supplemental_with_desc": 25,
       "supplemental_meta": {
-        "generated_at": "2026-07-11T10:02:07.234Z",
+        "generated_at": "2026-07-11T10:16:50.155Z",
         "lane_name": "custom",
         "jobs_fetched": 3307
       },
@@ -341,7 +343,7 @@
       "supplemental_rows": 68,
       "supplemental_with_desc": 68,
       "supplemental_meta": {
-        "generated_at": "2026-07-11T10:02:07.234Z",
+        "generated_at": "2026-07-11T10:16:50.155Z",
         "lane_name": "custom",
         "jobs_fetched": 3307
       },
