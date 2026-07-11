@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-11T14:07:57.181Z",
+  "generated_at": "2026-07-11T14:22:59.660Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -45,21 +45,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-11T14:06:32.868Z",
+    "generated_at": "2026-07-11T14:21:30.876Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 14607,
-    "description_entries": 13541,
-    "coverage_pct": 92.7,
+    "board_row_count": 14640,
+    "description_entries": 11947,
+    "coverage_pct": 81.6,
     "source_breakdown": {
-      "sidecar": 13541,
+      "sidecar": 11947,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-07-11T08:36:28.814Z",
+    "jobs_metadata_generated": "2026-07-11T14:07:08.275Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-11T14:07:54.014Z",
+    "checked_at": "2026-07-11T14:22:56.160Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -75,21 +75,84 @@
   },
   "rows": [
     {
+      "source": "workday",
+      "pool_rows": 52821,
+      "us_rows": 27475,
+      "tech_us_rows": 8904,
+      "raw_sidecar_rows": 26167,
+      "sidecar_active_rows": 6578,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 6478,
+      "published_pct": 72.8,
+      "enriched_rows": 8229,
+      "enriched_pct": 92.4,
+      "enriched_with_skills": 7895,
+      "skills_pct": 95.9,
+      "examples": [
+        {
+          "id": "workday-intel-JR0285313",
+          "company": "Intel",
+          "title": "Module Engineering Undergraduate Intern"
+        },
+        {
+          "id": "workday-vertex-pharmaceuticals-REQ-28811",
+          "company": "Vertex Pharmaceuticals",
+          "title": "Product Lifecycle Engineering Principal Scientist - Medical Device & Combination Products"
+        },
+        {
+          "id": "workday-vertex-pharmaceuticals-REQ-29247",
+          "company": "Vertex Pharmaceuticals",
+          "title": "Senior Manager, Tech Support"
+        },
+        {
+          "id": "workday-vertex-pharmaceuticals-REQ-28922",
+          "company": "Vertex Pharmaceuticals",
+          "title": "Senior Director, Material Science"
+        },
+        {
+          "id": "workday-boston-dynamics-R2296",
+          "company": "Boston Dynamics",
+          "title": "Senior Staff Manufacturing Test Engineer"
+        },
+        {
+          "id": "workday-parsons-R182628",
+          "company": "Parsons",
+          "title": "Software Engineer - TS/SCI required"
+        },
+        {
+          "id": "workday-jll-REQ520216",
+          "company": "JLL",
+          "title": "Facilities Capital Engineer"
+        },
+        {
+          "id": "workday-jll-REQ520932",
+          "company": "JLL",
+          "title": "Associate Design Manager, Workplace"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage"
+      ]
+    },
+    {
       "source": "oracle",
-      "pool_rows": 11130,
-      "us_rows": 6941,
+      "pool_rows": 11162,
+      "us_rows": 6945,
       "tech_us_rows": 1273,
-      "raw_sidecar_rows": 9036,
+      "raw_sidecar_rows": 8901,
       "sidecar_active_rows": 1001,
       "supplemental_rows": 35053,
       "supplemental_with_desc": 25906,
       "supplemental_meta": {
-        "generated_at": "2026-07-11T14:05:17.935Z",
+        "generated_at": "2026-07-11T14:19:55.203Z",
         "lane_name": "oracle",
         "jobs_fetched": 35053
       },
-      "published_rows": 990,
-      "published_pct": 77.8,
+      "published_rows": 1001,
+      "published_pct": 78.6,
       "enriched_rows": 1273,
       "enriched_pct": 100,
       "enriched_with_skills": 893,
@@ -99,11 +162,6 @@
           "id": "oracle-cummins-2431553",
           "company": "Cummins",
           "title": "Mechatronics Engineer – Chassis Systems"
-        },
-        {
-          "id": "oracle-vertiv-20276650",
-          "company": "Vertiv",
-          "title": "Mfg. Engineering Technician"
         },
         {
           "id": "oracle-citizens-financial-46690",
@@ -134,6 +192,11 @@
           "id": "oracle-cummins-2432881",
           "company": "Cummins",
           "title": "Embedded Software Architect"
+        },
+        {
+          "id": "oracle-cummins-2432905",
+          "company": "Cummins",
+          "title": "Software Calibration & Validation Specialist"
         }
       ],
       "severity": "high",
@@ -142,85 +205,47 @@
       ]
     },
     {
-      "source": "workday",
-      "pool_rows": 52821,
-      "us_rows": 27578,
-      "tech_us_rows": 8898,
-      "raw_sidecar_rows": 26640,
-      "sidecar_active_rows": 6324,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 8120,
-      "published_pct": 91.3,
-      "enriched_rows": 8216,
-      "enriched_pct": 92.3,
-      "enriched_with_skills": 7883,
-      "skills_pct": 95.9,
-      "examples": [
-        {
-          "id": "workday-nvidia-JR2000169",
-          "company": "NVIDIA",
-          "title": "Senior Solutions Architect"
-        },
-        {
-          "id": "workday-caterpillar-R0000382034",
-          "company": "Caterpillar",
-          "title": "Maintenance Support Specialist - 1st, 2nd, 3rd & Weekend Shifts"
-        },
-        {
-          "id": "workday-boston-dynamics-R2296",
-          "company": "Boston Dynamics",
-          "title": "Senior Staff Manufacturing Test Engineer"
-        },
-        {
-          "id": "workday-parsons-R182628",
-          "company": "Parsons",
-          "title": "Software Engineer - TS/SCI required"
-        },
-        {
-          "id": "workday-abb-JR00041182",
-          "company": "ABB",
-          "title": "Associate Project Manager"
-        },
-        {
-          "id": "workday-abb-JR00029965",
-          "company": "ABB",
-          "title": "Quality Packaging Specialist"
-        },
-        {
-          "id": "workday-abb-JR00031276",
-          "company": "ABB",
-          "title": "Senior Field Service Technican"
-        },
-        {
-          "id": "workday-abb-JR00032784",
-          "company": "ABB",
-          "title": "Protection and Control Engineer"
-        }
-      ],
-      "severity": "medium",
-      "flags": [
-        "published_gt_raw_sidecar"
-      ]
-    },
-    {
       "source": "smartrecruiters",
       "pool_rows": 1986,
       "us_rows": 1985,
       "tech_us_rows": 342,
       "raw_sidecar_rows": 714,
-      "sidecar_active_rows": 254,
+      "sidecar_active_rows": 257,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 295,
-      "published_pct": 86.3,
+      "published_rows": 257,
+      "published_pct": 75.1,
       "enriched_rows": 295,
       "enriched_pct": 86.3,
       "enriched_with_skills": 290,
       "skills_pct": 98.3,
       "examples": [
+        {
+          "id": "sr-WellmarkInc-744000136512919",
+          "company": "Wellmark, Inc.",
+          "title": "Software Engineer"
+        },
+        {
+          "id": "sr-Intuitive-744000136107169",
+          "company": "Intuitive",
+          "title": "Sr Human Factors Design Engineer"
+        },
+        {
+          "id": "sr-VeoliaEnvironnementSA-744000135551709",
+          "company": "Veolia Environnement SA",
+          "title": "Data Engineer"
+        },
+        {
+          "id": "sr-llnl-3743990013907505",
+          "company": "LLNL",
+          "title": "Combat Simulation Systems Analyst"
+        },
+        {
+          "id": "sr-Intuitive-744000135329990",
+          "company": "Intuitive",
+          "title": "Platform automation Engineer"
+        },
         {
           "id": "sr-ServiceNow-744000135168359",
           "company": "ServiceNow",
@@ -235,65 +260,12 @@
           "id": "sr-Intuitive-744000135114287",
           "company": "Intuitive",
           "title": "Senior Clinical Development Engineer- SP, I&A"
-        },
-        {
-          "id": "sr-Intuitive-744000135108429",
-          "company": "Intuitive",
-          "title": "Sr. Manager, Clinical Research Engineering"
-        },
-        {
-          "id": "sr-Intuitive-744000135098179",
-          "company": "Intuitive",
-          "title": "Staff Quality Engineer - New Product Development"
-        },
-        {
-          "id": "sr-CapTechConsulting-744000135097949",
-          "company": "CapTech Consulting",
-          "title": "Senior Data Architect (AWS, Azure, GCP)"
-        },
-        {
-          "id": "sr-CapTechConsulting-744000135097829",
-          "company": "CapTech Consulting",
-          "title": "Senior Data Architect (AWS, Azure, GCP)"
-        },
-        {
-          "id": "sr-CapTechConsulting-744000135097213",
-          "company": "CapTech Consulting",
-          "title": "Data Architect (AWS, Azure, GCP)"
         }
       ],
-      "severity": "ok",
-      "flags": []
-    },
-    {
-      "source": "microsoft",
-      "pool_rows": 512,
-      "us_rows": 333,
-      "tech_us_rows": 162,
-      "raw_sidecar_rows": 514,
-      "sidecar_active_rows": 162,
-      "supplemental_rows": 537,
-      "supplemental_with_desc": 20,
-      "supplemental_meta": {
-        "generated_at": "2026-07-11T14:06:00.299Z",
-        "lane_name": "custom",
-        "jobs_fetched": 3307
-      },
-      "published_rows": 161,
-      "published_pct": 99.4,
-      "enriched_rows": 162,
-      "enriched_pct": 100,
-      "enriched_with_skills": 162,
-      "skills_pct": 100,
-      "examples": [
-        {
-          "id": "microsoft-200042676",
-          "company": "Microsoft",
-          "title": "Software Engineering II"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
+      "severity": "high",
+      "flags": [
+        "low_published_coverage"
+      ]
     },
     {
       "source": "icims",
@@ -313,6 +285,30 @@
       "skills_pct": 0,
       "examples": [],
       "severity": "info",
+      "flags": []
+    },
+    {
+      "source": "microsoft",
+      "pool_rows": 512,
+      "us_rows": 333,
+      "tech_us_rows": 162,
+      "raw_sidecar_rows": 512,
+      "sidecar_active_rows": 162,
+      "supplemental_rows": 537,
+      "supplemental_with_desc": 20,
+      "supplemental_meta": {
+        "generated_at": "2026-07-11T14:17:28.068Z",
+        "lane_name": "custom",
+        "jobs_fetched": 3307
+      },
+      "published_rows": 162,
+      "published_pct": 100,
+      "enriched_rows": 162,
+      "enriched_pct": 100,
+      "enriched_with_skills": 162,
+      "skills_pct": 100,
+      "examples": [],
+      "severity": "ok",
       "flags": []
     },
     {
@@ -345,7 +341,7 @@
       "supplemental_rows": 68,
       "supplemental_with_desc": 68,
       "supplemental_meta": {
-        "generated_at": "2026-07-11T14:06:00.299Z",
+        "generated_at": "2026-07-11T14:17:28.068Z",
         "lane_name": "custom",
         "jobs_fetched": 3307
       },
