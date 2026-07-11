@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-11T07:23:23.958Z",
+  "generated_at": "2026-07-11T07:32:32.486Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -59,12 +59,14 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-11T07:23:21.035Z",
+    "checked_at": "2026-07-11T07:32:29.443Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [],
-    "warning_count": 0,
+    "warnings": [
+      "Runtime trending up: 7.6 min (warning at 7, alert at 10)"
+    ],
+    "warning_count": 1,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -75,71 +77,67 @@
   },
   "rows": [
     {
-      "source": "oracle",
-      "pool_rows": 11154,
-      "us_rows": 6936,
-      "tech_us_rows": 1271,
-      "raw_sidecar_rows": 8921,
-      "sidecar_active_rows": 1000,
-      "supplemental_rows": 34288,
-      "supplemental_with_desc": 25180,
-      "supplemental_meta": {
-        "generated_at": "2026-07-11T07:19:34.316Z",
-        "lane_name": "oracle",
-        "jobs_fetched": 34288
-      },
-      "published_rows": 1000,
-      "published_pct": 78.7,
-      "enriched_rows": 1271,
-      "enriched_pct": 100,
-      "enriched_with_skills": 885,
-      "skills_pct": 69.6,
+      "source": "workday",
+      "pool_rows": 45792,
+      "us_rows": 24749,
+      "tech_us_rows": 7806,
+      "raw_sidecar_rows": 29540,
+      "sidecar_active_rows": 6351,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 5721,
+      "published_pct": 73.3,
+      "enriched_rows": 6237,
+      "enriched_pct": 79.9,
+      "enriched_with_skills": 6004,
+      "skills_pct": 96.3,
       "examples": [
         {
-          "id": "oracle-citizens-financial-46690",
-          "company": "Citizens Financial Group",
-          "title": "Equity Research Analyst -(Westwood, MA; Boston, MA; Johnston, RI)"
+          "id": "workday-caterpillar-R0000381823",
+          "company": "Caterpillar",
+          "title": "Facilities Engineer- (Planning/ Scheduler)"
         },
         {
-          "id": "oracle-citizens-financial-47613",
-          "company": "Citizens Financial Group",
-          "title": "Principal Data Analyst"
+          "id": "workday-parsons-R182628",
+          "company": "Parsons",
+          "title": "Software Engineer - TS/SCI required"
         },
         {
-          "id": "oracle-citizens-financial-47699",
-          "company": "Citizens Financial Group",
-          "title": "Program Manager - AI Engineering"
+          "id": "workday-vertex-pharmaceuticals-REQ-28811",
+          "company": "Vertex Pharmaceuticals",
+          "title": "Product Lifecycle Engineering Principal Scientist - Medical Device & Combination Products"
         },
         {
-          "id": "oracle-cummins-2428332",
-          "company": "Cummins",
-          "title": "Senior Sales Application Engineer"
+          "id": "workday-vertex-pharmaceuticals-REQ-29247",
+          "company": "Vertex Pharmaceuticals",
+          "title": "Senior Manager, Tech Support"
         },
         {
-          "id": "oracle-cummins-2431539",
-          "company": "Cummins",
-          "title": "Controls Engineer"
+          "id": "workday-vertex-pharmaceuticals-REQ-28922",
+          "company": "Vertex Pharmaceuticals",
+          "title": "Senior Director, Material Science"
         },
         {
-          "id": "oracle-cummins-2432881",
-          "company": "Cummins",
-          "title": "Embedded Software Architect"
+          "id": "workday-gdit-RQ223907",
+          "company": "GDIT",
+          "title": "Operations Planner & Configuration Manager"
         },
         {
-          "id": "oracle-cummins-2432905",
-          "company": "Cummins",
-          "title": "Software Calibration & Validation Specialist"
+          "id": "workday-analog-devices-R262324",
+          "company": "Analog Devices",
+          "title": "RF/High Speed Instrumentation Systems Design Engineer"
         },
         {
-          "id": "oracle-dell-technologies-R286249",
-          "company": "Dell Technologies",
-          "title": "AI Security Engineer- Senior Advisor"
+          "id": "workday-wells-fargo-R-546740",
+          "company": "Wells Fargo",
+          "title": "Lead Network Automation Engineer"
         }
       ],
       "severity": "high",
       "flags": [
         "low_published_coverage",
-        "low_skill_fill"
+        "low_enrichment_coverage"
       ]
     },
     {
@@ -147,8 +145,8 @@
       "pool_rows": 1986,
       "us_rows": 1985,
       "tech_us_rows": 345,
-      "raw_sidecar_rows": 679,
-      "sidecar_active_rows": 220,
+      "raw_sidecar_rows": 677,
+      "sidecar_active_rows": 219,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
@@ -207,65 +205,71 @@
       ]
     },
     {
-      "source": "workday",
-      "pool_rows": 43851,
-      "us_rows": 23187,
-      "tech_us_rows": 6944,
-      "raw_sidecar_rows": 24697,
-      "sidecar_active_rows": 5880,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 5880,
-      "published_pct": 84.7,
-      "enriched_rows": 6226,
-      "enriched_pct": 89.7,
-      "enriched_with_skills": 5990,
-      "skills_pct": 96.2,
+      "source": "oracle",
+      "pool_rows": 10516,
+      "us_rows": 6793,
+      "tech_us_rows": 1158,
+      "raw_sidecar_rows": 8800,
+      "sidecar_active_rows": 994,
+      "supplemental_rows": 34288,
+      "supplemental_with_desc": 25180,
+      "supplemental_meta": {
+        "generated_at": "2026-07-11T07:19:34.316Z",
+        "lane_name": "oracle",
+        "jobs_fetched": 34288
+      },
+      "published_rows": 994,
+      "published_pct": 85.8,
+      "enriched_rows": 1158,
+      "enriched_pct": 100,
+      "enriched_with_skills": 780,
+      "skills_pct": 67.4,
       "examples": [
         {
-          "id": "workday-parsons-R182628",
-          "company": "Parsons",
-          "title": "Software Engineer - TS/SCI required"
+          "id": "oracle-citizens-financial-46690",
+          "company": "Citizens Financial Group",
+          "title": "Equity Research Analyst -(Westwood, MA; Boston, MA; Johnston, RI)"
         },
         {
-          "id": "workday-gdit-RQ223907",
-          "company": "GDIT",
-          "title": "Operations Planner & Configuration Manager"
+          "id": "oracle-citizens-financial-47613",
+          "company": "Citizens Financial Group",
+          "title": "Principal Data Analyst"
         },
         {
-          "id": "workday-caterpillar-R0000381823",
-          "company": "Caterpillar",
-          "title": "Facilities Engineer- (Planning/ Scheduler)"
+          "id": "oracle-citizens-financial-47699",
+          "company": "Citizens Financial Group",
+          "title": "Program Manager - AI Engineering"
         },
         {
-          "id": "workday-allstate-R32514",
-          "company": "Allstate",
-          "title": "Software Engineer Consultant II"
+          "id": "oracle-cummins-2428332",
+          "company": "Cummins",
+          "title": "Senior Sales Application Engineer"
         },
         {
-          "id": "workday-analog-devices-R262324",
-          "company": "Analog Devices",
-          "title": "RF/High Speed Instrumentation Systems Design Engineer"
+          "id": "oracle-cummins-2431539",
+          "company": "Cummins",
+          "title": "Controls Engineer"
         },
         {
-          "id": "workday-wells-fargo-R-546740",
-          "company": "Wells Fargo",
-          "title": "Lead Network Automation Engineer"
+          "id": "oracle-cummins-2432881",
+          "company": "Cummins",
+          "title": "Embedded Software Architect"
         },
         {
-          "id": "workday-wells-fargo-R-552156",
-          "company": "Wells Fargo",
-          "title": "Lead Network Automation Engineer"
+          "id": "oracle-cummins-2432905",
+          "company": "Cummins",
+          "title": "Software Calibration & Validation Specialist"
         },
         {
-          "id": "workday-wells-fargo-R-555762",
-          "company": "Wells Fargo",
-          "title": "Lead Software Engineer - Observability Events Management"
+          "id": "oracle-dell-technologies-R286249",
+          "company": "Dell Technologies",
+          "title": "AI Security Engineer- Senior Advisor"
         }
       ],
-      "severity": "ok",
-      "flags": []
+      "severity": "medium",
+      "flags": [
+        "low_skill_fill"
+      ]
     },
     {
       "source": "icims",
@@ -289,23 +293,23 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 512,
-      "us_rows": 333,
-      "tech_us_rows": 162,
-      "raw_sidecar_rows": 512,
-      "sidecar_active_rows": 162,
+      "pool_rows": 511,
+      "us_rows": 332,
+      "tech_us_rows": 161,
+      "raw_sidecar_rows": 513,
+      "sidecar_active_rows": 161,
       "supplemental_rows": 537,
-      "supplemental_with_desc": 24,
+      "supplemental_with_desc": 13,
       "supplemental_meta": {
-        "generated_at": "2026-07-11T07:16:48.722Z",
+        "generated_at": "2026-07-11T07:31:49.483Z",
         "lane_name": "custom",
         "jobs_fetched": 3305
       },
-      "published_rows": 162,
+      "published_rows": 161,
       "published_pct": 100,
-      "enriched_rows": 162,
+      "enriched_rows": 161,
       "enriched_pct": 100,
-      "enriched_with_skills": 162,
+      "enriched_with_skills": 161,
       "skills_pct": 100,
       "examples": [],
       "severity": "ok",
@@ -336,12 +340,12 @@
       "pool_rows": 44,
       "us_rows": 36,
       "tech_us_rows": 20,
-      "raw_sidecar_rows": 88,
+      "raw_sidecar_rows": 111,
       "sidecar_active_rows": 20,
       "supplemental_rows": 68,
       "supplemental_with_desc": 68,
       "supplemental_meta": {
-        "generated_at": "2026-07-11T07:16:48.722Z",
+        "generated_at": "2026-07-11T07:31:49.483Z",
         "lane_name": "custom",
         "jobs_fetched": 3305
       },
