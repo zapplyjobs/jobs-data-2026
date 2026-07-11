@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-11T07:37:13.492Z",
+  "generated_at": "2026-07-11T07:51:47.078Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -45,28 +45,26 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-11T07:35:47.374Z",
+    "generated_at": "2026-07-11T07:50:29.527Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 13440,
-    "description_entries": 11818,
-    "coverage_pct": 87.9,
+    "board_row_count": 14087,
+    "description_entries": 11986,
+    "coverage_pct": 85.1,
     "source_breakdown": {
-      "sidecar": 11818,
+      "sidecar": 11986,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-07-11T07:26:57.601Z",
+    "jobs_metadata_generated": "2026-07-11T07:36:46.801Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-11T07:37:10.486Z",
+    "checked_at": "2026-07-11T07:51:44.038Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [
-      "Runtime trending up: 7.6 min (warning at 7, alert at 10)"
-    ],
-    "warning_count": 1,
+    "warnings": [],
+    "warning_count": 0,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -76,6 +74,136 @@
     ]
   },
   "rows": [
+    {
+      "source": "workday",
+      "pool_rows": 48932,
+      "us_rows": 25760,
+      "tech_us_rows": 8377,
+      "raw_sidecar_rows": 26625,
+      "sidecar_active_rows": 6692,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 6692,
+      "published_pct": 79.9,
+      "enriched_rows": 6989,
+      "enriched_pct": 83.4,
+      "enriched_with_skills": 6736,
+      "skills_pct": 96.4,
+      "examples": [
+        {
+          "id": "workday-gdit-RQ223523",
+          "company": "GDIT",
+          "title": "Network Engineer - TS/SCI Required"
+        },
+        {
+          "id": "workday-gdit-RQ223919",
+          "company": "GDIT",
+          "title": "Network Engineer - TS/SCI Required"
+        },
+        {
+          "id": "workday-gdit-RQ223907",
+          "company": "GDIT",
+          "title": "Operations Planner & Configuration Manager"
+        },
+        {
+          "id": "workday-caterpillar-R0000381823",
+          "company": "Caterpillar",
+          "title": "Facilities Engineer- (Planning/ Scheduler)"
+        },
+        {
+          "id": "workday-parsons-R182628",
+          "company": "Parsons",
+          "title": "Software Engineer - TS/SCI required"
+        },
+        {
+          "id": "workday-analog-devices-R262324",
+          "company": "Analog Devices",
+          "title": "RF/High Speed Instrumentation Systems Design Engineer"
+        },
+        {
+          "id": "workday-wells-fargo-R-546740",
+          "company": "Wells Fargo",
+          "title": "Lead Network Automation Engineer"
+        },
+        {
+          "id": "workday-wells-fargo-R-552156",
+          "company": "Wells Fargo",
+          "title": "Lead Network Automation Engineer"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage"
+      ]
+    },
+    {
+      "source": "oracle",
+      "pool_rows": 11049,
+      "us_rows": 6881,
+      "tech_us_rows": 1231,
+      "raw_sidecar_rows": 8818,
+      "sidecar_active_rows": 960,
+      "supplemental_rows": 35058,
+      "supplemental_with_desc": 25910,
+      "supplemental_meta": {
+        "generated_at": "2026-07-11T07:49:19.425Z",
+        "lane_name": "oracle",
+        "jobs_fetched": 35058
+      },
+      "published_rows": 960,
+      "published_pct": 78,
+      "enriched_rows": 1222,
+      "enriched_pct": 99.3,
+      "enriched_with_skills": 855,
+      "skills_pct": 70,
+      "examples": [
+        {
+          "id": "oracle-citizens-financial-46690",
+          "company": "Citizens Financial Group",
+          "title": "Equity Research Analyst -(Westwood, MA; Boston, MA; Johnston, RI)"
+        },
+        {
+          "id": "oracle-citizens-financial-47613",
+          "company": "Citizens Financial Group",
+          "title": "Principal Data Analyst"
+        },
+        {
+          "id": "oracle-citizens-financial-47699",
+          "company": "Citizens Financial Group",
+          "title": "Program Manager - AI Engineering"
+        },
+        {
+          "id": "oracle-cummins-2428332",
+          "company": "Cummins",
+          "title": "Senior Sales Application Engineer"
+        },
+        {
+          "id": "oracle-cummins-2431539",
+          "company": "Cummins",
+          "title": "Controls Engineer"
+        },
+        {
+          "id": "oracle-cummins-2432881",
+          "company": "Cummins",
+          "title": "Embedded Software Architect"
+        },
+        {
+          "id": "oracle-cummins-2432905",
+          "company": "Cummins",
+          "title": "Software Calibration & Validation Specialist"
+        },
+        {
+          "id": "oracle-dell-technologies-R286249",
+          "company": "Dell Technologies",
+          "title": "AI Security Engineer- Senior Advisor"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage"
+      ]
+    },
     {
       "source": "smartrecruiters",
       "pool_rows": 1986,
@@ -141,134 +269,6 @@
       ]
     },
     {
-      "source": "oracle",
-      "pool_rows": 10516,
-      "us_rows": 6793,
-      "tech_us_rows": 1158,
-      "raw_sidecar_rows": 8678,
-      "sidecar_active_rows": 994,
-      "supplemental_rows": 33413,
-      "supplemental_with_desc": 24489,
-      "supplemental_meta": {
-        "generated_at": "2026-07-11T07:34:48.529Z",
-        "lane_name": "oracle",
-        "jobs_fetched": 33413
-      },
-      "published_rows": 994,
-      "published_pct": 85.8,
-      "enriched_rows": 1158,
-      "enriched_pct": 100,
-      "enriched_with_skills": 780,
-      "skills_pct": 67.4,
-      "examples": [
-        {
-          "id": "oracle-citizens-financial-46690",
-          "company": "Citizens Financial Group",
-          "title": "Equity Research Analyst -(Westwood, MA; Boston, MA; Johnston, RI)"
-        },
-        {
-          "id": "oracle-citizens-financial-47613",
-          "company": "Citizens Financial Group",
-          "title": "Principal Data Analyst"
-        },
-        {
-          "id": "oracle-citizens-financial-47699",
-          "company": "Citizens Financial Group",
-          "title": "Program Manager - AI Engineering"
-        },
-        {
-          "id": "oracle-cummins-2428332",
-          "company": "Cummins",
-          "title": "Senior Sales Application Engineer"
-        },
-        {
-          "id": "oracle-cummins-2431539",
-          "company": "Cummins",
-          "title": "Controls Engineer"
-        },
-        {
-          "id": "oracle-cummins-2432881",
-          "company": "Cummins",
-          "title": "Embedded Software Architect"
-        },
-        {
-          "id": "oracle-cummins-2432905",
-          "company": "Cummins",
-          "title": "Software Calibration & Validation Specialist"
-        },
-        {
-          "id": "oracle-dell-technologies-R286249",
-          "company": "Dell Technologies",
-          "title": "AI Security Engineer- Senior Advisor"
-        }
-      ],
-      "severity": "medium",
-      "flags": [
-        "low_skill_fill"
-      ]
-    },
-    {
-      "source": "workday",
-      "pool_rows": 45792,
-      "us_rows": 24749,
-      "tech_us_rows": 7806,
-      "raw_sidecar_rows": 25635,
-      "sidecar_active_rows": 6491,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 6491,
-      "published_pct": 83.2,
-      "enriched_rows": 6737,
-      "enriched_pct": 86.3,
-      "enriched_with_skills": 6501,
-      "skills_pct": 96.5,
-      "examples": [
-        {
-          "id": "workday-caterpillar-R0000381823",
-          "company": "Caterpillar",
-          "title": "Facilities Engineer- (Planning/ Scheduler)"
-        },
-        {
-          "id": "workday-parsons-R182628",
-          "company": "Parsons",
-          "title": "Software Engineer - TS/SCI required"
-        },
-        {
-          "id": "workday-gdit-RQ223907",
-          "company": "GDIT",
-          "title": "Operations Planner & Configuration Manager"
-        },
-        {
-          "id": "workday-analog-devices-R262324",
-          "company": "Analog Devices",
-          "title": "RF/High Speed Instrumentation Systems Design Engineer"
-        },
-        {
-          "id": "workday-wells-fargo-R-546740",
-          "company": "Wells Fargo",
-          "title": "Lead Network Automation Engineer"
-        },
-        {
-          "id": "workday-wells-fargo-R-552156",
-          "company": "Wells Fargo",
-          "title": "Lead Network Automation Engineer"
-        },
-        {
-          "id": "workday-wells-fargo-R-555762",
-          "company": "Wells Fargo",
-          "title": "Lead Software Engineer - Observability Events Management"
-        },
-        {
-          "id": "workday-wells-fargo-R-520285",
-          "company": "Wells Fargo",
-          "title": "Senior Specialty Protocol Engineer"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
-    },
-    {
       "source": "icims",
       "pool_rows": 0,
       "us_rows": 0,
@@ -296,9 +296,9 @@
       "raw_sidecar_rows": 511,
       "sidecar_active_rows": 161,
       "supplemental_rows": 537,
-      "supplemental_with_desc": 13,
+      "supplemental_with_desc": 24,
       "supplemental_meta": {
-        "generated_at": "2026-07-11T07:31:49.483Z",
+        "generated_at": "2026-07-11T07:46:44.669Z",
         "lane_name": "custom",
         "jobs_fetched": 3305
       },
@@ -342,7 +342,7 @@
       "supplemental_rows": 68,
       "supplemental_with_desc": 68,
       "supplemental_meta": {
-        "generated_at": "2026-07-11T07:31:49.483Z",
+        "generated_at": "2026-07-11T07:46:44.669Z",
         "lane_name": "custom",
         "jobs_fetched": 3305
       },
