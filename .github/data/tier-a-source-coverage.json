@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-11T02:07:09.083Z",
+  "generated_at": "2026-07-11T02:22:36.005Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -45,21 +45,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-11T02:05:43.031Z",
+    "generated_at": "2026-07-11T02:21:09.404Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 14672,
-    "description_entries": 12766,
-    "coverage_pct": 87,
+    "board_row_count": 14645,
+    "description_entries": 12299,
+    "coverage_pct": 84,
     "source_breakdown": {
-      "sidecar": 12766,
+      "sidecar": 12299,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-07-11T01:21:33.065Z",
+    "jobs_metadata_generated": "2026-07-11T02:06:52.594Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-11T02:07:05.844Z",
+    "checked_at": "2026-07-11T02:22:32.884Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -75,36 +75,89 @@
   },
   "rows": [
     {
-      "source": "oracle",
-      "pool_rows": 11131,
-      "us_rows": 6943,
-      "tech_us_rows": 1270,
-      "raw_sidecar_rows": 8846,
-      "sidecar_active_rows": 992,
-      "supplemental_rows": 34568,
-      "supplemental_with_desc": 25403,
-      "supplemental_meta": {
-        "generated_at": "2026-07-11T02:04:32.905Z",
-        "lane_name": "oracle",
-        "jobs_fetched": 34568
-      },
-      "published_rows": 992,
-      "published_pct": 78.1,
-      "enriched_rows": 1270,
-      "enriched_pct": 100,
-      "enriched_with_skills": 928,
-      "skills_pct": 73.1,
+      "source": "workday",
+      "pool_rows": 52993,
+      "us_rows": 27649,
+      "tech_us_rows": 8946,
+      "raw_sidecar_rows": 28065,
+      "sidecar_active_rows": 7018,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 6935,
+      "published_pct": 77.5,
+      "enriched_rows": 7655,
+      "enriched_pct": 85.6,
+      "enriched_with_skills": 7388,
+      "skills_pct": 96.5,
       "examples": [
         {
-          "id": "oracle-jpmorgan-chase-210768056",
-          "company": "JPMorgan Chase",
-          "title": "AI/ML Data and Analytics - Product Manager, Vice President"
+          "id": "workday-vertex-pharmaceuticals-REQ-29571",
+          "company": "Vertex Pharmaceuticals",
+          "title": "Immunology Senior Scientist"
         },
         {
-          "id": "oracle-jpmc-210768056",
-          "company": "JP Morgan Chase",
-          "title": "AI/ML Data and Analytics - Product Manager, Vice President"
+          "id": "workday-teledyne-REQ35576",
+          "company": "Teledyne",
+          "title": "Environmental, Health and Safety Manager"
         },
+        {
+          "id": "workday-teledyne-REQ35494",
+          "company": "Teledyne",
+          "title": "IC Design Engineer"
+        },
+        {
+          "id": "workday-teledyne-REQ35674",
+          "company": "Teledyne",
+          "title": "Manufacturing Process Engineer"
+        },
+        {
+          "id": "workday-snap-R0045924",
+          "company": "Snap",
+          "title": "Senior Data Scientist, Core, Level 5"
+        },
+        {
+          "id": "workday-cigna-26006986",
+          "company": "Cigna",
+          "title": "Information Protection Advisor"
+        },
+        {
+          "id": "workday-jll-REQ520216",
+          "company": "JLL",
+          "title": "Facilities Capital Engineer"
+        },
+        {
+          "id": "workday-jll-REQ520932",
+          "company": "JLL",
+          "title": "Associate Design Manager, Workplace"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage"
+      ]
+    },
+    {
+      "source": "oracle",
+      "pool_rows": 11030,
+      "us_rows": 6920,
+      "tech_us_rows": 1260,
+      "raw_sidecar_rows": 8942,
+      "sidecar_active_rows": 988,
+      "supplemental_rows": 32990,
+      "supplemental_with_desc": 23919,
+      "supplemental_meta": {
+        "generated_at": "2026-07-11T02:19:12.370Z",
+        "lane_name": "oracle",
+        "jobs_fetched": 32990
+      },
+      "published_rows": 988,
+      "published_pct": 78.4,
+      "enriched_rows": 1260,
+      "enriched_pct": 100,
+      "enriched_with_skills": 921,
+      "skills_pct": 73.1,
+      "examples": [
         {
           "id": "oracle-citizens-financial-46690",
           "company": "Citizens Financial Group",
@@ -134,6 +187,16 @@
           "id": "oracle-cummins-2432881",
           "company": "Cummins",
           "title": "Embedded Software Architect"
+        },
+        {
+          "id": "oracle-cummins-2432905",
+          "company": "Cummins",
+          "title": "Software Calibration & Validation Specialist"
+        },
+        {
+          "id": "oracle-dell-technologies-R286249",
+          "company": "Dell Technologies",
+          "title": "AI Security Engineer- Senior Advisor"
         }
       ],
       "severity": "high",
@@ -146,13 +209,13 @@
       "pool_rows": 1991,
       "us_rows": 1990,
       "tech_us_rows": 342,
-      "raw_sidecar_rows": 673,
-      "sidecar_active_rows": 217,
+      "raw_sidecar_rows": 672,
+      "sidecar_active_rows": 216,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 217,
-      "published_pct": 63.5,
+      "published_rows": 216,
+      "published_pct": 63.2,
       "enriched_rows": 253,
       "enriched_pct": 74,
       "enriched_with_skills": 249,
@@ -206,61 +269,30 @@
       ]
     },
     {
-      "source": "workday",
-      "pool_rows": 53005,
-      "us_rows": 27656,
-      "tech_us_rows": 8938,
-      "raw_sidecar_rows": 28671,
-      "sidecar_active_rows": 7471,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 7471,
-      "published_pct": 83.6,
-      "enriched_rows": 7649,
-      "enriched_pct": 85.6,
-      "enriched_with_skills": 7383,
-      "skills_pct": 96.5,
+      "source": "microsoft",
+      "pool_rows": 512,
+      "us_rows": 329,
+      "tech_us_rows": 159,
+      "raw_sidecar_rows": 516,
+      "sidecar_active_rows": 158,
+      "supplemental_rows": 544,
+      "supplemental_with_desc": 25,
+      "supplemental_meta": {
+        "generated_at": "2026-07-11T02:16:56.918Z",
+        "lane_name": "custom",
+        "jobs_fetched": 3312
+      },
+      "published_rows": 158,
+      "published_pct": 99.4,
+      "enriched_rows": 158,
+      "enriched_pct": 99.4,
+      "enriched_with_skills": 158,
+      "skills_pct": 100,
       "examples": [
         {
-          "id": "workday-parsons-R182628",
-          "company": "Parsons",
-          "title": "Software Engineer - TS/SCI required"
-        },
-        {
-          "id": "workday-becton-dickinson-R-550587",
-          "company": "Becton Dickinson",
-          "title": "Sr Quality Engineer II"
-        },
-        {
-          "id": "workday-nvidia-JR2018261",
-          "company": "NVIDIA",
-          "title": "Machine Learning Systems Engineer, Networking"
-        },
-        {
-          "id": "workday-nvidia-JR2020349",
-          "company": "NVIDIA",
-          "title": "Director, Engineering Operations and Site Reliability Engineering - Datacenter Server Systems"
-        },
-        {
-          "id": "workday-nvidia-JR1999599",
-          "company": "NVIDIA",
-          "title": "Senior Firmware Engineer – CSP Engagements"
-        },
-        {
-          "id": "workday-pnc-financial-services-R225257",
-          "company": "PNC Financial Services",
-          "title": "Data Analyst Senior/Business Analyst Senior - Data and Automation (SQL, Python, Data Quality, AI Tools)"
-        },
-        {
-          "id": "workday-cvs-health-R0962823",
-          "company": "CVS Health",
-          "title": "Pharmacy Technician - Full Time Back End"
-        },
-        {
-          "id": "workday-cvs-health-R0922217",
-          "company": "CVS Health",
-          "title": "Pharmacy Technician Back End"
+          "id": "microsoft-200043210",
+          "company": "Microsoft",
+          "title": "Principal Software Engineering Manager - CoreAI"
         }
       ],
       "severity": "ok",
@@ -284,30 +316,6 @@
       "skills_pct": 0,
       "examples": [],
       "severity": "info",
-      "flags": []
-    },
-    {
-      "source": "microsoft",
-      "pool_rows": 516,
-      "us_rows": 333,
-      "tech_us_rows": 161,
-      "raw_sidecar_rows": 513,
-      "sidecar_active_rows": 161,
-      "supplemental_rows": 544,
-      "supplemental_with_desc": 29,
-      "supplemental_meta": {
-        "generated_at": "2026-07-11T02:02:22.960Z",
-        "lane_name": "custom",
-        "jobs_fetched": 3314
-      },
-      "published_rows": 161,
-      "published_pct": 100,
-      "enriched_rows": 161,
-      "enriched_pct": 100,
-      "enriched_with_skills": 161,
-      "skills_pct": 100,
-      "examples": [],
-      "severity": "ok",
       "flags": []
     },
     {
@@ -340,9 +348,9 @@
       "supplemental_rows": 68,
       "supplemental_with_desc": 68,
       "supplemental_meta": {
-        "generated_at": "2026-07-11T02:02:22.960Z",
+        "generated_at": "2026-07-11T02:16:56.918Z",
         "lane_name": "custom",
-        "jobs_fetched": 3314
+        "jobs_fetched": 3312
       },
       "published_rows": 20,
       "published_pct": 100,
