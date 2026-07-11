@@ -178,6 +178,38 @@ jobs:
                     issues.append(f"{repo}: {i}")
             results["repos"].append(r)
 
+        # --- 3. Pipeline workflow status (critical jobs-data-2026 workflows) ---
+        critical_workflows = ["Post Jobs to Discord", "Verify Discord Posts", "Refresh ZJP Public Snapshot", "Collect Metrics"]
+        try:
+            req = urllib.request.Request(
+                "https://api.github.com/repos/zapplyjobs/jobs-data-2026/actions/runs?per_page=30",
+                headers={"User-Agent": "out-health-check/1.0", "Accept": "application/vnd.github+json", "Authorization": f"token {gh_token}"}
+            )
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                runs_data = json.loads(resp.read())
+            latest_by_wf = {}
+            for run in runs_data.get("workflow_runs", []):
+                wf_name = run.get("name", "?")
+                if wf_name in critical_workflows and wf_name not in latest_by_wf:
+                    latest_by_wf[wf_name] = run
+            pipeline_wf_results = []
+            for wf_name in critical_workflows:
+                run = latest_by_wf.get(wf_name)
+                if run:
+                    conclusion = run.get("conclusion", "unknown")
+                    wf_r = {"workflow": wf_name, "conclusion": conclusion}
+                    if conclusion == "failure":
+                        wf_r["verdict"] = "FAIL"
+                        issues.append(f"pipeline workflow '{wf_name}' FAILING")
+                    else:
+                        wf_r["verdict"] = "PASS"
+                    pipeline_wf_results.append(wf_r)
+                else:
+                    pipeline_wf_results.append({"workflow": wf_name, "verdict": "UNKNOWN", "reason": "no recent run"})
+            results["pipeline_workflows"] = pipeline_wf_results
+        except Exception:
+            pass
+
         # --- Aggregate ---
         results["verdict"] = "FAIL" if issues else "PASS"
         results["issue_count"] = len(issues)
@@ -200,6 +232,13 @@ jobs:
             mark = "✅" if r["verdict"] == "PASS" else "❌"
             detail = "; ".join(r["issues"]) if r["issues"] else "OK"
             summary_lines.append(f"- {mark} **{r['repo']}** — {detail}")
+
+        if results.get("pipeline_workflows"):
+            summary_lines += ["", "### Pipeline Workflows", ""]
+            for wf in results["pipeline_workflows"]:
+                mark = "✅" if wf.get("verdict") == "PASS" else "❌"
+                detail = wf.get("conclusion", wf.get("reason", "?"))
+                summary_lines.append(f"- {mark} **{wf['workflow']}** — {detail}")
 
         if issues:
             summary_lines += ["", "### Issues", ""]
