@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-12T09:10:59.485Z",
+  "generated_at": "2026-07-12T10:03:34.416Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -31,6 +31,7 @@
     "descriptions-deshaw.jsonl",
     "descriptions-eightfold.jsonl",
     "descriptions-enriched-1.jsonl",
+    "descriptions-enriched-2.jsonl",
     "descriptions-google.jsonl",
     "descriptions-greenhouse-1.jsonl",
     "descriptions-greenhouse-2.jsonl",
@@ -45,21 +46,21 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-12T09:06:27.615Z",
+    "generated_at": "2026-07-12T09:51:29.575Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 14696,
-    "description_entries": 13256,
-    "coverage_pct": 90.2,
+    "board_row_count": 14599,
+    "description_entries": 13451,
+    "coverage_pct": 92.1,
     "source_breakdown": {
-      "sidecar": 13256,
+      "sidecar": 13451,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-07-12T08:50:46.178Z",
+    "jobs_metadata_generated": "2026-07-12T09:36:11.466Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-12T09:10:56.551Z",
+    "checked_at": "2026-07-12T10:03:31.188Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -76,24 +77,24 @@
   "rows": [
     {
       "source": "oracle",
-      "pool_rows": 11021,
-      "us_rows": 6884,
-      "tech_us_rows": 1273,
-      "raw_sidecar_rows": 3969,
+      "pool_rows": 11045,
+      "us_rows": 6898,
+      "tech_us_rows": 1266,
+      "raw_sidecar_rows": 3925,
       "sidecar_active_rows": 432,
-      "supplemental_rows": 35003,
-      "supplemental_with_desc": 25869,
+      "supplemental_rows": 34548,
+      "supplemental_with_desc": 25504,
       "supplemental_meta": {
-        "generated_at": "2026-07-12T09:05:13.369Z",
+        "generated_at": "2026-07-12T09:50:12.984Z",
         "lane_name": "oracle",
-        "jobs_fetched": 35003
+        "jobs_fetched": 34548
       },
       "published_rows": 432,
-      "published_pct": 33.9,
-      "enriched_rows": 1242,
-      "enriched_pct": 97.6,
-      "enriched_with_skills": 1135,
-      "skills_pct": 91.4,
+      "published_pct": 34.1,
+      "enriched_rows": 1266,
+      "enriched_pct": 100,
+      "enriched_with_skills": 1159,
+      "skills_pct": 91.5,
       "examples": [
         {
           "id": "oracle-cummins-2431553",
@@ -143,61 +144,129 @@
       ]
     },
     {
+      "source": "microsoft",
+      "pool_rows": 510,
+      "us_rows": 333,
+      "tech_us_rows": 151,
+      "raw_sidecar_rows": 30,
+      "sidecar_active_rows": 1,
+      "supplemental_rows": 535,
+      "supplemental_with_desc": 121,
+      "supplemental_meta": {
+        "generated_at": "2026-07-12T09:49:39.788Z",
+        "lane_name": "custom",
+        "jobs_fetched": 3302
+      },
+      "published_rows": 1,
+      "published_pct": 0.7,
+      "enriched_rows": 148,
+      "enriched_pct": 98,
+      "enriched_with_skills": 148,
+      "skills_pct": 100,
+      "examples": [
+        {
+          "id": "microsoft-200041565",
+          "company": "Microsoft",
+          "title": "Software Engineering - Commercial Engineering & AI (CEAI)"
+        },
+        {
+          "id": "microsoft-200043210",
+          "company": "Microsoft",
+          "title": "Principal Software Engineering Manager - CoreAI"
+        },
+        {
+          "id": "microsoft-200043248",
+          "company": "Microsoft",
+          "title": "Mechanical Designer - Cryomechanical Systems"
+        },
+        {
+          "id": "microsoft-200043409",
+          "company": "Microsoft",
+          "title": "Senior Software Engineer"
+        },
+        {
+          "id": "microsoft-200043243",
+          "company": "Microsoft",
+          "title": "Principal Software Engineering Manager"
+        },
+        {
+          "id": "microsoft-200042951",
+          "company": "Microsoft",
+          "title": "Principal Hardware Engineer"
+        },
+        {
+          "id": "microsoft-200043017",
+          "company": "Microsoft",
+          "title": "Principal Hardware Engineering Manager"
+        },
+        {
+          "id": "microsoft-200042031",
+          "company": "Microsoft",
+          "title": "Software Engineer II"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage",
+        "supplemental_stage_gap"
+      ]
+    },
+    {
       "source": "workday",
-      "pool_rows": 52810,
-      "us_rows": 27535,
-      "tech_us_rows": 8883,
-      "raw_sidecar_rows": 28231,
-      "sidecar_active_rows": 8353,
+      "pool_rows": 52813,
+      "us_rows": 27670,
+      "tech_us_rows": 8907,
+      "raw_sidecar_rows": 28933,
+      "sidecar_active_rows": 8781,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 8268,
-      "published_pct": 93.1,
-      "enriched_rows": 8706,
-      "enriched_pct": 98,
-      "enriched_with_skills": 8386,
-      "skills_pct": 96.3,
+      "published_rows": 8664,
+      "published_pct": 97.3,
+      "enriched_rows": 8817,
+      "enriched_pct": 99,
+      "enriched_with_skills": 8486,
+      "skills_pct": 96.2,
       "examples": [
         {
-          "id": "workday-cisco-2017918",
-          "company": "Cisco",
-          "title": "Cloud Engineer"
-        },
-        {
-          "id": "workday-cisco-2018124",
-          "company": "Cisco",
-          "title": "Cloud Engineer"
-        },
-        {
-          "id": "workday-gdit-RQ224001",
+          "id": "workday-gdit-RQ223697",
           "company": "GDIT",
-          "title": "Deputy Program Manager   TS/SCI clearance"
+          "title": "Software Developer/Web Master Senior"
         },
         {
-          "id": "workday-gdit-RQ224019",
-          "company": "GDIT",
-          "title": "NCIS Cyber Security Analyst   Active TS/SCI clearance"
+          "id": "workday-schweitzer-engineering-laboratories-2025-18714",
+          "company": "Schweitzer Engineering Laboratories",
+          "title": "Project Engineer I/II/III - Automation"
         },
         {
-          "id": "workday-gdit-RQ224031",
-          "company": "GDIT",
-          "title": "Network Computer Support Technician"
+          "id": "workday-schweitzer-engineering-laboratories-2025-18525",
+          "company": "Schweitzer Engineering Laboratories",
+          "title": "Installation Technician"
         },
         {
-          "id": "workday-gdit-RQ224015",
-          "company": "GDIT",
-          "title": "SASMO Software Support Representative at Fort Eustis, VA (Secret Clearance)"
+          "id": "workday-schweitzer-engineering-laboratories-2026-19558",
+          "company": "Schweitzer Engineering Laboratories",
+          "title": "Relay Technician"
         },
         {
-          "id": "workday-gdit-RQ223796",
-          "company": "GDIT",
-          "title": "Senior Enterprise Architect"
+          "id": "workday-schweitzer-engineering-laboratories-2025-18875",
+          "company": "Schweitzer Engineering Laboratories",
+          "title": "Primary Equipment Technician"
         },
         {
-          "id": "workday-gdit-RQ223293",
-          "company": "GDIT",
-          "title": "UiPath Robotic Process Automation Developer Associate"
+          "id": "workday-schweitzer-engineering-laboratories-2026-20421",
+          "company": "Schweitzer Engineering Laboratories",
+          "title": "Project Engineer I/II/III - Commissioning"
+        },
+        {
+          "id": "workday-schweitzer-engineering-laboratories-2026-21278",
+          "company": "Schweitzer Engineering Laboratories",
+          "title": "Project Engineer II/III - Automation"
+        },
+        {
+          "id": "workday-boston-dynamics-R2296",
+          "company": "Boston Dynamics",
+          "title": "Senior Staff Manufacturing Test Engineer"
         }
       ],
       "severity": "ok",
@@ -208,59 +277,18 @@
       "pool_rows": 1984,
       "us_rows": 1983,
       "tech_us_rows": 346,
-      "raw_sidecar_rows": 1149,
-      "sidecar_active_rows": 312,
+      "raw_sidecar_rows": 1190,
+      "sidecar_active_rows": 346,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 312,
-      "published_pct": 90.2,
+      "published_rows": 346,
+      "published_pct": 100,
       "enriched_rows": 346,
       "enriched_pct": 100,
       "enriched_with_skills": 341,
       "skills_pct": 98.6,
-      "examples": [
-        {
-          "id": "sr-Sandisk-744000134550855",
-          "company": "Sandisk",
-          "title": "Senior Technologist Datapath Design Engineer and Circuit Design Engineer, VLSI Design Engineering"
-        },
-        {
-          "id": "sr-VeoliaEnvironnementSA-744000134526870",
-          "company": "Veolia Environnement SA",
-          "title": "Electrical Commissioning Engineer - Mission Critical Data Centers"
-        },
-        {
-          "id": "sr-VeoliaEnvironnementSA-744000134525646",
-          "company": "Veolia Environnement SA",
-          "title": "Mechanical Commissioning Engineer - Mission Critical Data Centers"
-        },
-        {
-          "id": "sr-llnl-3743990013813396",
-          "company": "LLNL",
-          "title": "Nuclear Procurement Engineer"
-        },
-        {
-          "id": "sr-Sandisk-744000134505827",
-          "company": "Sandisk",
-          "title": "Technologist, Firmware Verification Engineering"
-        },
-        {
-          "id": "sr-WellmarkInc-744000134508191",
-          "company": "Wellmark, Inc.",
-          "title": "Senior Software Engineer - Enterprise Data Services"
-        },
-        {
-          "id": "sr-VeoliaEnvironnementSA-744000134485660",
-          "company": "Veolia Environnement SA",
-          "title": "Utility Project Engineer"
-        },
-        {
-          "id": "sr-Intuitive-744000134343169",
-          "company": "Intuitive",
-          "title": "SFDC - Field Service Solution Architects"
-        }
-      ],
+      "examples": [],
       "severity": "ok",
       "flags": []
     },
@@ -282,30 +310,6 @@
       "skills_pct": 0,
       "examples": [],
       "severity": "info",
-      "flags": []
-    },
-    {
-      "source": "microsoft",
-      "pool_rows": 30,
-      "us_rows": 2,
-      "tech_us_rows": 1,
-      "raw_sidecar_rows": 490,
-      "sidecar_active_rows": 1,
-      "supplemental_rows": 535,
-      "supplemental_with_desc": 43,
-      "supplemental_meta": {
-        "generated_at": "2026-07-12T09:03:24.287Z",
-        "lane_name": "custom",
-        "jobs_fetched": 3299
-      },
-      "published_rows": 1,
-      "published_pct": 100,
-      "enriched_rows": 1,
-      "enriched_pct": 100,
-      "enriched_with_skills": 1,
-      "skills_pct": 100,
-      "examples": [],
-      "severity": "ok",
       "flags": []
     },
     {
@@ -338,9 +342,9 @@
       "supplemental_rows": 64,
       "supplemental_with_desc": 64,
       "supplemental_meta": {
-        "generated_at": "2026-07-12T09:03:24.287Z",
+        "generated_at": "2026-07-12T09:49:39.788Z",
         "lane_name": "custom",
-        "jobs_fetched": 3299
+        "jobs_fetched": 3302
       },
       "published_rows": 18,
       "published_pct": 100,
