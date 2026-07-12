@@ -46,7 +46,7 @@ jobs:
             const dataDir = '.github/data';
             if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
 
-            const files = ['all_jobs.json', 'enriched_jobs.json', 'posted_jobs.json', 'jobs-metadata.json', 'daily-stats.json'];
+            const files = ['all_jobs.json', 'enriched_jobs.json', 'posted_jobs.json', 'jobs-metadata.json', 'daily-stats.json', 'history.jsonl', 'history-archive.jsonl', 'traffic-history.jsonl'];
             for (const file of files) {
               try {
                 const raw = await r2.downloadRaw(file);
