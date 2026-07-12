@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-12T20:45:30.860Z",
+  "generated_at": "2026-07-12T21:16:54.809Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -45,24 +45,27 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-12T18:36:39.635Z",
+    "generated_at": "2026-07-12T21:13:17.027Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 14679,
-    "description_entries": 12569,
-    "coverage_pct": 85.6,
+    "board_row_count": 14600,
+    "description_entries": 11322,
+    "coverage_pct": 77.5,
     "source_breakdown": {
-      "sidecar": 12569,
+      "sidecar": 11322,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-07-12T18:21:25.201Z",
+    "jobs_metadata_generated": "2026-07-12T20:33:40.198Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-12T20:45:27.479Z",
-    "active": false,
-    "message": null,
-    "failures": [],
+    "checked_at": "2026-07-12T21:16:50.569Z",
+    "active": true,
+    "message": "**fetch-jobs.yml**: Last run 41m ago (expected ≤30m) | **Submodule bump failed** (run 29208329167, 31 min ago) and live drift remains in 12 target(s): shared:New-Grad-Jobs-2027, shared:Internships-2027, shared:New-Grad-Software-Engineering-Jobs-2027, shared:New-Grad-Data-Science-Jobs-2027. Check [run log](https://github.com/zapplyjobs/jobs-aggregator-private/actions/runs/29208329167).",
+    "failures": [
+      "**fetch-jobs.yml**: Last run 41m ago (expected ≤30m)",
+      "**Submodule bump failed** (run 29208329167, 31 min ago) and live drift remains in 12 target(s): shared:New-Grad-Jobs-2027, shared:Internships-2027, shared:New-Grad-Software-Engineering-Jobs-2027, shared:New-Grad-Data-Science-Jobs-2027. Check [run log](https://github.com/zapplyjobs/jobs-aggregator-private/actions/runs/29208329167)."
+    ],
     "warnings": [],
     "warning_count": 0,
     "secrets": [
@@ -79,57 +82,57 @@
       "pool_rows": 52399,
       "us_rows": 27456,
       "tech_us_rows": 8839,
-      "raw_sidecar_rows": 34217,
-      "sidecar_active_rows": 6653,
+      "raw_sidecar_rows": 27308,
+      "sidecar_active_rows": 6889,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 7032,
-      "published_pct": 79.6,
-      "enriched_rows": 8726,
-      "enriched_pct": 98.7,
-      "enriched_with_skills": 8403,
+      "published_rows": 6889,
+      "published_pct": 77.9,
+      "enriched_rows": 8737,
+      "enriched_pct": 98.8,
+      "enriched_with_skills": 8414,
       "skills_pct": 96.3,
       "examples": [
-        {
-          "id": "workday-rtx-01856396",
-          "company": "RTX",
-          "title": "Principal Embedded Software Engineer - Platform and Foundation Software (Onsite)"
-        },
-        {
-          "id": "workday-northrop-grumman-R10239605",
-          "company": "Northrop Grumman",
-          "title": "RF Systems Engineer 3/4"
-        },
-        {
-          "id": "workday-northrop-grumman-R10236100",
-          "company": "Northrop Grumman",
-          "title": "Intelligence Analyst - Level 2 or 3"
-        },
-        {
-          "id": "workday-northrop-grumman-R10239898",
-          "company": "Northrop Grumman",
-          "title": "Sr Principal Computer Systems Analyst-AHT"
-        },
-        {
-          "id": "workday-northrop-grumman-R10239985",
-          "company": "Northrop Grumman",
-          "title": "Hardware/RF Engineering Lead - Level 5"
-        },
         {
           "id": "workday-symbotic-R7084",
           "company": "Symbotic",
           "title": "Technical Support Administrator"
         },
         {
-          "id": "workday-jabil-J2455152",
-          "company": "Jabil",
-          "title": "Principal Product Test Engineer, Rack & Server"
+          "id": "workday-pnc-financial-services-R226888",
+          "company": "PNC Financial Services",
+          "title": "Software Engineering Manager - Technical"
         },
         {
-          "id": "workday-jabil-J2448997",
-          "company": "Jabil",
-          "title": "Prototyping Engineering Technician"
+          "id": "workday-leidos-R-00185419",
+          "company": "Leidos",
+          "title": "Program Manager"
+        },
+        {
+          "id": "workday-leidos-R-00187134",
+          "company": "Leidos",
+          "title": "Staffing Manager"
+        },
+        {
+          "id": "workday-boston-dynamics-R2296",
+          "company": "Boston Dynamics",
+          "title": "Senior Staff Manufacturing Test Engineer"
+        },
+        {
+          "id": "workday-parsons-R182628",
+          "company": "Parsons",
+          "title": "Software Engineer - TS/SCI required"
+        },
+        {
+          "id": "workday-penn-state-university-REQ_0000076265",
+          "company": "Penn State University",
+          "title": "Navigation Analysis Research and Development Engineer"
+        },
+        {
+          "id": "workday-tel-R26-01071",
+          "company": "TEL",
+          "title": "Technical Support Engineer - CT"
         }
       ],
       "severity": "high",
@@ -151,13 +154,28 @@
         "lane_name": "oracle",
         "jobs_fetched": 34980
       },
-      "published_rows": 939,
-      "published_pct": 73.8,
+      "published_rows": 0,
+      "published_pct": 0,
       "enriched_rows": 1272,
       "enriched_pct": 100,
       "enriched_with_skills": 1181,
       "skills_pct": 92.8,
       "examples": [
+        {
+          "id": "oracle-oracle-336935",
+          "company": "Oracle",
+          "title": "Lead Principal Platform Software Engineer"
+        },
+        {
+          "id": "oracle-oracle-332886",
+          "company": "Oracle",
+          "title": "Senior Manager, Reliability Engineering-Shackelford County Texas"
+        },
+        {
+          "id": "oracle-oracle-338575",
+          "company": "Oracle",
+          "title": "Senior Platform Software Engineer"
+        },
         {
           "id": "oracle-wsp-80201",
           "company": "WSP",
@@ -169,39 +187,26 @@
           "title": "Mechatronics Engineer – Chassis Systems"
         },
         {
-          "id": "oracle-citizens-financial-46690",
-          "company": "Citizens Financial Group",
-          "title": "Equity Research Analyst -(Westwood, MA; Boston, MA; Johnston, RI)"
+          "id": "oracle-jpmorgan-chase-210768056",
+          "company": "JPMorgan Chase",
+          "title": "AI/ML Data and Analytics - Product Manager, Vice President"
         },
         {
-          "id": "oracle-citizens-financial-47613",
-          "company": "Citizens Financial Group",
-          "title": "Principal Data Analyst"
+          "id": "oracle-oracle-338591",
+          "company": "Oracle",
+          "title": "Senior Platform Software Engineer"
         },
         {
-          "id": "oracle-citizens-financial-47699",
-          "company": "Citizens Financial Group",
-          "title": "Program Manager - AI Engineering"
-        },
-        {
-          "id": "oracle-cummins-2428332",
-          "company": "Cummins",
-          "title": "Senior Sales Application Engineer"
-        },
-        {
-          "id": "oracle-cummins-2431539",
-          "company": "Cummins",
-          "title": "Controls Engineer"
-        },
-        {
-          "id": "oracle-cummins-2432881",
-          "company": "Cummins",
-          "title": "Embedded Software Architect"
+          "id": "oracle-oracle-338624",
+          "company": "Oracle",
+          "title": "Senior Platform Software Engineer"
         }
       ],
       "severity": "high",
       "flags": [
-        "low_published_coverage"
+        "low_published_coverage",
+        "no_source_text_surface",
+        "supplemental_stage_gap"
       ]
     },
     {
@@ -209,8 +214,8 @@
       "pool_rows": 1981,
       "us_rows": 1980,
       "tech_us_rows": 346,
-      "raw_sidecar_rows": 1142,
-      "sidecar_active_rows": 301,
+      "raw_sidecar_rows": 1141,
+      "sidecar_active_rows": 304,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
@@ -290,7 +295,7 @@
       "pool_rows": 510,
       "us_rows": 333,
       "tech_us_rows": 162,
-      "raw_sidecar_rows": 510,
+      "raw_sidecar_rows": 508,
       "sidecar_active_rows": 162,
       "supplemental_rows": 535,
       "supplemental_with_desc": 24,
