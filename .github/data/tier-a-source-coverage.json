@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-12T02:17:15.826Z",
+  "generated_at": "2026-07-12T03:43:52.472Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -31,7 +31,6 @@
     "descriptions-deshaw.jsonl",
     "descriptions-eightfold.jsonl",
     "descriptions-enriched-1.jsonl",
-    "descriptions-enriched-2.jsonl",
     "descriptions-google.jsonl",
     "descriptions-greenhouse-1.jsonl",
     "descriptions-greenhouse-2.jsonl",
@@ -46,26 +45,24 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-12T02:06:25.547Z",
+    "generated_at": "2026-07-12T03:36:26.822Z",
     "source_basis": "us_jobs.json",
     "board_row_count": 14620,
-    "description_entries": 14035,
-    "coverage_pct": 96,
+    "description_entries": 12221,
+    "coverage_pct": 83.6,
     "source_breakdown": {
-      "sidecar": 14035,
+      "sidecar": 12221,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-07-12T01:51:05.746Z",
+    "jobs_metadata_generated": "2026-07-12T03:21:30.234Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-12T02:17:11.089Z",
-    "active": true,
-    "message": "**fetch-jobs.yml**: Last run failed (<t:1783822568:R>)",
-    "failures": [
-      "**fetch-jobs.yml**: Last run failed (<t:1783822568:R>)"
-    ],
+    "checked_at": "2026-07-12T03:43:49.415Z",
+    "active": false,
+    "message": null,
+    "failures": [],
     "warnings": [],
     "warning_count": 0,
     "secrets": [
@@ -78,31 +75,89 @@
   },
   "rows": [
     {
-      "source": "oracle",
-      "pool_rows": 10904,
-      "us_rows": 6742,
-      "tech_us_rows": 1272,
-      "raw_sidecar_rows": 7264,
-      "sidecar_active_rows": 817,
-      "supplemental_rows": 35027,
-      "supplemental_with_desc": 25887,
-      "supplemental_meta": {
-        "generated_at": "2026-07-12T02:05:23.059Z",
-        "lane_name": "oracle",
-        "jobs_fetched": 35027
-      },
-      "published_rows": 817,
-      "published_pct": 64.2,
-      "enriched_rows": 1272,
-      "enriched_pct": 100,
-      "enriched_with_skills": 971,
-      "skills_pct": 76.3,
+      "source": "workday",
+      "pool_rows": 52556,
+      "us_rows": 27478,
+      "tech_us_rows": 8934,
+      "raw_sidecar_rows": 26541,
+      "sidecar_active_rows": 6840,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 6743,
+      "published_pct": 75.5,
+      "enriched_rows": 8846,
+      "enriched_pct": 99,
+      "enriched_with_skills": 8519,
+      "skills_pct": 96.3,
       "examples": [
         {
-          "id": "oracle-oracle-336935",
-          "company": "Oracle",
-          "title": "Lead Principal Platform Software Engineer"
+          "id": "workday-nvidia-JR2007277",
+          "company": "NVIDIA",
+          "title": "Director, Software TPM - Server Firmware and System Software"
         },
+        {
+          "id": "workday-ss&c-technologies-R40587",
+          "company": "SS&C Technologies",
+          "title": "Senior Software Engineer"
+        },
+        {
+          "id": "workday-ss&c-technologies-R43952",
+          "company": "SS&C Technologies",
+          "title": "Software Development Engineer in Test"
+        },
+        {
+          "id": "workday-micron-technology-JR104071",
+          "company": "Micron Technology",
+          "title": "MTS, Technical Solutions Sales Architect"
+        },
+        {
+          "id": "workday-micron-JR104071",
+          "company": "Micron",
+          "title": "MTS, Technical Solutions Sales Architect"
+        },
+        {
+          "id": "workday-blackstone-42443",
+          "company": "Blackstone",
+          "title": "Talent Partner, VP"
+        },
+        {
+          "id": "workday-blackstone-43558",
+          "company": "Blackstone",
+          "title": "Blackstone Energy Transition Partners – Senior Associate"
+        },
+        {
+          "id": "workday-blackstone-43556",
+          "company": "Blackstone",
+          "title": "Blackstone Harvest – Vice President"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage"
+      ]
+    },
+    {
+      "source": "oracle",
+      "pool_rows": 11131,
+      "us_rows": 6941,
+      "tech_us_rows": 1276,
+      "raw_sidecar_rows": 8848,
+      "sidecar_active_rows": 1004,
+      "supplemental_rows": 33571,
+      "supplemental_with_desc": 24684,
+      "supplemental_meta": {
+        "generated_at": "2026-07-12T03:34:51.682Z",
+        "lane_name": "oracle",
+        "jobs_fetched": 33571
+      },
+      "published_rows": 1004,
+      "published_pct": 78.7,
+      "enriched_rows": 1276,
+      "enriched_pct": 100,
+      "enriched_with_skills": 975,
+      "skills_pct": 76.4,
+      "examples": [
         {
           "id": "oracle-cummins-2431553",
           "company": "Cummins",
@@ -112,11 +167,6 @@
           "id": "oracle-dell-technologies-R288065",
           "company": "Dell Technologies",
           "title": "Senior Principal Mechanical Engineer - Mechanical Engineering Center of Excellence"
-        },
-        {
-          "id": "oracle-oracle-338591",
-          "company": "Oracle",
-          "title": "Senior Platform Software Engineer"
         },
         {
           "id": "oracle-citizens-financial-46690",
@@ -137,6 +187,16 @@
           "id": "oracle-cummins-2428332",
           "company": "Cummins",
           "title": "Senior Sales Application Engineer"
+        },
+        {
+          "id": "oracle-cummins-2431539",
+          "company": "Cummins",
+          "title": "Controls Engineer"
+        },
+        {
+          "id": "oracle-cummins-2432881",
+          "company": "Cummins",
+          "title": "Embedded Software Architect"
         }
       ],
       "severity": "high",
@@ -145,83 +205,63 @@
       ]
     },
     {
-      "source": "workday",
-      "pool_rows": 52518,
-      "us_rows": 27418,
-      "tech_us_rows": 8859,
-      "raw_sidecar_rows": 28978,
-      "sidecar_active_rows": 8753,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 8680,
-      "published_pct": 98,
-      "enriched_rows": 8778,
-      "enriched_pct": 99.1,
-      "enriched_with_skills": 8455,
-      "skills_pct": 96.3,
-      "examples": [
-        {
-          "id": "workday-boston-dynamics-R2296",
-          "company": "Boston Dynamics",
-          "title": "Senior Staff Manufacturing Test Engineer"
-        },
-        {
-          "id": "workday-parsons-R182628",
-          "company": "Parsons",
-          "title": "Software Engineer - TS/SCI required"
-        },
-        {
-          "id": "workday-highmark-health-J281843",
-          "company": "Highmark Health",
-          "title": "Artificial Intelligence (AI) Consultant"
-        },
-        {
-          "id": "workday-highmark-health-J281849",
-          "company": "Highmark Health",
-          "title": "Manager Decision Support Analytics"
-        },
-        {
-          "id": "workday-nxp-R-10063540",
-          "company": "NXP",
-          "title": "Silicon Design IP Licensing Specialist"
-        },
-        {
-          "id": "workday-jll-REQ520216",
-          "company": "JLL",
-          "title": "Facilities Capital Engineer"
-        },
-        {
-          "id": "workday-jll-REQ520932",
-          "company": "JLL",
-          "title": "Associate Design Manager, Workplace"
-        },
-        {
-          "id": "workday-moderna-R19348",
-          "company": "Moderna",
-          "title": "ASU CMC Technical Integration Lead"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
-    },
-    {
       "source": "smartrecruiters",
-      "pool_rows": 1986,
-      "us_rows": 1985,
+      "pool_rows": 1985,
+      "us_rows": 1984,
       "tech_us_rows": 346,
-      "raw_sidecar_rows": 1190,
-      "sidecar_active_rows": 346,
+      "raw_sidecar_rows": 1142,
+      "sidecar_active_rows": 304,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 346,
-      "published_pct": 100,
+      "published_rows": 304,
+      "published_pct": 87.9,
       "enriched_rows": 346,
       "enriched_pct": 100,
       "enriched_with_skills": 341,
       "skills_pct": 98.6,
-      "examples": [],
+      "examples": [
+        {
+          "id": "sr-WellmarkInc-744000136512919",
+          "company": "Wellmark, Inc.",
+          "title": "Software Engineer"
+        },
+        {
+          "id": "sr-Intuitive-744000136107169",
+          "company": "Intuitive",
+          "title": "Sr Human Factors Design Engineer"
+        },
+        {
+          "id": "sr-VeoliaEnvironnementSA-744000135551709",
+          "company": "Veolia Environnement SA",
+          "title": "Data Engineer"
+        },
+        {
+          "id": "sr-llnl-3743990013907505",
+          "company": "LLNL",
+          "title": "Combat Simulation Systems Analyst"
+        },
+        {
+          "id": "sr-Intuitive-744000135329990",
+          "company": "Intuitive",
+          "title": "Platform automation Engineer"
+        },
+        {
+          "id": "sr-RESPECInc-744000135094199",
+          "company": "RE/SPEC Inc.",
+          "title": "Engineering Program Manager"
+        },
+        {
+          "id": "sr-Intuitive-744000135083462",
+          "company": "Intuitive",
+          "title": "Robotic Algorithms & Controls Engineer (Systems Analyst)"
+        },
+        {
+          "id": "sr-Intuitive-744000135060959",
+          "company": "Intuitive",
+          "title": "Field Service Engineer 2 - Wknd Shift"
+        }
+      ],
       "severity": "ok",
       "flags": []
     },
@@ -253,9 +293,9 @@
       "raw_sidecar_rows": 510,
       "sidecar_active_rows": 162,
       "supplemental_rows": 535,
-      "supplemental_with_desc": 13,
+      "supplemental_with_desc": 25,
       "supplemental_meta": {
-        "generated_at": "2026-07-12T02:04:58.351Z",
+        "generated_at": "2026-07-12T03:32:27.773Z",
         "lane_name": "custom",
         "jobs_fetched": 3303
       },
@@ -296,10 +336,10 @@
       "tech_us_rows": 19,
       "raw_sidecar_rows": 84,
       "sidecar_active_rows": 19,
-      "supplemental_rows": 65,
-      "supplemental_with_desc": 65,
+      "supplemental_rows": 64,
+      "supplemental_with_desc": 64,
       "supplemental_meta": {
-        "generated_at": "2026-07-12T02:04:58.351Z",
+        "generated_at": "2026-07-12T03:32:27.773Z",
         "lane_name": "custom",
         "jobs_fetched": 3303
       },
