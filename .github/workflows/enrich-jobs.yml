@@ -177,6 +177,7 @@ jobs:
 
       - name: Commit enrichment stats
         if: success()
+        continue-on-error: true
         run: |
           git config user.email "bot@zapplyjobs.com"
           git config user.name "Aggregator Bot"
