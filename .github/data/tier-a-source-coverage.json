@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-12T21:23:02.400Z",
+  "generated_at": "2026-07-12T21:44:02.925Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -59,12 +59,11 @@
     "enrichment_version": null
   },
   "consumer_alert": {
-    "checked_at": "2026-07-12T21:22:58.319Z",
+    "checked_at": "2026-07-12T21:43:58.282Z",
     "active": true,
-    "message": "**fetch-jobs.yml**: Last run 47m ago (expected ≤30m) | **Submodule bump failed** (run 29208329167, 37 min ago) and live drift remains in 13 target(s): shared:New-Grad-Jobs-2027, shared:Internships-2027, shared:New-Grad-Software-Engineering-Jobs-2027, shared:New-Grad-Data-Science-Jobs-2027. Check [run log](https://github.com/zapplyjobs/jobs-aggregator-private/actions/runs/29208329167).",
+    "message": "**Submodule bump failed** (run 29208329167, 59 min ago) and live drift remains in 12 target(s): shared:New-Grad-Jobs-2027, shared:Internships-2027, shared:New-Grad-Software-Engineering-Jobs-2027, shared:New-Grad-Data-Science-Jobs-2027. Check [run log](https://github.com/zapplyjobs/jobs-aggregator-private/actions/runs/29208329167).",
     "failures": [
-      "**fetch-jobs.yml**: Last run 47m ago (expected ≤30m)",
-      "**Submodule bump failed** (run 29208329167, 37 min ago) and live drift remains in 13 target(s): shared:New-Grad-Jobs-2027, shared:Internships-2027, shared:New-Grad-Software-Engineering-Jobs-2027, shared:New-Grad-Data-Science-Jobs-2027. Check [run log](https://github.com/zapplyjobs/jobs-aggregator-private/actions/runs/29208329167)."
+      "**Submodule bump failed** (run 29208329167, 59 min ago) and live drift remains in 12 target(s): shared:New-Grad-Jobs-2027, shared:Internships-2027, shared:New-Grad-Software-Engineering-Jobs-2027, shared:New-Grad-Data-Science-Jobs-2027. Check [run log](https://github.com/zapplyjobs/jobs-aggregator-private/actions/runs/29208329167)."
     ],
     "warnings": [],
     "warning_count": 0,
@@ -77,6 +76,69 @@
     ]
   },
   "rows": [
+    {
+      "source": "workday",
+      "pool_rows": 52410,
+      "us_rows": 27675,
+      "tech_us_rows": 8888,
+      "raw_sidecar_rows": 28155,
+      "sidecar_active_rows": 6920,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 7037,
+      "published_pct": 79.2,
+      "enriched_rows": 8773,
+      "enriched_pct": 98.7,
+      "enriched_with_skills": 8444,
+      "skills_pct": 96.2,
+      "examples": [
+        {
+          "id": "workday-wells-fargo-R-555857",
+          "company": "Wells Fargo",
+          "title": "Senior Software Engineer"
+        },
+        {
+          "id": "workday-ss&c-technologies-R38100",
+          "company": "SS&C Technologies",
+          "title": "Senior Associate, Loan Operations"
+        },
+        {
+          "id": "workday-northrop-grumman-R10239633",
+          "company": "Northrop Grumman",
+          "title": "Systems Engineer 2/3"
+        },
+        {
+          "id": "workday-northrop-grumman-R10238978",
+          "company": "Northrop Grumman",
+          "title": "Systems Integration & Test Engineer - Level 3/4"
+        },
+        {
+          "id": "workday-kla-2638812",
+          "company": "KLA",
+          "title": "Customer Support Engineer - PCB"
+        },
+        {
+          "id": "workday-johnson-&-johnson-R-085495",
+          "company": "Johnson & Johnson",
+          "title": "Director, World Model & Agentic Learning"
+        },
+        {
+          "id": "workday-micron-JR105867",
+          "company": "Micron",
+          "title": "Principal Design Engineer"
+        },
+        {
+          "id": "workday-micron-JR105872",
+          "company": "Micron",
+          "title": "Senior Design Engineer"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage"
+      ]
+    },
     {
       "source": "oracle",
       "pool_rows": 11111,
@@ -147,73 +209,12 @@
       ]
     },
     {
-      "source": "workday",
-      "pool_rows": 52399,
-      "us_rows": 27456,
-      "tech_us_rows": 8839,
-      "raw_sidecar_rows": 27567,
-      "sidecar_active_rows": 7136,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 7136,
-      "published_pct": 80.7,
-      "enriched_rows": 8737,
-      "enriched_pct": 98.8,
-      "enriched_with_skills": 8414,
-      "skills_pct": 96.3,
-      "examples": [
-        {
-          "id": "workday-symbotic-R7084",
-          "company": "Symbotic",
-          "title": "Technical Support Administrator"
-        },
-        {
-          "id": "workday-pnc-financial-services-R226888",
-          "company": "PNC Financial Services",
-          "title": "Software Engineering Manager - Technical"
-        },
-        {
-          "id": "workday-leidos-R-00185419",
-          "company": "Leidos",
-          "title": "Program Manager"
-        },
-        {
-          "id": "workday-leidos-R-00187134",
-          "company": "Leidos",
-          "title": "Staffing Manager"
-        },
-        {
-          "id": "workday-boston-dynamics-R2296",
-          "company": "Boston Dynamics",
-          "title": "Senior Staff Manufacturing Test Engineer"
-        },
-        {
-          "id": "workday-parsons-R182628",
-          "company": "Parsons",
-          "title": "Software Engineer - TS/SCI required"
-        },
-        {
-          "id": "workday-penn-state-university-REQ_0000076265",
-          "company": "Penn State University",
-          "title": "Navigation Analysis Research and Development Engineer"
-        },
-        {
-          "id": "workday-tel-R26-01071",
-          "company": "TEL",
-          "title": "Technical Support Engineer - CT"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
-    },
-    {
       "source": "smartrecruiters",
-      "pool_rows": 1981,
-      "us_rows": 1980,
+      "pool_rows": 1980,
+      "us_rows": 1979,
       "tech_us_rows": 346,
       "raw_sidecar_rows": 1141,
-      "sidecar_active_rows": 304,
+      "sidecar_active_rows": 301,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
@@ -293,7 +294,7 @@
       "pool_rows": 510,
       "us_rows": 333,
       "tech_us_rows": 162,
-      "raw_sidecar_rows": 508,
+      "raw_sidecar_rows": 509,
       "sidecar_active_rows": 162,
       "supplemental_rows": 535,
       "supplemental_with_desc": 24,
