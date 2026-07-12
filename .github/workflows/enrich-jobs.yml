@@ -55,7 +55,7 @@ jobs:
             // Download core data files (enriched_jobs.json: INF-BLOAT-5 left it git-tracked but stale;
             // must download from R2 to get fresh version instead of May 14 git snapshot)
             // jobs-metadata.json: DASH-METRICS-1 — dashboard reads from git, must download fresh from R2
-            const coreFiles = ['all_jobs.json', 'us_jobs.json', 'processed_ids.json', 'enriched_jobs.json', 'jobs-metadata.json'];
+            const coreFiles = ['all_jobs.json', 'us_jobs.json', 'processed_ids.json', 'enriched_jobs.json', 'jobs-metadata.json', 'enrichment-history.jsonl'];
             for (const file of coreFiles) {
               try {
                 const raw = await r2.downloadRaw(file);
