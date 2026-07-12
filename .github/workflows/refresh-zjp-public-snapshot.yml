@@ -117,15 +117,6 @@ jobs:
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
         run: node .github/scripts/r2-artifact-contract-check.js
 
-      - name: Commit snapshot
-        run: |
-          git config user.email "bot@zapplyjobs.com"
-          git config user.name "Data Bot"
-          git restore .github/data/all_jobs.json .github/data/jobs-metadata.json || true
-          git add .github/data/zjp-public-snapshot.json .github/data/tag-history.jsonl
-          git commit -m "chore: refresh zjp public snapshot [skip ci]" || exit 0
-          for i in 1 2 3; do
-            git pull --rebase --autostash origin main && git push && break
-            echo "Push attempt $i failed, retrying in 5s..."
-            sleep 5
-          done
+      # Commit step removed — .github/data/ files are R2-only (INF-REPOCLEANUP-1).
+      # The snapshot is uploaded to R2 in the "Upload public snapshot to R2" step above.
+      # No git commit needed.
