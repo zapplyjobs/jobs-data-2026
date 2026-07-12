@@ -159,24 +159,9 @@ jobs:
                 except (ValueError, TypeError):
                     pass
 
-            # Workflow status — last run pass/fail (pipeline repos only)
-            if pipeline_repos:
-                try:
-                    req = urllib.request.Request(
-                        f"https://api.github.com/repos/zapplyjobs/{repo}/actions/runs?per_page=1",
-                        headers={"User-Agent": "out-health-check/1.0", "Accept": "application/vnd.github+json", "Authorization": f"token {gh_token}"}
-                    )
-                    with urllib.request.urlopen(req, timeout=10) as resp:
-                        runs = json.loads(resp.read())
-                    if runs.get("workflow_runs"):
-                        last_run = runs["workflow_runs"][0]
-                        conclusion = last_run.get("conclusion", "unknown")
-                        r["last_workflow_status"] = conclusion
-                        if conclusion == "failure":
-                            wf_name = last_run.get("name", "?")
-                            r["issues"].append(f"workflow '{wf_name}' FAILING")
-                except Exception:
-                    pass
+            # Consumer-repo workflow status REMOVED — repos are now pure display
+            # (INF Phase 4 architecture change: centralized pipeline generates READMEs).
+            # README freshness (pushed_at check above) is sufficient to verify repos are updating.
 
             if r["issues"]:
                 r["verdict"] = "FAIL"
