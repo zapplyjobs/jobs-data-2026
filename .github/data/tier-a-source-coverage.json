@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-12T01:03:10.030Z",
+  "generated_at": "2026-07-12T02:17:15.826Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -31,6 +31,7 @@
     "descriptions-deshaw.jsonl",
     "descriptions-eightfold.jsonl",
     "descriptions-enriched-1.jsonl",
+    "descriptions-enriched-2.jsonl",
     "descriptions-google.jsonl",
     "descriptions-greenhouse-1.jsonl",
     "descriptions-greenhouse-2.jsonl",
@@ -45,24 +46,26 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-12T00:51:19.701Z",
+    "generated_at": "2026-07-12T02:06:25.547Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 14656,
-    "description_entries": 13083,
-    "coverage_pct": 89.3,
+    "board_row_count": 14620,
+    "description_entries": 14035,
+    "coverage_pct": 96,
     "source_breakdown": {
-      "sidecar": 13083,
+      "sidecar": 14035,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-07-12T00:35:59.939Z",
+    "jobs_metadata_generated": "2026-07-12T01:51:05.746Z",
     "enrichment_stats_generated": null,
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-12T01:03:06.370Z",
-    "active": false,
-    "message": null,
-    "failures": [],
+    "checked_at": "2026-07-12T02:17:11.089Z",
+    "active": true,
+    "message": "**fetch-jobs.yml**: Last run failed (<t:1783822568:R>)",
+    "failures": [
+      "**fetch-jobs.yml**: Last run failed (<t:1783822568:R>)"
+    ],
     "warnings": [],
     "warning_count": 0,
     "secrets": [
@@ -76,25 +79,30 @@
   "rows": [
     {
       "source": "oracle",
-      "pool_rows": 11130,
-      "us_rows": 6940,
-      "tech_us_rows": 1275,
+      "pool_rows": 10904,
+      "us_rows": 6742,
+      "tech_us_rows": 1272,
       "raw_sidecar_rows": 7264,
-      "sidecar_active_rows": 820,
-      "supplemental_rows": 35026,
-      "supplemental_with_desc": 25886,
+      "sidecar_active_rows": 817,
+      "supplemental_rows": 35027,
+      "supplemental_with_desc": 25887,
       "supplemental_meta": {
-        "generated_at": "2026-07-12T00:50:04.535Z",
+        "generated_at": "2026-07-12T02:05:23.059Z",
         "lane_name": "oracle",
-        "jobs_fetched": 35026
+        "jobs_fetched": 35027
       },
-      "published_rows": 820,
-      "published_pct": 64.3,
-      "enriched_rows": 1275,
+      "published_rows": 817,
+      "published_pct": 64.2,
+      "enriched_rows": 1272,
       "enriched_pct": 100,
-      "enriched_with_skills": 974,
-      "skills_pct": 76.4,
+      "enriched_with_skills": 971,
+      "skills_pct": 76.3,
       "examples": [
+        {
+          "id": "oracle-oracle-336935",
+          "company": "Oracle",
+          "title": "Lead Principal Platform Software Engineer"
+        },
         {
           "id": "oracle-cummins-2431553",
           "company": "Cummins",
@@ -129,11 +137,6 @@
           "id": "oracle-cummins-2428332",
           "company": "Cummins",
           "title": "Senior Sales Application Engineer"
-        },
-        {
-          "id": "oracle-cummins-2431539",
-          "company": "Cummins",
-          "title": "Controls Engineer"
         }
       ],
       "severity": "high",
@@ -143,36 +146,21 @@
     },
     {
       "source": "workday",
-      "pool_rows": 52816,
-      "us_rows": 27573,
-      "tech_us_rows": 8893,
-      "raw_sidecar_rows": 27770,
-      "sidecar_active_rows": 7841,
+      "pool_rows": 52518,
+      "us_rows": 27418,
+      "tech_us_rows": 8859,
+      "raw_sidecar_rows": 28978,
+      "sidecar_active_rows": 8753,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 7788,
-      "published_pct": 87.6,
-      "enriched_rows": 8794,
-      "enriched_pct": 98.9,
-      "enriched_with_skills": 8471,
+      "published_rows": 8680,
+      "published_pct": 98,
+      "enriched_rows": 8778,
+      "enriched_pct": 99.1,
+      "enriched_with_skills": 8455,
       "skills_pct": 96.3,
       "examples": [
-        {
-          "id": "workday-jabil-J2455549",
-          "company": "Jabil",
-          "title": "Information Technology Project Manager - SAP experience required"
-        },
-        {
-          "id": "workday-boeing-JR2026516771",
-          "company": "Boeing",
-          "title": "Data Solution Architect (Senior or Lead)"
-        },
-        {
-          "id": "workday-nidec-R0016618",
-          "company": "Nidec",
-          "title": "Customer Support Engineer"
-        },
         {
           "id": "workday-boston-dynamics-R2296",
           "company": "Boston Dynamics",
@@ -184,19 +172,34 @@
           "title": "Software Engineer - TS/SCI required"
         },
         {
-          "id": "workday-elevance-health-JR199309",
-          "company": "Elevance Health",
-          "title": "Engineer Senior"
+          "id": "workday-highmark-health-J281843",
+          "company": "Highmark Health",
+          "title": "Artificial Intelligence (AI) Consultant"
         },
         {
-          "id": "workday-elevance-health-JR199275",
-          "company": "Elevance Health",
-          "title": "Engineer Senior"
+          "id": "workday-highmark-health-J281849",
+          "company": "Highmark Health",
+          "title": "Manager Decision Support Analytics"
         },
         {
-          "id": "workday-carrier-global-30206638",
-          "company": "Carrier Global",
-          "title": "Energy Engineer II (NORESCO)"
+          "id": "workday-nxp-R-10063540",
+          "company": "NXP",
+          "title": "Silicon Design IP Licensing Specialist"
+        },
+        {
+          "id": "workday-jll-REQ520216",
+          "company": "JLL",
+          "title": "Facilities Capital Engineer"
+        },
+        {
+          "id": "workday-jll-REQ520932",
+          "company": "JLL",
+          "title": "Associate Design Manager, Workplace"
+        },
+        {
+          "id": "workday-moderna-R19348",
+          "company": "Moderna",
+          "title": "ASU CMC Technical Integration Lead"
         }
       ],
       "severity": "ok",
@@ -207,59 +210,18 @@
       "pool_rows": 1986,
       "us_rows": 1985,
       "tech_us_rows": 346,
-      "raw_sidecar_rows": 1145,
-      "sidecar_active_rows": 306,
+      "raw_sidecar_rows": 1190,
+      "sidecar_active_rows": 346,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 306,
-      "published_pct": 88.4,
+      "published_rows": 346,
+      "published_pct": 100,
       "enriched_rows": 346,
       "enriched_pct": 100,
       "enriched_with_skills": 341,
       "skills_pct": 98.6,
-      "examples": [
-        {
-          "id": "sr-VeoliaEnvironnementSA-744000135551709",
-          "company": "Veolia Environnement SA",
-          "title": "Data Engineer"
-        },
-        {
-          "id": "sr-llnl-3743990013907505",
-          "company": "LLNL",
-          "title": "Combat Simulation Systems Analyst"
-        },
-        {
-          "id": "sr-Intuitive-744000135329990",
-          "company": "Intuitive",
-          "title": "Platform automation Engineer"
-        },
-        {
-          "id": "sr-RESPECInc-744000135094199",
-          "company": "RE/SPEC Inc.",
-          "title": "Engineering Program Manager"
-        },
-        {
-          "id": "sr-Intuitive-744000135083462",
-          "company": "Intuitive",
-          "title": "Robotic Algorithms & Controls Engineer (Systems Analyst)"
-        },
-        {
-          "id": "sr-Intuitive-744000135060959",
-          "company": "Intuitive",
-          "title": "Field Service Engineer 2 - Wknd Shift"
-        },
-        {
-          "id": "sr-Sandisk-744000134550855",
-          "company": "Sandisk",
-          "title": "Senior Technologist Datapath Design Engineer and Circuit Design Engineer, VLSI Design Engineering"
-        },
-        {
-          "id": "sr-VeoliaEnvironnementSA-744000134526870",
-          "company": "Veolia Environnement SA",
-          "title": "Electrical Commissioning Engineer - Mission Critical Data Centers"
-        }
-      ],
+      "examples": [],
       "severity": "ok",
       "flags": []
     },
@@ -291,11 +253,11 @@
       "raw_sidecar_rows": 510,
       "sidecar_active_rows": 162,
       "supplemental_rows": 535,
-      "supplemental_with_desc": 25,
+      "supplemental_with_desc": 13,
       "supplemental_meta": {
-        "generated_at": "2026-07-12T00:54:05.756Z",
+        "generated_at": "2026-07-12T02:04:58.351Z",
         "lane_name": "custom",
-        "jobs_fetched": 3304
+        "jobs_fetched": 3303
       },
       "published_rows": 162,
       "published_pct": 100,
@@ -332,14 +294,14 @@
       "pool_rows": 42,
       "us_rows": 35,
       "tech_us_rows": 19,
-      "raw_sidecar_rows": 107,
+      "raw_sidecar_rows": 84,
       "sidecar_active_rows": 19,
       "supplemental_rows": 65,
       "supplemental_with_desc": 65,
       "supplemental_meta": {
-        "generated_at": "2026-07-12T00:54:05.756Z",
+        "generated_at": "2026-07-12T02:04:58.351Z",
         "lane_name": "custom",
-        "jobs_fetched": 3304
+        "jobs_fetched": 3303
       },
       "published_rows": 19,
       "published_pct": 100,
