@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-12T17:22:24.566Z",
+  "generated_at": "2026-07-12T17:37:49.296Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -45,26 +45,24 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-12T17:06:36.779Z",
+    "generated_at": "2026-07-12T17:36:31.780Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 14600,
-    "description_entries": 12632,
-    "coverage_pct": 86.5,
+    "board_row_count": 14630,
+    "description_entries": 12474,
+    "coverage_pct": 85.3,
     "source_breakdown": {
-      "sidecar": 12632,
+      "sidecar": 12474,
       "inline": 0
     },
-    "jobs_metadata_generated": "2026-07-12T16:36:31.332Z",
+    "jobs_metadata_generated": "2026-07-12T17:21:09.898Z",
     "enrichment_stats_generated": null,
-    "enrichment_version": 89
+    "enrichment_version": null
   },
   "consumer_alert": {
-    "checked_at": "2026-07-12T17:22:19.617Z",
-    "active": true,
-    "message": "**Submodule bump failed** (run 29200440863, 46 min ago) and live drift remains in 12 target(s): shared:New-Grad-Jobs-2027, shared:Internships-2027, shared:New-Grad-Software-Engineering-Jobs-2027, shared:New-Grad-Data-Science-Jobs-2027. Check [run log](https://github.com/zapplyjobs/jobs-aggregator-private/actions/runs/29200440863).",
-    "failures": [
-      "**Submodule bump failed** (run 29200440863, 46 min ago) and live drift remains in 12 target(s): shared:New-Grad-Jobs-2027, shared:Internships-2027, shared:New-Grad-Software-Engineering-Jobs-2027, shared:New-Grad-Data-Science-Jobs-2027. Check [run log](https://github.com/zapplyjobs/jobs-aggregator-private/actions/runs/29200440863)."
-    ],
+    "checked_at": "2026-07-12T17:37:45.606Z",
+    "active": false,
+    "message": null,
+    "failures": [],
     "warnings": [],
     "warning_count": 0,
     "secrets": [
@@ -77,18 +75,81 @@
   },
   "rows": [
     {
+      "source": "workday",
+      "pool_rows": 52825,
+      "us_rows": 27512,
+      "tech_us_rows": 8834,
+      "raw_sidecar_rows": 27133,
+      "sidecar_active_rows": 7066,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 7036,
+      "published_pct": 79.6,
+      "enriched_rows": 8740,
+      "enriched_pct": 98.9,
+      "enriched_with_skills": 8417,
+      "skills_pct": 96.3,
+      "examples": [
+        {
+          "id": "workday-pnc-financial-services-R226888",
+          "company": "PNC Financial Services",
+          "title": "Software Engineering Manager - Technical"
+        },
+        {
+          "id": "workday-leidos-R-00185419",
+          "company": "Leidos",
+          "title": "Program Manager"
+        },
+        {
+          "id": "workday-leidos-R-00187134",
+          "company": "Leidos",
+          "title": "Staffing Manager"
+        },
+        {
+          "id": "workday-boston-dynamics-R2296",
+          "company": "Boston Dynamics",
+          "title": "Senior Staff Manufacturing Test Engineer"
+        },
+        {
+          "id": "workday-parsons-R182628",
+          "company": "Parsons",
+          "title": "Software Engineer - TS/SCI required"
+        },
+        {
+          "id": "workday-jll-REQ520932",
+          "company": "JLL",
+          "title": "Associate Design Manager, Workplace"
+        },
+        {
+          "id": "workday-jll-REQ520216",
+          "company": "JLL",
+          "title": "Facilities Capital Engineer"
+        },
+        {
+          "id": "workday-highmark-health-J281843",
+          "company": "Highmark Health",
+          "title": "Artificial Intelligence (AI) Consultant"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage"
+      ]
+    },
+    {
       "source": "oracle",
-      "pool_rows": 11112,
+      "pool_rows": 11113,
       "us_rows": 6939,
       "tech_us_rows": 1273,
-      "raw_sidecar_rows": 8858,
+      "raw_sidecar_rows": 8720,
       "sidecar_active_rows": 940,
-      "supplemental_rows": 34985,
-      "supplemental_with_desc": 25855,
+      "supplemental_rows": 34788,
+      "supplemental_with_desc": 25659,
       "supplemental_meta": {
-        "generated_at": "2026-07-12T17:19:57.354Z",
+        "generated_at": "2026-07-12T17:35:07.318Z",
         "lane_name": "oracle",
-        "jobs_fetched": 34985
+        "jobs_fetched": 34788
       },
       "published_rows": 940,
       "published_pct": 73.8,
@@ -144,83 +205,27 @@
       ]
     },
     {
-      "source": "workday",
-      "pool_rows": 52825,
-      "us_rows": 27571,
-      "tech_us_rows": 8866,
-      "raw_sidecar_rows": 29210,
-      "sidecar_active_rows": 6590,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 7242,
-      "published_pct": 81.7,
-      "enriched_rows": 8772,
-      "enriched_pct": 98.9,
-      "enriched_with_skills": 8449,
-      "skills_pct": 96.3,
-      "examples": [
-        {
-          "id": "workday-salesforce-JR330837",
-          "company": "Salesforce",
-          "title": "Data Analytics Analyst/Manager (US Citizen Only)"
-        },
-        {
-          "id": "workday-pnc-financial-services-R226888",
-          "company": "PNC Financial Services",
-          "title": "Software Engineering Manager - Technical"
-        },
-        {
-          "id": "workday-leidos-R-00185419",
-          "company": "Leidos",
-          "title": "Program Manager"
-        },
-        {
-          "id": "workday-leidos-R-00187134",
-          "company": "Leidos",
-          "title": "Staffing Manager"
-        },
-        {
-          "id": "workday-boston-dynamics-R2296",
-          "company": "Boston Dynamics",
-          "title": "Senior Staff Manufacturing Test Engineer"
-        },
-        {
-          "id": "workday-parsons-R182628",
-          "company": "Parsons",
-          "title": "Software Engineer - TS/SCI required"
-        },
-        {
-          "id": "workday-abb-JR00032784",
-          "company": "ABB",
-          "title": "Protection and Control Engineer"
-        },
-        {
-          "id": "workday-carrier-global-30206638",
-          "company": "Carrier Global",
-          "title": "Energy Engineer II (NORESCO)"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
-    },
-    {
       "source": "smartrecruiters",
       "pool_rows": 1983,
       "us_rows": 1982,
       "tech_us_rows": 346,
-      "raw_sidecar_rows": 1138,
-      "sidecar_active_rows": 301,
+      "raw_sidecar_rows": 1141,
+      "sidecar_active_rows": 304,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 305,
-      "published_pct": 88.2,
+      "published_rows": 304,
+      "published_pct": 87.9,
       "enriched_rows": 346,
       "enriched_pct": 100,
       "enriched_with_skills": 341,
       "skills_pct": 98.6,
       "examples": [
+        {
+          "id": "sr-WellmarkInc-744000136512919",
+          "company": "Wellmark, Inc.",
+          "title": "Software Engineer"
+        },
         {
           "id": "sr-Intuitive-744000136107169",
           "company": "Intuitive",
@@ -255,76 +260,6 @@
           "id": "sr-Intuitive-744000135060959",
           "company": "Intuitive",
           "title": "Field Service Engineer 2 - Wknd Shift"
-        },
-        {
-          "id": "sr-Sandisk-744000134550855",
-          "company": "Sandisk",
-          "title": "Senior Technologist Datapath Design Engineer and Circuit Design Engineer, VLSI Design Engineering"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
-    },
-    {
-      "source": "microsoft",
-      "pool_rows": 510,
-      "us_rows": 333,
-      "tech_us_rows": 162,
-      "raw_sidecar_rows": 512,
-      "sidecar_active_rows": 162,
-      "supplemental_rows": 535,
-      "supplemental_with_desc": 23,
-      "supplemental_meta": {
-        "generated_at": "2026-07-12T17:17:32.161Z",
-        "lane_name": "custom",
-        "jobs_fetched": 3302
-      },
-      "published_rows": 135,
-      "published_pct": 83.3,
-      "enriched_rows": 162,
-      "enriched_pct": 100,
-      "enriched_with_skills": 162,
-      "skills_pct": 100,
-      "examples": [
-        {
-          "id": "microsoft-200039991",
-          "company": "Microsoft",
-          "title": "Senior Security Engineer - Red Team"
-        },
-        {
-          "id": "microsoft-200035405",
-          "company": "Microsoft",
-          "title": "Senior Software Engineer - Responsible AI (CoreAI)"
-        },
-        {
-          "id": "microsoft-200018305",
-          "company": "Microsoft",
-          "title": "Multidisciplinary Manager, Industry Solutions Engineering (ISE) / Data Science"
-        },
-        {
-          "id": "microsoft-200042223",
-          "company": "Microsoft",
-          "title": "Physical Security Engineer - CTJ - Top Secret"
-        },
-        {
-          "id": "microsoft-200042221",
-          "company": "Microsoft",
-          "title": "Physical Security Engineer - CTJ - Poly"
-        },
-        {
-          "id": "microsoft-200042675",
-          "company": "Microsoft",
-          "title": "Senior Software Engineer"
-        },
-        {
-          "id": "microsoft-200024090",
-          "company": "Microsoft",
-          "title": "Senior Performance Architect"
-        },
-        {
-          "id": "microsoft-200018882",
-          "company": "Microsoft",
-          "title": "Senior Software Engineer - CTJ - Poly"
         }
       ],
       "severity": "ok",
@@ -348,6 +283,30 @@
       "skills_pct": 0,
       "examples": [],
       "severity": "info",
+      "flags": []
+    },
+    {
+      "source": "microsoft",
+      "pool_rows": 510,
+      "us_rows": 333,
+      "tech_us_rows": 162,
+      "raw_sidecar_rows": 510,
+      "sidecar_active_rows": 162,
+      "supplemental_rows": 535,
+      "supplemental_with_desc": 7,
+      "supplemental_meta": {
+        "generated_at": "2026-07-12T17:32:45.278Z",
+        "lane_name": "custom",
+        "jobs_fetched": 3302
+      },
+      "published_rows": 162,
+      "published_pct": 100,
+      "enriched_rows": 162,
+      "enriched_pct": 100,
+      "enriched_with_skills": 162,
+      "skills_pct": 100,
+      "examples": [],
+      "severity": "ok",
       "flags": []
     },
     {
@@ -380,7 +339,7 @@
       "supplemental_rows": 64,
       "supplemental_with_desc": 64,
       "supplemental_meta": {
-        "generated_at": "2026-07-12T17:17:32.161Z",
+        "generated_at": "2026-07-12T17:32:45.278Z",
         "lane_name": "custom",
         "jobs_fetched": 3302
       },
