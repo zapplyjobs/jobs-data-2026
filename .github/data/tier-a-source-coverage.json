@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-13T06:34:13.667Z",
+  "generated_at": "2026-07-13T06:39:29.503Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -59,12 +59,10 @@
     "enrichment_version": null
   },
   "consumer_alert": {
-    "checked_at": "2026-07-13T06:34:07.492Z",
-    "active": true,
-    "message": "**R2 manifest stale**: 62 min old (threshold: 60 min). Pipeline may not be writing to R2.",
-    "failures": [
-      "**R2 manifest stale**: 62 min old (threshold: 60 min). Pipeline may not be writing to R2."
-    ],
+    "checked_at": "2026-07-13T06:39:25.910Z",
+    "active": false,
+    "message": null,
+    "failures": [],
     "warnings": [],
     "warning_count": 0,
     "secrets": [
@@ -79,24 +77,29 @@
     {
       "source": "workday",
       "pool_rows": 52685,
-      "us_rows": 27929,
-      "tech_us_rows": 8880,
-      "raw_sidecar_rows": 38674,
-      "sidecar_active_rows": 7027,
+      "us_rows": 27185,
+      "tech_us_rows": 8777,
+      "raw_sidecar_rows": 39673,
+      "sidecar_active_rows": 7062,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 6765,
-      "published_pct": 76.2,
-      "enriched_rows": 8615,
-      "enriched_pct": 97,
-      "enriched_with_skills": 8323,
-      "skills_pct": 96.6,
+      "published_rows": 6664,
+      "published_pct": 75.9,
+      "enriched_rows": 8490,
+      "enriched_pct": 96.7,
+      "enriched_with_skills": 8208,
+      "skills_pct": 96.7,
       "examples": [
         {
-          "id": "workday-marvell-2601605",
-          "company": "Marvell",
-          "title": "Senior Staff Analog and Mixed-Signal IC Design Engineer"
+          "id": "workday-pnc-financial-services-R226888",
+          "company": "PNC Financial Services",
+          "title": "Software Engineering Manager - Technical"
+        },
+        {
+          "id": "workday-booz-allen-hamilton-R0237640",
+          "company": "Booz Allen Hamilton",
+          "title": "Electrical Engineer"
         },
         {
           "id": "workday-wells-fargo-R-555857",
@@ -114,24 +117,19 @@
           "title": "AI Product Readiness Program Manager - VP"
         },
         {
-          "id": "workday-the-hartford-R2625941",
-          "company": "The Hartford",
-          "title": "AVP, End User Engineering"
+          "id": "workday-nvidia-JR2017461",
+          "company": "NVIDIA",
+          "title": "Senior Software Engineer, NCCL and CUDA - CSP Engagements"
         },
         {
-          "id": "workday-rtx-01858411",
-          "company": "RTX",
-          "title": "GR/IR Research Analyst (Hybrid)"
+          "id": "workday-nvidia-JR2019010",
+          "company": "NVIDIA",
+          "title": "Principal Architect, System Software - Orbital Data Center"
         },
         {
-          "id": "workday-rtx-01859086",
-          "company": "RTX",
-          "title": "Systems Integration and Test Engineer"
-        },
-        {
-          "id": "workday-medtronic-R66033",
-          "company": "Medtronic",
-          "title": "Principal Software Engineer"
+          "id": "workday-nvidia-JR2015287",
+          "company": "NVIDIA",
+          "title": "Senior Linux Kernel Systems Software Engineer – CSP Engagements"
         }
       ],
       "severity": "high",
@@ -209,75 +207,6 @@
       ]
     },
     {
-      "source": "apple",
-      "pool_rows": 376,
-      "us_rows": 315,
-      "tech_us_rows": 205,
-      "raw_sidecar_rows": 418,
-      "sidecar_active_rows": 205,
-      "supplemental_rows": 65,
-      "supplemental_with_desc": 65,
-      "supplemental_meta": {
-        "generated_at": "2026-07-13T05:18:43.685Z",
-        "lane_name": "custom",
-        "jobs_fetched": 3310
-      },
-      "published_rows": 18,
-      "published_pct": 8.8,
-      "enriched_rows": 18,
-      "enriched_pct": 8.8,
-      "enriched_with_skills": 18,
-      "skills_pct": 100,
-      "examples": [
-        {
-          "id": "apple-200671839",
-          "company": "Apple",
-          "title": "Manager, Engineering Program Manager, Apple Foundation Models, Engineering Tools"
-        },
-        {
-          "id": "apple-200671639",
-          "company": "Apple",
-          "title": "Senior Software Security Engineering"
-        },
-        {
-          "id": "apple-200670698",
-          "company": "Apple",
-          "title": "Data Engineer, iOS — Health Technologies"
-        },
-        {
-          "id": "apple-200671848",
-          "company": "Apple",
-          "title": "Senior Software Engineer, Cloud Efficiency"
-        },
-        {
-          "id": "apple-200671796",
-          "company": "Apple",
-          "title": "ML Software Engineering Manager - Apple Music"
-        },
-        {
-          "id": "apple-200671801",
-          "company": "Apple",
-          "title": "Senior Engineering Manager, Live Sports and Media Analytics"
-        },
-        {
-          "id": "apple-200671825",
-          "company": "Apple",
-          "title": "Optical Design Engineer"
-        },
-        {
-          "id": "apple-200671826",
-          "company": "Apple",
-          "title": "Optical Design Engineer"
-        }
-      ],
-      "severity": "high",
-      "flags": [
-        "low_published_coverage",
-        "low_enrichment_coverage",
-        "supplemental_stage_gap"
-      ]
-    },
-    {
       "source": "smartrecruiters",
       "pool_rows": 1965,
       "us_rows": 1964,
@@ -339,6 +268,66 @@
       "flags": []
     },
     {
+      "source": "microsoft",
+      "pool_rows": 510,
+      "us_rows": 314,
+      "tech_us_rows": 153,
+      "raw_sidecar_rows": 507,
+      "sidecar_active_rows": 152,
+      "supplemental_rows": 536,
+      "supplemental_with_desc": 42,
+      "supplemental_meta": {
+        "generated_at": "2026-07-13T05:18:43.685Z",
+        "lane_name": "custom",
+        "jobs_fetched": 3310
+      },
+      "published_rows": 152,
+      "published_pct": 99.3,
+      "enriched_rows": 152,
+      "enriched_pct": 99.3,
+      "enriched_with_skills": 152,
+      "skills_pct": 100,
+      "examples": [
+        {
+          "id": "microsoft-200040505",
+          "company": "Microsoft",
+          "title": "Sr. Cloud Solution Architect - CTJ - TS/SCI"
+        }
+      ],
+      "severity": "ok",
+      "flags": []
+    },
+    {
+      "source": "apple",
+      "pool_rows": 376,
+      "us_rows": 36,
+      "tech_us_rows": 19,
+      "raw_sidecar_rows": 83,
+      "sidecar_active_rows": 19,
+      "supplemental_rows": 65,
+      "supplemental_with_desc": 65,
+      "supplemental_meta": {
+        "generated_at": "2026-07-13T05:18:43.685Z",
+        "lane_name": "custom",
+        "jobs_fetched": 3310
+      },
+      "published_rows": 18,
+      "published_pct": 94.7,
+      "enriched_rows": 18,
+      "enriched_pct": 94.7,
+      "enriched_with_skills": 18,
+      "skills_pct": 100,
+      "examples": [
+        {
+          "id": "apple-200671839",
+          "company": "Apple",
+          "title": "Manager, Engineering Program Manager, Apple Foundation Models, Engineering Tools"
+        }
+      ],
+      "severity": "ok",
+      "flags": []
+    },
+    {
       "source": "icims",
       "pool_rows": 0,
       "us_rows": 0,
@@ -359,35 +348,11 @@
       "flags": []
     },
     {
-      "source": "microsoft",
-      "pool_rows": 510,
-      "us_rows": 331,
-      "tech_us_rows": 161,
-      "raw_sidecar_rows": 512,
-      "sidecar_active_rows": 161,
-      "supplemental_rows": 536,
-      "supplemental_with_desc": 42,
-      "supplemental_meta": {
-        "generated_at": "2026-07-13T05:18:43.685Z",
-        "lane_name": "custom",
-        "jobs_fetched": 3310
-      },
-      "published_rows": 161,
-      "published_pct": 100,
-      "enriched_rows": 161,
-      "enriched_pct": 100,
-      "enriched_with_skills": 161,
-      "skills_pct": 100,
-      "examples": [],
-      "severity": "ok",
-      "flags": []
-    },
-    {
       "source": "tiktok",
       "pool_rows": 1451,
-      "us_rows": 1451,
+      "us_rows": 1452,
       "tech_us_rows": 601,
-      "raw_sidecar_rows": 1451,
+      "raw_sidecar_rows": 1452,
       "sidecar_active_rows": 601,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
