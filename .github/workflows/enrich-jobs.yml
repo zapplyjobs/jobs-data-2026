@@ -1,7 +1,9 @@
 name: Enrich Jobs
 
 on:
-  workflow_dispatch:  # Triggered by job-board-cron-worker (Cloudflare) every 15 min
+  workflow_dispatch:
+  schedule:
+    - cron: '*/15 * * * *'  # Backup trigger (Worker cron is unreliable for sub-15-min intervals)
 
 # Prevent concurrent enrich runs — two runs picking the same pending batch would
 # produce duplicate entries in enriched_jobs.json.
