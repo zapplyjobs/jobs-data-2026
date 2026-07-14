@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-14T20:39:43.032Z",
+  "generated_at": "2026-07-14T20:43:03.033Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -60,7 +60,7 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-14T20:39:39.149Z",
+    "checked_at": "2026-07-14T20:42:59.002Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -146,21 +146,26 @@
     },
     {
       "source": "workday",
-      "pool_rows": 53787,
-      "us_rows": 28353,
-      "tech_us_rows": 8835,
-      "raw_sidecar_rows": 45314,
-      "sidecar_active_rows": 8568,
+      "pool_rows": 53747,
+      "us_rows": 28378,
+      "tech_us_rows": 8836,
+      "raw_sidecar_rows": 45501,
+      "sidecar_active_rows": 7885,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 8562,
-      "published_pct": 96.9,
-      "enriched_rows": 8644,
-      "enriched_pct": 97.8,
-      "enriched_with_skills": 8401,
+      "published_rows": 8368,
+      "published_pct": 94.7,
+      "enriched_rows": 8621,
+      "enriched_pct": 97.6,
+      "enriched_with_skills": 8379,
       "skills_pct": 97.2,
       "examples": [
+        {
+          "id": "workday-td-synnex-R52072",
+          "company": "TD Synnex",
+          "title": "LC Associate-10am-6:30pm"
+        },
         {
           "id": "workday-wells-fargo-R-559880",
           "company": "Wells Fargo",
@@ -195,23 +200,48 @@
           "id": "workday-wells-fargo-R-560800",
           "company": "Wells Fargo",
           "title": "Securities Quantitative Analytics Associate (#002143)"
-        },
-        {
-          "id": "workday-wells-fargo-R-542229",
-          "company": "Wells Fargo",
-          "title": "Senior Business Intelligence Consultant - WIM Operations Data, Analytics and Reporting (DAR)"
         }
       ],
-      "severity": "ok",
-      "flags": []
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
+    },
+    {
+      "source": "smartrecruiters",
+      "pool_rows": 1866,
+      "us_rows": 1865,
+      "tech_us_rows": 324,
+      "raw_sidecar_rows": 1297,
+      "sidecar_active_rows": 265,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 323,
+      "published_pct": 99.7,
+      "enriched_rows": 323,
+      "enriched_pct": 99.7,
+      "enriched_with_skills": 318,
+      "skills_pct": 98.5,
+      "examples": [
+        {
+          "id": "sr-BoschGroup-744000137746568",
+          "company": "Bosch Group",
+          "title": "Manufacturing Engineering Technician"
+        }
+      ],
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
     },
     {
       "source": "tiktok",
       "pool_rows": 1483,
       "us_rows": 1483,
       "tech_us_rows": 617,
-      "raw_sidecar_rows": 1480,
-      "sidecar_active_rows": 616,
+      "raw_sidecar_rows": 1483,
+      "sidecar_active_rows": 617,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
@@ -228,26 +258,6 @@
           "title": "Machine Learning Engineer, Monetization Technology"
         }
       ],
-      "severity": "ok",
-      "flags": []
-    },
-    {
-      "source": "smartrecruiters",
-      "pool_rows": 1867,
-      "us_rows": 1866,
-      "tech_us_rows": 323,
-      "raw_sidecar_rows": 1347,
-      "sidecar_active_rows": 323,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 323,
-      "published_pct": 100,
-      "enriched_rows": 323,
-      "enriched_pct": 100,
-      "enriched_with_skills": 318,
-      "skills_pct": 98.5,
-      "examples": [],
       "severity": "ok",
       "flags": []
     },
@@ -276,7 +286,7 @@
       "pool_rows": 493,
       "us_rows": 288,
       "tech_us_rows": 152,
-      "raw_sidecar_rows": 493,
+      "raw_sidecar_rows": 497,
       "sidecar_active_rows": 152,
       "supplemental_rows": 537,
       "supplemental_with_desc": 43,
