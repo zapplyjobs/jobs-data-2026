@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-14T12:44:25.042Z",
+  "generated_at": "2026-07-14T12:52:53.600Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -59,7 +59,7 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-14T12:44:20.852Z",
+    "checked_at": "2026-07-14T12:52:49.372Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -145,21 +145,27 @@
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 1887,
-      "us_rows": 1886,
+      "pool_rows": 1886,
+      "us_rows": 1885,
       "tech_us_rows": 345,
-      "raw_sidecar_rows": 1388,
-      "sidecar_active_rows": 290,
+      "raw_sidecar_rows": 1386,
+      "sidecar_active_rows": 289,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 345,
-      "published_pct": 100,
-      "enriched_rows": 345,
-      "enriched_pct": 100,
-      "enriched_with_skills": 339,
+      "published_rows": 344,
+      "published_pct": 99.7,
+      "enriched_rows": 344,
+      "enriched_pct": 99.7,
+      "enriched_with_skills": 338,
       "skills_pct": 98.3,
-      "examples": [],
+      "examples": [
+        {
+          "id": "sr-Eurofins-744000137657566",
+          "company": "Eurofins",
+          "title": "Laboratory Instrument System Administrator"
+        }
+      ],
       "severity": "medium",
       "flags": [
         "published_gt_raw_sidecar"
@@ -167,35 +173,40 @@
     },
     {
       "source": "workday",
-      "pool_rows": 53453,
-      "us_rows": 27632,
-      "tech_us_rows": 8628,
-      "raw_sidecar_rows": 57496,
-      "sidecar_active_rows": 8429,
+      "pool_rows": 53492,
+      "us_rows": 27772,
+      "tech_us_rows": 8735,
+      "raw_sidecar_rows": 58486,
+      "sidecar_active_rows": 8534,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 8200,
-      "published_pct": 95,
-      "enriched_rows": 8431,
-      "enriched_pct": 97.7,
-      "enriched_with_skills": 8177,
+      "published_rows": 8240,
+      "published_pct": 94.3,
+      "enriched_rows": 8519,
+      "enriched_pct": 97.5,
+      "enriched_with_skills": 8265,
       "skills_pct": 97,
       "examples": [
         {
-          "id": "workday-booz-allen-hamilton-R0242616",
-          "company": "Booz Allen Hamilton",
-          "title": "Systems Engineer"
+          "id": "workday-general-motors-JR-202615128",
+          "company": "General Motors",
+          "title": "Controls Systems Engineer"
         },
         {
-          "id": "workday-vanguard-179964",
-          "company": "Vanguard",
-          "title": "Senior Data Analyst"
+          "id": "workday-medtronic-R69761",
+          "company": "Medtronic",
+          "title": "Sr DevSecOps Engineer"
         },
         {
-          "id": "workday-university-system-of-new-hampshire-JR8636",
-          "company": "University System of New Hampshire",
-          "title": "Public Safety Officer V"
+          "id": "workday-medtronic-R65900",
+          "company": "Medtronic",
+          "title": "Senior Systems Engineer - Imaging"
+        },
+        {
+          "id": "workday-northrop-grumman-R10238325",
+          "company": "Northrop Grumman",
+          "title": "Classified Cybersecurity Analyst - Top Secret"
         },
         {
           "id": "workday-fidelity-investments-2127722",
@@ -208,19 +219,44 @@
           "title": "Senior Product Designer (Fidelity Labs – Fidelity Private Shares)"
         },
         {
-          "id": "workday-crowdstrike-R28559",
-          "company": "CrowdStrike",
-          "title": "Detection Focused Senior Cloud Security Consultant - JAPAC (Remote)"
+          "id": "workday-fiserv-R-10366034",
+          "company": "Fiserv",
+          "title": "Sr. Data Engineer"
         },
         {
-          "id": "workday-dexcom-JR119681",
-          "company": "Dexcom",
-          "title": "Sr Hardware Engineer"
-        },
+          "id": "workday-crane-co.-JR101757",
+          "company": "Crane Co.",
+          "title": "Design Engineer"
+        }
+      ],
+      "severity": "ok",
+      "flags": []
+    },
+    {
+      "source": "microsoft",
+      "pool_rows": 502,
+      "us_rows": 286,
+      "tech_us_rows": 151,
+      "raw_sidecar_rows": 506,
+      "sidecar_active_rows": 151,
+      "supplemental_rows": 536,
+      "supplemental_with_desc": 36,
+      "supplemental_meta": {
+        "generated_at": "2026-07-14T12:38:07.694Z",
+        "lane_name": "custom",
+        "jobs_fetched": 4238
+      },
+      "published_rows": 150,
+      "published_pct": 99.3,
+      "enriched_rows": 150,
+      "enriched_pct": 99.3,
+      "enriched_with_skills": 150,
+      "skills_pct": 100,
+      "examples": [
         {
-          "id": "workday-northrop-grumman-R10238325",
-          "company": "Northrop Grumman",
-          "title": "Classified Cybersecurity Analyst - Top Secret"
+          "id": "microsoft-200042147",
+          "company": "Microsoft",
+          "title": "Director, AI Business & Security Solutions Engineering"
         }
       ],
       "severity": "ok",
@@ -244,30 +280,6 @@
       "skills_pct": 0,
       "examples": [],
       "severity": "info",
-      "flags": []
-    },
-    {
-      "source": "microsoft",
-      "pool_rows": 509,
-      "us_rows": 298,
-      "tech_us_rows": 157,
-      "raw_sidecar_rows": 509,
-      "sidecar_active_rows": 157,
-      "supplemental_rows": 536,
-      "supplemental_with_desc": 36,
-      "supplemental_meta": {
-        "generated_at": "2026-07-14T12:38:07.694Z",
-        "lane_name": "custom",
-        "jobs_fetched": 4238
-      },
-      "published_rows": 157,
-      "published_pct": 100,
-      "enriched_rows": 157,
-      "enriched_pct": 100,
-      "enriched_with_skills": 157,
-      "skills_pct": 100,
-      "examples": [],
-      "severity": "ok",
       "flags": []
     },
     {
