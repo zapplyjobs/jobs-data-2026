@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-15T05:57:38.666Z",
+  "generated_at": "2026-07-15T06:04:12.512Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -35,6 +35,7 @@
     "descriptions-google.jsonl",
     "descriptions-greenhouse-1.jsonl",
     "descriptions-greenhouse-2.jsonl",
+    "descriptions-greenhouse-3.jsonl",
     "descriptions-icims.jsonl",
     "descriptions-lever.jsonl",
     "descriptions-microsoft.jsonl",
@@ -46,13 +47,13 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-15T05:56:03.785Z",
+    "generated_at": "2026-07-15T06:02:38.730Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 14824,
-    "description_entries": 13351,
-    "coverage_pct": 90.1,
+    "board_row_count": 14756,
+    "description_entries": 13284,
+    "coverage_pct": 90,
     "source_breakdown": {
-      "sidecar": 13351,
+      "sidecar": 13284,
       "inline": 0
     },
     "jobs_metadata_generated": "2026-07-15T04:57:32.010Z",
@@ -60,7 +61,7 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-15T05:57:34.897Z",
+    "checked_at": "2026-07-15T06:04:09.030Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -146,72 +147,74 @@
     },
     {
       "source": "workday",
-      "pool_rows": 53091,
-      "us_rows": 27851,
-      "tech_us_rows": 8616,
-      "raw_sidecar_rows": 46125,
-      "sidecar_active_rows": 8439,
+      "pool_rows": 53097,
+      "us_rows": 27838,
+      "tech_us_rows": 8633,
+      "raw_sidecar_rows": 43919,
+      "sidecar_active_rows": 7855,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 8378,
-      "published_pct": 97.2,
-      "enriched_rows": 8516,
-      "enriched_pct": 98.8,
-      "enriched_with_skills": 8277,
+      "published_rows": 8343,
+      "published_pct": 96.6,
+      "enriched_rows": 8535,
+      "enriched_pct": 98.9,
+      "enriched_with_skills": 8296,
       "skills_pct": 97.2,
       "examples": [
         {
-          "id": "workday-hitachi-R0133478",
-          "company": "Hitachi",
-          "title": "Senior QA group Lead"
+          "id": "workday-johnson-controls-WD30273971",
+          "company": "Johnson Controls",
+          "title": "Controls Service Technician"
         },
         {
-          "id": "workday-hitachi-R0135595",
-          "company": "Hitachi",
-          "title": "Technical Design Sales Specialist - Power Systems Application Engineering"
+          "id": "workday-johnson-controls-WD30273835",
+          "company": "Johnson Controls",
+          "title": "Controls Service Technician"
         },
         {
-          "id": "workday-fox-R50032942",
-          "company": "FOX",
-          "title": "Assistant, Business & Legal Affairs"
+          "id": "workday-arch-capital-group-R26_509",
+          "company": "Arch Capital Group",
+          "title": "AVP, AI (Data Science/Engineer) Remote - EST"
         },
         {
-          "id": "workday-leidos-R-00187184",
-          "company": "Leidos",
-          "title": "Marine Electrical Technician"
+          "id": "workday-wells-fargo-R-546631",
+          "company": "Wells Fargo",
+          "title": "Principal Engineer - Application Security: Secure Development"
         },
         {
-          "id": "workday-aes-corporation-R1063955",
-          "company": "AES Corporation",
-          "title": "Associate Engineer - Relay"
+          "id": "workday-wells-fargo-R-557607",
+          "company": "Wells Fargo",
+          "title": "Lead Full Stack Information Security Engineer - Counter Threat Operations"
         },
         {
-          "id": "workday-applied-materials-R2622760",
-          "company": "Applied Materials",
-          "title": "Application Development Engineer - (E3 or E4)"
+          "id": "workday-wells-fargo-R-556973",
+          "company": "Wells Fargo",
+          "title": "Senior Lead Data Product Management Consultant -- Auto Data & Insights"
         },
         {
-          "id": "workday-applied-materials-R2623987",
-          "company": "Applied Materials",
-          "title": "Manager, Electrical Engineer"
+          "id": "workday-wells-fargo-R-555304",
+          "company": "Wells Fargo",
+          "title": "Senior Full Stack Java Developer"
         },
         {
-          "id": "workday-rtx-01856265",
-          "company": "RTX",
-          "title": "Senior Systems Engineer"
+          "id": "workday-wells-fargo-R-543060",
+          "company": "Wells Fargo",
+          "title": "Senior Lead Microsoft Power Platform Engineer"
         }
       ],
-      "severity": "ok",
-      "flags": []
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
     },
     {
       "source": "smartrecruiters",
       "pool_rows": 1893,
       "us_rows": 1892,
       "tech_us_rows": 342,
-      "raw_sidecar_rows": 1498,
-      "sidecar_active_rows": 342,
+      "raw_sidecar_rows": 1437,
+      "sidecar_active_rows": 285,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
@@ -222,8 +225,10 @@
       "enriched_with_skills": 337,
       "skills_pct": 98.5,
       "examples": [],
-      "severity": "ok",
-      "flags": []
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
     },
     {
       "source": "icims",
@@ -250,7 +255,7 @@
       "pool_rows": 516,
       "us_rows": 311,
       "tech_us_rows": 173,
-      "raw_sidecar_rows": 508,
+      "raw_sidecar_rows": 520,
       "sidecar_active_rows": 173,
       "supplemental_rows": 542,
       "supplemental_with_desc": 34,
@@ -274,7 +279,7 @@
       "pool_rows": 1492,
       "us_rows": 1491,
       "tech_us_rows": 617,
-      "raw_sidecar_rows": 1491,
+      "raw_sidecar_rows": 1492,
       "sidecar_active_rows": 617,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
