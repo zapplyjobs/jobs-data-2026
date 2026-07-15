@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-15T09:26:58.580Z",
+  "generated_at": "2026-07-15T09:31:17.213Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -31,6 +31,7 @@
     "descriptions-deshaw.jsonl",
     "descriptions-eightfold.jsonl",
     "descriptions-enriched-1.jsonl",
+    "descriptions-enriched-2.jsonl",
     "descriptions-google.jsonl",
     "descriptions-greenhouse-1.jsonl",
     "descriptions-greenhouse-2.jsonl",
@@ -60,7 +61,7 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-15T09:26:54.713Z",
+    "checked_at": "2026-07-15T09:31:13.049Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -146,30 +147,25 @@
     },
     {
       "source": "workday",
-      "pool_rows": 52964,
-      "us_rows": 27720,
-      "tech_us_rows": 8585,
-      "raw_sidecar_rows": 44191,
-      "sidecar_active_rows": 8416,
+      "pool_rows": 53271,
+      "us_rows": 27862,
+      "tech_us_rows": 8651,
+      "raw_sidecar_rows": 52297,
+      "sidecar_active_rows": 7870,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 8266,
-      "published_pct": 96.3,
-      "enriched_rows": 8482,
-      "enriched_pct": 98.8,
-      "enriched_with_skills": 8244,
-      "skills_pct": 97.2,
+      "published_rows": 8253,
+      "published_pct": 95.4,
+      "enriched_rows": 8479,
+      "enriched_pct": 98,
+      "enriched_with_skills": 8236,
+      "skills_pct": 97.1,
       "examples": [
         {
-          "id": "workday-t-mobile-REQ356134",
-          "company": "T-Mobile",
-          "title": "Manager, Product & Engineering"
-        },
-        {
-          "id": "workday-morgan-stanley-PT-JR038925",
-          "company": "Morgan Stanley",
-          "title": "Senior Low Latency Engineer - Vice President"
+          "id": "workday-usaa-R0119067",
+          "company": "USAA",
+          "title": "Director, UW Capabilities and Tools- Dwelling"
         },
         {
           "id": "workday-nvidia-JR2021234",
@@ -177,40 +173,69 @@
           "title": "Senior Systems Software Engineer – GPU Software"
         },
         {
-          "id": "workday-rtx-01858640",
-          "company": "RTX",
-          "title": "Senior Principal Engineer"
+          "id": "workday-vertex-pharmaceuticals-REQ-28037",
+          "company": "Vertex Pharmaceuticals",
+          "title": "Director, S2P Process, Controls & Analytics"
         },
         {
-          "id": "workday-arrow-electronics-R246641",
-          "company": "Arrow Electronics",
-          "title": "Procurement Executive"
+          "id": "workday-abbott-31155920",
+          "company": "Abbott",
+          "title": "Sr. Embedded Software Engineer"
         },
         {
-          "id": "workday-arch-capital-group-R26_509",
-          "company": "Arch Capital Group",
-          "title": "AVP, AI (Data Science/Engineer) Remote - EST"
+          "id": "workday-caci-329116",
+          "company": "CACI",
+          "title": "SME Scientists and Science Technicians II"
         },
         {
-          "id": "workday-wells-fargo-R-559880",
-          "company": "Wells Fargo",
-          "title": "Senior Systems Operations Engineer- ITSM Governance"
+          "id": "workday-caci-328902",
+          "company": "CACI",
+          "title": "SME Scientists and Science Technicians Group 2"
         },
         {
-          "id": "workday-wells-fargo-R-540213",
-          "company": "Wells Fargo",
-          "title": "Lead Platform Software Engineer"
+          "id": "workday-caci-326616",
+          "company": "CACI",
+          "title": "Data Scientist"
+        },
+        {
+          "id": "workday-entrust-R004213",
+          "company": "Entrust",
+          "title": "Prin AI & Analytics Data Architect"
         }
       ],
-      "severity": "ok",
-      "flags": []
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
+    },
+    {
+      "source": "smartrecruiters",
+      "pool_rows": 1889,
+      "us_rows": 1888,
+      "tech_us_rows": 341,
+      "raw_sidecar_rows": 1439,
+      "sidecar_active_rows": 283,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 341,
+      "published_pct": 100,
+      "enriched_rows": 341,
+      "enriched_pct": 100,
+      "enriched_with_skills": 336,
+      "skills_pct": 98.5,
+      "examples": [],
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
     },
     {
       "source": "tiktok",
-      "pool_rows": 1492,
-      "us_rows": 1491,
+      "pool_rows": 1491,
+      "us_rows": 1490,
       "tech_us_rows": 617,
-      "raw_sidecar_rows": 1492,
+      "raw_sidecar_rows": 1491,
       "sidecar_active_rows": 617,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
@@ -267,26 +292,6 @@
       "flags": []
     },
     {
-      "source": "smartrecruiters",
-      "pool_rows": 1889,
-      "us_rows": 1888,
-      "tech_us_rows": 341,
-      "raw_sidecar_rows": 1501,
-      "sidecar_active_rows": 341,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 341,
-      "published_pct": 100,
-      "enriched_rows": 341,
-      "enriched_pct": 100,
-      "enriched_with_skills": 336,
-      "skills_pct": 98.5,
-      "examples": [],
-      "severity": "ok",
-      "flags": []
-    },
-    {
       "source": "icims",
       "pool_rows": 0,
       "us_rows": 0,
@@ -311,7 +316,7 @@
       "pool_rows": 515,
       "us_rows": 301,
       "tech_us_rows": 167,
-      "raw_sidecar_rows": 515,
+      "raw_sidecar_rows": 516,
       "sidecar_active_rows": 167,
       "supplemental_rows": 542,
       "supplemental_with_desc": 18,
