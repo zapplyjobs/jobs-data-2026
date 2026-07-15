@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-15T08:50:54.775Z",
+  "generated_at": "2026-07-15T08:54:03.006Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -31,6 +31,7 @@
     "descriptions-deshaw.jsonl",
     "descriptions-eightfold.jsonl",
     "descriptions-enriched-1.jsonl",
+    "descriptions-enriched-2.jsonl",
     "descriptions-google.jsonl",
     "descriptions-greenhouse-1.jsonl",
     "descriptions-greenhouse-2.jsonl",
@@ -60,7 +61,7 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-15T08:50:50.017Z",
+    "checked_at": "2026-07-15T08:53:59.038Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -146,21 +147,31 @@
     },
     {
       "source": "workday",
-      "pool_rows": 53196,
-      "us_rows": 27909,
-      "tech_us_rows": 8666,
-      "raw_sidecar_rows": 43906,
-      "sidecar_active_rows": 8037,
+      "pool_rows": 53231,
+      "us_rows": 27974,
+      "tech_us_rows": 8612,
+      "raw_sidecar_rows": 47588,
+      "sidecar_active_rows": 7779,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 8037,
-      "published_pct": 92.7,
-      "enriched_rows": 8564,
+      "published_rows": 7885,
+      "published_pct": 91.6,
+      "enriched_rows": 8507,
       "enriched_pct": 98.8,
-      "enriched_with_skills": 8326,
+      "enriched_with_skills": 8270,
       "skills_pct": 97.2,
       "examples": [
+        {
+          "id": "workday-uline-R265549",
+          "company": "Uline",
+          "title": "Data Analyst"
+        },
+        {
+          "id": "workday-kbr-R2124067",
+          "company": "KBR",
+          "title": "Project Engineer"
+        },
         {
           "id": "workday-blue-origin-R67560",
           "company": "Blue Origin",
@@ -172,38 +183,30 @@
           "title": "Vice President of Product Design, Consumer"
         },
         {
-          "id": "workday-kbr-R2124067",
-          "company": "KBR",
-          "title": "Project Engineer"
+          "id": "workday-booz-allen-hamilton-R0243642",
+          "company": "Booz Allen Hamilton",
+          "title": "Graphic Designer"
         },
         {
-          "id": "workday-snyk-JR100722",
-          "company": "Snyk",
-          "title": "Senior Solutions Engineering Specialist"
+          "id": "workday-intel-JR0285561",
+          "company": "Intel",
+          "title": "Process Integration Development Engineer"
         },
         {
-          "id": "workday-wells-fargo-R-560809",
-          "company": "Wells Fargo",
-          "title": "Lead Software Engineer 1 (#002294)"
+          "id": "workday-intel-JR0285491",
+          "company": "Intel",
+          "title": "Firmware Solutions Engineer"
         },
         {
-          "id": "workday-wells-fargo-R-542229",
-          "company": "Wells Fargo",
-          "title": "Senior Business Intelligence Consultant - WIM Operations Data, Analytics and Reporting (DAR)"
-        },
-        {
-          "id": "workday-wells-fargo-R-546631",
-          "company": "Wells Fargo",
-          "title": "Principal Engineer - Application Security: Secure Development"
-        },
-        {
-          "id": "workday-wells-fargo-R-557607",
-          "company": "Wells Fargo",
-          "title": "Lead Full Stack Information Security Engineer - Counter Threat Operations"
+          "id": "workday-intel-JR0285559",
+          "company": "Intel",
+          "title": "Process Integration Development Engineer"
         }
       ],
-      "severity": "ok",
-      "flags": []
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
     },
     {
       "source": "smartrecruiters",
@@ -211,7 +214,7 @@
       "us_rows": 1888,
       "tech_us_rows": 341,
       "raw_sidecar_rows": 1439,
-      "sidecar_active_rows": 285,
+      "sidecar_active_rows": 283,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
@@ -312,19 +315,19 @@
     },
     {
       "source": "tiktok",
-      "pool_rows": 1492,
-      "us_rows": 1491,
-      "tech_us_rows": 617,
-      "raw_sidecar_rows": 1492,
-      "sidecar_active_rows": 617,
+      "pool_rows": 600,
+      "us_rows": 600,
+      "tech_us_rows": 249,
+      "raw_sidecar_rows": 600,
+      "sidecar_active_rows": 249,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 617,
+      "published_rows": 249,
       "published_pct": 100,
-      "enriched_rows": 617,
+      "enriched_rows": 249,
       "enriched_pct": 100,
-      "enriched_with_skills": 617,
+      "enriched_with_skills": 249,
       "skills_pct": 100,
       "examples": [],
       "severity": "ok",
