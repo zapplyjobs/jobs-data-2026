@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-15T19:51:01.699Z",
+  "generated_at": "2026-07-15T19:53:21.496Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -45,13 +45,13 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-15T19:44:50.968Z",
+    "generated_at": "2026-07-15T19:51:43.298Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 13882,
-    "description_entries": 11699,
-    "coverage_pct": 84.3,
+    "board_row_count": 12892,
+    "description_entries": 10448,
+    "coverage_pct": 81,
     "source_breakdown": {
-      "sidecar": 11699,
+      "sidecar": 10448,
       "inline": 0
     },
     "jobs_metadata_generated": "2026-07-15T19:02:51.658Z",
@@ -59,10 +59,12 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-15T19:50:57.601Z",
-    "active": false,
-    "message": null,
-    "failures": [],
+    "checked_at": "2026-07-15T19:53:17.597Z",
+    "active": true,
+    "message": "**Aggregator execution time high**: 12.5 min (threshold: 10 min). Queue: 0.0 min. At 25 min execution, 15-min cadence breaks.",
+    "failures": [
+      "**Aggregator execution time high**: 12.5 min (threshold: 10 min). Queue: 0.0 min. At 25 min execution, 15-min cadence breaks."
+    ],
     "warnings": [],
     "warning_count": 0,
     "secrets": [
@@ -79,17 +81,17 @@
       "pool_rows": 40800,
       "us_rows": 21233,
       "tech_us_rows": 6148,
-      "raw_sidecar_rows": 60412,
-      "sidecar_active_rows": 4829,
+      "raw_sidecar_rows": 31643,
+      "sidecar_active_rows": 4625,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 4622,
-      "published_pct": 75.2,
-      "enriched_rows": 4724,
-      "enriched_pct": 76.8,
-      "enriched_with_skills": 4550,
-      "skills_pct": 96.3,
+      "published_rows": 4538,
+      "published_pct": 73.8,
+      "enriched_rows": 4651,
+      "enriched_pct": 75.7,
+      "enriched_with_skills": 4491,
+      "skills_pct": 96.6,
       "examples": [
         {
           "id": "workday-nasdaq-R0025388",
@@ -100,11 +102,6 @@
           "id": "workday-merck-&-co.-R404495",
           "company": "Merck & Co.",
           "title": "Senior System Engineer"
-        },
-        {
-          "id": "workday-workday-inc-JR-0108567",
-          "company": "Workday Inc",
-          "title": "Sr. Incentive Comp Design Analyst"
         },
         {
           "id": "workday-bmo-R260019829",
@@ -122,14 +119,19 @@
           "title": "Director of Lending Technology"
         },
         {
-          "id": "workday-transunion-19041149",
-          "company": "TransUnion",
-          "title": "Senior Developer Platform Engineering"
-        },
-        {
           "id": "workday-penn-state-university-REQ_0000080138",
           "company": "Penn State University",
           "title": "AR/VR/XR Visualization Research and Development Engineer"
+        },
+        {
+          "id": "workday-usaa-R0118989",
+          "company": "USAA",
+          "title": "Data Scientist Senior - Model Development"
+        },
+        {
+          "id": "workday-usaa-R0119067",
+          "company": "USAA",
+          "title": "Director, UW Capabilities and Tools- Dwelling"
         }
       ],
       "severity": "high",
@@ -208,39 +210,6 @@
       ]
     },
     {
-      "source": "smartrecruiters",
-      "pool_rows": 1908,
-      "us_rows": 1907,
-      "tech_us_rows": 338,
-      "raw_sidecar_rows": 1407,
-      "sidecar_active_rows": 270,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 336,
-      "published_pct": 99.4,
-      "enriched_rows": 336,
-      "enriched_pct": 99.4,
-      "enriched_with_skills": 331,
-      "skills_pct": 98.5,
-      "examples": [
-        {
-          "id": "sr-AbbVie-3743990014114916",
-          "company": "AbbVie",
-          "title": "Project Engineer"
-        },
-        {
-          "id": "sr-NBCUniversal3-744000137971349",
-          "company": "NBCUniversal",
-          "title": "Staff Red Team Operator"
-        }
-      ],
-      "severity": "medium",
-      "flags": [
-        "published_gt_raw_sidecar"
-      ]
-    },
-    {
       "source": "microsoft",
       "pool_rows": 506,
       "us_rows": 301,
@@ -306,6 +275,37 @@
       "flags": []
     },
     {
+      "source": "smartrecruiters",
+      "pool_rows": 1908,
+      "us_rows": 1907,
+      "tech_us_rows": 338,
+      "raw_sidecar_rows": 1469,
+      "sidecar_active_rows": 336,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 336,
+      "published_pct": 99.4,
+      "enriched_rows": 336,
+      "enriched_pct": 99.4,
+      "enriched_with_skills": 331,
+      "skills_pct": 98.5,
+      "examples": [
+        {
+          "id": "sr-AbbVie-3743990014114916",
+          "company": "AbbVie",
+          "title": "Project Engineer"
+        },
+        {
+          "id": "sr-NBCUniversal3-744000137971349",
+          "company": "NBCUniversal",
+          "title": "Staff Red Team Operator"
+        }
+      ],
+      "severity": "ok",
+      "flags": []
+    },
+    {
       "source": "icims",
       "pool_rows": 0,
       "us_rows": 0,
@@ -350,7 +350,7 @@
       "pool_rows": 422,
       "us_rows": 346,
       "tech_us_rows": 224,
-      "raw_sidecar_rows": 538,
+      "raw_sidecar_rows": 835,
       "sidecar_active_rows": 224,
       "supplemental_rows": 871,
       "supplemental_with_desc": 871,
