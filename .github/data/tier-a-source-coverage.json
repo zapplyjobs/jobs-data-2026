@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-15T19:24:37.297Z",
+  "generated_at": "2026-07-15T19:27:34.228Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -45,13 +45,13 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-15T19:15:01.010Z",
+    "generated_at": "2026-07-15T19:26:01.380Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 15716,
-    "description_entries": 13780,
-    "coverage_pct": 87.7,
+    "board_row_count": 15085,
+    "description_entries": 13442,
+    "coverage_pct": 89.1,
     "source_breakdown": {
-      "sidecar": 13780,
+      "sidecar": 13442,
       "inline": 0
     },
     "jobs_metadata_generated": "2026-07-15T19:02:51.658Z",
@@ -59,10 +59,12 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-15T19:24:32.640Z",
-    "active": false,
-    "message": null,
-    "failures": [],
+    "checked_at": "2026-07-15T19:27:29.632Z",
+    "active": true,
+    "message": "**Aggregator execution time high**: 12.5 min (threshold: 10 min). Queue: 0.0 min. At 25 min execution, 15-min cadence breaks.",
+    "failures": [
+      "**Aggregator execution time high**: 12.5 min (threshold: 10 min). Queue: 0.0 min. At 25 min execution, 15-min cadence breaks."
+    ],
     "warnings": [],
     "warning_count": 0,
     "secrets": [
@@ -148,18 +150,38 @@
       "pool_rows": 53519,
       "us_rows": 28126,
       "tech_us_rows": 8754,
-      "raw_sidecar_rows": 57566,
-      "sidecar_active_rows": 8032,
+      "raw_sidecar_rows": 43452,
+      "sidecar_active_rows": 8310,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 8073,
-      "published_pct": 92.2,
-      "enriched_rows": 8616,
-      "enriched_pct": 98.4,
-      "enriched_with_skills": 8362,
-      "skills_pct": 97.1,
+      "published_rows": 8182,
+      "published_pct": 93.5,
+      "enriched_rows": 8459,
+      "enriched_pct": 96.6,
+      "enriched_with_skills": 8205,
+      "skills_pct": 97,
       "examples": [
+        {
+          "id": "workday-boeing-JR2026519022",
+          "company": "Boeing",
+          "title": "Electrician Installation and Maintenance - C2009"
+        },
+        {
+          "id": "workday-boeing-JR2026518326",
+          "company": "Boeing",
+          "title": "Associate Data and Cost Modeling Analyst - Government Estimating"
+        },
+        {
+          "id": "workday-boeing-JR2026517650",
+          "company": "Boeing",
+          "title": "Lead Software Architect"
+        },
+        {
+          "id": "workday-boeing-JR2026500267",
+          "company": "Boeing",
+          "title": "Senior/Expert Electromagnetic Compatibility Engineer/Scientist"
+        },
         {
           "id": "workday-boeing-JR2026496092",
           "company": "Boeing",
@@ -179,89 +201,67 @@
           "id": "workday-booz-allen-hamilton-R0241891",
           "company": "Booz Allen Hamilton",
           "title": "Bioinformatics Software Tester"
-        },
-        {
-          "id": "workday-wells-fargo-R-555612",
-          "company": "Wells Fargo",
-          "title": "Lead Infrastructure Engineer-DevSecOps Engineering"
-        },
-        {
-          "id": "workday-wells-fargo-R-555412",
-          "company": "Wells Fargo",
-          "title": "Lead Infrastructure Engineer/Mainframe Optimization"
-        },
-        {
-          "id": "workday-wells-fargo-R-554389",
-          "company": "Wells Fargo",
-          "title": "Principal Architect - Enterprise CI/CD & DevSecOps"
-        },
-        {
-          "id": "workday-wells-fargo-R-560592",
-          "company": "Wells Fargo",
-          "title": "Securities Operations Associate - UIT Operations"
         }
       ],
-      "severity": "medium",
-      "flags": [
-        "published_gt_raw_sidecar"
-      ]
+      "severity": "ok",
+      "flags": []
     },
     {
       "source": "smartrecruiters",
       "pool_rows": 1904,
       "us_rows": 1903,
       "tech_us_rows": 336,
-      "raw_sidecar_rows": 1407,
-      "sidecar_active_rows": 269,
+      "raw_sidecar_rows": 1420,
+      "sidecar_active_rows": 285,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 277,
-      "published_pct": 82.4,
+      "published_rows": 285,
+      "published_pct": 84.8,
       "enriched_rows": 336,
       "enriched_pct": 100,
       "enriched_with_skills": 331,
       "skills_pct": 98.5,
       "examples": [
         {
-          "id": "sr-VeoliaEnvironnementSA-744000137477379",
+          "id": "sr-VeoliaEnvironnementSA-744000135551709",
           "company": "Veolia Environnement SA",
-          "title": "Production Engineer"
+          "title": "Data Engineer"
         },
         {
-          "id": "sr-Sandisk-744000137225869",
-          "company": "Sandisk",
-          "title": "Senior Information Security Analyst, GRC/Responsible AI"
+          "id": "sr-llnl-3743990013907505",
+          "company": "LLNL",
+          "title": "Combat Simulation Systems Analyst"
         },
         {
-          "id": "sr-VeoliaEnvironnementSA-744000137221019",
-          "company": "Veolia Environnement SA",
-          "title": "Copy of Field Service Engineer"
+          "id": "sr-atpco1-744000135544748",
+          "company": "ATPCO",
+          "title": "Principal Software Engineer"
         },
         {
-          "id": "sr-VeoliaEnvironnementSA-744000137220849",
-          "company": "Veolia Environnement SA",
-          "title": "Field Service Engineer"
-        },
-        {
-          "id": "sr-VeoliaEnvironnementSA-744000137220729",
-          "company": "Veolia Environnement SA",
-          "title": "Field Service Engineer"
-        },
-        {
-          "id": "sr-Intuitive-744000137139479",
+          "id": "sr-Intuitive-744000135329990",
           "company": "Intuitive",
-          "title": "Staff Software Engineer, Infrastructure"
+          "title": "Platform automation Engineer"
         },
         {
-          "id": "sr-WellmarkInc-744000136512919",
+          "id": "sr-llnl-3743990013887206",
+          "company": "LLNL",
+          "title": "Engineering Technical Associate/Senior Engineering Associate - High Explosives Applications Facility (HEAF) Gun Bay Lead"
+        },
+        {
+          "id": "sr-VeoliaEnvironnementSA-744000135319379",
+          "company": "Veolia Environnement SA",
+          "title": "Lead Engineer - Customer Application Engineering"
+        },
+        {
+          "id": "sr-Intuitive-744000135304642",
+          "company": "Intuitive",
+          "title": "Senior Therapy Clinical Development Engineer – Tissue & Thermal"
+        },
+        {
+          "id": "sr-WellmarkInc-744000135292154",
           "company": "Wellmark, Inc.",
-          "title": "Software Engineer"
-        },
-        {
-          "id": "sr-Intuitive-744000136107169",
-          "company": "Intuitive",
-          "title": "Sr Human Factors Design Engineer"
+          "title": "Sr Financial & Data Analyst – Healthcare Economics"
         }
       ],
       "severity": "ok",
@@ -357,7 +357,7 @@
       "pool_rows": 1488,
       "us_rows": 1483,
       "tech_us_rows": 615,
-      "raw_sidecar_rows": 1488,
+      "raw_sidecar_rows": 1490,
       "sidecar_active_rows": 615,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
@@ -377,7 +377,7 @@
       "pool_rows": 424,
       "us_rows": 348,
       "tech_us_rows": 225,
-      "raw_sidecar_rows": 540,
+      "raw_sidecar_rows": 725,
       "sidecar_active_rows": 225,
       "supplemental_rows": 871,
       "supplemental_with_desc": 871,
