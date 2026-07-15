@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-15T07:51:37.235Z",
+  "generated_at": "2026-07-15T07:56:13.207Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -31,6 +31,7 @@
     "descriptions-deshaw.jsonl",
     "descriptions-eightfold.jsonl",
     "descriptions-enriched-1.jsonl",
+    "descriptions-enriched-2.jsonl",
     "descriptions-google.jsonl",
     "descriptions-greenhouse-1.jsonl",
     "descriptions-greenhouse-2.jsonl",
@@ -60,7 +61,7 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-15T07:51:33.347Z",
+    "checked_at": "2026-07-15T07:56:08.524Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -146,30 +147,30 @@
     },
     {
       "source": "workday",
-      "pool_rows": 53130,
-      "us_rows": 27990,
-      "tech_us_rows": 8620,
-      "raw_sidecar_rows": 44401,
-      "sidecar_active_rows": 8378,
+      "pool_rows": 53141,
+      "us_rows": 27937,
+      "tech_us_rows": 8658,
+      "raw_sidecar_rows": 51366,
+      "sidecar_active_rows": 7772,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 8301,
-      "published_pct": 96.3,
-      "enriched_rows": 8460,
+      "published_rows": 8303,
+      "published_pct": 95.9,
+      "enriched_rows": 8497,
       "enriched_pct": 98.1,
-      "enriched_with_skills": 8225,
+      "enriched_with_skills": 8259,
       "skills_pct": 97.2,
       "examples": [
+        {
+          "id": "workday-morgan-stanley-PT-JR038925",
+          "company": "Morgan Stanley",
+          "title": "Senior Low Latency Engineer - Vice President"
+        },
         {
           "id": "workday-jll-REQ515866",
           "company": "JLL",
           "title": "Project Engineer"
-        },
-        {
-          "id": "workday-crowdstrike-R28559",
-          "company": "CrowdStrike",
-          "title": "Detection Focused Senior Cloud Security Consultant - JAPAC (Remote)"
         },
         {
           "id": "workday-fox-R50032942",
@@ -177,41 +178,43 @@
           "title": "Assistant, Business & Legal Affairs"
         },
         {
+          "id": "workday-elanco-R0025926",
+          "company": "Elanco",
+          "title": "Engineer, IT Manufacturing QC Labs"
+        },
+        {
           "id": "workday-aerovironment-8044",
           "company": "AeroVironment",
           "title": "M&S Integration Engineer/Manager"
         },
         {
-          "id": "workday-jll-REQ516114",
-          "company": "JLL",
-          "title": "Senior Performance Analyst"
+          "id": "workday-wells-fargo-R-560809",
+          "company": "Wells Fargo",
+          "title": "Lead Software Engineer 1 (#002294)"
         },
         {
-          "id": "workday-jll-REQ521894",
-          "company": "JLL",
-          "title": "Mobile Engineer"
+          "id": "workday-wells-fargo-R-542229",
+          "company": "Wells Fargo",
+          "title": "Senior Business Intelligence Consultant - WIM Operations Data, Analytics and Reporting (DAR)"
         },
         {
-          "id": "workday-jll-REQ522230",
-          "company": "JLL",
-          "title": "Critical Environment Electrician"
-        },
-        {
-          "id": "workday-allegion-JR36715",
-          "company": "Allegion",
-          "title": "Architectural Services Project Manager – Cincinnati, OH or Louisville, KY or Lexington, KY"
+          "id": "workday-wells-fargo-R-546631",
+          "company": "Wells Fargo",
+          "title": "Principal Engineer - Application Security: Secure Development"
         }
       ],
-      "severity": "ok",
-      "flags": []
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
     },
     {
       "source": "smartrecruiters",
       "pool_rows": 1889,
       "us_rows": 1888,
       "tech_us_rows": 341,
-      "raw_sidecar_rows": 1488,
-      "sidecar_active_rows": 341,
+      "raw_sidecar_rows": 1432,
+      "sidecar_active_rows": 283,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
@@ -222,8 +225,10 @@
       "enriched_with_skills": 336,
       "skills_pct": 98.5,
       "examples": [],
-      "severity": "ok",
-      "flags": []
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
     },
     {
       "source": "icims",
@@ -250,7 +255,7 @@
       "pool_rows": 516,
       "us_rows": 307,
       "tech_us_rows": 173,
-      "raw_sidecar_rows": 515,
+      "raw_sidecar_rows": 519,
       "sidecar_active_rows": 173,
       "supplemental_rows": 542,
       "supplemental_with_desc": 22,
