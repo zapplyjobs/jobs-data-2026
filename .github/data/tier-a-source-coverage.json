@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-15T07:24:10.839Z",
+  "generated_at": "2026-07-15T07:26:50.385Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -31,6 +31,7 @@
     "descriptions-deshaw.jsonl",
     "descriptions-eightfold.jsonl",
     "descriptions-enriched-1.jsonl",
+    "descriptions-enriched-2.jsonl",
     "descriptions-google.jsonl",
     "descriptions-greenhouse-1.jsonl",
     "descriptions-greenhouse-2.jsonl",
@@ -60,7 +61,7 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-15T07:24:07.171Z",
+    "checked_at": "2026-07-15T07:26:46.302Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -146,21 +147,41 @@
     },
     {
       "source": "workday",
-      "pool_rows": 53111,
-      "us_rows": 27884,
-      "tech_us_rows": 8666,
-      "raw_sidecar_rows": 44057,
-      "sidecar_active_rows": 8083,
+      "pool_rows": 52868,
+      "us_rows": 27995,
+      "tech_us_rows": 8609,
+      "raw_sidecar_rows": 47573,
+      "sidecar_active_rows": 7779,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 8078,
-      "published_pct": 93.2,
-      "enriched_rows": 8532,
-      "enriched_pct": 98.5,
-      "enriched_with_skills": 8293,
+      "published_rows": 7804,
+      "published_pct": 90.6,
+      "enriched_rows": 8474,
+      "enriched_pct": 98.4,
+      "enriched_with_skills": 8234,
       "skills_pct": 97.2,
       "examples": [
+        {
+          "id": "workday-nvidia-JR2020320",
+          "company": "NVIDIA",
+          "title": "Principal Software Engineer, At-Scale Reliability and Fleet Intelligence — CSP Engagements"
+        },
+        {
+          "id": "workday-morgan-stanley-PT-JR038925",
+          "company": "Morgan Stanley",
+          "title": "Senior Low Latency Engineer - Vice President"
+        },
+        {
+          "id": "workday-boeing-JR2026493801",
+          "company": "Boeing",
+          "title": "Associate or Experienced Product Security Engineer"
+        },
+        {
+          "id": "workday-fiserv-R-10398109",
+          "company": "Fiserv",
+          "title": "Enterprise Design System Lead"
+        },
         {
           "id": "workday-crowdstrike-R28559",
           "company": "CrowdStrike",
@@ -180,30 +201,12 @@
           "id": "workday-aerovironment-8044",
           "company": "AeroVironment",
           "title": "M&S Integration Engineer/Manager"
-        },
-        {
-          "id": "workday-jll-REQ521894",
-          "company": "JLL",
-          "title": "Mobile Engineer"
-        },
-        {
-          "id": "workday-snyk-JR100722",
-          "company": "Snyk",
-          "title": "Senior Solutions Engineering Specialist"
-        },
-        {
-          "id": "workday-fidelity-investments-2127722",
-          "company": "Fidelity Investments",
-          "title": "Software Engineer- BPM Developer"
-        },
-        {
-          "id": "workday-fiserv-R-10398109",
-          "company": "Fiserv",
-          "title": "Enterprise Design System Lead"
         }
       ],
-      "severity": "ok",
-      "flags": []
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
     },
     {
       "source": "smartrecruiters",
@@ -211,7 +214,7 @@
       "us_rows": 1888,
       "tech_us_rows": 341,
       "raw_sidecar_rows": 1432,
-      "sidecar_active_rows": 285,
+      "sidecar_active_rows": 283,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
@@ -291,7 +294,7 @@
       "pool_rows": 516,
       "us_rows": 307,
       "tech_us_rows": 173,
-      "raw_sidecar_rows": 515,
+      "raw_sidecar_rows": 519,
       "sidecar_active_rows": 173,
       "supplemental_rows": 542,
       "supplemental_with_desc": 22,
