@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-15T09:14:04.656Z",
+  "generated_at": "2026-07-15T09:16:38.449Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -31,6 +31,7 @@
     "descriptions-deshaw.jsonl",
     "descriptions-eightfold.jsonl",
     "descriptions-enriched-1.jsonl",
+    "descriptions-enriched-2.jsonl",
     "descriptions-google.jsonl",
     "descriptions-greenhouse-1.jsonl",
     "descriptions-greenhouse-2.jsonl",
@@ -60,10 +61,12 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-15T09:14:00.559Z",
-    "active": false,
-    "message": null,
-    "failures": [],
+    "checked_at": "2026-07-15T09:16:32.157Z",
+    "active": true,
+    "message": "**Source fetch failure (tiktok)**: 0 jobs fetched this run despite 1492 in pool (carry-forward). Fetcher likely timed out or broken.",
+    "failures": [
+      "**Source fetch failure (tiktok)**: 0 jobs fetched this run despite 1492 in pool (carry-forward). Fetcher likely timed out or broken."
+    ],
     "warnings": [],
     "warning_count": 0,
     "secrets": [
@@ -146,19 +149,19 @@
     },
     {
       "source": "workday",
-      "pool_rows": 52943,
-      "us_rows": 27617,
-      "tech_us_rows": 8583,
-      "raw_sidecar_rows": 43747,
-      "sidecar_active_rows": 8026,
+      "pool_rows": 52948,
+      "us_rows": 27715,
+      "tech_us_rows": 8570,
+      "raw_sidecar_rows": 50398,
+      "sidecar_active_rows": 7788,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 8026,
-      "published_pct": 93.5,
-      "enriched_rows": 8483,
+      "published_rows": 7899,
+      "published_pct": 92.2,
+      "enriched_rows": 8470,
       "enriched_pct": 98.8,
-      "enriched_with_skills": 8244,
+      "enriched_with_skills": 8231,
       "skills_pct": 97.2,
       "examples": [
         {
@@ -167,43 +170,67 @@
           "title": "Vice President of Product Design, Consumer"
         },
         {
-          "id": "workday-blue-origin-R61416",
-          "company": "Blue Origin",
-          "title": "Technical Program Manager-– Technical Product Integrator, Core Avionics & RF"
+          "id": "workday-fidelity-investments-2127722",
+          "company": "Fidelity Investments",
+          "title": "Software Engineer- BPM Developer"
         },
         {
-          "id": "workday-blue-origin-R67934",
-          "company": "Blue Origin",
-          "title": "Senior Mechatronics Engineer"
+          "id": "workday-fis-JR0308455",
+          "company": "FIS",
+          "title": "Systems Administrator Seniors- Unity Application Engineer"
         },
         {
-          "id": "workday-blue-origin-R67765",
-          "company": "Blue Origin",
-          "title": "Senior Electrical Design Engineer - TeraWave"
+          "id": "workday-fis-JR0308453",
+          "company": "FIS",
+          "title": "Business Systems Specialists /Test Automation Engineers: Digital Applications"
         },
         {
-          "id": "workday-blue-origin-R68684",
-          "company": "Blue Origin",
-          "title": "Satellite Flight Software Engineer II - TeraWave"
+          "id": "workday-fis-JR0307744",
+          "company": "FIS",
+          "title": "Sr. Manager, Software Engineering"
         },
         {
-          "id": "workday-blue-origin-R67766",
-          "company": "Blue Origin",
-          "title": "Senior Power Electronics Design Engineer - TeraWave"
+          "id": "workday-zillow-P750740",
+          "company": "Zillow",
+          "title": "Partner Support Consultant"
         },
         {
-          "id": "workday-blue-origin-R67768",
-          "company": "Blue Origin",
-          "title": "Senior Test Hardware Engineer - TeraWave"
+          "id": "workday-zillow-P750570",
+          "company": "Zillow",
+          "title": "Senior Support Consultant, Follow Up Boss"
         },
         {
-          "id": "workday-blue-origin-R67769",
-          "company": "Blue Origin",
-          "title": "Sr. Mechanical Engineer - Avionics Mechanical Packaging - TeraWave"
+          "id": "workday-zillow-P750919",
+          "company": "Zillow",
+          "title": "Senior Manager, GTM Strategy & Compensation"
         }
       ],
-      "severity": "ok",
-      "flags": []
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
+    },
+    {
+      "source": "tiktok",
+      "pool_rows": 1492,
+      "us_rows": 1491,
+      "tech_us_rows": 601,
+      "raw_sidecar_rows": 0,
+      "sidecar_active_rows": 0,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 601,
+      "published_pct": 100,
+      "enriched_rows": 601,
+      "enriched_pct": 100,
+      "enriched_with_skills": 601,
+      "skills_pct": 100,
+      "examples": [],
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
     },
     {
       "source": "smartrecruiters",
@@ -211,7 +238,7 @@
       "us_rows": 1888,
       "tech_us_rows": 341,
       "raw_sidecar_rows": 1439,
-      "sidecar_active_rows": 285,
+      "sidecar_active_rows": 283,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
@@ -291,7 +318,7 @@
       "pool_rows": 515,
       "us_rows": 301,
       "tech_us_rows": 167,
-      "raw_sidecar_rows": 515,
+      "raw_sidecar_rows": 516,
       "sidecar_active_rows": 167,
       "supplemental_rows": 542,
       "supplemental_with_desc": 18,
@@ -305,26 +332,6 @@
       "enriched_rows": 167,
       "enriched_pct": 100,
       "enriched_with_skills": 167,
-      "skills_pct": 100,
-      "examples": [],
-      "severity": "ok",
-      "flags": []
-    },
-    {
-      "source": "tiktok",
-      "pool_rows": 1492,
-      "us_rows": 1491,
-      "tech_us_rows": 617,
-      "raw_sidecar_rows": 1492,
-      "sidecar_active_rows": 617,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 617,
-      "published_pct": 100,
-      "enriched_rows": 617,
-      "enriched_pct": 100,
-      "enriched_with_skills": 617,
       "skills_pct": 100,
       "examples": [],
       "severity": "ok",
