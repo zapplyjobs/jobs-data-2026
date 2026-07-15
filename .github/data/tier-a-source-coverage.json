@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-15T00:29:52.039Z",
+  "generated_at": "2026-07-15T00:34:26.532Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -32,11 +32,18 @@
     "descriptions-eightfold.jsonl",
     "descriptions-enriched-1.jsonl",
     "descriptions-enriched-2.jsonl",
+    "descriptions-enriched-3.jsonl",
+    "descriptions-enriched-4.jsonl",
+    "descriptions-enriched-5.jsonl",
+    "descriptions-enriched-6.jsonl",
+    "descriptions-enriched-7.jsonl",
+    "descriptions-enriched-8.jsonl",
     "descriptions-google.jsonl",
     "descriptions-greenhouse-1.jsonl",
     "descriptions-greenhouse-2.jsonl",
     "descriptions-greenhouse-3.jsonl",
     "descriptions-icims.jsonl",
+    "descriptions-jsearch.jsonl",
     "descriptions-lever.jsonl",
     "descriptions-microsoft.jsonl",
     "descriptions-oracle.jsonl",
@@ -61,7 +68,7 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-15T00:29:48.039Z",
+    "checked_at": "2026-07-15T00:34:22.903Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -147,71 +154,95 @@
     },
     {
       "source": "workday",
-      "pool_rows": 52912,
-      "us_rows": 27869,
-      "tech_us_rows": 8529,
-      "raw_sidecar_rows": 45006,
-      "sidecar_active_rows": 8353,
+      "pool_rows": 52914,
+      "us_rows": 27964,
+      "tech_us_rows": 8536,
+      "raw_sidecar_rows": 51977,
+      "sidecar_active_rows": 7770,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 8265,
-      "published_pct": 96.9,
-      "enriched_rows": 8428,
+      "published_rows": 8225,
+      "published_pct": 96.4,
+      "enriched_rows": 8436,
       "enriched_pct": 98.8,
-      "enriched_with_skills": 8202,
+      "enriched_with_skills": 8206,
       "skills_pct": 97.3,
       "examples": [
         {
-          "id": "workday-ge-vernova-R5047277",
-          "company": "GE Vernova",
-          "title": "Technical Leader"
+          "id": "workday-sierra-nevada-corporation-R0030294",
+          "company": "Sierra Nevada Corporation",
+          "title": "Avionics Technician II (Current Military Fellows Only)"
         },
         {
-          "id": "workday-allegion-JR36715",
-          "company": "Allegion",
-          "title": "Architectural Services Project Manager – Cincinnati, OH or Louisville, KY or Lexington, KY"
+          "id": "workday-jll-REQ520510",
+          "company": "JLL",
+          "title": "Project Manager – Portfolio Maintenance"
         },
         {
-          "id": "workday-zayo-R0016594",
-          "company": "Zayo",
-          "title": "Edge Infrastructure Engineer I - Del"
+          "id": "workday-jll-REQ516114",
+          "company": "JLL",
+          "title": "Senior Performance Analyst"
         },
         {
-          "id": "workday-zayo-R0016534",
-          "company": "Zayo",
-          "title": "Edge Infrastructure Engineer I - Del"
+          "id": "workday-becton-dickinson-R-548950",
+          "company": "Becton Dickinson",
+          "title": "Associate Director, Global Sales Analytics Engineering - Business Decision Intelligence"
         },
         {
-          "id": "workday-nxp-R-10063876",
-          "company": "NXP",
-          "title": "Senior IP Project Engineer"
+          "id": "workday-becton-dickinson-R-548949",
+          "company": "Becton Dickinson",
+          "title": "Principal Commercial Analytics Engineer - Business Decision Intelligence"
         },
         {
-          "id": "workday-northrop-grumman-R10240444",
-          "company": "Northrop Grumman",
-          "title": "Systems Engineer: Software - Level 3/4"
+          "id": "workday-kbr-R2126336",
+          "company": "KBR",
+          "title": "Sustainment & Maintenance Specialist"
         },
         {
-          "id": "workday-insulet-corporation-REQ-2025-11790",
-          "company": "Insulet Corporation",
-          "title": "Customer Identity Management Platform Architect (Hybrid - Acton, MA or San Diego, CA)"
+          "id": "workday-kbr-R2126307",
+          "company": "KBR",
+          "title": "Software Architect"
         },
         {
-          "id": "workday-leidos-R-00187184",
-          "company": "Leidos",
-          "title": "Marine Electrical Technician"
+          "id": "workday-kbr-R2125578",
+          "company": "KBR",
+          "title": "Software Data Integration Engineer"
         }
       ],
-      "severity": "ok",
-      "flags": []
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
+    },
+    {
+      "source": "smartrecruiters",
+      "pool_rows": 1898,
+      "us_rows": 1897,
+      "tech_us_rows": 343,
+      "raw_sidecar_rows": 1558,
+      "sidecar_active_rows": 280,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 343,
+      "published_pct": 100,
+      "enriched_rows": 343,
+      "enriched_pct": 100,
+      "enriched_with_skills": 338,
+      "skills_pct": 98.5,
+      "examples": [],
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
     },
     {
       "source": "microsoft",
       "pool_rows": 512,
       "us_rows": 313,
       "tech_us_rows": 168,
-      "raw_sidecar_rows": 500,
+      "raw_sidecar_rows": 501,
       "sidecar_active_rows": 164,
       "supplemental_rows": 538,
       "supplemental_with_desc": 33,
@@ -248,26 +279,6 @@
           "title": "Data Center Technician (Night Shift)"
         }
       ],
-      "severity": "ok",
-      "flags": []
-    },
-    {
-      "source": "smartrecruiters",
-      "pool_rows": 1896,
-      "us_rows": 1895,
-      "tech_us_rows": 343,
-      "raw_sidecar_rows": 1500,
-      "sidecar_active_rows": 343,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 343,
-      "published_pct": 100,
-      "enriched_rows": 343,
-      "enriched_pct": 100,
-      "enriched_with_skills": 338,
-      "skills_pct": 98.5,
-      "examples": [],
       "severity": "ok",
       "flags": []
     },
@@ -316,7 +327,7 @@
       "pool_rows": 412,
       "us_rows": 337,
       "tech_us_rows": 218,
-      "raw_sidecar_rows": 824,
+      "raw_sidecar_rows": 828,
       "sidecar_active_rows": 218,
       "supplemental_rows": 872,
       "supplemental_with_desc": 872,
