@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-15T14:25:09.082Z",
+  "generated_at": "2026-07-15T14:27:20.874Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -31,6 +31,7 @@
     "descriptions-deshaw.jsonl",
     "descriptions-eightfold.jsonl",
     "descriptions-enriched-1.jsonl",
+    "descriptions-enriched-2.jsonl",
     "descriptions-google.jsonl",
     "descriptions-greenhouse-1.jsonl",
     "descriptions-greenhouse-2.jsonl",
@@ -60,7 +61,7 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-15T14:25:05.203Z",
+    "checked_at": "2026-07-15T14:27:17.352Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -146,82 +147,94 @@
     },
     {
       "source": "workday",
-      "pool_rows": 53830,
-      "us_rows": 28100,
-      "tech_us_rows": 8833,
-      "raw_sidecar_rows": 43059,
-      "sidecar_active_rows": 8140,
+      "pool_rows": 53866,
+      "us_rows": 28214,
+      "tech_us_rows": 8780,
+      "raw_sidecar_rows": 46272,
+      "sidecar_active_rows": 7825,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 8140,
-      "published_pct": 92.2,
-      "enriched_rows": 8483,
-      "enriched_pct": 96,
-      "enriched_with_skills": 8240,
-      "skills_pct": 97.1,
+      "published_rows": 7921,
+      "published_pct": 90.2,
+      "enriched_rows": 8415,
+      "enriched_pct": 95.8,
+      "enriched_with_skills": 8177,
+      "skills_pct": 97.2,
       "examples": [
         {
-          "id": "workday-symbotic-R6999",
-          "company": "Symbotic",
-          "title": "Advanced Software Engineer"
+          "id": "workday-bose-R28789",
+          "company": "Bose",
+          "title": "End-to-End Systems Lead"
         },
         {
-          "id": "workday-symbotic-R7175",
-          "company": "Symbotic",
-          "title": "Data Scientist – Simulation (Senior - Principal)"
+          "id": "workday-huntsman-J-019786",
+          "company": "Huntsman",
+          "title": "Chemical Process Engineer"
         },
         {
-          "id": "workday-symbotic-R7179",
-          "company": "Symbotic",
-          "title": "New Grad- Robotics Reliability Engineer"
+          "id": "workday-wells-fargo-R-555412",
+          "company": "Wells Fargo",
+          "title": "Lead Infrastructure Engineer/Mainframe Optimization"
         },
         {
-          "id": "workday-symbotic-R7289",
-          "company": "Symbotic",
-          "title": "Quality Engineer"
+          "id": "workday-booz-allen-hamilton-R0244394",
+          "company": "Booz Allen Hamilton",
+          "title": "OSINT Analyst"
         },
         {
-          "id": "workday-symbotic-R7000",
-          "company": "Symbotic",
-          "title": "Senior Software Engineer"
+          "id": "workday-booz-allen-hamilton-R0244469",
+          "company": "Booz Allen Hamilton",
+          "title": "Data Scientist, Mid"
         },
         {
-          "id": "workday-symbotic-R6796",
-          "company": "Symbotic",
-          "title": "Field Engineer"
+          "id": "workday-booz-allen-hamilton-R0244198",
+          "company": "Booz Allen Hamilton",
+          "title": "Automation Engineer"
         },
         {
-          "id": "workday-symbotic-R6977",
-          "company": "Symbotic",
-          "title": "Software Engineer – Robotics Design Simulation (Senior to Principal)"
+          "id": "workday-booz-allen-hamilton-R0242401",
+          "company": "Booz Allen Hamilton",
+          "title": "Unmanned & Autonomous Systems Engineer, Lead"
         },
         {
-          "id": "workday-symbotic-R7327",
-          "company": "Symbotic",
-          "title": "Software Engineer, Core Systems & Platform Services"
+          "id": "workday-booz-allen-hamilton-R0237839",
+          "company": "Booz Allen Hamilton",
+          "title": "Network Engineer"
         }
       ],
-      "severity": "ok",
-      "flags": []
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
     },
     {
       "source": "smartrecruiters",
       "pool_rows": 1902,
       "us_rows": 1901,
-      "tech_us_rows": 342,
-      "raw_sidecar_rows": 1453,
-      "sidecar_active_rows": 286,
+      "tech_us_rows": 343,
+      "raw_sidecar_rows": 1452,
+      "sidecar_active_rows": 284,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 286,
-      "published_pct": 83.6,
-      "enriched_rows": 341,
-      "enriched_pct": 99.7,
-      "enriched_with_skills": 336,
+      "published_rows": 285,
+      "published_pct": 83.1,
+      "enriched_rows": 340,
+      "enriched_pct": 99.1,
+      "enriched_with_skills": 335,
       "skills_pct": 98.5,
       "examples": [
+        {
+          "id": "sr-SmithsGroup2-744000137911079",
+          "company": "Smiths Group",
+          "title": "Global Product Regulatory Specialist (Contract)"
+        },
+        {
+          "id": "sr-AbbVie-3743990014103046",
+          "company": "AbbVie",
+          "title": "Equipment Process Engineer II"
+        },
         {
           "id": "sr-Intuitive-744000137905640",
           "company": "Intuitive",
@@ -251,16 +264,6 @@
           "id": "sr-VeoliaEnvironnementSA-744000137220729",
           "company": "Veolia Environnement SA",
           "title": "Field Service Engineer"
-        },
-        {
-          "id": "sr-Intuitive-744000137139479",
-          "company": "Intuitive",
-          "title": "Staff Software Engineer, Infrastructure"
-        },
-        {
-          "id": "sr-WellmarkInc-744000136512919",
-          "company": "Wellmark, Inc.",
-          "title": "Software Engineer"
         }
       ],
       "severity": "ok",
@@ -291,7 +294,7 @@
       "pool_rows": 516,
       "us_rows": 300,
       "tech_us_rows": 167,
-      "raw_sidecar_rows": 516,
+      "raw_sidecar_rows": 519,
       "sidecar_active_rows": 167,
       "supplemental_rows": 542,
       "supplemental_with_desc": 37,
