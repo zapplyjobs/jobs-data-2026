@@ -1,7 +1,9 @@
 name: Post Jobs to Discord
 
 on:
-  workflow_dispatch:  # Triggered by job-board-cron-worker (Cloudflare) every 15 min
+  schedule:
+    - cron: '*/15 * * * *'  # Every 15 minutes
+  workflow_dispatch:
 
 jobs:
   post-discord:
