@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-15T14:52:41.459Z",
+  "generated_at": "2026-07-15T14:57:08.064Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -31,6 +31,7 @@
     "descriptions-deshaw.jsonl",
     "descriptions-eightfold.jsonl",
     "descriptions-enriched-1.jsonl",
+    "descriptions-enriched-2.jsonl",
     "descriptions-google.jsonl",
     "descriptions-greenhouse-1.jsonl",
     "descriptions-greenhouse-2.jsonl",
@@ -60,7 +61,7 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-15T14:52:36.558Z",
+    "checked_at": "2026-07-15T14:57:03.626Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -145,26 +146,105 @@
       ]
     },
     {
+      "source": "apple",
+      "pool_rows": 416,
+      "us_rows": 340,
+      "tech_us_rows": 225,
+      "raw_sidecar_rows": 459,
+      "sidecar_active_rows": 225,
+      "supplemental_rows": 872,
+      "supplemental_with_desc": 872,
+      "supplemental_meta": {
+        "generated_at": "2026-07-15T14:43:14.614Z",
+        "lane_name": "custom",
+        "jobs_fetched": 5057
+      },
+      "published_rows": 18,
+      "published_pct": 8,
+      "enriched_rows": 18,
+      "enriched_pct": 8,
+      "enriched_with_skills": 18,
+      "skills_pct": 100,
+      "examples": [
+        {
+          "id": "apple-200672224",
+          "company": "Apple",
+          "title": "Siri AI Software Engineer, Siri Core"
+        },
+        {
+          "id": "apple-200671854",
+          "company": "Apple",
+          "title": "Product Design Engineer - Core Systems"
+        },
+        {
+          "id": "apple-200672425",
+          "company": "Apple",
+          "title": "Staff / Sr. Machine Learning Engineer, AI, Search & Knowledge Platforms"
+        },
+        {
+          "id": "apple-200671628",
+          "company": "Apple",
+          "title": "Software Engineer, Music Search"
+        },
+        {
+          "id": "apple-200672410",
+          "company": "Apple",
+          "title": "Acoustics Engineering Project Manager, Microphone"
+        },
+        {
+          "id": "apple-200654519",
+          "company": "Apple",
+          "title": "Senior Software Engineer"
+        },
+        {
+          "id": "apple-200671980",
+          "company": "Apple",
+          "title": "Engineering Program Manager- Customer Systems"
+        },
+        {
+          "id": "apple-200672367",
+          "company": "Apple",
+          "title": "Camera Embedded Software Engineer"
+        }
+      ],
+      "severity": "high",
+      "flags": [
+        "low_published_coverage",
+        "low_enrichment_coverage",
+        "supplemental_stage_gap"
+      ]
+    },
+    {
       "source": "workday",
-      "pool_rows": 53638,
-      "us_rows": 28209,
-      "tech_us_rows": 8759,
-      "raw_sidecar_rows": 42802,
-      "sidecar_active_rows": 8022,
+      "pool_rows": 53404,
+      "us_rows": 27792,
+      "tech_us_rows": 8619,
+      "raw_sidecar_rows": 49090,
+      "sidecar_active_rows": 7870,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 8020,
-      "published_pct": 91.6,
-      "enriched_rows": 8475,
-      "enriched_pct": 96.8,
-      "enriched_with_skills": 8235,
+      "published_rows": 7805,
+      "published_pct": 90.6,
+      "enriched_rows": 8408,
+      "enriched_pct": 97.6,
+      "enriched_with_skills": 8169,
       "skills_pct": 97.2,
       "examples": [
         {
-          "id": "workday-the-federal-reserve-system-R-0000032725",
-          "company": "The Federal Reserve System",
-          "title": "DevOps Engineer/Senior DevOps Engineer"
+          "id": "workday-parsons-R183323",
+          "company": "Parsons",
+          "title": "Environmental Project Manager"
+        },
+        {
+          "id": "workday-abbott-31153710",
+          "company": "Abbott",
+          "title": "Sr. Embedded Software Engineer - Digital Signal Processing"
+        },
+        {
+          "id": "workday-arrow-electronics-R246641",
+          "company": "Arrow Electronics",
+          "title": "Procurement Executive"
         },
         {
           "id": "workday-wells-fargo-R-555412",
@@ -172,34 +252,24 @@
           "title": "Lead Infrastructure Engineer/Mainframe Optimization"
         },
         {
-          "id": "workday-leidos-R-00186971",
-          "company": "Leidos",
-          "title": "Oracle Software Engineer"
+          "id": "workday-wash-u-JR95756",
+          "company": "Wash U",
+          "title": "Research Technician II - Ob/Gyn"
         },
         {
-          "id": "workday-fiserv-R-10380471",
-          "company": "Fiserv",
-          "title": "Product Director, Clover Hardware"
+          "id": "workday-ss&c-technologies-R44470",
+          "company": "SS&C Technologies",
+          "title": "Sr. Project Manager"
         },
         {
-          "id": "workday-blue-origin-R66591",
-          "company": "Blue Origin",
-          "title": "Enterprise Operations Center Analyst"
+          "id": "workday-unisys-REQ574389",
+          "company": "Unisys",
+          "title": "Oracle Database Administrator"
         },
         {
-          "id": "workday-wells-fargo-R-542229",
-          "company": "Wells Fargo",
-          "title": "Senior Business Intelligence Consultant - WIM Operations Data, Analytics and Reporting (DAR)"
-        },
-        {
-          "id": "workday-wells-fargo-R-546631",
-          "company": "Wells Fargo",
-          "title": "Principal Engineer - Application Security: Secure Development"
-        },
-        {
-          "id": "workday-wells-fargo-R-557607",
-          "company": "Wells Fargo",
-          "title": "Lead Full Stack Information Security Engineer - Counter Threat Operations"
+          "id": "workday-rtx-01858033",
+          "company": "RTX",
+          "title": "STORMBREAKER Systems Test Integrated Product Team Lead I(PTL)"
         }
       ],
       "severity": "ok",
@@ -207,21 +277,26 @@
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 1897,
-      "us_rows": 1896,
+      "pool_rows": 1898,
+      "us_rows": 1897,
       "tech_us_rows": 343,
-      "raw_sidecar_rows": 1451,
-      "sidecar_active_rows": 287,
+      "raw_sidecar_rows": 1446,
+      "sidecar_active_rows": 283,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 287,
-      "published_pct": 83.7,
-      "enriched_rows": 343,
-      "enriched_pct": 100,
-      "enriched_with_skills": 338,
+      "published_rows": 286,
+      "published_pct": 83.4,
+      "enriched_rows": 342,
+      "enriched_pct": 99.7,
+      "enriched_with_skills": 337,
       "skills_pct": 98.5,
       "examples": [
+        {
+          "id": "sr-AbbVie-3743990014104146",
+          "company": "AbbVie",
+          "title": "Equipment Process Engineer II"
+        },
         {
           "id": "sr-VeoliaEnvironnementSA-744000137477379",
           "company": "Veolia Environnement SA",
@@ -256,11 +331,6 @@
           "id": "sr-WellmarkInc-744000136512919",
           "company": "Wellmark, Inc.",
           "title": "Software Engineer"
-        },
-        {
-          "id": "sr-Intuitive-744000136107169",
-          "company": "Intuitive",
-          "title": "Sr Human Factors Design Engineer"
         }
       ],
       "severity": "ok",
@@ -288,10 +358,10 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 516,
+      "pool_rows": 511,
       "us_rows": 300,
       "tech_us_rows": 167,
-      "raw_sidecar_rows": 516,
+      "raw_sidecar_rows": 509,
       "sidecar_active_rows": 167,
       "supplemental_rows": 542,
       "supplemental_with_desc": 23,
@@ -325,30 +395,6 @@
       "enriched_rows": 617,
       "enriched_pct": 100,
       "enriched_with_skills": 617,
-      "skills_pct": 100,
-      "examples": [],
-      "severity": "ok",
-      "flags": []
-    },
-    {
-      "source": "apple",
-      "pool_rows": 43,
-      "us_rows": 34,
-      "tech_us_rows": 18,
-      "raw_sidecar_rows": 86,
-      "sidecar_active_rows": 18,
-      "supplemental_rows": 872,
-      "supplemental_with_desc": 872,
-      "supplemental_meta": {
-        "generated_at": "2026-07-15T14:43:14.614Z",
-        "lane_name": "custom",
-        "jobs_fetched": 5057
-      },
-      "published_rows": 18,
-      "published_pct": 100,
-      "enriched_rows": 18,
-      "enriched_pct": 100,
-      "enriched_with_skills": 18,
       "skills_pct": 100,
       "examples": [],
       "severity": "ok",
