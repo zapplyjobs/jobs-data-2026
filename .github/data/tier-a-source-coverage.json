@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-15T22:48:03.494Z",
+  "generated_at": "2026-07-15T22:52:47.173Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -59,12 +59,14 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-15T22:48:00.819Z",
+    "checked_at": "2026-07-15T22:52:44.679Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [],
-    "warning_count": 0,
+    "warnings": [
+      "Runtime trending up: 7.0 min (warning at 7, alert at 10)"
+    ],
+    "warning_count": 1,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -76,25 +78,35 @@
   "rows": [
     {
       "source": "workday",
-      "pool_rows": 32552,
-      "us_rows": 18699,
-      "tech_us_rows": 5457,
-      "raw_sidecar_rows": 14353,
-      "sidecar_active_rows": 3236,
+      "pool_rows": 33764,
+      "us_rows": 19148,
+      "tech_us_rows": 5880,
+      "raw_sidecar_rows": 15875,
+      "sidecar_active_rows": 3048,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 3236,
-      "published_pct": 59.3,
-      "enriched_rows": 3252,
-      "enriched_pct": 59.6,
-      "enriched_with_skills": 3111,
-      "skills_pct": 95.7,
+      "published_rows": 3016,
+      "published_pct": 51.3,
+      "enriched_rows": 3035,
+      "enriched_pct": 51.6,
+      "enriched_with_skills": 2897,
+      "skills_pct": 95.5,
       "examples": [
+        {
+          "id": "workday-teledyne-REQ34458",
+          "company": "Teledyne",
+          "title": "Senior Electronics Engineer - (Onsite -Niceville, Florida)"
+        },
         {
           "id": "workday-penn-state-university-REQ_0000080138",
           "company": "Penn State University",
           "title": "AR/VR/XR Visualization Research and Development Engineer"
+        },
+        {
+          "id": "workday-verizon-R-1094342",
+          "company": "Verizon",
+          "title": "Marketing Data Science"
         },
         {
           "id": "workday-thermo-fisher-scientific-R-01360677",
@@ -102,34 +114,24 @@
           "title": "Field Service Engineer II (TEM) Iowa- REMOTE"
         },
         {
-          "id": "workday-snap-R0045965",
+          "id": "workday-cibc-2613843",
+          "company": "CIBC",
+          "title": "Production Support Engineering Lead"
+        },
+        {
+          "id": "workday-cibc-2606745",
+          "company": "CIBC",
+          "title": "Director of Lending Technology"
+        },
+        {
+          "id": "workday-rtx-01851891",
+          "company": "RTX",
+          "title": "Senior Systems Integration and Test Engineer"
+        },
+        {
+          "id": "workday-snap-R0046172",
           "company": "Snap",
-          "title": "Data Scientist, Level 4"
-        },
-        {
-          "id": "workday-snap-R0043448",
-          "company": "Snap",
-          "title": "AR Engineer, Level 4"
-        },
-        {
-          "id": "workday-pfizer-4960759",
-          "company": "Pfizer",
-          "title": "Head of AI & Agentic Platform Engineering"
-        },
-        {
-          "id": "workday-pfizer-4960760",
-          "company": "Pfizer",
-          "title": "Head of Data & BI Platform Engineering"
-        },
-        {
-          "id": "workday-magna-R00252207",
-          "company": "Magna",
-          "title": "Paint Process Engineering Group Leader"
-        },
-        {
-          "id": "workday-magna-R00251617",
-          "company": "Magna",
-          "title": "Environmental Coordinator"
+          "title": "Security Engineer, Level 5"
         }
       ],
       "severity": "high",
@@ -208,11 +210,39 @@
       ]
     },
     {
+      "source": "smartrecruiters",
+      "pool_rows": 1926,
+      "us_rows": 1925,
+      "tech_us_rows": 339,
+      "raw_sidecar_rows": 1402,
+      "sidecar_active_rows": 274,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 338,
+      "published_pct": 99.7,
+      "enriched_rows": 338,
+      "enriched_pct": 99.7,
+      "enriched_with_skills": 333,
+      "skills_pct": 98.5,
+      "examples": [
+        {
+          "id": "sr-Eurofins-744000137987229",
+          "company": "Eurofins",
+          "title": "Full Stack Web Developer"
+        }
+      ],
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
+    },
+    {
       "source": "microsoft",
       "pool_rows": 508,
       "us_rows": 311,
       "tech_us_rows": 172,
-      "raw_sidecar_rows": 504,
+      "raw_sidecar_rows": 508,
       "sidecar_active_rows": 170,
       "supplemental_rows": 545,
       "supplemental_with_desc": 67,
@@ -239,26 +269,6 @@
           "title": "Design Verification Engineer"
         }
       ],
-      "severity": "ok",
-      "flags": []
-    },
-    {
-      "source": "smartrecruiters",
-      "pool_rows": 1924,
-      "us_rows": 1923,
-      "tech_us_rows": 338,
-      "raw_sidecar_rows": 1466,
-      "sidecar_active_rows": 338,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 338,
-      "published_pct": 100,
-      "enriched_rows": 338,
-      "enriched_pct": 100,
-      "enriched_with_skills": 333,
-      "skills_pct": 98.5,
-      "examples": [],
       "severity": "ok",
       "flags": []
     },
@@ -304,10 +314,10 @@
     },
     {
       "source": "apple",
-      "pool_rows": 429,
-      "us_rows": 354,
+      "pool_rows": 428,
+      "us_rows": 353,
       "tech_us_rows": 232,
-      "raw_sidecar_rows": 848,
+      "raw_sidecar_rows": 841,
       "sidecar_active_rows": 232,
       "supplemental_rows": 871,
       "supplemental_with_desc": 871,
