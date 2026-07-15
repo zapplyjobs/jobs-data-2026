@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-15T00:23:12.818Z",
+  "generated_at": "2026-07-15T00:27:20.233Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -31,10 +31,10 @@
     "descriptions-deshaw.jsonl",
     "descriptions-eightfold.jsonl",
     "descriptions-enriched-1.jsonl",
+    "descriptions-enriched-2.jsonl",
     "descriptions-google.jsonl",
     "descriptions-greenhouse-1.jsonl",
     "descriptions-greenhouse-2.jsonl",
-    "descriptions-greenhouse-3.jsonl",
     "descriptions-icims.jsonl",
     "descriptions-lever.jsonl",
     "descriptions-microsoft.jsonl",
@@ -60,7 +60,7 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-15T00:23:08.475Z",
+    "checked_at": "2026-07-15T00:27:16.229Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -146,50 +146,45 @@
     },
     {
       "source": "workday",
-      "pool_rows": 52906,
-      "us_rows": 28054,
-      "tech_us_rows": 8575,
-      "raw_sidecar_rows": 44713,
-      "sidecar_active_rows": 8409,
+      "pool_rows": 52912,
+      "us_rows": 27869,
+      "tech_us_rows": 8529,
+      "raw_sidecar_rows": 51181,
+      "sidecar_active_rows": 7668,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 8236,
-      "published_pct": 96,
-      "enriched_rows": 8483,
-      "enriched_pct": 98.9,
-      "enriched_with_skills": 8256,
+      "published_rows": 8230,
+      "published_pct": 96.5,
+      "enriched_rows": 8425,
+      "enriched_pct": 98.8,
+      "enriched_with_skills": 8199,
       "skills_pct": 97.3,
       "examples": [
         {
-          "id": "workday-centene-1643671",
-          "company": "Centene",
-          "title": "Data Analyst II Healthcare Analytics"
+          "id": "workday-ge-vernova-R5047277",
+          "company": "GE Vernova",
+          "title": "Technical Leader"
         },
         {
-          "id": "workday-hp-inc-3164985",
-          "company": "HP Inc",
-          "title": "Solutions Architect Engagement Lead"
+          "id": "workday-allegion-JR36715",
+          "company": "Allegion",
+          "title": "Architectural Services Project Manager – Cincinnati, OH or Louisville, KY or Lexington, KY"
         },
         {
-          "id": "workday-hp-inc-3164949",
-          "company": "HP Inc",
-          "title": "AI/ML Platform Engineer"
+          "id": "workday-zayo-R0016594",
+          "company": "Zayo",
+          "title": "Edge Infrastructure Engineer I - Del"
         },
         {
-          "id": "workday-hp-inc-3165034",
-          "company": "HP Inc",
-          "title": "AI Data Scientist – Enterprise AI"
+          "id": "workday-zayo-R0016534",
+          "company": "Zayo",
+          "title": "Edge Infrastructure Engineer I - Del"
         },
         {
-          "id": "workday-hp-inc-3163342",
-          "company": "HP Inc",
-          "title": "New Product Introduction Procurement Engineer (Injection Molding)"
-        },
-        {
-          "id": "workday-visa-REF081644W",
-          "company": "Visa",
-          "title": "Director (Mainframe and GGS)"
+          "id": "workday-nxp-R-10063876",
+          "company": "NXP",
+          "title": "Senior IP Project Engineer"
         },
         {
           "id": "workday-t-mobile-REQ360900",
@@ -197,20 +192,49 @@
           "title": "Principal Engineer, Software – AI Platforms & Network Data"
         },
         {
-          "id": "workday-crowdstrike-R28559",
-          "company": "CrowdStrike",
-          "title": "Detection Focused Senior Cloud Security Consultant - JAPAC (Remote)"
+          "id": "workday-northrop-grumman-R10239154",
+          "company": "Northrop Grumman",
+          "title": "Engineer / Principal Engineer Systems Test"
+        },
+        {
+          "id": "workday-northrop-grumman-R10240376",
+          "company": "Northrop Grumman",
+          "title": "Principal Systems Architect Engineer - MBSE Cameo"
         }
       ],
-      "severity": "ok",
-      "flags": []
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
+    },
+    {
+      "source": "smartrecruiters",
+      "pool_rows": 1896,
+      "us_rows": 1895,
+      "tech_us_rows": 343,
+      "raw_sidecar_rows": 1558,
+      "sidecar_active_rows": 280,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 343,
+      "published_pct": 100,
+      "enriched_rows": 343,
+      "enriched_pct": 100,
+      "enriched_with_skills": 338,
+      "skills_pct": 98.5,
+      "examples": [],
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
     },
     {
       "source": "microsoft",
       "pool_rows": 512,
       "us_rows": 313,
       "tech_us_rows": 168,
-      "raw_sidecar_rows": 500,
+      "raw_sidecar_rows": 501,
       "sidecar_active_rows": 164,
       "supplemental_rows": 538,
       "supplemental_with_desc": 33,
@@ -247,26 +271,6 @@
           "title": "Data Center Technician (Night Shift)"
         }
       ],
-      "severity": "ok",
-      "flags": []
-    },
-    {
-      "source": "smartrecruiters",
-      "pool_rows": 1897,
-      "us_rows": 1896,
-      "tech_us_rows": 343,
-      "raw_sidecar_rows": 1500,
-      "sidecar_active_rows": 343,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 343,
-      "published_pct": 100,
-      "enriched_rows": 343,
-      "enriched_pct": 100,
-      "enriched_with_skills": 338,
-      "skills_pct": 98.5,
-      "examples": [],
       "severity": "ok",
       "flags": []
     },
@@ -315,7 +319,7 @@
       "pool_rows": 412,
       "us_rows": 337,
       "tech_us_rows": 218,
-      "raw_sidecar_rows": 824,
+      "raw_sidecar_rows": 828,
       "sidecar_active_rows": 218,
       "supplemental_rows": 872,
       "supplemental_with_desc": 872,
