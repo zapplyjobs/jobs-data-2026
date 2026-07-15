@@ -1,0 +1,32 @@
+name: Gate
+
+on:
+  push:
+    branches: ['**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - name: Check for large files (>5MB)
+        run: |
+          LARGE_FILES=$(find . -not -path './.git/*' -not -path '*/node_modules/*' -type f -size +5M 2>/dev/null)
+          if [ -n "$LARGE_FILES" ]; then
+            echo "::error::Files larger than 5MB detected — use R2 or Git LFS instead of committing:"
+            echo "$LARGE_FILES" | while read f; do
+              SIZE=$(du -h "$f" | cut -f1)
+              echo "::error::$SIZE $f"
+            done
+            exit 1
+          else
+            echo "✅ No files larger than 5MB"
+          fi
