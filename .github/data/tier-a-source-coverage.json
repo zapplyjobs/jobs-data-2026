@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-16T08:47:53.053Z",
+  "generated_at": "2026-07-16T08:51:28.112Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -59,14 +59,12 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-16T08:47:50.776Z",
+    "checked_at": "2026-07-16T08:51:25.450Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [
-      "Runtime trending up: 7.6 min (warning at 7, alert at 10)"
-    ],
-    "warning_count": 1,
+    "warnings": [],
+    "warning_count": 0,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -78,21 +76,46 @@
   "rows": [
     {
       "source": "workday",
-      "pool_rows": 29591,
-      "us_rows": 15935,
-      "tech_us_rows": 4929,
-      "raw_sidecar_rows": 12905,
-      "sidecar_active_rows": 3112,
+      "pool_rows": 34800,
+      "us_rows": 18384,
+      "tech_us_rows": 5359,
+      "raw_sidecar_rows": 19164,
+      "sidecar_active_rows": 3015,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 3110,
-      "published_pct": 63.1,
-      "enriched_rows": 3122,
-      "enriched_pct": 63.3,
-      "enriched_with_skills": 2991,
+      "published_rows": 2863,
+      "published_pct": 53.4,
+      "enriched_rows": 2875,
+      "enriched_pct": 53.6,
+      "enriched_with_skills": 2755,
       "skills_pct": 95.8,
       "examples": [
+        {
+          "id": "workday-uline-R265628",
+          "company": "Uline",
+          "title": "IT Security Administrator"
+        },
+        {
+          "id": "workday-uline-R265627",
+          "company": "Uline",
+          "title": "Senior Software Engineer"
+        },
+        {
+          "id": "workday-intel-JR0285604",
+          "company": "Intel",
+          "title": "Principal Engineer, AMS IP Architecture"
+        },
+        {
+          "id": "workday-baker-hughes-R161885",
+          "company": "Baker Hughes",
+          "title": "ASPIRE - Engineering and Technology (India) 2026 Opportunities"
+        },
+        {
+          "id": "workday-baker-hughes-R165833",
+          "company": "Baker Hughes",
+          "title": "Production Technologist"
+        },
         {
           "id": "workday-rocket-companies-R-083730",
           "company": "Rocket Companies",
@@ -104,34 +127,9 @@
           "title": "Specialist Software Engineering"
         },
         {
-          "id": "workday-magna-R00252207",
-          "company": "Magna",
-          "title": "Paint Process Engineering Group Leader"
-        },
-        {
-          "id": "workday-magna-R00251617",
-          "company": "Magna",
-          "title": "Environmental Coordinator"
-        },
-        {
-          "id": "workday-snap-R0046172",
-          "company": "Snap",
-          "title": "Security Engineer, Level 5"
-        },
-        {
-          "id": "workday-snap-R0045965",
-          "company": "Snap",
-          "title": "Data Scientist, Level 4"
-        },
-        {
-          "id": "workday-snap-R0043448",
-          "company": "Snap",
-          "title": "AR Engineer, Level 4"
-        },
-        {
-          "id": "workday-penn-state-university-REQ_0000080138",
-          "company": "Penn State University",
-          "title": "AR/VR/XR Visualization Research and Development Engineer"
+          "id": "workday-parsons-R182648",
+          "company": "Parsons",
+          "title": "Junior Software Developer - TS/SCI"
         }
       ],
       "severity": "high",
@@ -214,8 +212,8 @@
       "pool_rows": 1914,
       "us_rows": 1913,
       "tech_us_rows": 337,
-      "raw_sidecar_rows": 1455,
-      "sidecar_active_rows": 337,
+      "raw_sidecar_rows": 1392,
+      "sidecar_active_rows": 273,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
@@ -226,8 +224,10 @@
       "enriched_with_skills": 332,
       "skills_pct": 98.5,
       "examples": [],
-      "severity": "ok",
-      "flags": []
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
     },
     {
       "source": "icims",
@@ -254,7 +254,7 @@
       "pool_rows": 515,
       "us_rows": 318,
       "tech_us_rows": 178,
-      "raw_sidecar_rows": 515,
+      "raw_sidecar_rows": 517,
       "sidecar_active_rows": 178,
       "supplemental_rows": 543,
       "supplemental_with_desc": 23,
