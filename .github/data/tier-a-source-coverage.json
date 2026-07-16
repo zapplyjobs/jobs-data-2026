@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-16T11:14:58.758Z",
+  "generated_at": "2026-07-16T11:16:27.648Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -45,13 +45,13 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-16T11:09:36.329Z",
+    "generated_at": "2026-07-16T11:15:28.713Z",
     "source_basis": "us_jobs.json",
     "board_row_count": 11424,
-    "description_entries": 7924,
-    "coverage_pct": 69.4,
+    "description_entries": 8153,
+    "coverage_pct": 71.4,
     "source_breakdown": {
-      "sidecar": 7924,
+      "sidecar": 8153,
       "inline": 0
     },
     "jobs_metadata_generated": "2026-07-16T11:03:23.581Z",
@@ -59,12 +59,14 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-16T11:14:56.042Z",
+    "checked_at": "2026-07-16T11:16:25.079Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [],
-    "warning_count": 0,
+    "warnings": [
+      "Runtime trending up: 7.4 min (warning at 7, alert at 10)"
+    ],
+    "warning_count": 1,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -79,17 +81,17 @@
       "pool_rows": 32083,
       "us_rows": 17219,
       "tech_us_rows": 4934,
-      "raw_sidecar_rows": 18048,
-      "sidecar_active_rows": 2800,
+      "raw_sidecar_rows": 13330,
+      "sidecar_active_rows": 2945,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 2757,
-      "published_pct": 55.9,
-      "enriched_rows": 2827,
-      "enriched_pct": 57.3,
-      "enriched_with_skills": 2704,
-      "skills_pct": 95.6,
+      "published_rows": 2877,
+      "published_pct": 58.3,
+      "enriched_rows": 2947,
+      "enriched_pct": 59.7,
+      "enriched_with_skills": 2820,
+      "skills_pct": 95.7,
       "examples": [
         {
           "id": "workday-wells-fargo-R-561196",
@@ -208,33 +210,11 @@
       ]
     },
     {
-      "source": "smartrecruiters",
-      "pool_rows": 1913,
-      "us_rows": 1912,
-      "tech_us_rows": 337,
-      "raw_sidecar_rows": 1392,
-      "sidecar_active_rows": 273,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 337,
-      "published_pct": 100,
-      "enriched_rows": 337,
-      "enriched_pct": 100,
-      "enriched_with_skills": 332,
-      "skills_pct": 98.5,
-      "examples": [],
-      "severity": "medium",
-      "flags": [
-        "published_gt_raw_sidecar"
-      ]
-    },
-    {
       "source": "microsoft",
       "pool_rows": 517,
       "us_rows": 306,
       "tech_us_rows": 172,
-      "raw_sidecar_rows": 514,
+      "raw_sidecar_rows": 510,
       "sidecar_active_rows": 170,
       "supplemental_rows": 543,
       "supplemental_with_desc": 40,
@@ -261,6 +241,26 @@
           "title": "Technical Support Engineering"
         }
       ],
+      "severity": "ok",
+      "flags": []
+    },
+    {
+      "source": "smartrecruiters",
+      "pool_rows": 1913,
+      "us_rows": 1912,
+      "tech_us_rows": 337,
+      "raw_sidecar_rows": 1455,
+      "sidecar_active_rows": 337,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 337,
+      "published_pct": 100,
+      "enriched_rows": 337,
+      "enriched_pct": 100,
+      "enriched_with_skills": 332,
+      "skills_pct": 98.5,
+      "examples": [],
       "severity": "ok",
       "flags": []
     },
@@ -309,7 +309,7 @@
       "pool_rows": 41,
       "us_rows": 33,
       "tech_us_rows": 18,
-      "raw_sidecar_rows": 81,
+      "raw_sidecar_rows": 82,
       "sidecar_active_rows": 18,
       "supplemental_rows": 60,
       "supplemental_with_desc": 60,
