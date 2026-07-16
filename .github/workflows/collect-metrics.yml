@@ -114,7 +114,7 @@ jobs:
       - name: Trigger Supabase publish (wave link)
         if: success()
         run: |
-          curl -sf -X POST "https://api.github.com/repos/zapplyjobs/job-board-processing/actions/workflows/publish-metrics-to-supabase.yml/dispatches" \
+          curl -sf -X POST "https://api.github.com/repos/zapplyjobs/jobs-data-2026/actions/workflows/publish-metrics-to-supabase.yml/dispatches" \
             -H "Authorization: Bearer ${GH_PAT}" \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \

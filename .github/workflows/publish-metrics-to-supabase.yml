@@ -1,0 +1,48 @@
+name: publish-metrics-to-supabase
+
+# Publishes pipeline metric blobs to the Supabase pipeline_metrics table (which the
+# dashboard reads). Moved from job-board-processing (private, billing blocked) to
+# jobs-data-2026 (public, free Actions) — INF-LEVELDATA-1 / billing fix 2026-07-16.
+#
+# The publish script lives in the job-board-processing submodule (checked out at
+# .github/scripts/processing/). R2 secrets are already set on this repo.
+# REQUIRED SECRET: PUBLISH_SECRET (same value as on job-board-processing).
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'   # every 10 min
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout jobs-data-2026 with submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.GH_PAT }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install processing submodule dependencies
+        run: cd .github/scripts/processing && npm ci
+
+      - name: Fetch metric blobs from R2
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: node .github/scripts/processing/scripts/r2-fetch-metrics.js .github/data
+
+      - name: POST metric blobs to the Supabase Edge Function
+        run: node .github/scripts/processing/lib/publish-metrics-to-edge.js --data-dir .github/data
+        env:
+          EDGE_FUNCTION_URL: https://xxmhgagpbxjflajoaahy.supabase.co/functions/v1/publish-metrics-function
+          PUBLISH_SECRET: ${{ secrets.PUBLISH_SECRET }}
