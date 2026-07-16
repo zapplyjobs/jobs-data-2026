@@ -67,6 +67,14 @@ jobs:
               const res = await client.send(new GetObjectCommand({ Bucket: process.env.R2_BUCKET_NAME, Key: `data/${name}` }));
               await streamToFile(res.Body, path.join('.github/data', name));
             }
+            // Optional: download previous snapshot for tag_history accumulation (INF-LEVELDATA-1)
+            try {
+              const snapRes = await client.send(new GetObjectCommand({ Bucket: process.env.R2_BUCKET_NAME, Key: 'data/zjp-public-snapshot.json' }));
+              await streamToFile(snapRes.Body, path.join('.github/data', 'zjp-public-snapshot.json'));
+              console.log('SEEDED_R2:zjp-public-snapshot (for tag_history accumulation)');
+            } catch (e) {
+              console.log('SKIP: no previous zjp-public-snapshot.json (first run or missing)');
+            }
             console.log('SEEDED_R2:all_jobs+jobs-metadata+enrichment-stats');
           }
           main().catch(err => { console.error(err.message); process.exit(1); });
