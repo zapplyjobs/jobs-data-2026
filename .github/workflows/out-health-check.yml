@@ -119,6 +119,7 @@ jobs:
                 homepage = info.get("homepage", "")
                 topics = len(info.get("topics", []))
                 pushed_at = info.get("pushed_at", "")
+                default_branch = info.get("default_branch", "main")
                 if disc is not True:
                     r["issues"].append(f"discussions={disc} (should be true)")
                 if wiki is True:
@@ -133,7 +134,7 @@ jobs:
             # Secrets scan
             try:
                 req = urllib.request.Request(
-                    f"https://raw.githubusercontent.com/zapplyjobs/{repo}/main/README.md",
+                    f"https://raw.githubusercontent.com/zapplyjobs/{repo}/{default_branch}/README.md",
                     headers={"User-Agent": "out-health-check/1.0"}
                 )
                 with urllib.request.urlopen(req, timeout=10) as resp:
