@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-16T08:13:23.206Z",
+  "generated_at": "2026-07-16T08:19:04.892Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -59,14 +59,12 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-16T08:13:20.543Z",
+    "checked_at": "2026-07-16T08:19:02.486Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [
-      "Runtime trending up: 7.2 min (warning at 7, alert at 10)"
-    ],
-    "warning_count": 1,
+    "warnings": [],
+    "warning_count": 0,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -78,21 +76,26 @@
   "rows": [
     {
       "source": "workday",
-      "pool_rows": 33858,
-      "us_rows": 18198,
-      "tech_us_rows": 5512,
-      "raw_sidecar_rows": 13320,
-      "sidecar_active_rows": 3162,
+      "pool_rows": 33440,
+      "us_rows": 18423,
+      "tech_us_rows": 5780,
+      "raw_sidecar_rows": 16250,
+      "sidecar_active_rows": 2982,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 3160,
-      "published_pct": 57.3,
-      "enriched_rows": 3174,
-      "enriched_pct": 57.6,
-      "enriched_with_skills": 3043,
-      "skills_pct": 95.9,
+      "published_rows": 2886,
+      "published_pct": 49.9,
+      "enriched_rows": 2902,
+      "enriched_pct": 50.2,
+      "enriched_with_skills": 2779,
+      "skills_pct": 95.8,
       "examples": [
+        {
+          "id": "workday-barclays-JR-0000096087",
+          "company": "Barclays",
+          "title": "Construction and Commercial/Technology Lawyer AVP"
+        },
         {
           "id": "workday-rocket-companies-R-083730",
           "company": "Rocket Companies",
@@ -104,34 +107,29 @@
           "title": "Specialist Software Engineering"
         },
         {
-          "id": "workday-magna-R00252207",
-          "company": "Magna",
-          "title": "Paint Process Engineering Group Leader"
+          "id": "workday-parsons-R179060",
+          "company": "Parsons",
+          "title": "Mechanical Engineer"
         },
         {
-          "id": "workday-magna-R00251617",
-          "company": "Magna",
-          "title": "Environmental Coordinator"
+          "id": "workday-parsons-R176120",
+          "company": "Parsons",
+          "title": "Nuclear Engineer"
         },
         {
-          "id": "workday-snap-R0046172",
-          "company": "Snap",
-          "title": "Security Engineer, Level 5"
+          "id": "workday-parsons-R175437",
+          "company": "Parsons",
+          "title": "Principal Enterprise Architect (Remote)"
         },
         {
-          "id": "workday-snap-R0045965",
-          "company": "Snap",
-          "title": "Data Scientist, Level 4"
+          "id": "workday-parsons-R179416",
+          "company": "Parsons",
+          "title": "Red Team Operator"
         },
         {
-          "id": "workday-snap-R0043448",
-          "company": "Snap",
-          "title": "AR Engineer, Level 4"
-        },
-        {
-          "id": "workday-penn-state-university-REQ_0000080138",
-          "company": "Penn State University",
-          "title": "AR/VR/XR Visualization Research and Development Engineer"
+          "id": "workday-parsons-R180544",
+          "company": "Parsons",
+          "title": "Red Team Software Developer"
         }
       ],
       "severity": "high",
@@ -214,8 +212,8 @@
       "pool_rows": 1914,
       "us_rows": 1913,
       "tech_us_rows": 337,
-      "raw_sidecar_rows": 1455,
-      "sidecar_active_rows": 337,
+      "raw_sidecar_rows": 1392,
+      "sidecar_active_rows": 273,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
@@ -226,8 +224,10 @@
       "enriched_with_skills": 332,
       "skills_pct": 98.5,
       "examples": [],
-      "severity": "ok",
-      "flags": []
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
     },
     {
       "source": "icims",
@@ -254,7 +254,7 @@
       "pool_rows": 515,
       "us_rows": 318,
       "tech_us_rows": 178,
-      "raw_sidecar_rows": 515,
+      "raw_sidecar_rows": 517,
       "sidecar_active_rows": 178,
       "supplemental_rows": 543,
       "supplemental_with_desc": 23,
