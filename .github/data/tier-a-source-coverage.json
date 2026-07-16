@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-16T21:15:03.809Z",
+  "generated_at": "2026-07-16T21:19:50.303Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -59,12 +59,14 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-16T21:15:01.430Z",
+    "checked_at": "2026-07-16T21:19:47.746Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [],
-    "warning_count": 0,
+    "warnings": [
+      "Runtime trending up: 7.0 min (warning at 7, alert at 10)"
+    ],
+    "warning_count": 1,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -76,21 +78,26 @@
   "rows": [
     {
       "source": "workday",
-      "pool_rows": 33746,
-      "us_rows": 18665,
-      "tech_us_rows": 5664,
-      "raw_sidecar_rows": 11900,
-      "sidecar_active_rows": 2894,
+      "pool_rows": 32899,
+      "us_rows": 18702,
+      "tech_us_rows": 6129,
+      "raw_sidecar_rows": 12589,
+      "sidecar_active_rows": 2638,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 2873,
-      "published_pct": 50.7,
-      "enriched_rows": 2904,
-      "enriched_pct": 51.3,
-      "enriched_with_skills": 2776,
-      "skills_pct": 95.6,
+      "published_rows": 2978,
+      "published_pct": 48.6,
+      "enriched_rows": 3015,
+      "enriched_pct": 49.2,
+      "enriched_with_skills": 2888,
+      "skills_pct": 95.8,
       "examples": [
+        {
+          "id": "workday-hntb-R-30788",
+          "company": "HNTB",
+          "title": "Senior Graphic Designer"
+        },
         {
           "id": "workday-workday-inc-JR-0102669",
           "company": "Workday Inc",
@@ -112,24 +119,19 @@
           "title": "Principal AI Engineer"
         },
         {
-          "id": "workday-warner-bros.-discovery-R000103806",
-          "company": "Warner Bros. Discovery",
-          "title": "Cloud Security Architect"
+          "id": "workday-wells-fargo-R-559960",
+          "company": "Wells Fargo",
+          "title": "Lead Infrastructure Engineer - Solace"
         },
         {
-          "id": "workday-cox-R202679495",
-          "company": "Cox",
-          "title": "Manager, Brand & Lifecycle Marketing"
+          "id": "workday-wells-fargo-R-560175",
+          "company": "Wells Fargo",
+          "title": "Global Servicing Solution Java/React - Senior Software Engineer"
         },
         {
-          "id": "workday-cox-R202679494",
-          "company": "Cox",
-          "title": "Senior Manager, Brand & Lifecycle Marketing"
-        },
-        {
-          "id": "workday-cox-R202679488",
-          "company": "Cox",
-          "title": "Director, Marketing Strategy"
+          "id": "workday-wells-fargo-R-543052",
+          "company": "Wells Fargo",
+          "title": "Lead DevOps Engineer"
         }
       ],
       "severity": "high",
@@ -208,12 +210,50 @@
       ]
     },
     {
+      "source": "smartrecruiters",
+      "pool_rows": 1931,
+      "us_rows": 1929,
+      "tech_us_rows": 355,
+      "raw_sidecar_rows": 1852,
+      "sidecar_active_rows": 293,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 352,
+      "published_pct": 99.2,
+      "enriched_rows": 355,
+      "enriched_pct": 100,
+      "enriched_with_skills": 350,
+      "skills_pct": 98.6,
+      "examples": [
+        {
+          "id": "sr-NBCUniversal3-744000138174149",
+          "company": "NBCUniversal",
+          "title": "Architect, Builder Enablement"
+        },
+        {
+          "id": "sr-Experian-744000138173245",
+          "company": "Experian",
+          "title": "Cyber Defense Senior Analyst (Remote)"
+        },
+        {
+          "id": "sr-WesternDigital-744000137986149",
+          "company": "Western Digital",
+          "title": "Technician 5, Engineering"
+        }
+      ],
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
+    },
+    {
       "source": "microsoft",
       "pool_rows": 511,
       "us_rows": 330,
       "tech_us_rows": 192,
-      "raw_sidecar_rows": 484,
-      "sidecar_active_rows": 177,
+      "raw_sidecar_rows": 515,
+      "sidecar_active_rows": 192,
       "supplemental_rows": 542,
       "supplemental_with_desc": 51,
       "supplemental_meta": {
@@ -273,42 +313,6 @@
       "flags": []
     },
     {
-      "source": "smartrecruiters",
-      "pool_rows": 1929,
-      "us_rows": 1927,
-      "tech_us_rows": 355,
-      "raw_sidecar_rows": 1419,
-      "sidecar_active_rows": 355,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 352,
-      "published_pct": 99.2,
-      "enriched_rows": 355,
-      "enriched_pct": 100,
-      "enriched_with_skills": 350,
-      "skills_pct": 98.6,
-      "examples": [
-        {
-          "id": "sr-NBCUniversal3-744000138174149",
-          "company": "NBCUniversal",
-          "title": "Architect, Builder Enablement"
-        },
-        {
-          "id": "sr-Experian-744000138173245",
-          "company": "Experian",
-          "title": "Cyber Defense Senior Analyst (Remote)"
-        },
-        {
-          "id": "sr-WesternDigital-744000137986149",
-          "company": "Western Digital",
-          "title": "Technician 5, Engineering"
-        }
-      ],
-      "severity": "ok",
-      "flags": []
-    },
-    {
       "source": "icims",
       "pool_rows": 0,
       "us_rows": 0,
@@ -350,10 +354,10 @@
     },
     {
       "source": "apple",
-      "pool_rows": 426,
+      "pool_rows": 425,
       "us_rows": 352,
       "tech_us_rows": 236,
-      "raw_sidecar_rows": 842,
+      "raw_sidecar_rows": 845,
       "sidecar_active_rows": 236,
       "supplemental_rows": 876,
       "supplemental_with_desc": 876,
