@@ -141,8 +141,8 @@ jobs:
                 hits = sorted(set(secret_re.findall(readme)))
                 if hits:
                     r["issues"].append(f"EXPOSED SECRETS: {hits}")
-            except Exception:
-                pass  # README fetch failure is not critical
+            except Exception as e:
+                r["issues"].append(f"README fetch failed (secrets scan skipped): {e}")
 
             # README freshness — flag pipeline repos with stale pushes (>6h)
             pipeline_repos = repo in ("New-Grad-Jobs-2027", "Internships-2027",
@@ -272,7 +272,8 @@ jobs:
                 ContentType='application/json')
             print("Results uploaded to R2: data/out-health-check.json")
         except Exception as e:
-            print(f"R2 upload skipped: {e}")
+            issues.append(f"R2 upload failed: {e}")
+            print(f"R2 upload failed: {e}")
 
         if issues:
             sys.exit(1)

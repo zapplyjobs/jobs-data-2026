@@ -163,7 +163,8 @@ jobs:
                 ContentType='application/json')
             print("Results uploaded to R2: data/dead-links.json")
         except Exception as e:
-            print(f"R2 upload skipped: {e}")
+            print(f"R2 upload failed: {e}")
+            sys.exit(1)
 
         # Exit 1 if dead links found (triggers tracking issue)
         if dead_links:
