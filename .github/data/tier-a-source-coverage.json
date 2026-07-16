@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-16T14:10:30.287Z",
+  "generated_at": "2026-07-16T14:13:35.829Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -59,12 +59,14 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-16T14:10:27.703Z",
+    "checked_at": "2026-07-16T14:13:33.380Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [],
-    "warning_count": 0,
+    "warnings": [
+      "Runtime trending up: 7.7 min (warning at 7, alert at 10)"
+    ],
+    "warning_count": 1,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -76,60 +78,60 @@
   "rows": [
     {
       "source": "workday",
-      "pool_rows": 31994,
-      "us_rows": 17240,
-      "tech_us_rows": 6261,
-      "raw_sidecar_rows": 12482,
-      "sidecar_active_rows": 3018,
+      "pool_rows": 34297,
+      "us_rows": 18093,
+      "tech_us_rows": 5607,
+      "raw_sidecar_rows": 14193,
+      "sidecar_active_rows": 2793,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 3016,
-      "published_pct": 48.2,
-      "enriched_rows": 3028,
-      "enriched_pct": 48.4,
-      "enriched_with_skills": 2905,
+      "published_rows": 2794,
+      "published_pct": 49.8,
+      "enriched_rows": 2820,
+      "enriched_pct": 50.3,
+      "enriched_with_skills": 2704,
       "skills_pct": 95.9,
       "examples": [
         {
-          "id": "workday-parsons-R177771",
-          "company": "Parsons",
-          "title": "Senior Bridge Engineer"
+          "id": "workday-pnc-financial-services-R229603",
+          "company": "PNC Financial Services",
+          "title": "Software Engineering Manager, Senior"
         },
         {
-          "id": "workday-parsons-R177766",
-          "company": "Parsons",
-          "title": "Roadway Engineer II"
+          "id": "workday-citi-26978781",
+          "company": "Citi",
+          "title": "Lead Applications Development Analyst - Vice President"
         },
         {
-          "id": "workday-parsons-R174819",
-          "company": "Parsons",
-          "title": "Senior Civil Design Engineer"
+          "id": "workday-citi-26979717",
+          "company": "Citi",
+          "title": "Solutions Architect-Vice President"
         },
         {
-          "id": "workday-rocket-companies-R-083730",
-          "company": "Rocket Companies",
-          "title": "Data Analyst II - Marketing Analytics"
+          "id": "workday-wells-fargo-R-548725",
+          "company": "Wells Fargo",
+          "title": "Senior Lead AI Research Scientist – Foundation Models & Agentic AI"
         },
         {
-          "id": "workday-magna-R00252207",
-          "company": "Magna",
-          "title": "Paint Process Engineering Group Leader"
+          "id": "workday-wells-fargo-R-561384",
+          "company": "Wells Fargo",
+          "title": "Senior Lead Analytics Consultant (002069)"
         },
         {
-          "id": "workday-magna-R00251617",
-          "company": "Magna",
-          "title": "Environmental Coordinator"
+          "id": "workday-wells-fargo-R-561376",
+          "company": "Wells Fargo",
+          "title": "Senior Software Engineer (002221)"
         },
         {
-          "id": "workday-kbr-R2126678",
-          "company": "KBR",
-          "title": "Release Train Engineer (RTE) - Agile Program Integration"
+          "id": "workday-wells-fargo-R-561196",
+          "company": "Wells Fargo",
+          "title": "Lead Applied AI Engineer"
         },
         {
-          "id": "workday-kbr-R2126675",
-          "company": "KBR",
-          "title": "SME, Acquisition and Engineering"
+          "id": "workday-wells-fargo-R-561199",
+          "company": "Wells Fargo",
+          "title": "Principal ML Engineer"
         }
       ],
       "severity": "high",
@@ -209,23 +211,31 @@
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 1911,
-      "us_rows": 1910,
-      "tech_us_rows": 337,
-      "raw_sidecar_rows": 1451,
-      "sidecar_active_rows": 337,
+      "pool_rows": 1908,
+      "us_rows": 1907,
+      "tech_us_rows": 338,
+      "raw_sidecar_rows": 1388,
+      "sidecar_active_rows": 273,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
       "published_rows": 337,
-      "published_pct": 100,
+      "published_pct": 99.7,
       "enriched_rows": 337,
-      "enriched_pct": 100,
+      "enriched_pct": 99.7,
       "enriched_with_skills": 331,
       "skills_pct": 98.2,
-      "examples": [],
-      "severity": "ok",
-      "flags": []
+      "examples": [
+        {
+          "id": "sr-BoschGroup-744000138127239",
+          "company": "Bosch Group",
+          "title": "Industrial Engineer"
+        }
+      ],
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
     },
     {
       "source": "icims",
@@ -252,7 +262,7 @@
       "pool_rows": 517,
       "us_rows": 309,
       "tech_us_rows": 174,
-      "raw_sidecar_rows": 517,
+      "raw_sidecar_rows": 521,
       "sidecar_active_rows": 174,
       "supplemental_rows": 543,
       "supplemental_with_desc": 45,
