@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-16T14:31:03.119Z",
+  "generated_at": "2026-07-16T14:36:57.602Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -59,12 +59,14 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-16T14:31:01.069Z",
+    "checked_at": "2026-07-16T14:36:55.020Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [],
-    "warning_count": 0,
+    "warnings": [
+      "Runtime trending up: 7.4 min (warning at 7, alert at 10)"
+    ],
+    "warning_count": 1,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -76,60 +78,60 @@
   "rows": [
     {
       "source": "workday",
-      "pool_rows": 32399,
-      "us_rows": 17562,
-      "tech_us_rows": 5611,
-      "raw_sidecar_rows": 12919,
-      "sidecar_active_rows": 3039,
+      "pool_rows": 28291,
+      "us_rows": 15560,
+      "tech_us_rows": 5036,
+      "raw_sidecar_rows": 16111,
+      "sidecar_active_rows": 2815,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 3039,
-      "published_pct": 54.2,
-      "enriched_rows": 3051,
-      "enriched_pct": 54.4,
-      "enriched_with_skills": 2925,
+      "published_rows": 2808,
+      "published_pct": 55.8,
+      "enriched_rows": 2827,
+      "enriched_pct": 56.1,
+      "enriched_with_skills": 2712,
       "skills_pct": 95.9,
       "examples": [
         {
-          "id": "workday-parsons-R182228",
-          "company": "Parsons",
-          "title": "Systems Engineer - Senior"
+          "id": "workday-target-R0000436289",
+          "company": "Target",
+          "title": "Lead Engineer - Incident Response Engineering"
         },
         {
-          "id": "workday-parsons-R182206",
-          "company": "Parsons",
-          "title": "ICS-SCADA Cyber Threat Analyst - TS/SCI w/ Poly Required"
+          "id": "workday-t.-rowe-price-82617",
+          "company": "T. Rowe Price",
+          "title": "Senior ETF Analyst – ETF Trading Solution"
         },
         {
-          "id": "workday-parsons-R182201",
-          "company": "Parsons",
-          "title": "Design Quality Control Engineer"
+          "id": "workday-rtx-01859317",
+          "company": "RTX",
+          "title": "Senior RF Mechanical Engineer"
         },
         {
-          "id": "workday-parsons-R180026",
-          "company": "Parsons",
-          "title": "Cyber Threat Analyst"
+          "id": "workday-moog-R-26-17145",
+          "company": "Moog",
+          "title": "Intern, IT Computer Science - Data Analytics"
         },
         {
-          "id": "workday-parsons-R182211",
-          "company": "Parsons",
-          "title": "Full Stack Software Engineer - TS/SCI w/ Poly Required"
+          "id": "workday-medtronic-R70436",
+          "company": "Medtronic",
+          "title": "Principal Signal Processing Engineer - Cardiac Ablation Solutions"
         },
         {
-          "id": "workday-parsons-R182207",
-          "company": "Parsons",
-          "title": "Cyber Vulnerability Analyst - Penetration Tester - TS/SCI w/ Poly Required"
+          "id": "workday-johnson-controls-WD30274441",
+          "company": "Johnson Controls",
+          "title": "Fire Installer"
         },
         {
-          "id": "workday-parsons-R180432",
-          "company": "Parsons",
-          "title": "Civil Drainage Engineer I"
+          "id": "workday-general-motors-JR-202612928",
+          "company": "General Motors",
+          "title": "Senior Hardware Engineer - ECU Safety Analysis"
         },
         {
-          "id": "workday-parsons-R180431",
-          "company": "Parsons",
-          "title": "Senior Civil Drainage Engineer"
+          "id": "workday-icf-R2602452",
+          "company": "ICF",
+          "title": "Senior Scrum Master"
         }
       ],
       "severity": "high",
@@ -209,11 +211,11 @@
     },
     {
       "source": "smartrecruiters",
-      "pool_rows": 1904,
-      "us_rows": 1903,
+      "pool_rows": 1905,
+      "us_rows": 1904,
       "tech_us_rows": 338,
-      "raw_sidecar_rows": 1450,
-      "sidecar_active_rows": 338,
+      "raw_sidecar_rows": 1382,
+      "sidecar_active_rows": 272,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
@@ -224,8 +226,10 @@
       "enriched_with_skills": 332,
       "skills_pct": 98.2,
       "examples": [],
-      "severity": "ok",
-      "flags": []
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
     },
     {
       "source": "icims",
@@ -252,7 +256,7 @@
       "pool_rows": 517,
       "us_rows": 309,
       "tech_us_rows": 174,
-      "raw_sidecar_rows": 517,
+      "raw_sidecar_rows": 521,
       "sidecar_active_rows": 174,
       "supplemental_rows": 543,
       "supplemental_with_desc": 45,
