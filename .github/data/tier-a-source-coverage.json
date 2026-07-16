@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-16T18:51:14.264Z",
+  "generated_at": "2026-07-16T18:54:47.616Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -59,12 +59,14 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-16T18:51:11.864Z",
+    "checked_at": "2026-07-16T18:54:45.146Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [],
-    "warning_count": 0,
+    "warnings": [
+      "Runtime trending up: 8.2 min (warning at 7, alert at 10)"
+    ],
+    "warning_count": 1,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -76,20 +78,20 @@
   "rows": [
     {
       "source": "workday",
-      "pool_rows": 34191,
-      "us_rows": 18549,
-      "tech_us_rows": 5702,
-      "raw_sidecar_rows": 12977,
-      "sidecar_active_rows": 3197,
+      "pool_rows": 29658,
+      "us_rows": 16209,
+      "tech_us_rows": 5049,
+      "raw_sidecar_rows": 13767,
+      "sidecar_active_rows": 2908,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 3197,
-      "published_pct": 56.1,
-      "enriched_rows": 3208,
-      "enriched_pct": 56.3,
-      "enriched_with_skills": 3076,
-      "skills_pct": 95.9,
+      "published_rows": 2979,
+      "published_pct": 59,
+      "enriched_rows": 3015,
+      "enriched_pct": 59.7,
+      "enriched_with_skills": 2885,
+      "skills_pct": 95.7,
       "examples": [
         {
           "id": "workday-tel-R26-01134",
@@ -97,39 +99,39 @@
           "title": "Business Intelligence Analyst II"
         },
         {
-          "id": "workday-snap-R0045799",
-          "company": "Snap",
-          "title": "Manager, Business Marketing (SMC)"
+          "id": "workday-wash-u-JR95850",
+          "company": "Wash U",
+          "title": "Senior Bioinformaticist - McDonnell Genome Institute"
         },
         {
-          "id": "workday-nvidia-JR2020052",
-          "company": "NVIDIA",
-          "title": "Senior IC Packaging Development Engineer"
+          "id": "workday-state-street-R-788826",
+          "company": "State Street",
+          "title": "Full Stack Solution Architect - VP, Hybrid"
         },
         {
-          "id": "workday-hpe-1205040",
-          "company": "HPE",
-          "title": "HPC AI Systems Administrator"
+          "id": "workday-state-street-R-788827",
+          "company": "State Street",
+          "title": "Full Stack Solution Architect - VP, Hybrid"
         },
         {
-          "id": "workday-general-motors-JR-202614126",
-          "company": "General Motors",
-          "title": "Launch Industrial Engineer"
+          "id": "workday-state-street-R-794391",
+          "company": "State Street",
+          "title": "Software Engineering & Development-Workstream Lead"
         },
         {
-          "id": "workday-fidelity-investments-2132414",
-          "company": "Fidelity Investments",
-          "title": "Principal Software Engineer/Developer"
+          "id": "workday-state-street-R-794351",
+          "company": "State Street",
+          "title": "Data Analytics"
         },
         {
-          "id": "workday-fidelity-investments-2132418",
-          "company": "Fidelity Investments",
-          "title": "Principal Software Engineer/Developer"
+          "id": "workday-state-street-R-794323",
+          "company": "State Street",
+          "title": "Client Support, Officer - State Street Investment Management"
         },
         {
-          "id": "workday-fidelity-investments-2132426",
-          "company": "Fidelity Investments",
-          "title": "Principal Software Engineer/Developer"
+          "id": "workday-oshkosh-corporation-R47061",
+          "company": "Oshkosh Corporation",
+          "title": "Associate Supplier Quality Engineer"
         }
       ],
       "severity": "high",
@@ -208,12 +210,45 @@
       ]
     },
     {
+      "source": "smartrecruiters",
+      "pool_rows": 1925,
+      "us_rows": 1924,
+      "tech_us_rows": 344,
+      "raw_sidecar_rows": 1361,
+      "sidecar_active_rows": 271,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 342,
+      "published_pct": 99.4,
+      "enriched_rows": 342,
+      "enriched_pct": 99.4,
+      "enriched_with_skills": 338,
+      "skills_pct": 98.8,
+      "examples": [
+        {
+          "id": "sr-VeoliaEnvironnementSA-744000138180129",
+          "company": "Veolia Environnement SA",
+          "title": "Senior Project Engineer"
+        },
+        {
+          "id": "sr-ServiceNow-744000138179499",
+          "company": "ServiceNow",
+          "title": "Machine Learning Engineering Manager, GAI Search Relevance - Moveworks"
+        }
+      ],
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
+    },
+    {
       "source": "microsoft",
-      "pool_rows": 507,
-      "us_rows": 310,
-      "tech_us_rows": 175,
-      "raw_sidecar_rows": 502,
-      "sidecar_active_rows": 172,
+      "pool_rows": 500,
+      "us_rows": 313,
+      "tech_us_rows": 178,
+      "raw_sidecar_rows": 500,
+      "sidecar_active_rows": 178,
       "supplemental_rows": 544,
       "supplemental_with_desc": 49,
       "supplemental_meta": {
@@ -221,49 +256,99 @@
         "lane_name": "custom",
         "jobs_fetched": 5072
       },
-      "published_rows": 172,
-      "published_pct": 98.3,
-      "enriched_rows": 175,
-      "enriched_pct": 100,
-      "enriched_with_skills": 175,
+      "published_rows": 163,
+      "published_pct": 91.6,
+      "enriched_rows": 166,
+      "enriched_pct": 93.3,
+      "enriched_with_skills": 166,
       "skills_pct": 100,
       "examples": [
         {
-          "id": "microsoft-200036442",
+          "id": "microsoft-200043336",
           "company": "Microsoft",
-          "title": "Member of Technical Staff, Engineering Manager - Copilot Applications"
+          "title": "Data Center Technician"
         },
         {
-          "id": "microsoft-200043114",
+          "id": "microsoft-200040793",
           "company": "Microsoft",
-          "title": "Senior Software Engineer"
+          "title": "Security Cloud Solution Architect- CTJ - Poly"
         },
         {
-          "id": "microsoft-200043023",
+          "id": "microsoft-200043759",
           "company": "Microsoft",
-          "title": "Technical Program Manager - Market Analytics, Datacenter"
+          "title": "Principal AI Accelerator Tools Development Engineer"
+        },
+        {
+          "id": "microsoft-200043542",
+          "company": "Microsoft",
+          "title": "Technical Program Manager II - Finance Data & Experiences"
+        },
+        {
+          "id": "microsoft-200043779",
+          "company": "Microsoft",
+          "title": "Principal Hardware Technical Program Manager"
+        },
+        {
+          "id": "microsoft-200043750",
+          "company": "Microsoft",
+          "title": "Sr. Hardware Engineer TPM"
+        },
+        {
+          "id": "microsoft-200043520",
+          "company": "Microsoft",
+          "title": "Technical Program Manager II - Finance Data & Experiences"
+        },
+        {
+          "id": "microsoft-200043580",
+          "company": "Microsoft",
+          "title": "Senior Service Engineer - DNS Subject Matter Expert"
         }
       ],
       "severity": "ok",
       "flags": []
     },
     {
-      "source": "smartrecruiters",
-      "pool_rows": 1927,
-      "us_rows": 1926,
-      "tech_us_rows": 342,
-      "raw_sidecar_rows": 1434,
-      "sidecar_active_rows": 342,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 342,
-      "published_pct": 100,
-      "enriched_rows": 342,
-      "enriched_pct": 100,
-      "enriched_with_skills": 338,
-      "skills_pct": 98.8,
-      "examples": [],
+      "source": "apple",
+      "pool_rows": 429,
+      "us_rows": 356,
+      "tech_us_rows": 236,
+      "raw_sidecar_rows": 846,
+      "sidecar_active_rows": 236,
+      "supplemental_rows": 876,
+      "supplemental_with_desc": 876,
+      "supplemental_meta": {
+        "generated_at": "2026-07-16T18:35:15.518Z",
+        "lane_name": "custom",
+        "jobs_fetched": 5072
+      },
+      "published_rows": 232,
+      "published_pct": 98.3,
+      "enriched_rows": 232,
+      "enriched_pct": 98.3,
+      "enriched_with_skills": 192,
+      "skills_pct": 82.8,
+      "examples": [
+        {
+          "id": "apple-200672699",
+          "company": "Apple",
+          "title": "Health Sensing Hardware - Electrical Engineer"
+        },
+        {
+          "id": "apple-200672753",
+          "company": "Apple",
+          "title": "Software Engineer - Journal Team"
+        },
+        {
+          "id": "apple-200672633",
+          "company": "Apple",
+          "title": "Analog Mixed-Signal Modeling Software Engineer"
+        },
+        {
+          "id": "apple-200672497",
+          "company": "Apple",
+          "title": "Senior Engineering Program Manager, Retail Technology"
+        }
+      ],
       "severity": "ok",
       "flags": []
     },
@@ -303,30 +388,6 @@
       "enriched_pct": 100,
       "enriched_with_skills": 599,
       "skills_pct": 100,
-      "examples": [],
-      "severity": "ok",
-      "flags": []
-    },
-    {
-      "source": "apple",
-      "pool_rows": 427,
-      "us_rows": 352,
-      "tech_us_rows": 233,
-      "raw_sidecar_rows": 847,
-      "sidecar_active_rows": 233,
-      "supplemental_rows": 876,
-      "supplemental_with_desc": 876,
-      "supplemental_meta": {
-        "generated_at": "2026-07-16T18:35:15.518Z",
-        "lane_name": "custom",
-        "jobs_fetched": 5072
-      },
-      "published_rows": 233,
-      "published_pct": 100,
-      "enriched_rows": 233,
-      "enriched_pct": 100,
-      "enriched_with_skills": 193,
-      "skills_pct": 82.8,
       "examples": [],
       "severity": "ok",
       "flags": []
