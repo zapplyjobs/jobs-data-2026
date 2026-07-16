@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-16T11:03:17.117Z",
+  "generated_at": "2026-07-16T11:05:17.010Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -59,7 +59,7 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-16T11:03:14.697Z",
+    "checked_at": "2026-07-16T11:05:14.230Z",
     "active": false,
     "message": null,
     "failures": [],
@@ -78,21 +78,26 @@
   "rows": [
     {
       "source": "workday",
-      "pool_rows": 32823,
-      "us_rows": 17195,
-      "tech_us_rows": 5258,
-      "raw_sidecar_rows": 13035,
-      "sidecar_active_rows": 3011,
+      "pool_rows": 33260,
+      "us_rows": 17987,
+      "tech_us_rows": 5316,
+      "raw_sidecar_rows": 17322,
+      "sidecar_active_rows": 2938,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 3009,
-      "published_pct": 57.2,
-      "enriched_rows": 3024,
-      "enriched_pct": 57.5,
-      "enriched_with_skills": 2898,
-      "skills_pct": 95.8,
+      "published_rows": 2839,
+      "published_pct": 53.4,
+      "enriched_rows": 2857,
+      "enriched_pct": 53.7,
+      "enriched_with_skills": 2735,
+      "skills_pct": 95.7,
       "examples": [
+        {
+          "id": "workday-state-street-R-794323",
+          "company": "State Street",
+          "title": "Client Support, Officer - State Street Investment Management"
+        },
         {
           "id": "workday-wells-fargo-R-561196",
           "company": "Wells Fargo",
@@ -114,24 +119,19 @@
           "title": "Specialist Software Engineering"
         },
         {
-          "id": "workday-parsons-R180544",
+          "id": "workday-parsons-R180173",
           "company": "Parsons",
-          "title": "Red Team Software Developer"
+          "title": "Senior Program Director - Rail & Transit Operations Planning"
         },
         {
-          "id": "workday-parsons-R181387",
+          "id": "workday-parsons-R177822",
           "company": "Parsons",
-          "title": "Senior Drainage Engineer"
+          "title": "Firmware-Savvy CNO Developer (TS/SCI w/Poly)"
         },
         {
-          "id": "workday-parsons-R181348",
+          "id": "workday-parsons-R180095",
           "company": "Parsons",
-          "title": "Software Engineering Manager"
-        },
-        {
-          "id": "workday-parsons-R181344",
-          "company": "Parsons",
-          "title": "Systems Engineer (Multiple Levels)"
+          "title": "Roadway Engineer II"
         }
       ],
       "severity": "high",
@@ -210,12 +210,34 @@
       ]
     },
     {
+      "source": "smartrecruiters",
+      "pool_rows": 1913,
+      "us_rows": 1912,
+      "tech_us_rows": 337,
+      "raw_sidecar_rows": 1392,
+      "sidecar_active_rows": 273,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 337,
+      "published_pct": 100,
+      "enriched_rows": 337,
+      "enriched_pct": 100,
+      "enriched_with_skills": 332,
+      "skills_pct": 98.5,
+      "examples": [],
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
+    },
+    {
       "source": "microsoft",
-      "pool_rows": 512,
-      "us_rows": 307,
+      "pool_rows": 517,
+      "us_rows": 306,
       "tech_us_rows": 172,
-      "raw_sidecar_rows": 501,
-      "sidecar_active_rows": 169,
+      "raw_sidecar_rows": 514,
+      "sidecar_active_rows": 170,
       "supplemental_rows": 543,
       "supplemental_with_desc": 40,
       "supplemental_meta": {
@@ -223,13 +245,18 @@
         "lane_name": "custom",
         "jobs_fetched": 4251
       },
-      "published_rows": 169,
-      "published_pct": 98.3,
-      "enriched_rows": 172,
-      "enriched_pct": 100,
-      "enriched_with_skills": 172,
+      "published_rows": 166,
+      "published_pct": 96.5,
+      "enriched_rows": 169,
+      "enriched_pct": 98.3,
+      "enriched_with_skills": 169,
       "skills_pct": 100,
       "examples": [
+        {
+          "id": "microsoft-200043573",
+          "company": "Microsoft",
+          "title": "Cloud Solution Architect (Field CTO, Digital Natives)"
+        },
         {
           "id": "microsoft-200042698",
           "company": "Microsoft",
@@ -244,28 +271,18 @@
           "id": "microsoft-200043554",
           "company": "Microsoft",
           "title": "Principal Firmware Engineer"
+        },
+        {
+          "id": "microsoft-200043303",
+          "company": "Microsoft",
+          "title": "Principal Software Engineer"
+        },
+        {
+          "id": "microsoft-200043013",
+          "company": "Microsoft",
+          "title": "Technical Support Engineering"
         }
       ],
-      "severity": "ok",
-      "flags": []
-    },
-    {
-      "source": "smartrecruiters",
-      "pool_rows": 1914,
-      "us_rows": 1913,
-      "tech_us_rows": 337,
-      "raw_sidecar_rows": 1455,
-      "sidecar_active_rows": 337,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 337,
-      "published_pct": 100,
-      "enriched_rows": 337,
-      "enriched_pct": 100,
-      "enriched_with_skills": 332,
-      "skills_pct": 98.5,
-      "examples": [],
       "severity": "ok",
       "flags": []
     },
@@ -311,11 +328,11 @@
     },
     {
       "source": "apple",
-      "pool_rows": 430,
-      "us_rows": 354,
-      "tech_us_rows": 235,
-      "raw_sidecar_rows": 749,
-      "sidecar_active_rows": 235,
+      "pool_rows": 41,
+      "us_rows": 33,
+      "tech_us_rows": 18,
+      "raw_sidecar_rows": 81,
+      "sidecar_active_rows": 18,
       "supplemental_rows": 60,
       "supplemental_with_desc": 60,
       "supplemental_meta": {
@@ -323,12 +340,12 @@
         "lane_name": "custom",
         "jobs_fetched": 4251
       },
-      "published_rows": 235,
+      "published_rows": 18,
       "published_pct": 100,
-      "enriched_rows": 235,
+      "enriched_rows": 18,
       "enriched_pct": 100,
-      "enriched_with_skills": 192,
-      "skills_pct": 81.7,
+      "enriched_with_skills": 18,
+      "skills_pct": 100,
       "examples": [],
       "severity": "ok",
       "flags": []
