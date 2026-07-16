@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-16T08:56:44.320Z",
+  "generated_at": "2026-07-16T09:03:22.348Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -59,12 +59,14 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-16T08:56:41.474Z",
+    "checked_at": "2026-07-16T09:03:19.803Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [],
-    "warning_count": 0,
+    "warnings": [
+      "Runtime trending up: 7.1 min (warning at 7, alert at 10)"
+    ],
+    "warning_count": 1,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -76,60 +78,60 @@
   "rows": [
     {
       "source": "workday",
-      "pool_rows": 34800,
-      "us_rows": 18384,
-      "tech_us_rows": 5359,
-      "raw_sidecar_rows": 13566,
-      "sidecar_active_rows": 3179,
+      "pool_rows": 32404,
+      "us_rows": 17339,
+      "tech_us_rows": 5242,
+      "raw_sidecar_rows": 20143,
+      "sidecar_active_rows": 3061,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 3177,
-      "published_pct": 59.3,
-      "enriched_rows": 3190,
-      "enriched_pct": 59.5,
-      "enriched_with_skills": 3063,
-      "skills_pct": 96,
+      "published_rows": 2873,
+      "published_pct": 54.8,
+      "enriched_rows": 2889,
+      "enriched_pct": 55.1,
+      "enriched_with_skills": 2768,
+      "skills_pct": 95.8,
       "examples": [
         {
-          "id": "workday-rocket-companies-R-083730",
-          "company": "Rocket Companies",
-          "title": "Data Analyst II - Marketing Analytics"
+          "id": "workday-uline-R265629",
+          "company": "Uline",
+          "title": "Senior Configuration Management Engineer"
         },
         {
-          "id": "workday-transamerica-R20061254",
-          "company": "Transamerica",
-          "title": "Specialist Software Engineering"
+          "id": "workday-leidos-R-00187343",
+          "company": "Leidos",
+          "title": "​​Capacity and Availability Manager​"
         },
         {
-          "id": "workday-parsons-R182154",
-          "company": "Parsons",
-          "title": "Drainage Engineer I"
+          "id": "workday-blue-origin-R68661",
+          "company": "Blue Origin",
+          "title": "Sr. Navigation Engineer"
         },
         {
-          "id": "workday-parsons-R182153",
-          "company": "Parsons",
-          "title": "Senior Bridge Engineer"
+          "id": "workday-blue-origin-R67732",
+          "company": "Blue Origin",
+          "title": "Manufacturing Engineer II/III/Sr - Standards & Process"
         },
         {
-          "id": "workday-parsons-R182051",
-          "company": "Parsons",
-          "title": "Software Developer (TS/SCI w/Poly)"
+          "id": "workday-blue-origin-R64723",
+          "company": "Blue Origin",
+          "title": "Manufacturing Engineer II, III, Sr. (Multiple Shifts) - New Glenn"
         },
         {
-          "id": "workday-parsons-R182060",
-          "company": "Parsons",
-          "title": "Field Electrical Engineer"
+          "id": "workday-blue-origin-R67959",
+          "company": "Blue Origin",
+          "title": "Manufacturing Engineer II/III/Sr - Machined Parts"
         },
         {
-          "id": "workday-parsons-R181393",
-          "company": "Parsons",
-          "title": "Senior Geotechnical Engineer - Rail and Transit"
+          "id": "workday-blue-origin-R66049",
+          "company": "Blue Origin",
+          "title": "Manufacturing Engineer II, III, Sr. (Multiple Shifts) - Engines"
         },
         {
-          "id": "workday-parsons-R182045",
-          "company": "Parsons",
-          "title": "Traffic Engineering Manager"
+          "id": "workday-blue-origin-R67644",
+          "company": "Blue Origin",
+          "title": "Manufacturing Design Engineer II/III/Sr - Lunar"
         }
       ],
       "severity": "high",
@@ -212,8 +214,8 @@
       "pool_rows": 1914,
       "us_rows": 1913,
       "tech_us_rows": 337,
-      "raw_sidecar_rows": 1455,
-      "sidecar_active_rows": 337,
+      "raw_sidecar_rows": 1392,
+      "sidecar_active_rows": 273,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
@@ -224,8 +226,10 @@
       "enriched_with_skills": 332,
       "skills_pct": 98.5,
       "examples": [],
-      "severity": "ok",
-      "flags": []
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
     },
     {
       "source": "icims",
@@ -252,14 +256,14 @@
       "pool_rows": 515,
       "us_rows": 318,
       "tech_us_rows": 178,
-      "raw_sidecar_rows": 515,
+      "raw_sidecar_rows": 517,
       "sidecar_active_rows": 178,
       "supplemental_rows": 543,
-      "supplemental_with_desc": 23,
+      "supplemental_with_desc": 18,
       "supplemental_meta": {
-        "generated_at": "2026-07-16T07:00:50.414Z",
+        "generated_at": "2026-07-16T08:58:05.356Z",
         "lane_name": "custom",
-        "jobs_fetched": 4258
+        "jobs_fetched": 5074
       },
       "published_rows": 178,
       "published_pct": 100,
@@ -273,10 +277,10 @@
     },
     {
       "source": "tiktok",
-      "pool_rows": 1489,
+      "pool_rows": 1490,
       "us_rows": 1469,
       "tech_us_rows": 613,
-      "raw_sidecar_rows": 1489,
+      "raw_sidecar_rows": 1490,
       "sidecar_active_rows": 613,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
@@ -298,12 +302,12 @@
       "tech_us_rows": 19,
       "raw_sidecar_rows": 82,
       "sidecar_active_rows": 19,
-      "supplemental_rows": 60,
-      "supplemental_with_desc": 60,
+      "supplemental_rows": 876,
+      "supplemental_with_desc": 876,
       "supplemental_meta": {
-        "generated_at": "2026-07-16T07:00:50.414Z",
+        "generated_at": "2026-07-16T08:58:05.356Z",
         "lane_name": "custom",
-        "jobs_fetched": 4258
+        "jobs_fetched": 5074
       },
       "published_rows": 19,
       "published_pct": 100,
