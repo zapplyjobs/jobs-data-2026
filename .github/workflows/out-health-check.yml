@@ -12,6 +12,9 @@ on:
   schedule:
     - cron: '0 * * * *'  # Hourly
   workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/out-health-check.yml'
 
 permissions:
   contents: read
