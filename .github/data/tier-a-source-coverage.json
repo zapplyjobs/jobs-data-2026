@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-16T00:07:22.868Z",
+  "generated_at": "2026-07-16T00:10:53.665Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -59,12 +59,12 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-16T00:07:20.444Z",
+    "checked_at": "2026-07-16T00:10:51.235Z",
     "active": false,
     "message": null,
     "failures": [],
     "warnings": [
-      "Runtime trending up: 7.2 min (warning at 7, alert at 10)"
+      "Runtime trending up: 7.3 min (warning at 7, alert at 10)"
     ],
     "warning_count": 1,
     "secrets": [
@@ -78,25 +78,35 @@
   "rows": [
     {
       "source": "workday",
-      "pool_rows": 34719,
-      "us_rows": 19733,
-      "tech_us_rows": 6003,
-      "raw_sidecar_rows": 13972,
-      "sidecar_active_rows": 3265,
+      "pool_rows": 29839,
+      "us_rows": 16921,
+      "tech_us_rows": 5337,
+      "raw_sidecar_rows": 14694,
+      "sidecar_active_rows": 3057,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 3264,
-      "published_pct": 54.4,
-      "enriched_rows": 3280,
-      "enriched_pct": 54.6,
-      "enriched_with_skills": 3138,
-      "skills_pct": 95.7,
+      "published_rows": 3012,
+      "published_pct": 56.4,
+      "enriched_rows": 3035,
+      "enriched_pct": 56.9,
+      "enriched_with_skills": 2901,
+      "skills_pct": 95.6,
       "examples": [
+        {
+          "id": "workday-wolters-kluwer-R0056839",
+          "company": "Wolters Kluwer",
+          "title": "CX/UX Designer (Tax & Accounting) - Hybrid (TX/KS/NJ/FL/GA/NY/IL) R0056839"
+        },
         {
           "id": "workday-penn-state-university-REQ_0000080138",
           "company": "Penn State University",
           "title": "AR/VR/XR Visualization Research and Development Engineer"
+        },
+        {
+          "id": "workday-wash-u-JR95756",
+          "company": "Wash U",
+          "title": "Research Technician II - Ob/Gyn"
         },
         {
           "id": "workday-wells-fargo-R-557465",
@@ -109,29 +119,19 @@
           "title": "Field Service Engineer II (TEM) Iowa- REMOTE"
         },
         {
-          "id": "workday-snap-R0046172",
-          "company": "Snap",
-          "title": "Security Engineer, Level 5"
+          "id": "workday-state-street-R-794061",
+          "company": "State Street",
+          "title": "Software Engineering & Development"
         },
         {
-          "id": "workday-snap-R0045965",
-          "company": "Snap",
-          "title": "Data Scientist, Level 4"
+          "id": "workday-state-street-R-789467",
+          "company": "State Street",
+          "title": "Software Quality Assurance Engineer, AVP"
         },
         {
-          "id": "workday-snap-R0043448",
-          "company": "Snap",
-          "title": "AR Engineer, Level 4"
-        },
-        {
-          "id": "workday-pfizer-4960759",
-          "company": "Pfizer",
-          "title": "Head of AI & Agentic Platform Engineering"
-        },
-        {
-          "id": "workday-pfizer-4960760",
-          "company": "Pfizer",
-          "title": "Head of Data & BI Platform Engineering"
+          "id": "workday-state-street-R-793295",
+          "company": "State Street",
+          "title": "Senior Software Engineer – Backend Platforms, Vice President (Wealth Custody & Clearing)"
         }
       ],
       "severity": "high",
@@ -142,9 +142,9 @@
     },
     {
       "source": "oracle",
-      "pool_rows": 11101,
-      "us_rows": 6936,
-      "tech_us_rows": 1271,
+      "pool_rows": 11087,
+      "us_rows": 6926,
+      "tech_us_rows": 1270,
       "raw_sidecar_rows": 0,
       "sidecar_active_rows": 0,
       "supplemental_rows": 34980,
@@ -156,9 +156,9 @@
       },
       "published_rows": 0,
       "published_pct": 0,
-      "enriched_rows": 1271,
+      "enriched_rows": 1270,
       "enriched_pct": 100,
-      "enriched_with_skills": 1180,
+      "enriched_with_skills": 1179,
       "skills_pct": 92.8,
       "examples": [
         {
@@ -210,11 +210,33 @@
       ]
     },
     {
+      "source": "smartrecruiters",
+      "pool_rows": 1924,
+      "us_rows": 1923,
+      "tech_us_rows": 338,
+      "raw_sidecar_rows": 1402,
+      "sidecar_active_rows": 274,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 338,
+      "published_pct": 100,
+      "enriched_rows": 338,
+      "enriched_pct": 100,
+      "enriched_with_skills": 333,
+      "skills_pct": 98.5,
+      "examples": [],
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
+    },
+    {
       "source": "microsoft",
       "pool_rows": 508,
       "us_rows": 311,
       "tech_us_rows": 172,
-      "raw_sidecar_rows": 504,
+      "raw_sidecar_rows": 508,
       "sidecar_active_rows": 170,
       "supplemental_rows": 545,
       "supplemental_with_desc": 67,
@@ -245,26 +267,6 @@
       "flags": []
     },
     {
-      "source": "smartrecruiters",
-      "pool_rows": 1928,
-      "us_rows": 1927,
-      "tech_us_rows": 338,
-      "raw_sidecar_rows": 1463,
-      "sidecar_active_rows": 338,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 338,
-      "published_pct": 100,
-      "enriched_rows": 338,
-      "enriched_pct": 100,
-      "enriched_with_skills": 333,
-      "skills_pct": 98.5,
-      "examples": [],
-      "severity": "ok",
-      "flags": []
-    },
-    {
       "source": "icims",
       "pool_rows": 0,
       "us_rows": 0,
@@ -289,7 +291,7 @@
       "pool_rows": 1483,
       "us_rows": 1468,
       "tech_us_rows": 613,
-      "raw_sidecar_rows": 1482,
+      "raw_sidecar_rows": 1483,
       "sidecar_active_rows": 613,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
@@ -306,11 +308,11 @@
     },
     {
       "source": "apple",
-      "pool_rows": 428,
-      "us_rows": 353,
-      "tech_us_rows": 232,
-      "raw_sidecar_rows": 846,
-      "sidecar_active_rows": 232,
+      "pool_rows": 423,
+      "us_rows": 348,
+      "tech_us_rows": 228,
+      "raw_sidecar_rows": 836,
+      "sidecar_active_rows": 228,
       "supplemental_rows": 871,
       "supplemental_with_desc": 871,
       "supplemental_meta": {
@@ -318,12 +320,12 @@
         "lane_name": "custom",
         "jobs_fetched": 5071
       },
-      "published_rows": 232,
+      "published_rows": 228,
       "published_pct": 100,
-      "enriched_rows": 232,
+      "enriched_rows": 228,
       "enriched_pct": 100,
-      "enriched_with_skills": 223,
-      "skills_pct": 96.1,
+      "enriched_with_skills": 220,
+      "skills_pct": 96.5,
       "examples": [],
       "severity": "ok",
       "flags": []
