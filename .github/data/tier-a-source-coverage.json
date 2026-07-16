@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-16T10:49:46.985Z",
+  "generated_at": "2026-07-16T10:53:26.547Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -59,12 +59,12 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-16T10:49:44.352Z",
+    "checked_at": "2026-07-16T10:53:24.614Z",
     "active": false,
     "message": null,
     "failures": [],
     "warnings": [
-      "Runtime trending up: 7.5 min (warning at 7, alert at 10)"
+      "Runtime trending up: 7.4 min (warning at 7, alert at 10)"
     ],
     "warning_count": 1,
     "secrets": [
@@ -78,21 +78,26 @@
   "rows": [
     {
       "source": "workday",
-      "pool_rows": 34953,
-      "us_rows": 19002,
-      "tech_us_rows": 5306,
-      "raw_sidecar_rows": 12905,
-      "sidecar_active_rows": 3151,
+      "pool_rows": 32823,
+      "us_rows": 17195,
+      "tech_us_rows": 5258,
+      "raw_sidecar_rows": 16341,
+      "sidecar_active_rows": 2846,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 3149,
-      "published_pct": 59.3,
-      "enriched_rows": 3161,
-      "enriched_pct": 59.6,
-      "enriched_with_skills": 3039,
-      "skills_pct": 96.1,
+      "published_rows": 2828,
+      "published_pct": 53.8,
+      "enriched_rows": 2845,
+      "enriched_pct": 54.1,
+      "enriched_with_skills": 2726,
+      "skills_pct": 95.8,
       "examples": [
+        {
+          "id": "workday-parsons-R183274",
+          "company": "Parsons",
+          "title": "ABAD Cyber Security**This position is located in Ramstein AFB, Germany (International Assignment) **NO REMOTE WORK**"
+        },
         {
           "id": "workday-wells-fargo-R-561196",
           "company": "Wells Fargo",
@@ -104,34 +109,29 @@
           "title": "Principal ML Engineer"
         },
         {
-          "id": "workday-rocket-companies-R-083730",
-          "company": "Rocket Companies",
-          "title": "Data Analyst II - Marketing Analytics"
+          "id": "workday-intel-JR0285604",
+          "company": "Intel",
+          "title": "Principal Engineer, AMS IP Architecture"
         },
         {
-          "id": "workday-transamerica-R20061254",
-          "company": "Transamerica",
-          "title": "Specialist Software Engineering"
+          "id": "workday-gdit-RQ224160",
+          "company": "GDIT",
+          "title": "Enterprise Performance Management Systems Engineer"
         },
         {
-          "id": "workday-snap-R0046172",
-          "company": "Snap",
-          "title": "Security Engineer, Level 5"
+          "id": "workday-gdit-RQ224384",
+          "company": "GDIT",
+          "title": "NCIS Systems Administrator   Active Top Secret clearance"
         },
         {
-          "id": "workday-snap-R0045965",
-          "company": "Snap",
-          "title": "Data Scientist, Level 4"
+          "id": "workday-gdit-RQ224161",
+          "company": "GDIT",
+          "title": "Senior Enterprise Performance Management Systems Engineer"
         },
         {
-          "id": "workday-snap-R0043448",
-          "company": "Snap",
-          "title": "AR Engineer, Level 4"
-        },
-        {
-          "id": "workday-penn-state-university-REQ_0000080138",
-          "company": "Penn State University",
-          "title": "AR/VR/XR Visualization Research and Development Engineer"
+          "id": "workday-gdit-RQ224231",
+          "company": "GDIT",
+          "title": "Senior Systems Engineer - Enterprise Directory Services and Authentication"
         }
       ],
       "severity": "high",
@@ -210,11 +210,33 @@
       ]
     },
     {
+      "source": "smartrecruiters",
+      "pool_rows": 1914,
+      "us_rows": 1913,
+      "tech_us_rows": 337,
+      "raw_sidecar_rows": 1392,
+      "sidecar_active_rows": 273,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 337,
+      "published_pct": 100,
+      "enriched_rows": 337,
+      "enriched_pct": 100,
+      "enriched_with_skills": 332,
+      "skills_pct": 98.5,
+      "examples": [],
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
+    },
+    {
       "source": "microsoft",
       "pool_rows": 512,
       "us_rows": 307,
       "tech_us_rows": 172,
-      "raw_sidecar_rows": 501,
+      "raw_sidecar_rows": 503,
       "sidecar_active_rows": 169,
       "supplemental_rows": 543,
       "supplemental_with_desc": 40,
@@ -250,26 +272,6 @@
       "flags": []
     },
     {
-      "source": "smartrecruiters",
-      "pool_rows": 1914,
-      "us_rows": 1913,
-      "tech_us_rows": 337,
-      "raw_sidecar_rows": 1455,
-      "sidecar_active_rows": 337,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 337,
-      "published_pct": 100,
-      "enriched_rows": 337,
-      "enriched_pct": 100,
-      "enriched_with_skills": 332,
-      "skills_pct": 98.5,
-      "examples": [],
-      "severity": "ok",
-      "flags": []
-    },
-    {
       "source": "icims",
       "pool_rows": 0,
       "us_rows": 0,
@@ -294,7 +296,7 @@
       "pool_rows": 1496,
       "us_rows": 1469,
       "tech_us_rows": 613,
-      "raw_sidecar_rows": 1495,
+      "raw_sidecar_rows": 1496,
       "sidecar_active_rows": 613,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
@@ -314,7 +316,7 @@
       "pool_rows": 430,
       "us_rows": 354,
       "tech_us_rows": 235,
-      "raw_sidecar_rows": 811,
+      "raw_sidecar_rows": 649,
       "sidecar_active_rows": 235,
       "supplemental_rows": 60,
       "supplemental_with_desc": 60,
