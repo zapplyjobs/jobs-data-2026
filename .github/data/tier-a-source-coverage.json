@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-16T06:36:25.308Z",
+  "generated_at": "2026-07-16T06:41:38.662Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -59,10 +59,12 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-16T06:36:22.998Z",
-    "active": false,
-    "message": null,
-    "failures": [],
+    "checked_at": "2026-07-16T06:41:34.246Z",
+    "active": true,
+    "message": "**Source fetch failure (tiktok)**: 0 jobs fetched this run despite 1483 in pool (carry-forward). Fetcher likely timed out or broken.",
+    "failures": [
+      "**Source fetch failure (tiktok)**: 0 jobs fetched this run despite 1483 in pool (carry-forward). Fetcher likely timed out or broken."
+    ],
     "warnings": [],
     "warning_count": 0,
     "secrets": [
@@ -76,20 +78,20 @@
   "rows": [
     {
       "source": "workday",
-      "pool_rows": 32160,
-      "us_rows": 17799,
-      "tech_us_rows": 5606,
-      "raw_sidecar_rows": 13097,
-      "sidecar_active_rows": 3106,
+      "pool_rows": 35181,
+      "us_rows": 19238,
+      "tech_us_rows": 5997,
+      "raw_sidecar_rows": 15807,
+      "sidecar_active_rows": 2967,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 3104,
-      "published_pct": 55.4,
-      "enriched_rows": 3124,
-      "enriched_pct": 55.7,
-      "enriched_with_skills": 2998,
-      "skills_pct": 96,
+      "published_rows": 2887,
+      "published_pct": 48.1,
+      "enriched_rows": 2921,
+      "enriched_pct": 48.7,
+      "enriched_with_skills": 2796,
+      "skills_pct": 95.7,
       "examples": [
         {
           "id": "workday-snap-R0046172",
@@ -107,14 +109,14 @@
           "title": "AR Engineer, Level 4"
         },
         {
-          "id": "workday-magna-R00252207",
-          "company": "Magna",
-          "title": "Paint Process Engineering Group Leader"
+          "id": "workday-flir-systems-REQ34458",
+          "company": "FLIR Systems",
+          "title": "Senior Electronics Engineer - (Onsite -Niceville, Florida)"
         },
         {
-          "id": "workday-magna-R00251617",
-          "company": "Magna",
-          "title": "Environmental Coordinator"
+          "id": "workday-cox-R202679352",
+          "company": "Cox",
+          "title": "Software Engineer I"
         },
         {
           "id": "workday-penn-state-university-REQ_0000080138",
@@ -122,14 +124,14 @@
           "title": "AR/VR/XR Visualization Research and Development Engineer"
         },
         {
-          "id": "workday-pfizer-4960759",
-          "company": "Pfizer",
-          "title": "Head of AI & Agentic Platform Engineering"
+          "id": "workday-wolters-kluwer-R0056839",
+          "company": "Wolters Kluwer",
+          "title": "CX/UX Designer (Tax & Accounting) - Hybrid (TX/KS/NJ/FL/GA/NY/IL) R0056839"
         },
         {
-          "id": "workday-pfizer-4960760",
-          "company": "Pfizer",
-          "title": "Head of Data & BI Platform Engineering"
+          "id": "workday-verizon-R-1094342",
+          "company": "Verizon",
+          "title": "Marketing Data Science"
         }
       ],
       "severity": "high",
@@ -208,12 +210,34 @@
       ]
     },
     {
+      "source": "tiktok",
+      "pool_rows": 1483,
+      "us_rows": 1468,
+      "tech_us_rows": 597,
+      "raw_sidecar_rows": 0,
+      "sidecar_active_rows": 0,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 597,
+      "published_pct": 100,
+      "enriched_rows": 597,
+      "enriched_pct": 100,
+      "enriched_with_skills": 597,
+      "skills_pct": 100,
+      "examples": [],
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
+    },
+    {
       "source": "smartrecruiters",
       "pool_rows": 1914,
       "us_rows": 1913,
       "tech_us_rows": 337,
-      "raw_sidecar_rows": 1407,
-      "sidecar_active_rows": 289,
+      "raw_sidecar_rows": 1392,
+      "sidecar_active_rows": 273,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
@@ -273,7 +297,7 @@
       "pool_rows": 517,
       "us_rows": 318,
       "tech_us_rows": 177,
-      "raw_sidecar_rows": 515,
+      "raw_sidecar_rows": 516,
       "sidecar_active_rows": 176,
       "supplemental_rows": 544,
       "supplemental_with_desc": 17,
@@ -316,26 +340,6 @@
       "skills_pct": 0,
       "examples": [],
       "severity": "info",
-      "flags": []
-    },
-    {
-      "source": "tiktok",
-      "pool_rows": 1483,
-      "us_rows": 1468,
-      "tech_us_rows": 613,
-      "raw_sidecar_rows": 1483,
-      "sidecar_active_rows": 613,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 613,
-      "published_pct": 100,
-      "enriched_rows": 613,
-      "enriched_pct": 100,
-      "enriched_with_skills": 613,
-      "skills_pct": 100,
-      "examples": [],
-      "severity": "ok",
       "flags": []
     },
     {
