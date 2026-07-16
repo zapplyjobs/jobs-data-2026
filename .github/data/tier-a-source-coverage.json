@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-16T08:24:28.374Z",
+  "generated_at": "2026-07-16T08:30:22.161Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -59,12 +59,14 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-16T08:24:26.124Z",
+    "checked_at": "2026-07-16T08:30:19.463Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [],
-    "warning_count": 0,
+    "warnings": [
+      "Runtime trending up: 7.6 min (warning at 7, alert at 10)"
+    ],
+    "warning_count": 1,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -76,60 +78,60 @@
   "rows": [
     {
       "source": "workday",
-      "pool_rows": 33440,
-      "us_rows": 18423,
-      "tech_us_rows": 5780,
-      "raw_sidecar_rows": 13427,
-      "sidecar_active_rows": 3156,
+      "pool_rows": 33996,
+      "us_rows": 18192,
+      "tech_us_rows": 5141,
+      "raw_sidecar_rows": 17216,
+      "sidecar_active_rows": 2952,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 3154,
-      "published_pct": 54.6,
-      "enriched_rows": 3170,
-      "enriched_pct": 54.8,
-      "enriched_with_skills": 3046,
-      "skills_pct": 96.1,
+      "published_rows": 2862,
+      "published_pct": 55.7,
+      "enriched_rows": 2888,
+      "enriched_pct": 56.2,
+      "enriched_with_skills": 2768,
+      "skills_pct": 95.8,
       "examples": [
         {
-          "id": "workday-rocket-companies-R-083730",
-          "company": "Rocket Companies",
-          "title": "Data Analyst II - Marketing Analytics"
+          "id": "workday-intel-JR0285604",
+          "company": "Intel",
+          "title": "Principal Engineer, AMS IP Architecture"
         },
         {
-          "id": "workday-transamerica-R20061254",
-          "company": "Transamerica",
-          "title": "Specialist Software Engineering"
+          "id": "workday-blue-origin-R68661",
+          "company": "Blue Origin",
+          "title": "Sr. Navigation Engineer"
         },
         {
-          "id": "workday-pnc-financial-services-R222744",
-          "company": "PNC Financial Services",
-          "title": "Software Engineer - Full Stack / Java, Angular"
+          "id": "workday-blue-origin-R67732",
+          "company": "Blue Origin",
+          "title": "Manufacturing Engineer II/III/Sr - Standards & Process"
         },
         {
-          "id": "workday-pnc-financial-services-R226163",
-          "company": "PNC Financial Services",
-          "title": "Solution Architect - Cyber Security Engineering"
+          "id": "workday-blue-origin-R64723",
+          "company": "Blue Origin",
+          "title": "Manufacturing Engineer II, III, Sr. (Multiple Shifts) - New Glenn"
         },
         {
-          "id": "workday-parsons-R179615",
-          "company": "Parsons",
-          "title": "Drainage Engineer I"
+          "id": "workday-blue-origin-R67959",
+          "company": "Blue Origin",
+          "title": "Manufacturing Engineer II/III/Sr - Machined Parts"
         },
         {
-          "id": "workday-parsons-R179304",
-          "company": "Parsons",
-          "title": "Senior Structural Engineer"
+          "id": "workday-blue-origin-R66049",
+          "company": "Blue Origin",
+          "title": "Manufacturing Engineer II, III, Sr. (Multiple Shifts) - Engines"
         },
         {
-          "id": "workday-parsons-R179308",
-          "company": "Parsons",
-          "title": "Drainage Engineer II"
+          "id": "workday-blue-origin-R67644",
+          "company": "Blue Origin",
+          "title": "Manufacturing Design Engineer II/III/Sr - Lunar"
         },
         {
-          "id": "workday-parsons-R180970",
-          "company": "Parsons",
-          "title": "Roadway Engineer I"
+          "id": "workday-blue-origin-R64730",
+          "company": "Blue Origin",
+          "title": "Manufacturing Engineer II, III, Sr. (Multiple Shifts) - Lunar"
         }
       ],
       "severity": "high",
@@ -212,8 +214,8 @@
       "pool_rows": 1914,
       "us_rows": 1913,
       "tech_us_rows": 337,
-      "raw_sidecar_rows": 1455,
-      "sidecar_active_rows": 337,
+      "raw_sidecar_rows": 1392,
+      "sidecar_active_rows": 273,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
@@ -224,8 +226,10 @@
       "enriched_with_skills": 332,
       "skills_pct": 98.5,
       "examples": [],
-      "severity": "ok",
-      "flags": []
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
     },
     {
       "source": "icims",
@@ -252,7 +256,7 @@
       "pool_rows": 515,
       "us_rows": 318,
       "tech_us_rows": 178,
-      "raw_sidecar_rows": 515,
+      "raw_sidecar_rows": 517,
       "sidecar_active_rows": 178,
       "supplemental_rows": 543,
       "supplemental_with_desc": 23,
@@ -273,10 +277,10 @@
     },
     {
       "source": "tiktok",
-      "pool_rows": 1486,
+      "pool_rows": 1489,
       "us_rows": 1469,
       "tech_us_rows": 613,
-      "raw_sidecar_rows": 1486,
+      "raw_sidecar_rows": 1489,
       "sidecar_active_rows": 613,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
