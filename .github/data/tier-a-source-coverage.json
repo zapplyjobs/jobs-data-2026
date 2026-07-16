@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-16T06:47:12.128Z",
+  "generated_at": "2026-07-16T06:51:52.680Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -59,12 +59,10 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-16T06:47:08.149Z",
-    "active": true,
-    "message": "**Source fetch failure (tiktok)**: 0 jobs fetched this run despite 1483 in pool (carry-forward). Fetcher likely timed out or broken.",
-    "failures": [
-      "**Source fetch failure (tiktok)**: 0 jobs fetched this run despite 1483 in pool (carry-forward). Fetcher likely timed out or broken."
-    ],
+    "checked_at": "2026-07-16T06:51:50.344Z",
+    "active": false,
+    "message": null,
+    "failures": [],
     "warnings": [],
     "warning_count": 0,
     "secrets": [
@@ -78,20 +76,20 @@
   "rows": [
     {
       "source": "workday",
-      "pool_rows": 35181,
-      "us_rows": 19238,
-      "tech_us_rows": 5997,
-      "raw_sidecar_rows": 13429,
-      "sidecar_active_rows": 3163,
+      "pool_rows": 29707,
+      "us_rows": 16348,
+      "tech_us_rows": 4836,
+      "raw_sidecar_rows": 16786,
+      "sidecar_active_rows": 2948,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 3160,
-      "published_pct": 52.7,
-      "enriched_rows": 3175,
-      "enriched_pct": 52.9,
-      "enriched_with_skills": 3046,
-      "skills_pct": 95.9,
+      "published_rows": 2889,
+      "published_pct": 59.7,
+      "enriched_rows": 2921,
+      "enriched_pct": 60.4,
+      "enriched_with_skills": 2796,
+      "skills_pct": 95.7,
       "examples": [
         {
           "id": "workday-snap-R0046172",
@@ -114,24 +112,24 @@
           "title": "AR/VR/XR Visualization Research and Development Engineer"
         },
         {
-          "id": "workday-semtech-REQ3460",
-          "company": "Semtech",
-          "title": "Senior Analog Design Engineer"
+          "id": "workday-td-bank-R_1486993",
+          "company": "TD Bank",
+          "title": "Data Steward II (US)- Regulatory Reporting"
         },
         {
-          "id": "workday-pfizer-4960759",
-          "company": "Pfizer",
-          "title": "Head of AI & Agentic Platform Engineering"
+          "id": "workday-td-bank-R_1496965",
+          "company": "TD Bank",
+          "title": "Analyst - Core Trade Finance Financial Institutions - Global Transaction Banking, TD Securities"
         },
         {
-          "id": "workday-pfizer-4960760",
-          "company": "Pfizer",
-          "title": "Head of Data & BI Platform Engineering"
+          "id": "workday-td-bank-R_1497321",
+          "company": "TD Bank",
+          "title": "Mgr Business Systems Analysis (US)"
         },
         {
-          "id": "workday-pfizer-4959935",
-          "company": "Pfizer",
-          "title": "Manager, PX, GWE, Utilities Operations Lead Electrical Engineer"
+          "id": "workday-td-bank-R_1492772",
+          "company": "TD Bank",
+          "title": "Data Scientist III (US) - Financial Crimes Modeling"
         }
       ],
       "severity": "high",
@@ -213,17 +211,17 @@
       "source": "tiktok",
       "pool_rows": 1483,
       "us_rows": 1468,
-      "tech_us_rows": 597,
-      "raw_sidecar_rows": 0,
-      "sidecar_active_rows": 0,
+      "tech_us_rows": 613,
+      "raw_sidecar_rows": 1483,
+      "sidecar_active_rows": 613,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
       "published_rows": 0,
       "published_pct": 0,
-      "enriched_rows": 597,
+      "enriched_rows": 613,
       "enriched_pct": 100,
-      "enriched_with_skills": 597,
+      "enriched_with_skills": 613,
       "skills_pct": 100,
       "examples": [
         {
@@ -262,15 +260,36 @@
           "title": "Data Scientist (Multiple Positions)"
         },
         {
-          "id": "tiktok-7660625939319048453",
+          "id": "tiktok-7660646443183868165",
           "company": "TikTok",
-          "title": "Senior Software Development Engineer in Test (Multiple Positions)"
+          "title": "Senior Solutions Engineer (Multiple Positions)"
         }
       ],
       "severity": "high",
       "flags": [
-        "low_published_coverage",
-        "no_source_text_surface"
+        "low_published_coverage"
+      ]
+    },
+    {
+      "source": "smartrecruiters",
+      "pool_rows": 1914,
+      "us_rows": 1913,
+      "tech_us_rows": 337,
+      "raw_sidecar_rows": 1392,
+      "sidecar_active_rows": 273,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 337,
+      "published_pct": 100,
+      "enriched_rows": 337,
+      "enriched_pct": 100,
+      "enriched_with_skills": 332,
+      "skills_pct": 98.5,
+      "examples": [],
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
       ]
     },
     {
@@ -278,7 +297,7 @@
       "pool_rows": 517,
       "us_rows": 318,
       "tech_us_rows": 177,
-      "raw_sidecar_rows": 515,
+      "raw_sidecar_rows": 516,
       "sidecar_active_rows": 176,
       "supplemental_rows": 544,
       "supplemental_with_desc": 17,
@@ -300,26 +319,6 @@
           "title": "Solutions Architect - CTJ - POLY"
         }
       ],
-      "severity": "ok",
-      "flags": []
-    },
-    {
-      "source": "smartrecruiters",
-      "pool_rows": 1914,
-      "us_rows": 1913,
-      "tech_us_rows": 337,
-      "raw_sidecar_rows": 1455,
-      "sidecar_active_rows": 337,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 337,
-      "published_pct": 100,
-      "enriched_rows": 337,
-      "enriched_pct": 100,
-      "enriched_with_skills": 332,
-      "skills_pct": 98.5,
-      "examples": [],
       "severity": "ok",
       "flags": []
     },
