@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-16T11:33:09.797Z",
+  "generated_at": "2026-07-16T11:34:29.014Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -45,13 +45,13 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-16T11:27:29.283Z",
+    "generated_at": "2026-07-16T11:33:30.923Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 11208,
-    "description_entries": 8143,
-    "coverage_pct": 72.7,
+    "board_row_count": 11148,
+    "description_entries": 8328,
+    "coverage_pct": 74.7,
     "source_breakdown": {
-      "sidecar": 8143,
+      "sidecar": 8328,
       "inline": 0
     },
     "jobs_metadata_generated": "2026-07-16T11:03:23.581Z",
@@ -59,12 +59,14 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-16T11:33:06.962Z",
+    "checked_at": "2026-07-16T11:34:26.943Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [],
-    "warning_count": 0,
+    "warnings": [
+      "Runtime trending up: 7.4 min (warning at 7, alert at 10)"
+    ],
+    "warning_count": 1,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -79,17 +81,17 @@
       "pool_rows": 32052,
       "us_rows": 17426,
       "tech_us_rows": 4987,
-      "raw_sidecar_rows": 20901,
-      "sidecar_active_rows": 2843,
+      "raw_sidecar_rows": 13337,
+      "sidecar_active_rows": 3424,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 3189,
-      "published_pct": 63.9,
-      "enriched_rows": 3225,
-      "enriched_pct": 64.7,
-      "enriched_with_skills": 3087,
-      "skills_pct": 95.7,
+      "published_rows": 3389,
+      "published_pct": 68,
+      "enriched_rows": 3432,
+      "enriched_pct": 68.8,
+      "enriched_with_skills": 3287,
+      "skills_pct": 95.8,
       "examples": [
         {
           "id": "workday-wells-fargo-R-561196",
@@ -100,16 +102,6 @@
           "id": "workday-wells-fargo-R-561199",
           "company": "Wells Fargo",
           "title": "Principal ML Engineer"
-        },
-        {
-          "id": "workday-baker-hughes-R158055",
-          "company": "Baker Hughes",
-          "title": "Intern – Mechanical Engineering & Mechatronics – Celle, Germany – 2026 (M/F/D)"
-        },
-        {
-          "id": "workday-baker-hughes-R165833",
-          "company": "Baker Hughes",
-          "title": "Production Technologist"
         },
         {
           "id": "workday-rocket-companies-R-083730",
@@ -130,6 +122,16 @@
           "id": "workday-wells-fargo-R-557375",
           "company": "Wells Fargo",
           "title": "Lead Analytic Consultant - Global Employee Fraud Monitoring Strategies"
+        },
+        {
+          "id": "workday-wells-fargo-R-544886",
+          "company": "Wells Fargo",
+          "title": "Senior Infrastructure Engineer - Data Center"
+        },
+        {
+          "id": "workday-wells-fargo-R-556392",
+          "company": "Wells Fargo",
+          "title": "Technology Business Services Consultant"
         }
       ],
       "severity": "high",
@@ -208,33 +210,11 @@
       ]
     },
     {
-      "source": "smartrecruiters",
-      "pool_rows": 1912,
-      "us_rows": 1911,
-      "tech_us_rows": 337,
-      "raw_sidecar_rows": 1392,
-      "sidecar_active_rows": 273,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 337,
-      "published_pct": 100,
-      "enriched_rows": 337,
-      "enriched_pct": 100,
-      "enriched_with_skills": 332,
-      "skills_pct": 98.5,
-      "examples": [],
-      "severity": "medium",
-      "flags": [
-        "published_gt_raw_sidecar"
-      ]
-    },
-    {
       "source": "microsoft",
       "pool_rows": 517,
       "us_rows": 306,
       "tech_us_rows": 172,
-      "raw_sidecar_rows": 514,
+      "raw_sidecar_rows": 510,
       "sidecar_active_rows": 170,
       "supplemental_rows": 543,
       "supplemental_with_desc": 40,
@@ -261,6 +241,26 @@
           "title": "Technical Support Engineering"
         }
       ],
+      "severity": "ok",
+      "flags": []
+    },
+    {
+      "source": "smartrecruiters",
+      "pool_rows": 1912,
+      "us_rows": 1911,
+      "tech_us_rows": 337,
+      "raw_sidecar_rows": 1461,
+      "sidecar_active_rows": 337,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 337,
+      "published_pct": 100,
+      "enriched_rows": 337,
+      "enriched_pct": 100,
+      "enriched_with_skills": 332,
+      "skills_pct": 98.5,
+      "examples": [],
       "severity": "ok",
       "flags": []
     },
@@ -309,7 +309,7 @@
       "pool_rows": 41,
       "us_rows": 33,
       "tech_us_rows": 18,
-      "raw_sidecar_rows": 81,
+      "raw_sidecar_rows": 82,
       "sidecar_active_rows": 18,
       "supplemental_rows": 60,
       "supplemental_with_desc": 60,
