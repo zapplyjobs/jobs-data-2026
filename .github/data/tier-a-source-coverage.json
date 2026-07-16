@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-16T15:11:17.712Z",
+  "generated_at": "2026-07-16T15:14:22.636Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -59,12 +59,12 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-16T15:11:15.312Z",
+    "checked_at": "2026-07-16T15:14:20.144Z",
     "active": false,
     "message": null,
     "failures": [],
     "warnings": [
-      "Runtime trending up: 7.7 min (warning at 7, alert at 10)"
+      "Runtime trending up: 9.3 min (warning at 7, alert at 10)"
     ],
     "warning_count": 1,
     "secrets": [
@@ -78,60 +78,60 @@
   "rows": [
     {
       "source": "workday",
-      "pool_rows": 30297,
-      "us_rows": 16853,
-      "tech_us_rows": 5480,
-      "raw_sidecar_rows": 12789,
-      "sidecar_active_rows": 2974,
+      "pool_rows": 33712,
+      "us_rows": 19009,
+      "tech_us_rows": 6119,
+      "raw_sidecar_rows": 14569,
+      "sidecar_active_rows": 2801,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 2974,
-      "published_pct": 54.3,
-      "enriched_rows": 2987,
-      "enriched_pct": 54.5,
-      "enriched_with_skills": 2865,
-      "skills_pct": 95.9,
+      "published_rows": 2783,
+      "published_pct": 45.5,
+      "enriched_rows": 2807,
+      "enriched_pct": 45.9,
+      "enriched_with_skills": 2689,
+      "skills_pct": 95.8,
       "examples": [
+        {
+          "id": "workday-target-R0000436289",
+          "company": "Target",
+          "title": "Lead Engineer - Incident Response Engineering"
+        },
+        {
+          "id": "workday-pnc-financial-services-R229603",
+          "company": "PNC Financial Services",
+          "title": "Software Engineering Manager, Senior"
+        },
+        {
+          "id": "workday-citi-26978781",
+          "company": "Citi",
+          "title": "Lead Applications Development Analyst - Vice President"
+        },
         {
           "id": "workday-wells-fargo-R-558651",
           "company": "Wells Fargo",
           "title": "Lead Software Engineer"
         },
         {
-          "id": "workday-wells-fargo-R-553686",
-          "company": "Wells Fargo",
-          "title": "Senior Lead Risk Analytics - AI Strategy, Data & AI Platform Enablement"
+          "id": "workday-cox-R202680089",
+          "company": "Cox",
+          "title": "Parts Coordinator I"
         },
         {
-          "id": "workday-parsons-R183323",
-          "company": "Parsons",
-          "title": "Environmental Project Manager"
+          "id": "workday-thornton-tomasetti-R7079",
+          "company": "Thornton Tomasetti",
+          "title": "Senior Structural Engineer"
         },
         {
-          "id": "workday-lexisnexis-risk-solutions-R116146",
-          "company": "LexisNexis Risk Solutions",
-          "title": "Sr Finance Automation & Standardization Analyst"
+          "id": "workday-tel-R26-01134",
+          "company": "TEL",
+          "title": "Business Intelligence Analyst II"
         },
         {
-          "id": "workday-transamerica-R20061254",
-          "company": "Transamerica",
-          "title": "Specialist Software Engineering"
-        },
-        {
-          "id": "workday-rocket-companies-R-083730",
-          "company": "Rocket Companies",
-          "title": "Data Analyst II - Marketing Analytics"
-        },
-        {
-          "id": "workday-semtech-REQ3460",
-          "company": "Semtech",
-          "title": "Senior Analog Design Engineer"
-        },
-        {
-          "id": "workday-nvidia-JR2014628",
-          "company": "NVIDIA",
-          "title": "Senior Hardware Systems Architect - LPU Platform Pathfinding"
+          "id": "workday-rtx-01860106",
+          "company": "RTX",
+          "title": "Project Engineer II, Proposals (Hybrid)"
         }
       ],
       "severity": "high",
@@ -214,8 +214,8 @@
       "pool_rows": 1906,
       "us_rows": 1905,
       "tech_us_rows": 337,
-      "raw_sidecar_rows": 1443,
-      "sidecar_active_rows": 337,
+      "raw_sidecar_rows": 1379,
+      "sidecar_active_rows": 273,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
@@ -226,6 +226,68 @@
       "enriched_with_skills": 331,
       "skills_pct": 98.2,
       "examples": [],
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
+    },
+    {
+      "source": "microsoft",
+      "pool_rows": 510,
+      "us_rows": 305,
+      "tech_us_rows": 172,
+      "raw_sidecar_rows": 511,
+      "sidecar_active_rows": 172,
+      "supplemental_rows": 543,
+      "supplemental_with_desc": 20,
+      "supplemental_meta": {
+        "generated_at": "2026-07-16T14:50:14.319Z",
+        "lane_name": "custom",
+        "jobs_fetched": 5072
+      },
+      "published_rows": 171,
+      "published_pct": 99.4,
+      "enriched_rows": 171,
+      "enriched_pct": 99.4,
+      "enriched_with_skills": 171,
+      "skills_pct": 100,
+      "examples": [
+        {
+          "id": "microsoft-200028723",
+          "company": "Microsoft",
+          "title": "Principal Firmware Engineer"
+        }
+      ],
+      "severity": "ok",
+      "flags": []
+    },
+    {
+      "source": "apple",
+      "pool_rows": 430,
+      "us_rows": 355,
+      "tech_us_rows": 233,
+      "raw_sidecar_rows": 808,
+      "sidecar_active_rows": 233,
+      "supplemental_rows": 875,
+      "supplemental_with_desc": 875,
+      "supplemental_meta": {
+        "generated_at": "2026-07-16T14:50:14.319Z",
+        "lane_name": "custom",
+        "jobs_fetched": 5072
+      },
+      "published_rows": 232,
+      "published_pct": 99.6,
+      "enriched_rows": 232,
+      "enriched_pct": 99.6,
+      "enriched_with_skills": 192,
+      "skills_pct": 82.8,
+      "examples": [
+        {
+          "id": "apple-200631982",
+          "company": "Apple",
+          "title": "Sr Software Engineering Manager, UI Rendering"
+        }
+      ],
       "severity": "ok",
       "flags": []
     },
@@ -250,30 +312,6 @@
       "flags": []
     },
     {
-      "source": "microsoft",
-      "pool_rows": 517,
-      "us_rows": 309,
-      "tech_us_rows": 174,
-      "raw_sidecar_rows": 517,
-      "sidecar_active_rows": 174,
-      "supplemental_rows": 543,
-      "supplemental_with_desc": 20,
-      "supplemental_meta": {
-        "generated_at": "2026-07-16T14:50:14.319Z",
-        "lane_name": "custom",
-        "jobs_fetched": 5072
-      },
-      "published_rows": 174,
-      "published_pct": 100,
-      "enriched_rows": 174,
-      "enriched_pct": 100,
-      "enriched_with_skills": 174,
-      "skills_pct": 100,
-      "examples": [],
-      "severity": "ok",
-      "flags": []
-    },
-    {
       "source": "tiktok",
       "pool_rows": 1496,
       "us_rows": 1469,
@@ -289,30 +327,6 @@
       "enriched_pct": 100,
       "enriched_with_skills": 613,
       "skills_pct": 100,
-      "examples": [],
-      "severity": "ok",
-      "flags": []
-    },
-    {
-      "source": "apple",
-      "pool_rows": 429,
-      "us_rows": 354,
-      "tech_us_rows": 235,
-      "raw_sidecar_rows": 808,
-      "sidecar_active_rows": 235,
-      "supplemental_rows": 875,
-      "supplemental_with_desc": 875,
-      "supplemental_meta": {
-        "generated_at": "2026-07-16T14:50:14.319Z",
-        "lane_name": "custom",
-        "jobs_fetched": 5072
-      },
-      "published_rows": 235,
-      "published_pct": 100,
-      "enriched_rows": 235,
-      "enriched_pct": 100,
-      "enriched_with_skills": 195,
-      "skills_pct": 83,
       "examples": [],
       "severity": "ok",
       "flags": []
