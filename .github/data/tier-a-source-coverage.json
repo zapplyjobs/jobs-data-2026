@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-16T16:12:13.013Z",
+  "generated_at": "2026-07-16T16:15:17.259Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -59,12 +59,14 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-16T16:12:10.900Z",
+    "checked_at": "2026-07-16T16:15:14.493Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [],
-    "warning_count": 0,
+    "warnings": [
+      "Runtime trending up: 7.0 min (warning at 7, alert at 10)"
+    ],
+    "warning_count": 1,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -76,60 +78,60 @@
   "rows": [
     {
       "source": "workday",
-      "pool_rows": 34599,
-      "us_rows": 18798,
-      "tech_us_rows": 5850,
-      "raw_sidecar_rows": 12601,
-      "sidecar_active_rows": 3058,
+      "pool_rows": 32435,
+      "us_rows": 18161,
+      "tech_us_rows": 5801,
+      "raw_sidecar_rows": 17300,
+      "sidecar_active_rows": 2907,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 3058,
-      "published_pct": 52.3,
-      "enriched_rows": 3070,
-      "enriched_pct": 52.5,
-      "enriched_with_skills": 2936,
+      "published_rows": 2859,
+      "published_pct": 49.3,
+      "enriched_rows": 2898,
+      "enriched_pct": 50,
+      "enriched_with_skills": 2771,
       "skills_pct": 95.6,
       "examples": [
         {
-          "id": "workday-wells-fargo-R-550378",
-          "company": "Wells Fargo",
-          "title": "Lead Information Security Engineer - Cryptographic Products and Services"
+          "id": "workday-daimler-truck-DT-18771",
+          "company": "Daimler Truck",
+          "title": "Mechanical Product Design Engineer I"
         },
         {
-          "id": "workday-snap-R0045799",
-          "company": "Snap",
-          "title": "Manager, Business Marketing (SMC)"
+          "id": "workday-wash-u-JR95885",
+          "company": "Wash U",
+          "title": "Research Technician II - Ophthalmology"
         },
         {
-          "id": "workday-tel-R26-01134",
-          "company": "TEL",
-          "title": "Business Intelligence Analyst II"
+          "id": "workday-state-street-R-788306",
+          "company": "State Street",
+          "title": "Senior Engineering  Mainframe Manager – Custody"
         },
         {
-          "id": "workday-parsons-R179495",
-          "company": "Parsons",
-          "title": "Senior Structural Bridge Engineer - Pennsylvania"
+          "id": "workday-northrop-grumman-R10240697",
+          "company": "Northrop Grumman",
+          "title": "Systems Engineer - Level 3"
         },
         {
-          "id": "workday-parsons-R178750",
-          "company": "Parsons",
-          "title": "Civil / Geotechnical Engineer"
+          "id": "workday-northrop-grumman-R10238953",
+          "company": "Northrop Grumman",
+          "title": "Engineering Tech Support - Level 2"
         },
         {
-          "id": "workday-parsons-R178160",
-          "company": "Parsons",
-          "title": "Associate Roadway Engineer"
+          "id": "workday-northrop-grumman-R10240782",
+          "company": "Northrop Grumman",
+          "title": "Staff Engineer Liaison - NCR Liaison Offer (26-330)"
         },
         {
-          "id": "workday-parsons-R177995",
-          "company": "Parsons",
-          "title": "Engineering Manager - Bridge Design/Build/Construction"
+          "id": "workday-rtx-01855222",
+          "company": "RTX",
+          "title": "Senior Systems Engineer"
         },
         {
-          "id": "workday-parsons-R177770",
-          "company": "Parsons",
-          "title": "Bridge Engineer II"
+          "id": "workday-leidos-R-00187452",
+          "company": "Leidos",
+          "title": "Software Development Analyst"
         }
       ],
       "severity": "high",
@@ -212,8 +214,8 @@
       "pool_rows": 1906,
       "us_rows": 1905,
       "tech_us_rows": 336,
-      "raw_sidecar_rows": 1434,
-      "sidecar_active_rows": 336,
+      "raw_sidecar_rows": 1369,
+      "sidecar_active_rows": 270,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
@@ -224,8 +226,10 @@
       "enriched_with_skills": 331,
       "skills_pct": 98.5,
       "examples": [],
-      "severity": "ok",
-      "flags": []
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
     },
     {
       "source": "icims",
@@ -249,10 +253,10 @@
     },
     {
       "source": "microsoft",
-      "pool_rows": 510,
+      "pool_rows": 509,
       "us_rows": 305,
       "tech_us_rows": 172,
-      "raw_sidecar_rows": 507,
+      "raw_sidecar_rows": 508,
       "sidecar_active_rows": 172,
       "supplemental_rows": 543,
       "supplemental_with_desc": 20,
@@ -293,11 +297,11 @@
     },
     {
       "source": "apple",
-      "pool_rows": 428,
-      "us_rows": 353,
-      "tech_us_rows": 232,
-      "raw_sidecar_rows": 854,
-      "sidecar_active_rows": 232,
+      "pool_rows": 427,
+      "us_rows": 352,
+      "tech_us_rows": 231,
+      "raw_sidecar_rows": 852,
+      "sidecar_active_rows": 231,
       "supplemental_rows": 875,
       "supplemental_with_desc": 875,
       "supplemental_meta": {
@@ -305,12 +309,12 @@
         "lane_name": "custom",
         "jobs_fetched": 5072
       },
-      "published_rows": 232,
+      "published_rows": 231,
       "published_pct": 100,
-      "enriched_rows": 232,
+      "enriched_rows": 231,
       "enriched_pct": 100,
-      "enriched_with_skills": 192,
-      "skills_pct": 82.8,
+      "enriched_with_skills": 191,
+      "skills_pct": 82.7,
       "examples": [],
       "severity": "ok",
       "flags": []
