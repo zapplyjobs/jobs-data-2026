@@ -7,6 +7,10 @@ on:
   repository_dispatch:
     types: [pipeline-alert]
 
+concurrency:
+  group: pipeline-alert
+  cancel-in-progress: false
+
 jobs:
   pipeline-alert:
     runs-on: ubuntu-latest

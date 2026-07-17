@@ -5,6 +5,10 @@ on:
     - cron: '*/15 * * * *'  # Every 15 minutes
   workflow_dispatch:
 
+concurrency:
+  group: post-to-discord
+  cancel-in-progress: false
+
 jobs:
   post-discord:
     runs-on: ubuntu-latest
