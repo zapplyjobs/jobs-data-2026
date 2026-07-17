@@ -92,38 +92,7 @@ jobs:
       - name: Build Tier A source coverage report
         run: node .github/scripts/source-coverage-audit.js
 
-      - name: Push alert status via API
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          ALERT_FILE=".github/data/pipeline-alert.json"
-          if [ ! -f "$ALERT_FILE" ]; then
-            echo "Alert file not found — skipping push"
-            exit 0
-          fi
-
-          REMOTE_SHA=$(gh api repos/zapplyjobs/jobs-data-2026/contents/$ALERT_FILE --jq '.sha' 2>/dev/null || echo "")
-          REMOTE_CONTENT=$(gh api repos/zapplyjobs/jobs-data-2026/contents/$ALERT_FILE --jq '.content' 2>/dev/null || echo "")
-
-          if [ -z "$REMOTE_SHA" ]; then
-            echo "Could not get remote SHA — skipping push"
-            exit 0
-          fi
-
-          LOCAL_CONTENT=$(base64 -w 0 "$ALERT_FILE")
-
-          if [ "$LOCAL_CONTENT" = "$REMOTE_CONTENT" ]; then
-            echo "Content unchanged — skipping push"
-            exit 0
-          fi
-
-          gh api repos/zapplyjobs/jobs-data-2026/contents/$ALERT_FILE \
-            --method PUT \
-            --field message="chore: update pipeline alert status [skip ci]" \
-            --field content="$LOCAL_CONTENT" \
-            --field sha="$REMOTE_SHA" \
-            --jq '.commit.sha' 2>/dev/null && echo "Alert status pushed" || echo "Push failed or no change"
-      - name: Upload dashboard data to R2 (INF-R2-GITCUTOVER-1)
+      - name: Upload to R2 (Phase 1 cleanup — removed redundant git commits)
         if: success()
         continue-on-error: true
         env:
@@ -131,71 +100,4 @@ jobs:
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
-        run: node scripts/upload-dashboard-data-to-r2.js pipeline-alert.json
-      - name: Push Tier A source coverage report
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          REPORT_FILE=".github/data/tier-a-source-coverage.json"
-          if [ ! -f "$REPORT_FILE" ]; then
-            echo "Coverage report not found — skipping push"
-            exit 0
-          fi
-
-          REMOTE_SHA=$(gh api repos/zapplyjobs/jobs-data-2026/contents/$REPORT_FILE --jq '.sha' 2>/dev/null || echo "")
-          REMOTE_CONTENT=$(gh api repos/zapplyjobs/jobs-data-2026/contents/$REPORT_FILE --jq '.content' 2>/dev/null || echo "")
-          LOCAL_CONTENT=$(base64 -w 0 "$REPORT_FILE")
-
-          if [ -n "$REMOTE_SHA" ] && [ "$LOCAL_CONTENT" = "$REMOTE_CONTENT" ]; then
-            echo "Coverage report unchanged — skipping push"
-            exit 0
-          fi
-
-          if [ -z "$REMOTE_SHA" ]; then
-            gh api repos/zapplyjobs/jobs-data-2026/contents/$REPORT_FILE \
-              --method PUT \
-              --field message="chore: publish tier-a coverage report [skip ci]" \
-              --field content="$LOCAL_CONTENT" \
-              --jq '.commit.sha' 2>/dev/null && echo "Coverage report created" || echo "Coverage report create failed"
-          else
-            gh api repos/zapplyjobs/jobs-data-2026/contents/$REPORT_FILE \
-              --method PUT \
-              --field message="chore: publish tier-a coverage report [skip ci]" \
-              --field content="$LOCAL_CONTENT" \
-              --field sha="$REMOTE_SHA" \
-              --jq '.commit.sha' 2>/dev/null && echo "Coverage report updated" || echo "Coverage report update failed"
-          fi
-
-      - name: Push zero-yield tracking state
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          TRACKING_FILE=".github/data/zero-yield-tracking.json"
-          if [ ! -f "$TRACKING_FILE" ]; then
-            echo "Tracking file not found — skipping push"
-            exit 0
-          fi
-
-          LOCAL_CONTENT=$(base64 -w 0 "$TRACKING_FILE")
-          REMOTE_SHA=$(gh api repos/zapplyjobs/jobs-data-2026/contents/$TRACKING_FILE --jq '.sha' 2>/dev/null || echo "")
-
-          if [ -z "$REMOTE_SHA" ]; then
-            # File doesn't exist on remote yet — create it
-            gh api repos/zapplyjobs/jobs-data-2026/contents/$TRACKING_FILE \
-              --method PUT \
-              --field message="chore: init zero-yield tracking state [skip ci]" \
-              --field content="$LOCAL_CONTENT" \
-              --jq '.commit.sha' 2>/dev/null && echo "Tracking state created" || echo "Create failed"
-          else
-            REMOTE_CONTENT=$(gh api repos/zapplyjobs/jobs-data-2026/contents/$TRACKING_FILE --jq '.content' 2>/dev/null || echo "")
-            if [ "$LOCAL_CONTENT" = "$REMOTE_CONTENT" ]; then
-              echo "Tracking state unchanged — skipping push"
-              exit 0
-            fi
-            gh api repos/zapplyjobs/jobs-data-2026/contents/$TRACKING_FILE \
-              --method PUT \
-              --field message="chore: update zero-yield tracking state [skip ci]" \
-              --field content="$LOCAL_CONTENT" \
-              --field sha="$REMOTE_SHA" \
-              --jq '.commit.sha' 2>/dev/null && echo "Tracking state pushed" || echo "Push failed or no change"
-          fi
+        run: node scripts/upload-dashboard-data-to-r2.js pipeline-alert.json tier-a-source-coverage.json
