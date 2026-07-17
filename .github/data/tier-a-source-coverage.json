@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-17T10:55:12.834Z",
+  "generated_at": "2026-07-17T10:58:06.523Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -31,9 +31,6 @@
     "descriptions-deshaw.jsonl",
     "descriptions-eightfold.jsonl",
     "descriptions-enriched-1.jsonl",
-    "descriptions-enriched-2.jsonl",
-    "descriptions-enriched-3.jsonl",
-    "descriptions-enriched-4.jsonl",
     "descriptions-google.jsonl",
     "descriptions-greenhouse-1.jsonl",
     "descriptions-greenhouse-2.jsonl",
@@ -48,13 +45,13 @@
     "descriptions-workday.jsonl"
   ],
   "published_meta": {
-    "generated_at": "2026-07-17T10:50:25.796Z",
+    "generated_at": "2026-07-17T10:56:35.418Z",
     "source_basis": "us_jobs.json",
-    "board_row_count": 12109,
-    "description_entries": 8084,
-    "coverage_pct": 66.8,
+    "board_row_count": 11759,
+    "description_entries": 8260,
+    "coverage_pct": 70.2,
     "source_breakdown": {
-      "sidecar": 8084,
+      "sidecar": 8260,
       "inline": 0
     },
     "jobs_metadata_generated": "2026-07-17T00:35:03.112Z",
@@ -62,14 +59,16 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-17T10:55:09.334Z",
+    "checked_at": "2026-07-17T10:58:02.903Z",
     "active": true,
-    "message": "**post-to-discord.yml**: Last run failed (<t:1784285449:R>)",
+    "message": "**post-to-discord.yml**: Last run failed (<t:1784285846:R>)",
     "failures": [
-      "**post-to-discord.yml**: Last run failed (<t:1784285449:R>)"
+      "**post-to-discord.yml**: Last run failed (<t:1784285846:R>)"
     ],
-    "warnings": [],
-    "warning_count": 0,
+    "warnings": [
+      "Runtime trending up: 7.6 min (warning at 7, alert at 10)"
+    ],
+    "warning_count": 1,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -84,16 +83,16 @@
       "pool_rows": 32294,
       "us_rows": 17232,
       "tech_us_rows": 5779,
-      "raw_sidecar_rows": 10824,
-      "sidecar_active_rows": 2428,
+      "raw_sidecar_rows": 12468,
+      "sidecar_active_rows": 3278,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 3065,
-      "published_pct": 53,
-      "enriched_rows": 3083,
-      "enriched_pct": 53.3,
-      "enriched_with_skills": 2959,
+      "published_rows": 3275,
+      "published_pct": 56.7,
+      "enriched_rows": 3288,
+      "enriched_pct": 56.9,
+      "enriched_with_skills": 3157,
       "skills_pct": 96,
       "examples": [
         {
@@ -213,33 +212,11 @@
       ]
     },
     {
-      "source": "smartrecruiters",
-      "pool_rows": 1937,
-      "us_rows": 1933,
-      "tech_us_rows": 373,
-      "raw_sidecar_rows": 2641,
-      "sidecar_active_rows": 368,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 373,
-      "published_pct": 100,
-      "enriched_rows": 373,
-      "enriched_pct": 100,
-      "enriched_with_skills": 368,
-      "skills_pct": 98.7,
-      "examples": [],
-      "severity": "medium",
-      "flags": [
-        "published_gt_raw_sidecar"
-      ]
-    },
-    {
       "source": "microsoft",
       "pool_rows": 510,
       "us_rows": 311,
       "tech_us_rows": 183,
-      "raw_sidecar_rows": 501,
+      "raw_sidecar_rows": 494,
       "sidecar_active_rows": 181,
       "supplemental_rows": 543,
       "supplemental_with_desc": 37,
@@ -250,9 +227,9 @@
       },
       "published_rows": 181,
       "published_pct": 98.9,
-      "enriched_rows": 181,
-      "enriched_pct": 98.9,
-      "enriched_with_skills": 181,
+      "enriched_rows": 183,
+      "enriched_pct": 100,
+      "enriched_with_skills": 183,
       "skills_pct": 100,
       "examples": [
         {
@@ -266,6 +243,26 @@
           "title": "Principal Silicon Design Verification Engineer"
         }
       ],
+      "severity": "ok",
+      "flags": []
+    },
+    {
+      "source": "smartrecruiters",
+      "pool_rows": 1937,
+      "us_rows": 1933,
+      "tech_us_rows": 373,
+      "raw_sidecar_rows": 2662,
+      "sidecar_active_rows": 373,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 373,
+      "published_pct": 100,
+      "enriched_rows": 373,
+      "enriched_pct": 100,
+      "enriched_with_skills": 368,
+      "skills_pct": 98.7,
+      "examples": [],
       "severity": "ok",
       "flags": []
     },
@@ -294,7 +291,7 @@
       "pool_rows": 1490,
       "us_rows": 1443,
       "tech_us_rows": 597,
-      "raw_sidecar_rows": 1490,
+      "raw_sidecar_rows": 1484,
       "sidecar_active_rows": 597,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
@@ -314,7 +311,7 @@
       "pool_rows": 44,
       "us_rows": 39,
       "tech_us_rows": 21,
-      "raw_sidecar_rows": 73,
+      "raw_sidecar_rows": 80,
       "sidecar_active_rows": 21,
       "supplemental_rows": 63,
       "supplemental_with_desc": 63,
