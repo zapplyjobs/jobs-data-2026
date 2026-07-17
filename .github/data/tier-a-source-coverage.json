@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-17T10:51:36.476Z",
+  "generated_at": "2026-07-17T10:54:32.839Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -31,6 +31,9 @@
     "descriptions-deshaw.jsonl",
     "descriptions-eightfold.jsonl",
     "descriptions-enriched-1.jsonl",
+    "descriptions-enriched-2.jsonl",
+    "descriptions-enriched-3.jsonl",
+    "descriptions-enriched-4.jsonl",
     "descriptions-google.jsonl",
     "descriptions-greenhouse-1.jsonl",
     "descriptions-greenhouse-2.jsonl",
@@ -59,16 +62,14 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-17T10:51:32.926Z",
+    "checked_at": "2026-07-17T10:54:29.364Z",
     "active": true,
     "message": "**post-to-discord.yml**: Last run failed (<t:1784285449:R>)",
     "failures": [
       "**post-to-discord.yml**: Last run failed (<t:1784285449:R>)"
     ],
-    "warnings": [
-      "Runtime trending up: 7.6 min (warning at 7, alert at 10)"
-    ],
-    "warning_count": 1,
+    "warnings": [],
+    "warning_count": 0,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -80,19 +81,19 @@
   "rows": [
     {
       "source": "workday",
-      "pool_rows": 32358,
-      "us_rows": 17156,
-      "tech_us_rows": 5556,
-      "raw_sidecar_rows": 12311,
-      "sidecar_active_rows": 3096,
+      "pool_rows": 32294,
+      "us_rows": 17232,
+      "tech_us_rows": 5779,
+      "raw_sidecar_rows": 10824,
+      "sidecar_active_rows": 2428,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 3090,
-      "published_pct": 55.6,
-      "enriched_rows": 3106,
-      "enriched_pct": 55.9,
-      "enriched_with_skills": 2981,
+      "published_rows": 3065,
+      "published_pct": 53,
+      "enriched_rows": 3083,
+      "enriched_pct": 53.3,
+      "enriched_with_skills": 2959,
       "skills_pct": 96,
       "examples": [
         {
@@ -106,34 +107,34 @@
           "title": "R&D Engineer II"
         },
         {
-          "id": "workday-warner-bros.-discovery-R000103806",
-          "company": "Warner Bros. Discovery",
-          "title": "Cloud Security Architect"
+          "id": "workday-state-street-R-787055",
+          "company": "State Street",
+          "title": "Software Engineering & Development, VP"
         },
         {
-          "id": "workday-marvell-2602003",
-          "company": "Marvell",
-          "title": "Senior Staff Design Verification Engineer – PCIE/CXL Sub-System"
+          "id": "workday-state-street-R-787998",
+          "company": "State Street",
+          "title": "Corporate Audit Operations, Assistant Vice President, Hybrid"
         },
         {
-          "id": "workday-marvell-2600888",
-          "company": "Marvell",
-          "title": "Senior Staff CAD Engineer, Multi-die 3DIC & Power"
+          "id": "workday-state-street-R-788306",
+          "company": "State Street",
+          "title": "Senior Engineering  Mainframe Manager – Custody"
         },
         {
-          "id": "workday-marvell-2602699",
-          "company": "Marvell",
-          "title": "Hardware & Silicon Validation Senior Staff Engineer"
+          "id": "workday-state-street-R-788826",
+          "company": "State Street",
+          "title": "Full Stack Solution Architect - VP, Hybrid"
         },
         {
-          "id": "workday-mastercard-R-282821",
-          "company": "Mastercard",
-          "title": "Senior Software Engineer"
+          "id": "workday-state-street-R-788827",
+          "company": "State Street",
+          "title": "Full Stack Solution Architect - VP, Hybrid"
         },
         {
-          "id": "workday-mastercard-R-275738",
-          "company": "Mastercard",
-          "title": "Senior Software Engineer"
+          "id": "workday-state-street-R-794391",
+          "company": "State Street",
+          "title": "Software Engineering & Development-Workstream Lead"
         }
       ],
       "severity": "high",
@@ -212,11 +213,33 @@
       ]
     },
     {
+      "source": "smartrecruiters",
+      "pool_rows": 1937,
+      "us_rows": 1933,
+      "tech_us_rows": 373,
+      "raw_sidecar_rows": 2641,
+      "sidecar_active_rows": 368,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 373,
+      "published_pct": 100,
+      "enriched_rows": 373,
+      "enriched_pct": 100,
+      "enriched_with_skills": 368,
+      "skills_pct": 98.7,
+      "examples": [],
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
+    },
+    {
       "source": "microsoft",
       "pool_rows": 510,
       "us_rows": 311,
       "tech_us_rows": 183,
-      "raw_sidecar_rows": 509,
+      "raw_sidecar_rows": 501,
       "sidecar_active_rows": 181,
       "supplemental_rows": 543,
       "supplemental_with_desc": 37,
@@ -247,26 +270,6 @@
       "flags": []
     },
     {
-      "source": "smartrecruiters",
-      "pool_rows": 1937,
-      "us_rows": 1933,
-      "tech_us_rows": 373,
-      "raw_sidecar_rows": 2662,
-      "sidecar_active_rows": 373,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 373,
-      "published_pct": 100,
-      "enriched_rows": 373,
-      "enriched_pct": 100,
-      "enriched_with_skills": 368,
-      "skills_pct": 98.7,
-      "examples": [],
-      "severity": "ok",
-      "flags": []
-    },
-    {
       "source": "icims",
       "pool_rows": 0,
       "us_rows": 0,
@@ -291,7 +294,7 @@
       "pool_rows": 1490,
       "us_rows": 1443,
       "tech_us_rows": 597,
-      "raw_sidecar_rows": 1484,
+      "raw_sidecar_rows": 1490,
       "sidecar_active_rows": 597,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
@@ -311,7 +314,7 @@
       "pool_rows": 44,
       "us_rows": 39,
       "tech_us_rows": 21,
-      "raw_sidecar_rows": 80,
+      "raw_sidecar_rows": 73,
       "sidecar_active_rows": 21,
       "supplemental_rows": 63,
       "supplemental_with_desc": 63,
