@@ -88,6 +88,7 @@ jobs:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TEAM_TOKEN }}
           DISCORD_PIPELINE_ALERT_CHANNEL_ID: ${{ secrets.DISCORD_PIPELINE_ALERT_CHANNEL_ID }}
           GH_PAT_EXPIRY_DATE: ${{ vars.GH_PAT_EXPIRY_DATE }}
+          DISCORD_SILENT: 'true'  # TEMP: suppression logic has a bug (failure messages include time, so string comparison never matches). Silent until proper fix or Discord sessions reset (~18:08 UTC Jul 17).
         run: node .github/scripts/processing/lib/pipeline-alert.js
       - name: Build Tier A source coverage report
         run: node .github/scripts/source-coverage-audit.js
