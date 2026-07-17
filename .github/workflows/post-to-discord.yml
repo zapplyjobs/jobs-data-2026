@@ -141,18 +141,10 @@ jobs:
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
 
-      - name: Commit updated database
+      - name: Publish posted_jobs to Supabase directly (Phase 1 R2 elimination)
         if: always()
-        run: |
-          git config user.email "bot@zapplyjobs.com"
-          git config user.name "Aggregator Bot"
-          # INF-BLOAT-5: only commit posted_jobs (dashboard reads it). dedupe-store lives in R2.
-          git add .github/data/posted_jobs.json || exit 0
-          git commit -m "chore: update dedupe database [skip ci]" || exit 0
-          for i in 1 2 3; do
-            git stash --include-untracked
-            git pull --rebase --strategy-option=theirs origin main
-            git push && break
-            echo "Push attempt $i failed, retrying in 5s..."
-            sleep 5
-          done
+        continue-on-error: true
+        run: node .github/scripts/processing/lib/publish-metrics-to-edge.js --data-dir .github/data
+        env:
+          EDGE_FUNCTION_URL: https://xxmhgagpbxjflajoaahy.supabase.co/functions/v1/publish-metrics-function
+          PUBLISH_SECRET: ${{ secrets.PUBLISH_SECRET }}
