@@ -9,9 +9,9 @@ name: publish-metrics-to-supabase
 # REQUIRED SECRET: PUBLISH_SECRET (same value as on job-board-processing).
 
 on:
-  schedule:
-    - cron: '*/10 * * * *'   # every 10 min
   workflow_dispatch:
+  # schedule removed (Phase 1): collect-metrics + post-to-discord now publish directly.
+  # This workflow stays as dispatch-only backup (triggered by collect-metrics wave link).
 
 permissions:
   contents: read
