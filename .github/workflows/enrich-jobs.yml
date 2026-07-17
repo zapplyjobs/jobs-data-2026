@@ -203,23 +203,16 @@ jobs:
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
         run: node scripts/upload-dashboard-data-to-r2.js enrichment-stats.json jobs-metadata.json enrichment-history.jsonl
 
-      - name: Trigger pipeline alert
+      - name: Dispatch post-to-discord (chain link)
         if: success()
         run: |
-          gh workflow run pipeline-alert.yml -R zapplyjobs/jobs-data-2026 --ref main 2>/dev/null && echo "Pipeline alert triggered" || echo "Alert trigger failed (non-critical)"
+          gh workflow run post-to-discord.yml -R zapplyjobs/jobs-data-2026 --ref main 2>/dev/null && echo "Dispatched post-to-discord" || echo "Post-to-discord dispatch failed (non-critical)"
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
 
-      - name: Heartbeat — dispatch next run
-        if: success() && github.ref_name == 'main'
-        env:
-          GH_PAT: ${{ secrets.GH_PAT }}
+      - name: Dispatch collect-metrics (chain link)
+        if: success()
         run: |
-          curl -sf -X POST \
-            "https://api.github.com/repos/zapplyjobs/jobs-data-2026/actions/workflows/enrich-jobs.yml/dispatches" \
-            -H "Authorization: Bearer ${GH_PAT}" \
-            -H "Accept: application/vnd.github+json" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            -d '{"ref":"main"}' \
-            && echo "💓 Heartbeat: dispatched next enrich run" \
-            || echo "⚠️ Heartbeat failed (cron backup will catch up)"
+          gh workflow run collect-metrics.yml -R zapplyjobs/jobs-data-2026 --ref main 2>/dev/null && echo "Dispatched collect-metrics" || echo "Collect-metrics dispatch failed (non-critical)"
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}

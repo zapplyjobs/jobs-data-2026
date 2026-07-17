@@ -156,17 +156,3 @@ jobs:
             echo "Push attempt $i failed, retrying in 5s..."
             sleep 5
           done
-
-      - name: Heartbeat — dispatch next run
-        if: success() && github.ref_name == 'main'
-        env:
-          GH_PAT: ${{ secrets.GH_PAT }}
-        run: |
-          curl -sf -X POST \
-            "https://api.github.com/repos/zapplyjobs/jobs-data-2026/actions/workflows/post-to-discord.yml/dispatches" \
-            -H "Authorization: Bearer ${GH_PAT}" \
-            -H "Accept: application/vnd.github+json" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            -d '{"ref":"main"}' \
-            && echo "💓 Heartbeat: dispatched next Discord post run" \
-            || echo "⚠️ Heartbeat failed (cron backup will catch up)"
