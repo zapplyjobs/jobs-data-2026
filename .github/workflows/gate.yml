@@ -30,3 +30,15 @@ jobs:
           else
             echo "✅ No files larger than 5MB"
           fi
+
+      - name: Check for data files in public repo
+        run: |
+          DATA_FILES=$(find .github/data -type f ! -name '.gitkeep' 2>/dev/null || true)
+          if [ -n "$DATA_FILES" ]; then
+            echo "::error::Data files detected in .github/data/ — these belong in R2/Supabase, not public git:"
+            echo "$DATA_FILES" | while read f; do echo "::error::$f"; done
+            echo "If this file MUST be in git, add an exception in this check."
+            exit 1
+          else
+            echo "✅ No data files in .github/data/"
+          fi
