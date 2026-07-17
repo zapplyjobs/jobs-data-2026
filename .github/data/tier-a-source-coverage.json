@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-17T00:48:21.651Z",
+  "generated_at": "2026-07-17T00:52:45.781Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -59,14 +59,12 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-17T00:48:19.303Z",
+    "checked_at": "2026-07-17T00:52:43.479Z",
     "active": false,
     "message": null,
     "failures": [],
-    "warnings": [
-      "Runtime trending up: 7.6 min (warning at 7, alert at 10)"
-    ],
-    "warning_count": 1,
+    "warnings": [],
+    "warning_count": 0,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -78,46 +76,21 @@
   "rows": [
     {
       "source": "workday",
-      "pool_rows": 31453,
-      "us_rows": 17681,
-      "tech_us_rows": 5319,
-      "raw_sidecar_rows": 11869,
-      "sidecar_active_rows": 2951,
+      "pool_rows": 31677,
+      "us_rows": 17728,
+      "tech_us_rows": 5564,
+      "raw_sidecar_rows": 11100,
+      "sidecar_active_rows": 2430,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 2912,
-      "published_pct": 54.7,
-      "enriched_rows": 2966,
-      "enriched_pct": 55.8,
-      "enriched_with_skills": 2841,
-      "skills_pct": 95.8,
+      "published_rows": 2737,
+      "published_pct": 49.2,
+      "enriched_rows": 2803,
+      "enriched_pct": 50.4,
+      "enriched_with_skills": 2680,
+      "skills_pct": 95.6,
       "examples": [
-        {
-          "id": "workday-disney-10149378",
-          "company": "Disney",
-          "title": "Senior Software Engineer - Java"
-        },
-        {
-          "id": "workday-disney-10154610",
-          "company": "Disney",
-          "title": "Senior Quality Controls Engineer (Project Hire/Internal Assignment))"
-        },
-        {
-          "id": "workday-disney-10150525",
-          "company": "Disney",
-          "title": "Software Engineer II"
-        },
-        {
-          "id": "workday-disney-10153799",
-          "company": "Disney",
-          "title": "Product Software Engineer II"
-        },
-        {
-          "id": "workday-disney-10155787",
-          "company": "Disney",
-          "title": "Senior Technology Portfolio Manager"
-        },
         {
           "id": "workday-paypal-R0134152",
           "company": "PayPal",
@@ -129,9 +102,34 @@
           "title": "Sr. Software Engineer – Cloud Infrastructure and Devops"
         },
         {
+          "id": "workday-abb-JR00041357",
+          "company": "ABB",
+          "title": "Quality Control Engineer"
+        },
+        {
+          "id": "workday-abb-JR00041062",
+          "company": "ABB",
+          "title": "Senior Project Engineer"
+        },
+        {
+          "id": "workday-abb-JR00028526",
+          "company": "ABB",
+          "title": "Production Engineering Technician (2nd Shift)"
+        },
+        {
+          "id": "workday-abb-JR00025188",
+          "company": "ABB",
+          "title": "Director of Sales PV and BESS Inverter"
+        },
+        {
           "id": "workday-member-solutions-R52400",
           "company": "Member Solutions",
           "title": "Technical Business Analyst"
+        },
+        {
+          "id": "workday-takeda-R0184638",
+          "company": "Takeda",
+          "title": "Windows Device Engineering Lead"
         }
       ],
       "severity": "high",
@@ -210,6 +208,28 @@
       ]
     },
     {
+      "source": "smartrecruiters",
+      "pool_rows": 1941,
+      "us_rows": 1937,
+      "tech_us_rows": 370,
+      "raw_sidecar_rows": 2669,
+      "sidecar_active_rows": 367,
+      "supplemental_rows": 0,
+      "supplemental_with_desc": 0,
+      "supplemental_meta": null,
+      "published_rows": 370,
+      "published_pct": 100,
+      "enriched_rows": 370,
+      "enriched_pct": 100,
+      "enriched_with_skills": 365,
+      "skills_pct": 98.6,
+      "examples": [],
+      "severity": "medium",
+      "flags": [
+        "published_gt_raw_sidecar"
+      ]
+    },
+    {
       "source": "microsoft",
       "pool_rows": 518,
       "us_rows": 338,
@@ -217,11 +237,11 @@
       "raw_sidecar_rows": 510,
       "sidecar_active_rows": 198,
       "supplemental_rows": 545,
-      "supplemental_with_desc": 39,
+      "supplemental_with_desc": 40,
       "supplemental_meta": {
-        "generated_at": "2026-07-16T22:28:36.199Z",
+        "generated_at": "2026-07-17T00:52:27.287Z",
         "lane_name": "custom",
-        "jobs_fetched": 5079
+        "jobs_fetched": 5084
       },
       "published_rows": 198,
       "published_pct": 99,
@@ -241,26 +261,6 @@
           "title": "Senior Software Engineer"
         }
       ],
-      "severity": "ok",
-      "flags": []
-    },
-    {
-      "source": "smartrecruiters",
-      "pool_rows": 1941,
-      "us_rows": 1937,
-      "tech_us_rows": 370,
-      "raw_sidecar_rows": 2672,
-      "sidecar_active_rows": 370,
-      "supplemental_rows": 0,
-      "supplemental_with_desc": 0,
-      "supplemental_meta": null,
-      "published_rows": 370,
-      "published_pct": 100,
-      "enriched_rows": 370,
-      "enriched_pct": 100,
-      "enriched_with_skills": 365,
-      "skills_pct": 98.6,
-      "examples": [],
       "severity": "ok",
       "flags": []
     },
@@ -309,14 +309,14 @@
       "pool_rows": 419,
       "us_rows": 344,
       "tech_us_rows": 231,
-      "raw_sidecar_rows": 834,
+      "raw_sidecar_rows": 884,
       "sidecar_active_rows": 231,
-      "supplemental_rows": 876,
-      "supplemental_with_desc": 876,
+      "supplemental_rows": 877,
+      "supplemental_with_desc": 877,
       "supplemental_meta": {
-        "generated_at": "2026-07-16T22:28:36.199Z",
+        "generated_at": "2026-07-17T00:52:27.287Z",
         "lane_name": "custom",
-        "jobs_fetched": 5079
+        "jobs_fetched": 5084
       },
       "published_rows": 231,
       "published_pct": 100,
