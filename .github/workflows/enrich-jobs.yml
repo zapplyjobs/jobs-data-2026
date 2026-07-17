@@ -2,6 +2,9 @@ name: Enrich Jobs
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/enrich-jobs.yml'
   schedule:
     - cron: '*/15 * * * *'  # Backup trigger (Worker cron is unreliable for sub-15-min intervals)
 

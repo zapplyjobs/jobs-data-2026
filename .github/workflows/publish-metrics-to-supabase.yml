@@ -10,6 +10,9 @@ name: publish-metrics-to-supabase
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/publish-metrics-to-supabase.yml'
   # schedule removed (Phase 1): collect-metrics + post-to-discord now publish directly.
   # This workflow stays as dispatch-only backup (triggered by collect-metrics wave link).
 
