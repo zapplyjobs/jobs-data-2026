@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: '*/15 * * * *'  # Every 15 minutes
   workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/post-to-discord.yml'
 
 concurrency:
   group: post-to-discord
