@@ -43,7 +43,7 @@ jobs:
             const r2 = createR2Client({ prefix: 'data/' });
             const dataDir = '.github/data';
             if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-            const files = ['all_jobs.json', 'jobs-metadata.json', 'enrichment-stats.json', 'canada-tech-summary.json', 'bridge-metrics.json', 'traffic-history.jsonl', 'bridge-metrics-history.jsonl'];
+            const files = ['all_jobs.json', 'jobs-metadata.json', 'enrichment-stats.json', 'canada-tech-summary.json', 'bridge-metrics.json', 'traffic-history.jsonl', 'bridge-metrics-history.jsonl', 'daily-stats.json', 'history.jsonl', 'history-archive.jsonl', 'enrichment-history.jsonl', 'pipeline-alert.json', 'general-review.json', 'tag-history.jsonl'];
             for (const file of files) {
               try {
                 const raw = await r2.downloadRaw(file);
@@ -114,6 +114,14 @@ jobs:
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
         run: node scripts/upload-dashboard-data-to-r2.js zjp-metrics.json metrics/latest.json traffic-history.jsonl bridge-metrics-history.jsonl
+
+      - name: Publish metrics to Supabase directly (Phase 1 R2 elimination)
+        if: success()
+        continue-on-error: true
+        run: node .github/scripts/processing/lib/publish-metrics-to-edge.js --data-dir .github/data
+        env:
+          EDGE_FUNCTION_URL: https://xxmhgagpbxjflajoaahy.supabase.co/functions/v1/publish-metrics-function
+          PUBLISH_SECRET: ${{ secrets.PUBLISH_SECRET }}
 
       - name: Trigger Supabase publish (wave link)
         if: success()
