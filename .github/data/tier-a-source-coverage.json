@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-17T10:47:22.157Z",
+  "generated_at": "2026-07-17T10:48:08.050Z",
   "truth_surfaces": {
     "producer_pool": "all_jobs.json",
     "board_input": "us_jobs.json",
@@ -31,6 +31,9 @@
     "descriptions-deshaw.jsonl",
     "descriptions-eightfold.jsonl",
     "descriptions-enriched-1.jsonl",
+    "descriptions-enriched-2.jsonl",
+    "descriptions-enriched-3.jsonl",
+    "descriptions-enriched-4.jsonl",
     "descriptions-google.jsonl",
     "descriptions-greenhouse-1.jsonl",
     "descriptions-greenhouse-2.jsonl",
@@ -59,16 +62,14 @@
     "enrichment_version": 89
   },
   "consumer_alert": {
-    "checked_at": "2026-07-17T10:47:18.382Z",
+    "checked_at": "2026-07-17T10:48:04.730Z",
     "active": true,
     "message": "**post-to-discord.yml**: Last run failed (<t:1784282951:R>)",
     "failures": [
       "**post-to-discord.yml**: Last run failed (<t:1784282951:R>)"
     ],
-    "warnings": [
-      "Runtime trending up: 7.6 min (warning at 7, alert at 10)"
-    ],
-    "warning_count": 1,
+    "warnings": [],
+    "warning_count": 0,
     "secrets": [
       {
         "secret": "GH_PAT",
@@ -80,19 +81,19 @@
   "rows": [
     {
       "source": "workday",
-      "pool_rows": 31528,
-      "us_rows": 17383,
-      "tech_us_rows": 5896,
-      "raw_sidecar_rows": 12121,
-      "sidecar_active_rows": 2892,
+      "pool_rows": 32358,
+      "us_rows": 17156,
+      "tech_us_rows": 5556,
+      "raw_sidecar_rows": 10860,
+      "sidecar_active_rows": 2427,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
       "supplemental_meta": null,
-      "published_rows": 2799,
-      "published_pct": 47.5,
-      "enriched_rows": 2976,
-      "enriched_pct": 50.5,
-      "enriched_with_skills": 2853,
+      "published_rows": 2828,
+      "published_pct": 50.9,
+      "enriched_rows": 3014,
+      "enriched_pct": 54.2,
+      "enriched_with_skills": 2890,
       "skills_pct": 95.9,
       "examples": [
         {
@@ -216,7 +217,7 @@
       "pool_rows": 1937,
       "us_rows": 1933,
       "tech_us_rows": 373,
-      "raw_sidecar_rows": 2657,
+      "raw_sidecar_rows": 2641,
       "sidecar_active_rows": 368,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
@@ -258,6 +259,41 @@
       "flags": []
     },
     {
+      "source": "microsoft",
+      "pool_rows": 510,
+      "us_rows": 311,
+      "tech_us_rows": 183,
+      "raw_sidecar_rows": 501,
+      "sidecar_active_rows": 181,
+      "supplemental_rows": 543,
+      "supplemental_with_desc": 37,
+      "supplemental_meta": {
+        "generated_at": "2026-07-17T10:40:10.929Z",
+        "lane_name": "custom",
+        "jobs_fetched": 4265
+      },
+      "published_rows": 181,
+      "published_pct": 98.9,
+      "enriched_rows": 181,
+      "enriched_pct": 98.9,
+      "enriched_with_skills": 181,
+      "skills_pct": 100,
+      "examples": [
+        {
+          "id": "microsoft-200031126",
+          "company": "Microsoft",
+          "title": "Senior Software Engineer"
+        },
+        {
+          "id": "microsoft-200040764",
+          "company": "Microsoft",
+          "title": "Principal Silicon Design Verification Engineer"
+        }
+      ],
+      "severity": "ok",
+      "flags": []
+    },
+    {
       "source": "icims",
       "pool_rows": 0,
       "us_rows": 0,
@@ -278,35 +314,11 @@
       "flags": []
     },
     {
-      "source": "microsoft",
-      "pool_rows": 509,
-      "us_rows": 317,
-      "tech_us_rows": 190,
-      "raw_sidecar_rows": 509,
-      "sidecar_active_rows": 190,
-      "supplemental_rows": 543,
-      "supplemental_with_desc": 37,
-      "supplemental_meta": {
-        "generated_at": "2026-07-17T10:40:10.929Z",
-        "lane_name": "custom",
-        "jobs_fetched": 4265
-      },
-      "published_rows": 190,
-      "published_pct": 100,
-      "enriched_rows": 190,
-      "enriched_pct": 100,
-      "enriched_with_skills": 190,
-      "skills_pct": 100,
-      "examples": [],
-      "severity": "ok",
-      "flags": []
-    },
-    {
       "source": "tiktok",
       "pool_rows": 1490,
       "us_rows": 1443,
       "tech_us_rows": 597,
-      "raw_sidecar_rows": 1484,
+      "raw_sidecar_rows": 1490,
       "sidecar_active_rows": 597,
       "supplemental_rows": 0,
       "supplemental_with_desc": 0,
@@ -326,7 +338,7 @@
       "pool_rows": 44,
       "us_rows": 39,
       "tech_us_rows": 21,
-      "raw_sidecar_rows": 80,
+      "raw_sidecar_rows": 73,
       "sidecar_active_rows": 21,
       "supplemental_rows": 63,
       "supplemental_with_desc": 63,
