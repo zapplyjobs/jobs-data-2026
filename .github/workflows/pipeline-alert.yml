@@ -195,3 +195,17 @@ jobs:
               --field sha="$REMOTE_SHA" \
               --jq '.commit.sha' 2>/dev/null && echo "Tracking state pushed" || echo "Push failed or no change"
           fi
+
+      - name: Heartbeat — dispatch next run
+        if: success() && github.ref_name == 'main'
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: |
+          curl -sf -X POST \
+            "https://api.github.com/repos/zapplyjobs/jobs-data-2026/actions/workflows/pipeline-alert.yml/dispatches" \
+            -H "Authorization: Bearer ${GH_PAT}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            -d '{"ref":"main"}' \
+            && echo "💓 Heartbeat: dispatched next pipeline alert run" \
+            || echo "⚠️ Heartbeat failed (cron backup will catch up)"
