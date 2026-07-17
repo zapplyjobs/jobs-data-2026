@@ -7,6 +7,10 @@ on:
   repository_dispatch:
     types: [collect-metrics]
 
+concurrency:
+  group: collect-metrics
+  cancel-in-progress: false
+
 jobs:
   metrics:
     runs-on: ubuntu-latest
