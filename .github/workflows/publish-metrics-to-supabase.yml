@@ -50,17 +50,3 @@ jobs:
         env:
           EDGE_FUNCTION_URL: https://xxmhgagpbxjflajoaahy.supabase.co/functions/v1/publish-metrics-function
           PUBLISH_SECRET: ${{ secrets.PUBLISH_SECRET }}
-
-      - name: Heartbeat — dispatch next run
-        if: success() && github.ref_name == 'main'
-        env:
-          GH_PAT: ${{ secrets.GH_PAT }}
-        run: |
-          curl -sf -X POST \
-            "https://api.github.com/repos/zapplyjobs/jobs-data-2026/actions/workflows/publish-metrics-to-supabase.yml/dispatches" \
-            -H "Authorization: Bearer ${GH_PAT}" \
-            -H "Accept: application/vnd.github+json" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            -d '{"ref":"main"}' \
-            && echo "💓 Heartbeat: dispatched next Supabase publish run" \
-            || echo "⚠️ Heartbeat failed (cron backup will catch up)"

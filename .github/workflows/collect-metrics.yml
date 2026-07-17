@@ -146,17 +146,3 @@ jobs:
           echo "Triggered pipeline alert (wave link — alerts checked right after metrics collection)"
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
-
-      - name: Heartbeat — dispatch next run
-        if: success() && github.ref_name == 'main'
-        env:
-          GH_PAT: ${{ secrets.GH_PAT }}
-        run: |
-          curl -sf -X POST \
-            "https://api.github.com/repos/zapplyjobs/jobs-data-2026/actions/workflows/collect-metrics.yml/dispatches" \
-            -H "Authorization: Bearer ${GH_PAT}" \
-            -H "Accept: application/vnd.github+json" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            -d '{"ref":"main"}' \
-            && echo "💓 Heartbeat: dispatched next metrics collection run" \
-            || echo "⚠️ Heartbeat failed (cron backup will catch up)"
