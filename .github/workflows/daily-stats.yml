@@ -99,3 +99,11 @@ jobs:
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
         run: node scripts/upload-dashboard-data-to-r2.js daily-stats.json history.jsonl history-archive.jsonl traffic-history.jsonl
+
+      - name: Publish to Supabase Edge (Phase 2 R2 elimination)
+        if: success()
+        continue-on-error: true
+        run: node .github/scripts/processing/lib/publish-metrics-to-edge.js --data-dir .github/data
+        env:
+          EDGE_FUNCTION_URL: https://xxmhgagpbxjflajoaahy.supabase.co/functions/v1/publish-metrics-function
+          PUBLISH_SECRET: ${{ secrets.PUBLISH_SECRET }}
