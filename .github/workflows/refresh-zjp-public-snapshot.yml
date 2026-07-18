@@ -1,3 +1,11 @@
+# Trigger policy (AGG-WORKFLOW-DISPATCH-AUDIT-1, 2026-07-18): workflow_dispatch-only BY DESIGN.
+# This workflow is WAVE-LINKED from jobs-aggregator-private/fetch-jobs.yml (final step,
+# `if: success() && github.ref_name == 'main'`). It runs ~5-10 min after each successful
+# main pipeline run — the right cadence because new snapshot data is only available then.
+# Risk: if fetch-jobs breaks, this stops too — but fetch-jobs has its own monitoring
+# (check-01 fetch-stale), so the silence is caught upstream. Do NOT add `schedule:` here
+# without removing the wave-link first; double-trigger would race the concurrency group.
+
 name: Refresh ZJP Public Snapshot
 
 on:
