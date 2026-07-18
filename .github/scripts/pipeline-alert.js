@@ -3,22 +3,28 @@
 /**
  * Pipeline Alert
  *
- * Checks 8 failure modes and posts a Discord alert if any fail.
+ * Checks 16 failure modes and posts a Discord alert if any fail.
  * Silent on all-green — only fires when something is actually wrong.
  *
  * Failure modes checked:
  *   1. fetch-jobs.yml stale (last run > 30 min ago or failed)
+ *  1b. desc-backfill.yml stale (last run > 30 min ago or failed)
  *   2. post-to-discord.yml last run failed
+ *  2b. enrich-jobs.yml run duration > 10 min (ENR-TIMELINESS-1)
  *   3. Any consumer update-jobs.yml failed
- *   4. total_jobs dropped >20% vs previous snapshot (compares same field)
- *   5. Any individual source dropped >40% vs previous snapshot
+ *   4. total_jobs dropped >40% vs previous snapshot
+ *   5. Any individual source dropped >60% vs previous snapshot
  *   6. Healthcare domain >30% of US-tagged pool (composition drift)
  *   7. us-tagged job count = 0 (location tagger broken)
- *   8. JSearch total_fetched = 0 (fetcher completely silent)
  *   9. Any key domain (software/data_science/hardware/healthcare/ai) has 0 tagged jobs
- *  10. Senior filter rate outside 40-65% range (AGG-9)
+ *  10. Senior filter rate >5% in tech+US (entry-level guards broken) (AGG-9)
  *  11. G1 general rate >55% (tag engine regression) (AGG-9)
  *  12. Enrichment coverage <70% of tech jobs (AGG-9)
+ *  13. WD rate-limited count >5 (Cloudflare throttling — AGG-WD-429MONITOR-1)
+ * 15b. Per-source T3 enrichment regression <50% (ENR-MONITOR-1)
+ * 15c. Retrievable description <80% (ENR-MONITOR-1)
+ * 15d. Silent rot >2000 jobs (ENR-MONITOR-1)
+ * 15e. Weighted Completeness Index <70 (ENR-MONITOR-1)
  *
  * Not alerts (by design, not failures):
  *   - posted_jobs count = 0 per run (dedup saturation is normal)
@@ -122,6 +128,18 @@ async function runChecks() {
     }
   }
 
+  // Check 1b: desc-backfill.yml stale or failed (AGG-DESC-ASYNC-1)
+  const descBackfillRun = await getLastWorkflowRun('zapplyjobs', 'jobs-aggregator-private', 'desc-backfill.yml');
+  if (descBackfillRun?.conclusion === 'failure') {
+    failures.push(`**desc-backfill.yml**: Last run failed (<t:${Math.floor(new Date(descBackfillRun.updated_at).getTime() / 1000)}:R>)`);
+  } else if (descBackfillRun) {
+    const descAge = now - new Date(descBackfillRun.updated_at).getTime();
+    if (descAge > STALE_THRESHOLD_MS) {
+      const mins = Math.floor(descAge / 60000);
+      failures.push(`**desc-backfill.yml**: Last run ${mins}m ago (expected ≤30m) — descriptions may be stale`);
+    }
+  }
+
   // Check 2: post-to-discord.yml failed
   const discordRun = await getLastWorkflowRun('zapplyjobs', 'jobs-data-2026', 'post-to-discord.yml');
   if (!discordRun) {
@@ -204,11 +222,6 @@ async function runChecks() {
       failures.push('**US location tagger broken**: 0 jobs tagged `us` — check tagLocations() in tag-engine.js');
     }
 
-    // Check 8: JSearch completely silent
-    const jsearchFetched = metadata.jsearch_stats?.total_fetched ?? null;
-    if (jsearchFetched === 0) {
-      failures.push('**JSearch silent**: total_fetched = 0 this run — fetcher may be broken');
-    }
 
     // Check 9: per-domain US job counts — alert if any key consumer domain hits 0
     // tag_stats.domains counts the full pool; we want US-tagged subset.
@@ -221,6 +234,13 @@ async function runChecks() {
       if (count === 0) {
         failures.push(`**Domain empty (${domain})**: 0 jobs tagged — tag-engine or fetcher broken for this domain`);
       }
+    }
+
+    // Check 13: WD rate-limited count (AGG-WD-429MONITOR-1)
+    // Cloudflare throttling signal. Count >5 means WD concurrency may need reduction.
+    const wdRateLimited = metadata.wd_rate_limited_count ?? 0;
+    if (wdRateLimited > 5) {
+      failures.push(`**WD rate-limited**: ${wdRateLimited} HTTP 429 responses this run (threshold: >5) — Cloudflare may be throttling; consider reducing WD fetcher concurrency`);
     }
 
     // Check 10 (AGG-9): Senior filter rate drift
