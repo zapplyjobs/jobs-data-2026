@@ -42,8 +42,9 @@ jobs:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TEAM_TOKEN }}
           DISCORD_WEEKLY_STATS_CHANNEL_ID: ${{ secrets.DISCORD_WEEKLY_STATS_CHANNEL_ID }}
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           REPORT_MODE: ${{ inputs.mode || 'current' }}
-          REPLAY_INDEX: ${{ inputs.replay_index || '0' }}
         run: node .github/scripts/processing/lib/weekly-summary.js --mode "$REPORT_MODE" --replay-index "$REPLAY_INDEX"
 
       - name: Commit updated stats file
