@@ -1,3 +1,8 @@
+# Trigger policy (AGG-WORKFLOW-DISPATCH-AUDIT-1, 2026-07-18): workflow_dispatch-only BY DESIGN.
+# Manual dashboard tool (added 2026-07-01 in commit 045cb423 alongside verify-all-jobs).
+# Operator invokes from the dashboard Tools tab on demand — not a regular-cadence workflow.
+# If this changes (e.g., scheduled coverage audits), add `schedule:` and update this note.
+
 name: Source Coverage Audit
 on:
   workflow_dispatch:
