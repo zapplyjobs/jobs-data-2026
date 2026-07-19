@@ -56,7 +56,7 @@ jobs:
             const r2 = createR2Client({ prefix: 'data/' });
             const dataDir = '.github/data';
             if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-            const files = ['all_jobs.json', 'us_jobs.json', 'enriched_jobs.json', 'enrichment-stats.json', 'desc-fetch-failures.json', 'jobs-metadata.json', 'zjp-metrics.json', 'softwarejobs-descriptions.json', 'softwarejobs-descriptions-meta.json', 'supplemental-custom-jobs.json', 'supplemental-custom-metadata.json', 'supplemental-oracle-jobs.json', 'supplemental-oracle-metadata.json', 'pipeline-alert.json'];  // ENR-MONITOR-FIX-1: +enrichment-stats.json — unblocks check-12/15/30/32. ENR-DESCCACHE-OBSERVABILITY-1: +desc-fetch-failures.json — surface silent fetch failures for observability.
+            const files = ['all_jobs.json', 'us_jobs.json', 'enriched_jobs.json', 'enrichment-stats.json', 'desc-fetch-failures.json', 'jobs-metadata.json', 'zjp-metrics.json', 'metrics/latest.json', 'softwarejobs-descriptions.json', 'softwarejobs-descriptions-meta.json', 'supplemental-custom-jobs.json', 'supplemental-custom-metadata.json', 'supplemental-oracle-jobs.json', 'supplemental-oracle-metadata.json', 'pipeline-alert.json'];  // ENR-MONITOR-FIX-1: +enrichment-stats.json. ENR-DESCCACHE-OBSERVABILITY-1: +desc-fetch-failures.json. ENR-PAL-DATA-AUDIT-1: +metrics/latest.json — unblocks checks 4/5/14/20 (silently null ctx.prev since deploy).
             const sidecars = await r2.list('descriptions-');
             for (const obj of sidecars) {
               const name = obj.key.replace(/^data\//, '');
@@ -66,7 +66,9 @@ jobs:
               try {
                 const raw = await r2.downloadRaw(file);
                 if (raw) {
-                  fs.writeFileSync(path.join(dataDir, file), Buffer.from(raw));
+                  const dest = path.join(dataDir, file);
+                  fs.mkdirSync(path.dirname(dest), { recursive: true });  // ENR-PAL-DATA-AUDIT-1: support nested paths like metrics/latest.json
+                  fs.writeFileSync(dest, Buffer.from(raw));
                   console.log('R2 download OK: ' + file);
                 } else { console.log('R2 SKIP: ' + file + ' (not found)'); }
               } catch (e) { console.error('R2 ERR: ' + file + ' - ' + e.message); }
