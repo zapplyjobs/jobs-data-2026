@@ -56,7 +56,7 @@ jobs:
             const r2 = createR2Client({ prefix: 'data/' });
             const dataDir = '.github/data';
             if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-            const files = ['all_jobs.json', 'us_jobs.json', 'enriched_jobs.json', 'enrichment-stats.json', 'jobs-metadata.json', 'zjp-metrics.json', 'softwarejobs-descriptions.json', 'softwarejobs-descriptions-meta.json', 'supplemental-custom-jobs.json', 'supplemental-custom-metadata.json', 'supplemental-oracle-jobs.json', 'supplemental-oracle-metadata.json', 'pipeline-alert.json'];  // ENR-MONITOR-FIX-1: +enrichment-stats.json — unblocks check-12/15/30/32 (were silently null ctx.enrichStats)
+            const files = ['all_jobs.json', 'us_jobs.json', 'enriched_jobs.json', 'enrichment-stats.json', 'desc-fetch-failures.json', 'jobs-metadata.json', 'zjp-metrics.json', 'softwarejobs-descriptions.json', 'softwarejobs-descriptions-meta.json', 'supplemental-custom-jobs.json', 'supplemental-custom-metadata.json', 'supplemental-oracle-jobs.json', 'supplemental-oracle-metadata.json', 'pipeline-alert.json'];  // ENR-MONITOR-FIX-1: +enrichment-stats.json — unblocks check-12/15/30/32. ENR-DESCCACHE-OBSERVABILITY-1: +desc-fetch-failures.json — surface silent fetch failures for observability.
             const sidecars = await r2.list('descriptions-');
             for (const obj of sidecars) {
               const name = obj.key.replace(/^data\//, '');
