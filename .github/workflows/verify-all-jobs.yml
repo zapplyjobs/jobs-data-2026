@@ -14,6 +14,22 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+      - name: Install transcrypt
+        run: |
+          curl -sSL https://raw.githubusercontent.com/elasticdog/transcrypt/5effa13/transcrypt -o /tmp/transcrypt
+          chmod +x /tmp/transcrypt
+          sudo mv /tmp/transcrypt /usr/local/bin/transcrypt
+
+      - name: Unlock encrypted files
+        run: |
+          echo "Y" | transcrypt --cipher aes-256-cbc --password "$TRANSCRYPT_PASSWORD" --force
+          git ls-files -z '*.js' '*.json' '*.jsonl' | xargs -0 rm -f
+          git checkout HEAD -- .
+          echo "Decrypt verification:" && head -1 .github/scripts/index.js 2>/dev/null || echo "(no index.js)"
+        env:
+          TRANSCRYPT_PASSWORD: ${{ secrets.TRANSCRYPT_PASSWORD }}
+
+
       - uses: actions/setup-node@v4
         with:
           node-version: '20'

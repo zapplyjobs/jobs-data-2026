@@ -1,46 +1,56 @@
-#!/usr/bin/env node
-// Dep-free R2 (S3-API) uploader — Node 22 built-ins only (crypto + fetch). No npm install needed,
-// so it runs in any jobs-data-2026 workflow. Uploads dashboard data files to R2 at data/<name>.
-// Usage: node upload-dashboard-data-to-r2-nodep.js <file1> [file2 ...]  (names relative to .github/data/)
-const fs = require('fs');
-const path = require('path');
-const crypto = require('crypto');
-
-const files = process.argv.slice(2);
-if (!files.length) { console.log('no files given'); process.exit(0); }
-const AK = process.env.R2_ACCESS_KEY_ID, SK = process.env.R2_SECRET_ACCESS_KEY;
-const EP = process.env.R2_ENDPOINT, BK = process.env.R2_BUCKET_NAME;
-if (!AK || !SK || !EP || !BK) { console.error('missing R2 env vars'); process.exit(1); }
-
-const sha = (b) => crypto.createHash('sha256').update(b).digest('hex');
-const hmac = (k, d) => crypto.createHmac('sha256', k).update(d).digest();
-const sigKey = (sec, date) => hmac(hmac(hmac(hmac('AWS4' + sec, date), 'auto'), 's3'), 'aws4_request');
-
-async function putR2(key, body, ct) {
-  const host = new URL(EP).host;
-  const resource = `/${BK}/${key}`;
-  const amzDate = new Date().toISOString().replace(/[:-]|\.\d{3}/g, '');
-  const dateStamp = amzDate.slice(0, 8);
-  const payloadHash = sha(body);
-  const hdrs = { host, 'x-amz-content-sha256': payloadHash, 'x-amz-date': amzDate, 'content-type': ct };
-  const canonHeaders = Object.keys(hdrs).sort().map(k => `${k}:${hdrs[k]}\n`).join('');
-  const signedHeaders = Object.keys(hdrs).sort().join(';');
-  const canonReq = `PUT\n${resource}\n\n${canonHeaders}\n${signedHeaders}\n${payloadHash}`;
-  const scope = `${dateStamp}/auto/s3/aws4_request`;
-  const strToSign = `AWS4-HMAC-SHA256\n${amzDate}\n${scope}\n${sha(canonReq)}`;
-  const signature = crypto.createHmac('sha256', sigKey(SK, dateStamp)).update(strToSign).digest('hex');
-  const auth = `AWS4-HMAC-SHA256 Credential=${AK}/${scope}, SignedHeaders=${signedHeaders}, Signature=${signature}`;
-  const res = await fetch(`${EP}${resource}`, { method: 'PUT', headers: { ...hdrs, authorization: auth }, body });
-  if (!res.ok) throw new Error(`PUT ${key} → ${res.status}: ${await res.text()}`);
-}
-
-(async () => {
-  for (const f of files) {
-    const local = path.join('.github/data', f);
-    if (!fs.existsSync(local)) { console.log(`SKIP(missing):${f}`); continue; }
-    const body = fs.readFileSync(local);
-    const ct = f.endsWith('.jsonl') ? 'application/x-ndjson' : 'application/json';
-    await putR2('data/' + f, body, ct);
-    console.log(`UPLOADED_R2:data/${f}`);
-  }
-})().catch(e => { console.error('upload ERROR:', e.message); process.exit(1); });
+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
+Ud9o4B1E2SJDJ6YI0CmlMQ==
