@@ -46,12 +46,14 @@ jobs:
             const r2 = createR2Client({ prefix: 'data/' });
             const dataDir = '.github/data';
             if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-            const files = ['all_jobs.json', 'jobs-metadata.json', 'enrichment-stats.json', 'canada-tech-summary.json', 'bridge-metrics.json', 'traffic-history.jsonl', 'bridge-metrics-history.jsonl', 'daily-stats.json', 'history.jsonl', 'history-archive.jsonl', 'enrichment-history.jsonl', 'pipeline-alert.json', 'general-review.json', 'tag-history.jsonl'];
+            const files = ['all_jobs.json', 'jobs-metadata.json', 'enrichment-stats.json', 'canada-tech-summary.json', 'bridge-metrics.json', 'traffic-history.jsonl', 'bridge-metrics-history.jsonl', 'daily-stats.json', 'history.jsonl', 'history-archive.jsonl', 'enrichment-history.jsonl', 'pipeline-alert.json', 'general-review.json', 'tag-history.jsonl', 'metrics/history.jsonl'];  // ENR-OTHER-WORKFLOWS-DLA-1: +metrics/history.jsonl — collect-metrics.js growth-trend history (was never downloaded → growth trends always null)
             for (const file of files) {
               try {
                 const raw = await r2.downloadRaw(file);
                 if (raw) {
-                  fs.writeFileSync(path.join(dataDir, file), Buffer.from(raw));
+                  const dest = path.join(dataDir, file);
+                  fs.mkdirSync(path.dirname(dest), { recursive: true });  // ENR-OTHER-WORKFLOWS-DLA-1: support nested paths like metrics/history.jsonl
+                  fs.writeFileSync(dest, Buffer.from(raw));
                   console.log('R2 download OK: ' + file);
                 } else { console.log('R2 SKIP: ' + file + ' (not found)'); }
               } catch (e) { console.error('R2 ERR: ' + file + ' - ' + e.message); }
@@ -116,7 +118,7 @@ jobs:
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
-        run: node scripts/upload-dashboard-data-to-r2.js zjp-metrics.json metrics/latest.json traffic-history.jsonl bridge-metrics-history.jsonl
+        run: node scripts/upload-dashboard-data-to-r2.js zjp-metrics.json metrics/latest.json metrics/history.jsonl traffic-history.jsonl bridge-metrics-history.jsonl  # ENR-OTHER-WORKFLOWS-DLA-1: +metrics/history.jsonl — persist collect-metrics growth-trend history
 
       - name: Publish metrics to Supabase directly (Phase 1 R2 elimination)
         if: success()
