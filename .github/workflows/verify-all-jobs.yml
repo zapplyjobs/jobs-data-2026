@@ -23,9 +23,12 @@ jobs:
       - name: Unlock encrypted files
         run: |
           echo "Y" | transcrypt --cipher aes-256-cbc --password "$TRANSCRYPT_PASSWORD" --force
-          git ls-files -z '*.js' '*.json' '*.jsonl' | xargs -0 rm -f
-          git checkout HEAD -- .
-          echo "Decrypt verification:" && head -1 .github/scripts/index.js 2>/dev/null || echo "(no index.js)"
+          git checkout -- .
+          git submodule foreach --recursive '
+            echo "Y" | transcrypt --cipher aes-256-cbc --password "'"$TRANSCRYPT_PASSWORD"'" --force 2>/dev/null || true
+            rm -f "$(git rev-parse --git-dir)/index" 2>/dev/null || true
+            git checkout HEAD -- . 2>/dev/null || true
+          ' || true
         env:
           TRANSCRYPT_PASSWORD: ${{ secrets.TRANSCRYPT_PASSWORD }}
 
