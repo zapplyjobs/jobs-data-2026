@@ -1,165 +1,126 @@
-#!/usr/bin/env node
-
-/**
- * Closed Job Cleanup (AGG-14)
- *
- * Checks Greenhouse and Lever jobs >7 days old against their public APIs.
- * If the API returns 404, the job is closed and removed from all_jobs.json.
- *
- * Design:
- *   - Batched: checks oldest BATCH_SIZE jobs per run (default 1000)
- *   - Rate-limited: DELAY_MS between API calls (default 150ms)
- *   - Safe: network errors → skip (don't remove unverifiable jobs)
- *   - Idempotent: re-running on the same pool is safe
- *
- * Run twice daily via cleanup-closed.yml. At 1000/run, full pool coverage in ~2 days.
- */
-
-const fs = require('fs');
-const path = require('path');
-const https = require('https');
-
-const DATA_DIR = path.join(process.cwd(), '.github', 'data');
-const JOBS_FILE = path.join(DATA_DIR, 'all_jobs.json');
-const BATCH_SIZE = parseInt(process.env.BATCH_SIZE || '1000', 10);
-const DELAY_MS = 150;
-const MIN_AGE_DAYS = 7;
-
-function httpGet(url) {
-  return new Promise((resolve) => {
-    https.get(url, { headers: { 'User-Agent': 'Zapply-Cleanup/1.0' }, timeout: 8000 }, (res) => {
-      // Drain response body to free socket
-      res.resume();
-      resolve(res.statusCode);
-    }).on('error', () => resolve(null)).on('timeout', function () { this.destroy(); resolve(null); });
-  });
-}
-
-async function checkGreenhouseJob(jobId) {
-  // ID format: greenhouse-{boardToken}-{ghId}
-  const parts = jobId.split('-');
-  if (parts.length < 3) return null;
-  const boardToken = parts[1];
-  const ghId = parts.slice(2).join('-');
-  const status = await httpGet(`https://boards-api.greenhouse.io/v1/boards/${boardToken}/jobs/${ghId}`);
-  if (status === 404) return 'closed';
-  if (status === 200) return 'open';
-  return null; // error or unexpected status — skip
-}
-
-async function checkLeverJob(jobId) {
-  // ID format: lever-{company}-{leverId}
-  const parts = jobId.split('-');
-  if (parts.length < 3) return null;
-  const company = parts[1];
-  const leverId = parts.slice(2).join('-');
-  const status = await httpGet(`https://api.lever.co/v0/postings/${company}/${leverId}`);
-  if (status === 404) return 'closed';
-  if (status === 200) return 'open';
-  return null;
-}
-
-async function main() {
-  if (!fs.existsSync(JOBS_FILE)) {
-    console.log('all_jobs.json not found — nothing to clean');
-    process.exit(0);
-  }
-
-  const lines = fs.readFileSync(JOBS_FILE, 'utf8').trim().split('\n').filter(Boolean);
-  const now = Date.now();
-  const minAgeMs = MIN_AGE_DAYS * 24 * 60 * 60 * 1000;
-
-  // Select checkable jobs: GH + Lever, >7d old, sorted oldest first
-  const checkable = [];
-  const keepLines = []; // lines not being checked (kept as-is)
-  const checkLineMap = new Map(); // lineIndex → job for jobs being checked
-
-  for (let i = 0; i < lines.length; i++) {
-    const job = JSON.parse(lines[i]);
-    const isCheckable = (job.source === 'greenhouse' || job.source === 'lever') &&
-      job.posted_at && (now - new Date(job.posted_at).getTime()) > minAgeMs;
-
-    if (isCheckable) {
-      checkable.push({ index: i, job });
-    }
-  }
-
-  // Shuffle checkable list so each run samples different jobs.
-  // Over multiple runs, the full pool gets covered. Avoids always checking the
-  // same oldest jobs (which tend to be evergreen postings that are always open).
-  for (let i = checkable.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [checkable[i], checkable[j]] = [checkable[j], checkable[i]];
-  }
-  const batch = checkable.slice(0, BATCH_SIZE);
-
-  console.log(`🔍 Checking ${batch.length} jobs (${checkable.length} checkable, batch ${BATCH_SIZE})`);
-
-  let closed = 0, open = 0, errors = 0;
-  const closedIds = new Set();
-
-  for (const { job } of batch) {
-    let result;
-    if (job.source === 'greenhouse') result = await checkGreenhouseJob(job.id);
-    else if (job.source === 'lever') result = await checkLeverJob(job.id);
-
-    if (result === 'closed') {
-      closed++;
-      closedIds.add(job.id);
-    } else if (result === 'open') {
-      open++;
-    } else {
-      errors++;
-    }
-
-    await new Promise(r => setTimeout(r, DELAY_MS));
-  }
-
-  console.log(`\n📊 Results: ${open} open, ${closed} closed, ${errors} errors`);
-
-  // Safety: if >50% of checked jobs return 404, likely an API outage — abort
-  const checked = open + closed;
-  if (checked > 0 && closed / checked > 0.5) {
-    console.log(`🛑 Aborting: ${closed}/${checked} (${Math.round(closed/checked*100)}%) returned 404 — likely API outage, not mass closure`);
-    process.exit(0);
-  }
-
-  if (closed === 0) {
-    console.log('✅ No closed jobs found — pool unchanged');
-    process.exit(0);
-  }
-
-  // Archive closed jobs before removing them (non-destructive)
-  const ARCHIVE_DIR = path.join(DATA_DIR, 'archive');
-  if (!fs.existsSync(ARCHIVE_DIR)) fs.mkdirSync(ARCHIVE_DIR, { recursive: true });
-  const closedJobs = lines
-    .map(line => { try { return JSON.parse(line); } catch { return null; } })
-    .filter(job => job && closedIds.has(job.id))
-    .map(job => ({ ...job, closed_at: new Date().toISOString(), closed_by: 'cleanup-closed-jobs' }));
-
-  if (closedJobs.length > 0) {
-    const d = new Date();
-    const weekNum = Math.ceil(((d - new Date(d.getFullYear(), 0, 1)) / 86400000 + 1) / 7);
-    const archiveFile = path.join(ARCHIVE_DIR, `closed-${d.getFullYear()}-W${String(weekNum).padStart(2, '0')}.jsonl`);
-    fs.appendFileSync(archiveFile, closedJobs.map(j => JSON.stringify(j)).join('\n') + '\n', 'utf8');
-    console.log(`📦 Archived ${closedJobs.length} closed jobs → ${path.basename(archiveFile)}`);
-  }
-
-  // Rewrite all_jobs.json without closed jobs
-  const remaining = lines.filter(line => {
-    try {
-      const job = JSON.parse(line);
-      return !closedIds.has(job.id);
-    } catch {
-      return true; // keep malformed lines
-    }
-  });
-
-  fs.writeFileSync(JOBS_FILE, remaining.join('\n') + '\n', 'utf8');
-  console.log(`🗑️  Removed ${closed} closed jobs (${lines.length} → ${remaining.length})`);
-}
-
-main().catch(err => {
-  console.error('❌ Fatal:', err.message);
-  process.exit(1);
-});
+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

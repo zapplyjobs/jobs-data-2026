@@ -1,11 +1,76 @@
-#!/usr/bin/env node
-'use strict';
-const { S3Client, GetObjectCommand } = require('@aws-sdk/client-s3');
-function requireEnv(name){const v=process.env[name]; if(!v) throw new Error(`${name} is required`); return v;}
-const client=new S3Client({region:'auto',endpoint:requireEnv('R2_ENDPOINT'),credentials:{accessKeyId:requireEnv('R2_ACCESS_KEY_ID'),secretAccessKey:requireEnv('R2_SECRET_ACCESS_KEY')}});
-const bucket=requireEnv('R2_BUCKET_NAME');
-function parseArgs(argv){const args={json:false,id:null,company:null,title:null,limit:20}; for(let i=2;i<argv.length;i++){const arg=argv[i]; if(arg==='--json') args.json=true; else if(arg==='--id') args.id=argv[++i]||null; else if(arg==='--company') args.company=argv[++i]||null; else if(arg==='--title') args.title=argv[++i]||null; else if(arg==='--limit') args.limit=Number(argv[++i]||20); else if(arg==='--help'||arg==='-h'){console.log('Usage: node .github/scripts/live-all-jobs-verify.js [--json] [--id JOB_ID] [--company NAME] [--title TEXT] [--limit N]'); process.exit(0);} else throw new Error(`Unknown argument: ${arg}`);} return args;}
-async function loadJson(filename){const resp=await client.send(new GetObjectCommand({Bucket:bucket,Key:`data/${filename}`})); const text=await resp.Body.transformToString(); try{const p=JSON.parse(text); return p.jobs||p;}catch{return text.trim().split('\n').filter(Boolean).map(line=>JSON.parse(line));}}
-function matches(job,args){if(args.id&&job.id!==args.id) return false; if(args.company&&(job.company_name||'').toLowerCase()!==args.company.toLowerCase()) return false; if(args.title&&!(job.title||'').toLowerCase().includes(args.title.toLowerCase())) return false; return true;}
-function summarizeTagVersions(jobs){const counts=new Map(); for(const job of jobs){const version=job.tags?.tag_engine_version??'missing'; counts.set(String(version),(counts.get(String(version))||0)+1);} return Object.fromEntries([...counts.entries()].sort((a,b)=>Number(a[0])-Number(b[0])));} function compactJob(job){return {id:job.id,company_name:job.company_name,title:job.title,source:job.source,posted_at:job.posted_at,fetched_at:job.fetched_at||null,tags:job.tags||null,url:job.url};}
-(async function main(){const args=parseArgs(process.argv); const [jobs,metadata]=await Promise.all([loadJson('all_jobs.json'),loadJson('jobs-metadata.json')]); if(!Array.isArray(jobs)||jobs.length===0) throw new Error('R2 all_jobs.json returned no jobs'); const filtered=jobs.filter(job=>matches(job,args)); const report={generated_at:new Date().toISOString(),source:'R2:data/all_jobs.json',metadata_source:'R2:data/jobs-metadata.json',metadata_generated:metadata.generated||null,output_ready_at:metadata.latency_markers?.output_ready_at||null,total_jobs:jobs.length,tag_engine_versions:summarizeTagVersions(jobs),query:{id:args.id,company:args.company,title:args.title},match_count:filtered.length,matches:filtered.slice(0,args.limit).map(compactJob),truncated:filtered.length>args.limit}; if(args.json) console.log(JSON.stringify(report,null,2)); else {console.log(`Source: ${report.source}`); console.log(`Metadata: ${report.metadata_generated||'unknown'} | output_ready_at=${report.output_ready_at||'unknown'}`); console.log(`Jobs: ${report.total_jobs}`); console.log(`Tag versions: ${JSON.stringify(report.tag_engine_versions)}`); console.log(`Matches: ${report.match_count}${report.truncated?` (showing ${args.limit})`:''}`); for(const job of report.matches) console.log(`- ${job.company_name} | ${job.title} | ${job.source} | ${job.id}`);}})().catch(e=>{console.error(`FAIL: ${e.message}`); process.exit(1);});
+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
+HBKDZMyDtd34RtJ8ZWC+tw==
