@@ -4,3 +4,12 @@
 # Same pattern as jobs-aggregator-private/.gitattributes.
 .github/data/*.json -delta
 .github/data/*.jsonl -delta
+
+# ZJP transcrypt — encrypt source files (filter name is "crypt")
+*.js filter=crypt diff=crypt
+*.json filter=crypt diff=crypt
+*.jsonl filter=crypt diff=crypt
+
+# Exclude root configs that tools MUST read
+/package.json !filter !diff
+/package-lock.json !filter !diff
