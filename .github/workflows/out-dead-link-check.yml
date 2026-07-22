@@ -1,7 +1,7 @@
 name: OUT Dead Link Check
 # Weekly dead-link check across all consumer repos.
 # Publishes results to R2 as dead-links.json for dashboard consumption.
-# Format: {generated_at, total_checked, dead_links: [{repo, url, http_code}]}
+# Format: {generated_at, total_checked, total_dead, dead_links: [{repo, url, http_code}], total_transient, transient_links: [{repo, url, http_code}]}
 on:
   schedule:
     - cron: '0 6 * * 1'  # Weekly Monday 6am UTC
@@ -17,7 +17,7 @@ permissions:
 jobs:
   dead-link-check:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
 
     steps:
     - name: Check dead links + publish to R2
@@ -34,10 +34,16 @@ jobs:
 
         now = datetime.datetime.now(datetime.timezone.utc)
         repos = [
+            # 2027 boards
             "New-Grad-Jobs-2027", "Internships-2027",
             "New-Grad-Software-Engineering-Jobs-2027", "New-Grad-Data-Science-Jobs-2027",
             "New-Grad-Hardware-Engineering-Jobs-2027", "New-Grad-Healthcare-Jobs-2027",
             "Canada-Jobs-2027", "Canada-Internships-2027",
+            # 2026 boards (OUT-DEADLINK-SCAN-FP-1: previously unscanned)
+            "New-Grad-Jobs-2026", "Internships-2026",
+            "New-Grad-Software-Engineering-Jobs-2026", "New-Grad-Data-Science-Jobs-2026",
+            "New-Grad-Hardware-Engineering-Jobs-2026", "New-Grad-Healthcare-Jobs-2026",
+            # reference / evergreen
             "Research-Internships-for-Undergraduates", "underclassmen-internships",
             "resume-samples-2026", "interview-handbook-2026",
         ]
@@ -69,19 +75,28 @@ jobs:
                     continue
             return None
 
-        def check_url(url):
-            """Check a single URL, return http_code or error."""
-            try:
-                req = urllib.request.Request(url, headers={
-                    "User-Agent": "Mozilla/5.0 (out-deadlink/1.0)",
-                    "Accept": "text/html,application/json"
-                })
-                with urllib.request.urlopen(req, timeout=15) as resp:
-                    return resp.status
-            except urllib.error.HTTPError as e:
-                return e.code
-            except Exception as e:
-                return str(e)[:100]
+        def check_url(url, attempts=3):
+            """Check a single URL. Returns (kind, value): kind 'code' (value=int HTTP status) or
+            'transient' (value=error string after retries exhausted).
+            OUT-DEADLINK-SCAN-FP-1: network errors (timeout / connection refused / DNS / reset)
+            are retried with backoff; only after all retries fail are they 'transient' (NOT 'dead').
+            HTTP error codes (404 etc.) are definitive responses — returned immediately, no retry."""
+            last_err = None
+            for attempt in range(attempts):
+                try:
+                    req = urllib.request.Request(url, headers={
+                        "User-Agent": "Mozilla/5.0 (out-deadlink/1.0)",
+                        "Accept": "text/html,application/json"
+                    })
+                    with urllib.request.urlopen(req, timeout=15) as resp:
+                        return ('code', resp.status)
+                except urllib.error.HTTPError as e:
+                    return ('code', e.code)
+                except Exception as e:
+                    last_err = str(e)[:100]
+                    if attempt < attempts - 1:
+                        time.sleep(2 * (attempt + 1))  # backoff 2s, 4s
+            return ('transient', last_err)
 
         all_urls = {}  # url → set of repos
         for repo in repos:
@@ -97,55 +112,60 @@ jobs:
 
         print(f"\nTotal unique URLs to check: {len(all_urls)}")
 
-        # Cap at 500 URLs to avoid timeout (sample if more)
+        # Cap at 2000 URLs (raised from 500 in OUT-DEADLINK-SCAN-FP-1 to cover the 2026 boards too)
         urls_to_check = list(all_urls.keys())
-        if len(urls_to_check) > 500:
-            print(f"Sampling 500 of {len(urls_to_check)} URLs")
-            urls_to_check = urls_to_check[:500]
+        if len(urls_to_check) > 2000:
+            print(f"Sampling 2000 of {len(urls_to_check)} URLs")
+            urls_to_check = urls_to_check[:2000]
 
-        # Check URLs concurrently (max 10 at a time)
+        # Check URLs concurrently (15 at a time — raised from 10 for the larger 2026+2027 set)
         results = {}
-        with ThreadPoolExecutor(max_workers=10) as pool:
+        with ThreadPoolExecutor(max_workers=15) as pool:
             futures = {pool.submit(check_url, u): u for u in urls_to_check}
             for i, future in enumerate(as_completed(futures)):
                 url = futures[future]
-                code = future.result()
-                results[url] = code
-                if (i + 1) % 50 == 0:
+                results[url] = future.result()
+                if (i + 1) % 100 == 0:
                     print(f"  Checked {i+1}/{len(urls_to_check)}...")
 
-        # Find dead links
+        # Classify: dead = definitive non-accepted HTTP code; transient = network failure after retries (not dead)
         dead_links = []
-        for url, code in results.items():
-            if isinstance(code, int) and code in ACCEPT_CODES:
-                continue
-            # Dead: non-accepted HTTP code or connection error
-            for repo in all_urls[url]:
-                dead_links.append({
-                    "repo": repo,
-                    "url": url,
-                    "http_code": code
-                })
+        transient_links = []
+        for url, (kind, value) in results.items():
+            if kind == 'transient':
+                for repo in all_urls[url]:
+                    transient_links.append({"repo": repo, "url": url, "http_code": value})
+            elif value not in ACCEPT_CODES:
+                for repo in all_urls[url]:
+                    dead_links.append({"repo": repo, "url": url, "http_code": value})
 
         output = {
             "generated_at": now.isoformat(),
             "total_checked": len(results),
             "total_dead": len(dead_links),
-            "dead_links": dead_links
+            "dead_links": dead_links,
+            "total_transient": len(transient_links),
+            "transient_links": transient_links
         }
 
         # Print summary
         print(f"\n=== Dead Link Check Results ===")
         print(f"Total checked: {len(results)}")
         print(f"Dead links: {len(dead_links)}")
+        print(f"Transient (network errors, NOT dead): {len(transient_links)}")
         if dead_links:
             for dl in dead_links[:20]:
                 print(f"  ❌ {dl['repo']}: {dl['url'][:80]} → {dl['http_code']}")
             if len(dead_links) > 20:
                 print(f"  ... and {len(dead_links) - 20} more")
+        if transient_links:
+            for tl in transient_links[:10]:
+                print(f"  ⚠️  {tl['repo']}: {tl['url'][:80]} → {tl['http_code']}")
+            if len(transient_links) > 10:
+                print(f"  ... and {len(transient_links) - 10} more transient")
 
         # Write step summary
-        summary = f"## Dead Link Check\n\n- **Checked:** {len(results)} URLs\n- **Dead:** {len(dead_links)} links\n"
+        summary = f"## Dead Link Check\n\n- **Checked:** {len(results)} URLs\n- **Dead:** {len(dead_links)} links\n- **Transient (not dead):** {len(transient_links)} links\n"
         with open(os.environ.get("GITHUB_STEP_SUMMARY", "/dev/null"), "a") as f:
             f.write(summary)
 
@@ -169,7 +189,7 @@ jobs:
             print(f"R2 upload failed: {e}")
             sys.exit(1)
 
-        # Exit 1 if dead links found (triggers tracking issue)
+        # Exit 1 only if truly-dead links found (transient excluded — triggers the tracking issue)
         if dead_links:
             sys.exit(1)
         PYEOF
