@@ -1,0 +1,71 @@
+name: OUT Aspect Status (verified)
+# Publishes OUT's aspect-status as MACHINE-VERIFIED objective checks (ASPECT_STATUS_CONTRACT.md,
+# OUT-ASPECT-VERIFY-1). Replaces the prior stale self-report read by the Quality Matrix (/api/aspect).
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # every 6h — keep status fresh (matrix flags >7d amber)
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/scripts/verify-out-aspect-status.py'
+      - '.github/workflows/publish-out-aspect-status.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout (with processing submodule)
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+          token: ${{ secrets.GH_PAT }}
+          fetch-depth: 1
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Run verifier
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          python3 .github/scripts/verify-out-aspect-status.py > out-aspect-status.json
+          python3 - <<'PY'
+          import json, os
+          d = json.load(open('out-aspect-status.json'))
+          counts = {}
+          lines = [f"## OUT Aspect Status (verified)\n\ngenerated {d['generated_at'][:19]}\n"]
+          for k, v in d['aspects'].items():
+              counts[v['status']] = counts.get(v['status'], 0) + 1
+              lines.append(f"- **{k}**: {v['status']} — {v['evidence']}")
+          lines.append(f"\n**Summary: {counts}** (content_quality + coordination are narrative in STATE_OUT, not grid)")
+          summary = "\n".join(lines) + "\n"
+          print(summary)
+          gss = os.environ.get('GITHUB_STEP_SUMMARY')
+          if gss:
+              open(gss, 'a').write(summary)
+          PY
+
+      - name: Upload to R2
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: |
+          python3 -m pip install boto3 -q
+          python3 -c "
+          import boto3, os
+          s3 = boto3.client('s3', endpoint_url=os.environ['R2_ENDPOINT'],
+              aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'],
+              aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY'], region_name='auto')
+          body = open('out-aspect-status.json').read()
+          s3.put_object(Bucket=os.environ['R2_BUCKET_NAME'], Key='data/out-aspect-status.json',
+              Body=body, ContentType='application/json')
+          print('uploaded data/out-aspect-status.json (' + str(len(body)) + ' bytes)')
+          "

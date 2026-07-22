@@ -1,0 +1,158 @@
+#!/usr/bin/env python3
+"""
+verify-out-aspect-status.py — OUT aspect-status VERIFIER (ASPECT_STATUS_CONTRACT.md, verified model).
+
+Produces OUT's aspect-status as the RESULT of objective machine checks on live signals
+(NOT self-report). CI-portable: uses repo-relative paths (.github/scripts/processing submodule),
+gh-api (GH_TOKEN), and the zjp-data-proxy. Run from the jobs-data-2026 repo root.
+
+Aspects (OUT-scoped, per OUT-ASPECT-VERIFY-1):
+  verification, monitoring, performance, infrastructure, configuration, discoverability,
+  security, documentation, change_mgmt, data_quality -> objective checks
+  content_quality, coordination -> OMITTED (subjective -> STATE narrative)
+
+v1 caveats (honest): data_quality reads the dead-link scan (known to undercount soft-404/IP-
+dependent dead links — TikTok; real rate higher than reported); configuration/discoverability/
+change_mgmt are structural-existence proxies (not deep validity); verification is a 3-run snapshot.
+"""
+import json, os, subprocess, urllib.request, datetime, sys
+
+NOW = datetime.datetime.now(datetime.timezone.utc)
+PROXY = "https://zjp-data-proxy.wild-queen-069e.workers.dev/data"
+REPOS = ["zapplyjobs/jobs-data-2026", "zapplyjobs/job-board-processing"]
+PROC = ".github/scripts/processing/lib/src"  # processing submodule (job-board-processing)
+
+def gh_json(args):
+    try:
+        out = subprocess.check_output(["gh"] + args, text=True, stderr=subprocess.DEVNULL, timeout=30)
+        return json.loads(out) if out.strip() else None
+    except Exception:
+        return None
+
+def gh_runs(repo, workflow=None, limit=5):
+    args = ["run", "list", "-R", repo, "-L", str(limit), "--json", "status,conclusion,createdAt,updatedAt"]
+    if workflow:
+        args[1:1] = ["-w", workflow]
+    return [r for r in (gh_json(args) or []) if r.get("status") == "completed"]
+
+def proxy_json(path):
+    try:
+        req = urllib.request.Request(f"{PROXY}/{path}", headers={"User-Agent": "out-aspect-verifier/1.0"})
+        with urllib.request.urlopen(req, timeout=20) as r:
+            return json.loads(r.read().decode("utf-8"))
+    except Exception:
+        return None
+
+def green_if(cond): return "GREEN" if cond else "RED"
+
+def c_verification():
+    # Workflows that SHOULD pass (post-to-discord + out-health-check). out-dead-link-check is
+    # excluded — its exit-1 is BY DESIGN (dead links found -> tracking issue), not a CI failure.
+    fails = total = 0; detail = []
+    for wf in ("post-to-discord.yml", "out-health-check.yml"):
+        runs = gh_runs("zapplyjobs/jobs-data-2026", workflow=wf, limit=3)
+        for r in runs:
+            total += 1
+            if r.get("conclusion") != "success":
+                fails += 1
+        detail.append(f"{wf}:{len(runs)}")
+    status = "GREEN" if (total and fails == 0) else ("YELLOW" if fails < total else "RED")
+    return status, f"{total} recent runs, {fails} non-success ({', '.join(detail)})", "gh-api:CI"
+
+def c_monitoring():
+    hc = gh_runs("zapplyjobs/jobs-data-2026", workflow="out-health-check.yml", limit=1)
+    dl = gh_runs("zapplyjobs/jobs-data-2026", workflow="out-dead-link-check.yml", limit=1)
+    return green_if(hc and dl), "health-check + dead-link-scan configured, recent runs present", "gh-api:workflows"
+
+def c_performance():
+    runs = gh_runs("zapplyjobs/jobs-data-2026", workflow="post-to-discord.yml", limit=1)
+    if not runs:
+        return "RED", "no recent post-to-discord run", "gh-api:runtime"
+    try:
+        c = datetime.datetime.fromisoformat(runs[0]["createdAt"].replace("Z", "+00:00"))
+        u = datetime.datetime.fromisoformat(runs[0]["updatedAt"].replace("Z", "+00:00"))
+        secs = (u - c).total_seconds()
+        status = "GREEN" if secs < 900 else ("YELLOW" if secs < 1500 else "RED")
+        return status, f"post-to-discord run {secs:.0f}s", "gh-api:runtime"
+    except Exception:
+        return "YELLOW", "runtime parse failed", "gh-api:runtime"
+
+def c_infrastructure():
+    hc = proxy_json("out-health-check.json")
+    if not hc:
+        return "RED", "out-health-check.json unreachable", "proxy:out-health-check"
+    dests = hc.get("destinations") or hc.get("healthCheck", {}).get("destinations") or []
+    if not dests:
+        return "YELLOW", "no destinations in health-check", "proxy:out-health-check"
+    failing = [d.get("name") for d in dests if (d.get("verdict", "").upper() != "PASS")]
+    return (green_if(not failing), f"{len(dests)} destinations, {len(failing)} failing", "proxy:out-health-check")
+
+def c_configuration():
+    paths = [f"{PROC}/discord/config.js", f"{PROC}/board-types.js"]
+    missing = [p for p in paths if not os.path.exists(p)]
+    return green_if(not missing), f"{len(paths)-len(missing)}/{len(paths)} OUT config files present (existence proxy)", "fs:config"
+
+def c_discoverability():
+    dirs = ["routing", "discord", "data"]
+    found = [d for d in dirs if os.path.isdir(f"{PROC}/{d}")]
+    return green_if(len(found) == len(dirs)), f"processing lib structure {len(found)}/{len(dirs)} present (structural proxy)", "fs:lib-structure"
+
+def c_security():
+    crit = opens = 0
+    for repo in REPOS:
+        alerts = gh_json(["api", f"repos/{repo}/dependabot/alerts", "-q", '[.[] | select(.state=="open")]']) or []
+        opens += len(alerts)
+        crit += sum(1 for a in alerts if (a.get("security_advisory", {}) or {}).get("severity") in ("critical", "high"))
+    return green_if(crit == 0), f"{opens} open alerts, {crit} critical/high", "gh-api:dependabot"
+
+def c_documentation():
+    try:
+        out = subprocess.check_output(["git", "log", "-1", "--format=%ct"], text=True, timeout=10).strip()
+        age_d = (NOW.timestamp() - float(out)) / 86400
+        status = "GREEN" if age_d < 3 else ("YELLOW" if age_d < 14 else "RED")
+        return status, f"repo last commit {age_d:.1f}d ago (activity/freshness proxy)", "git:repo-commits"
+    except Exception:
+        return "YELLOW", "git log failed", "git:repo-commits"
+
+def c_change_mgmt():
+    wfdir = ".github/workflows"
+    try:
+        files = os.listdir(wfdir) if os.path.isdir(wfdir) else []
+    except Exception:
+        files = []
+    has_gate = any("gate" in f.lower() or "ci-gate" in f.lower() for f in files)
+    return green_if(has_gate), f"CI-gate workflow present ({has_gate}) — SDLC structural proxy", "fs:workflows"
+
+def c_data_quality():
+    dl = proxy_json("dead-links.json")
+    if not dl:
+        return "YELLOW", "dead-links.json unreachable", "proxy:dead-links"
+    checked = dl.get("total_checked", 0); dead = dl.get("total_dead", 0)
+    rate = dead / checked if checked else 1
+    status = "GREEN" if rate < 0.01 else ("YELLOW" if rate < 0.05 else "RED")
+    return status, f"dead-link rate {rate*100:.2f}% ({dead}/{checked}) — OUT output-quality proxy (scan undercounts soft-404s)", "proxy:dead-links"
+
+CHECKS = {
+    "verification": c_verification, "monitoring": c_monitoring, "performance": c_performance,
+    "infrastructure": c_infrastructure, "configuration": c_configuration,
+    "discoverability": c_discoverability, "security": c_security, "documentation": c_documentation,
+    "change_mgmt": c_change_mgmt, "data_quality": c_data_quality,
+}
+
+def verify():
+    aspects = {}
+    for name, fn in CHECKS.items():
+        try:
+            status, evidence, source = fn()
+        except Exception as e:
+            status, evidence, source = "RED", f"check error: {e}", "verifier-error"
+        aspects[name] = {"status": status, "evidence": evidence, "source": source}
+    return {"module": "OUT", "generated_at": NOW.isoformat(), "aspects": aspects}
+
+if __name__ == "__main__":
+    result = verify()
+    print(json.dumps(result, indent=2))
+    counts = {}
+    for a in result["aspects"].values():
+        counts[a["status"]] = counts.get(a["status"], 0) + 1
+    print(f"\nSummary: {counts}", file=sys.stderr)
