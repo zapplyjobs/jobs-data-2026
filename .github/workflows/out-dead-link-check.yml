@@ -80,7 +80,7 @@ jobs:
             'transient' (value=error string after retries exhausted).
             OUT-DEADLINK-SCAN-FP-1: network errors (timeout / connection refused / DNS / reset)
             are retried with backoff; only after all retries fail are they 'transient' (NOT 'dead').
-            HTTP error codes (404 etc.) are definitive responses — returned immediately, no retry."""
+            4xx HTTP codes are definitive (returned immediately, no retry); 5xx server errors are retried like network errors (transient, not dead)."""
             last_err = None
             for attempt in range(attempts):
                 try:
@@ -91,7 +91,13 @@ jobs:
                     with urllib.request.urlopen(req, timeout=15) as resp:
                         return ('code', resp.status)
                 except urllib.error.HTTPError as e:
-                    return ('code', e.code)
+                    if 500 <= e.code < 600:
+                        # Server error (5xx) — transient like a timeout; retry before judging.
+                        last_err = f"HTTP {e.code}"
+                        if attempt < attempts - 1:
+                            time.sleep(2 * (attempt + 1))  # backoff 2s, 4s
+                        continue
+                    return ('code', e.code)  # 4xx etc. — definitive response, no retry
                 except Exception as e:
                     last_err = str(e)[:100]
                     if attempt < attempts - 1:
@@ -112,11 +118,11 @@ jobs:
 
         print(f"\nTotal unique URLs to check: {len(all_urls)}")
 
-        # Cap at 2000 URLs (raised from 500 in OUT-DEADLINK-SCAN-FP-1 to cover the 2026 boards too)
+        # Cap at 3000 URLs (OUT-DEADLINK-SCAN-FP-1 polish: exhaustive — current pool ~2700; was sampling ~25%)
         urls_to_check = list(all_urls.keys())
-        if len(urls_to_check) > 2000:
-            print(f"Sampling 2000 of {len(urls_to_check)} URLs")
-            urls_to_check = urls_to_check[:2000]
+        if len(urls_to_check) > 3000:
+            print(f"Sampling 3000 of {len(urls_to_check)} URLs")
+            urls_to_check = urls_to_check[:3000]
 
         # Check URLs concurrently (15 at a time — raised from 10 for the larger 2026+2027 set)
         results = {}
