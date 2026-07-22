@@ -29,7 +29,7 @@ jobs:
         R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
       run: |
         python3 - <<'PYEOF'
-        import json, urllib.request, urllib.error, urllib.parse, re, os, sys, datetime, time
+        import json, urllib.request, urllib.error, re, os, sys, datetime, time
         from concurrent.futures import ThreadPoolExecutor, as_completed
 
         now = datetime.datetime.now(datetime.timezone.utc)
@@ -60,16 +60,11 @@ jobs:
         # Status codes we accept as "not dead"
         ACCEPT_CODES = {200, 201, 202, 203, 204, 301, 302, 303, 307, 308, 403, 429}
 
-        # OUT soft-404 follow-up: hosts that serve a 200 body meaning "page gone" (TikTok lifeattiktok
-        # returns 200 + 'page ... missing' for closed positions — but ONLY to some client IPs; behavior
-        # is IP-dependent, so this also doubles as a diagnostic). Only watched hosts get a body sniff
-        # on a 200 → zero false-positive risk on all other hosts.
-        SOFT404_HOSTS = {
-            'lifeattiktok.com': re.compile(r'page you are looking for is missing', re.I),
-        }
-        def _soft404_signature(host):
-            h = host.lower()
-            return next((sig for hk, sig in SOFT404_HOSTS.items() if h == hk or h.endswith('.' + hk)), None)
+        # Soft-404 detection intentionally NOT implemented (OUT-SOFT404-SCAN-1, 2026-07-22).
+        # The one known soft-404 host (TikTok lifeattiktok) is IP-dependent: this GitHub runner
+        # gets HTTP 200 with a non-matching body, while users/other probes get a real 404 — so
+        # body-sniffing cannot catch it from here. Durable fix is upstream (AGG-TIKTOK-STALE-1
+        # purges the stale jobs). Do NOT re-add host body-sniffing without an IP-independent signature.
 
         url_re = re.compile(r'https?://[^\s\)"<>\]]+')
 
@@ -100,12 +95,7 @@ jobs:
                         "Accept": "text/html,application/json"
                     })
                     with urllib.request.urlopen(req, timeout=15) as resp:
-                        status = resp.status
-                        if status == 200:
-                            sig = _soft404_signature(urllib.parse.urlparse(url).netloc)
-                            if sig and sig.search(resp.read(8192).decode('utf-8', 'replace')):
-                                return ('soft404', 'soft-404 (200 body match)')
-                        return ('code', status)
+                        return ('code', resp.status)
                 except urllib.error.HTTPError as e:
                     if 500 <= e.code < 600:
                         # Server error (5xx) — transient like a timeout; retry before judging.
@@ -154,26 +144,12 @@ jobs:
         dead_links = []
         transient_links = []
         for url, (kind, value) in results.items():
-            if kind == 'soft404':
-                for repo in all_urls[url]:
-                    dead_links.append({"repo": repo, "url": url, "http_code": "soft-404"})
-            elif kind == 'transient':
+            if kind == 'transient':
                 for repo in all_urls[url]:
                     transient_links.append({"repo": repo, "url": url, "http_code": value})
             elif value not in ACCEPT_CODES:
                 for repo in all_urls[url]:
                     dead_links.append({"repo": repo, "url": url, "http_code": value})
-
-        # Diagnostic: what HTTP status does THIS runner's IP get for soft-404-watched hosts?
-        # Reveals whether body-sniffing catches them here (soft404) or they're served an accept-code
-        # (e.g. 403/429 block) — TikTok behavior is IP-dependent, so this tells us if the fix landed.
-        watched_status = {}
-        for url, (kind, value) in results.items():
-            if _soft404_signature(urllib.parse.urlparse(url).netloc):
-                key = kind if kind != 'code' else f'HTTP {value}'
-                watched_status[key] = watched_status.get(key, 0) + 1
-        if watched_status:
-            print(f"\nSoft-404-watched host status distribution (this runner's IP): {watched_status}")
 
         output = {
             "generated_at": now.isoformat(),
