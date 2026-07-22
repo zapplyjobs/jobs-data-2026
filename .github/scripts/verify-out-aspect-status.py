@@ -15,19 +15,24 @@ v1 caveats (honest): data_quality reads the dead-link scan (known to undercount 
 dependent dead links — TikTok; real rate higher than reported); configuration/discoverability/
 change_mgmt are structural-existence proxies (not deep validity); verification is a 3-run snapshot.
 """
-import json, os, subprocess, urllib.request, datetime, sys
+import json, os, subprocess, urllib.request, datetime, sys, time
 
 NOW = datetime.datetime.now(datetime.timezone.utc)
 PROXY = "https://zjp-data-proxy.wild-queen-069e.workers.dev/data"
 REPOS = ["zapplyjobs/jobs-data-2026", "zapplyjobs/job-board-processing"]
 PROC = ".github/scripts/processing/lib/src"  # processing submodule (job-board-processing)
 
-def gh_json(args):
-    try:
-        out = subprocess.check_output(["gh"] + args, text=True, stderr=subprocess.DEVNULL, timeout=30)
-        return json.loads(out) if out.strip() else None
-    except Exception:
-        return None
+def gh_json(args, attempts=3):
+    # Retry on transient gh-api failures (rate-limit/network) so a flaky call doesn't produce a
+    # false aspect status. Legit empty output still returns None (rare for these endpoints).
+    for a in range(attempts):
+        try:
+            out = subprocess.check_output(["gh"] + args, text=True, stderr=subprocess.DEVNULL, timeout=30)
+            return json.loads(out) if out.strip() else None
+        except Exception:
+            if a < attempts - 1:
+                time.sleep(2 * (a + 1))
+    return None
 
 def gh_runs(repo, workflow=None, limit=5):
     args = ["run", "list", "-R", repo, "-L", str(limit), "--json", "status,conclusion,createdAt,updatedAt"]
@@ -98,11 +103,15 @@ def c_discoverability():
     return green_if(len(found) == len(dirs)), f"processing lib structure {len(found)}/{len(dirs)} present (structural proxy)", "fs:lib-structure"
 
 def c_security():
-    crit = opens = 0
+    crit = opens = 0; failed = []
     for repo in REPOS:
-        alerts = gh_json(["api", f"repos/{repo}/dependabot/alerts", "-q", '[.[] | select(.state=="open")]']) or []
+        alerts = gh_json(["api", f"repos/{repo}/dependabot/alerts", "-q", '[.[] | select(.state=="open")]'])
+        if alerts is None:
+            failed.append(repo); continue   # api failure — don't false-GREEN ("0 alerts")
         opens += len(alerts)
         crit += sum(1 for a in alerts if (a.get("security_advisory", {}) or {}).get("severity") in ("critical", "high"))
+    if failed:
+        return "YELLOW", f"unable to verify {failed} (dependabot api); {opens} open / {crit} critical in the rest", "gh-api:dependabot"
     return green_if(crit == 0), f"{opens} open alerts, {crit} critical/high", "gh-api:dependabot"
 
 def c_documentation():
