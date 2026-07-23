@@ -70,9 +70,11 @@ def c_monitoring():
     return green_if(hc and dl), "health-check + dead-link-scan configured, recent runs present", "gh-api:workflows"
 
 def c_performance():
-    runs = gh_runs("zapplyjobs/jobs-data-2026", workflow="post-to-discord.yml", limit=1)
+    # limit=5 + most-recent COMPLETED run — avoids a false "no recent run" RED when the latest
+    # run is momentarily in-progress (post-to-discord runs every 15min; ~13% in-progress window).
+    runs = gh_runs("zapplyjobs/jobs-data-2026", workflow="post-to-discord.yml", limit=5)
     if not runs:
-        return "RED", "no recent post-to-discord run", "gh-api:runtime"
+        return "RED", "no recent COMPLETED post-to-discord run (of last 5)", "gh-api:runtime"
     try:
         c = datetime.datetime.fromisoformat(runs[0]["createdAt"].replace("Z", "+00:00"))
         u = datetime.datetime.fromisoformat(runs[0]["updatedAt"].replace("Z", "+00:00"))
