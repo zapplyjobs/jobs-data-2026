@@ -1,0 +1,61 @@
+name: Refresh LCA Data
+
+# Quarterly refresh of lca-sponsors.json from DOL OFLC disclosure data.
+# Downloads all quarters in the rolling window, extracts certified H-1B employer
+# names, rebuilds from scratch, and uploads to R2 (data/lca-sponsors.json).
+#
+# Trigger: manual (workflow_dispatch). Run quarterly when DOL publishes new data.
+# INF-LCA-QUARTERLY-REFRESH-1
+
+on:
+  workflow_dispatch:
+    inputs:
+      window:
+        description: 'Rolling window size (quarters, default 5)'
+        required: false
+        default: '5'
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python dependencies
+        run: pip install openpyxl requests
+
+      - name: Generate lca-sponsors.json from DOL data
+        run: |
+          python3 .github/scripts/lca-refresh.py \
+            --auto \
+            --window ${{ inputs.window }} \
+            --output lca-sponsors.json
+
+      - name: Upload to R2
+        run: |
+          aws s3 cp lca-sponsors.json \
+            "s3://$R2_BUCKET_NAME/data/lca-sponsors.json" \
+            --endpoint-url "$R2_ENDPOINT"
+          echo "=== Uploaded lca-sponsors.json to R2 ==="
+          # Verify the upload
+          aws s3 ls "s3://$R2_BUCKET_NAME/data/lca-sponsors.json" \
+            --endpoint-url "$R2_ENDPOINT" \
+            --human-readable
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
