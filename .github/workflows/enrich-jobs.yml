@@ -6,7 +6,7 @@ on:
     paths:
       - '.github/workflows/enrich-jobs.yml'
   schedule:
-    - cron: '0 * * * *'  # Backup trigger (Worker cron is unreliable for sub-15-min intervals)
+    - cron: '*/10 * * * *'  # Backup trigger — matches Worker cadence (INF-PIPELINE-SLOWNESS-1)
 
 # Prevent concurrent enrich runs — two runs picking the same pending batch would
 # produce duplicate entries in enriched_jobs.json.
