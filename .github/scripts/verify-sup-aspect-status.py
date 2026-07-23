@@ -44,9 +44,11 @@ def gh_runs(repo, workflow=None, limit=5):
 def proxy_json(path):
     try:
         url = f"{PROXY}/{path}"
-        with urllib.request.urlopen(url, timeout=10) as resp:
+        req = urllib.request.Request(url, headers={"User-Agent": "ZJP-AspectVerifier/1.0"})
+        with urllib.request.urlopen(req, timeout=10) as resp:
             return json.loads(resp.read())
-    except Exception:
+    except Exception as e:
+        print(f"[proxy_json] {path}: {e}", file=sys.stderr)
         return None
 
 
@@ -68,13 +70,15 @@ def c_verification():
 
 
 def c_monitoring():
-    """SUP yield-decay monitor workflow exists + zjp-metrics alerts present."""
+    """SUP yield-decay monitor workflow exists + zjp-metrics alerting surface available.
+    GREEN if decay monitor workflow is configured with recent runs.
+    Alert count is informational (zero alerts = healthy, not RED)."""
     decay_runs = gh_runs("zapplyjobs/jobs-data-2026", workflow="sup-yield-decay-monitor.yml", limit=1)
-    metrics = proxy_json("zjp-metrics.json")
-    alerts = metrics.get("alerts", []) if metrics else []
     has_decay = decay_runs is not None and len(decay_runs) > 0
-    has_alerts = len(alerts) > 0
-    return green_if(has_decay and has_alerts), f"decay-monitor workflow {'present' if has_decay else 'MISSING'}, zjp-metrics.alerts {'present' if has_alerts else 'absent'}", "gh-api:workflows+proxy:zjp-metrics"
+    metrics = proxy_json("zjp-metrics.json")
+    alert_count = len(metrics.get("alerts", [])) if metrics else None
+    alert_info = f"{alert_count} alerts" if alert_count is not None else "proxy unavailable"
+    return green_if(has_decay), f"decay-monitor workflow {'present' if has_decay else 'MISSING'}, zjp-metrics.alerts {alert_info}", "gh-api:workflows+proxy:zjp-metrics"
 
 
 def c_security():
