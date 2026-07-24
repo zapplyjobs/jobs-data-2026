@@ -5,8 +5,6 @@ on:
   push:
     paths:
       - '.github/workflows/enrich-jobs.yml'
-  schedule:
-    - cron: '0 * * * *'  # Hourly backup — wave link from fetch-jobs is primary
 
 # Prevent concurrent enrich runs — two runs picking the same pending batch would
 # produce duplicate entries in enriched_jobs.json.
