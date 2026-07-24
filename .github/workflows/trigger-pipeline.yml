@@ -1,7 +1,7 @@
 name: Trigger Pipeline (external cron via Worker /dispatch)
 # Works around Cloudflare cron scheduler bugs + GitHub schedule unreliability.
 # When this workflow fires (schedule or manual), it hits the Worker's /dispatch
-# endpoint, which reliably dispatches fetch-jobs + enrich-jobs.
+# endpoint, which dispatches fetch-jobs. fetch-jobs wave-links to enrich + metrics + Discord.
 # The Worker fetch handler is unaffected by the Cloudflare cron platform bug.
 # INF-PIPELINE-SLOWNESS-1 / INF-WORKER-CRON-STOPPED-1
 on:
@@ -9,6 +9,10 @@ on:
     - cron: '*/10 * * * *'
   workflow_dispatch:
 
+
+concurrency:
+  group: trigger-pipeline
+  cancel-in-progress: true
 permissions:
   contents: read
 

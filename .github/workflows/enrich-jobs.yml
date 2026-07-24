@@ -6,7 +6,7 @@ on:
     paths:
       - '.github/workflows/enrich-jobs.yml'
   schedule:
-    - cron: '*/10 * * * *'  # Backup trigger — matches Worker cadence (INF-PIPELINE-SLOWNESS-1)
+    - cron: '0 * * * *'  # Hourly backup — wave link from fetch-jobs is primary
 
 # Prevent concurrent enrich runs — two runs picking the same pending batch would
 # produce duplicate entries in enriched_jobs.json.
