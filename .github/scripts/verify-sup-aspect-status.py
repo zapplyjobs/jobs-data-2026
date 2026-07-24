@@ -92,33 +92,50 @@ def c_security():
 
 # --- CI-native checks (all aspects live — no carry-forward) ---
 
-def gh_file_exists(repo, filepath):
-    """Check if a file exists in a repo via GitHub contents API."""
-    result = gh_json(["api", f"/repos/{repo}/contents/{filepath}"])
-    return result is not None and "message" not in result
+def gh_file_age_days(repo, filepath):
+    """Days since a file was last modified, via commits API."""
+    commits = gh_json(["api", f"/repos/{repo}/commits?path={filepath}&per_page=1"]) or []
+    if commits:
+        date = commits[0].get("commit", {}).get("author", {}).get("date", "")
+        if date:
+            return (NOW - datetime.datetime.fromisoformat(date.replace("Z", "+00:00"))).days
+    return None
+
+
+def bucket_age(age, green_days, yellow_days):
+    if age is None:
+        return "RED", "age unknown"
+    if age <= green_days:
+        return "GREEN", f"{age}d ago"
+    if age <= yellow_days:
+        return "YELLOW", f"{age}d ago"
+    return "RED", f"{age}d ago"
 
 
 def c_data_quality():
-    """company-list.json exists in job-board-aggregator — structural proxy.
-    Content validity is already enforced by ci-gate.yml."""
-    ok = gh_file_exists(SUP_REPO, "lib/fetchers/company-list.json")
-    return green_if(ok), f"company-list.json {'present' if ok else 'MISSING'} — ci-gate validates structure", "gh-api:repo-contents"
+    """company-list.json freshness — stale data degrades SUP matching."""
+    age = gh_file_age_days(SUP_REPO, "lib/fetchers/company-list.json")
+    status, detail = bucket_age(age, 30, 90)
+    return status, f"company-list.json modified {detail}", "gh-api:commits"
 
 
 def c_configuration():
-    """Key config/workflow files exist in SUP repos."""
-    paths = [
-        (SUP_REPO, "lib/fetchers/company-list.json"),
-        (SUP_REPO, ".github/workflows/ci-gate.yml"),
-    ]
-    missing = [f"{r}/{p}" for r, p in paths if not gh_file_exists(r, p)]
-    return green_if(not missing), f"{len(paths)-len(missing)}/{len(paths)} config files present", "gh-api:repo-contents"
+    """Config files freshness — stale config indicates neglect."""
+    paths = ["lib/fetchers/company-list.json", ".github/workflows/ci-gate.yml"]
+    ages = [gh_file_age_days(SUP_REPO, p) for p in paths]
+    valid = [a for a in ages if a is not None]
+    if not valid:
+        return "RED", "cannot determine config ages", "gh-api:commits"
+    max_age = max(valid)
+    status, _ = bucket_age(max_age, 90, 180)
+    return status, f"oldest config file {max_age}d old ({len(valid)}/{len(paths)} files)", "gh-api:commits"
 
 
 def c_discoverability():
-    """Repo has community-facing files (README) — discoverability proxy."""
-    ok = gh_file_exists(SUP_REPO, "README.md")
-    return green_if(ok), f"README {'present' if ok else 'MISSING'} — discoverability proxy", "gh-api:repo-contents"
+    """README freshness — stale README means stale public face."""
+    age = gh_file_age_days(SUP_REPO, "README.md")
+    status, detail = bucket_age(age, 90, 180)
+    return status, f"README modified {detail}", "gh-api:commits"
 
 
 def c_documentation():
@@ -134,9 +151,15 @@ def c_documentation():
 
 
 def c_change_mgmt():
-    """ci-gate.yml exists — SDLC structural proxy."""
-    ok = gh_file_exists(SUP_REPO, ".github/workflows/ci-gate.yml")
-    return green_if(ok), f"ci-gate workflow {'present' if ok else 'MISSING'} — SDLC structural proxy", "gh-api:repo-contents"
+    """ci-gate triggers on push — SDLC enforcement proxy (non-redundant with verification).
+    Verification checks the RESULT (pass/fail); this checks ENFORCEMENT (auto-trigger)."""
+    import base64
+    content = gh_json(["api", f"/repos/{SUP_REPO}/contents/.github/workflows/ci-gate.yml"])
+    if not content or "message" in content:
+        return "RED", "ci-gate.yml not found", "gh-api:repo-contents"
+    yaml_text = base64.b64decode(content.get("content", "")).decode("utf-8", errors="replace")
+    has_push = "push:" in yaml_text
+    return green_if(has_push), f"ci-gate {'auto-triggers on push' if has_push else 'manual-only'} — enforcement proxy", "gh-api:repo-contents"
 
 
 CI_CHECKS = {
