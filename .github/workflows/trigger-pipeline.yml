@@ -1,0 +1,34 @@
+name: Trigger Pipeline (external cron via Worker /dispatch)
+# Works around Cloudflare cron scheduler bugs + GitHub schedule unreliability.
+# When this workflow fires (schedule or manual), it hits the Worker's /dispatch
+# endpoint, which reliably dispatches fetch-jobs + enrich-jobs.
+# The Worker fetch handler is unaffected by the Cloudflare cron platform bug.
+# INF-PIPELINE-SLOWNESS-1 / INF-WORKER-CRON-STOPPED-1
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Trigger pipeline via Worker /dispatch
+        run: |
+          RESPONSE=$(curl -sf -w "\n%{http_code}" \
+            "https://job-board-cron-worker.wild-queen-069e.workers.dev/dispatch" \
+            -H "X-Trigger-Secret: ${{ secrets.TRIGGER_SECRET }}" \
+            --max-time 30) || true
+          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+          BODY=$(echo "$RESPONSE" | head -n -1)
+          echo "Worker /dispatch response: HTTP $HTTP_CODE"
+          echo "$BODY"
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "✅ Pipeline triggered successfully"
+          else
+            echo "⚠️ Trigger failed — GitHub schedule backup will retry next cycle"
+          fi
