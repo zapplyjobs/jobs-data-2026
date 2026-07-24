@@ -250,6 +250,16 @@ jobs:
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
           GH_TOKEN: ${{ secrets.GH_PAT }}
 
+      - name: Publish quality-signal (INF-ENR-QUALITY-SIGNAL-WIRE-1)
+        if: success()
+        continue-on-error: true
+        run: node .github/scripts/processing/lib/publish-quality-signal.js
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+
       - name: Dispatch post-to-discord (chain link)
         if: success()
         run: |
