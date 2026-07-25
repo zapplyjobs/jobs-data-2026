@@ -258,12 +258,10 @@ jobs:
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
 
-      - name: Dispatch post-to-discord (chain link)
-        if: success()
-        run: |
-          gh workflow run post-to-discord.yml -R zapplyjobs/jobs-data-2026 --ref main 2>/dev/null && echo "Dispatched post-to-discord" || echo "Post-to-discord dispatch failed (non-critical)"
-        env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}
+      # post-to-discord is NOT dispatched here — fetch-jobs.yml is the single
+      # dispatcher (wave-link, "no 15-min lag"). Dual-dispatching exhausted
+      # Discord's gateway IDENTIFY budget (OUT-DISCORD-SESSION-EXHAUSTION-1).
+      # Do NOT re-add a dispatch here.
 
       - name: Dispatch collect-metrics (chain link)
         if: success()
