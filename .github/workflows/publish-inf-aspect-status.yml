@@ -1,0 +1,71 @@
+name: INF Aspect Status (verified)
+# Publishes INF's aspect-status as MACHINE-VERIFIED objective checks (CI-native,
+# zero carry-forward). Per ASPECT_STATUS_CONTRACT: 10 verified aspects; content_quality +
+# coordination are narrative (omitted). INF-ASPECT-VERIFIER-1.
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # every 6h — keep status fresh (matrix flags >7d amber)
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/scripts/verify-inf-aspect-status.py'
+      - '.github/workflows/publish-inf-aspect-status.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Run verifier
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          python3 .github/scripts/verify-inf-aspect-status.py > inf-aspect-status.json
+          python3 - <<'PY'
+          import json, os
+          d = json.load(open('inf-aspect-status.json'))
+          counts = {}
+          lines = [f"## INF Aspect Status (verified)\n\ngenerated {d['generated_at'][:19]}\n"]
+          for k, v in d['aspects'].items():
+              counts[v['status']] = counts.get(v['status'], 0) + 1
+              lines.append(f"- **{k}**: {v['status']} — {v['evidence']}")
+          lines.append(f"\n**Summary: {counts}**")
+          summary = "\n".join(lines) + "\n"
+          print(summary)
+          gss = os.environ.get('GITHUB_STEP_SUMMARY')
+          if gss:
+              open(gss, 'a').write(summary)
+          PY
+
+      - name: Upload to R2
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: |
+          python3 -m pip install boto3 -q
+          python3 -c "
+          import boto3, os
+          s3 = boto3.client('s3', endpoint_url=os.environ['R2_ENDPOINT'],
+              aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'],
+              aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY'], region_name='auto')
+          body = open('inf-aspect-status.json').read()
+          s3.put_object(Bucket=os.environ['R2_BUCKET_NAME'], Key='data/inf-aspect-status.json',
+              Body=body, ContentType='application/json')
+          print('uploaded data/inf-aspect-status.json (' + str(len(body)) + ' bytes)')
+          "
