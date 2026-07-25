@@ -40,19 +40,23 @@ except ImportError as e:
     print("Install: pip install openpyxl requests", file=sys.stderr)
     sys.exit(1)
 
-DOL_BASE_URL = "https://www.dol.gov/sites/dolgov/files/ETA/oflc/pdfs/LCA_Disclosure_Data_{quarter}.xlsx"
+DOL_BASE_URL = "https://www.dol.gov/sites/dolgov/files/ETA/oflc/pdfs/{prefix}_Disclosure_Data_{quarter}.xlsx"
 DEFAULT_WINDOW = 5  # quarters to keep
+
+# Data sources: LCA (H-1B) + PERM (green card). Both filtered to Certified.
 LCA_FILTER = {"CASE_STATUS": "Certified", "VISA_CLASS": "H-1B"}
+PERM_FILTER = {"CASE_STATUS": "Certified"}
 EMPLOYER_COL = "EMPLOYER_NAME"
+PERM_EMPLOYER_COL = "EMP_BUSINESS_NAME"
 
 
-def download_quarter(quarter: str, dest: Path) -> bool:
-    url = DOL_BASE_URL.format(quarter=quarter)
-    print(f"Downloading {quarter} from DOL...")
+def download_quarter(quarter: str, dest: Path, prefix: str = "LCA") -> bool:
+    url = DOL_BASE_URL.format(prefix=prefix, quarter=quarter)
+    print(f"Downloading {prefix} {quarter} from DOL...")
     try:
         resp = requests.get(url, timeout=120, stream=True)
         if resp.status_code == 404:
-            print(f"  NOT FOUND (404) — {quarter} data not yet published", file=sys.stderr)
+            print(f"  NOT FOUND (404) — {prefix} {quarter} data not yet published", file=sys.stderr)
             return False
         resp.raise_for_status()
         size_mb = int(resp.headers.get("content-length", 0)) / 1024 / 1024
@@ -67,7 +71,10 @@ def download_quarter(quarter: str, dest: Path) -> bool:
         return False
 
 
-def extract_employers(xlsx_path: Path) -> set[str]:
+def extract_employers(xlsx_path: Path, employer_col: str = EMPLOYER_COL,
+                      filters: dict = None) -> set[str]:
+    if filters is None:
+        filters = LCA_FILTER
     print(f"Extracting employers from {xlsx_path.name}...")
     wb = openpyxl.load_workbook(xlsx_path, read_only=True, data_only=True)
     ws = wb.active
@@ -75,23 +82,25 @@ def extract_employers(xlsx_path: Path) -> set[str]:
     header = [cell.value for cell in next(ws.iter_rows(min_row=1, max_row=1))]
     col_idx = {name: i for i, name in enumerate(header)}
 
-    if EMPLOYER_COL not in col_idx:
-        print(f"  ERROR: {EMPLOYER_COL} column not found. Columns: {header[:20]}", file=sys.stderr)
+    if employer_col not in col_idx:
+        print(f"  ERROR: {employer_col} column not found. Columns: {header[:20]}", file=sys.stderr)
         wb.close()
         return set()
 
-    case_idx = col_idx.get("CASE_STATUS")
-    visa_idx = col_idx.get("VISA_CLASS")
-    employer_idx = col_idx[EMPLOYER_COL]
+    employer_idx = col_idx[employer_col]
 
     employers = set()
     total = 0
     filtered = 0
     for row in ws.iter_rows(min_row=2, values_only=True):
         total += 1
-        if case_idx is not None and row[case_idx] != LCA_FILTER["CASE_STATUS"]:
-            continue
-        if visa_idx is not None and row[visa_idx] != LCA_FILTER["VISA_CLASS"]:
+        skip = False
+        for filter_col, filter_val in filters.items():
+            idx = col_idx.get(filter_col)
+            if idx is not None and row[idx] != filter_val:
+                skip = True
+                break
+        if skip:
             continue
         name = row[employer_idx]
         if name and isinstance(name, str):
@@ -99,7 +108,8 @@ def extract_employers(xlsx_path: Path) -> set[str]:
             filtered += 1
 
     wb.close()
-    print(f"  Rows: {total:,}, Certified H-1B: {filtered:,}, Unique employers: {len(employers):,}")
+    filter_desc = ", ".join(f"{k}={v}" for k, v in filters.items())
+    print(f"  Rows: {total:,}, {filter_desc}: {filtered:,}, Unique employers: {len(employers):,}")
     return employers
 
 
@@ -228,25 +238,35 @@ def main():
 
     # Build the rolling window of N quarters ending at latest
     quarters = build_quarter_window(latest, args.window)
-    print(f"\n=== LCA Quarterly Refresh ===")
+    print(f"\n=== DOL Sponsor Data Refresh (LCA + PERM) ===")
     print(f"Latest quarter: {latest}")
     print(f"Window ({args.window} quarters): {quarters}\n")
 
     # Download and extract employers from ALL quarters in the window.
-    # Rebuild from scratch — no merge with existing. Guarantees the rolling
-    # window is exact: employers from quarters outside the window are dropped.
+    # Two sources: LCA (H-1B, large ~72MB/quarter) + PERM (green card, ~11MB/quarter).
+    # Both rebuilt from scratch each run — no merge with existing.
     all_employers: set[str] = set()
     with tempfile.TemporaryDirectory() as tmpdir:
         for q in quarters:
-            xlsx_path = Path(tmpdir) / f"LCA_Disclosure_Data_{q}.xlsx"
-            if not download_quarter(q, xlsx_path):
-                if q == latest:
-                    print(f"\nERROR: Could not download latest quarter {q}", file=sys.stderr)
-                    sys.exit(1)
-                print(f"  WARNING: {q} unavailable — window may be smaller than {args.window}", file=sys.stderr)
-                continue
-            employers = extract_employers(xlsx_path)
-            all_employers |= employers
+            # LCA (H-1B)
+            lca_path = Path(tmpdir) / f"LCA_Disclosure_Data_{q}.xlsx"
+            if download_quarter(q, lca_path, prefix="LCA"):
+                employers = extract_employers(lca_path, employer_col=EMPLOYER_COL, filters=LCA_FILTER)
+                all_employers |= employers
+            elif q == latest:
+                print(f"\nERROR: Could not download latest LCA quarter {q}", file=sys.stderr)
+                sys.exit(1)
+            else:
+                print(f"  WARNING: LCA {q} unavailable — window may be smaller\n", file=sys.stderr)
+
+            # PERM (green card)
+            perm_path = Path(tmpdir) / f"PERM_Disclosure_Data_{q}.xlsx"
+            if download_quarter(q, perm_path, prefix="PERM"):
+                employers = extract_employers(perm_path, employer_col=PERM_EMPLOYER_COL, filters=PERM_FILTER)
+                all_employers |= employers
+            else:
+                print(f"  (PERM {q} not available — LCA-only for this quarter)\n", file=sys.stderr)
+
             print(f"  Running total: {len(all_employers):,} unique employers\n")
 
     if not all_employers:
@@ -269,11 +289,11 @@ def main():
     # Build output
     output = {
         "_meta": {
-            "description": "DOL OFLC LCA certified H-1B employer names (rolling window)",
-            "source": "DOL OFLC LCA Disclosure Data",
+            "description": "DOL OFLC certified employer names — LCA (H-1B) + PERM (green card), rolling window",
+            "source": "DOL OFLC LCA + PERM Disclosure Data",
             "quarters": quarters,
             "generated": datetime.datetime.now().isoformat()[:10],
-            "filter": f"CASE_STATUS={LCA_FILTER['CASE_STATUS']}, VISA_CLASS={LCA_FILTER['VISA_CLASS']}",
+            "filter": "LCA: CASE_STATUS=Certified, VISA_CLASS=H-1B | PERM: CASE_STATUS=Certified",
             "total_employers": len(all_employers),
             "format": "name-only (backward compatible with enrich-jobs.js loadLcaSponsors)",
         },
