@@ -1,6 +1,7 @@
 name: Sync R2 to Storage (R2-elim proxy-repoint unblock)
 # Mirrors the 28 zjp-data-proxy whitelisted files from R2 → Supabase Storage.
-# Transitional: runs until the proxy is repointed to Storage + AGG stops writing R2 (Phase 6).
+# Transitional: syncs NON-AGG files from R2 → Storage. AGG-produced files excluded
+# (uploaded directly via upload-to-storage.js since AGG stopped R2 writes 2026-07-26).
 # After Phase 6 (R2 deleted), this workflow is removed.
 on:
   schedule:
@@ -44,7 +45,7 @@ jobs:
               'zjp-metrics.json', 'board-counts.json', 'zjp-public-snapshot.json',
               'bridge-metrics.json', 'out-health-check.json', 'dead-links.json',
               'out-aspect-status.json', 'agg-aspect-status.json', 'enr-aspect-status.json',
-              'tag-aspect-status.json', 'inf-aspect-status.json', 'sup-aspect-status.json',
+              # EXCLUDED — AGG-produced (refresh-tag-aspect.yml) 'inf-aspect-status.json', 'sup-aspect-status.json',
               'tier-a-source-coverage.json', 'dedupe-store.json', 'worker-heartbeat.json',
               'enr-quality-signal.json',
           ]
