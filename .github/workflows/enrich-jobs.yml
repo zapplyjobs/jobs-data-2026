@@ -203,6 +203,38 @@ jobs:
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
           GITHUB_RUN_ID: ${{ github.run_id }}
 
+      - name: Dual-write to Supabase Storage (ENR-R2ELIM-PHASE2-1)
+        if: success()
+        continue-on-error: true
+        run: |
+          echo "Dual-writing ENR files to Supabase Storage (pipeline-data bucket)..."
+          for f in enriched_jobs.json enrichment-stats.json; do
+            if [ -f ".github/data/$f" ]; then
+              STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+                -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+                -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+                -H "Content-Type: application/octet-stream" \
+                --data-binary @".github/data/$f" \
+                "https://xxmhgagpbxjflajoaahy.supabase.co/storage/v1/object/pipeline-data/$f")
+              echo "  $f: HTTP $STATUS"
+            fi
+          done
+          for f in .github/data/descriptions-enriched-*.jsonl; do
+            if [ -f "$f" ]; then
+              BASENAME=$(basename "$f")
+              STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+                -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+                -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+                -H "Content-Type: application/octet-stream" \
+                --data-binary @"$f" \
+                "https://xxmhgagpbxjflajoaahy.supabase.co/storage/v1/object/pipeline-data/$BASENAME")
+              echo "  $BASENAME: HTTP $STATUS"
+            fi
+          done
+          echo "Dual-write complete."
+        env:
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
       - name: Commit enrichment stats
         if: success()
         continue-on-error: true
