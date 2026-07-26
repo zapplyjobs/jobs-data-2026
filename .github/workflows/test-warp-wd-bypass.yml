@@ -1,0 +1,47 @@
+name: Test WARP for WD/LabCorp IP block bypass
+# Experimental: tests if Cloudflare WARP on a GHA runner bypasses WD Bot Management.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/test-warp-wd-bypass.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Baseline — fetch WD URL WITHOUT WARP (expect 403)
+        run: |
+          echo "=== BASELINE (no WARP, expect 403 from GHA datacenter IP) ==="
+          # Test a Workday tenant URL (Wells Fargo careers API)
+          for url in \
+            "https://wd1.myworkdayjobs.com/wday/cxs/en-US/wf/careers/jobs" \
+            "https://wd3.myworkdayjobs.com/wday/cxs/en-US/labcorp/jobs"; do
+            code=$(curl -sf -o /dev/null -w "%{http_code}" --max-time 10 "$url" 2>/dev/null || echo "TIMEOUT/FAIL")
+            echo "  $url → HTTP $code"
+          done
+
+      - name: Install + connect Cloudflare WARP
+        run: |
+          curl -fsSL https://pkg.cloudflareclient.com/pubkey.gpg | sudo gpg --yes --dearmor --output /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] https://pkg.cloudflareclient.com/ $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/cloudflare-client.list
+          sudo apt-get update -qq && sudo apt-get install -y -qq cloudflare-warp
+          warp-cli registration new
+          warp-cli connect
+          sleep 5
+          echo "=== WARP status ==="
+          curl -s https://cloudflare.com/cdn-cgi/trace | grep -E '^warp=|^ip='
+
+      - name: Test — fetch WD URL WITH WARP (hope for 200)
+        run: |
+          echo "=== WITH WARP (hope for 200/422, not 403) ==="
+          for url in \
+            "https://wd1.myworkdayjobs.com/wday/cxs/en-US/wf/careers/jobs" \
+            "https://wd3.myworkdayjobs.com/wday/cxs/en-US/labcorp/jobs"; do
+            code=$(curl -sf -o /dev/null -w "%{http_code}" --max-time 10 "$url" 2>/dev/null || echo "TIMEOUT/FAIL")
+            echo "  $url → HTTP $code"
+          done
