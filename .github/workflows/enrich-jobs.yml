@@ -113,6 +113,30 @@ jobs:
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
 
+      - name: Refresh from Supabase Storage (ENR-R2ELIM-URGENT-R2READS-1)
+        if: success()
+        continue-on-error: true
+        run: |
+          echo "Refreshing from Supabase Storage (fresh data overwrites stale R2)..."
+          STORAGE_BASE="https://xxmhgagpbxjflajoaahy.supabase.co/storage/v1/object/public/pipeline-data"
+          # Core files
+          for f in all_jobs.json us_jobs.json processed_ids.json enriched_jobs.json jobs-metadata.json enrichment-history.jsonl lca-sponsors.json zjp-metrics.json; do
+            HTTP=$(curl -s -o ".github/data/$f" -w "%{http_code}" "$STORAGE_BASE/$f" 2>/dev/null)
+            if [ "$HTTP" = "200" ]; then echo "  Storage OK: $f"; else echo "  Storage SKIP: $f ($HTTP — using R2 fallback)"; fi
+          done
+          # Description sidecars via Storage list API
+          FILES=$(curl -s -X POST "https://xxmhgagpbxjflajoaahy.supabase.co/storage/v1/object/list/pipeline-data" \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{"prefix":"descriptions-","limit":100}' | jq -r '.[].name' 2>/dev/null || echo "")
+          for name in $FILES; do
+            HTTP=$(curl -s -o ".github/data/$name" -w "%{http_code}" "$STORAGE_BASE/$name" 2>/dev/null)
+            if [ "$HTTP" = "200" ]; then echo "  Storage OK: $name"; else echo "  Storage SKIP: $name ($HTTP)"; fi
+          done
+          echo "Storage refresh complete."
+        env:
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
       - name: Fetch Google+Apple detail pages
         if: success()
         continue-on-error: true
