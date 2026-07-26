@@ -1,4 +1,4 @@
-name: Test WARP for WD/LabCorp IP block bypass
+name: Test WARP on GHA
 on:
   workflow_dispatch:
   push:
@@ -11,15 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Baseline — WD URL without WARP
+      - name: Pre-WARP IP
         run: |
-          echo "=== BASELINE (no WARP) ==="
-          for url in \
-            "https://wellsfargo.wd1.myworkdayjobs.com/wday/cxs/en-US/wf/jobs" \
-            "https://labcorp.wd3.myworkdayjobs.com/wday/cxs/en-US/labcorp/jobs"; do
-            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "$url" 2>/dev/null)
-            echo "  $url → HTTP $code"
-          done
+          echo "=== BEFORE WARP ==="
+          curl -s https://cloudflare.com/cdn-cgi/trace | grep -E '^warp=|^ip='
       - name: Install + connect WARP
         run: |
           curl -fsSL https://pkg.cloudflareclient.com/pubkey.gpg | sudo gpg --yes --dearmor --output /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
@@ -28,14 +23,12 @@ jobs:
           warp-cli registration new --accept-tos
           warp-cli connect
           sleep 5
-          echo "=== WARP status ==="
-          curl -s https://cloudflare.com/cdn-cgi/trace | grep -E '^warp=|^ip='
-      - name: Test — WD URL with WARP
+      - name: Post-WARP IP + WD test
         run: |
-          echo "=== WITH WARP ==="
-          for url in \
-            "https://wellsfargo.wd1.myworkdayjobs.com/wday/cxs/en-US/wf/jobs" \
-            "https://labcorp.wd3.myworkdayjobs.com/wday/cxs/en-US/labcorp/jobs"; do
-            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "$url" 2>/dev/null)
-            echo "  $url → HTTP $code"
-          done
+          echo "=== AFTER WARP ==="
+          curl -s https://cloudflare.com/cdn-cgi/trace | grep -E '^warp=|^ip='
+          echo ""
+          echo "=== WD API test (any tenant — checks CF Bot Management) ==="
+          curl -s -o /dev/null -w "HTTP %{http_code}" --max-time 15 "https://acme.wd1.myworkdayjobs.com/wday/cxs/acme/Acme/jobs" || echo " FAILED"
+          echo ""
+          curl -s -o /dev/null -w "HTTP %{http_code}" --max-time 15 "https://pfizer.wd1.myworkdayjobs.com/wday/cxs/pfizer/PfizerCareers/jobs" || echo " FAILED"
