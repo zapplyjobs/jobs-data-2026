@@ -70,3 +70,16 @@ jobs:
               Body=body, ContentType='application/json')
           print('uploaded data/sup-aspect-status.json (' + str(len(body)) + ' bytes)')
           "
+
+      - name: Upload to Supabase Storage (R2-elim Phase 5 dual-write)
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          curl -sf -X PUT "${SUPABASE_URL}/storage/v1/object/pipeline-data/sup-aspect-status.json" \
+            -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
+            -H "Content-Type: application/json" \
+            --data-binary @sup-aspect-status.json \
+            && echo "uploaded sup-aspect-status.json to Storage" \
+            || echo "Storage upload failed (non-blocking)"
