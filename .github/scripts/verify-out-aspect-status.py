@@ -89,10 +89,17 @@ def c_infrastructure():
     if not hc:
         return "RED", "out-health-check.json unreachable", "proxy:out-health-check"
     dests = hc.get("destinations") or hc.get("healthCheck", {}).get("destinations") or []
-    if not dests:
-        return "YELLOW", "no destinations in health-check", "proxy:out-health-check"
-    failing = [d.get("name") for d in dests if (d.get("verdict", "").upper() != "PASS")]
-    return (green_if(not failing), f"{len(dests)} destinations, {len(failing)} failing", "proxy:out-health-check")
+    repos = hc.get("repos") or []
+    # Gate on BOTH destination uptime (sjd/zappy boards) AND consumer-repo push health
+    # (README deploy verdicts). Previously only destinations were gated — a stale consumer
+    # repo left this aspect GREEN even though OUT output stopped reaching that surface.
+    failing = ([d.get("name") for d in dests if (d.get("verdict", "").upper() != "PASS")]
+               + [r.get("repo") for r in repos if (r.get("verdict", "").upper() != "PASS")])
+    if not dests and not repos:
+        return "YELLOW", "no destinations/repos in health-check", "proxy:out-health-check"
+    return (green_if(not failing),
+            f"{len(dests)} destinations + {len(repos)} consumer repos, {len(failing)} failing",
+            "proxy:out-health-check")
 
 def c_configuration():
     paths = [f"{PROC}/discord/config.js", f"{PROC}/board-types.js"]
