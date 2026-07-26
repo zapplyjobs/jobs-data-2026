@@ -1,0 +1,79 @@
+name: Sync R2 to Storage (R2-elim proxy-repoint unblock)
+# Mirrors the 28 zjp-data-proxy whitelisted files from R2 → Supabase Storage.
+# Transitional: runs until the proxy is repointed to Storage + AGG stops writing R2 (Phase 6).
+# After Phase 6 (R2 deleted), this workflow is removed.
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Sync whitelisted files R2 → Supabase Storage
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          python3 -m pip install boto3 -q
+          python3 << 'PY'
+          import boto3, os, subprocess, sys
+
+          s3 = boto3.client('s3', endpoint_url=os.environ['R2_ENDPOINT'],
+              aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'],
+              aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY'], region_name='auto')
+          bucket = os.environ['R2_BUCKET_NAME']
+          supa_url = os.environ['SUPABASE_URL'].rstrip('/')
+          supa_key = os.environ['SUPABASE_SERVICE_ROLE_KEY']
+
+          # The 28 files served by zjp-data-proxy (must ALL be in Storage before repoint)
+          WHITELIST = [
+              'metrics/latest.json', 'daily-stats.json', 'history.jsonl',
+              'enrichment-stats.json', 'enrichment-history.jsonl', 'jobs-metadata.json',
+              'posted_jobs.json', 'pipeline-alert.json', 'history-archive.jsonl',
+              'general-review.json', 'discord-verification.json', 'traffic-history.jsonl',
+              'zjp-metrics.json', 'board-counts.json', 'zjp-public-snapshot.json',
+              'bridge-metrics.json', 'out-health-check.json', 'dead-links.json',
+              'out-aspect-status.json', 'agg-aspect-status.json', 'enr-aspect-status.json',
+              'tag-aspect-status.json', 'inf-aspect-status.json', 'sup-aspect-status.json',
+              'tier-a-source-coverage.json', 'dedupe-store.json', 'worker-heartbeat.json',
+              'enr-quality-signal.json',
+          ]
+
+          ok = 0; skip = 0; fail = 0
+          for f in WHITELIST:
+              try:
+                  obj = s3.get_object(Bucket=bucket, Key=f'data/{f}')
+                  body = obj['Body'].read()
+                  ct = 'application/x-ndjson' if f.endswith('.jsonl') else 'application/json'
+                  result = subprocess.run([
+                      'curl', '-sf', '-X', 'PUT',
+                      f'{supa_url}/storage/v1/object/pipeline-data/{f}',
+                      '-H', f'Authorization: Bearer {supa_key}',
+                      '-H', f'Content-Type: {ct}',
+                      '--data-binary', '@-',
+                  ], input=body, capture_output=True, timeout=30)
+                  if result.returncode == 0:
+                      ok += 1
+                  else:
+                      fail += 1
+                      print(f'  FAIL {f}: {result.stderr.decode()[:100]}', file=sys.stderr)
+              except s3.exceptions.NoSuchKey:
+                  skip += 1  # file not in R2 yet (intermittent producer)
+              except Exception as e:
+                  fail += 1
+                  print(f'  FAIL {f}: {e}', file=sys.stderr)
+
+          print(f'R2→Storage sync: {ok} ok, {skip} skip (not in R2), {fail} fail')
+          if fail > 5:
+              print(f'WARNING: {fail} failures — check Storage credentials + R2 access', file=sys.stderr)
+          PY
