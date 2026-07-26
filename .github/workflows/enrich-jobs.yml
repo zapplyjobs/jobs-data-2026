@@ -208,7 +208,7 @@ jobs:
         continue-on-error: true
         run: |
           echo "Dual-writing ENR files to Supabase Storage (pipeline-data bucket)..."
-          for f in enriched_jobs.json enrichment-stats.json; do
+          for f in enriched_jobs.json enrichment-stats.json processed_ids.json enrichment-history.jsonl; do
             if [ -f ".github/data/$f" ]; then
               STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X PUT \
                 -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
@@ -290,6 +290,7 @@ jobs:
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
       # post-to-discord is NOT dispatched here — fetch-jobs.yml is the single
       # dispatcher (wave-link, "no 15-min lag"). Dual-dispatching exhausted
