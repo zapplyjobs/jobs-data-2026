@@ -210,7 +210,7 @@ jobs:
           echo "Dual-writing ENR files to Supabase Storage (pipeline-data bucket)..."
           for f in enriched_jobs.json enrichment-stats.json; do
             if [ -f ".github/data/$f" ]; then
-              STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+              STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X PUT \
                 -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
                 -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
                 -H "Content-Type: application/octet-stream" \
@@ -222,7 +222,7 @@ jobs:
           for f in .github/data/descriptions-enriched-*.jsonl; do
             if [ -f "$f" ]; then
               BASENAME=$(basename "$f")
-              STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+              STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X PUT \
                 -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
                 -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
                 -H "Content-Type: application/octet-stream" \
