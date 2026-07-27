@@ -34,6 +34,8 @@ jobs:
         R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
         R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
         R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       run: |
         python3 - <<'PYEOF'
         import json, urllib.request, datetime, sys, os, time, subprocess
@@ -289,6 +291,18 @@ jobs:
                 Body=json.dumps(results, indent=2),
                 ContentType='application/json')
             print("Results uploaded to R2: data/out-health-check.json")
+            # R2-elim Phase 6: dual-write to Supabase Storage (so R2 can be deleted)
+            try:
+                _url = f"{os.environ.get('SUPABASE_URL', '')}/storage/v1/object/pipeline-data/out-health-check.json"
+                _req = urllib.request.Request(_url, method='PUT',
+                    data=json.dumps(results, indent=2).encode(),
+                    headers={'Authorization': f"Bearer {os.environ.get('SUPABASE_SERVICE_ROLE_KEY', '')}",
+                             'apikey': os.environ.get('SUPABASE_SERVICE_ROLE_KEY', ''),
+                             'Content-Type': 'application/json'})
+                urllib.request.urlopen(_req, timeout=15)
+                print("Results uploaded to Storage: pipeline-data/out-health-check.json")
+            except Exception as e:
+                print(f"Storage dual-write error (non-fatal): {e}")
         except Exception as e:
             issues.append(f"R2 upload failed: {e}")
             print(f"R2 upload failed: {e}")
