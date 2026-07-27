@@ -1,0 +1,75 @@
+name: No New R2 Writes
+# R2 is being ELIMINATED (CORE_RULES §6 — Supabase is canonical). This gate FAILS any
+# push/PR that introduces an R2 write not in the baseline below. The baseline only ever
+# SHRINKS as R2 writes are migrated to Supabase — it must never grow. To remove a site,
+# migrate it to Supabase Storage/DB, then delete its line from the baseline.
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Block new R2 writes (R2-elimination enforcement)
+        run: |
+          python3 <<'PYEOF'
+          import re, os, sys
+          patterns = {
+            'upload-dashboard-data-to-r2': r'upload-dashboard-data-to-r2',
+            'PutObjectCommand': r'PutObjectCommand',
+            'put_object': r'\.put_object\(',
+            'r2.uploadJson': r'r2\.uploadJson',
+            'r2.uploadRaw': r'r2\.uploadRaw',
+            'r2.uploadJsonl': r'r2\.uploadJsonl',
+          }
+          # BASELINE — current allowed R2-write sites (file:pattern). Shrink-only.
+          baseline = {
+            '.github/workflows/cleanup-closed.yml:r2.uploadRaw',
+            '.github/workflows/collect-metrics.yml:upload-dashboard-data-to-r2',
+            '.github/workflows/daily-stats.yml:upload-dashboard-data-to-r2',
+            '.github/workflows/enrich-jobs.yml:r2.uploadRaw',
+            '.github/workflows/enrich-jobs.yml:upload-dashboard-data-to-r2',
+            '.github/workflows/out-dead-link-check.yml:put_object',
+            '.github/workflows/out-health-check.yml:put_object',
+            '.github/workflows/pipeline-alert.yml:upload-dashboard-data-to-r2',
+            '.github/workflows/post-to-discord.yml:r2.uploadRaw',
+            '.github/workflows/publish-inf-aspect-status.yml:put_object',
+            '.github/workflows/publish-out-aspect-status.yml:put_object',
+            '.github/workflows/publish-sup-aspect-status.yml:put_object',
+            '.github/workflows/refresh-zjp-public-snapshot.yml:PutObjectCommand',
+            '.github/workflows/verify-discord.yml:upload-dashboard-data-to-r2',
+          }
+          sites = set()
+          for d in ['.github/workflows', 'scripts']:
+            for root, _, files in os.walk(d):
+              for f in files:
+                if not f.endswith(('.yml', '.yaml', '.js', '.py', '.ts')):
+                  continue
+                p = os.path.join(root, f); rel = os.path.relpath(p)
+                if rel.endswith('upload-dashboard-data-to-r2.js'):
+                  continue  # the tool itself, not a consumer
+                if rel.endswith('no-r2-writes.yml'):
+                  continue  # this gate file itself (contains the pattern strings)
+                try:
+                  txt = open(p, encoding='utf-8', errors='ignore').read()
+                except Exception:
+                  continue
+                for pk, pr in patterns.items():
+                  if re.search(pr, txt):
+                    sites.add(f'{rel}:{pk}')
+          new = sites - baseline
+          removed = baseline - sites
+          if removed:
+            print(f'ℹ️  R2 writes removed (migration progress): {sorted(removed)}')
+            print('   Update the baseline in .github/workflows/no-r2-writes.yml to drop these.')
+          if new:
+            print(f'❌ NEW R2 write(s) detected — not in baseline: {sorted(new)}')
+            print('   R2 is being ELIMINATED (CORE_RULES §6). Do NOT add R2 writes.')
+            print('   Use Supabase Storage (pipeline-data bucket) or the jobs table instead.')
+            print('   If this is genuinely a pre-existing site, add it to the baseline — otherwise migrate it.')
+            sys.exit(1)
+          print(f'✅ No new R2 writes. {len(sites)} baseline sites present ({len(removed)} removed).')
+          PYEOF
