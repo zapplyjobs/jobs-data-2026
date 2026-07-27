@@ -25,7 +25,7 @@ jobs:
         run: |
           RESPONSE=$(curl -sf -w "\n%{http_code}" \
             "https://job-board-cron-worker.wild-queen-069e.workers.dev/dispatch" \
-            -H "X-Trigger-Secret: ${{ secrets.TRIGGER_SECRET }}" \
+            -H "Authorization: Bearer ${{ secrets.TRIGGER_SECRET }}" \
             --max-time 30) || true
           HTTP_CODE=$(echo "$RESPONSE" | tail -1)
           BODY=$(echo "$RESPONSE" | head -n -1)
