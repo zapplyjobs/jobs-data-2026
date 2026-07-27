@@ -144,6 +144,20 @@ jobs:
           main().catch(err => { console.error(err.message); process.exit(1); });
           NODE
 
+      - name: Dual-write public snapshot to Supabase Storage (R2-elim INF E140)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          node -e '
+          const fs=require("fs");
+          const url=process.env.SUPABASE_URL, key=process.env.SUPABASE_SERVICE_ROLE_KEY;
+          if(!url||!key){console.log("Storage skip (no creds)");process.exit(0);}
+          const body=fs.readFileSync(".github/data/zjp-public-snapshot.json");
+          fetch(url+"/storage/v1/object/pipeline-data/zjp-public-snapshot.json",{method:"PUT",headers:{Authorization:"Bearer "+key,"Content-Type":"application/json"},body}).then(r=>console.log(r.ok?"Storage OK":"Storage FAIL "+r.status)).catch(e=>console.log("Storage ERR",e.message));
+          '
+
+
       - name: Validate R2 artifact contracts
         env:
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
