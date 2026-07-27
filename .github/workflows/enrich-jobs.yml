@@ -125,7 +125,7 @@ jobs:
             if [ "$HTTP" = "200" ]; then echo "  Storage OK: $f"; else echo "  Storage SKIP: $f ($HTTP — using R2 fallback)"; fi
           done
           # Description sidecars (explicit names — Storage list API returns empty for prefix, known issue)
-          for name in descriptions-workday-1.jsonl descriptions-workday-2.jsonl descriptions-greenhouse.jsonl descriptions-smartrecruiters.jsonl descriptions-microsoft.jsonl descriptions-lever.jsonl descriptions-ashby.jsonl descriptions-amazon.jsonl descriptions-oracle.jsonl descriptions-bytedance.jsonl descriptions-google.jsonl descriptions-tiktok.jsonl descriptions-enriched-1.jsonl descriptions-enriched-2.jsonl; do
+          for name in descriptions-workday-1.jsonl descriptions-workday-2.jsonl descriptions-greenhouse-1.jsonl descriptions-greenhouse-2.jsonl descriptions-greenhouse-3.jsonl descriptions-greenhouse-4.jsonl descriptions-greenhouse-5.jsonl descriptions-greenhouse-6.jsonl descriptions-smartrecruiters.jsonl descriptions-microsoft.jsonl descriptions-lever.jsonl descriptions-ashby.jsonl descriptions-amazon.jsonl descriptions-oracle.jsonl descriptions-bytedance.jsonl descriptions-google.jsonl descriptions-tiktok.jsonl descriptions-enriched-1.jsonl descriptions-enriched-2.jsonl; do
             HTTP=$(curl -s -o ".github/data/$name" -w "%{http_code}" "$STORAGE_BASE/$name" 2>/dev/null)
             if [ "$HTTP" = "200" ]; then echo "  Storage OK: $name"; else echo "  Storage SKIP: $name ($HTTP)"; fi
           done
