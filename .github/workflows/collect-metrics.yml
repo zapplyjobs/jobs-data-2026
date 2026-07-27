@@ -137,6 +137,30 @@ jobs:
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
         run: node scripts/upload-dashboard-data-to-r2.js zjp-metrics.json metrics/latest.json metrics/history.jsonl traffic-history.jsonl bridge-metrics-history.jsonl  # ENR-OTHER-WORKFLOWS-DLA-1: +metrics/history.jsonl — persist collect-metrics growth-trend history
 
+      - name: Dual-write metrics to Supabase Storage (R2-elimination INF E140)
+        if: success()
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          node -e '
+          const fs = require("fs"), path = require("path");
+          const url = process.env.SUPABASE_URL, key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+          if (!url || !key) { console.log("Storage dual-write skipped (no Supabase creds)"); process.exit(0); }
+          const dir = path.join(".github", "data");
+          const files = ["metrics/latest.json", "metrics/history.jsonl", "bridge-metrics-history.jsonl"];
+          (async () => {
+            for (const f of files) {
+              const p = path.join(dir, f);
+              if (!fs.existsSync(p)) { console.log("SKIP " + f); continue; }
+              const ct = f.endsWith(".jsonl") ? "application/x-ndjson" : "application/json";
+              const r = await fetch(url + "/storage/v1/object/pipeline-data/" + f, { method: "PUT", headers: { Authorization: "Bearer " + key, "Content-Type": ct }, body: fs.readFileSync(p) });
+              console.log((r.ok ? "Storage OK: " : "Storage FAIL: ") + f + (r.ok ? "" : " HTTP " + r.status));
+            }
+          })();
+          '
+
       - name: Publish metrics to Supabase directly (Phase 1 R2 elimination)
         if: success()
         continue-on-error: true
