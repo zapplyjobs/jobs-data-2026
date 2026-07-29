@@ -51,25 +51,6 @@ jobs:
               open(gss, 'a').write(summary)
           PY
 
-      - name: Upload to R2
-        env:
-          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
-          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
-        run: |
-          python3 -m pip install boto3 -q
-          python3 -c "
-          import boto3, os
-          s3 = boto3.client('s3', endpoint_url=os.environ['R2_ENDPOINT'],
-              aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'],
-              aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY'], region_name='auto')
-          body = open('inf-aspect-status.json').read()
-          s3.put_object(Bucket=os.environ['R2_BUCKET_NAME'], Key='data/inf-aspect-status.json',
-              Body=body, ContentType='application/json')
-          print('uploaded data/inf-aspect-status.json (' + str(len(body)) + ' bytes)')
-          "
-
       - name: Upload to Supabase Storage (R2-elim Phase 5 dual-write)
         continue-on-error: true
         env:
