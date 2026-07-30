@@ -195,8 +195,8 @@ jobs:
               .filter(name => name.startsWith('descriptions-') && name.endsWith('.jsonl'));
             const staleSidecars = existingSidecars.filter(name => !desiredSidecars.has(name));
             for (const stale of staleSidecars) {
-              await r2.remove(stale);
-              console.log('DELETE: ' + stale);
+              try { await r2.remove(stale); console.log('DELETE: ' + stale); }
+              catch (e) { console.log('SKIP DELETE (R2 gone): ' + stale); }
             }
 
             let ok = 0, fail = 0;
@@ -224,6 +224,8 @@ jobs:
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
           GITHUB_RUN_ID: ${{ github.run_id }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
       - name: Dual-write to Supabase Storage (ENR-R2ELIM-PHASE2-1)
         if: success()
