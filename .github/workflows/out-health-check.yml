@@ -175,6 +175,28 @@ jobs:
                 except (ValueError, TypeError):
                     pass
 
+            # README data quality check (OUT-MONITORING-README-DATA-QUALITY-1)
+            # Check one representative repo for visa fill rate + date coverage
+            if repo == "New-Grad-Jobs-2027":
+                readme_text = locals().get('readme', '')
+                if readme_text:
+                    try:
+                        job_rows = readme_text.count('images/apply.png')
+                        visa_sponsor = readme_text.count('✅ Sponsor')
+                        visa_h1b = readme_text.count('🏛 H-1B')
+                        undated = readme_text.count('Undated') + readme_text.count('Date unknown')
+                        if job_rows > 0:
+                            visa_rate = round((visa_sponsor + visa_h1b) / job_rows * 100, 1)
+                            undated_rate = round(undated / job_rows * 100, 1)
+                            r["readme_visa_pct"] = visa_rate
+                            r["readme_undated_pct"] = undated_rate
+                            if visa_rate < 10:
+                                r["issues"].append(f"README visa fill {visa_rate}% (<10% threshold — enrichment may not be reaching README)")
+                            if undated_rate > 80:
+                                r["issues"].append(f"README {undated_rate}% Undated (>80% — posted_at may be missing upstream)")
+                    except Exception as e:
+                        print(f"WARNING: README data quality check failed (non-fatal): {e}")
+
             # Consumer-repo workflow status REMOVED — repos are now pure display
             # (INF Phase 4 architecture change: centralized pipeline generates READMEs).
             # README freshness (pushed_at check above) is sufficient to verify repos are updating.
