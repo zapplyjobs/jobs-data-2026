@@ -65,27 +65,12 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
         run: |
           mkdir -p .github/data
-          node - <<'NODE'
-          const fs = require('fs');
-          const path = require('path');
-          const URL = process.env.SUPABASE_URL;
-          async function fetchToFile(name, target) {
-            const res = await fetch(`${URL}/storage/v1/object/public/pipeline-data/${name}`);
-            if (!res.ok) throw new Error(`${name} → ${res.status}`);
-            fs.writeFileSync(target, await res.text());
-          }
-          async function main() {
-            for (const name of ['all_jobs.json', 'jobs-metadata.json', 'enrichment-stats.json']) {
-              await fetchToFile(name, path.join('.github/data', name));
-            }
-            try {
-              await fetchToFile('zjp-public-snapshot.json', path.join('.github/data', 'zjp-public-snapshot.json'));
-              console.log('SEEDED:zjp-public-snapshot (for tag_history accumulation)');
-            } catch (e) { console.log('SKIP: no previous zjp-public-snapshot.json'); }
-            console.log('SEEDED:all_jobs+jobs-metadata+enrichment-stats (from Storage)');
-          }
-          main().catch(err => { console.error(err.message); process.exit(1); });
-          NODE
+          BASE="${SUPABASE_URL}/storage/v1/object/public/pipeline-data"
+          for f in all_jobs.json jobs-metadata.json enrichment-stats.json; do
+            curl -sf -o ".github/data/$f" "$BASE/$f" && echo "SEEDED:$f" || { echo "FAIL:$f"; exit 1; }
+          done
+          curl -sf -o ".github/data/zjp-public-snapshot.json" "$BASE/zjp-public-snapshot.json" && echo "SEEDED:snapshot (tag_history)" || echo "SKIP:no previous snapshot (first run)"
+          echo "seeded all_jobs+jobs-metadata+enrichment-stats from Storage"
 
       - name: Generate public snapshot
         env:
