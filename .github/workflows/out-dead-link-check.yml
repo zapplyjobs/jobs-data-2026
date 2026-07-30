@@ -1,6 +1,6 @@
 name: OUT Dead Link Check
 # Weekly dead-link check across all consumer repos.
-# Publishes results to R2 as dead-links.json for dashboard consumption.
+# Publishes results to Supabase Storage as dead-links.json for dashboard consumption.
 # Format: {generated_at, total_checked, total_dead, dead_links: [{repo, url, http_code}], total_transient, transient_links: [{repo, url, http_code}]}
 on:
   schedule:
@@ -20,13 +20,9 @@ jobs:
     timeout-minutes: 25
 
     steps:
-    - name: Check dead links + publish to R2
+    - name: Check dead links + publish to Storage
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-        R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-        R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
-        R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
         SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
         SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       run: |
@@ -183,36 +179,18 @@ jobs:
         with open(os.environ.get("GITHUB_STEP_SUMMARY", "/dev/null"), "a") as f:
             f.write(summary)
 
-        # Publish to R2
+        # Publish to Supabase Storage (R2 eliminated — bucket deleted 2026-07-29)
         try:
-            import subprocess
-            subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'boto3', '-q'], stderr=subprocess.DEVNULL)
-            import boto3
-            s3 = boto3.client('s3',
-                endpoint_url=os.environ.get('R2_ENDPOINT', ''),
-                aws_access_key_id=os.environ.get('R2_ACCESS_KEY_ID', ''),
-                aws_secret_access_key=os.environ.get('R2_SECRET_ACCESS_KEY', ''),
-                region_name='auto')
-            s3.put_object(
-                Bucket=os.environ.get('R2_BUCKET_NAME', 'zjp-data'),
-                Key='data/dead-links.json',
-                Body=json.dumps(output, indent=2),
-                ContentType='application/json')
-            print("Results uploaded to R2: data/dead-links.json")
-            # R2-elim Phase 6: dual-write to Supabase Storage (so R2 can be deleted)
-            try:
-                _url = f"{os.environ.get('SUPABASE_URL', '')}/storage/v1/object/pipeline-data/dead-links.json"
-                _req = urllib.request.Request(_url, method='PUT',
-                    data=json.dumps(output, indent=2).encode(),
-                    headers={'Authorization': f"Bearer {os.environ.get('SUPABASE_SERVICE_ROLE_KEY', '')}",
-                             'apikey': os.environ.get('SUPABASE_SERVICE_ROLE_KEY', ''),
-                             'Content-Type': 'application/json'})
-                urllib.request.urlopen(_req, timeout=15)
-                print("Results uploaded to Storage: pipeline-data/dead-links.json")
-            except Exception as e:
-                print(f"Storage dual-write error (non-fatal): {e}")
+            _url = f"{os.environ.get('SUPABASE_URL', '')}/storage/v1/object/pipeline-data/dead-links.json"
+            _req = urllib.request.Request(_url, method='PUT',
+                data=json.dumps(output, indent=2).encode(),
+                headers={'Authorization': f"Bearer {os.environ.get('SUPABASE_SERVICE_ROLE_KEY', '')}",
+                         'apikey': os.environ.get('SUPABASE_SERVICE_ROLE_KEY', ''),
+                         'Content-Type': 'application/json'})
+            urllib.request.urlopen(_req, timeout=15)
+            print("Results uploaded to Storage: pipeline-data/dead-links.json")
         except Exception as e:
-            print(f"R2 upload failed: {e}")
+            print(f"Storage upload failed: {e}")
             sys.exit(1)
 
         # Exit 1 only if truly-dead links found (transient excluded — triggers the tracking issue)
@@ -226,7 +204,7 @@ jobs:
       with:
         script: |
           const title = 'Dead links detected in consumer repos';
-          const body = `The weekly dead-link check found broken links on ${new Date().toISOString()}.\n\nSee [workflow run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}) for the full list.\n\nResults are published to R2: data/dead-links.json`;
+          const body = `The weekly dead-link check found broken links on ${new Date().toISOString()}.\n\nSee [workflow run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}) for the full list.\n\nResults are published to Supabase Storage: pipeline-data/dead-links.json`;
           const existing = await github.rest.issues.listForRepo({
             ...context.repo,
             state: 'open',
