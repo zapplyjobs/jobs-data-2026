@@ -35,7 +35,7 @@ jobs:
           echo "Y" | transcrypt --cipher aes-256-cbc --password "$TRANSCRYPT_PASSWORD" --force
           git checkout -- .
           git submodule foreach --recursive '
-            echo "Y" | transcrypt --cipher aes-256-cbc --password "'"$TRANSCRYPT_PASSWORD"'" --force 2>/dev/null || true
+            echo "Y" | transcrypt --cipher aes-256-cbc --password "$TRANSCRYPT_PASSWORD" --force 2>/dev/null || true
             rm -f "$(git rev-parse --git-dir)/index" 2>/dev/null || true
             git checkout HEAD -- . 2>/dev/null || true
           ' || true
