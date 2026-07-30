@@ -117,6 +117,14 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: node .github/scripts/processing/lib/generate-zjp-metrics.js
 
+      - name: Produce sjd-jobs.json (INF-SJD-PAGINATION-1)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          node scripts/produce-sjd-jobs.js
+          node scripts/upload-dashboard-data-to-r2.js sjd-jobs.json
+
       - name: Commit and push metrics
         run: |
           git config user.email "bot@zapplyjobs.com"
