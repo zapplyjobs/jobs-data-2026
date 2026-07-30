@@ -5,8 +5,12 @@ name: Trigger Pipeline (external cron via Worker /dispatch)
 # The Worker fetch handler is unaffected by the Cloudflare cron platform bug.
 # INF-PIPELINE-SLOWNESS-1 / INF-WORKER-CRON-STOPPED-1
 on:
-  schedule:
-    - cron: '*/10 * * * *'
+  # schedule DISABLED (INF-TRIGGER-DOUBLE-DISPATCH-1): this workflow called Worker /dispatch
+  # every 10 min, but the Worker already has its own */15 CF cron. With fetch-jobs.yml's own
+  # */10 GH schedule (primary) + Worker cron (backup), this tertiary trigger caused redundant
+  # double-dispatch (~12/hr vs intended 6/hr). Kept as workflow_dispatch for manual emergency.
+  # schedule:
+  #   - cron: '*/10 * * * *'
   workflow_dispatch:
 
 
