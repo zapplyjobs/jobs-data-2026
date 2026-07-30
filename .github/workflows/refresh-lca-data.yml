@@ -43,19 +43,16 @@ jobs:
             --window ${{ inputs.window }} \
             --output lca-sponsors.json
 
-      - name: Upload to R2
+      - name: Upload to Supabase Storage
         run: |
-          aws s3 cp lca-sponsors.json \
-            "s3://$R2_BUCKET_NAME/data/lca-sponsors.json" \
-            --endpoint-url "$R2_ENDPOINT"
-          echo "=== Uploaded lca-sponsors.json to R2 ==="
-          # Verify the upload
-          aws s3 ls "s3://$R2_BUCKET_NAME/data/lca-sponsors.json" \
-            --endpoint-url "$R2_ENDPOINT" \
-            --human-readable
+          curl -sf -X PUT \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Content-Type: application/json" \
+            --data-binary @lca-sponsors.json \
+            "$SUPABASE_URL/storage/v1/object/pipeline-data/lca-sponsors.json" \
+            && echo "=== Uploaded lca-sponsors.json to Storage ===" \
+            || { echo "⚠️ Storage upload failed"; exit 1; }
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: auto
-          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
-          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
