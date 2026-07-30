@@ -118,6 +118,7 @@ jobs:
         run: node .github/scripts/processing/lib/generate-zjp-metrics.js
 
       - name: Produce sjd-jobs.json (INF-SJD-PAGINATION-1)
+        continue-on-error: true  # Non-critical: sjd-jobs.json is a cache; don't break collect-metrics if the Supabase query times out
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
