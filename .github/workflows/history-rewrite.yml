@@ -54,20 +54,15 @@ jobs:
           echo "=== Object count ==="
           git -C repo.git count-objects -vH
 
-      - name: Create rollback bundle (full-rewrite only)
+      - name: Record pre-rewrite SHAs (rollback point)
         if: inputs.mode == 'full-rewrite'
         run: |
-          echo "=== Creating rollback bundle ==="
-          git -C repo.git bundle create pre-rewrite.bundle --all
-          ls -lh pre-rewrite.bundle
-
-      - name: Upload rollback bundle as artifact (full-rewrite only)
-        if: inputs.mode == 'full-rewrite'
-        uses: actions/upload-artifact@v4
-        with:
-          name: pre-rewrite-bundle
-          path: pre-rewrite.bundle
-          retention-days: 90
+          echo "=== Pre-rewrite main SHA (rollback point) ==="
+          git -C repo.git rev-parse refs/heads/main
+          echo "=== All branch SHAs ==="
+          git -C repo.git for-each-ref --format='%(refname) %(objectname)' refs/heads/
+          echo "=== Rollback: old commits persist as dangling objects on GitHub for weeks ==="
+          echo "=== To restore: force-push the old main SHA back ==="
 
       - name: Analyze history (always runs)
         run: |
