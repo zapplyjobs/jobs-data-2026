@@ -90,11 +90,14 @@ jobs:
 
       # ===== DESTRUCTIVE SECTION — only runs in full-rewrite mode =====
 
-      - name: Strip large blobs (>5MB)
+      - name: Strip .github/data/ files from history (path-based, precise)
         if: inputs.mode == 'full-rewrite'
         run: |
-          echo "=== Stripping all blobs larger than 5MB ==="
-          git -C repo.git filter-repo --force --strip-blobs-bigger-than 5M
+          echo "=== Stripping .github/data/*.json + *.jsonl from ALL history ==="
+          echo "=== (path-based: only data files, source/config/images preserved) ==="
+          git -C repo.git filter-repo --force --invert-paths \
+            --path-glob '.github/data/*.json' \
+            --path-glob '.github/data/*.jsonl'
 
           echo ""
           echo "=== Post-rewrite size ==="
