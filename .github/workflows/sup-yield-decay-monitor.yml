@@ -62,30 +62,14 @@ jobs:
             && echo "CSV downloaded: $(wc -l < .github/data/company-research-log.csv) lines" \
             || { echo "FAILED to download CSV"; exit 1; }
 
-      - name: Download all_jobs.json from R2
-        continue-on-error: true
+      - name: Download all_jobs.json from Supabase Storage
         run: |
-          node -e "
-          const { createR2Client } = require('./.github/scripts/processing/lib/storage/r2-client');
-          const fs = require('fs');
-          async function main() {
-            const r2 = createR2Client({ prefix: 'data/' });
-            const raw = await r2.downloadRaw('all_jobs.json');
-            if (raw) {
-              fs.writeFileSync('.github/data/all_jobs.json', Buffer.from(raw));
-              console.log('R2 download OK: all_jobs.json');
-            } else {
-              console.error('R2 returned null for all_jobs.json');
-              process.exit(1);
-            }
-          }
-          main().catch(e => { console.error('R2 fatal: ' + e.message); process.exit(1); });
-          "
-        env:
-          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
-          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+          curl -sf -o .github/data/all_jobs.json \
+            'https://xxmhgagpbxjflajoaahy.supabase.co/storage/v1/object/pipeline-data/all_jobs.json' \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            && echo "Downloaded all_jobs.json from Storage ($(wc -c < .github/data/all_jobs.json) bytes)" \
+            || { echo "FAILED to download all_jobs.json from Storage"; exit 1; }
 
       - name: Run yield decay monitor
         run: |
