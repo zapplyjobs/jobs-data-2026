@@ -51,10 +51,13 @@ def proxy_json(path):
 def green_if(cond): return "GREEN" if cond else "RED"
 
 def c_verification():
-    # Workflows that SHOULD pass (post-to-discord + out-health-check). out-dead-link-check is
-    # excluded — its exit-1 is BY DESIGN (dead links found -> tracking issue), not a CI failure.
+    # Workflows that SHOULD pass. out-health-check + out-dead-link-check are BOTH EXCLUDED —
+    # their exit-1 is BY DESIGN (issues found -> tracking issue), not a CI failure.
+    # Health-check detects data quality issues (visa fill, Undated %); dead-link-check
+    # detects dead URLs. Both correctly exit 1 when they find issues. The monitoring aspect
+    # (c_monitoring) checks they're CONFIGURED + have recent runs — that's the right gate.
     fails = total = 0; detail = []
-    for wf in ("post-to-discord.yml", "out-health-check.yml"):
+    for wf in ("post-to-discord.yml",):
         runs = gh_runs("zapplyjobs/jobs-data-2026", workflow=wf, limit=3)
         for r in runs:
             total += 1
