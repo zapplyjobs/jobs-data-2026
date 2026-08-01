@@ -1,9 +1,8 @@
-name: Enrichment Health Check (Gemini cap monitor)
+name: Enrichment + Bridge Health Check
 
-# INF-GEMINI-CAP-MONITORING-1: Monitors zapply-backend job-processor Worker
-# errors/day as an early-warning signal for Gemini monthly spend-cap exhaustion.
-# Calibrated from the 2026-07-30 incident (normal ~1-3/day, WARN >15, CRITICAL >50).
-# Would have given 4 days warning before the Jul 30 cap exhaustion.
+# INF-GEMINI-CAP-MONITORING-1: Gemini cap early warning (job-processor errors/day).
+# INF-BRIDGEMETRICS-FROZEN-1: bridge-metrics freshness check (bridge_run_at must be <1h old).
+# Catches stale bridge data within 1 hour instead of 2+ days.
 
 on:
   schedule:
@@ -96,4 +95,40 @@ jobs:
               || echo "Discord alert failed (non-blocking)"
           else
             echo "Status OK — no alert needed"
+          fi
+
+      - name: Check bridge-metrics freshness
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          DISCORD_TEAM_TOKEN: ${{ secrets.DISCORD_TEAM_TOKEN }}
+          DISCORD_PIPELINE_ALERT_CHANNEL_ID: ${{ secrets.DISCORD_PIPELINE_ALERT_CHANNEL_ID }}
+        run: |
+          BRIDGE=$(curl -sf "${SUPABASE_URL}/storage/v1/object/pipeline-data/bridge-metrics.json" \
+            -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" 2>/dev/null || echo "{}")
+          BRIDGE_AT=$(echo "$BRIDGE" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('bridge_run_at',''))" 2>/dev/null)
+          if [ -z "$BRIDGE_AT" ]; then
+            echo "Bridge-metrics.json missing or unreadable"
+            STALE_HOURS=999
+          else
+            STALE_HOURS=$(python3 -c "
+          from datetime import datetime, timezone
+          bridge = datetime.fromisoformat('$BRIDGE_AT'.replace('Z','+00:00'))
+          age = (datetime.now(timezone.utc) - bridge).total_seconds() / 3600
+          print(f'{age:.1f}')
+          " 2>/dev/null || echo "999")
+          fi
+          echo "Bridge run_at: $BRIDGE_AT (stale: ${STALE_HOURS}h)"
+          if [ "$(echo "$STALE_HOURS > 1" | bc -l 2>/dev/null || echo 1)" = "1" ]; then
+            EMOJI=$([ "$(echo "$STALE_HOURS > 6" | bc -l 2>/dev/null || echo 0)" = "1" ] && echo "🚨" || echo "⚠️")
+            MSG="$EMOJI Bridge-metrics STALE: ${STALE_HOURS}h old (bridge_run_at=$BRIDGE_AT). Dashboard latency data is stale. The bridge Worker may not be writing metrics to Storage."
+            curl -sf -X POST \
+              "https://discord.com/api/v10/channels/${DISCORD_PIPELINE_ALERT_CHANNEL_ID}/messages" \
+              -H "Authorization: Bot ${DISCORD_TEAM_TOKEN}" \
+              -H "Content-Type: application/json" \
+              -d "{\"content\": \"${MSG}\"}" \
+              && echo "Discord alert sent" \
+              || echo "Discord alert failed (non-blocking)"
+          else
+            echo "Bridge-metrics fresh (<1h) — no alert needed"
           fi
