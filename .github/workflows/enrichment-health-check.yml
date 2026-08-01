@@ -1,0 +1,99 @@
+name: Enrichment Health Check (Gemini cap monitor)
+
+# INF-GEMINI-CAP-MONITORING-1: Monitors zapply-backend job-processor Worker
+# errors/day as an early-warning signal for Gemini monthly spend-cap exhaustion.
+# Calibrated from the 2026-07-30 incident (normal ~1-3/day, WARN >15, CRITICAL >50).
+# Would have given 4 days warning before the Jul 30 cap exhaustion.
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # Every hour
+  workflow_dispatch:
+
+concurrency:
+  group: enrichment-health
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Query CF Workers Analytics + assess
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          DISCORD_TEAM_TOKEN: ${{ secrets.DISCORD_TEAM_TOKEN }}
+          DISCORD_PIPELINE_ALERT_CHANNEL_ID: ${{ secrets.DISCORD_PIPELINE_ALERT_CHANNEL_ID }}
+        run: |
+          ACCT="2bdd97b381a85ec2b9d40e7a0a7fde4c"
+          [ -n "$CLOUDFLARE_API_TOKEN" ] || { echo "ERROR: CLOUDFLARE_API_TOKEN not set"; exit 2; }
+
+          RESULT=$(python3 - "$ACCT" "$CLOUDFLARE_API_TOKEN" <<'PY'
+          import sys, json, urllib.request, datetime, collections
+          acct, tok = sys.argv[1], sys.argv[2]
+          today = datetime.date.today()
+          since = (today - datetime.timedelta(days=7)).isoformat()
+          q = ('{ viewer { accounts(filter:{accountTag:"%s"}) { workersInvocationsAdaptive'
+               '(limit:300, filter:{date_geq:"%s"}){ sum{requests errors} dimensions{scriptName date} } } } }') % (acct, since)
+          req = urllib.request.Request("https://api.cloudflare.com/client/v4/graphql",
+              data=json.dumps({"query": q}).encode(),
+              headers={"Authorization": "Bearer " + tok, "Content-Type": "application/json"})
+          d = json.load(urllib.request.urlopen(req))
+          rows = d["data"]["viewer"]["accounts"][0]["workersInvocationsAdaptive"]
+          agg = collections.defaultdict(lambda: {"r": 0, "e": 0})
+          for r in rows:
+              dn = r["dimensions"]
+              if dn.get("scriptName") != "job-processor-cron-service-worker":
+                  continue
+              agg[dn.get("date")]["r"] += r["sum"]["requests"]
+              agg[dn.get("date")]["e"] += r["sum"]["errors"]
+
+          print("=== job-processor errors/day, last 7d ===")
+          for dt in sorted(agg):
+              print(f"  {dt}: {agg[dt]['e']} errors / {agg[dt]['r']} requests")
+
+          last24 = sum(v["e"] for k, v in agg.items() if k == today.isoformat())
+          if last24 == 0 and agg:
+              last24 = agg[max(agg)]["e"]; daylbl = max(agg) + " (latest)"
+          else:
+              daylbl = today.isoformat()
+
+          if   last24 >  50: status = "CRITICAL"
+          elif last24 >  15: status = "WARN"
+          else:              status = "OK"
+
+          print(f"STATUS:{status}")
+          print(f"LAST24:{last24}")
+          print(f"DAY:{daylbl}")
+          PY
+          )
+
+          echo "$RESULT"
+          STATUS=$(echo "$RESULT" | grep '^STATUS:' | cut -d: -f2)
+          LAST24=$(echo "$RESULT" | grep '^LAST24:' | cut -d: -f2)
+          DAY=$(echo "$RESULT" | grep '^DAY:' | cut -d: -f2)
+
+          echo "Status: $STATUS, Errors: $LAST24 ($DAY)"
+
+          # Alert on Discord only if WARN or CRITICAL
+          if [ "$STATUS" = "WARN" ] || [ "$STATUS" = "CRITICAL" ]; then
+            COLOR=$([ "$STATUS" = "CRITICAL" ] && echo "0xe74c3c" || echo "0xf1c40f")
+            EMOJI=$([ "$STATUS" = "CRITICAL" ] && echo "🚨" || echo "⚠️")
+            MSG="$EMOJI Enrichment Health: **$STATUS** — job-processor errors ${LAST24}/day ($DAY)."
+            if [ "$STATUS" = "CRITICAL" ]; then
+              MSG="$MSG Cap likely EXHAUSTED — enrichment failing."
+            else
+              MSG="$MSG Cap likely APPROACHING — check Gemini usage."
+            fi
+            MSG="$MSG Fix: summary.ts:91 — don't retry RESOURCE_EXHAUSTED 429s."
+
+            curl -sf -X POST \
+              "https://discord.com/api/v10/channels/${DISCORD_PIPELINE_ALERT_CHANNEL_ID}/messages" \
+              -H "Authorization: Bot ${DISCORD_TEAM_TOKEN}" \
+              -H "Content-Type: application/json" \
+              -d "{\"content\": \"${MSG}\"}" \
+              && echo "Discord alert sent" \
+              || echo "Discord alert failed (non-blocking)"
+          else
+            echo "Status OK — no alert needed"
+          fi
