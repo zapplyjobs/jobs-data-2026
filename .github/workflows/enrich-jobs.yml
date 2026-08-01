@@ -343,6 +343,7 @@ jobs:
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
           GH_TOKEN: ${{ secrets.GH_PAT }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
 
       - name: Publish quality-signal (INF-ENR-QUALITY-SIGNAL-WIRE-1)
         if: success()
