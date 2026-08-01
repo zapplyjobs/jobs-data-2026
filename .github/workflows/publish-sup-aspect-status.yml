@@ -5,7 +5,7 @@ name: SUP Aspect Status (verified)
 # INF-ASPECT-CADENCE-1: wires SUP to the 6h schedule (matching OUT's cadence).
 on:
   schedule:
-    - cron: '0 */6 * * *'  # every 6h — keep status fresh (matrix flags >7d amber)
+    - cron: '0 * * * *'  # every hour — script is just API calls, negligible cost
   workflow_dispatch:
   push:
     paths:
