@@ -4,7 +4,7 @@ name: INF Aspect Status (verified)
 # coordination are narrative (omitted). INF-ASPECT-VERIFIER-1.
 on:
   schedule:
-    - cron: '0 */6 * * *'  # every 6h — keep status fresh (matrix flags >7d amber)
+    - cron: '0 * * * *'  # every hour — script is just API calls, negligible Actions cost
   workflow_dispatch:
   push:
     paths:
