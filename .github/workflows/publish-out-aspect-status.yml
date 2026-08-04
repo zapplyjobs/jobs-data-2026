@@ -62,3 +62,29 @@ jobs:
             --data-binary @out-aspect-status.json \
             && echo "uploaded out-aspect-status.json to Storage" \
             || echo "Storage upload failed (non-blocking)"
+
+      - name: Upload to R2 (canonical object store)
+        if: always()
+        continue-on-error: true
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: |
+          python3 - <<'PYEOF'
+          import boto3, os
+          try:
+              s3 = boto3.client('s3',
+                  endpoint_url=os.environ['R2_ENDPOINT'],
+                  aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'],
+                  aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY'])
+              with open('out-aspect-status.json', 'rb') as f:
+                  s3.put_object(Bucket=os.environ['R2_BUCKET_NAME'],
+                                Key='out-aspect-status.json',
+                                Body=f.read(),
+                                ContentType='application/json')
+              print("R2 upload OK: out-aspect-status.json")
+          except Exception as e:
+              print(f"R2 upload failed (non-blocking): {e}")
+          PYEOF

@@ -25,6 +25,10 @@ jobs:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
         SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+        R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+        R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
       run: |
         python3 - <<'PYEOF'
         import json, urllib.request, urllib.error, re, os, sys, datetime, time
@@ -192,6 +196,21 @@ jobs:
         except Exception as e:
             print(f"Storage upload failed: {e}")
             sys.exit(1)
+
+        # R2 dual-write (recovery plan v2)
+        try:
+            import boto3
+            _s3 = boto3.client('s3',
+                endpoint_url=os.environ.get('R2_ENDPOINT', ''),
+                aws_access_key_id=os.environ.get('R2_ACCESS_KEY_ID', ''),
+                aws_secret_access_key=os.environ.get('R2_SECRET_ACCESS_KEY', ''))
+            _s3.put_object(Bucket=os.environ.get('R2_BUCKET_NAME', 'zjp-data'),
+                           Key='dead-links.json',
+                           Body=json.dumps(output, indent=2).encode(),
+                           ContentType='application/json')
+            print("R2 upload OK: dead-links.json")
+        except Exception as e:
+            print(f"R2 upload failed (non-blocking): {e}")
 
         # Exit 1 only if truly-dead links found (transient excluded — triggers the tracking issue)
         if dead_links:

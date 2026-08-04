@@ -32,6 +32,10 @@ jobs:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
         SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+        R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+        R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
       run: |
         python3 - <<'PYEOF'
         import json, urllib.request, datetime, sys, os, time
@@ -294,7 +298,7 @@ jobs:
 
         print("\n".join(summary_lines))
 
-        # Persist results to Supabase Storage (R2 eliminated — bucket deleted 2026-07-29)
+        # Persist results to Storage + R2 (recovery plan v2: R2 is canonical object store)
         try:
             _url = f"{os.environ.get('SUPABASE_URL', '')}/storage/v1/object/pipeline-data/out-health-check.json"
             _req = urllib.request.Request(_url, method='PUT',
@@ -307,6 +311,21 @@ jobs:
         except Exception as e:
             issues.append(f"Storage upload failed: {e}")
             print(f"Storage upload failed: {e}")
+
+        # R2 dual-write (recovery plan v2)
+        try:
+            import boto3
+            _s3 = boto3.client('s3',
+                endpoint_url=os.environ.get('R2_ENDPOINT', ''),
+                aws_access_key_id=os.environ.get('R2_ACCESS_KEY_ID', ''),
+                aws_secret_access_key=os.environ.get('R2_SECRET_ACCESS_KEY', ''))
+            _s3.put_object(Bucket=os.environ.get('R2_BUCKET_NAME', 'zjp-data'),
+                           Key='out-health-check.json',
+                           Body=json.dumps(results, indent=2).encode(),
+                           ContentType='application/json')
+            print("R2 upload OK: out-health-check.json")
+        except Exception as e:
+            print(f"R2 upload failed (non-blocking): {e}")
 
         if issues:
             sys.exit(1)

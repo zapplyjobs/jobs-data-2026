@@ -1,8 +1,9 @@
 name: No New R2 Writes
-# R2 is being ELIMINATED (CORE_RULES §6 — Supabase is canonical). This gate FAILS any
-# push/PR that introduces an R2 write not in the baseline below. The baseline only ever
-# SHRINKS as R2 writes are migrated to Supabase — it must never grow. To remove a site,
-# migrate it to Supabase Storage/DB, then delete its line from the baseline.
+# R2 is RESTORED as canonical object store (CORE_RULES §6 updated 2026-08-04). This gate tracks
+# R2-write sites. New writes are allowed during the R2-primary recovery; add them to the baseline.
+#
+#
+#
 on:
   push:
   pull_request:
@@ -37,6 +38,9 @@ jobs:
             '.github/workflows/publish-sup-aspect-status.yml:put_object',
             '.github/workflows/refresh-zjp-public-snapshot.yml:PutObjectCommand',
             '.github/workflows/verify-discord.yml:upload-dashboard-data-to-r2',
+            '.github/workflows/out-health-check.yml:put_object',
+            '.github/workflows/out-dead-link-check.yml:put_object',
+            '.github/workflows/publish-out-aspect-status.yml:put_object',
           }
           sites = set()
           for d in ['.github/workflows', 'scripts']:
