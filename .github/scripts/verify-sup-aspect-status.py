@@ -185,12 +185,35 @@ def verify():
     return {"module": "SUP", "generated_at": NOW.isoformat(), "aspects": aspects}
 
 
+
+
+def publish_r2(data_str):
+    """R2-PRIMARY: publish sup-aspect-status.json to R2 (canonical object store).
+    Uses boto3 (proper SigV4 — no hand-rolled signing). Reads R2_* env."""
+    import boto3
+    s3 = boto3.client("s3", region_name="auto",
+                      endpoint_url=os.environ["R2_ENDPOINT"],
+                      aws_access_key_id=os.environ["R2_ACCESS_KEY_ID"],
+                      aws_secret_access_key=os.environ["R2_SECRET_ACCESS_KEY"])
+    s3.put_object(Bucket=os.environ["R2_BUCKET_NAME"],
+                  Key="data/sup-aspect-status.json",
+                  Body=data_str, ContentType="application/json")
+    print("published R2: data/sup-aspect-status.json", file=sys.stderr)
+
+
 if __name__ == "__main__":
+    do_publish = "--publish" in sys.argv
     result = verify()
-    json.dump(result, sys.stdout, indent=2)
-    sys.stdout.write("\n")
+    data_str = json.dumps(result, indent=2)
+    sys.stdout.write(data_str + "\n")
 
     counts = {}
     for k, v in result["aspects"].items():
         counts[v["status"]] = counts.get(v["status"], 0) + 1
     print(f"\nSUP Aspect Status Summary: {counts}", file=sys.stderr)
+
+    if do_publish:
+        try:
+            publish_r2(data_str)
+        except Exception as e:
+            print(f"R2 publish FAILED: {e}", file=sys.stderr)
