@@ -178,6 +178,7 @@ jobs:
               'tech-us-truth.json',
               'softwarejobs-descriptions.json',
               'softwarejobs-descriptions-meta.json',
+              'desc-fetch-failures.json',  // ENR-R2PRIMARY-ENRICHWRITES-1: ensure failCache lands in R2 (canonical)
             ];
 
             // Add all description sidecars (pruned versions overwrite R2 — INF-SIDECAR-COMPACT-1)
@@ -226,8 +227,29 @@ jobs:
           GITHUB_RUN_ID: ${{ github.run_id }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - name: Verify R2 upload (ENR-R2PRIMARY-ENRICHWRITES-1)
+        if: success()
+        continue-on-error: true
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_REGION: auto
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: |
+          echo "Verifying R2 upload (HEAD check on key ENR files)..."
+          for f in enriched_jobs.json enrichment-stats.json desc-fetch-failures.json; do
+            SIZE=$(aws s3 ls "s3://${R2_BUCKET_NAME}/data/${f}" --endpoint-url "https://${R2_ENDPOINT}" 2>/dev/null | awk '{print $3}')
+            if [ -n "$SIZE" ] && [ "$SIZE" -gt 0 ]; then
+              echo "  OK $f: ${SIZE} bytes in R2"
+            else
+              echo "  WARN $f: NOT in R2 (will retry next cycle)"
+            fi
+          done
+          SIDECAR_COUNT=$(aws s3 ls "s3://${R2_BUCKET_NAME}/data/" --endpoint-url "https://${R2_ENDPOINT}" 2>/dev/null | grep -c 'descriptions-' || true)
+          echo "  descriptions-*.jsonl in R2: ${SIDECAR_COUNT} files"
 
-      - name: Dual-write to Supabase Storage (ENR-R2ELIM-PHASE2-1)
+      - name: Dual-write to Supabase Storage (SAFETY COPY -- R2 is canonical via r2-client above; ENR-R2ELIM-PHASE2-1 + ENR-R2PRIMARY-ENRICHWRITES-1)
         if: success()
         continue-on-error: true
         run: |
