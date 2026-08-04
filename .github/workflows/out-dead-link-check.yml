@@ -205,7 +205,7 @@ jobs:
                 aws_access_key_id=os.environ.get('R2_ACCESS_KEY_ID', ''),
                 aws_secret_access_key=os.environ.get('R2_SECRET_ACCESS_KEY', ''))
             _s3.put_object(Bucket=os.environ.get('R2_BUCKET_NAME', 'zjp-data'),
-                           Key='dead-links.json',
+                           Key='data/dead-links.json',
                            Body=json.dumps(output, indent=2).encode(),
                            ContentType='application/json')
             print("R2 upload OK: dead-links.json")

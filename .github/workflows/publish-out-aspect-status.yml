@@ -81,7 +81,7 @@ jobs:
                   aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY'])
               with open('out-aspect-status.json', 'rb') as f:
                   s3.put_object(Bucket=os.environ['R2_BUCKET_NAME'],
-                                Key='out-aspect-status.json',
+                                Key='data/out-aspect-status.json',
                                 Body=f.read(),
                                 ContentType='application/json')
               print("R2 upload OK: out-aspect-status.json")
