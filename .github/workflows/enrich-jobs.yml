@@ -115,26 +115,6 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
-      - name: Refresh from Supabase Storage (ENR-R2ELIM-URGENT-R2READS-1)
-        if: success()
-        continue-on-error: true
-        run: |
-          echo "Refreshing from Supabase Storage (fresh data overwrites stale R2)..."
-          STORAGE_BASE="https://xxmhgagpbxjflajoaahy.supabase.co/storage/v1/object/public/pipeline-data"
-          # Core files
-          for f in all_jobs.json us_jobs.json processed_ids.json enriched_jobs.json jobs-metadata.json enrichment-history.jsonl lca-sponsors.json zjp-metrics.json; do
-            HTTP=$(curl -s -o ".github/data/$f" -w "%{http_code}" "$STORAGE_BASE/$f" 2>/dev/null)
-            if [ "$HTTP" = "200" ]; then echo "  Storage OK: $f"; else echo "  Storage SKIP: $f ($HTTP — using R2 fallback)"; fi
-          done
-          # Description sidecars (explicit names — Storage list API returns empty for prefix, known issue)
-          for name in descriptions-workday-1.jsonl descriptions-workday-2.jsonl descriptions-greenhouse-1.jsonl descriptions-greenhouse-2.jsonl descriptions-greenhouse-3.jsonl descriptions-greenhouse-4.jsonl descriptions-greenhouse-5.jsonl descriptions-greenhouse-6.jsonl descriptions-smartrecruiters.jsonl descriptions-microsoft.jsonl descriptions-lever.jsonl descriptions-ashby.jsonl descriptions-amazon.jsonl descriptions-oracle.jsonl descriptions-bytedance.jsonl descriptions-google.jsonl descriptions-tiktok.jsonl descriptions-enriched-1.jsonl descriptions-enriched-2.jsonl; do
-            HTTP=$(curl -s -o ".github/data/$name" -w "%{http_code}" "$STORAGE_BASE/$name" 2>/dev/null)
-            if [ "$HTTP" = "200" ]; then echo "  Storage OK: $name"; else echo "  Storage SKIP: $name ($HTTP)"; fi
-          done
-          echo "Storage refresh complete."
-        env:
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-
       - name: Fetch Google+Apple detail pages
         if: success()
         continue-on-error: true
