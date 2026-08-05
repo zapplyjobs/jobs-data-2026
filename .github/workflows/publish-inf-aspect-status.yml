@@ -33,8 +33,13 @@ jobs:
       - name: Run verifier
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
         run: |
-          python3 .github/scripts/verify-inf-aspect-status.py > inf-aspect-status.json
+          pip install -q boto3
+          python3 .github/scripts/verify-inf-aspect-status.py --publish > inf-aspect-status.json
           python3 - <<'PY'
           import json, os
           d = json.load(open('inf-aspect-status.json'))
