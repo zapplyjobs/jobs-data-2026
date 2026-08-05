@@ -9,7 +9,7 @@ on:
 # Prevent concurrent enrich runs — two runs picking the same pending batch would
 # produce duplicate entries in enriched_jobs.json.
 concurrency:
-  group: enrich-jobs
+  group: enrich-jobs-v2  # AGG-GHOST-RUN-CADENCE-BLOCK-1: renamed to escape 8 ghost queued runs
   cancel-in-progress: false
 
 jobs:
