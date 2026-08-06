@@ -80,7 +80,7 @@ jobs:
             const coreFiles = ['all_jobs.json', 'us_jobs.json', 'processed_ids.json', 'enriched_jobs.json', 'jobs-metadata.json', 'enrichment-history.jsonl', 'lca-sponsors.json', 'zjp-metrics.json'];
             for (const file of coreFiles) {
               try {
-                const raw = await r2.downloadRawR2(file);
+                const raw = await r2.downloadRaw(file);
                 if (raw) {
                   fs.writeFileSync(path.join(dataDir, file), Buffer.from(raw));
                   console.log('R2 download OK: ' + file);
@@ -96,7 +96,7 @@ jobs:
             for (const obj of jsonlKeys) {
               const name = obj.key.replace('data/', '');
               try {
-                const raw = await r2.downloadRawR2(name);
+                const raw = await r2.downloadRaw(name);
                 if (raw) {
                   fs.writeFileSync(path.join(dataDir, name), Buffer.from(raw));
                   console.log('R2 download OK: ' + name + ' (' + (obj.size / 1024 / 1024).toFixed(1) + ' MB)');
