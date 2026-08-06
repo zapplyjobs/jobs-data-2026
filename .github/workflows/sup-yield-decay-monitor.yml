@@ -59,14 +59,15 @@ jobs:
             && echo "CSV downloaded: $(wc -l < .github/data/company-research-log.csv) lines" \
             || { echo "FAILED to download CSV"; exit 1; }
 
-      - name: Download all_jobs.json from Supabase Storage
+      - name: Download all_jobs.json from R2 (canonical object store)
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
         run: |
-          curl -sf -o .github/data/all_jobs.json \
-            'https://xxmhgagpbxjflajoaahy.supabase.co/storage/v1/object/pipeline-data/all_jobs.json' \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
-            -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
-            && echo "Downloaded all_jobs.json from Storage ($(wc -c < .github/data/all_jobs.json) bytes)" \
-            || { echo "FAILED to download all_jobs.json from Storage"; exit 1; }
+          pip install -q boto3
+          python3 -c "import boto3, os; s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']); s3.download_file(os.environ['R2_BUCKET_NAME'], 'data/all_jobs.json', '.github/data/all_jobs.json'); print('Downloaded all_jobs.json from R2 (' + str(os.path.getsize('.github/data/all_jobs.json')) + ' bytes)')"
 
       - name: Run yield decay monitor
         run: |
