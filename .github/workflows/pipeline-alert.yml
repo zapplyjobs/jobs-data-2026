@@ -119,7 +119,7 @@ jobs:
         run: node .github/scripts/source-coverage-audit.js
 
       - name: Upload to R2 (Phase 1 cleanup — removed redundant git commits)
-        if: success()
+        if: always()  # CRITICAL: upload alert JSON EVEN when checks fail — the JSON CONTAINS the failures (that's its purpose). if:success() caused the structured alert data to go stale DURING incidents (when it's most needed).
         continue-on-error: true
         env:
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
