@@ -37,7 +37,7 @@ jobs:
       - name: Unlock encrypted files
         run: |
           echo "Y" | transcrypt --cipher aes-256-cbc --password "$TRANSCRYPT_PASSWORD" --force
-          git checkout -- .
+          git checkout -- . 2>/dev/null || true
           git submodule foreach --recursive '
             echo "Y" | transcrypt --cipher aes-256-cbc --password "'"$TRANSCRYPT_PASSWORD"'" --force 2>/dev/null || true
             rm -f "$(git rev-parse --git-dir)/index" 2>/dev/null || true
