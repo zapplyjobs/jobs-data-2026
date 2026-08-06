@@ -145,13 +145,33 @@ def c_change_mgmt():
     return green_if(has_gate), f"CI-gate workflow present ({has_gate}) — SDLC structural proxy", "fs:workflows"
 
 def c_data_quality():
+    issues = []
+    # 1. Dead-link rate (existing check)
     dl = proxy_json("dead-links.json")
     if not dl:
-        return "YELLOW", "dead-links.json unreachable", "proxy:dead-links"
-    checked = dl.get("total_checked", 0); dead = dl.get("total_dead", 0)
-    rate = dead / checked if checked else 1
-    status = "GREEN" if rate < 0.01 else ("YELLOW" if rate < 0.05 else "RED")
-    return status, f"dead-link rate {rate*100:.2f}% ({dead}/{checked}) — OUT output-quality proxy (scan undercounts soft-404s)", "proxy:dead-links"
+        issues.append(("warn", "dead-links.json unreachable"))
+    else:
+        checked = dl.get("total_checked", 0); dead = dl.get("total_dead", 0)
+        rate = dead / checked if checked else 1
+        if rate >= 0.05: issues.append(("red", f"dead-link {rate*100:.1f}% ({dead}/{checked})"))
+        elif rate >= 0.01: issues.append(("warn", f"dead-link {rate*100:.1f}% ({dead}/{checked})"))
+    # 2. Visa fill + undated rate from health check (NEW — catches enrichment failures)
+    hc = proxy_json("out-health-check.json")
+    if hc:
+        for r in (hc.get("repos") or []):
+            if r.get("repo") == "New-Grad-Jobs-2027":
+                visa = r.get("readme_visa_pct")
+                undated = r.get("readme_undated_pct")
+                if visa is not None and visa < 10: issues.append(("red", f"visa fill {visa}% (<10%)"))
+                if undated is not None and undated > 80: issues.append(("red", f"undated {undated}% (>80%)"))
+                break
+    reds = [m for s, m in issues if s == "red"]
+    warns = [m for s, m in issues if s == "warn"]
+    if reds: status = "RED"
+    elif warns: status = "YELLOW"
+    else: status = "GREEN"
+    evidence = "; ".join(m for _, m in issues) if issues else "dead-link + visa + undated all healthy"
+    return status, f"{evidence}", "proxy:dead-links+health-check"
 
 CHECKS = {
     "verification": c_verification, "monitoring": c_monitoring, "performance": c_performance,
