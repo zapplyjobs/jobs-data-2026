@@ -60,17 +60,35 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Seed latest snapshot inputs from Storage
+      - name: Seed latest snapshot inputs from R2 (canonical object store)
         env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
         run: |
           mkdir -p .github/data
+          node -e "
+          const { createR2Client } = require('./.github/scripts/processing/lib/storage/r2-client');
+          const fs = require('fs');
+          async function main() {
+            const r2 = createR2Client({ prefix: 'data/' });
+            for (const f of ['all_jobs.json', 'jobs-metadata.json', 'enrichment-stats.json']) {
+              try {
+                const raw = await r2.downloadRaw(f);
+                if (!raw) throw new Error('R2 returned no data');
+                fs.writeFileSync('.github/data/' + f, Buffer.from(raw));
+                console.log('SEEDED(R2): ' + f);
+              } catch (e) { console.error('FAIL(R2): ' + f + ' - ' + e.message); process.exit(1); }
+            }
+          }
+          main().catch(e => { console.error('R2 fatal: ' + e.message); process.exit(1); });
+          "
+          # Previous snapshot = this workflow's OWN output (written to Storage each run, not in R2) — kept on Storage
           BASE="${SUPABASE_URL}/storage/v1/object/public/pipeline-data"
-          for f in all_jobs.json jobs-metadata.json enrichment-stats.json; do
-            curl -sf -o ".github/data/$f" "$BASE/$f" && echo "SEEDED:$f" || { echo "FAIL:$f"; exit 1; }
-          done
           curl -sf -o ".github/data/zjp-public-snapshot.json" "$BASE/zjp-public-snapshot.json" && echo "SEEDED:snapshot (tag_history)" || echo "SKIP:no previous snapshot (first run)"
-          echo "seeded all_jobs+jobs-metadata+enrichment-stats from Storage"
+          echo "seeded all_jobs+jobs-metadata+enrichment-stats from R2 (canonical); previous snapshot from Storage"
 
       - name: Generate public snapshot
         env:
