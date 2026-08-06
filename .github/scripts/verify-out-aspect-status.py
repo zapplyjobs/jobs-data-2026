@@ -155,16 +155,16 @@ def c_data_quality():
         rate = dead / checked if checked else 1
         if rate >= 0.05: issues.append(("red", f"dead-link {rate*100:.1f}% ({dead}/{checked})"))
         elif rate >= 0.01: issues.append(("warn", f"dead-link {rate*100:.1f}% ({dead}/{checked})"))
-    # 2. Visa fill + undated rate from health check (NEW — catches enrichment failures)
+    # 2. Visa fill + undated rate from health check (catches enrichment failures across sampled repos)
     hc = proxy_json("out-health-check.json")
     if hc:
         for r in (hc.get("repos") or []):
-            if r.get("repo") == "New-Grad-Jobs-2027":
-                visa = r.get("readme_visa_pct")
-                undated = r.get("readme_undated_pct")
-                if visa is not None and visa < 10: issues.append(("red", f"visa fill {visa}% (<10%)"))
-                if undated is not None and undated > 80: issues.append(("red", f"undated {undated}% (>80%)"))
-                break
+            visa = r.get("readme_visa_pct")
+            undated = r.get("readme_undated_pct")
+            if visa is not None:
+                repo_name = r.get("repo", "?")
+                if visa < 10: issues.append(("red", f"{repo_name} visa {visa}% (<10%)"))
+                if undated is not None and undated > 80: issues.append(("red", f"{repo_name} undated {undated}% (>80%)"))
     reds = [m for s, m in issues if s == "red"]
     warns = [m for s, m in issues if s == "warn"]
     if reds: status = "RED"
