@@ -211,6 +211,29 @@ jobs:
                 for i in r["issues"]:
                     issues.append(f"{repo}: {i}")
             results["repos"].append(r)
+        # --- Peer-lag check (OUT-CONSUMER-STALENESS-ALERT-1) ---
+        # A board frozen while peers keep updating is the signature of a PARTIAL push
+        # failure (e.g. a feed file missing -> board silently skipped while the pipeline
+        # reports "6 succeeded, 0 failed"). The absolute 6h threshold above only fires
+        # 6h late; comparing each pipeline repo's push age to the FRESHEST peer catches
+        # the partial-failure class within ~1h instead of ~6h of silent staleness.
+        _PIPELINE = {"New-Grad-Jobs-2027", "Internships-2027",
+            "New-Grad-Software-Engineering-Jobs-2027", "New-Grad-Data-Science-Jobs-2027",
+            "New-Grad-Hardware-Engineering-Jobs-2027", "New-Grad-Healthcare-Jobs-2027",
+            "Canada-Jobs-2027", "Canada-Internships-2027"}
+        _ages = [(r["repo"], r.get("last_push_age_h")) for r in results["repos"]
+                 if r["repo"] in _PIPELINE and isinstance(r.get("last_push_age_h"), (int, float))]
+        if len(_ages) >= 2:
+            _freshest = min(a for _, a in _ages)
+            for _repo, _age in _ages:
+                _lag = _age - _freshest
+                if _lag > 1.0:
+                    _msg = f"README push lagging freshest peer by {_lag:.1f}h (freshest {_freshest:.1f}h ago) - partial push failure suspected"
+                    issues.append(f"{_repo}: {_msg}")
+                    for r in results["repos"]:
+                        if r["repo"] == _repo:
+                            r["issues"].append(_msg)
+                            r["verdict"] = "FAIL"
 
         # --- 3. Pipeline workflow status (critical jobs-data-2026 workflows) ---
         critical_workflows = ["Post Jobs to Discord", "Verify Discord Posts", "Refresh ZJP Public Snapshot", "Collect Metrics"]
