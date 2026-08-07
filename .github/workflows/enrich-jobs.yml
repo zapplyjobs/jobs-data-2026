@@ -42,6 +42,15 @@ jobs:
             rm -f "$(git rev-parse --git-dir)/index" 2>/dev/null || true
             git checkout HEAD -- . 2>/dev/null || true
           ' || true
+
+        # Verify submodule decryption succeeded (INF-TRANSCRYPT-KEY-BACKUP-1).
+        SAMPLE_JS=$(find .github/scripts -name '*.js' -print -quit 2>/dev/null)
+        if [ -n "$SAMPLE_JS" ]; then
+          if ! file -b "$SAMPLE_JS" | grep -qiE 'ASCII|UTF-8|text'; then
+            echo "::error::Submodule decryption FAILED — $SAMPLE_JS is ciphertext. Pipeline would run garbage. Check TRANSCRYPT_PASSWORD + transcrypt unlock."
+            exit 1
+          fi
+        fi
         env:
           TRANSCRYPT_PASSWORD: ${{ secrets.TRANSCRYPT_PASSWORD }}
 
