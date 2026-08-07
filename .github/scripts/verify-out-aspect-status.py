@@ -93,7 +93,7 @@ def c_infrastructure():
         return "RED", "out-health-check.json unreachable", "proxy:out-health-check"
     dests = hc.get("destinations") or hc.get("healthCheck", {}).get("destinations") or []
     repos = hc.get("repos") or []
-    # Gate on BOTH destination uptime (sjd/zappy boards) AND consumer-repo push health
+    # Gate on BOTH destination uptime (sjd/zapply boards) AND consumer-repo push health
     # (README deploy verdicts). Previously only destinations were gated — a stale consumer
     # repo left this aspect GREEN even though OUT output stopped reaching that surface.
     failing = ([d.get("name") for d in dests if (d.get("verdict", "").upper() != "PASS")]
