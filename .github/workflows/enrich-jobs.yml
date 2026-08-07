@@ -369,3 +369,12 @@ jobs:
           gh workflow run collect-metrics.yml -R zapplyjobs/jobs-data-2026 --ref main 2>/dev/null && echo "Dispatched collect-metrics" || echo "Collect-metrics dispatch failed (non-critical)"
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
+      - name: Trigger consumer README push (wave link — fresh post-enrichment, INF-CONSUMER-PUSH-ENRICH-RACE-1)
+        if: success()
+        continue-on-error: true
+        run: |
+          gh workflow run push-consumer-readmes.yml -R zapplyjobs/jobs-aggregator-private --ref main 2>/dev/null \
+            && echo "Dispatched consumer README push (fresh post-enrichment)" \
+            || echo "Consumer push dispatch failed (non-blocking — fetch-jobs stale push is fallback)"
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
