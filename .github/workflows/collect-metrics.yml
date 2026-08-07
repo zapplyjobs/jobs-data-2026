@@ -116,6 +116,7 @@ jobs:
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}  # INF-SUPABASE-HEALTH-CHECK: depth metrics (connections, rollback rate, cache hit) for dashboard display
         run: node .github/scripts/processing/lib/generate-zjp-metrics.js
 
       - name: Produce sjd-jobs.json (INF-SJD-PAGINATION-1)
