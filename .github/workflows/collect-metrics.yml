@@ -161,7 +161,7 @@ jobs:
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: node scripts/upload-dashboard-data-to-r2.js zjp-metrics.json metrics/latest.json metrics/history.jsonl traffic-history.jsonl bridge-metrics-history.jsonl  # ENR-OTHER-WORKFLOWS-DLA-1: +metrics/history.jsonl — persist collect-metrics growth-trend history
+        run: node scripts/upload-dashboard-data-to-r2.js zjp-metrics.json metrics/latest.json metrics/history.jsonl bridge-metrics-history.jsonl  # INF-TRAFFICREFERRERS-NOPERDAY-1: removed traffic-history.jsonl — collect-metrics doesn't own it (daily-stats does); re-uploading caused a race that overwrote daily-stats' daily update with a stale version every 15 min
 
       - name: Dual-write metrics to Supabase Storage (R2-elimination INF E140)
         if: success()
