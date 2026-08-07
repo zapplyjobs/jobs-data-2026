@@ -76,7 +76,6 @@ jobs:
 
           # Alert on Discord only if WARN or CRITICAL
           if [ "$STATUS" = "WARN" ] || [ "$STATUS" = "CRITICAL" ]; then
-            COLOR=$([ "$STATUS" = "CRITICAL" ] && echo "0xe74c3c" || echo "0xf1c40f")
             EMOJI=$([ "$STATUS" = "CRITICAL" ] && echo "🚨" || echo "⚠️")
             MSG="$EMOJI Enrichment Health: **$STATUS** — job-processor errors ${LAST24}/day ($DAY)."
             if [ "$STATUS" = "CRITICAL" ]; then
