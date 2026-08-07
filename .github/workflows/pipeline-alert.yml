@@ -115,6 +115,9 @@ jobs:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TEAM_TOKEN }}
           DISCORD_PIPELINE_ALERT_CHANNEL_ID: ${{ secrets.DISCORD_PIPELINE_ALERT_CHANNEL_ID }}
           GH_PAT_EXPIRY_DATE: ${{ vars.GH_PAT_EXPIRY_DATE }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}  # INF-SUPABASE-HEALTH-CHECK: Management API for depth metrics (connections, rollback rate, cache hit)
         run: node .github/scripts/processing/lib/pipeline-alert.js
       - name: Build Tier A source coverage report
         run: node .github/scripts/source-coverage-audit.js
