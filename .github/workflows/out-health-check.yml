@@ -181,7 +181,9 @@ jobs:
 
             # README data quality check (OUT-MONITORING-README-DATA-QUALITY-1)
             # Check representative repos for visa fill rate + date coverage
-            # Covers diverse configs: NGJ (general), SWE (domain-specific), Canada (feedKey/different data path)
+            # NGJ (general) + SWE (domain-specific) + Canada (feedKey/different data path).
+            # NOTE: visa fill is US-H1B-based + meaningless for Canada (no visa column there since D67),
+            # so Canada is EXCLUDED from the visa check below but KEPT for the undated check.
             if repo in ("New-Grad-Jobs-2027", "New-Grad-Software-Engineering-Jobs-2027", "Canada-Jobs-2027"):
                 readme_text = locals().get('readme', '')
                 if readme_text:
@@ -195,7 +197,7 @@ jobs:
                             undated_rate = round(undated / job_rows * 100, 1)
                             r["readme_visa_pct"] = visa_rate
                             r["readme_undated_pct"] = undated_rate
-                            if visa_rate < 10:
+                            if visa_rate < 10 and repo != "Canada-Jobs-2027":
                                 r["issues"].append(f"README visa fill {visa_rate}% (<10% threshold — enrichment may not be reaching README)")
                             if undated_rate > 80:
                                 r["issues"].append(f"README {undated_rate}% Undated (>80% — posted_at may be missing upstream)")
