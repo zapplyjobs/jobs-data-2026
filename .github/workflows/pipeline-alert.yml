@@ -2,7 +2,7 @@ name: Pipeline Alert
 
 on:
   schedule:
-    - cron: '0 * * * *'  # Every 30 minutes (backup — GitHub cron unreliable during peak)
+    - cron: '0 * * * *'  # Every hour (backup — GitHub cron unreliable during peak)
   workflow_dispatch:
   push:
     paths:
