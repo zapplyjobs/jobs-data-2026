@@ -163,7 +163,8 @@ def c_data_quality():
             undated = r.get("readme_undated_pct")
             if visa is not None:
                 repo_name = r.get("repo", "?")
-                if visa < 10: issues.append(("red", f"{repo_name} visa {visa}% (<10%)"))
+                # Canada boards have NO visa column (US-H1B is meaningless for Canada-located jobs, D67) — skip the visa check for them
+                if visa < 10 and not repo_name.startswith("Canada"): issues.append(("red", f"{repo_name} visa {visa}% (<10%)"))
                 if undated is not None and undated > 80: issues.append(("red", f"{repo_name} undated {undated}% (>80%)"))
     reds = [m for s, m in issues if s == "red"]
     warns = [m for s, m in issues if s == "warn"]
