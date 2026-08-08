@@ -243,7 +243,7 @@ jobs:
         continue-on-error: true
         run: |
           echo "Dual-writing ENR files to Supabase Storage (pipeline-data bucket)..."
-          for f in enriched_jobs.json enrichment-stats.json processed_ids.json enrichment-history.jsonl; do
+          for f in enriched_jobs.json enrichment-stats.json; do
             if [ -f ".github/data/$f" ]; then
               STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X PUT \
                 -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
@@ -266,43 +266,10 @@ jobs:
               echo "  $BASENAME: HTTP $STATUS"
             fi
           done
-          # ENR-R2ELIM-DUALWRITE-1: additional ENR-owned files
-          for f in softwarejobs-descriptions-meta.json desc-fetch-failures.json; do
-            if [ -f ".github/data/$f" ]; then
-              STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X PUT \
-                -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
-                -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
-                -H "Content-Type: application/octet-stream" \
-                --data-binary @".github/data/$f" \
-                "https://xxmhgagpbxjflajoaahy.supabase.co/storage/v1/object/pipeline-data/$f")
-              echo "  $f: HTTP $STATUS"
-            fi
-          done
-          # softwarejobs-descriptions.json: chunk if >48MB (single JSON object — split via Node)
-          if [ -f ".github/data/softwarejobs-descriptions.json" ]; then
-            node -e "
-            const fs=require('fs'),https=require('https');
-            const f='.github/data/softwarejobs-descriptions.json';
-            const data=fs.readFileSync(f,'utf8');
-            const KEY=process.env.SUPABASE_SERVICE_ROLE_KEY;
-            const BASE='https://xxmhgagpbxjflajoaahy.supabase.co/storage/v1/object/pipeline-data';
-            async function put(name,body){
-              const r=await new Promise(res=>{const req=https.request(BASE+'/'+name,{method:'PUT',headers:{'Authorization':'Bearer '+KEY,'apikey':KEY,'Content-Type':'application/octet-stream','Content-Length':Buffer.byteLength(body)}},r=>{r.resume();res(r.statusCode)});req.on('error',()=>res(0));req.write(body);req.end();});
-              console.log('  '+name+': HTTP '+r);
-            }
-            (async()=>{
-              if(Buffer.byteLength(data)<48000000){await put('softwarejobs-descriptions.json',data);return;}
-              // Chunk: split the JSON object's entries
-              const obj=JSON.parse(data);
-              const entries=Object.entries(obj);
-              const half=Math.ceil(entries.length/2);
-              const c1=JSON.stringify(Object.fromEntries(entries.slice(0,half)));
-              const c2=JSON.stringify(Object.fromEntries(entries.slice(half)));
-              await put('softwarejobs-descriptions-1.json',c1);
-              await put('softwarejobs-descriptions-2.json',c2);
-            })();
-            "
-          fi
+          # ENR-DUALWRITE-KEEPGATE-1: narrowed to keep-list (files consumers read from Storage).
+          # Dropped: processed_ids, enrichment-history, softwarejobs-descriptions-meta, desc-fetch-failures,
+          # softwarejobs-descriptions.json (~20MB chunked). R2 is canonical; Storage is safety copy for
+          # consumer-read files only. Verified: zero Storage readers for dropped files (grep zapply-backend/src).
           echo "Dual-write complete."
         env:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
