@@ -53,6 +53,58 @@ def proxy_json(path):
 def green_if(cond):
     return "GREEN" if cond else "RED"
 
+VALID_ATS = {"greenhouse", "lever", "ashby", "workday", "smartrecruiters", "oracle", "tiktok", "deshaw", "custom-supplemental"}
+
+
+
+
+def validate_company_list(data):
+    """Structural validation of company-list.json — Python port of
+    projects/zjp/scripts/sup-company-list-validate.js. Returns (errors, warnings,
+    tenant_count, ats_count). GREEN iff no errors (scope-variant warnings don't fail).
+    INF-ASPECT-DATAQUALITY-VALIDATOR-1."""
+    errors, warnings = [], []
+    if not isinstance(data, dict):
+        return ["company-list is not a JSON object"], [], 0, 0
+    meta = data.get("_meta")
+    if not meta:
+        errors.append("_meta key missing")
+    else:
+        if not meta.get("version"):
+            warnings.append("_meta.version missing")
+        if not meta.get("updated"):
+            warnings.append("_meta.updated missing")
+    ats_keys = [k for k in data if k != "_meta"]
+    total = 0
+    for ats in ats_keys:
+        if ats not in VALID_ATS:
+            errors.append('Unknown ATS platform: "%s"' % ats)
+            continue
+        tenants = data[ats]
+        if not isinstance(tenants, list):
+            errors.append('ATS "%s" is not an array' % ats)
+            continue
+        total += len(tenants)
+        seen = {}
+        for i, t in enumerate(tenants):
+            name = t.get("name") if isinstance(t, dict) else ""
+            if not name or not str(name).strip():
+                errors.append("[%s][%d] missing or empty name" % (ats, i))
+                continue
+            id_field = "url" if ats == "workday" else ("base_url" if ats == "oracle" else "slug")
+            idv = t.get(id_field)
+            if not idv or not str(idv).strip():
+                errors.append('[%s][%d] "%s" missing required field "%s"' % (ats, i, name, id_field))
+                continue
+            if idv in seen:
+                if seen[idv] == name:
+                    errors.append('[%s] exact duplicate: id="%s" name="%s"' % (ats, idv, name))
+                else:
+                    warnings.append('[%s] scope variant: id="%s" has names "%s" + "%s"' % (ats, idv, seen[idv], name))
+            else:
+                seen[idv] = name
+    return errors, warnings, total, len(ats_keys)
+
 
 # --- CI-runnable checks ---
 
@@ -113,10 +165,28 @@ def bucket_age(age, green_days, yellow_days):
 
 
 def c_data_quality():
-    """company-list.json freshness — stale data degrades SUP matching."""
+    """company-list.json STRUCTURAL validity (content accuracy — not just freshness).
+    Ports sup-company-list-validate.js: valid JSON, _meta.version, known ATS, required
+    fields, no dup slugs. Reads the checked-out + transcrypt-unlocked copy (the file is
+    encrypted at rest, so it cannot be validated via gh-api). The workflow checks out
+    job-board-aggregator at _agg/ + unlocks it. Falls back to freshness if the checkout
+    is absent or validate fails. INF-ASPECT-DATAQUALITY-VALIDATOR-1."""
+    local = os.path.join(os.getcwd(), "_agg", "lib", "fetchers", "company-list.json")
+    if os.path.exists(local):
+        try:
+            data = json.load(open(local))
+            errors, warnings, total, ats_n = validate_company_list(data)
+            ok = len(errors) == 0
+            status = "GREEN" if ok else "RED"
+            detail = f"validator {'PASS' if ok else 'FAIL'}: {total} tenants / {ats_n} ATS; {len(errors)} err, {len(warnings)} warn"
+            if errors:
+                detail += " — " + "; ".join(errors[:2])
+            return status, detail, "fs:company-list+sup-company-list-validate"
+        except Exception as e:
+            print(f"[c_data_quality] local validate failed: {e}", file=sys.stderr)
     age = gh_file_age_days(SUP_REPO, "lib/fetchers/company-list.json")
     status, detail = bucket_age(age, 30, 90)
-    return status, f"company-list.json modified {detail}", "gh-api:commits"
+    return status, f"company-list.json modified {detail} (content-validation unavailable)", "gh-api:commits"
 
 
 def c_configuration():

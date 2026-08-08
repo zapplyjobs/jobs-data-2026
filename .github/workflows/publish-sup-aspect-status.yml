@@ -26,6 +26,34 @@ jobs:
           fetch-depth: 1
           token: ${{ secrets.GH_PAT }}
 
+      - name: Checkout job-board-aggregator (for company-list content validation)
+        # INF-ASPECT-DATAQUALITY-VALIDATOR-1: company-list.json is transcrypt-encrypted
+        # at rest, so c_data_quality validates the checked-out+unlocked copy at _agg/.
+        # Non-fatal — if this fails, c_data_quality falls back to the freshness proxy.
+        uses: actions/checkout@v5
+        with:
+          repository: zapplyjobs/job-board-aggregator
+          path: _agg
+          token: ${{ secrets.GH_PAT }}
+        continue-on-error: true
+
+      - name: Unlock aggregator (transcrypt) so company-list.json is readable
+        continue-on-error: true
+        env:
+          TRANSCRYPT_PASSWORD: ${{ secrets.TRANSCRYPT_PASSWORD }}
+        run: |
+          if [ ! -d _agg ]; then echo "aggregator checkout absent — c_data_quality will use freshness fallback"; exit 0; fi
+          curl -sSL https://raw.githubusercontent.com/elasticdog/transcrypt/5effa13/transcrypt -o /tmp/transcrypt
+          chmod +x /tmp/transcrypt && sudo mv /tmp/transcrypt /usr/local/bin/transcrypt
+          cd _agg
+          echo "Y" | transcrypt --cipher aes-256-cbc --password "$TRANSCRYPT_PASSWORD" --force
+          git checkout -- .
+          if file -b lib/fetchers/company-list.json | grep -qiE 'ASCII|UTF-8|text'; then
+            echo "company-list.json decrypted OK — c_data_quality will validate content"
+          else
+            echo "::warning::company-list.json still ciphertext — c_data_quality will fall back to freshness"
+          fi
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
