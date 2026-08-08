@@ -78,12 +78,24 @@ jobs:
           pip install -q boto3
           python3 -c "import boto3, os; s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']); s3.download_file(os.environ['R2_BUCKET_NAME'], 'data/all_jobs.json', '.github/data/all_jobs.json'); print('Downloaded all_jobs.json from R2 (' + str(os.path.getsize('.github/data/all_jobs.json')) + ' bytes)')"
 
+      - name: Download decay baseline from R2 (rolling snapshot store)
+        continue-on-error: true
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: |
+          pip install -q boto3
+          python3 -c "import boto3, os; s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']); s3.download_file(os.environ['R2_BUCKET_NAME'], 'data/sup-decay-baseline.json', '.github/data/sup-decay-baseline.json'); print('Downloaded sup-decay-baseline.json from R2')"
+
       - name: Run yield decay monitor
         run: |
           node .github/scripts/processing/lib/sup-yield-decay-monitor.js \
             --csv .github/data/company-research-log.csv \
             --jobs .github/data/all_jobs.json \
             --write .github/data/sup_yield_decay_monitor.json \
+            --baseline-file .github/data/sup-decay-baseline.json \
             --json
 
       - name: Upload output to Supabase Storage
@@ -108,3 +120,14 @@ jobs:
         run: |
           pip install -q boto3
           python3 -c "import boto3, os; s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']); s3.put_object(Bucket=os.environ['R2_BUCKET_NAME'], Key='data/sup_yield_decay_monitor.json', Body=open('.github/data/sup_yield_decay_monitor.json','rb').read(), ContentType='application/json'); print('uploaded sup_yield_decay_monitor.json to R2')"
+
+      - name: Upload decay baseline to R2 (rolling snapshot store)
+        continue-on-error: true
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: |
+          pip install -q boto3
+          if [ -f .github/data/sup-decay-baseline.json ]; then python3 -c "import boto3, os; s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']); s3.put_object(Bucket=os.environ['R2_BUCKET_NAME'], Key='data/sup-decay-baseline.json', Body=open('.github/data/sup-decay-baseline.json','rb').read(), ContentType='application/json'); print('uploaded sup-decay-baseline.json to R2')"; else echo 'No baseline file to upload (monitor did not write one)'; fi
