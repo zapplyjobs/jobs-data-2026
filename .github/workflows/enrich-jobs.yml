@@ -290,6 +290,27 @@ jobs:
             echo "Push attempt $i failed, retrying in 5s..."
             sleep 5
           done
+
+      - name: Canada LMIA visa enrichment (ENR-CANADA-LMIA-VISA-LANE-1)
+        if: success()
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          curl -sf "$SUPABASE_URL/storage/v1/object/public/pipeline-data/lmia-sponsors.json" \
+            -o .github/data/lmia-sponsors.json && echo "LMIA data downloaded" \
+            || { echo "LMIA data not available — skipping Canada visa"; exit 0; }
+          node .github/scripts/processing/enrich-canada-visa.js
+          for f in canada-jobs-enriched.json canada-visa-stats.json; do
+            [ -f ".github/data/$f" ] && curl -sf -X PUT \
+              -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+              -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+              -H "Content-Type: application/octet-stream" \
+              --data-binary @".github/data/$f" \
+              "$SUPABASE_URL/storage/v1/object/pipeline-data/$f" \
+              && echo "Uploaded $f" || echo "Upload $f failed"
+          done
       - name: Upload dashboard data to R2 (INF-R2-GITCUTOVER-1)
         if: success()
         continue-on-error: true
