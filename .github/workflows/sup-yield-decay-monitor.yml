@@ -131,3 +131,48 @@ jobs:
         run: |
           pip install -q boto3
           if [ -f .github/data/sup-decay-baseline.json ]; then python3 -c "import boto3, os; s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']); s3.put_object(Bucket=os.environ['R2_BUCKET_NAME'], Key='data/sup-decay-baseline.json', Body=open('.github/data/sup-decay-baseline.json','rb').read(), ContentType='application/json'); print('uploaded sup-decay-baseline.json to R2')"; else echo 'No baseline file to upload (monitor did not write one)'; fi
+
+      - name: Alert on significant decay (Discord)
+        continue-on-error: true
+        env:
+          DISCORD_TEAM_TOKEN: ${{ secrets.DISCORD_TEAM_TOKEN }}
+          DISCORD_PIPELINE_ALERT_CHANNEL_ID: ${{ secrets.DISCORD_PIPELINE_ALERT_CHANNEL_ID }}
+        run: |
+          python3 - <<'PY'
+          import json, os, sys, urllib.request
+          try:
+              d = json.load(open('.github/data/sup_yield_decay_monitor.json'))
+          except Exception as e:
+              print(f"No monitor output to alert on ({e})"); sys.exit(0)
+          flagged = d.get('flagged_companies', [])
+          # Supply-leak candidates: accepted tenant with a meaningful tech-US baseline now
+          # MISSING from final output, on an ACTIVE ATS. Excludes eightfold (removed, GAP-4)
+          # + simplify (reference-only, C167) whose baselines are stale, not real leaks.
+          REMOVED = {'eightfold', 'simplify'}
+          severe = [c for c in flagged
+                    if 'company_missing_from_final_output' in c.get('flags', [])
+                    and (c.get('ats') or '').lower() not in REMOVED
+                    and c.get('baseline', {}).get('tech_us_count', 0) >= 10]
+          if not severe:
+              print("No significant supply-leak decay — no alert"); sys.exit(0)
+          lines = [f"⚠️ SUP Yield Decay — {len(severe)} accepted tenant(s) with ≥10 tech-US baseline now MISSING from output (supply-leak candidates):"]
+          for c in severe[:10]:
+              lines.append(f"- {c['company']} [{c['ats']}]: tech-US {c['baseline']['tech_us_count']}→{c['current']['tech_us_count']}")
+          if len(severe) > 10:
+              lines.append(f"(+{len(severe)-10} more — see monitor output)")
+          drops = sorted(flagged, key=lambda c: c['baseline']['tech_us_count'] - c['current']['tech_us_count'], reverse=True)[:3]
+          if drops:
+              lines.append("Top drops: " + ", ".join(f"{c['company']} {c['baseline']['tech_us_count']}→{c['current']['tech_us_count']}" for c in drops))
+          msg = "\n".join(lines)[:1900]
+          tok = os.environ.get('DISCORD_TEAM_TOKEN'); chan = os.environ.get('DISCORD_PIPELINE_ALERT_CHANNEL_ID')
+          if not tok or not chan:
+              print("Discord secrets unset — skipping alert"); sys.exit(0)
+          req = urllib.request.Request(
+              f"https://discord.com/api/v10/channels/{chan}/messages",
+              data=json.dumps({"content": msg}).encode(),
+              headers={"Authorization": f"Bot {tok}", "Content-Type": "application/json"})
+          try:
+              urllib.request.urlopen(req, timeout=20); print("Discord decay alert sent")
+          except Exception as e:
+              print(f"Discord alert failed (non-blocking): {e}")
+          PY
