@@ -1,0 +1,58 @@
+name: Refresh LMIA Data
+
+# Quarterly refresh of lmia-sponsors.json from ESDC Positive LMIA Employers List.
+# Downloads quarterly XLSX files, extracts employer names, rebuilds from scratch,
+# and uploads to Storage (pipeline-data/lmia-sponsors.json).
+#
+# Trigger: manual (workflow_dispatch). Run quarterly when ESDC publishes new data
+# (typically April, July, October, January for the previous quarter).
+# ENR-CANADA-LMIA-VISA-LANE-1
+
+on:
+  workflow_dispatch:
+    inputs:
+      quarters:
+        description: 'Number of recent quarters to include (default 8 = 2 years)'
+        required: false
+        default: '8'
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python dependencies
+        run: pip install openpyxl
+
+      - name: Generate lmia-sponsors.json from ESDC data
+        run: |
+          python3 .github/scripts/lmia-refresh.py \
+            --quarters ${{ inputs.quarters }} \
+            --output lmia-sponsors.json
+
+      - name: Upload to Supabase Storage
+        run: |
+          curl -sf -X PUT \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+            -H "Content-Type: application/json" \
+            --data-binary @lmia-sponsors.json \
+            "$SUPABASE_URL/storage/v1/object/pipeline-data/lmia-sponsors.json" \
+            && echo "=== Uploaded lmia-sponsors.json to Storage ===" \
+            || { echo "⚠️ Storage upload failed"; exit 1; }
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
