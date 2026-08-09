@@ -84,7 +84,7 @@ jobs:
             const r2 = createR2Client({ prefix: 'data/' });
             const dataDir = '.github/data';
             if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-            const files = ['all_jobs.json', 'us_jobs.json', 'enriched_jobs.json', 'enrichment-stats.json', 'desc-fetch-failures.json', 'jobs-metadata.json', 'zjp-metrics.json', 'metrics/latest.json', 'softwarejobs-descriptions.json', 'softwarejobs-descriptions-meta.json', 'supplemental-custom-jobs.json', 'supplemental-custom-metadata.json', 'supplemental-oracle-jobs.json', 'supplemental-oracle-metadata.json', 'pipeline-alert.json'];  // ENR-MONITOR-FIX-1: +enrichment-stats.json. ENR-DESCCACHE-OBSERVABILITY-1: +desc-fetch-failures.json. ENR-PAL-DATA-AUDIT-1: +metrics/latest.json — unblocks checks 4/5/14/20 (silently null ctx.prev since deploy).
+            const files = ['all_jobs.json', 'us_jobs.json', 'enriched_jobs.json', 'enrichment-stats.json', 'desc-fetch-failures.json', 'jobs-metadata.json', 'zjp-metrics.json', 'metrics/latest.json', 'softwarejobs-descriptions.json', 'softwarejobs-descriptions-meta.json', 'supplemental-custom-jobs.json', 'supplemental-custom-metadata.json', 'supplemental-oracle-jobs.json', 'supplemental-oracle-metadata.json', 'pipeline-alert.json', 'pipeline-alert-history.jsonl'];  // INF-ALERT-HISTORY-PUBLISH-1: +pipeline-alert-history.jsonl (download for append)
             files.push('inf-aspect-status.json', 'agg-aspect-status.json', 'tag-aspect-status.json', 'enr-aspect-status.json', 'sup-aspect-status.json', 'out-aspect-status.json');  // INF-ASPECT-ALARM-GAPS-1: check 40 consumes per-module aspect-status (RED alarm)
             const sidecars = await r2.list('descriptions-');
             for (const obj of sidecars) {
@@ -141,4 +141,4 @@ jobs:
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: node scripts/upload-dashboard-data-to-r2.js pipeline-alert.json tier-a-source-coverage.json
+        run: node scripts/upload-dashboard-data-to-r2.js pipeline-alert.json pipeline-alert-history.jsonl tier-a-source-coverage.json
