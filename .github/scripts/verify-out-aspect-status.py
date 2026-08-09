@@ -155,6 +155,13 @@ def c_data_quality():
         rate = dead / checked if checked else 1
         if rate >= 0.05: issues.append(("red", f"dead-link {rate*100:.1f}% ({dead}/{checked})"))
         elif rate >= 0.01: issues.append(("warn", f"dead-link {rate*100:.1f}% ({dead}/{checked})"))
+    # 1b. Publish status — boards that failed to push. Catches the continue-on-error masking
+    # (a failed board leaves the workflow GREEN; e.g. the IT GH_PAT 403 class). Absent artifact = cold start -> no issue.
+    ps = proxy_json("publish-status.json")
+    if ps:
+        failed = ps.get("failed") or []
+        if failed:
+            issues.append(("red", f"boards failed to publish: {', '.join(failed)}"))
     # 2. Visa fill + undated rate from health check (catches enrichment failures across sampled repos)
     hc = proxy_json("out-health-check.json")
     if hc:
