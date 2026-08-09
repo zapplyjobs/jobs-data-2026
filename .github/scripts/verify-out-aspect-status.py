@@ -42,7 +42,7 @@ def gh_runs(repo, workflow=None, limit=5):
 
 def proxy_json(path):
     try:
-        req = urllib.request.Request(f"{PROXY}/{path}", headers={"User-Agent": "out-aspect-verifier/1.0"})
+        req = urllib.request.Request(f"{PROXY}/{path}", headers={"User-Agent": "out-aspect-verifier/1.0", "X-Proxy-Token": os.environ.get("DATA_PROXY_TOKEN", "")})
         with urllib.request.urlopen(req, timeout=20) as r:
             return json.loads(r.read().decode("utf-8"))
     except Exception:

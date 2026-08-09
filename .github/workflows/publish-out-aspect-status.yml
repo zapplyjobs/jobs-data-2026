@@ -33,6 +33,7 @@ jobs:
       - name: Run verifier
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
+          DATA_PROXY_TOKEN: ${{ secrets.DATA_PROXY_TOKEN }}
         run: |
           python3 .github/scripts/verify-out-aspect-status.py > out-aspect-status.json
           python3 - <<'PY'

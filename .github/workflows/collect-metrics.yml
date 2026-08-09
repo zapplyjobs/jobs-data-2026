@@ -119,6 +119,7 @@ jobs:
         continue-on-error: true  # INF-METRICS-SILENT-CLEANUP-1: generate-zjp-metrics now exits non-zero on fatal (was swallowed → exit 0 → silent stale dashboard). continue-on-error keeps a failure visible (red step) without aborting sjd-jobs/canada-bridge commit; check-25 (r2-freshness) is the staleness backstop.
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          DATA_PROXY_TOKEN: ${{ secrets.DATA_PROXY_TOKEN }}
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}

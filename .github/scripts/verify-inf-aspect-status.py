@@ -60,8 +60,7 @@ def gh_runs(repo, workflow=None, limit=5):
 
 
 def proxy_json(path, timeout=15):
-    req = urllib.request.Request(PROXY_DATA + "/" + path,
-                                 headers={"User-Agent": "verify-inf-aspect/1.0"})
+    req = urllib.request.Request(PROXY_DATA + "/" + path, headers={"User-Agent": "verify-inf-aspect/1.0", "X-Proxy-Token": os.environ.get("DATA_PROXY_TOKEN", "")})
     try:
         with urllib.request.urlopen(req, timeout=timeout) as r:
             return json.loads(r.read().decode())
@@ -171,7 +170,7 @@ def c_performance():
     """INF-infra latency — Worker proxy + dashboard /api/data response time.
     Correctly scoped to INF infrastructure (NOT AGG pipeline runtime)."""
     def timed_get(url, timeout=8):
-        req = urllib.request.Request(url, headers={"User-Agent": "verify-inf-aspect/1.0"})
+        req = urllib.request.Request(url, headers={"User-Agent": "verify-inf-aspect/1.0", "X-Proxy-Token": os.environ.get("DATA_PROXY_TOKEN", "")})
         t0 = time.time()
         try:
             with urllib.request.urlopen(req, timeout=timeout) as r:
