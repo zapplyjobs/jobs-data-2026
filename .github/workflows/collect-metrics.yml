@@ -72,7 +72,7 @@ jobs:
             const r2 = createR2Client({ prefix: 'data/' });
             const dataDir = '.github/data';
             if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-            const files = ['all_jobs.json', 'jobs-metadata.json', 'enrichment-stats.json', 'canada-tech-summary.json', 'bridge-metrics.json', 'traffic-history.jsonl', 'bridge-metrics-history.jsonl', 'daily-stats.json', 'history.jsonl', 'history-archive.jsonl', 'enrichment-history.jsonl', 'pipeline-alert.json', 'general-review.json', 'tag-history.jsonl', 'metrics/history.jsonl'];  // ENR-OTHER-WORKFLOWS-DLA-1: +metrics/history.jsonl — collect-metrics.js growth-trend history (was never downloaded → growth trends always null)
+            const files = ['all_jobs.json', 'jobs-metadata.json', 'enrichment-stats.json', 'canada-tech-summary.json', 'board-counts.json', 'bridge-metrics.json', 'traffic-history.jsonl', 'bridge-metrics-history.jsonl', 'daily-stats.json', 'history.jsonl', 'history-archive.jsonl', 'enrichment-history.jsonl', 'pipeline-alert.json', 'general-review.json', 'tag-history.jsonl', 'metrics/history.jsonl'];  // ENR-OTHER-WORKFLOWS-DLA-1: +metrics/history.jsonl — collect-metrics.js growth-trend history (was never downloaded → growth trends always null). AGG-CONSUMER-PERCOUNT-DATA-1: +board-counts.json — per-consumer job counts for DASH PipelineTree
             for (const file of files) {
               try {
                 const raw = await r2.downloadRaw(file);
