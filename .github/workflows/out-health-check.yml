@@ -116,6 +116,7 @@ jobs:
             "New-Grad-Jobs-2027", "Internships-2027",
             "New-Grad-Software-Engineering-Jobs-2027", "New-Grad-Data-Science-Jobs-2027",
             "New-Grad-Hardware-Engineering-Jobs-2027", "New-Grad-Healthcare-Jobs-2027",
+            "New-Grad-IT-Jobs-2027",
             "Canada-Jobs-2027", "Canada-Internships-2027",
             "Research-Internships-for-Undergraduates", "underclassmen-internships",
             "resume-samples-2026", "interview-handbook-2026",
@@ -168,6 +169,7 @@ jobs:
             pipeline_repos = repo in ("New-Grad-Jobs-2027", "Internships-2027",
                 "New-Grad-Software-Engineering-Jobs-2027", "New-Grad-Data-Science-Jobs-2027",
                 "New-Grad-Hardware-Engineering-Jobs-2027", "New-Grad-Healthcare-Jobs-2027",
+                "New-Grad-IT-Jobs-2027",
                 "Canada-Jobs-2027", "Canada-Internships-2027")
             if pushed_at and pipeline_repos:
                 try:
@@ -222,6 +224,7 @@ jobs:
         _PIPELINE = {"New-Grad-Jobs-2027", "Internships-2027",
             "New-Grad-Software-Engineering-Jobs-2027", "New-Grad-Data-Science-Jobs-2027",
             "New-Grad-Hardware-Engineering-Jobs-2027", "New-Grad-Healthcare-Jobs-2027",
+            "New-Grad-IT-Jobs-2027",
             "Canada-Jobs-2027", "Canada-Internships-2027"}
         _ages = [(r["repo"], r.get("last_push_age_h")) for r in results["repos"]
                  if r["repo"] in _PIPELINE and isinstance(r.get("last_push_age_h"), (int, float))]
