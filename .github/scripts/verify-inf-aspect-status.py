@@ -50,11 +50,13 @@ def gh_json(args, attempts=3):
     return None
 
 
-def gh_runs(repo, workflow=None, limit=5):
-    args = ["run", "list", "-R", repo, "-L", str(limit), "--json", "status,conclusion,createdAt"]
+def gh_runs(repo, workflow=None, limit=5, branch=None):
+    args = ["run", "list", "-R", repo, "-L", str(limit), "--json", "status,conclusion,createdAt,headBranch"]
     if workflow:
         args = ["run", "list", "-R", repo, "-w", workflow, "-L", str(limit),
-                "--json", "status,conclusion,createdAt"]
+                "--json", "status,conclusion,createdAt,headBranch"]
+    if branch:
+        args.extend(["--branch", branch])
     rows = gh_json(args) or []
     return [r for r in rows if r.get("status") == "completed"]
 
@@ -111,7 +113,7 @@ def c_verification():
     fails, total = 0, 0
     detail = []
     for repo, wf in GATE_WORKFLOW.items():
-        runs = gh_runs(repo, workflow=wf, limit=3)
+        runs = gh_runs(repo, workflow=wf, limit=3, branch="main")
         if not runs:
             detail.append(f"{repo.split('/')[-1]}: no runs")
             fails += 1
