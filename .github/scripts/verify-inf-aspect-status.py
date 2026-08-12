@@ -213,9 +213,12 @@ def c_configuration():
 
 
 def c_discoverability():
-    """README freshness on the main pipeline repo (repo-resident discoverability proxy)."""
+    """README freshness on the main pipeline repo (repo-resident discoverability proxy).
+    180-day GREEN threshold: an infrastructure repo README is structural, not dynamic —
+    a stable 2-line README that accurately describes the repo shouldn't be YELLOW at 90d.
+    Raised from 90→180 (INF-DISCOVERABILITY-STALE-EVIDENCE-1)."""
     age = gh_file_age_days("zapplyjobs/jobs-data-2026", "README.md")
-    return bucket_age(age, 90, 365) + ("gh-api:commits",)
+    return bucket_age(age, 180, 365) + ("gh-api:commits",)
 
 
 def c_documentation():
