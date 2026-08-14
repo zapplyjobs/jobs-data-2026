@@ -226,66 +226,34 @@ jobs:
                 return ('candidate', closed_variant)
             return ('unknown', 'html-or-unreachable')
         wd_urls = {u for u in all_urls if wd_re.search(u)} if PROXY_TOKEN else set()
+        ats_watch = []
         if wd_urls:
-            print(f"\nATS availability pass: {len(wd_urls)} Workday links")
+            print(f"\nATS availability pass (observability-only): {len(wd_urls)} Workday links")
             with ThreadPoolExecutor(max_workers=8) as pool2:
                 ats_results = dict(zip(wd_urls, pool2.map(ats_check, sorted(wd_urls))))
             from collections import Counter as _C
             print(f"  ATS first-pass verdicts: {dict(_C(k for k, _ in ats_results.values()))}")
-            # Phase 2 — post-settle re-verification (serial, spaced): under the burst above,
-            # Workday transiently serves closure-looking payloads for OPEN jobs. Wait for
-            # the load to settle, then require a closure verdict on 2 consecutive spaced
-            # probes before declaring dead. Anything else drops to unknown (lower bound).
+            # OBSERVABILITY-ONLY (revised 2026-08-14 after live validation): per-job CXS
+            # verdicts through the proxy are NON-DETERMINISTIC — the same URL returns
+            # jobPostingInfo on one request and an S22/S21/404 error payload minutes later
+            # (verified live: 'confirmed-dead' CACI/Disney jobs probed ALIVE afterward; an
+            # 'alive'-classified CACI job returned S21; Cox served 406 error storms under
+            # burst load). Closure CANNOT be reliably judged per-job from this path, so
+            # closure candidates are recorded to ats_watch for trend analysis and are
+            # NEVER appended to dead_links. The reliable design (OUT-DEADLINK-ATSIGNATURE-1)
+            # is tenant job-LISTING membership: one paginated list request per tenant;
+            # reqId membership = authoritative open/closed.
             candidates = sorted(u for u, (k, _) in ats_results.items() if k == 'candidate')
-            if candidates:
-                print(f"  Settling 45s before re-verifying {len(candidates)} closure candidates...")
-                time.sleep(45)
-            confirmed_dead = []
             for u in candidates:
-                variant = ats_results[u][1]
-                verdicts = []
-                for attempt in range(2):
-                    v2 = wd_variants(u)
-                    r = 'unknown'
-                    for v in ([variant] + [x for x in v2 if x != variant]):
-                        import urllib.parse as _up2
-                        try:
-                            req = urllib.request.Request(f"{PROXY}/?url={_up2.quote(v, safe='')}",
-                                headers={'X-Proxy-Token': PROXY_TOKEN, 'User-Agent': 'out-deadlink/1.0'})
-                            try:
-                                with urllib.request.urlopen(req, timeout=15) as resp:
-                                    st2, body2 = resp.status, resp.read()
-                            except urllib.error.HTTPError as e2:
-                                st2, body2 = e2.code, e2.read()
-                        except Exception:
-                            continue
-                        try:
-                            d2 = json.loads(body2)
-                        except Exception:
-                            continue
-                        if isinstance(d2, dict) and d2.get('jobPostingInfo'):
-                            r = 'alive'; break
-                        if isinstance(d2, dict) and d2.get('errorCode') == 'S22':
-                            r = 'closed'; break
-                        if st2 in (404, 410):
-                            r = 'closed'; break
-                    verdicts.append(r)
-                    time.sleep(1.0)
-                if verdicts == ['closed', 'closed']:
-                    confirmed_dead.append(u)
-                    print(f"  ❌ ATS-CONFIRMED-DEAD: {u[:100]}")
-                else:
-                    print(f"  ✔ survived re-verification (not dead): {u[:100]} → {verdicts}")
-            for u in confirmed_dead:
                 for repo in all_urls[u]:
-                    dead_links.append({"repo": repo, "url": u, "http_code": "ATS-CLOSED"})
-            print(f"  ATS final: {len(confirmed_dead)} confirmed dead of {len(candidates)} candidates")
+                    ats_watch.append({"repo": repo, "url": u, "note": "closure-candidate-unverified"})
+            print(f"  ATS closure candidates recorded to ats_watch (not counted dead): {len(candidates)}")
 
         output = {
             "generated_at": now.isoformat(),
             "total_checked": len(results),
             "total_dead": len(dead_links),
-            "dead_links": dead_links,
+            "ats_watch": ats_watch,
             "total_transient": len(transient_links),
             "transient_links": transient_links
         }
