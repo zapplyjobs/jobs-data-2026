@@ -1,0 +1,10 @@
+name: repo-guard
+on:
+  push:
+  pull_request:
+    branches: [main]
+jobs:
+  guard:
+    uses: zapplyjobs/.github/.github/workflows/repo_guard.yml@main
+    permissions:
+      contents: read
