@@ -185,11 +185,10 @@ jobs:
         PROXY_TOKEN = os.environ.get('DATA_PROXY_TOKEN', '')
         def ats_check(url):
             import urllib.parse as _up
-            import time as _t
             variants = wd_variants(url)
             if not variants: return ('skip', 'no-variant')
             def probe(v):
-                # returns ('alive'|'closed'|None) — closed ONLY on definitive verdicts
+                # returns 'alive' | 'closed' | None
                 try:
                     req = urllib.request.Request(f"{PROXY}/?url={_up.quote(v, safe='')}",
                         headers={'X-Proxy-Token': PROXY_TOKEN, 'User-Agent': 'out-deadlink/1.0'})
@@ -206,9 +205,11 @@ jobs:
                     return None  # HTML SPA shell → unknown
                 if isinstance(d, dict) and d.get('jobPostingInfo'):
                     return 'alive'
-                # Closure verdicts ONLY: S22 (= position no longer available) or hard 404/410.
-                # Other errorCodes/statuses (406/429/… ) are throttling/edge responses, NOT
-                # closure — live-run 2026-08-14 proved 406 storms on live jobs (Cox et al.).
+                # Closure verdicts: S22 (= position no longer available) or hard 404/410.
+                # CAUTION (live-run 2026-08-14): under scan burst-load Workday ALSO serves
+                # error payloads (S22/406/404) for OPEN jobs — a first-pass 'closed' is
+                # only a CANDIDATE; final dead requires the post-settle re-verification
+                # below. Never trust a single in-flight verdict.
                 if isinstance(d, dict) and d.get('errorCode') == 'S22':
                     return 'closed'
                 if status in (404, 410):
@@ -222,23 +223,63 @@ jobs:
                 if r == 'closed' and closed_variant is None:
                     closed_variant = v
             if closed_variant is not None:
-                _t.sleep(1.5)  # confirm: throttling transients clear, real closure persists
-                if probe(closed_variant) == 'closed':
-                    return ('dead', 'ATS-CLOSED')
-                return ('unknown', 'closed-not-confirmed')
+                return ('candidate', closed_variant)
             return ('unknown', 'html-or-unreachable')
         wd_urls = {u for u in all_urls if wd_re.search(u)} if PROXY_TOKEN else set()
         if wd_urls:
             print(f"\nATS availability pass: {len(wd_urls)} Workday links")
-            with ThreadPoolExecutor(max_workers=12) as pool2:
+            with ThreadPoolExecutor(max_workers=8) as pool2:
                 ats_results = dict(zip(wd_urls, pool2.map(ats_check, sorted(wd_urls))))
-            ats_dead = [u for u, (k, _) in ats_results.items() if k == 'dead']
-            for u in ats_dead:
-                detail = ats_results[u][1]
-                for repo in all_urls[u]:
-                    dead_links.append({"repo": repo, "url": u, "http_code": detail})
             from collections import Counter as _C
-            print(f"  ATS verdicts: {dict(_C(k for k, _ in ats_results.values()))}")
+            print(f"  ATS first-pass verdicts: {dict(_C(k for k, _ in ats_results.values()))}")
+            # Phase 2 — post-settle re-verification (serial, spaced): under the burst above,
+            # Workday transiently serves closure-looking payloads for OPEN jobs. Wait for
+            # the load to settle, then require a closure verdict on 2 consecutive spaced
+            # probes before declaring dead. Anything else drops to unknown (lower bound).
+            candidates = sorted(u for u, (k, _) in ats_results.items() if k == 'candidate')
+            if candidates:
+                print(f"  Settling 45s before re-verifying {len(candidates)} closure candidates...")
+                time.sleep(45)
+            confirmed_dead = []
+            for u in candidates:
+                variant = ats_results[u][1]
+                verdicts = []
+                for attempt in range(2):
+                    v2 = wd_variants(u)
+                    r = 'unknown'
+                    for v in ([variant] + [x for x in v2 if x != variant]):
+                        import urllib.parse as _up2
+                        try:
+                            req = urllib.request.Request(f"{PROXY}/?url={_up2.quote(v, safe='')}",
+                                headers={'X-Proxy-Token': PROXY_TOKEN, 'User-Agent': 'out-deadlink/1.0'})
+                            try:
+                                with urllib.request.urlopen(req, timeout=15) as resp:
+                                    st2, body2 = resp.status, resp.read()
+                            except urllib.error.HTTPError as e2:
+                                st2, body2 = e2.code, e2.read()
+                        except Exception:
+                            continue
+                        try:
+                            d2 = json.loads(body2)
+                        except Exception:
+                            continue
+                        if isinstance(d2, dict) and d2.get('jobPostingInfo'):
+                            r = 'alive'; break
+                        if isinstance(d2, dict) and d2.get('errorCode') == 'S22':
+                            r = 'closed'; break
+                        if st2 in (404, 410):
+                            r = 'closed'; break
+                    verdicts.append(r)
+                    time.sleep(1.0)
+                if verdicts == ['closed', 'closed']:
+                    confirmed_dead.append(u)
+                    print(f"  ❌ ATS-CONFIRMED-DEAD: {u[:100]}")
+                else:
+                    print(f"  ✔ survived re-verification (not dead): {u[:100]} → {verdicts}")
+            for u in confirmed_dead:
+                for repo in all_urls[u]:
+                    dead_links.append({"repo": repo, "url": u, "http_code": "ATS-CLOSED"})
+            print(f"  ATS final: {len(confirmed_dead)} confirmed dead of {len(candidates)} candidates")
 
         output = {
             "generated_at": now.isoformat(),
