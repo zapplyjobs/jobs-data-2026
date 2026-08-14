@@ -155,6 +155,7 @@ jobs:
           const { createR2Client } = require('./.github/scripts/processing/lib/storage/r2-client');
           const fs = require('fs');
           const path = require('path');
+          const { isEnrOwnedSidecar } = require('./.github/scripts/processing/lib/sidecar-standard');
 
           async function main() {
             const r2 = createR2Client({ prefix: 'data/' });
@@ -170,8 +171,9 @@ jobs:
               'desc-fetch-failures.json',  // ENR-R2PRIMARY-ENRICHWRITES-1: ensure failCache lands in R2 (canonical)
             ];
 
-            // Add all description sidecars (pruned versions overwrite R2 — INF-SIDECAR-COMPACT-1)
-            const sidecars = fs.readdirSync(dataDir).filter(f => f.startsWith('descriptions-') && f.endsWith('.jsonl'));
+            // ENR owns only descriptions-enriched-N.jsonl. AGG source sidecars
+            // are read as inputs but must not be rewritten or deleted by ENR.
+            const sidecars = fs.readdirSync(dataDir).filter(isEnrOwnedSidecar);
             for (const s of sidecars) files.push(s);
 
             // Add enrichment history if it exists
@@ -182,10 +184,10 @@ jobs:
             const desiredSidecars = new Set(sidecars);
             const existingSidecars = (await r2.list('descriptions-'))
               .map(obj => obj.key.replace(/^data\//, ''))
-              .filter(name => name.startsWith('descriptions-') && name.endsWith('.jsonl'));
+              .filter(isEnrOwnedSidecar);
             const staleSidecars = existingSidecars.filter(name => !desiredSidecars.has(name));
             for (const stale of staleSidecars) {
-              try { await r2.remove(stale); console.log('DELETE: ' + stale); }
+              try { await r2.remove(stale); console.log('DELETE ENR-OWNED: ' + stale); }
               catch (e) { console.log('SKIP DELETE (R2 gone): ' + stale); }
             }
 
