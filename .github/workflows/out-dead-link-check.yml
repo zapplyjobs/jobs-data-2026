@@ -185,10 +185,11 @@ jobs:
         PROXY_TOKEN = os.environ.get('DATA_PROXY_TOKEN', '')
         def ats_check(url):
             import urllib.parse as _up
+            import time as _t
             variants = wd_variants(url)
             if not variants: return ('skip', 'no-variant')
-            alive = False; verdict = None
-            for v in variants:
+            def probe(v):
+                # returns ('alive'|'closed'|None) — closed ONLY on definitive verdicts
                 try:
                     req = urllib.request.Request(f"{PROXY}/?url={_up.quote(v, safe='')}",
                         headers={'X-Proxy-Token': PROXY_TOKEN, 'User-Agent': 'out-deadlink/1.0'})
@@ -198,21 +199,34 @@ jobs:
                     except urllib.error.HTTPError as e:
                         status, body = e.code, e.read()
                 except Exception:
-                    continue  # network/proxy failure → unknown, never dead
+                    return None  # network/proxy failure → unknown, never dead
                 try:
                     d = json.loads(body)
                 except Exception:
-                    continue  # HTML SPA shell → unknown for this variant
+                    return None  # HTML SPA shell → unknown
                 if isinstance(d, dict) and d.get('jobPostingInfo'):
-                    alive = True; break
-                if isinstance(d, dict) and d.get('errorCode'):
-                    verdict = verdict or f"ATS-CLOSED ({d['errorCode']})"
-                elif status in (404, 410):
-                    verdict = verdict or f"ATS-DEAD (HTTP {status})"
-            if alive: return ('alive', 'ok')
-            if verdict: return ('dead', verdict)
+                    return 'alive'
+                # Closure verdicts ONLY: S22 (= position no longer available) or hard 404/410.
+                # Other errorCodes/statuses (406/429/… ) are throttling/edge responses, NOT
+                # closure — live-run 2026-08-14 proved 406 storms on live jobs (Cox et al.).
+                if isinstance(d, dict) and d.get('errorCode') == 'S22':
+                    return 'closed'
+                if status in (404, 410):
+                    return 'closed'
+                return None
+            closed_variant = None
+            for v in variants:
+                r = probe(v)
+                if r == 'alive':
+                    return ('alive', 'ok')
+                if r == 'closed' and closed_variant is None:
+                    closed_variant = v
+            if closed_variant is not None:
+                _t.sleep(1.5)  # confirm: throttling transients clear, real closure persists
+                if probe(closed_variant) == 'closed':
+                    return ('dead', 'ATS-CLOSED')
+                return ('unknown', 'closed-not-confirmed')
             return ('unknown', 'html-or-unreachable')
-
         wd_urls = {u for u in all_urls if wd_re.search(u)} if PROXY_TOKEN else set()
         if wd_urls:
             print(f"\nATS availability pass: {len(wd_urls)} Workday links")
