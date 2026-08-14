@@ -29,6 +29,7 @@ jobs:
         R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
         R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
         R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        DATA_PROXY_TOKEN: ${{ secrets.DATA_PROXY_TOKEN }}
       run: |
         python3 - <<'PYEOF'
         import json, urllib.request, urllib.error, re, os, sys, datetime, time
@@ -153,6 +154,77 @@ jobs:
             elif value not in ACCEPT_CODES:
                 for repo in all_urls[url]:
                     dead_links.append({"repo": repo, "url": url, "http_code": value})
+        # ── ATS availability pass (OUT-DEADLINK-ATSIGNATURE-1, 2026-08-14) ──
+        # Workday links return a 200 SPA shell whether the job is open or closed, so the
+        # status-code pass above cannot judge them (the soft-404 blind class behind the
+        # recurring dev-team dead-link reports). IP-independent signature: the Workday CXS
+        # JSON API reached through the authenticated wd-fetch-proxy (same path the desc
+        # fetcher uses; DATA_PROXY_TOKEN is already a repo secret).
+        #   alive    = any URL variant returns JSON with jobPostingInfo
+        #   dead     = definitive WD errorCode payload (e.g. S22) or HTTP 404/410, with no
+        #              alive variant (dead ONLY on a definitive API verdict — never on
+        #              HTML shells, auth quirks, or network errors; lower bound preserved)
+        # Dry-run-verified 2026-08-14: 25/25 live board rows classified alive (zero FP);
+        # a known-closed HP internship returns 403 errorCode S22; BAE-style removals 410.
+        wd_re = re.compile(r'https://[a-z0-9-]+\.(?:wd\d*\.myworkdayjobs\.com|myworkdaysite\.com)/[^)\s"<\]]+')
+        def wd_variants(u):
+            m = re.match(r'(https://[^/]+)(/[^?#]*?)(?:[?#].*)?$', u)
+            if not m: return []
+            origin, path = m.groups()
+            seg = [s for s in path.split('/') if s]
+            if seg and re.match(r'^[a-z]{2}(-[A-Z]{2})?$', seg[0]): seg = seg[1:]
+            if len(seg) < 2: return []
+            tenant = origin.split('//')[1].split('.')[0]
+            site = seg[0]
+            out = [f"{origin}/wday/cxs/{tenant}/{site}/" + '/'.join(seg[1:])]
+            if len(seg) >= 3 and seg[1].lower() == site.lower():  # doubled-site tenants (wellsfargojobs shape)
+                out.append(f"{origin}/wday/cxs/{tenant}/{site}/" + '/'.join(seg[2:]))
+            return out
+
+        PROXY = "https://wd-fetch-proxy.wild-queen-069e.workers.dev"
+        PROXY_TOKEN = os.environ.get('DATA_PROXY_TOKEN', '')
+        def ats_check(url):
+            import urllib.parse as _up
+            variants = wd_variants(url)
+            if not variants: return ('skip', 'no-variant')
+            alive = False; verdict = None
+            for v in variants:
+                try:
+                    req = urllib.request.Request(f"{PROXY}/?url={_up.quote(v, safe='')}",
+                        headers={'X-Proxy-Token': PROXY_TOKEN, 'User-Agent': 'out-deadlink/1.0'})
+                    try:
+                        with urllib.request.urlopen(req, timeout=15) as resp:
+                            status, body = resp.status, resp.read()
+                    except urllib.error.HTTPError as e:
+                        status, body = e.code, e.read()
+                except Exception:
+                    continue  # network/proxy failure → unknown, never dead
+                try:
+                    d = json.loads(body)
+                except Exception:
+                    continue  # HTML SPA shell → unknown for this variant
+                if isinstance(d, dict) and d.get('jobPostingInfo'):
+                    alive = True; break
+                if isinstance(d, dict) and d.get('errorCode'):
+                    verdict = verdict or f"ATS-CLOSED ({d['errorCode']})"
+                elif status in (404, 410):
+                    verdict = verdict or f"ATS-DEAD (HTTP {status})"
+            if alive: return ('alive', 'ok')
+            if verdict: return ('dead', verdict)
+            return ('unknown', 'html-or-unreachable')
+
+        wd_urls = {u for u in all_urls if wd_re.search(u)} if PROXY_TOKEN else set()
+        if wd_urls:
+            print(f"\nATS availability pass: {len(wd_urls)} Workday links")
+            with ThreadPoolExecutor(max_workers=12) as pool2:
+                ats_results = dict(zip(wd_urls, pool2.map(ats_check, sorted(wd_urls))))
+            ats_dead = [u for u, (k, _) in ats_results.items() if k == 'dead']
+            for u in ats_dead:
+                detail = ats_results[u][1]
+                for repo in all_urls[u]:
+                    dead_links.append({"repo": repo, "url": u, "http_code": detail})
+            from collections import Counter as _C
+            print(f"  ATS verdicts: {dict(_C(k for k, _ in ats_results.values()))}")
 
         output = {
             "generated_at": now.isoformat(),
