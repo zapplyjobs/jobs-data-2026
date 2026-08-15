@@ -135,9 +135,12 @@ jobs:
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
-      - name: Publish softwarejobs descriptions map
-        if: success()
-        run: node .github/scripts/processing/lib/publish-descriptions-map.js --data-dir .github/data
+      # ENR-SJD-DESCSIZE-ORPHANCHUNK-1 (2026-08-15): softwarejobs-descriptions map RETIRED.
+      # Verified zero product consumers: SJD list reads sjd-jobs.json; SJD detail reads
+      # descriptions-enriched-*.jsonl shards directly; not in data-proxy whitelist; no
+      # dashboard/backend/metrics/checks consumer. The 185MB single-JSON publish was
+      # write-only bloat (plus a string-cap time-bomb at ~537MB) — removed with its
+      # upload entries, pipeline-alert download, and source-coverage-audit fields.
 
 
       - name: Prune stale sidecar entries
@@ -164,8 +167,6 @@ jobs:
               'processed_ids.json',
               'enrichment-stats.json',
               'tech-us-truth.json',
-              'softwarejobs-descriptions.json',
-              'softwarejobs-descriptions-meta.json',
               'desc-fetch-failures.json',  // ENR-R2PRIMARY-ENRICHWRITES-1: ensure failCache lands in R2 (canonical)
             ];
 
@@ -268,7 +269,7 @@ jobs:
           done
           # ENR-DUALWRITE-KEEPGATE-1: narrowed to keep-list (files consumers read from Storage).
           # Dropped: processed_ids, enrichment-history, softwarejobs-descriptions-meta, desc-fetch-failures,
-          # softwarejobs-descriptions.json (~20MB chunked). R2 is canonical; Storage is safety copy for
+          # softwarejobs-descriptions.json (fully retired from R2 too 2026-08-15, ENR-SJD-DESCSIZE-ORPHANCHUNK-1). R2 is canonical; Storage is safety copy for
           # consumer-read files only. Verified: zero Storage readers for dropped files (grep zapply-backend/src).
           echo "Dual-write complete."
         env:
