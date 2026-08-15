@@ -88,17 +88,8 @@ jobs:
               } catch (e) { console.error('R2 download ERR: ' + file + ' - ' + e.message); }
             }
             console.log('R2 download complete');
-            // R2 freshness gate (INF-ZJP-SYSTEM-REDESIGN-1 slice B, 2026-08-15): pipeline-stop detector.
-            // Fail closed. Alert mapping: pipeline-stop class is alarmed by check-25 (zjp-metrics staleness).
-            const setOut = v => fs.appendFileSync(process.env.GITHUB_OUTPUT, 'pipeline_fresh=' + v + '\n');
-            try {
-              const m = await r2.head('all_jobs.json');
-              const ageMin = m && m.lastModified ? (Date.now() - new Date(m.lastModified).getTime())/60000 : NaN;
-              if (!Number.isFinite(ageMin) || ageMin > 120) {
-                console.log('::warning::FRESHNESS GATE SKIP: all_jobs.json age=' + (Number.isFinite(ageMin)?Math.round(ageMin):'?') + 'min (limit 120) — pipeline stopped; skipping stale-data processing');
-                setOut('false');
-              } else { console.log('FRESHNESS GATE PASS: all_jobs.json ' + Math.round(ageMin) + 'min old'); setOut('true'); }
-            } catch(e) { console.log('::warning::FRESHNESS GATE SKIP: heartbeat check failed — ' + e.message); setOut('false'); }
+            const { checkFreshness } = require('./.github/scripts/processing/lib/storage/freshness-gate');
+            await checkFreshness({ r2, limitMinutes: 120, label: 'daily-stats' });
 
           }
           main().catch(e => { console.error('R2 fatal: ' + e.message); process.exit(1); });
