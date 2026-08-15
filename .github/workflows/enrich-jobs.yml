@@ -362,12 +362,10 @@ jobs:
       # Discord's gateway IDENTIFY budget (OUT-DISCORD-SESSION-EXHAUSTION-1).
       # Do NOT re-add a dispatch here.
 
-      - name: Dispatch collect-metrics (chain link)
-        if: success()
-        run: |
-          gh workflow run collect-metrics.yml -R zapplyjobs/jobs-data-2026 --ref main 2>/dev/null && echo "Dispatched collect-metrics" || echo "Collect-metrics dispatch failed (non-critical)"
-        env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}
+      # AGG-REDUNDANT-COLLECTMETRICS-DISPATCH-2: collect-metrics dispatch REMOVED —
+      # fired while board-counts was mid-flight (intermediate-state snapshot). The correct
+      # dispatch is push-consumer-readmes.yml (post board-counts upload, freshness-gated);
+      # collect-metrics retains its own push trigger + INF's 45m R2 freshness gate.
       - name: Trigger consumer README push (wave link — fresh post-enrichment, INF-CONSUMER-PUSH-ENRICH-RACE-1)
         if: success()
         continue-on-error: true
