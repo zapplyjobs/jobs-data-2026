@@ -1,7 +1,10 @@
 name: OUT Dead Link Check
 # Weekly dead-link check across all consumer repos.
 # Publishes results to Supabase Storage as dead-links.json for dashboard consumption.
-# Format: {generated_at, total_checked, total_dead, dead_links: [{repo, url, http_code}], total_transient, transient_links: [{repo, url, http_code}]}
+# Format: {generated_at, total_checked, total_dead, dead_links: [{repo, url, http_code, closed_via?, note?}],
+#          ats_watch: [{repo, url, note}], ats_stats: {judged, alive, dead, unknown},
+#          total_transient, transient_links: [{repo, url, http_code}]}
+# http_code is an int for status-code deaths and the string 'ats-closed' for ATS-listing deaths.
 on:
   schedule:
     - cron: '0 6 * * 1'  # Weekly Monday 6am UTC
@@ -17,7 +20,7 @@ permissions:
 jobs:
   dead-link-check:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 50
 
     steps:
     - name: Check dead links + publish to Storage
@@ -154,100 +157,212 @@ jobs:
             elif value not in ACCEPT_CODES:
                 for repo in all_urls[url]:
                     dead_links.append({"repo": repo, "url": url, "http_code": value})
-        # ── ATS availability pass (OUT-DEADLINK-ATSIGNATURE-1, 2026-08-14) ──
-        # Workday links return a 200 SPA shell whether the job is open or closed, so the
-        # status-code pass above cannot judge them (the soft-404 blind class behind the
-        # recurring dev-team dead-link reports). IP-independent signature: the Workday CXS
-        # JSON API reached through the authenticated wd-fetch-proxy (same path the desc
-        # fetcher uses; DATA_PROXY_TOKEN is already a repo secret).
-        #   alive    = any URL variant returns JSON with jobPostingInfo
-        #   dead     = definitive WD errorCode payload (e.g. S22) or HTTP 404/410, with no
-        #              alive variant (dead ONLY on a definitive API verdict — never on
-        #              HTML shells, auth quirks, or network errors; lower bound preserved)
-        # Dry-run-verified 2026-08-14: 25/25 live board rows classified alive (zero FP);
-        # a known-closed HP internship returns 403 errorCode S22; BAE-style removals 410.
+        # ── ATS availability pass v2: tenant LISTING membership (OUT-DEADLINK-ATSIGNATURE-1) ──
+        # Workday/Ashby links return a 200 SPA shell whether the job is open or closed, so
+        # the status-code pass cannot judge them (the soft-404 blind class behind the
+        # recurring dev-team dead-link reports). v1 (2026-08-14) probed the per-job CXS
+        # DETAIL endpoint and was reverted to observability-only: per-job verdicts through
+        # the proxy are NON-DETERMINISTIC (same URL flips between jobPostingInfo and
+        # S21/S22/404/406 across requests/edges; Cox 406 storms for open jobs). Do NOT
+        # re-attempt per-job CXS closure verdicts.
+        # v2 (2026-08-15) uses the tenant job-LISTING (the same authoritative paginated
+        # POST AGG's workday fetcher consumes) through the authenticated wd-fetch-proxy:
+        #   POST {origin}/wday/cxs/{tenant}/{site}/jobs  {"limit":20,"offset":N}
+        #   → {"total": N, "jobPostings": [{"externalPath": "/job/.../Title_REQID"}]}
+        # Verdicts:
+        #   alive = reqId present in the listing (authoritative — this IS the site's data)
+        #   dead  = reqId absent AND the listing was enumerated to its full total AND
+        #           total <= ENUM_MAX_TOTAL (beyond-2000 tails are capped/unreachable —
+        #           SUP-verified: absence there proves nothing) — recorded to dead_links
+        #           with http_code 'ats-closed' + closed_via
+        #   unknown = capped tenant (total > ENUM_MAX_TOTAL), lookup-prefix miss,
+        #             enumeration error, or unparsable URL — recorded to ats_watch only
+        # Dry-run 2026-08-15: 131/131 small tenants enumerated 0-fail; 1445 board rows alive;
+        # 9 authoritative closures on tenants fully enumerated below the 2000 cap — 6/6 sampled
+        # (autodesk/cigna/gdit/kbr/hp/utaustin) browser-verified "page doesn't exist" at the user
+        # surface, and a listing-alive control rendered the live job. The 2 bpinternational
+        # reqIds absent from a full enumeration also returned S22 on 3/3 detail probes.
         wd_re = re.compile(r'https://[a-z0-9-]+\.(?:wd\d*\.myworkdayjobs\.com|myworkdaysite\.com)/[^)\s"<\]]+')
-        def wd_variants(u):
-            m = re.match(r'(https://[^/]+)(/[^?#]*?)(?:[?#].*)?$', u)
-            if not m: return []
-            origin, path = m.groups()
-            seg = [s for s in path.split('/') if s]
-            if seg and re.match(r'^[a-z]{2}(-[A-Z]{2})?$', seg[0]): seg = seg[1:]
-            if len(seg) < 2: return []
-            tenant = origin.split('//')[1].split('.')[0]
-            site = seg[0]
-            out = [f"{origin}/wday/cxs/{tenant}/{site}/" + '/'.join(seg[1:])]
-            if len(seg) >= 3 and seg[1].lower() == site.lower():  # doubled-site tenants (wellsfargojobs shape)
-                out.append(f"{origin}/wday/cxs/{tenant}/{site}/" + '/'.join(seg[2:]))
-            return out
+        ash_re = re.compile(r'https://jobs\.ashbyhq\.com/([A-Za-z0-9_-]+)/([A-Za-z0-9-]+)')
 
         PROXY = "https://wd-fetch-proxy.wild-queen-069e.workers.dev"
         PROXY_TOKEN = os.environ.get('DATA_PROXY_TOKEN', '')
-        def ats_check(url):
+        PAGE = 20
+        ENUM_MAX_TOTAL = 1999   # full enumeration is authoritative ONLY below 2000: the CXS `total`
+                                # field itself caps at 2000 on big tenants (SUP-verified), and the
+                                # unreachable tail can still hold OPEN jobs pushed down by inflow —
+                                # absence there is NOT closure (same class AGG guards via carry-forward)
+        LOOKUP_PREFIX = 500     # capped tenants: enumerate only this many for positive membership
+
+        def wd_listing_post(key, offset):
+            """POST the tenant listing through wd-fetch-proxy. Returns (status, dict|None)."""
             import urllib.parse as _up
-            variants = wd_variants(url)
-            if not variants: return ('skip', 'no-variant')
-            def probe(v):
-                # returns 'alive' | 'closed' | None
+            origin, tenant, site = key
+            u = f"{origin}/wday/cxs/{tenant}/{site}/jobs"
+            try:
+                req = urllib.request.Request(f"{PROXY}/?url={_up.quote(u, safe='')}",
+                    method='POST',
+                    data=json.dumps({"appliedFacets": {}, "limit": PAGE, "offset": offset, "searchText": ""}).encode(),
+                    headers={'X-Proxy-Token': PROXY_TOKEN, 'User-Agent': 'Mozilla/5.0 (out-deadlink/2.0)',
+                             'Accept': 'application/json', 'Content-Type': 'application/json'})
                 try:
-                    req = urllib.request.Request(f"{PROXY}/?url={_up.quote(v, safe='')}",
-                        headers={'X-Proxy-Token': PROXY_TOKEN, 'User-Agent': 'out-deadlink/1.0'})
+                    with urllib.request.urlopen(req, timeout=20) as resp:
+                        return resp.status, json.loads(resp.read())
+                except urllib.error.HTTPError as e:
                     try:
-                        with urllib.request.urlopen(req, timeout=15) as resp:
-                            status, body = resp.status, resp.read()
-                    except urllib.error.HTTPError as e:
-                        status, body = e.code, e.read()
-                except Exception:
-                    return None  # network/proxy failure → unknown, never dead
-                try:
-                    d = json.loads(body)
-                except Exception:
-                    return None  # HTML SPA shell → unknown
-                if isinstance(d, dict) and d.get('jobPostingInfo'):
-                    return 'alive'
-                # Closure verdicts: S22 (= position no longer available) or hard 404/410.
-                # CAUTION (live-run 2026-08-14): under scan burst-load Workday ALSO serves
-                # error payloads (S22/406/404) for OPEN jobs — a first-pass 'closed' is
-                # only a CANDIDATE; final dead requires the post-settle re-verification
-                # below. Never trust a single in-flight verdict.
-                if isinstance(d, dict) and d.get('errorCode') == 'S22':
-                    return 'closed'
-                if status in (404, 410):
-                    return 'closed'
-                return None
-            closed_variant = None
-            for v in variants:
-                r = probe(v)
-                if r == 'alive':
-                    return ('alive', 'ok')
-                if r == 'closed' and closed_variant is None:
-                    closed_variant = v
-            if closed_variant is not None:
-                return ('candidate', closed_variant)
-            return ('unknown', 'html-or-unreachable')
-        wd_urls = {u for u in all_urls if wd_re.search(u)} if PROXY_TOKEN else set()
+                        return e.code, json.loads(e.read())
+                    except Exception:
+                        return e.code, None
+            except Exception:
+                return None, None
+
+        def wd_parse(u):
+            """Board URL → (origin, tenant, site, reqId) or None."""
+            m = re.match(r'(https://[^/]+)(/[^?#]*?)(?:[?#].*)?$', u)
+            if not m: return None
+            origin, path = m.groups()
+            if 'myworkdaysite.com' in origin: return None  # tenant not derivable from hostname (AGG needs explicitTenant too)
+            seg = [s for s in path.split('/') if s]
+            if seg and re.match(r'^[a-z]{2}(-[A-Z]{2})?$', seg[0]): seg = seg[1:]
+            if len(seg) < 2: return None
+            tenant = origin.split('//')[1].split('.')[0]
+            site = seg[0]
+            rest = seg[1:]
+            if rest and rest[0].lower() == site.lower(): rest = rest[1:]  # doubled-site (wellsfargojobs shape)
+            if not rest: return None
+            m2 = re.search(r'_([A-Za-z0-9-]+)$', rest[-1])
+            if not m2: return None
+            return (origin, tenant, site, m2.group(1))
+
         ats_watch = []
+        ats_stats = {"judged": 0, "alive": 0, "dead": 0, "unknown": 0}
+        ats_dead_pending = []  # [(url, closed_via, note)] — flipped to dead_links below the storm guard
+
+        wd_urls = sorted(u for u in all_urls if wd_re.search(u)) if PROXY_TOKEN else []
         if wd_urls:
-            print(f"\nATS availability pass (observability-only): {len(wd_urls)} Workday links")
-            with ThreadPoolExecutor(max_workers=8) as pool2:
-                ats_results = dict(zip(wd_urls, pool2.map(ats_check, sorted(wd_urls))))
-            from collections import Counter as _C
-            print(f"  ATS first-pass verdicts: {dict(_C(k for k, _ in ats_results.values()))}")
-            # OBSERVABILITY-ONLY (revised 2026-08-14 after live validation): per-job CXS
-            # verdicts through the proxy are NON-DETERMINISTIC — the same URL returns
-            # jobPostingInfo on one request and an S22/S21/404 error payload minutes later
-            # (verified live: 'confirmed-dead' CACI/Disney jobs probed ALIVE afterward; an
-            # 'alive'-classified CACI job returned S21; Cox served 406 error storms under
-            # burst load). Closure CANNOT be reliably judged per-job from this path, so
-            # closure candidates are recorded to ats_watch for trend analysis and are
-            # NEVER appended to dead_links. The reliable design (OUT-DEADLINK-ATSIGNATURE-1)
-            # is tenant job-LISTING membership: one paginated list request per tenant;
-            # reqId membership = authoritative open/closed.
-            candidates = sorted(u for u, (k, _) in ats_results.items() if k == 'candidate')
-            for u in candidates:
+            print(f"\nATS listing-membership pass: {len(wd_urls)} Workday links")
+            # key → {reqId → [urls]}; url → (key, reqId)
+            key_reqs = {}
+            url_key = {}
+            for u in wd_urls:
+                p = wd_parse(u)
+                if not p:
+                    ats_stats["unknown"] += 1
+                    for repo in all_urls[u]:
+                        ats_watch.append({"repo": repo, "url": u, "note": "unparsable-wd-url"})
+                    continue
+                key, reqid = (p[0], p[1], p[2]), p[3]
+                key_reqs.setdefault(key, {}).setdefault(reqid, []).append(u)
+                url_key[u] = (key, reqid)
+            print(f"  distinct tenants: {len(key_reqs)}")
+
+            def enumerate_key(key):
+                """→ (mode, ids|None, total) — mode 'full'|'prefix'|'error'."""
+                st, d = wd_listing_post(key, 0)
+                if st != 200 or not isinstance(d, dict):
+                    return ('error', None, f'http-{st}')
+                total = d.get('total') or 0
+                if total == 0:
+                    return ('error', None, 'site-empty')  # posting site gone/renamed — not proof per-job
+                ids = set()
+                def grab(page):
+                    for p in page.get('jobPostings') or []:
+                        m3 = re.search(r'_([A-Za-z0-9-]+)$', (p.get('externalPath') or '').split('/')[-1])
+                        if m3:
+                            rid = m3.group(1)
+                            ids.add(rid)
+                            ids.add(re.sub(r'-\d+$', '', rid))  # URL can carry a '-1' collision suffix the listing omits
+                grab(d)
+                limit = total if total <= ENUM_MAX_TOTAL else LOOKUP_PREFIX
+                offset = PAGE
+                misses = 0
+                while offset < limit + PAGE:  # +PAGE margin: survive inserts shifting the tail mid-enumeration
+                    st2, d2 = wd_listing_post(key, offset)
+                    if st2 != 200 or not isinstance(d2, dict) or not d2.get('jobPostings'):
+                        misses += 1
+                        if misses >= 2:
+                            if total <= ENUM_MAX_TOTAL:
+                                return ('error', None, f'partial-{total}')  # gap → absence NOT authoritative
+                            break  # prefix mode: keep what we have (positive membership still valid)
+                        time.sleep(2)
+                        continue
+                    misses = 0
+                    grab(d2)
+                    offset += PAGE
+                return ('full' if total <= ENUM_MAX_TOTAL else 'prefix', ids, total)
+
+            with ThreadPoolExecutor(max_workers=6) as pool2:
+                enum_results = dict(zip(sorted(key_reqs), pool2.map(enumerate_key, sorted(key_reqs))))
+
+            for key, (mode, ids, total) in enum_results.items():
+                for reqid, urls in sorted(key_reqs[key].items()):
+                    for u in urls:
+                        ats_stats["judged"] += 1
+                        for repo in all_urls[u]:
+                            if ids is not None and reqid in ids:
+                                ats_stats["alive"] += 1
+                            elif mode == 'full':
+                                ats_stats["dead"] += 1
+                                ats_dead_pending.append((u, 'wd-listing', f"absent from full listing (total={total})"))
+                            else:
+                                ats_stats["unknown"] += 1
+                                note = f"listing-error-{total}" if mode == 'error' else f"tenant-capped-or-partial (total={total})"
+                                ats_watch.append({"repo": repo, "url": u, "note": note})
+            print(f"  Workday verdicts: {ats_stats}")
+
+        # ── Ashby posting-API membership (same task; jobs.ashbyhq.com/{org}/{id}) ──
+        # GET https://api.ashbyhq.com/posting-api/job-board/{org} → {jobs:[{id,isListed,...}]}
+        # alive = id listed; dead = org board fetched OK but id absent or isListed=false;
+        # unknown on any fetch error (private/gated boards stay unknown).
+        ash_urls = sorted(u for u in all_urls if ash_re.search(u)) if PROXY_TOKEN else []
+        if ash_urls:
+            print(f"\nAshby posting-API pass: {len(ash_urls)} Ashby links")
+            org_jobs = {}
+            def ash_fetch(org):
+                try:
+                    req = urllib.request.Request(f"https://api.ashbyhq.com/posting-api/job-board/{org}",
+                        headers={'User-Agent': 'Mozilla/5.0 (out-deadlink/2.0)', 'Accept': 'application/json'})
+                    with urllib.request.urlopen(req, timeout=20) as resp:
+                        return org, resp.status, json.loads(resp.read())
+                except Exception as e:
+                    return org, None, str(e)[:60]
+            orgs = sorted({ash_re.search(u).group(1) for u in ash_urls})
+            with ThreadPoolExecutor(max_workers=4) as pool3:
+                for org, st, d in pool3.map(ash_fetch, orgs):
+                    org_jobs[org] = (st, d)
+            for u in ash_urls:
+                m4 = ash_re.search(u)
+                org, jid = m4.group(1), m4.group(2)
+                st, d = org_jobs.get(org, (None, None))
+                ats_stats["judged"] += 1
+                if st == 200 and isinstance(d, dict) and isinstance(d.get('jobs'), list):
+                    match = [j for j in d['jobs'] if str(j.get('id')) == jid or jid in str(j.get('jobUrl') or '')]
+                    if match and match[0].get('isListed') is not False:
+                        ats_stats["alive"] += 1
+                    else:
+                        ats_stats["dead"] += 1
+                        ats_dead_pending.append((u, 'ashby-posting-api', 'absent from org job board'))
+                else:
+                    ats_stats["unknown"] += 1
+                    for repo in all_urls[u]:
+                        ats_watch.append({"repo": repo, "url": u, "note": f"ashby-board-error-{st}"})
+            print(f"  Ashby+WD verdicts: {ats_stats}")
+
+        # Storm guard: a listing-side anomaly (proxy outage, WD behavior change) must not
+        # mass-close live jobs. If ATS deaths exceed 5% of judged rows (or 25, whichever
+        # is larger), keep them in ats_watch instead of dead_links.
+        storm_cap = max(25, int(ats_stats["judged"] * 0.05))
+        if len(ats_dead_pending) > storm_cap:
+            print(f"  ⚠️ ATS storm guard: {len(ats_dead_pending)} deaths > cap {storm_cap} — NOT flipping to dead_links")
+            for u, via, note in ats_dead_pending:
                 for repo in all_urls[u]:
-                    ats_watch.append({"repo": repo, "url": u, "note": "closure-candidate-unverified"})
-            print(f"  ATS closure candidates recorded to ats_watch (not counted dead): {len(candidates)}")
+                    ats_watch.append({"repo": repo, "url": u, "note": f"storm-guard-held ({via}, {note})"})
+        else:
+            for u, via, note in ats_dead_pending:
+                for repo in all_urls[u]:
+                    dead_links.append({"repo": repo, "url": u, "http_code": "ats-closed", "closed_via": via, "note": note})
+            print(f"  ATS-closed links flipped to dead_links: {len(ats_dead_pending)} urls")
+
 
         output = {
             "generated_at": now.isoformat(),
@@ -255,6 +370,7 @@ jobs:
             "total_checked": len(results),
             "total_dead": len(dead_links),
             "ats_watch": ats_watch,
+            "ats_stats": ats_stats,
             "total_transient": len(transient_links),
             "transient_links": transient_links
         }
@@ -276,11 +392,14 @@ jobs:
                 print(f"  ... and {len(transient_links) - 10} more transient")
 
         # Write step summary
-        summary = f"## Dead Link Check\n\n- **Checked:** {len(results)} URLs\n- **Dead:** {len(dead_links)} links\n- **Transient (not dead):** {len(transient_links)} links\n"
+        summary = (f"## Dead Link Check\n\n- **Checked:** {len(results)} URLs\n- **Dead:** {len(dead_links)} links\n"
+                   f"- **Transient (not dead):** {len(transient_links)} links\n"
+                   f"- **ATS listing verdicts:** {ats_stats['judged']} judged — {ats_stats['alive']} alive, "
+                   f"{ats_stats['dead']} ats-closed, {ats_stats['unknown']} unknown (capped/error → ats_watch)\n")
         with open(os.environ.get("GITHUB_STEP_SUMMARY", "/dev/null"), "a") as f:
             f.write(summary)
 
-        # Publish to Supabase Storage (R2 eliminated — bucket deleted 2026-07-29)
+        # Publish to Supabase Storage (dual-write; R2 below is canonical)
         try:
             _url = f"{os.environ.get('SUPABASE_URL', '')}/storage/v1/object/pipeline-data/dead-links.json"
             _req = urllib.request.Request(_url, method='PUT',
