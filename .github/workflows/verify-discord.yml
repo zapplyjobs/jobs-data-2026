@@ -56,10 +56,8 @@ jobs:
         with:
           node-version: '22'
           cache: 'npm'
-          cache-dependency-path: package-lock.json
+          cache-dependency-path: .github/scripts/processing/package-lock.json
 
-      - name: Install dependencies
-        run: npm install
 
       - name: Install processing submodule dependencies (verify-discord.js resolves discord.js there)
         run: cd .github/scripts/processing && npm install

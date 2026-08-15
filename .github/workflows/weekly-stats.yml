@@ -60,10 +60,10 @@ jobs:
         with:
           node-version: '22'
           cache: 'npm'
-          cache-dependency-path: package-lock.json
+          cache-dependency-path: .github/scripts/processing/package-lock.json
 
-      - name: Install dependencies
-        run: npm install
+      - name: Install processing submodule dependencies (INF-ROOTMANIFEST-DEAD-1 — weekly-summary requires discord.js; root install never provided it after the 08-15 manifest slim; latent Monday crash fixed)
+        run: cd .github/scripts/processing && npm install
 
       - name: Post weekly summary to Discord
         env:

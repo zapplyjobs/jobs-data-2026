@@ -60,10 +60,8 @@ jobs:
         with:
           node-version: '22'
           cache: 'npm'
-          cache-dependency-path: package-lock.json
+          cache-dependency-path: .github/scripts/processing/package-lock.json
 
-      - name: Install dependencies
-        run: npm ci
 
       - name: Install shared submodule dependencies (for R2 client)
         run: cd .github/scripts/shared && npm install && cd "$GITHUB_WORKSPACE"/.github/scripts/processing && npm install
