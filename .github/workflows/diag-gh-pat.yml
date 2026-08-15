@@ -7,8 +7,11 @@ jobs:
     steps:
       - run: |
           for ep in "repos/zapplyjobs/zjp-dashboard/contents/AGENTS.md" "repos/zapplyjobs/zjp-dashboard/commits/main" "repos/zapplyjobs/zjp-dashboard/commits/main/check-runs" "repos/zapplyjobs/jobs-data-2026/commits/main/check-runs"; do
-            code=$(gh api -o /dev/null -w '%{http_code}' "$ep" 2>/dev/null || echo ERR)
-            echo "$ep -> $code"
+            if out=$(gh api "$ep" 2>&1 >/dev/null); then
+              echo "$ep -> OK"
+            else
+              echo "$ep -> FAIL: $(echo "$out" | head -1)"
+            fi
           done
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
