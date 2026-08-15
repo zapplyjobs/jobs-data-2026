@@ -66,6 +66,8 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Install processing deps (INF-ROOTMANIFEST-DEAD-1 — r2-client needs @aws-sdk; this workflow silently relied on the removed root manifest)
+        run: cd .github/scripts/processing && npm install --no-audit --no-fund
 
       - name: Seed latest snapshot inputs from R2 (canonical object store)
         env:
