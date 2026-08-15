@@ -45,8 +45,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Install shared deps
-        run: cd .github/scripts/shared && npm install --no-audit --no-fund
+      - name: Install processing deps (INF-ROOTMANIFEST-DEAD-1 — shared has no package.json — the old shared install silently ran against the root manifest, which is now removed)
+        run: cd .github/scripts/processing && npm install --no-audit --no-fund
       - name: Run source coverage audit
         env:
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
