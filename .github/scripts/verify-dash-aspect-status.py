@@ -101,8 +101,12 @@ def c_infrastructure():
         edge = e.code  # 3xx/4xx from CF Access = edge alive
     except Exception:
         edge = None
+    if runs is None:
+        # Credential invisibility (PAT repo list) is NOT a deploy failure — RED here would
+        # page Discord via check-40 for a non-incident. YELLOW carries the operator ask.
+        return "YELLOW", f"check-runs unreadable ({GH_LAST_ERR[0] or 'unknown'}) — GH_PAT cannot see zjp-dashboard; add the repo to the PAT access list (INF-GHPAT-ZJPDASH-SCOPE-1); edge {edge}", "gh-api:check-runs + edge probe"
     if deploy != "success":
-        return "RED", f"Workers Builds {deploy or 'unknown'} on main HEAD ({GH_LAST_ERR[0] or 'no check-runs'}); edge {edge}", "gh-api:check-runs + edge probe"
+        return "RED", f"Workers Builds {deploy or 'unknown'} on main HEAD; edge {edge}", "gh-api:check-runs + edge probe"
     if edge is None or edge >= 500:
         return "RED", f"Workers Builds success but edge unreachable ({edge})", "gh-api:check-runs + edge probe"
     return "GREEN", f"Workers Builds success on main HEAD; edge HTTP {edge}", "gh-api:check-runs + edge probe"
