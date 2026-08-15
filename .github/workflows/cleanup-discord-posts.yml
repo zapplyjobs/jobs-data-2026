@@ -87,6 +87,9 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Install processing submodule dependencies (executed scripts resolve discord.js/supabase there)
+        run: cd .github/scripts/processing && npm install
+
       - name: Run Discord cleanup
         env:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TEAM_TOKEN }}
