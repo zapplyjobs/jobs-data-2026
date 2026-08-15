@@ -23,22 +23,28 @@ DASH_URL = "https://dash.zapply.jobs"
 PROXY = "https://zjp-data-proxy.wild-queen-069e.workers.dev/data"
 
 
+GH_LAST_ERR = [None]
+
+
 def gh_json(args, attempts=3):
     for a in range(attempts):
         try:
             result = subprocess.run(["gh"] + args, capture_output=True, text=True, timeout=30)
             if result.returncode == 0 and result.stdout.strip():
+                GH_LAST_ERR[0] = None
                 return json.loads(result.stdout)
-            if a < attempts:
+            GH_LAST_ERR[0] = (result.stderr or result.stdout or "empty output").strip().splitlines()[0][:160]
+            if a < attempts - 1:
                 time.sleep(2)
-        except Exception:
+        except Exception as e:
+            GH_LAST_ERR[0] = str(e)[:160]
             if a < attempts - 1:
                 time.sleep(2)
     return None
 
 
 def head_check_runs():
-    """check-runs for the HEAD commit of zjp-dashboard main: {name: conclusion}."""
+    """check-runs for the HEAD commit of zjp-dashboard main: {name: run}."""
     data = gh_json(["api", f"repos/{DASH_REPO}/commits/main/check-runs",
                     "--jq", "{runs: [.check_runs[] | {name: .name, conclusion: .conclusion, status: .status}]}"])
     if not data or "runs" not in data:
@@ -71,7 +77,7 @@ def fetch_api_data():
 def c_verification():
     runs = head_check_runs()
     if runs is None:
-        return "YELLOW", "gh-api check-runs unreadable (rate limit?)", "gh-api:check-runs"
+        return "YELLOW", f"gh-api check-runs unreadable: {GH_LAST_ERR[0] or 'unknown error'}", "gh-api:check-runs"
     v = runs.get("verify")
     if not v:
         return "YELLOW", "no 'verify' check on main HEAD", "gh-api:check-runs"
@@ -96,7 +102,7 @@ def c_infrastructure():
     except Exception:
         edge = None
     if deploy != "success":
-        return "RED", f"Workers Builds {deploy or 'unknown'} on main HEAD; edge {edge}", "gh-api:check-runs + edge probe"
+        return "RED", f"Workers Builds {deploy or 'unknown'} on main HEAD ({GH_LAST_ERR[0] or 'no check-runs'}); edge {edge}", "gh-api:check-runs + edge probe"
     if edge is None or edge >= 500:
         return "RED", f"Workers Builds success but edge unreachable ({edge})", "gh-api:check-runs + edge probe"
     return "GREEN", f"Workers Builds success on main HEAD; edge HTTP {edge}", "gh-api:check-runs + edge probe"
