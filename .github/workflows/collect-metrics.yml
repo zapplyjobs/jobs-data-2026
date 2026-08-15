@@ -61,6 +61,7 @@ jobs:
         run: cd .github/scripts/shared && npm install && cd "$GITHUB_WORKSPACE"/.github/scripts/processing && npm install
 
       - name: Download data from R2
+        id: r2fetch
         continue-on-error: true
         run: |
           echo "📥 Downloading pipeline data from R2..."
@@ -85,6 +86,18 @@ jobs:
               } catch (e) { console.error('R2 ERR: ' + file + ' - ' + e.message); }
             }
             console.log('R2 download complete');
+            // R2 freshness gate (INF-ZJP-SYSTEM-REDESIGN-1 slice B, 2026-08-15): pipeline-stop detector.
+            // Fail closed. Alert mapping: pipeline-stop class is alarmed by check-25 (zjp-metrics staleness).
+            const setOut = v => fs.appendFileSync(process.env.GITHUB_OUTPUT, 'pipeline_fresh=' + v + '\n');
+            try {
+              const m = await r2.head('all_jobs.json');
+              const ageMin = m && m.lastModified ? (Date.now() - new Date(m.lastModified).getTime())/60000 : NaN;
+              if (!Number.isFinite(ageMin) || ageMin > 45) {
+                console.log('::warning::FRESHNESS GATE SKIP: all_jobs.json age=' + (Number.isFinite(ageMin)?Math.round(ageMin):'?') + 'min (limit 45) — pipeline stopped; skipping stale-data processing');
+                setOut('false');
+              } else { console.log('FRESHNESS GATE PASS: all_jobs.json ' + Math.round(ageMin) + 'min old'); setOut('true'); }
+            } catch(e) { console.log('::warning::FRESHNESS GATE SKIP: heartbeat check failed — ' + e.message); setOut('false'); }
+
           }
           main().catch(e => { console.error('R2 fatal: ' + e.message); process.exit(1); });
           "
@@ -111,11 +124,13 @@ jobs:
           console.log('bridge-metrics-history.jsonl appended (bridge_run_at='+cur.bridge_run_at+')');
           "
       - name: Collect metrics
+        if: success() && steps.r2fetch.outputs.pipeline_fresh == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node .github/scripts/processing/lib/collect-metrics.js
 
       - name: Generate consolidated metrics
+        if: success() && steps.r2fetch.outputs.pipeline_fresh == 'true'
         continue-on-error: true  # INF-METRICS-SILENT-CLEANUP-1: generate-zjp-metrics now exits non-zero on fatal (was swallowed → exit 0 → silent stale dashboard). continue-on-error keeps a failure visible (red step) without aborting sjd-jobs/canada-bridge commit; check-25 (r2-freshness) is the staleness backstop.
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
@@ -130,6 +145,7 @@ jobs:
         run: node .github/scripts/processing/lib/generate-zjp-metrics.js
 
       - name: Produce sjd-jobs.json (INF-SJD-PAGINATION-1)
+        if: success() && steps.r2fetch.outputs.pipeline_fresh == 'true'
         continue-on-error: true  # Non-critical: sjd-jobs.json is a cache; don't break collect-metrics if the Supabase query times out
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -139,6 +155,7 @@ jobs:
           node scripts/upload-dashboard-data-to-r2.js sjd-jobs.json
 
       - name: Commit and push metrics
+        if: success() && steps.r2fetch.outputs.pipeline_fresh == 'true'
         run: |
           git config user.email "bot@zapplyjobs.com"
           git config user.name "Metrics Bot"

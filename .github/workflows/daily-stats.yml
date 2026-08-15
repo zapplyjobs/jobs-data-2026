@@ -60,6 +60,7 @@ jobs:
         run: cd .github/scripts/shared && npm install && cd "$GITHUB_WORKSPACE"/.github/scripts/processing && npm install
 
       - name: Download data from R2
+        id: r2fetch
         if: success()
         continue-on-error: true
         run: |
@@ -87,6 +88,18 @@ jobs:
               } catch (e) { console.error('R2 download ERR: ' + file + ' - ' + e.message); }
             }
             console.log('R2 download complete');
+            // R2 freshness gate (INF-ZJP-SYSTEM-REDESIGN-1 slice B, 2026-08-15): pipeline-stop detector.
+            // Fail closed. Alert mapping: pipeline-stop class is alarmed by check-25 (zjp-metrics staleness).
+            const setOut = v => fs.appendFileSync(process.env.GITHUB_OUTPUT, 'pipeline_fresh=' + v + '\n');
+            try {
+              const m = await r2.head('all_jobs.json');
+              const ageMin = m && m.lastModified ? (Date.now() - new Date(m.lastModified).getTime())/60000 : NaN;
+              if (!Number.isFinite(ageMin) || ageMin > 120) {
+                console.log('::warning::FRESHNESS GATE SKIP: all_jobs.json age=' + (Number.isFinite(ageMin)?Math.round(ageMin):'?') + 'min (limit 120) — pipeline stopped; skipping stale-data processing');
+                setOut('false');
+              } else { console.log('FRESHNESS GATE PASS: all_jobs.json ' + Math.round(ageMin) + 'min old'); setOut('true'); }
+            } catch(e) { console.log('::warning::FRESHNESS GATE SKIP: heartbeat check failed — ' + e.message); setOut('false'); }
+
           }
           main().catch(e => { console.error('R2 fatal: ' + e.message); process.exit(1); });
           "
@@ -99,6 +112,7 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
       - name: Post daily stats to Discord
+        if: success() && steps.r2fetch.outputs.pipeline_fresh == 'true'
         env:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TEAM_TOKEN }}
           DISCORD_DAILY_STATS_CHANNEL_ID: ${{ secrets.DISCORD_DAILY_STATS_CHANNEL_ID }}
@@ -106,6 +120,7 @@ jobs:
         run: node .github/scripts/processing/lib/daily-stats.js
 
       - name: Commit updated stats file
+        if: success() && steps.r2fetch.outputs.pipeline_fresh == 'true'
         continue-on-error: true
         run: |
           git config user.email "bot@zapplyjobs.com"

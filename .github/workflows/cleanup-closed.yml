@@ -62,6 +62,7 @@ jobs:
           cd .github/scripts/shared && npm install && cd "$GITHUB_WORKSPACE"/.github/scripts/processing && npm install
 
       - name: Download all_jobs.json from R2
+        id: r2fetch
         if: success()
         continue-on-error: true
         run: |
@@ -80,9 +81,42 @@ jobs:
             if (raw) {
               fs.writeFileSync(path.join(dataDir, 'all_jobs.json'), Buffer.from(raw));
               console.log('R2 download OK: all_jobs.json');
-            } else {
+              // R2 freshness gate (INF-ZJP-SYSTEM-REDESIGN-1 slice B, 2026-08-15): NEVER delete posts based on stale data
+            // (a stale all_jobs makes live jobs look closed → mass false deletion). Fail closed. Alert: check-25.
+            const setOut = v => fs.appendFileSync(process.env.GITHUB_OUTPUT, 'pipeline_fresh=' + v + '\n');
+            try {
+              const m = await r2.head('all_jobs.json');
+              const ageMin = m && m.lastModified ? (Date.now() - new Date(m.lastModified).getTime())/60000 : NaN;
+              if (!Number.isFinite(ageMin) || ageMin > 120) {
+                console.log('::warning::FRESHNESS GATE SKIP: all_jobs.json age=' + (Number.isFinite(ageMin)?Math.round(ageMin):'?') + 'min (limit 120) — pipeline stopped; NOT cleaning (stale data would delete live posts)');
+                setOut('false');
+              } else { console.log('FRESHNESS GATE PASS: all_jobs.json ' + Math.round(ageMin) + 'min old'); setOut('true'); }
+            } catch(e) { console.log('::warning::FRESHNESS GATE SKIP: heartbeat check failed — ' + e.message); setOut('false'); }
+          } else {
               console.log('R2 SKIP: all_jobs.json not found — will use git version');
-            }
+              // R2 freshness gate (INF-ZJP-SYSTEM-REDESIGN-1 slice B, 2026-08-15): NEVER delete posts based on stale data
+            // (a stale all_jobs makes live jobs look closed → mass false deletion). Fail closed. Alert: check-25.
+            const setOut = v => fs.appendFileSync(process.env.GITHUB_OUTPUT, 'pipeline_fresh=' + v + '\n');
+            try {
+              const m = await r2.head('all_jobs.json');
+              const ageMin = m && m.lastModified ? (Date.now() - new Date(m.lastModified).getTime())/60000 : NaN;
+              if (!Number.isFinite(ageMin) || ageMin > 120) {
+                console.log('::warning::FRESHNESS GATE SKIP: all_jobs.json age=' + (Number.isFinite(ageMin)?Math.round(ageMin):'?') + 'min (limit 120) — pipeline stopped; NOT cleaning (stale data would delete live posts)');
+                setOut('false');
+              } else { console.log('FRESHNESS GATE PASS: all_jobs.json ' + Math.round(ageMin) + 'min old'); setOut('true'); }
+            } catch(e) { console.log('::warning::FRESHNESS GATE SKIP: heartbeat check failed — ' + e.message); setOut('false'); }
+          }
+            // R2 freshness gate (INF-ZJP-SYSTEM-REDESIGN-1 slice B, 2026-08-15): NEVER delete posts based on stale data
+            // (a stale all_jobs makes live jobs look closed → mass false deletion). Fail closed. Alert: check-25.
+            const setOut = v => fs.appendFileSync(process.env.GITHUB_OUTPUT, 'pipeline_fresh=' + v + '\n');
+            try {
+              const m = await r2.head('all_jobs.json');
+              const ageMin = m && m.lastModified ? (Date.now() - new Date(m.lastModified).getTime())/60000 : NaN;
+              if (!Number.isFinite(ageMin) || ageMin > 120) {
+                console.log('::warning::FRESHNESS GATE SKIP: all_jobs.json age=' + (Number.isFinite(ageMin)?Math.round(ageMin):'?') + 'min (limit 120) — pipeline stopped; NOT cleaning (stale data would delete live posts)');
+                setOut('false');
+              } else { console.log('FRESHNESS GATE PASS: all_jobs.json ' + Math.round(ageMin) + 'min old'); setOut('true'); }
+            } catch(e) { console.log('::warning::FRESHNESS GATE SKIP: heartbeat check failed — ' + e.message); setOut('false'); }
           }
           main().catch(e => { console.error('R2 fatal: ' + e.message); process.exit(1); });
           "
@@ -95,6 +129,7 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
       - name: Run closed-job cleanup
+        if: success() && steps.r2fetch.outputs.pipeline_fresh == 'true'
         run: node .github/scripts/cleanup-closed-jobs.js
 
       - name: Upload cleaned all_jobs.json to R2
