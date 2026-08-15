@@ -1,0 +1,14 @@
+name: Diag GH PAT endpoints (temp)
+on: workflow_dispatch
+permissions: { contents: read }
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          for ep in "repos/zapplyjobs/zjp-dashboard/contents/AGENTS.md" "repos/zapplyjobs/zjp-dashboard/commits/main" "repos/zapplyjobs/zjp-dashboard/commits/main/check-runs" "repos/zapplyjobs/jobs-data-2026/commits/main/check-runs"; do
+            code=$(gh api -o /dev/null -w '%{http_code}' "$ep" 2>/dev/null || echo ERR)
+            echo "$ep -> $code"
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
