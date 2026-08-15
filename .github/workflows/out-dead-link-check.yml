@@ -297,16 +297,18 @@ jobs:
             for key, (mode, ids, total) in enum_results.items():
                 for reqid, urls in sorted(key_reqs[key].items()):
                     for u in urls:
+                        # stats are per-URL (one verdict per unique board URL); dead_links rows
+                        # expand to per-repo later — the pending list carries each URL ONCE.
                         ats_stats["judged"] += 1
-                        for repo in all_urls[u]:
-                            if ids is not None and reqid in ids:
-                                ats_stats["alive"] += 1
-                            elif mode == 'full':
-                                ats_stats["dead"] += 1
-                                ats_dead_pending.append((u, 'wd-listing', f"absent from full listing (total={total})"))
-                            else:
-                                ats_stats["unknown"] += 1
-                                note = f"listing-error-{total}" if mode == 'error' else f"tenant-capped-or-partial (total={total})"
+                        if ids is not None and reqid in ids:
+                            ats_stats["alive"] += 1
+                        elif mode == 'full':
+                            ats_stats["dead"] += 1
+                            ats_dead_pending.append((u, 'wd-listing', f"absent from full listing (total={total})"))
+                        else:
+                            ats_stats["unknown"] += 1
+                            note = f"wd-{total}" if mode == 'error' else f"wd-capped-or-partial (total={total})"
+                            for repo in all_urls[u]:
                                 ats_watch.append({"repo": repo, "url": u, "note": note})
             print(f"  Workday verdicts: {ats_stats}")
 
