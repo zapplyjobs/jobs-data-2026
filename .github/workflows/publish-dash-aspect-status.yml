@@ -1,0 +1,79 @@
+name: DASH Aspect Status (verified)
+# Publishes DASH's own aspect-status as MACHINE-VERIFIED objective checks —
+# closing the "who watches the watchman" gap (the dashboard displays every
+# module's health but previously had no row of its own; check-43 is
+# availability-only and blind to false-healthy payloads / stale deploys).
+# Non-circular: this runs OUTSIDE the dashboard and probes it via gh-api +
+# the CF Access service token.
+# Mirrors publish-sup-aspect-status.yml (R2 canonical + Storage dual-write
+# so /api/aspect's Storage fallback serves the row before the proxy
+# whitelist deploy).
+on:
+  schedule:
+    - cron: '0 * * * *'  # hourly — script is API calls, negligible cost
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/scripts/verify-dash-aspect-status.py'
+      - '.github/workflows/publish-dash-aspect-status.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Run verifier
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+          DATA_PROXY_TOKEN: ${{ secrets.DATA_PROXY_TOKEN }}
+          DASH_ACCESS_CLIENT_ID: ${{ secrets.DASH_ACCESS_CLIENT_ID }}
+          DASH_ACCESS_CLIENT_SECRET: ${{ secrets.DASH_ACCESS_CLIENT_SECRET }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: |
+          pip install -q boto3
+          python3 .github/scripts/verify-dash-aspect-status.py --publish > dash-aspect-status.json
+          python3 - <<'PY'
+          import json, os
+          d = json.load(open('dash-aspect-status.json'))
+          counts = {}
+          lines = [f"## DASH Aspect Status (verified)\n\ngenerated {d['generated_at'][:19]}\n"]
+          for k, v in d['aspects'].items():
+              counts[v['status']] = counts.get(v['status'], 0) + 1
+              lines.append(f"- **{k}**: {v['status']} — {v['evidence']}")
+          lines.append(f"\n**Summary: {counts}**")
+          summary = "\n".join(lines) + "\n"
+          print(summary)
+          gss = os.environ.get('GITHUB_STEP_SUMMARY')
+          if gss:
+              open(gss, 'a').write(summary)
+          PY
+
+      - name: Upload to Supabase Storage
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          curl -sf -X PUT "${SUPABASE_URL}/storage/v1/object/pipeline-data/dash-aspect-status.json" \
+            -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
+            -H "Content-Type: application/json" \
+            --data-binary @dash-aspect-status.json \
+            && echo "uploaded dash-aspect-status.json to Storage" \
+            || echo "Storage upload failed (non-blocking)"
