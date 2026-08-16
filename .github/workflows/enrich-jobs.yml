@@ -15,7 +15,7 @@ concurrency:
 jobs:
   enrich:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20  # ENR-SIDECAR-MARKER-RACE-1: headroom for wait(≤7m)+repair(≤3m+re-download); normal path unchanged (~4-5m)
     permissions:
       contents: write
 
@@ -66,11 +66,21 @@ jobs:
       - name: Install shared submodule dependencies (for R2 client)
         run: cd "$GITHUB_WORKSPACE"/.github/scripts/processing && npm install
 
-      - name: Wait for stable AGG sidecar generations (ENR-SIDECAR-MARKER-READ-1)
+      - name: Acquire stable AGG sidecar snapshot (ENR-SIDECAR-MARKER-RACE-1)
+        # Merged wait+download+verify with ONE bounded repair attempt.
+        # Why: AGG desc-backfill dual-trigger (~2-5m cadence, 1-2m runs) and fetch-jobs
+        # (10m cadence, ~7m runs) flip markers mid-download often enough that the old
+        # fail-at-first-flip guard killed ~1/3 of runs (2026-08-16: 10/30). Safety property
+        # is UNCHANGED: we proceed only when a FULL download window sat inside one completed,
+        # unchanged generation (same run_ids before and after). A flip now triggers
+        # wait-for-complete + full re-download + re-verify instead of failing the run.
+        # Naive tolerate-without-re-download was rejected: the local set stays torn
+        # (desc-backfill renumbers/deletes chunks mid-run; mixed generations can drop entries).
         run: |
           mkdir -p .github/data
           node <<'EOF'
           const fs = require('fs');
+          const path = require('path');
           const { createR2Client } = require('./.github/scripts/processing/lib/storage/r2-client');
           const NAMES = ['desc-backfill-complete.json', 'fetch-jobs-sidecar-complete.json'];
           const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -85,53 +95,27 @@ jobs:
             }
             return markers;
           }
-          async function main() {
-            const r2 = createR2Client({ prefix: 'data/' });
-            for (let attempt = 1; attempt <= 8; attempt++) {
+          async function waitForComplete(r2, capMinutes, attempt) {
+            const deadline = Date.now() + capMinutes * 60 * 1000;
+            let poll = 0;
+            while (Date.now() < deadline) {
               const markers = await readMarkers(r2);
-              const active = Object.entries(markers).filter(([, marker]) => marker.status === 'in_progress');
-              const failed = Object.entries(markers).filter(([, marker]) => marker.status === 'failed');
+              const active = Object.entries(markers).filter(([, m]) => m.status === 'in_progress');
+              const failed = Object.entries(markers).filter(([, m]) => m.status === 'failed');
               if (failed.length > 0) {
-                throw new Error(`AGG sidecar generation failed; refusing mixed snapshot (${failed.map(([name]) => name).join(', ')})`);
+                throw new Error(`AGG sidecar generation failed; refusing mixed snapshot (${failed.map(([n]) => n).join(', ')})`);
               }
-              if (active.length === 0) {
-                fs.writeFileSync('.github/data/.sidecar-markers-before.json', JSON.stringify(markers));
-                for (const [name, marker] of Object.entries(markers)) {
-                  console.log(`Marker ${name}: ${marker.status}${marker.run_id ? ` (${marker.run_id})` : ' (legacy generation)'}`);
-                }
-                return;
-              }
-              console.log(`AGG sidecar write in progress (${active.map(([name]) => name).join(', ')}); waiting 30s (${attempt}/8)`);
+              if (active.length === 0) return markers;
+              poll++;
+              console.log(`AGG sidecar write in progress (${active.map(([n]) => n).join(', ')}); waiting 30s (poll ${poll}, cap ${capMinutes}m, attempt ${attempt})`);
               await sleep(30000);
             }
-            throw new Error('AGG sidecar marker remained in_progress for 4 minutes');
+            throw new Error(`AGG sidecar markers still in_progress after ${capMinutes} minutes (attempt ${attempt})`);
           }
-          main().catch(err => { console.error(err.message); process.exit(1); });
-          EOF
-        env:
-          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
-          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
-
-      - name: Download data from R2
-        if: success()
-        continue-on-error: true
-        run: |
-          echo "📥 Downloading pipeline data from R2..."
-          node -e "
-          const { createR2Client } = require('./.github/scripts/processing/lib/storage/r2-client');
-          const fs = require('fs');
-          const path = require('path');
-
-          async function main() {
-            const r2 = createR2Client({ prefix: 'data/' });
+          async function downloadAll(r2) {
             const dataDir = '.github/data';
             if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-
-            // Download core data files (enriched_jobs.json: INF-BLOAT-5 left it git-tracked but stale;
-            // must download from R2 to get fresh version instead of May 14 git snapshot)
-            // jobs-metadata.json: DASH-METRICS-1 — dashboard reads from git, must download fresh from R2
+            // Core data files (enriched_jobs.json: INF-BLOAT-5 git copy is stale; jobs-metadata.json: DASH-METRICS-1)
             const coreFiles = ['all_jobs.json', 'us_jobs.json', 'processed_ids.json', 'enriched_jobs.json', 'jobs-metadata.json', 'enrichment-history.jsonl', 'lca-sponsors.json', 'zjp-metrics.json'];
             for (const file of coreFiles) {
               try {
@@ -144,8 +128,6 @@ jobs:
                 }
               } catch (e) { console.error('R2 download ERR: ' + file + ' - ' + e.message); }
             }
-
-            // Download description sidecars
             const keys = await r2.list('descriptions-');
             const jsonlKeys = (keys || []).filter(k => k.key.endsWith('.jsonl'));
             for (const obj of jsonlKeys) {
@@ -160,35 +142,46 @@ jobs:
             }
             console.log('R2 download complete');
           }
-          main().catch(e => { console.error('R2 fatal: ' + e.message); process.exit(1); });
-          "
-        env:
-          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
-          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-      - name: Verify sidecar generations stayed stable (ENR-SIDECAR-MARKER-READ-1)
-        run: |
-          node <<'EOF'
-          const fs = require('fs');
-          const { createR2Client } = require('./.github/scripts/processing/lib/storage/r2-client');
-          const NAMES = ['desc-backfill-complete.json', 'fetch-jobs-sidecar-complete.json'];
-          async function main() {
-            const before = JSON.parse(fs.readFileSync('.github/data/.sidecar-markers-before.json', 'utf8'));
-            const r2 = createR2Client({ prefix: 'data/' });
-            const afterValues = await Promise.all(NAMES.map(name => r2.downloadJson(name)));
-            const after = Object.fromEntries(NAMES.map((name, i) => [name, afterValues[i] || null]));
+          function diffGenerations(before, after) {
             const changed = [];
             for (const name of NAMES) {
               const prior = before[name];
               const current = after[name];
-              if (!current || current.status !== 'complete') changed.push(`${name}: final status=${current?.status || 'missing'}`);
-              if ((prior?.run_id || null) !== (current?.run_id || null)) changed.push(`${name}: ${prior?.run_id || 'legacy/missing'} -> ${current?.run_id || 'legacy/missing'}`);
+              if (!current || current.status !== 'complete') changed.push(`${name}: status=${current?.status || 'missing'}`);
+              if ((prior?.run_id || null) !== (current?.run_id || null)) changed.push(`${name}: run_id ${prior?.run_id || 'legacy/missing'} -> ${current?.run_id || 'legacy/missing'}`);
             }
-            if (changed.length > 0) throw new Error(`AGG sidecar generation changed during R2 download; retry next cycle (${changed.join('; ')})`);
-            console.log('AGG sidecar generations stable across R2 download');
+            return changed;
+          }
+          async function main() {
+            const r2 = createR2Client({ prefix: 'data/' });
+            // Attempt 1 waits up to 7m: fetch-jobs holds in_progress ~7m of its 10m cycle,
+            // so a 4m cap fails runs when no simultaneous-complete instant exists in the
+            // window. Repair attempt waits 3m — covers desc-backfill's 1-2m runs.
+            const ATTEMPTS = [{ waitCapMin: 7 }, { waitCapMin: 3 }];
+            for (let i = 0; i < ATTEMPTS.length; i++) {
+              const attempt = i + 1;
+              const markers = await waitForComplete(r2, ATTEMPTS[i].waitCapMin, attempt);
+              const before = Object.fromEntries(NAMES.map(name => [name, { status: markers[name].status, run_id: markers[name].run_id || null }]));
+              for (const [name, marker] of Object.entries(markers)) {
+                console.log(`Marker ${name}: ${marker.status}${marker.run_id ? ` (${marker.run_id})` : ' (legacy generation)'}`);
+              }
+              try {
+                await downloadAll(r2);
+              } catch (e) {
+                // Non-fatal — matches the old continue-on-error download step (git fallback).
+                console.error('R2 download fatal (non-fatal for run): ' + e.message);
+              }
+              const after = await readMarkers(r2);
+              const changed = diffGenerations(before, after);
+              if (changed.length === 0) {
+                fs.writeFileSync('.github/data/.sidecar-markers-before.json', JSON.stringify(after));
+                console.log(`AGG sidecar generations stable across R2 download (attempt ${attempt})`);
+                return;
+              }
+              console.log(`AGG sidecar generation changed during R2 download (attempt ${attempt}): ${changed.join('; ')}`);
+              if (attempt < ATTEMPTS.length) console.log('Tolerating flip: waiting for the new generation to complete, then re-downloading (ENR-SIDECAR-MARKER-RACE-1)');
+            }
+            throw new Error('AGG sidecar generation changed during every download attempt; failing closed (mixed-snapshot guard intact)');
           }
           main().catch(err => { console.error(err.message); process.exit(1); });
           EOF
@@ -197,6 +190,8 @@ jobs:
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
 
       - name: Fetch Google+Apple detail pages
