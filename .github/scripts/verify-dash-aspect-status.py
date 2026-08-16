@@ -256,7 +256,7 @@ def dependabot_state():
     token when present. Pure classification lives in classify_dependabot; this
     does the I/O."""
     data = gh_json(["api", f"repos/{DASH_REPO}/dependabot/alerts?state=open",
-                    "--jq", "[.[] | {.severity: .security_advisory.severity, .html_url: .html_url}]"],
+                    "--jq", "[.[] | {severity: .security_advisory.severity, url: .html_url}]"],
                    token_env="DASH_REPO_TOKEN")
     if data is None:
         err = (GH_LAST_ERR[0] or "unreadable")
@@ -398,9 +398,6 @@ if __name__ == "__main__":
     do_publish = "--publish" in sys.argv
     result = verify()
     data_str = json.dumps(result, indent=2)
-    sys.stdout.write(data_str + "\n")
-
-    counts = {}
     for k, v in result["aspects"].items():
         counts[v["status"]] = counts.get(v["status"], 0) + 1
     print(f"\nDASH Aspect Status Summary: {counts}", file=sys.stderr)
