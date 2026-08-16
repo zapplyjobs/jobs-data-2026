@@ -226,7 +226,8 @@ def c_infrastructure():
     if edge is None or edge >= 500:
         return "RED", f"edge unreachable ({edge})", "edge probe + dash:/build-info.json"
     info = fetch_build_info()
-    head = head_sha()
+    run = head_ci_run()
+    head = (run or {}).get("head_sha") or head_sha()  # Actions run sha needs no Contents permission
     band = classify_deploy_match((info or {}).get("sha"), head)
     if band == "current":
         return "GREEN", f"serving HEAD {str(head)[:8]}; edge HTTP {edge}", "edge probe + dash:/build-info.json + gh-api:contents"
@@ -238,7 +239,7 @@ def c_infrastructure():
     if runs is not None and wb is not None:
         status, summary = classify_check(wb, "Workers Builds")
         return status, f"{summary}; edge {edge}", "gh-api:check-runs + edge probe"
-    return "YELLOW", f"deploy state unreadable (build-info {'absent' if info is None else 'malformed'}, head {'unreadable' if head is None else 'ok'}; check-runs need a classic PAT) — edge {edge}", "edge probe + dash:/build-info.json + gh-api:contents"
+    return "YELLOW", f"deploy state unreadable (build-info {'absent' if info is None else 'carries no sha'}; HEAD sha unreadable via Actions+Contents) — edge {edge}", "edge probe + dash:/build-info.json + gh-api:actions-runs"
 
 
 def proxy_json(path):
