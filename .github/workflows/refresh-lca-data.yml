@@ -27,6 +27,12 @@ jobs:
         uses: actions/checkout@v5
         with:
           fetch-depth: 1
+          submodules: recursive
+          token: ${{ secrets.GH_PAT }}
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -43,16 +49,17 @@ jobs:
             --window ${{ inputs.window }} \
             --output lca-sponsors.json
 
-      - name: Upload to Supabase Storage
+      - name: Install processing deps (uploader requires processing r2-client -> @aws-sdk; no root manifest exists to satisfy it via upward resolution)
+        run: cd .github/scripts/processing && npm install --no-audit --no-fund
+      - name: "Upload lca-sponsors.json (R2 canonical + Storage dual-write — INF-R2-STALERELIC-CLUSTER-1: the consumer enrich-jobs reads data/lca-sponsors.json from R2; the old Storage-only curl left R2 frozen at the Aug-4 bucket seed)"
         run: |
-          curl -sf -X PUT \
-            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
-            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
-            -H "Content-Type: application/json" \
-            --data-binary @lca-sponsors.json \
-            "$SUPABASE_URL/storage/v1/object/pipeline-data/lca-sponsors.json" \
-            && echo "=== Uploaded lca-sponsors.json to Storage ===" \
-            || { echo "⚠️ Storage upload failed"; exit 1; }
+          mkdir -p .github/data
+          cp lca-sponsors.json .github/data/lca-sponsors.json
+          node scripts/upload-dashboard-data-to-r2.js lca-sponsors.json
         env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
