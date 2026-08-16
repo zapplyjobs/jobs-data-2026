@@ -87,7 +87,8 @@ jobs:
             if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
             const files = ['all_jobs.json', 'us_jobs.json', 'enriched_jobs.json', 'enrichment-stats.json', 'desc-fetch-failures.json', 'jobs-metadata.json', 'zjp-metrics.json', 'metrics/latest.json', 'supplemental-custom-jobs.json', 'supplemental-custom-metadata.json', 'supplemental-oracle-jobs.json', 'supplemental-oracle-metadata.json', 'pipeline-alert.json', 'pipeline-alert-history.jsonl'];  // INF-ALERT-HISTORY-PUBLISH-1: +pipeline-alert-history.jsonl (download for append)
             files.push('inf-aspect-status.json', 'agg-aspect-status.json', 'tag-aspect-status.json', 'enr-aspect-status.json', 'sup-aspect-status.json', 'out-aspect-status.json');  // INF-ASPECT-ALARM-GAPS-1: check 40 consumes per-module aspect-status (RED alarm)
-            files.push('enr-quality-signal.json');  // ENR-FIELDACCURACY-CHECK-1: check 44 consumes the extraction-quality signal (RED/YELLOW alarm)
+            files.push('enr-quality-signal.json');
+            files.push('system-state.json');  // INF-COST-SPEND-GOVERNANCE-1: check 48 capacity utilization  // ENR-FIELDACCURACY-CHECK-1: check 44 consumes the extraction-quality signal (RED/YELLOW alarm)
             const sidecars = await r2.list('descriptions-');
             for (const obj of sidecars) {
               const name = obj.key.replace(/^data\//, '');
