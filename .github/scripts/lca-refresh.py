@@ -174,7 +174,7 @@ def detect_latest_available() -> str | None:
 
     for _ in range(6):  # Try up to 6 quarters back (DOL can lag ~6 months)
         candidate = f"FY{fy}_Q{qn}"
-        url = DOL_BASE_URL.format(quarter=candidate)
+        url = DOL_BASE_URL.format(prefix="LCA", quarter=candidate)  # INF-R2-STALERELIC-CLUSTER-1: detect path predates the {prefix} template param — KeyError'd every --auto run
         print(f"Auto-detect: checking {candidate}...")
         try:
             resp = requests.head(url, timeout=30, allow_redirects=True)
