@@ -66,6 +66,54 @@ jobs:
       - name: Install shared submodule dependencies (for R2 client)
         run: cd "$GITHUB_WORKSPACE"/.github/scripts/processing && npm install
 
+      - name: Wait for stable AGG sidecar generations (ENR-SIDECAR-MARKER-READ-1)
+        run: |
+          mkdir -p .github/data
+          node <<'EOF'
+          const fs = require('fs');
+          const { createR2Client } = require('./.github/scripts/processing/lib/storage/r2-client');
+          const NAMES = ['desc-backfill-complete.json', 'fetch-jobs-sidecar-complete.json'];
+          const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+          async function readMarkers(r2) {
+            const values = await Promise.all(NAMES.map(name => r2.downloadJson(name)));
+            const markers = Object.fromEntries(NAMES.map((name, i) => [name, values[i] || null]));
+            for (const name of NAMES) {
+              const marker = markers[name];
+              if (!marker || !['complete', 'in_progress', 'failed'].includes(marker.status)) {
+                throw new Error(`Invalid or missing AGG sidecar marker: ${name}`);
+              }
+            }
+            return markers;
+          }
+          async function main() {
+            const r2 = createR2Client({ prefix: 'data/' });
+            for (let attempt = 1; attempt <= 8; attempt++) {
+              const markers = await readMarkers(r2);
+              const active = Object.entries(markers).filter(([, marker]) => marker.status === 'in_progress');
+              const failed = Object.entries(markers).filter(([, marker]) => marker.status === 'failed');
+              if (failed.length > 0) {
+                throw new Error(`AGG sidecar generation failed; refusing mixed snapshot (${failed.map(([name]) => name).join(', ')})`);
+              }
+              if (active.length === 0) {
+                fs.writeFileSync('.github/data/.sidecar-markers-before.json', JSON.stringify(markers));
+                for (const [name, marker] of Object.entries(markers)) {
+                  console.log(`Marker ${name}: ${marker.status}${marker.run_id ? ` (${marker.run_id})` : ' (legacy generation)'}`);
+                }
+                return;
+              }
+              console.log(`AGG sidecar write in progress (${active.map(([name]) => name).join(', ')}); waiting 30s (${attempt}/8)`);
+              await sleep(30000);
+            }
+            throw new Error('AGG sidecar marker remained in_progress for 4 minutes');
+          }
+          main().catch(err => { console.error(err.message); process.exit(1); });
+          EOF
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+
       - name: Download data from R2
         if: success()
         continue-on-error: true
@@ -121,6 +169,35 @@ jobs:
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - name: Verify sidecar generations stayed stable (ENR-SIDECAR-MARKER-READ-1)
+        run: |
+          node <<'EOF'
+          const fs = require('fs');
+          const { createR2Client } = require('./.github/scripts/processing/lib/storage/r2-client');
+          const NAMES = ['desc-backfill-complete.json', 'fetch-jobs-sidecar-complete.json'];
+          async function main() {
+            const before = JSON.parse(fs.readFileSync('.github/data/.sidecar-markers-before.json', 'utf8'));
+            const r2 = createR2Client({ prefix: 'data/' });
+            const afterValues = await Promise.all(NAMES.map(name => r2.downloadJson(name)));
+            const after = Object.fromEntries(NAMES.map((name, i) => [name, afterValues[i] || null]));
+            const changed = [];
+            for (const name of NAMES) {
+              const prior = before[name];
+              const current = after[name];
+              if (!current || current.status !== 'complete') changed.push(`${name}: final status=${current?.status || 'missing'}`);
+              if ((prior?.run_id || null) !== (current?.run_id || null)) changed.push(`${name}: ${prior?.run_id || 'legacy/missing'} -> ${current?.run_id || 'legacy/missing'}`);
+            }
+            if (changed.length > 0) throw new Error(`AGG sidecar generation changed during R2 download; retry next cycle (${changed.join('; ')})`);
+            console.log('AGG sidecar generations stable across R2 download');
+          }
+          main().catch(err => { console.error(err.message); process.exit(1); });
+          EOF
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+
 
       - name: Fetch Google+Apple detail pages
         if: success()
