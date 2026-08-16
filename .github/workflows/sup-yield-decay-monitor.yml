@@ -60,8 +60,27 @@ jobs:
 
       - name: Install processing submodule dependencies
         run: cd .github/scripts/processing && npm ci || npm install
+      - name: Freshness gate (SUP-YIELDDECAY-FRESHNESS-GATE-1 — 3h; derived from ~15-20min producer cadence)
+        id: freshness
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: |
+          node -e "
+          const { createR2Client } = require('./.github/scripts/processing/lib/storage/r2-client');
+          const { checkFreshness } = require('./.github/scripts/processing/lib/storage/freshness-gate');
+          async function main() {
+            const r2 = createR2Client({ prefix: 'data/' });
+            const fresh = await checkFreshness({ r2, limitMinutes: 180, label: 'sup-yield-decay' });
+            if (!fresh) { console.log('::warning::sup-yield-decay monitor SKIPPED — stale all_jobs.json would poison the 21-day rolling baseline'); }
+          }
+          main().catch(e => { console.error('gate fatal: ' + e.message); process.exit(1); });
+          "
 
       - name: Download company-research-log.csv from Supabase Storage
+        if: steps.freshness.outputs.pipeline_fresh == 'true'
         run: |
           curl -sf -o .github/data/company-research-log.csv \
             'https://xxmhgagpbxjflajoaahy.supabase.co/storage/v1/object/public/pipeline-data/company-research-log.csv' \
@@ -69,6 +88,7 @@ jobs:
             || { echo "FAILED to download CSV"; exit 1; }
 
       - name: Download all_jobs.json from R2 (canonical object store)
+        if: steps.freshness.outputs.pipeline_fresh == 'true'
         env:
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
@@ -79,6 +99,7 @@ jobs:
           python3 -c "import boto3, os; s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']); s3.download_file(os.environ['R2_BUCKET_NAME'], 'data/all_jobs.json', '.github/data/all_jobs.json'); print('Downloaded all_jobs.json from R2 (' + str(os.path.getsize('.github/data/all_jobs.json')) + ' bytes)')"
 
       - name: Download decay baseline from R2 (rolling snapshot store)
+        if: steps.freshness.outputs.pipeline_fresh == 'true'
         continue-on-error: true
         env:
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
@@ -90,6 +111,7 @@ jobs:
           python3 -c "import boto3, os; s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']); s3.download_file(os.environ['R2_BUCKET_NAME'], 'data/sup-decay-baseline.json', '.github/data/sup-decay-baseline.json'); print('Downloaded sup-decay-baseline.json from R2')"
 
       - name: Run yield decay monitor
+        if: steps.freshness.outputs.pipeline_fresh == 'true'
         run: |
           node .github/scripts/processing/lib/sup-yield-decay-monitor.js \
             --csv .github/data/company-research-log.csv \
@@ -99,6 +121,7 @@ jobs:
             --json
 
       - name: Upload output to Supabase Storage
+        if: steps.freshness.outputs.pipeline_fresh == 'true'
         continue-on-error: true
         run: |
           curl -sf -X POST \
@@ -111,6 +134,7 @@ jobs:
             && echo "Output uploaded to Supabase Storage" \
             || echo "Upload skipped (secret may not be set — output available in run logs)"
       - name: Upload output to R2 (R2-PRIMARY canonical dual-write)
+        if: steps.freshness.outputs.pipeline_fresh == 'true'
         continue-on-error: true
         env:
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
@@ -122,6 +146,7 @@ jobs:
           python3 -c "import boto3, os; s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']); s3.put_object(Bucket=os.environ['R2_BUCKET_NAME'], Key='data/sup_yield_decay_monitor.json', Body=open('.github/data/sup_yield_decay_monitor.json','rb').read(), ContentType='application/json'); print('uploaded sup_yield_decay_monitor.json to R2')"
 
       - name: Upload decay baseline to R2 (rolling snapshot store)
+        if: steps.freshness.outputs.pipeline_fresh == 'true'
         continue-on-error: true
         env:
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
@@ -133,6 +158,7 @@ jobs:
           if [ -f .github/data/sup-decay-baseline.json ]; then python3 -c "import boto3, os; s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']); s3.put_object(Bucket=os.environ['R2_BUCKET_NAME'], Key='data/sup-decay-baseline.json', Body=open('.github/data/sup-decay-baseline.json','rb').read(), ContentType='application/json'); print('uploaded sup-decay-baseline.json to R2')"; else echo 'No baseline file to upload (monitor did not write one)'; fi
 
       - name: Alert on significant decay (Discord)
+        if: steps.freshness.outputs.pipeline_fresh == 'true'
         continue-on-error: true
         env:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TEAM_TOKEN }}
