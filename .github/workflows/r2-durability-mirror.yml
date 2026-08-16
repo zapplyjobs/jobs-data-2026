@@ -1,0 +1,67 @@
+name: R2 Durability Mirror
+
+# INF-R2-DATA-DURABILITY-1 (operator-approved 2026-08-16, option B of R2_DURABILITY_DECISION_2026_08_16.md):
+# nightly copy of the irreplaceable set (description sidecars, enrichment/dedupe/tag/trend history)
+# from canonical R2 to Supabase Storage — different provider (bucket/account loss) + implicit nightly
+# snapshot (overwrite protection). Local third copy rides disaster-recovery-backup.sh (--local-dir mode).
+# Restore proof: monthly, in the INF weekly review — pull one backup object, byte-compare vs R2.
+
+on:
+  schedule:
+    - cron: '30 3 * * *'  # nightly, off-peak
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: r2-durability-mirror
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+          submodules: recursive
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Install transcrypt
+        run: |
+          curl -sSL https://raw.githubusercontent.com/elasticdog/transcrypt/5effa13/transcrypt -o /tmp/transcrypt
+          chmod +x /tmp/transcrypt
+          sudo mv /tmp/transcrypt /usr/local/bin/transcrypt
+
+      - name: Unlock encrypted files
+        run: |
+          echo "Y" | transcrypt --cipher aes-256-cbc --password "$TRANSCRYPT_PASSWORD" --force
+          git checkout -- .
+          git submodule foreach --recursive '
+            echo "Y" | transcrypt --cipher aes-256-cbc --password "'"$TRANSCRYPT_PASSWORD"'" --force 2>/dev/null || true
+            rm -f "$(git rev-parse --git-dir)/index" 2>/dev/null || true
+            git checkout HEAD -- . 2>/dev/null || true
+          ' || true
+          git submodule sync --recursive
+          git submodule update --init --recursive
+        env:
+          TRANSCRYPT_PASSWORD: ${{ secrets.TRANSCRYPT_PASSWORD }}
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Install processing deps (mirror requires processing r2-client -> @aws-sdk)
+        run: cd .github/scripts/processing && npm install --no-audit --no-fund
+
+      - name: Mirror durability set to Supabase Storage
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/r2-durability-mirror.js
