@@ -16,6 +16,29 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 1
+          submodules: recursive  # INF-DEPRESOLUTION-ANALYZER-1: the dep-resolution check walks processing submodule scripts
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Install transcrypt (dep-resolution check reads encrypted script requires)
+        run: |
+          curl -sSL https://raw.githubusercontent.com/elasticdog/transcrypt/5effa13/transcrypt -o /tmp/transcrypt
+          chmod +x /tmp/transcrypt
+          sudo mv /tmp/transcrypt /usr/local/bin/transcrypt
+
+      - name: Unlock encrypted files
+        run: |
+          echo "Y" | transcrypt --cipher aes-256-cbc --password "$TRANSCRYPT_PASSWORD" --force
+          git checkout -- .
+          git submodule foreach --recursive '
+            echo "Y" | transcrypt --cipher aes-256-cbc --password "'"$TRANSCRYPT_PASSWORD"'" --force 2>/dev/null || true
+            rm -f "$(git rev-parse --git-dir)/index" 2>/dev/null || true
+            git checkout HEAD -- . 2>/dev/null || true
+          ' || true
+          git submodule sync --recursive
+          git submodule update --init --recursive
+        env:
+          TRANSCRYPT_PASSWORD: ${{ secrets.TRANSCRYPT_PASSWORD }}
+
 
       - name: Check for large files (>5MB)
         run: |
@@ -45,3 +68,6 @@ jobs:
 
       - name: DASH aspect verifier unit tests
         run: python3 .github/scripts/verify-dash-aspect-status.test.py
+
+      - name: Dependency-resolution check (INF-DEPRESOLUTION-ANALYZER-1 — blocks the silent-missing-module class)
+        run: python3 .github/scripts/dep-resolution-check.py
