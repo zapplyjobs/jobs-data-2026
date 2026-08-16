@@ -47,13 +47,41 @@ jobs:
           node-version: '20'
       - name: Install processing deps (INF-ROOTMANIFEST-DEAD-1 — shared has no package.json — the old shared install silently ran against the root manifest, which is now removed)
         run: cd .github/scripts/processing && npm install --no-audit --no-fund
-      - name: Run source coverage audit
+      - name: Download audit inputs from R2 (INF-DEPRESOLUTION-CICHECK-1 — the script reads .github/data relative to REPO ROOT; post-R2-cutover the data left the repo, so the dispatch path must download like pipeline-alert does)
         env:
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
         run: |
-          cd .github/scripts
-          # INF-DEPRESOLUTION-CICHECK-1: shared tree has no package.json post-manifest-removal — @aws-sdk lives in processing
-          NODE_PATH=$GITHUB_WORKSPACE/.github/scripts/processing/node_modules node source-coverage-audit.js
+          node -e "
+          const { createR2Client } = require('./.github/scripts/processing/lib/storage/r2-client');
+          const fs = require('fs');
+          const path = require('path');
+          async function main() {
+            const r2 = createR2Client({ prefix: 'data/' });
+            const dataDir = '.github/data';
+            if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+            const files = ['all_jobs.json', 'supplemental-custom-jobs.json', 'supplemental-custom-metadata.json', 'supplemental-oracle-jobs.json', 'supplemental-oracle-metadata.json'];
+            const sidecars = await r2.list('descriptions-');
+            for (const obj of sidecars) {
+              const name = obj.key.replace(/^data\//, '');
+              if (name.endsWith('.jsonl')) files.push(name);
+            }
+            for (const file of files) {
+              try {
+                const raw = await r2.downloadRaw(file);
+                if (raw) {
+                  const dest = path.join(dataDir, file);
+                  fs.mkdirSync(path.dirname(dest), { recursive: true });
+                  fs.writeFileSync(dest, Buffer.from(raw));
+                  console.log('R2 download OK: ' + file);
+                } else { console.log('R2 SKIP: ' + file + ' (not found)'); }
+              } catch (e) { console.error('R2 ERR: ' + file + ' - ' + e.message); }
+            }
+            console.log('R2 download complete');
+          }
+          main().catch(e => { console.error('R2 fatal: ' + e.message); process.exit(1); });
+          "
+      - name: Run source coverage audit (repo root — DATA_DIR is cwd-relative)
+        run: node .github/scripts/source-coverage-audit.js
