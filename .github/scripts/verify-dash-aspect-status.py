@@ -91,6 +91,7 @@ def c_infrastructure():
     """Deploy currency: Workers Builds check success on HEAD + edge answers."""
     runs = head_check_runs()
     wb = (runs or {}).get("Workers Builds: zjp-dashboard")
+    wb_status = None if runs is None else (wb or {}).get("status")
     deploy = None if runs is None else (wb or {}).get("conclusion")
     edge = None
     try:
@@ -105,16 +106,57 @@ def c_infrastructure():
         # Credential invisibility (PAT repo list) is NOT a deploy failure — RED here would
         # page Discord via check-40 for a non-incident. YELLOW carries the operator ask.
         return "YELLOW", f"check-runs unreadable ({GH_LAST_ERR[0] or 'unknown'}) — GH_PAT cannot see zjp-dashboard; add the repo to the PAT access list (INF-GHPAT-ZJPDASH-SCOPE-1); edge {edge}", "gh-api:check-runs + edge probe"
+    if wb is None:
+        # Fresh push: the Workers Builds check-run may not exist yet. Not a failure.
+        return "YELLOW", f"Workers Builds check not created yet on main HEAD (fresh push?); edge {edge}", "gh-api:check-runs + edge probe"
+    if wb_status != "completed":
+        return "YELLOW", f"Workers Builds {wb_status} on main HEAD; edge {edge}", "gh-api:check-runs + edge probe"
     if deploy != "success":
-        return "RED", f"Workers Builds {deploy or 'unknown'} on main HEAD; edge {edge}", "gh-api:check-runs + edge probe"
+        return "RED", f"Workers Builds {deploy} on main HEAD; edge {edge}", "gh-api:check-runs + edge probe"
     if edge is None or edge >= 500:
         return "RED", f"Workers Builds success but edge unreachable ({edge})", "gh-api:check-runs + edge probe"
     return "GREEN", f"Workers Builds success on main HEAD; edge HTTP {edge}", "gh-api:check-runs + edge probe"
 
 
+def proxy_json(path):
+    try:
+        req = urllib.request.Request(f"{PROXY}/{path}", headers={
+            "User-Agent": "ZJP-DashAspectVerifier/1.0",
+            "X-Proxy-Token": os.environ.get("DATA_PROXY_TOKEN", "").strip()})
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            return json.loads(resp.read())
+    except Exception as e:
+        print(f"[proxy_json] {path}: {e}", file=sys.stderr)
+        return None
+
+
+def c_security():
+    """Exposure checks that need no gh access: unauthenticated /api/data must be
+    Access-blocked (the workers.dev-backdoor class — service-role-key routes, token
+    dispatch behind this endpoint). Dependabot + wrangler workers_dev pin are
+    PAT-gated (INF-GHPAT-ZJPDASH-SCOPE-1) and noted honestly below."""
+    class _NoRedirect(urllib.request.HTTPRedirectHandler):
+        def redirect_request(self, req, fp, code, msg, headers, newurl):
+            return None  # treat 3xx as terminal (check-43's redirect:'manual' pattern)
+    try:
+        opener = urllib.request.build_opener(_NoRedirect)
+        req = urllib.request.Request(f"{DASH_URL}/api/data", headers={"User-Agent": "ZJP-DashAspectVerifier/1.0"})
+        opener.open(req, timeout=20)
+        unauth = 200  # got a full response WITHOUT Access credentials — exposure
+    except urllib.error.HTTPError as e:
+        unauth = e.code  # 3xx (Access redirect) or 401/403 = denied — expected
+    except Exception as e:
+        return "YELLOW", f"unauth probe failed to resolve ({e})", "dash:/api/data unauth probe"
+    if unauth == 200:
+        return "RED", "UNAUTHENTICATED /api/data returned 200 — Cloudflare Access is not gating the API surface", "dash:/api/data unauth probe"
+    return "YELLOW", f"unauth access denied (HTTP {unauth}) — verified; Dependabot + workers.dev pin unreadable: GH_PAT cannot see zjp-dashboard (INF-GHPAT-ZJPDASH-SCOPE-1)", "dash:/api/data unauth probe (dependabot pending PAT)"
+
+
 def c_data_quality():
-    """Payload completeness + freshness through the dashboard's own read path.
-    Catches the false-healthy class (200 + nulls / stale-but-fresh)."""
+    """Payload completeness + freshness through the dashboard's own read path,
+    PLUS an external cross-check: the served payload vs R2-canonical zjp-metrics.
+    The completeness field alone is circular (computed by the API it grades); the
+    cross-check catches the stale-Supabase-row class (Aug-3 incident family)."""
     elapsed, code, payload, note = fetch_api_data()
     if code is None and note and "not configured" in note:
         return "YELLOW", note + " — live completeness probe skipped", "dash:/api/data"
@@ -134,13 +176,32 @@ def c_data_quality():
             age_min = (NOW - datetime.datetime.fromisoformat(gen.replace("Z", "+00:00"))).total_seconds() / 60
         except Exception:
             problems.append("generated_at unparseable")
+    # External cross-check: R2-canonical zjp-metrics vs what the dashboard serves.
+    # Small divergence is NORMAL propagation lag (Supabase publish trails R2 by ~a cycle;
+    # pool moves every cycle); bands: <0.5% fine, <5% lagging, >=5% read path broken/stale.
+    served_pool = ((zjp.get("pool") or {}).get("total_jobs"))
+    r2 = proxy_json("zjp-metrics.json")
+    r2_pool = ((r2 or {}).get("pool") or {}).get("total_jobs")
+    cross = ""
+    if r2 is None:
+        cross = "; R2 cross-check unreadable (proxy)"
+    elif served_pool is not None and r2_pool:
+        divergence = abs(served_pool - r2_pool) / r2_pool * 100
+        if divergence < 0.5:
+            cross = f"; R2 agrees (pool {r2_pool:,}, diff {divergence:.2f}%)"
+        elif divergence < 5:
+            cross = f"; R2 lagging: served {served_pool:,} vs R2 {r2_pool:,} ({divergence:.1f}%)"
+        else:
+            problems.append(f"read-path divergence: served pool {served_pool:,} != R2 {r2_pool:,} ({divergence:.1f}%)")
+    elif served_pool is not None and r2_pool is not None and served_pool != r2_pool:
+        problems.append(f"read-path divergence: served pool {served_pool:,} != R2 {r2_pool:,}")
     if problems:
-        return "RED", "; ".join(problems), "dash:/api/data"
+        return "RED", "; ".join(problems) + cross, "dash:/api/data + data-proxy:zjp-metrics"
     # Freshness bands mirror the dashboard's own model: LIVE <30m, DELAYED <6h, DOWN >=6h.
     if age_min < 30: status = "GREEN"
     elif age_min < 360: status = "YELLOW"
     else: status = "RED"
-    return status, f"/api/data complete; zjpMetrics age {age_min:.0f}m", "dash:/api/data"
+    return status, f"/api/data complete; zjpMetrics age {age_min:.0f}m{cross}", "dash:/api/data + data-proxy:zjp-metrics"
 
 
 def c_performance():
@@ -151,7 +212,7 @@ def c_performance():
         return "RED", f"/api/data unreachable ({note})", "dash:/api/data"
     # Budget mirrors the dashboard's own fetchWithTimeout (15s): <5s GREEN, <15s YELLOW.
     status = "GREEN" if elapsed < 5 else ("YELLOW" if elapsed < 15 else "RED")
-    return status, f"/api/data responded in {elapsed:.1f}s", "dash:/api/data"
+    return status, f"/api/data (the dashboard's data-fetch leg — the one combined API call every page awaits) responded in {elapsed:.1f}s", "dash:/api/data"
 
 
 def c_monitoring():
@@ -196,9 +257,9 @@ CHECKS = {
     "infrastructure": c_infrastructure,
     "data_quality": c_data_quality,
     "performance": c_performance,
+    "security": c_security,
     "monitoring": c_monitoring,
 }
-
 
 def verify():
     aspects = {}
