@@ -129,6 +129,15 @@ def classify_subdomain_probe(code):
     return "RED" if code == 200 else "GREEN"
 
 
+def classify_deploy_match(deployed_sha, head_sha):
+    """Deploy currency from the served build-info sha vs origin/main HEAD.
+    'current' = serving HEAD; 'lagging' = deploy behind (in flight or stale);
+    'unknown' = either side unreadable (never invented green)."""
+    if not deployed_sha or not head_sha:
+        return "unknown"
+    return "current" if deployed_sha == head_sha else "lagging"
+
+
 def classify_dependabot(alerts, err):
     """(status, note) for Dependabot posture: 0 open = GREEN; open alerts or a
     disabled/unreadable API = YELLOW-with-ask (never invented green)."""
@@ -151,18 +160,60 @@ def latency_band(elapsed_s):
     if elapsed_s < 15: return "YELLOW"
     return "RED"
 
-def c_verification():
-    runs = head_check_runs()
-    if runs is None:
-        return "YELLOW", f"gh-api check-runs unreadable: {GH_LAST_ERR[0] or 'unknown error'}", "gh-api:check-runs"
-    status, summary = classify_check(runs.get("verify"), "verify")
-    return status, summary, "gh-api:check-runs"
+def head_sha():
+    """origin/main HEAD sha via Contents read (fine-grained-PAT compatible)."""
+    data = gh_json(["api", f"repos/{DASH_REPO}/commits/main", "--jq", ".sha"])
+    return data if isinstance(data, str) and data.strip() else None
 
+
+def head_ci_run():
+    """Latest CI workflow run on main via the Actions API (fine-grained-PAT
+    compatible — fine-grained PATs CANNOT read check-runs at all; GitHub
+    disabled that permission class, community/discussions/129512)."""
+    data = gh_json(["api", f"repos/{DASH_REPO}/actions/workflows/ci.yml/runs?branch=main&per_page=1",
+                    "--jq", ".workflow_runs[0] | {head_sha, status, conclusion}"])
+    return data if data and data.get("head_sha") else None
+
+
+def fetch_build_info():
+    """Served build-info.json (embedded at Workers-Build time by wrangler.toml)."""
+    try:
+        cid = (os.environ.get("DASH_ACCESS_CLIENT_ID") or "").strip()
+        sec = (os.environ.get("DASH_ACCESS_CLIENT_SECRET") or "").strip()
+        headers = {"User-Agent": "ZJP-DashAspectVerifier/1.0"}
+        if cid and sec:
+            headers.update({"CF-Access-Client-Id": cid, "CF-Access-Client-Secret": sec})
+        req = urllib.request.Request(f"{DASH_URL}/build-info.json", headers=headers)
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            return json.loads(resp.read())
+    except Exception:
+        return None
+
+
+def c_verification():
+    """CI green on main HEAD. Prefer check-runs (needs a classic PAT/GitHub App
+    via DASH_REPO_TOKEN); fall back to the Actions workflow-run API, which
+    fine-grained PATs CAN read ('Actions' permission)."""
+    runs = head_check_runs()
+    if runs is not None:
+        status, summary = classify_check(runs.get("verify"), "verify")
+        return status, summary, "gh-api:check-runs"
+    run = head_ci_run()
+    if run is not None:
+        sha = run.get("head_sha") or ""
+        head = head_sha() or ""
+        if sha and head and not sha.startswith(head[:8]) and not head.startswith(sha[:8]):
+            return "YELLOW", f"CI last ran on {sha[:8]}, HEAD is {head[:8]} (fresh push?)", "gh-api:actions-runs"
+        status, summary = classify_check({"status": run.get("status"), "conclusion": run.get("conclusion")}, "CI")
+        return status, summary, "gh-api:actions-runs"
+    return "YELLOW", f"CI state unreadable: {GH_LAST_ERR[0] or 'unknown'} (check-runs need a classic PAT — INF-GHPAT-ZJPDASH-SCOPE-1; Actions permission on GH_PAT enables the fallback)", "gh-api:actions-runs"
 
 def c_infrastructure():
-    """Deploy currency: Workers Builds check success on HEAD + edge answers."""
-    runs = head_check_runs()
-    wb = (runs or {}).get("Workers Builds: zjp-dashboard")
+    """Deploy currency. PRIMARY: the sha the edge is actually SERVING
+    (/build-info.json, embedded at build time) vs origin/main HEAD — verifies
+    the deployed artifact itself, no Checks API needed (fine-grained PATs
+    cannot read check-runs; community/discussions/129512). Fallbacks:
+    Workers Builds check-runs when a classic PAT (DASH_REPO_TOKEN) is present."""
     edge = None
     try:
         req = urllib.request.Request(DASH_URL + "/", headers={"User-Agent": "ZJP-DashAspectVerifier/1.0"})
@@ -172,19 +223,22 @@ def c_infrastructure():
         edge = e.code  # 3xx/4xx from CF Access = edge alive
     except Exception:
         edge = None
-    if runs is None:
-        # Credential invisibility (PAT repo list) is NOT a deploy failure — RED here would
-        # page Discord via check-40 for a non-incident. YELLOW carries the operator ask.
-        return "YELLOW", f"check-runs unreadable ({GH_LAST_ERR[0] or 'unknown'}) — GH_PAT cannot see zjp-dashboard; add the repo to the PAT access list (INF-GHPAT-ZJPDASH-SCOPE-1); edge {edge}", "gh-api:check-runs + edge probe"
-    if wb is None:
-        # Fresh push: the Workers Builds check-run may not exist yet. Not a failure.
-        return "YELLOW", f"Workers Builds check not created yet on main HEAD (fresh push?); edge {edge}", "gh-api:check-runs + edge probe"
-    status, summary = classify_check(wb, "Workers Builds")
-    if status != "GREEN":
-        return status, f"{summary}; edge {edge}", "gh-api:check-runs + edge probe"
     if edge is None or edge >= 500:
-        return "RED", f"Workers Builds success but edge unreachable ({edge})", "gh-api:check-runs + edge probe"
-    return "GREEN", f"{summary}; edge HTTP {edge}", "gh-api:check-runs + edge probe"
+        return "RED", f"edge unreachable ({edge})", "edge probe + dash:/build-info.json"
+    info = fetch_build_info()
+    head = head_sha()
+    band = classify_deploy_match((info or {}).get("sha"), head)
+    if band == "current":
+        return "GREEN", f"serving HEAD {str(head)[:8]}; edge HTTP {edge}", "edge probe + dash:/build-info.json + gh-api:contents"
+    if band == "lagging":
+        return "YELLOW", f"serving {(info or {}).get('sha', '?')[:8]}, HEAD is {str(head)[:8]} — deploy lagging; edge {edge}", "edge probe + dash:/build-info.json + gh-api:contents"
+    # build-info absent (pre-change deploy) or sha unreadable — fall back to check-runs
+    runs = head_check_runs()
+    wb = (runs or {}).get("Workers Builds: zjp-dashboard")
+    if runs is not None and wb is not None:
+        status, summary = classify_check(wb, "Workers Builds")
+        return status, f"{summary}; edge {edge}", "gh-api:check-runs + edge probe"
+    return "YELLOW", f"deploy state unreadable (build-info {'absent' if info is None else 'malformed'}, head {'unreadable' if head is None else 'ok'}; check-runs need a classic PAT) — edge {edge}", "edge probe + dash:/build-info.json + gh-api:contents"
 
 
 def proxy_json(path):

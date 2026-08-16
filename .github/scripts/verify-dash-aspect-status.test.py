@@ -107,6 +107,19 @@ class LatencyBandTest(unittest.TestCase):
 
 
 
+class DeployMatchTest(unittest.TestCase):
+    def test_current_when_shas_equal(self):
+        self.assertEqual(vdas.classify_deploy_match("abc123", "abc123"), "current")
+
+    def test_lagging_when_behind(self):
+        self.assertEqual(vdas.classify_deploy_match("abc123", "def456"), "lagging")
+
+    def test_unknown_never_green(self):
+        self.assertEqual(vdas.classify_deploy_match(None, "abc"), "unknown")
+        self.assertEqual(vdas.classify_deploy_match("abc", None), "unknown")
+        self.assertEqual(vdas.classify_deploy_match(None, None), "unknown")
+
+
 class SubdomainProbeTest(unittest.TestCase):
     def test_serving_is_exposure_red(self):
         self.assertEqual(vdas.classify_subdomain_probe(200), "RED")
