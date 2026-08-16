@@ -408,3 +408,4 @@ if __name__ == "__main__":
             publish_r2(data_str)
         except Exception as e:
             print(f"R2 publish FAILED: {e}", file=sys.stderr)
+    print(data_str)
