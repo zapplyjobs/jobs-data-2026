@@ -74,25 +74,61 @@ def fetch_api_data():
         return time.monotonic() - t0, None, None, str(e)
 
 
+# ─── Pure decision logic (no I/O) — unit-tested in verify-dash-aspect-status.test.py ───
+
+def classify_check(run, label):
+    """Check-run ladder shared by verification + infrastructure:
+    missing/not-completed = YELLOW transient (fresh push / in-flight), completed
+    failure = RED, completed success = GREEN."""
+    if run is None:
+        return "YELLOW", f"no '{label}' check on main HEAD"
+    if run.get("status") != "completed":
+        return "YELLOW", f"{label} {run.get('status')} on main HEAD"
+    return ("GREEN" if run.get("conclusion") == "success" else "RED"), \
+           f"{label} {run.get('conclusion')} on main HEAD"
+
+
+def classify_unauth(http_code):
+    """Unauth /api/data probe: 200 = exposure (RED); 3xx/4xx/5xx = did not
+    serve the payload unauthenticated (YELLOW — the PAT-gated remainder)."""
+    return "RED" if http_code == 200 else "YELLOW"
+
+
+def divergence_band(served, r2_pool):
+    """Served-vs-R2-canonical pool divergence: (band, pct).
+    'agree' <0.5% (normal cycle lag), 'lagging' <5%, 'broken' >=5% (read-path
+    stale/broken, Aug-3 incident family). Band None when not computable."""
+    if served is None or not r2_pool:
+        return None, None
+    pct = abs(served - r2_pool) / r2_pool * 100
+    return ("agree" if pct < 0.5 else ("lagging" if pct < 5 else "broken")), pct
+
+
+def freshness_band(age_min):
+    """LIVE <30m / DELAYED <6h / DOWN >=6h — mirrors the dashboard's own model."""
+    if age_min < 30: return "GREEN"
+    if age_min < 360: return "YELLOW"
+    return "RED"
+
+
+def latency_band(elapsed_s):
+    """<5s GREEN / <15s YELLOW (the dashboard's own fetchWithTimeout budget) / else RED."""
+    if elapsed_s < 5: return "GREEN"
+    if elapsed_s < 15: return "YELLOW"
+    return "RED"
+
 def c_verification():
     runs = head_check_runs()
     if runs is None:
         return "YELLOW", f"gh-api check-runs unreadable: {GH_LAST_ERR[0] or 'unknown error'}", "gh-api:check-runs"
-    v = runs.get("verify")
-    if not v:
-        return "YELLOW", "no 'verify' check on main HEAD", "gh-api:check-runs"
-    if v.get("status") != "completed":
-        return "YELLOW", f"verify {v.get('status')} on main HEAD", "gh-api:check-runs"
-    return ("GREEN" if v.get("conclusion") == "success" else "RED"), \
-           f"verify {v.get('conclusion')} on main HEAD", "gh-api:check-runs"
+    status, summary = classify_check(runs.get("verify"), "verify")
+    return status, summary, "gh-api:check-runs"
 
 
 def c_infrastructure():
     """Deploy currency: Workers Builds check success on HEAD + edge answers."""
     runs = head_check_runs()
     wb = (runs or {}).get("Workers Builds: zjp-dashboard")
-    wb_status = None if runs is None else (wb or {}).get("status")
-    deploy = None if runs is None else (wb or {}).get("conclusion")
     edge = None
     try:
         req = urllib.request.Request(DASH_URL + "/", headers={"User-Agent": "ZJP-DashAspectVerifier/1.0"})
@@ -109,13 +145,12 @@ def c_infrastructure():
     if wb is None:
         # Fresh push: the Workers Builds check-run may not exist yet. Not a failure.
         return "YELLOW", f"Workers Builds check not created yet on main HEAD (fresh push?); edge {edge}", "gh-api:check-runs + edge probe"
-    if wb_status != "completed":
-        return "YELLOW", f"Workers Builds {wb_status} on main HEAD; edge {edge}", "gh-api:check-runs + edge probe"
-    if deploy != "success":
-        return "RED", f"Workers Builds {deploy} on main HEAD; edge {edge}", "gh-api:check-runs + edge probe"
+    status, summary = classify_check(wb, "Workers Builds")
+    if status != "GREEN":
+        return status, f"{summary}; edge {edge}", "gh-api:check-runs + edge probe"
     if edge is None or edge >= 500:
         return "RED", f"Workers Builds success but edge unreachable ({edge})", "gh-api:check-runs + edge probe"
-    return "GREEN", f"Workers Builds success on main HEAD; edge HTTP {edge}", "gh-api:check-runs + edge probe"
+    return "GREEN", f"{summary}; edge HTTP {edge}", "gh-api:check-runs + edge probe"
 
 
 def proxy_json(path):
@@ -147,7 +182,7 @@ def c_security():
         unauth = e.code  # 3xx (Access redirect) or 401/403 = denied — expected
     except Exception as e:
         return "YELLOW", f"unauth probe failed to resolve ({e})", "dash:/api/data unauth probe"
-    if unauth == 200:
+    if classify_unauth(unauth) == "RED":
         return "RED", "UNAUTHENTICATED /api/data returned 200 — Cloudflare Access is not gating the API surface", "dash:/api/data unauth probe"
     return "YELLOW", f"unauth access denied (HTTP {unauth}) — verified; Dependabot + workers.dev pin unreadable: GH_PAT cannot see zjp-dashboard (INF-GHPAT-ZJPDASH-SCOPE-1)", "dash:/api/data unauth probe (dependabot pending PAT)"
 
@@ -183,24 +218,21 @@ def c_data_quality():
     r2 = proxy_json("zjp-metrics.json")
     r2_pool = ((r2 or {}).get("pool") or {}).get("total_jobs")
     cross = ""
+    band, divergence = divergence_band(served_pool, r2_pool)
     if r2 is None:
         cross = "; R2 cross-check unreadable (proxy)"
-    elif served_pool is not None and r2_pool:
-        divergence = abs(served_pool - r2_pool) / r2_pool * 100
-        if divergence < 0.5:
-            cross = f"; R2 agrees (pool {r2_pool:,}, diff {divergence:.2f}%)"
-        elif divergence < 5:
-            cross = f"; R2 lagging: served {served_pool:,} vs R2 {r2_pool:,} ({divergence:.1f}%)"
-        else:
-            problems.append(f"read-path divergence: served pool {served_pool:,} != R2 {r2_pool:,} ({divergence:.1f}%)")
+    elif band == "agree":
+        cross = f"; R2 agrees (pool {r2_pool:,}, diff {divergence:.2f}%)"
+    elif band == "lagging":
+        cross = f"; R2 lagging: served {served_pool:,} vs R2 {r2_pool:,} ({divergence:.1f}%)"
+    elif band == "broken":
+        problems.append(f"read-path divergence: served pool {served_pool:,} != R2 {r2_pool:,} ({divergence:.1f}%)")
     elif served_pool is not None and r2_pool is not None and served_pool != r2_pool:
         problems.append(f"read-path divergence: served pool {served_pool:,} != R2 {r2_pool:,}")
     if problems:
         return "RED", "; ".join(problems) + cross, "dash:/api/data + data-proxy:zjp-metrics"
     # Freshness bands mirror the dashboard's own model: LIVE <30m, DELAYED <6h, DOWN >=6h.
-    if age_min < 30: status = "GREEN"
-    elif age_min < 360: status = "YELLOW"
-    else: status = "RED"
+    status = freshness_band(age_min)
     return status, f"/api/data complete; zjpMetrics age {age_min:.0f}m{cross}", "dash:/api/data + data-proxy:zjp-metrics"
 
 
@@ -211,9 +243,8 @@ def c_performance():
     if code != 200:
         return "RED", f"/api/data unreachable ({note})", "dash:/api/data"
     # Budget mirrors the dashboard's own fetchWithTimeout (15s): <5s GREEN, <15s YELLOW.
-    status = "GREEN" if elapsed < 5 else ("YELLOW" if elapsed < 15 else "RED")
+    status = latency_band(elapsed)
     return status, f"/api/data (the dashboard's data-fetch leg — the one combined API call every page awaits) responded in {elapsed:.1f}s", "dash:/api/data"
-
 
 def c_monitoring():
     """The dashboard's own watchdog (check-43) is configured (source file on main)

@@ -42,3 +42,6 @@ jobs:
           else
             echo "✅ No data files in .github/data/"
           fi
+
+      - name: DASH aspect verifier unit tests
+        run: python3 .github/scripts/verify-dash-aspect-status.test.py
