@@ -21,15 +21,25 @@ NOW = datetime.datetime.now(datetime.timezone.utc)
 DASH_REPO = "zapplyjobs/zjp-dashboard"
 DASH_URL = "https://dash.zapply.jobs"
 PROXY = "https://zjp-data-proxy.wild-queen-069e.workers.dev/data"
+WORKERS_DEV_URL = "https://zjp-dashboard.wild-queen-069e.workers.dev/"  # must stay pinned OFF (wrangler workers_dev:false)
 
 
 GH_LAST_ERR = [None]
 
 
-def gh_json(args, attempts=3):
+def gh_json(args, attempts=3, token_env=None):
+    """gh api helper. token_env: name of an env var holding a DEDICATED token
+    (e.g. DASH_REPO_TOKEN/GH_PAT_DASH) — when set+non-empty it overrides GH_TOKEN
+    for this call only, so a repo-scoped PAT can read zjp-dashboard without
+    replacing the org-wide GH_PAT used by every other call."""
+    env = os.environ
+    if token_env:
+        dedicated = (os.environ.get(token_env) or "").strip()
+        if dedicated:
+            env = {**os.environ, "GH_TOKEN": dedicated}
     for a in range(attempts):
         try:
-            result = subprocess.run(["gh"] + args, capture_output=True, text=True, timeout=30)
+            result = subprocess.run(["gh"] + args, capture_output=True, text=True, timeout=30, env=env)
             if result.returncode == 0 and result.stdout.strip():
                 GH_LAST_ERR[0] = None
                 return json.loads(result.stdout)
@@ -46,7 +56,8 @@ def gh_json(args, attempts=3):
 def head_check_runs():
     """check-runs for the HEAD commit of zjp-dashboard main: {name: run}."""
     data = gh_json(["api", f"repos/{DASH_REPO}/commits/main/check-runs",
-                    "--jq", "{runs: [.check_runs[] | {name: .name, conclusion: .conclusion, status: .status}]}"])
+                    "--jq", "{runs: [.check_runs[] | {name: .name, conclusion: .conclusion, status: .status}]}"],
+                   token_env="DASH_REPO_TOKEN")
     if not data or "runs" not in data:
         return None
     return {r["name"]: r for r in data["runs"]}
@@ -111,6 +122,29 @@ def freshness_band(age_min):
     return "RED"
 
 
+def classify_subdomain_probe(code):
+    """workers.dev route state from a live probe: 200 = the app is SERVING on the
+    ungated subdomain (RED — the G24 backdoor class for an Access-gated app);
+    404/3xx/5xx/None (edge error or DNS fail) = route not serving = pinned."""
+    return "RED" if code == 200 else "GREEN"
+
+
+def classify_dependabot(alerts, err):
+    """(status, note) for Dependabot posture: 0 open = GREEN; open alerts or a
+    disabled/unreadable API = YELLOW-with-ask (never invented green)."""
+    if err is not None:
+        if "disabled" in err.lower():
+            return "YELLOW", "Dependabot DISABLED on zjp-dashboard — enable it (INF hardening P2) or accept the posture explicitly"
+        if "not accessible" in err.lower() or "not found" in err.lower():
+            return "YELLOW", "Dependabot unreadable — GH_PAT_DASH (DASH_REPO_TOKEN) lacks zjp-dashboard access (INF-GHPAT-ZJPDASH-SCOPE-1)"
+        return "YELLOW", f"Dependabot unreadable ({err[:90]})"
+    n = len(alerts)
+    if n == 0:
+        return "GREEN", "0 open Dependabot alerts"
+    return "YELLOW", f"{n} open Dependabot alerts — triage"
+
+
+
 def latency_band(elapsed_s):
     """<5s GREEN / <15s YELLOW (the dashboard's own fetchWithTimeout budget) / else RED."""
     if elapsed_s < 5: return "GREEN"
@@ -166,13 +200,20 @@ def proxy_json(path):
 
 
 def c_security():
-    """Exposure checks that need no gh access: unauthenticated /api/data must be
-    Access-blocked (the workers.dev-backdoor class — service-role-key routes, token
-    dispatch behind this endpoint). Dependabot + wrangler workers_dev pin are
-    PAT-gated (INF-GHPAT-ZJPDASH-SCOPE-1) and noted honestly below."""
+    """Three exposure/posture checks:
+    (a) unauthenticated /api/data must be Access-blocked (service-role-key routes,
+        token dispatch behind this endpoint);
+    (b) the workers.dev route must stay pinned OFF (the G24 ungated-backdoor class)
+        — verifiable PAT-free by probing the subdomain (not serving = pinned);
+    (c) Dependabot open alerts on zjp-dashboard — needs DASH_REPO_TOKEN/GH_PAT_DASH
+        with the repo in its access list (INF-GHPAT-ZJPDASH-SCOPE-1); if Dependabot
+        is disabled on the repo, that fact is surfaced (operator hardening-P2 call).
+    GREEN only when all three are actually verified healthy — no invented green."""
     class _NoRedirect(urllib.request.HTTPRedirectHandler):
         def redirect_request(self, req, fp, code, msg, headers, newurl):
             return None  # treat 3xx as terminal (check-43's redirect:'manual' pattern)
+    facts, exposures = [], []
+    # (a) unauth probe
     try:
         opener = urllib.request.build_opener(_NoRedirect)
         req = urllib.request.Request(f"{DASH_URL}/api/data", headers={"User-Agent": "ZJP-DashAspectVerifier/1.0"})
@@ -181,10 +222,46 @@ def c_security():
     except urllib.error.HTTPError as e:
         unauth = e.code  # 3xx (Access redirect) or 401/403 = denied — expected
     except Exception as e:
-        return "YELLOW", f"unauth probe failed to resolve ({e})", "dash:/api/data unauth probe"
+        return "YELLOW", f"unauth probe failed to resolve ({e})", "dash:/api/data + workers.dev probes"
     if classify_unauth(unauth) == "RED":
-        return "RED", "UNAUTHENTICATED /api/data returned 200 — Cloudflare Access is not gating the API surface", "dash:/api/data unauth probe"
-    return "YELLOW", f"unauth access denied (HTTP {unauth}) — verified; Dependabot + workers.dev pin unreadable: GH_PAT cannot see zjp-dashboard (INF-GHPAT-ZJPDASH-SCOPE-1)", "dash:/api/data unauth probe (dependabot pending PAT)"
+        exposures.append("UNAUTHENTICATED /api/data returned 200 — Cloudflare Access is not gating the API surface")
+    else:
+        facts.append(f"unauth denied (HTTP {unauth})")
+    # (b) workers.dev pin — PAT-free live probe
+    wd_code = None
+    try:
+        req = urllib.request.Request(WORKERS_DEV_URL, headers={"User-Agent": "ZJP-DashAspectVerifier/1.0"})
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            wd_code = resp.status
+    except urllib.error.HTTPError as e:
+        wd_code = e.code  # 404 from the edge = workers.dev disabled for this Worker
+    except Exception:
+        wd_code = None  # DNS/connection failure = route not serving = pinned
+    if classify_subdomain_probe(wd_code) == "RED":
+        exposures.append(f"workers.dev route SERVING (HTTP {wd_code}) — the ungated-backdoor class; pin workers_dev=false")
+    else:
+        facts.append(f"workers.dev pinned (probe HTTP {wd_code})")
+    # (c) Dependabot
+    db_status, db_note = dependabot_state()
+    if exposures:
+        return "RED", "; ".join(exposures), "dash:/api/data + workers.dev probes + gh-api:dependabot"
+    if db_status == "GREEN":
+        facts.append(db_note)
+        return "GREEN", f"{'; '.join(facts)}; {db_note}", "dash:/api/data + workers.dev probes + gh-api:dependabot"
+    return "YELLOW", f"{'; '.join(facts)}; {db_note}", "dash:/api/data + workers.dev probes + gh-api:dependabot"
+
+
+def dependabot_state():
+    """(status, note) for Dependabot on zjp-dashboard, via the dedicated repo
+    token when present. Pure classification lives in classify_dependabot; this
+    does the I/O."""
+    data = gh_json(["api", f"repos/{DASH_REPO}/dependabot/alerts?state=open",
+                    "--jq", "[.[] | {.severity: .security_advisory.severity, .html_url: .html_url}]"],
+                   token_env="DASH_REPO_TOKEN")
+    if data is None:
+        err = (GH_LAST_ERR[0] or "unreadable")
+        return classify_dependabot(None, err)
+    return classify_dependabot(data, None)
 
 
 def c_data_quality():

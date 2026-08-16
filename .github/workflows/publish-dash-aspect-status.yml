@@ -39,6 +39,7 @@ jobs:
       - name: Run verifier
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
+          DASH_REPO_TOKEN: ${{ secrets.GH_PAT_DASH }}
           DATA_PROXY_TOKEN: ${{ secrets.DATA_PROXY_TOKEN }}
           DASH_ACCESS_CLIENT_ID: ${{ secrets.DASH_ACCESS_CLIENT_ID }}
           DASH_ACCESS_CLIENT_SECRET: ${{ secrets.DASH_ACCESS_CLIENT_SECRET }}

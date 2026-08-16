@@ -106,5 +106,33 @@ class LatencyBandTest(unittest.TestCase):
         self.assertEqual(vdas.latency_band(60), "RED")
 
 
+
+class SubdomainProbeTest(unittest.TestCase):
+    def test_serving_is_exposure_red(self):
+        self.assertEqual(vdas.classify_subdomain_probe(200), "RED")
+
+    def test_edge_error_or_dns_fail_is_pinned(self):
+        for code in (404, 302, 500, 503, None):
+            self.assertEqual(vdas.classify_subdomain_probe(code), "GREEN", str(code))
+
+
+class DependabotClassifyTest(unittest.TestCase):
+    def test_zero_open_is_green(self):
+        self.assertEqual(vdas.classify_dependabot([], None), ("GREEN", "0 open Dependabot alerts"))
+
+    def test_open_alerts_need_triage(self):
+        self.assertEqual(vdas.classify_dependabot([1, 2], None)[0], "YELLOW")
+
+    def test_disabled_is_a_named_ask_not_a_vague_unknown(self):
+        s, note = vdas.classify_dependabot(None, "gh: Dependabot alerts are disabled for this repository. (HTTP 403)")
+        self.assertEqual(s, "YELLOW")
+        self.assertIn("DISABLED", note)
+
+    def test_scope_error_names_the_token_ask(self):
+        s, note = vdas.classify_dependabot(None, "Resource not accessible by personal access token (HTTP 403)")
+        self.assertEqual(s, "YELLOW")
+        self.assertIn("GH_PAT_DASH", note)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
