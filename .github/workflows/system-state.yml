@@ -47,6 +47,8 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Install processing deps (INF-DEPRESOLUTION-CICHECK-1 — generate-system-state lazily requires processing r2-client → @aws-sdk; the removed root manifest used to satisfy it via upward resolution; the hourly upload has been silently failing since 2026-08-15)
+        run: cd .github/scripts/processing && npm install --no-audit --no-fund
 
       - name: Generate system-state.json
         env:

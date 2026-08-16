@@ -55,4 +55,5 @@ jobs:
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
         run: |
           cd .github/scripts
-          NODE_PATH=$GITHUB_WORKSPACE/.github/scripts/shared/node_modules node source-coverage-audit.js
+          # INF-DEPRESOLUTION-CICHECK-1: shared tree has no package.json post-manifest-removal — @aws-sdk lives in processing
+          NODE_PATH=$GITHUB_WORKSPACE/.github/scripts/processing/node_modules node source-coverage-audit.js
