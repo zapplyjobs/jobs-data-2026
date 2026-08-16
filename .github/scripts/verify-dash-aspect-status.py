@@ -398,6 +398,7 @@ if __name__ == "__main__":
     do_publish = "--publish" in sys.argv
     result = verify()
     data_str = json.dumps(result, indent=2)
+    counts = {}
     for k, v in result["aspects"].items():
         counts[v["status"]] = counts.get(v["status"], 0) + 1
     print(f"\nDASH Aspect Status Summary: {counts}", file=sys.stderr)
