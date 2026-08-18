@@ -33,19 +33,8 @@ jobs:
 
 
 
-      - name: Install transcrypt
-        run: |
-          # INF-UNLOCK-INTERMITTENT-1: -sSL without -f silently installs raw.github's 429
-          # rate-limit PAGE as the binary (observed 2026-08-17: 8 workflow failures in a 80-min
-          # throttled window). Fail on HTTP errors, retry 3x, and verify it's a script.
-          for i in 1 2 3; do
-            curl -sfSL "https://raw.githubusercontent.com/elasticdog/transcrypt/5effa13/transcrypt" -o /tmp/transcrypt && break
-            echo "transcrypt download attempt $i failed — retrying in 15s"; sleep 15
-          done
-          [ -s /tmp/transcrypt ] || { echo "::error::transcrypt download failed after retries"; exit 1; }
-          head -c2 /tmp/transcrypt | grep -q '#!' || { echo "::error::transcrypt download is not a script (rate-limit page?) — refusing to install"; exit 1; }
-          chmod +x /tmp/transcrypt
-          sudo mv /tmp/transcrypt /usr/local/bin/transcrypt
+      - name: Install transcrypt (vendored action — immune to raw-CDN 429s, INF-TRANSCRYPT-ACTION-1)
+        uses: zapplyjobs/.github/actions/setup-transcrypt@afcb5f41ec28fe10cefcf421fc455d0d89588b1f
 
       - name: Unlock encrypted files
         run: |

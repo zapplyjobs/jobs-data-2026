@@ -37,19 +37,15 @@ jobs:
           token: ${{ secrets.GH_PAT }}
         continue-on-error: true
 
+      - name: Install transcrypt (vendored action — immune to raw-CDN 429s, INF-TRANSCRYPT-ACTION-1)
+        uses: zapplyjobs/.github/actions/setup-transcrypt@afcb5f41ec28fe10cefcf421fc455d0d89588b1f
+
       - name: Unlock aggregator (transcrypt) so company-list.json is readable
         continue-on-error: true
         env:
           TRANSCRYPT_PASSWORD: ${{ secrets.TRANSCRYPT_PASSWORD }}
         run: |
           if [ ! -d _agg ]; then echo "aggregator checkout absent — c_data_quality will use freshness fallback"; exit 0; fi
-          # INF-UNLOCK-INTERMITTENT-1: fail on HTTP errors + verify it's a script (silent 429-page install class)
-          for i in 1 2 3; do
-            curl -sfSL "https://raw.githubusercontent.com/elasticdog/transcrypt/5effa13/transcrypt" -o /tmp/transcrypt && break
-            sleep 15
-          done
-          head -c2 /tmp/transcrypt | grep -q '#!' || { echo "::error::transcrypt download is not a script"; exit 1; }
-          chmod +x /tmp/transcrypt && sudo mv /tmp/transcrypt /usr/local/bin/transcrypt
           cd _agg
           echo "Y" | transcrypt --cipher aes-256-cbc --password "$TRANSCRYPT_PASSWORD" --force
           git checkout -- .
