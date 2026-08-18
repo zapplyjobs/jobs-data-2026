@@ -141,4 +141,4 @@ jobs:
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: node scripts/upload-dashboard-data-to-r2.js pipeline-alert.json pipeline-alert-history.jsonl tier-a-source-coverage.json
+        run: node scripts/upload-dashboard-data-to-r2.js pipeline-alert.json pipeline-alert-history.jsonl checks-registry.json tier-a-source-coverage.json  # INF-CHECKS-REGISTRY-1: +checks-registry.json (full catalog for the /alerts tab)
