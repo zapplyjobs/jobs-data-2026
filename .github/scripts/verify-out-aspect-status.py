@@ -98,10 +98,19 @@ def c_infrastructure():
     # repo left this aspect GREEN even though OUT output stopped reaching that surface.
     failing = ([d.get("name") for d in dests if (d.get("verdict", "").upper() != "PASS")]
                + [r.get("repo") for r in repos if (r.get("verdict", "").upper() != "PASS")])
+    # Top-level verdict gate: some health-check failure classes append to issues[] + exit 1
+    # WITHOUT setting any per-item verdict (critical-workflow failures, peer-lag edge cases) —
+    # and the tracking-issue alert step itself can fail (observed 2026-08-17 15:07Z run
+    # 32041303487: checks failed AND issue step failed → zero alert anywhere). Gating on the
+    # aggregate verdict gives those classes an independent aspect-side signal (<=6h).
+    verdict = (hc.get("verdict") or "").upper()
+    if verdict == "FAIL":
+        failing.append(f"verdict={verdict}")
     if not dests and not repos:
         return "YELLOW", "no destinations/repos in health-check", "proxy:out-health-check"
     return (green_if(not failing),
-            f"{len(dests)} destinations + {len(repos)} consumer repos, {len(failing)} failing",
+            f"{len(dests)} destinations + {len(repos)} consumer repos, {len(failing)} failing"
+            + (f" (incl. aggregate {verdict})" if verdict == "FAIL" else ""),
             "proxy:out-health-check")
 
 def c_configuration():
