@@ -1,0 +1,228 @@
+name: Collect Metrics
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/collect-metrics.yml'
+  repository_dispatch:
+    types: [collect-metrics]
+
+concurrency:
+  group: collect-metrics
+  cancel-in-progress: false
+
+jobs:
+  metrics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+          submodules: recursive
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Install transcrypt (vendored action — immune to raw-CDN 429s, INF-TRANSCRYPT-ACTION-1)
+        uses: zapplyjobs/.github/actions/setup-transcrypt@afcb5f41ec28fe10cefcf421fc455d0d89588b1f
+
+      - name: Unlock encrypted files
+        run: |
+          echo "Y" | transcrypt --cipher aes-256-cbc --password "$TRANSCRYPT_PASSWORD" --force
+          git checkout -- .
+          git submodule foreach --recursive '
+            echo "Y" | transcrypt --cipher aes-256-cbc --password "$TRANSCRYPT_PASSWORD" --force 2>/dev/null || true
+            rm -f "$(git rev-parse --git-dir)/index" 2>/dev/null || true
+            git checkout HEAD -- . 2>/dev/null || true
+          ' || true
+
+          # Verify submodule decryption succeeded (INF-TRANSCRYPT-KEY-BACKUP-1).
+          SAMPLE_JS=$(find .github/scripts -name '*.js' -print -quit 2>/dev/null)
+          if [ -n "$SAMPLE_JS" ]; then
+            if ! file -b "$SAMPLE_JS" | grep -qiE 'ASCII|UTF-8|text'; then
+              echo "::error::Submodule decryption FAILED — $SAMPLE_JS is ciphertext. Pipeline would run garbage. Check TRANSCRYPT_PASSWORD + transcrypt unlock."
+              exit 1
+            fi
+          fi
+        env:
+          TRANSCRYPT_PASSWORD: ${{ secrets.TRANSCRYPT_PASSWORD }}
+
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Install shared submodule dependencies
+        run: cd "$GITHUB_WORKSPACE"/.github/scripts/processing && npm install
+
+      - name: Download data from R2
+        id: r2fetch
+        continue-on-error: true
+        run: |
+          echo "📥 Downloading pipeline data from R2..."
+          node -e "
+          const { createR2Client } = require('./.github/scripts/processing/lib/storage/r2-client');
+          const fs = require('fs');
+          const path = require('path');
+          async function main() {
+            const r2 = createR2Client({ prefix: 'data/' });
+            const dataDir = '.github/data';
+            if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+            const files = ['all_jobs.json', 'jobs-metadata.json', 'enrichment-stats.json', 'canada-tech-summary.json', 'board-counts.json', 'bridge-metrics.json', 'posted_jobs.json', 'traffic-history.jsonl', 'bridge-metrics-history.jsonl', 'daily-stats.json', 'history.jsonl', 'history-archive.jsonl', 'enrichment-history.jsonl', 'pipeline-alert.json', 'general-review.json', 'tag-history.jsonl', 'metrics/history.jsonl', 'latency-history.jsonl'];  // INF-TREND-DATA-EXPANSION-1: posted_jobs.json supplies the Discord channel snapshot for build-forward trend history. ENR-OTHER-WORKFLOWS-DLA-1: +metrics/history.jsonl — collect-metrics.js growth-trend history. AGG-CONSUMER-PERCOUNT-DATA-1: +board-counts.json — per-consumer job counts for DASH PipelineTree
+            for (const file of files) {
+              try {
+                const raw = await r2.downloadRaw(file);
+                if (raw) {
+                  const dest = path.join(dataDir, file);
+                  fs.mkdirSync(path.dirname(dest), { recursive: true });  // ENR-OTHER-WORKFLOWS-DLA-1: support nested paths like metrics/history.jsonl
+                  fs.writeFileSync(dest, Buffer.from(raw));
+                  console.log('R2 download OK: ' + file);
+                } else { console.log('R2 SKIP: ' + file + ' (not found)'); }
+              } catch (e) { console.error('R2 ERR: ' + file + ' - ' + e.message); }
+            }
+            console.log('R2 download complete');
+            const { checkFreshness } = require('./.github/scripts/processing/lib/storage/freshness-gate');
+            await checkFreshness({ r2, limitMinutes: 45, label: 'collect-metrics' });
+
+          }
+          main().catch(e => { console.error('R2 fatal: ' + e.message); process.exit(1); });
+          "
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+      - name: Append bridge-metrics to history (bridge-metrics-history.jsonl)
+        if: success() && steps.r2fetch.outputs.pipeline_fresh == 'true'
+        run: |
+          node -e "
+          const fs=require('fs');
+          const src='.github/data/bridge-metrics.json', hist='.github/data/bridge-metrics-history.jsonl';
+          if(!fs.existsSync(src)){console.log('bridge-metrics.json absent — skip history append');process.exit(0);}
+          let cur; try{cur=JSON.parse(fs.readFileSync(src,'utf8'));}catch(e){console.log('bridge-metrics.json unparseable — skip');process.exit(0);}
+          if(!cur.bridge_run_at){console.log('bridge-metrics.json has no bridge_run_at — skip');process.exit(0);}
+          let last=null;
+          if(fs.existsSync(hist)){const lines=fs.readFileSync(hist,'utf8').trim().split('\n').filter(Boolean);if(lines.length)try{last=JSON.parse(lines[lines.length-1]);}catch(e){}}
+          if(last && last.bridge_run_at===cur.bridge_run_at){console.log('bridge-metrics unchanged since last append (bridge_run_at='+cur.bridge_run_at+') — skip');process.exit(0);}
+          fs.appendFileSync(hist, JSON.stringify(Object.assign({history_appended_at:new Date().toISOString()},cur))+'\n');
+          console.log('bridge-metrics-history.jsonl appended (bridge_run_at='+cur.bridge_run_at+')');
+          "
+      - name: Collect metrics
+        if: success() && steps.r2fetch.outputs.pipeline_fresh == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node .github/scripts/processing/lib/collect-metrics.js
+
+      - name: Generate consolidated metrics
+        if: success() && steps.r2fetch.outputs.pipeline_fresh == 'true'
+        continue-on-error: true  # INF-METRICS-SILENT-CLEANUP-1: generate-zjp-metrics now exits non-zero on fatal (was swallowed → exit 0 → silent stale dashboard). continue-on-error keeps a failure visible (red step) without aborting sjd-jobs/canada-bridge commit; check-25 (r2-freshness) is the staleness backstop.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          DATA_PROXY_TOKEN: ${{ secrets.DATA_PROXY_TOKEN }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}  # INF-SUPABASE-HEALTH-CHECK: depth metrics (connections, rollback rate, cache hit) for dashboard display
+        run: node .github/scripts/processing/lib/generate-zjp-metrics.js
+
+      - name: Produce sjd-jobs.json (INF-SJD-PAGINATION-1)
+        if: success() && steps.r2fetch.outputs.pipeline_fresh == 'true'
+        continue-on-error: true  # Non-critical: sjd-jobs.json is a cache; don't break collect-metrics if the Supabase query times out
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          node scripts/produce-sjd-jobs.js
+          # INF-R2-STALERELIC-CLUSTER-1: sjd-jobs.json home = STORAGE cache (SJD consumer is kind=supabase; nothing reads the R2 copy — frozen Aug-4 relic, deletion approved separately). No R2_* env here BY DECISION: uploader writes Storage only.
+          node scripts/upload-dashboard-data-to-r2.js sjd-jobs.json
+
+      - name: Commit and push metrics
+        if: success() && steps.r2fetch.outputs.pipeline_fresh == 'true'
+        run: |
+          git config user.email "bot@zapplyjobs.com"
+          git config user.name "Metrics Bot"
+          git add .github/data/canada-tech-summary.json .github/data/bridge-metrics.json .github/data/bridge-metrics-history.jsonl || exit 0
+          git diff --cached --quiet && { echo "No changes to commit"; exit 0; }
+          git commit -m "chore: update metrics [skip ci]"
+          for i in 1 2 3; do
+            git stash --include-untracked
+            git pull --rebase --strategy-option=theirs origin main
+            git push && break
+            echo "Push attempt $i failed, retrying in 5s..."
+            sleep 5
+          done
+      - name: Upload dashboard data to R2 (INF-R2-GITCUTOVER-1)
+        if: success()
+        continue-on-error: true
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/upload-dashboard-data-to-r2.js zjp-metrics.json metrics/latest.json metrics/history.jsonl bridge-metrics-history.jsonl latency-history.jsonl  # INF-LATENCY-TRENDS-WIDGET-1: +latency history upload  # INF-TRAFFICREFERRERS-NOPERDAY-1: removed traffic-history.jsonl — collect-metrics doesn't own it (daily-stats does); re-uploading caused a race that overwrote daily-stats' daily update with a stale version every 15 min
+
+      - name: Dual-write metrics to Supabase Storage (R2-elimination INF E140)
+        if: success()
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          node -e '
+          const fs = require("fs"), path = require("path");
+          const url = process.env.SUPABASE_URL, key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+          if (!url || !key) { console.log("Storage dual-write skipped (no Supabase creds)"); process.exit(0); }
+          const dir = path.join(".github", "data");
+          const files = ["metrics/latest.json", "metrics/history.jsonl", "bridge-metrics-history.jsonl"];
+          (async () => {
+            for (const f of files) {
+              const p = path.join(dir, f);
+              if (!fs.existsSync(p)) { console.log("SKIP " + f); continue; }
+              const ct = f.endsWith(".jsonl") ? "application/x-ndjson" : "application/json";
+              const r = await fetch(url + "/storage/v1/object/pipeline-data/" + f, { method: "PUT", headers: { Authorization: "Bearer " + key, "Content-Type": ct }, body: fs.readFileSync(p) });
+              console.log((r.ok ? "Storage OK: " : "Storage FAIL: ") + f + (r.ok ? "" : " HTTP " + r.status));
+            }
+          })();
+          '
+
+      - name: Publish metrics to Supabase directly (Phase 1 R2 elimination)
+        if: success()
+        continue-on-error: true
+        run: node .github/scripts/processing/lib/publish-metrics-to-edge.js --data-dir .github/data
+        env:
+          EDGE_FUNCTION_URL: https://xxmhgagpbxjflajoaahy.supabase.co/functions/v1/publish-metrics-function
+          PUBLISH_SECRET: ${{ secrets.PUBLISH_SECRET }}
+
+      - name: Trigger Supabase publish (wave link)
+        if: success()
+        run: |
+          curl -sf -X POST "https://api.github.com/repos/zapplyjobs/jobs-data-2026/actions/workflows/publish-metrics-to-supabase.yml/dispatches" \
+            -H "Authorization: Bearer ${GH_PAT}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            -d '{"ref":"main"}'
+          echo "Triggered Supabase publish (wave link — dashboard data refreshes right after metrics collection)"
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+
+      - name: Trigger pipeline alert check (wave link)
+        if: success()
+        run: |
+          curl -sf -X POST "https://api.github.com/repos/zapplyjobs/jobs-data-2026/actions/workflows/pipeline-alert.yml/dispatches" \
+            -H "Authorization: Bearer ${GH_PAT}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            -d '{"ref":"main"}'
+          echo "Triggered pipeline alert (wave link — alerts checked right after metrics collection)"
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
