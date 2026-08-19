@@ -10,7 +10,7 @@ name: OUT Dead Link Check
 # http_code is an int for status-code deaths and the string 'ats-closed' for ATS-listing deaths.
 on:
   schedule:
-    - cron: '0 6 * * 1'  # Weekly Monday 6am UTC
+    - cron: '0 6 * * *'  # Daily 06:00 UTC (was weekly Monday; daily since OUT-ATSCLOSED-HIDE-1 — the consumer now hides ats-closed URLs each publisher cycle, so scan freshness = hide latency)
   workflow_dispatch:
   push:
     paths:
