@@ -180,6 +180,15 @@ jobs:
                         r["issues"].append(f"README stale: last push {push_age_h:.1f}h ago (>6h threshold)")
                 except (ValueError, TypeError):
                     pass
+            elif pushed_at:
+                # Static repos (community lists + manual resources): no pipeline push, but the
+                # operator still needs a freshness signal — expose last-commit age (informational
+                # only; no threshold: curated lists can legitimately go weeks between commits).
+                try:
+                    commit_dt = datetime.datetime.fromisoformat(pushed_at.replace("Z", "+00:00"))
+                    r["last_commit_age_h"] = round((now - commit_dt).total_seconds() / 3600, 1)
+                except (ValueError, TypeError):
+                    pass
 
             # README data quality check (OUT-MONITORING-README-DATA-QUALITY-1)
             # Check representative repos for visa fill rate + date coverage
