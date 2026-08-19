@@ -22,10 +22,11 @@ repos = [
     "New-Grad-Hardware-Engineering-Jobs-2027", "New-Grad-Healthcare-Jobs-2027",
     "New-Grad-IT-Jobs-2027",
     "Canada-Jobs-2027", "Canada-Internships-2027",
-    # 2026 boards (OUT-DEADLINK-SCAN-FP-1: previously unscanned)
-    "New-Grad-Jobs-2026", "Internships-2026",
-    "New-Grad-Software-Engineering-Jobs-2026", "New-Grad-Data-Science-Jobs-2026",
-    "New-Grad-Hardware-Engineering-Jobs-2026", "New-Grad-Healthcare-Jobs-2026",
+    # 2026 alias names REMOVED post-swap (2026-08-19): they are 301 redirects to the
+    # -2027 boards (or, post-swap, to the community lists), so scanning them re-scanned
+    # identical READMEs and DOUBLE-COUNTED every dead link under a phantom repo name
+    # (101 rows reported for 63 unique dead). OUT-DEADLINK-SCAN-FP-1's rationale is
+    # void: a redirect of the same content adds no detection coverage.
     # reference / evergreen
     "Research-Internships-for-Undergraduates", "underclassmen-internships",
     "resume-samples-2026", "interview-handbook-2026",
