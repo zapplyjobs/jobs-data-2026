@@ -70,7 +70,7 @@ jobs:
             const r2 = createR2Client({ prefix: 'data/' });
             const dataDir = '.github/data';
             if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-            const files = ['all_jobs.json', 'jobs-metadata.json', 'enrichment-stats.json', 'canada-tech-summary.json', 'board-counts.json', 'bridge-metrics.json', 'posted_jobs.json', 'traffic-history.jsonl', 'bridge-metrics-history.jsonl', 'daily-stats.json', 'history.jsonl', 'history-archive.jsonl', 'enrichment-history.jsonl', 'pipeline-alert.json', 'general-review.json', 'tag-history.jsonl', 'metrics/history.jsonl'];  // INF-TREND-DATA-EXPANSION-1: posted_jobs.json supplies the Discord channel snapshot for build-forward trend history. ENR-OTHER-WORKFLOWS-DLA-1: +metrics/history.jsonl — collect-metrics.js growth-trend history. AGG-CONSUMER-PERCOUNT-DATA-1: +board-counts.json — per-consumer job counts for DASH PipelineTree
+            const files = ['all_jobs.json', 'jobs-metadata.json', 'enrichment-stats.json', 'canada-tech-summary.json', 'board-counts.json', 'bridge-metrics.json', 'posted_jobs.json', 'traffic-history.jsonl', 'bridge-metrics-history.jsonl', 'daily-stats.json', 'history.jsonl', 'history-archive.jsonl', 'enrichment-history.jsonl', 'pipeline-alert.json', 'general-review.json', 'tag-history.jsonl', 'metrics/history.jsonl', 'latency-history.jsonl']  # INF-LATENCY-TRENDS-WIDGET-1: per-stage latency history (download for append);  // INF-TREND-DATA-EXPANSION-1: posted_jobs.json supplies the Discord channel snapshot for build-forward trend history. ENR-OTHER-WORKFLOWS-DLA-1: +metrics/history.jsonl — collect-metrics.js growth-trend history. AGG-CONSUMER-PERCOUNT-DATA-1: +board-counts.json — per-consumer job counts for DASH PipelineTree
             for (const file of files) {
               try {
                 const raw = await r2.downloadRaw(file);
@@ -169,7 +169,7 @@ jobs:
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: node scripts/upload-dashboard-data-to-r2.js zjp-metrics.json metrics/latest.json metrics/history.jsonl bridge-metrics-history.jsonl  # INF-TRAFFICREFERRERS-NOPERDAY-1: removed traffic-history.jsonl — collect-metrics doesn't own it (daily-stats does); re-uploading caused a race that overwrote daily-stats' daily update with a stale version every 15 min
+        run: node scripts/upload-dashboard-data-to-r2.js zjp-metrics.json metrics/latest.json metrics/history.jsonl bridge-metrics-history.jsonl latency-history.jsonl  # INF-LATENCY-TRENDS-WIDGET-1: +latency history upload  # INF-TRAFFICREFERRERS-NOPERDAY-1: removed traffic-history.jsonl — collect-metrics doesn't own it (daily-stats does); re-uploading caused a race that overwrote daily-stats' daily update with a stale version every 15 min
 
       - name: Dual-write metrics to Supabase Storage (R2-elimination INF E140)
         if: success()
