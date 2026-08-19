@@ -65,9 +65,17 @@ jobs:
       - name: Install processing submodule dependencies
         run: cd .github/scripts/processing && npm ci
 
-      - name: Fetch metric blobs from Storage
+      - name: Fetch metric blobs from R2 (canonical)
+        # TAG-TAGHISTORY-FROZEN-1: r2-fetch-metrics.js reads R2 (data/ prefix) — the
+        # R2-elim-era Storage reads served frozen mirrors over the fresh R2-sourced
+        # row every cycle. bridge-metrics.json still comes from Storage (bridge
+        # worker is its only writer) — see the script header.
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
         run: node .github/scripts/processing/scripts/r2-fetch-metrics.js .github/data
 
       - name: POST metric blobs to the Supabase Edge Function
