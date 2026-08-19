@@ -254,10 +254,6 @@ jobs:
               .map(obj => obj.key.replace(/^data\//, ''))
               .filter(isEnrOwnedSidecar);
             const staleSidecars = existingSidecars.filter(name => !desiredSidecars.has(name));
-            for (const stale of staleSidecars) {
-              try { await r2.remove(stale); console.log('DELETE ENR-OWNED: ' + stale); }
-              catch (e) { console.log('SKIP DELETE (R2 gone): ' + stale); }
-            }
 
             let ok = 0, fail = 0;
             for (const file of files) {
@@ -273,6 +269,24 @@ jobs:
               } catch (e) { console.error('ERR: ' + file + ' - ' + e.message); fail++; }
             }
 
+            // ENR-ENRICHED9-ENUMERATION-RACE-1: superseded ENR-owned sidecars are deleted ONLY
+            // AFTER the full replacement set is uploaded (parity with AGG desc-backfill's
+            // upload->prune step order). Delete-first raced the bridge's enumeration->get on
+            // chunk-count shrinks: the 2026-08-19T02:03:20Z rebuild (9 chunks -> 8) removed
+            // descriptions-enriched-9.jsonl from R2 at 02:03:21Z, 22s before the renumbered
+            // chunks landed; a bridge that enumerated 9 shards got 'R2 object not found' on
+            // GET (02:04:37Z). Skipping the prune on any upload failure keeps the old shard
+            // readable until a later successful publish replaces it.
+            if (staleSidecars.length > 0) {
+              if (fail === 0) {
+                for (const stale of staleSidecars) {
+                  try { await r2.remove(stale); console.log('DELETE ENR-OWNED (post-upload): ' + stale); }
+                  catch (e) { console.log('SKIP DELETE (R2 gone): ' + stale); }
+                }
+              } else {
+                console.log('SKIP stale-sidecar prune: ' + fail + ' upload failure(s) — superseded shards kept readable');
+              }
+            }
             await r2.writeManifest({ files_uploaded: ok, files_failed: fail, stage: 'enrichment' });
             console.log('R2 upload done: ' + ok + ' ok, ' + fail + ' failed');
           }
