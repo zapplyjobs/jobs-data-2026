@@ -5,7 +5,7 @@ name: SUP Aspect Status (verified)
 # INF-ASPECT-CADENCE-1: wires SUP to the 6h schedule (matching OUT's cadence).
 on:
   schedule:
-    - cron: '0 * * * *'  # every hour — script is just API calls, negligible cost
+    - cron: '15 * * * *'  # hourly at :15 — offset from the 06:00 daily decay-monitor run (completes ~06:10) so the freshness check never samples mid-run (SUP-CIGATE-IDENT-FYI-1 race fix)
   workflow_dispatch:
   push:
     paths:
