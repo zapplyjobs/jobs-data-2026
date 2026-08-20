@@ -161,6 +161,30 @@ jobs:
                 hits = sorted(set(secret_re.findall(readme)))
                 if hits:
                     r["issues"].append(f"EXPOSED SECRETS: {hits}")
+                # OUT-IMAGECHECK-1 (2026-08-20): every README-referenced image must exist
+                # in the repo. Twice-bitten class (swap covers 08-18; IT repo-rss.png 08-20),
+                # both human-caught. Rides this workflow's existing alert/tracking-issue path;
+                # ~3 listing calls per repo. Checks the CONSUMED reference set, not a hand list.
+                img_refs = sorted(set(re.findall(r'src="images/([A-Za-z0-9\-/.]+\.png)"', readme)))
+                have = set()
+                def _list_images(sub):
+                    try:
+                        rq2 = urllib.request.Request(
+                            f"https://api.github.com/repos/zapplyjobs/{repo}/contents/images/{sub}".rstrip("/"),
+                            headers={"User-Agent": "out-health-check/1.0", "Accept": "application/vnd.github+json", "Authorization": f"token {gh_token}"}
+                        )
+                        with urllib.request.urlopen(rq2, timeout=10) as resp2:
+                            for _it in json.loads(resp2.read()):
+                                have.add(_it["name"])
+                    except Exception:
+                        pass
+                _list_images("")
+                for _sub in {p.split("/")[0] for p in img_refs if "/" in p}:
+                    _list_images(_sub)
+                missing_images = [p for p in img_refs if p.split("/")[-1] not in have]
+                if missing_images:
+                    r["issues"].append(f"BROKEN IMAGE REFS ({len(missing_images)}): {missing_images[:5]}")
+                    r["missing_images"] = missing_images
             except Exception as e:
                 # Non-fatal: README timeout shouldn't fail entire health check
                 print(f"WARNING: {repo}: README fetch failed — secrets scan skipped (non-fatal): {e}")
