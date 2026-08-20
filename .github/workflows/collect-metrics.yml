@@ -145,7 +145,7 @@ jobs:
           node scripts/upload-dashboard-data-to-r2.js sjd-jobs.json
 
 
-      - name: Enrich output-funnel with public-board serve counts (INF-SJDZAPPLY-SERVECOUNTERS-1)
+      - name: Publish sjd serve count for the publisher funnel (INF-SJDZAPPLY-SERVECOUNTERS-1)
         if: success() && steps.r2fetch.outputs.pipeline_fresh == 'true'
         continue-on-error: true  # Fail-open: widget renders served=null honestly; never break the cycle
         env:
@@ -153,7 +153,7 @@ jobs:
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
-        run: node scripts/enrich-output-funnel.js
+        run: node scripts/publish-sjd-serve-count.js
       - name: Commit and push metrics
         if: success() && steps.r2fetch.outputs.pipeline_fresh == 'true'
         run: |
