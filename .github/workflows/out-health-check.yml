@@ -165,7 +165,11 @@ jobs:
                 # in the repo. Twice-bitten class (swap covers 08-18; IT repo-rss.png 08-20),
                 # both human-caught. Rides this workflow's existing alert/tracking-issue path;
                 # ~3 listing calls per repo. Checks the CONSUMED reference set, not a hand list.
-                img_refs = sorted(set(re.findall(r'src="images/([A-Za-z0-9\-/.]+\.png)"', readme)))
+                # Cadence gate (operator constraint: once a day AT MOST): only the 07:00
+                # UTC hourly cycle executes the image sweep (fresh runner each run — no
+                # cross-run state, so a pure hour gate is the honest once-daily bound).
+                _do_image_check = now.hour == 7
+                img_refs = sorted(set(re.findall(r'src="images/([A-Za-z0-9\-/.]+\.png)"', readme))) if _do_image_check else []
                 have = set()
                 def _list_images(sub):
                     try:
@@ -185,6 +189,7 @@ jobs:
                 if missing_images:
                     r["issues"].append(f"BROKEN IMAGE REFS ({len(missing_images)}): {missing_images[:5]}")
                     r["missing_images"] = missing_images
+
             except Exception as e:
                 # Non-fatal: README timeout shouldn't fail entire health check
                 print(f"WARNING: {repo}: README fetch failed — secrets scan skipped (non-fatal): {e}")
