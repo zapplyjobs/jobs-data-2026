@@ -127,6 +127,7 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}  # INF-SUPABASE-HEALTH-CHECK: Management API for depth metrics (connections, rollback rate, cache hit)
+          SUPABASE_TOKEN_EXPIRES: ${{ vars.SUPABASE_TOKEN_EXPIRES }}  # INF-SUPABASE-TOKEN-EXPIRY-1: rotation date (YYYY-MM-DD) — check-42 warns <=14d. Update this variable at each token rotation.
         run: node .github/scripts/processing/lib/pipeline-alert.js
       - name: Build Tier A source coverage report
         run: node .github/scripts/source-coverage-audit.js
