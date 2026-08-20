@@ -144,6 +144,16 @@ jobs:
           # INF-R2-STALERELIC-CLUSTER-1: sjd-jobs.json home = STORAGE cache (SJD consumer is kind=supabase; nothing reads the R2 copy — frozen Aug-4 relic, deletion approved separately). No R2_* env here BY DECISION: uploader writes Storage only.
           node scripts/upload-dashboard-data-to-r2.js sjd-jobs.json
 
+
+      - name: Enrich output-funnel with public-board serve counts (INF-SJDZAPPLY-SERVECOUNTERS-1)
+        if: success() && steps.r2fetch.outputs.pipeline_fresh == 'true'
+        continue-on-error: true  # Fail-open: widget renders served=null honestly; never break the cycle
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: node scripts/enrich-output-funnel.js
       - name: Commit and push metrics
         if: success() && steps.r2fetch.outputs.pipeline_fresh == 'true'
         run: |
