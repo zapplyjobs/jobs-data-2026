@@ -386,7 +386,7 @@ jobs:
             -o .github/data/lmia-sponsors.json && echo "LMIA data downloaded" \
             || { echo "LMIA data not available — skipping Canada visa"; exit 0; }
           node .github/scripts/processing/enrich-canada-visa.js
-          for f in canada-jobs-enriched.json canada-visa-stats.json; do
+          for f in canada-jobs-enriched.json; do
             [ -f ".github/data/$f" ] && curl -sf -X PUT \
               -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
               -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
@@ -405,7 +405,7 @@ jobs:
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: node scripts/upload-dashboard-data-to-r2.js enrichment-stats.json enrichment-history.jsonl  # AGG-METADATA-STALE-1: removed jobs-metadata.json — enrich-jobs was re-uploading stale copy (race condition with fetch-jobs's fresh upload)
+        run: node scripts/upload-dashboard-data-to-r2.js enrichment-stats.json enrichment-history.jsonl canada-visa-stats.json  # AGG-METADATA-STALE-1: removed jobs-metadata.json — enrich-jobs was re-uploading stale copy (race condition with fetch-jobs's fresh upload); canada-visa-stats.json: ENR-CANADA-COVERAGE-SLICE-1 — publish lane stats to R2 canonical for the DASH Canada tab (was Storage-only)
 
       - name: Publish to Supabase Edge (Phase 2 R2 elimination)
         if: success()
