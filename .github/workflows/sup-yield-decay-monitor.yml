@@ -179,7 +179,7 @@ jobs:
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
 
-      - name: Fail run on parity findings (alert surfacing: red run + check-47 workflow-liveness sees it)
+      - name: Fail run on parity findings (alert surfacing — red run + check-47 workflow-liveness sees it)
         if: steps.freshness.outputs.pipeline_fresh == 'true' && steps.parity.outcome == 'failure'
         run: |
           echo "::error::SOURCE PARITY FINDINGS — see parity step output + data/sup_source_parity.json (fetched-vs-pool retention below 40% on custom sources)"
