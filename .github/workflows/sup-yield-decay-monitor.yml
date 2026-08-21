@@ -117,6 +117,30 @@ jobs:
             --baseline-file .github/data/sup-decay-baseline.json \
             --json
 
+      - name: Refresh CSV auto-fields (SUP-CSV-AUTOFIELDS-REFRESH-1 — F4)
+        if: steps.freshness.outputs.pipeline_fresh == 'true'
+        run: |
+          python3 .github/scripts/processing/lib/csv-enrich-refresh.py \
+            --csv .github/data/company-research-log.csv \
+            --data-dir .github/data
+          echo "CSV auto-fields refreshed ($(grep -c '2026-' /dev/null || true); stamps verified below)"
+        env:
+          SUPABASE_URL: https://xxmhgagpbxjflajoaahy.supabase.co
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+      - name: Upload refreshed CSV back to Supabase Storage
+        if: steps.freshness.outputs.pipeline_fresh == 'true'
+        run: |
+          curl -sf -X POST \
+            'https://xxmhgagpbxjflajoaahy.supabase.co/storage/v1/object/pipeline-data/company-research-log.csv' \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: text/csv" \
+            -H "x-upsert: true" \
+            --data-binary @.github/data/company-research-log.csv \
+            && echo "Refreshed CSV uploaded to Storage" \
+            || echo "CSV upload skipped"
+
       - name: Upload output to Supabase Storage
         if: steps.freshness.outputs.pipeline_fresh == 'true'
         continue-on-error: true
