@@ -99,11 +99,26 @@ jobs:
 
       - name: Append bridge-metrics to history (bridge-metrics-history.jsonl)
         if: success() && steps.r2fetch.outputs.pipeline_fresh == 'true'
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
           node -e "
+          (async()=>{
           const fs=require('fs');
           const src='.github/data/bridge-metrics.json', hist='.github/data/bridge-metrics-history.jsonl';
-          if(!fs.existsSync(src)){console.log('bridge-metrics.json absent — skip history append');process.exit(0);}
+          // INF-BRIDGE-METRICSWRITER-REVIVE-1: bridge-metrics.json's ONE live home is Supabase
+          // Storage (the worker writes only there since the Jul-29 R2-elim; R2 was restored
+          // Aug-4 but this file never rejoined R2). The R2 download above therefore skips it,
+          // and history appends silently stopped 2026-08-03. Fetch the Storage copy when the
+          // R2 copy is absent; fail-open (skip) preserves old behavior on fetch error.
+          if(!fs.existsSync(src)){
+            const url=process.env.SUPABASE_URL+'/storage/v1/object/pipeline-data/bridge-metrics.json';
+            const res=await fetch(url,{headers:{Authorization:'Bearer '+process.env.SUPABASE_SERVICE_ROLE_KEY}});
+            if(!res.ok){console.log('bridge-metrics.json absent on R2 and Storage fetch '+res.status+' — skip history append');process.exit(0);}
+            fs.writeFileSync(src, Buffer.from(await res.arrayBuffer()));
+            console.log('bridge-metrics.json fetched from Storage home');
+          }
           let cur; try{cur=JSON.parse(fs.readFileSync(src,'utf8'));}catch(e){console.log('bridge-metrics.json unparseable — skip');process.exit(0);}
           if(!cur.bridge_run_at){console.log('bridge-metrics.json has no bridge_run_at — skip');process.exit(0);}
           let last=null;
@@ -111,6 +126,7 @@ jobs:
           if(last && last.bridge_run_at===cur.bridge_run_at){console.log('bridge-metrics unchanged since last append (bridge_run_at='+cur.bridge_run_at+') — skip');process.exit(0);}
           fs.appendFileSync(hist, JSON.stringify(Object.assign({history_appended_at:new Date().toISOString()},cur))+'\n');
           console.log('bridge-metrics-history.jsonl appended (bridge_run_at='+cur.bridge_run_at+')');
+          })();
           "
       - name: Collect metrics
         if: success() && steps.r2fetch.outputs.pipeline_fresh == 'true'
