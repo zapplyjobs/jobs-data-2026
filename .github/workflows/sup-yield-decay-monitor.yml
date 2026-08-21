@@ -139,7 +139,7 @@ jobs:
             -H "x-upsert: true" \
             --data-binary @.github/data/company-research-log.csv \
             && echo "Refreshed CSV uploaded to Storage" \
-            || echo "CSV upload skipped"
+            || { echo "::error::CSV upload FAILED — Storage would silently stay stale (SSOT surface; do not swallow)"; exit 1; }
 
       - name: Upload output to Supabase Storage
         if: steps.freshness.outputs.pipeline_fresh == 'true'
