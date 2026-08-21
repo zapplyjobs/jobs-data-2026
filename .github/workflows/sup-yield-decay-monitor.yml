@@ -179,12 +179,6 @@ jobs:
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
 
-      - name: Fail run on parity findings (alert surfacing — red run + check-47 workflow-liveness sees it)
-        if: steps.freshness.outputs.pipeline_fresh == 'true' && steps.parity.outcome == 'failure'
-        run: |
-          echo "::error::SOURCE PARITY FINDINGS — see parity step output + data/sup_source_parity.json (fetched-vs-pool retention below 40% on custom sources)"
-          exit 1
-
       - name: Upload output to Supabase Storage
         if: steps.freshness.outputs.pipeline_fresh == 'true'
         continue-on-error: true
@@ -229,3 +223,10 @@ jobs:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TEAM_TOKEN }}
           DISCORD_PIPELINE_ALERT_CHANNEL_ID: ${{ secrets.DISCORD_PIPELINE_ALERT_CHANNEL_ID }}
         run: node .github/scripts/processing/lib/sup-decay-alert.js
+
+      - name: Fail run on parity findings (LAST step — never blocks decay outputs/alerts)
+        if: steps.freshness.outputs.pipeline_fresh == 'true' && steps.parity.outcome == 'failure'
+        run: |
+          echo "::error::SOURCE PARITY FINDINGS — see parity step output + data/sup_source_parity.json (fetched-vs-pool retention below 40% on custom sources)"
+          exit 1
+
