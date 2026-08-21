@@ -141,6 +141,50 @@ jobs:
             && echo "Refreshed CSV uploaded to Storage" \
             || { echo "::error::CSV upload FAILED — Storage would silently stay stale (SSOT surface; do not swallow)"; exit 1; }
 
+      - name: Download jobs-metadata.json from R2 (parity input)
+        if: steps.freshness.outputs.pipeline_fresh == 'true'
+        run: |
+          pip install -q boto3
+          python3 -c "import boto3, os; s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']); s3.download_file(os.environ['R2_BUCKET_NAME'], 'data/jobs-metadata.json', '.github/data/jobs-metadata.json'); print('Downloaded jobs-metadata.json')"
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+
+      - name: Run source-parity monitor (L1 — SUP-SOURCE-PARITY-MONITOR-1)
+        id: parity
+        if: steps.freshness.outputs.pipeline_fresh == 'true'
+        continue-on-error: true
+        run: |
+          node .github/scripts/processing/lib/sup-source-parity-monitor.js \
+            --meta .github/data/jobs-metadata.json \
+            --jobs .github/data/all_jobs.json \
+            --out .github/data/sup_source_parity.json
+
+      - name: Upload parity artifact to R2 + Storage
+        if: steps.freshness.outputs.pipeline_fresh == 'true' && steps.parity.outcome != 'skipped'
+        continue-on-error: true
+        run: |
+          pip install -q boto3
+          python3 -c "import boto3, os; s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']); s3.put_object(Bucket=os.environ['R2_BUCKET_NAME'], Key='data/sup_source_parity.json', Body=open('.github/data/sup_source_parity.json','rb').read(), ContentType='application/json'); print('uploaded sup_source_parity.json to R2')"
+          curl -sf -X POST 'https://xxmhgagpbxjflajoaahy.supabase.co/storage/v1/object/pipeline-data/sup_source_parity.json' \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json" -H "x-upsert: true" \
+            --data-binary @.github/data/sup_source_parity.json || echo "Storage mirror skipped"
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+
+      - name: Fail run on parity findings (alert surfacing: red run + check-47 workflow-liveness sees it)
+        if: steps.freshness.outputs.pipeline_fresh == 'true' && steps.parity.outcome == 'failure'
+        run: |
+          echo "::error::SOURCE PARITY FINDINGS — see parity step output + data/sup_source_parity.json (fetched-vs-pool retention below 40% on custom sources)"
+          exit 1
+
       - name: Upload output to Supabase Storage
         if: steps.freshness.outputs.pipeline_fresh == 'true'
         continue-on-error: true
