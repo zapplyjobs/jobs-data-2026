@@ -106,13 +106,59 @@ for repo in repos:
     for u in filtered:
         all_urls.setdefault(u, set()).add(repo)
 
+# ── OUT-LIFECYCLE-P4-MEMORY-1: carry-over with re-verification ────────────────
+# The artifact was rebuilt daily from BOARD-VISIBLE urls only — but the consumer
+# hides dead urls from the boards, so a hidden url drops out of the next scan's
+# input, the artifact forgets it, and the publisher re-exposes it next cycle
+# (verified 2026-08-22: 08-21 artifact 35 urls → boards clean → 08-22 artifact
+# 0 urls → boards re-polluted same morning). Fix: load the previous artifact's
+# ats-closed set, feed those urls through the SAME verdict paths (tenant listing
+# / posting API / HTTP), and keep the ones still dead. Alive ⇒ dropped (job
+# reopened — it may legitimately return to the boards). Unknown ⇒ retained with
+# stale last_seen (proven closed before; an inconclusive re-check must not
+# re-expose it); pruned at CARRY_MAX_AGE_DAYS, which covers the 14d pool TTL.
+CARRY_MAX_AGE_DAYS = 16
+prev_dead = {}  # url → {"repos": [...], "first_seen": iso}
+try:
+    _prev_src = os.environ.get("PREV_DEAD_LINKS_URL",
+        "https://zjp-data-proxy.wild-queen-069e.workers.dev/data/dead-links.json")
+    _req = urllib.request.Request(_prev_src,
+        headers={'X-Proxy-Token': os.environ.get('DATA_PROXY_TOKEN', '')})
+    with urllib.request.urlopen(_req, timeout=20) as _r:
+        _prev = json.loads(_r.read())
+    _prev_gen = _prev.get('generated_at') or ''
+    for row in _prev.get('dead_links', []):
+        u = row.get('url')
+        if not isinstance(u, str) or row.get('http_code') != 'ats-closed':
+            continue  # only the hideable class needs memory
+        seen = row.get('first_seen') or _prev_gen
+        try:
+            _age = (time.time() - datetime.datetime.fromisoformat(seen).timestamp()) / 86400.0
+        except Exception:
+            _age = 0.0  # unparsable date ⇒ retain (safe; 16d prune still bounds it)
+        if _age > CARRY_MAX_AGE_DAYS:
+            continue
+        e = prev_dead.setdefault(u, {"repos": [], "first_seen": seen})
+        if row.get('repo'):
+            e["repos"].append(row['repo'])
+    print(f"Carried over {len(prev_dead)} ats-closed url(s) from previous artifact (max age {CARRY_MAX_AGE_DAYS}d)")
+except Exception as e:
+    print(f"Previous artifact unavailable (carry-over skipped — self-heals on a later run): {e}")
+
+for u, e in prev_dead.items():
+    _s = all_urls.setdefault(u, set())
+    _s.update(r for r in e["repos"] if r and not r.startswith('('))
+    if not _s:
+        _s.add("(carried)")
+
 print(f"\nTotal unique URLs to check: {len(all_urls)}")
 
-# Cap at 3000 URLs (OUT-DEADLINK-SCAN-FP-1 polish: exhaustive — current pool ~2700; was sampling ~25%)
+# Cap at 6000 URLs (OUT-LIFECYCLE-P4-DISPLAY-1: the 14d display window roughly
+# doubles the visible board set vs the old ~2700-at-7d; 6000 covers it. Was 3000.)
 urls_to_check = list(all_urls.keys())
-if len(urls_to_check) > 3000:
-    print(f"Sampling 3000 of {len(urls_to_check)} URLs")
-    urls_to_check = urls_to_check[:3000]
+if len(urls_to_check) > 6000:
+    print(f"Sampling 6000 of {len(urls_to_check)} URLs")
+    urls_to_check = urls_to_check[:6000]
 
 # Check URLs concurrently (15 at a time — raised from 10 for the larger 2026+2027 set)
 results = {}
@@ -335,9 +381,10 @@ if ash_urls:
     print(f"  Ashby+WD verdicts: {ats_stats}")
 
 # Storm guard: a listing-side anomaly (proxy outage, WD behavior change) must not
-# mass-close live jobs. If ATS deaths exceed 5% of judged rows (or 25, whichever
-# is larger), keep them in ats_watch instead of dead_links.
-storm_cap = max(25, int(ats_stats["judged"] * 0.05))
+# mass-close live jobs. Expected closure rate scales with display age: ~1.2% at
+# ≤7d, measured 8.7% at 7-14d (out_deadzone_liveness.json 2026-08-21) — a 14d
+# window blends to ~5-6%, so the cap is max(200, 12% of judged) (was max(25, 5%)).
+storm_cap = max(200, int(ats_stats["judged"] * 0.12))
 if len(ats_dead_pending) > storm_cap:
     print(f"  ⚠️ ATS storm guard: {len(ats_dead_pending)} deaths > cap {storm_cap} — NOT flipping to dead_links")
     for u, via, note in ats_dead_pending:
@@ -348,6 +395,31 @@ else:
         for repo in all_urls[u]:
             dead_links.append({"repo": repo, "url": u, "http_code": "ats-closed", "closed_via": via, "note": note})
     print(f"  ATS-closed links flipped to dead_links: {len(ats_dead_pending)} urls")
+
+# ── OUT-LIFECYCLE-P4-MEMORY-1: retention + bookkeeping ───────────────────────
+# Fresh dead rows get first_seen/last_seen; carried urls whose re-check was
+# inconclusive (storm-held, capped tenant, fetch error → ats_watch) are RETAINED
+# with their previous verdict; carried urls that re-verified ALIVE (or recorded
+# no verdict shape at all) are dropped — the job may have reopened.
+_today = now.date().isoformat()
+_watch_urls = {w.get('url') for w in ats_watch}
+_final_urls = {d['url'] for d in dead_links}
+_retained = 0
+for u, e in prev_dead.items():
+    if u in _final_urls:
+        continue
+    if u in _watch_urls:
+        for r in sorted(all_urls.get(u, {"(carried)"})):
+            dead_links.append({"repo": r, "url": u, "http_code": "ats-closed",
+                               "closed_via": "carry-over-unverified",
+                               "note": "re-check inconclusive; retained from previous closure verdict"})
+        _retained += 1
+for d in dead_links:
+    _e = prev_dead.get(d['url'])
+    d['first_seen'] = _e['first_seen'] if _e else _today
+    d['last_seen'] = _today
+print(f"Carry-over: retained {_retained} unverified url(s); "
+      f"{len(prev_dead) - _retained - len(_final_urls & set(prev_dead))} dropped (re-verified alive or no verdict)")
 
 
 output = {
