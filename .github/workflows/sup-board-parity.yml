@@ -1,0 +1,127 @@
+name: SUP Board Parity Monitor (L2)
+
+on:
+  schedule:
+    - cron: '0 7 * * 1'  # Weekly Monday 07:00Z (after the 06:00Z daily decay run)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sup-board-parity
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+          submodules: recursive
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Install transcrypt (vendored action — immune to raw-CDN 429s, INF-TRANSCRYPT-ACTION-1)
+        uses: zapplyjobs/.github/actions/setup-transcrypt@afcb5f41ec28fe10cefcf421fc455d0d89588b1f
+
+      - name: Unlock encrypted files
+        run: |
+          echo "Y" | transcrypt --cipher aes-256-cbc --password "$TRANSCRYPT_PASSWORD" --force
+          git checkout -- . 2>/dev/null || true
+          git submodule foreach --recursive '
+            echo "Y" | transcrypt --cipher aes-256-cbc --password "'"$TRANSCRYPT_PASSWORD"'" --force 2>/dev/null || true
+            rm -f "$(git rev-parse --git-dir)/index" 2>/dev/null || true
+            git checkout HEAD -- . 2>/dev/null || true
+          ' || true
+          SAMPLE_JS=$(find .github/scripts -name '*.js' -print -quit 2>/dev/null)
+          if [ -n "$SAMPLE_JS" ]; then
+            if ! file -b "$SAMPLE_JS" | grep -qiE 'ASCII|UTF-8|text'; then
+              echo "::error::Submodule decryption FAILED — $SAMPLE_JS is ciphertext."
+              exit 1
+            fi
+          fi
+        env:
+          TRANSCRYPT_PASSWORD: ${{ secrets.TRANSCRYPT_PASSWORD }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Install processing submodule dependencies
+        run: cd .github/scripts/processing && npm ci || npm install
+
+      - name: Download SUP tenant projection from Supabase Storage
+        run: |
+          curl -sf -o .github/data/sup_tenants.json \
+            'https://xxmhgagpbxjflajoaahy.supabase.co/storage/v1/object/public/pipeline-data/sup_tenants.json' \
+            && echo "tenants downloaded: $(python3 -c "import json;print(json.load(open('.github/data/sup_tenants.json'))['tenant_count'])")" \
+            || { echo "::error::FAILED to download sup_tenants.json (run sup-csv-sync.py --tenants from the SUP workspace)"; exit 1; }
+
+      - name: Download jobs-metadata.json from R2
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: |
+          pip install -q boto3
+          python3 -c "import boto3, os; s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']); s3.download_file(os.environ['R2_BUCKET_NAME'], 'data/jobs-metadata.json', '.github/data/jobs-metadata.json'); print('Downloaded jobs-metadata.json')"
+
+      - name: Download previous board-parity artifact from R2 (history)
+        continue-on-error: true
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: |
+          pip install -q boto3
+          python3 -c "import boto3, os; s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']); s3.download_file(os.environ['R2_BUCKET_NAME'], 'data/sup_board_parity.json', '.github/data/sup_board_parity_prev.json'); print('Downloaded previous artifact')"
+
+      - name: Run board-parity monitor (L2)
+        id: parity
+        continue-on-error: true
+        run: |
+          PREV=""
+          [ -f .github/data/sup_board_parity_prev.json ] && PREV="--prev .github/data/sup_board_parity_prev.json"
+          node .github/scripts/processing/lib/sup-board-parity-monitor.js \
+            --tenants .github/data/sup_tenants.json \
+            --meta .github/data/jobs-metadata.json \
+            $PREV \
+            --out .github/data/sup_board_parity.json
+
+      - name: Upload board-parity artifact to R2 + Storage
+        if: steps.parity.outcome != 'skipped'
+        continue-on-error: true
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: |
+          pip install -q boto3
+          python3 -c "import boto3, os; s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']); s3.put_object(Bucket=os.environ['R2_BUCKET_NAME'], Key='data/sup_board_parity.json', Body=open('.github/data/sup_board_parity.json','rb').read(), ContentType='application/json'); print('uploaded sup_board_parity.json to R2')"
+          curl -sf -X POST 'https://xxmhgagpbxjflajoaahy.supabase.co/storage/v1/object/pipeline-data/sup_board_parity.json' \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json" -H "x-upsert: true" \
+            --data-binary @.github/data/sup_board_parity.json || echo "Storage mirror skipped"
+
+      - name: Alert on confirmed findings (Discord)
+        if: steps.parity.outcome != 'skipped'
+        continue-on-error: true
+        env:
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TEAM_TOKEN }}
+          DISCORD_PIPELINE_ALERT_CHANNEL_ID: ${{ secrets.DISCORD_PIPELINE_ALERT_CHANNEL_ID }}
+        run: node .github/scripts/processing/lib/sup-board-parity-alert.js
+
+      - name: Fail run on CONFIRMED parity findings (LAST step — never blocks artifact/alert)
+        if: steps.parity.outcome == 'failure'
+        run: |
+          echo "::error::BOARD PARITY CONFIRMED FINDINGS — public board vs fetched diverged 2 consecutive weeks. See artifact data/sup_board_parity.json (R2+Storage)."
+          exit 1
