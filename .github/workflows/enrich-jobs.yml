@@ -193,8 +193,36 @@ jobs:
 
       - name: Fetch Google+Apple detail pages
         if: success()
+        id: detail_fetch
         continue-on-error: true
         run: node .github/scripts/processing/lib/detail-page-fetcher.js --data-dir .github/data
+
+      # INF-ENR-FETCHERCRASH-VISIBILITY-1: continue-on-error hides CRASHES (non-zero exit)
+      # along with graceful skips (exit 0) — the 08-21 oNeed crash concluded SUCCESS with a
+      # full healing cycle silently dropped. This marker makes the distinction visible:
+      # annotation + a capped crash log (check-52 watches it; vacuous-safe when absent).
+      - name: Mark detail-fetcher crash (if crashed)
+        if: always() && steps.detail_fetch.outcome == 'failure'
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+        run: |
+          echo "::error::[DETAIL-FETCH-CRASH] detail-page-fetcher exited non-zero (run $GITHUB_RUN_ID) — this cycle's oracle/detail healing was skipped; check-52 carries it to the alert feed"
+          node -e "
+          const { createR2Client } = require('./.github/scripts/processing/lib/storage/r2-client');
+          (async () => {
+            const r2 = createR2Client({ prefix: 'data/' });
+            let lines = [];
+            try { lines = (await r2.downloadRaw('detail-fetch-crash-log.jsonl')).toString().trim().split('\n').filter(Boolean); } catch {}
+            lines.push(JSON.stringify({ ts: new Date().toISOString(), run_id: process.env.GITHUB_RUN_ID }));
+            if (lines.length > 200) lines = lines.slice(-200);
+            await r2.uploadRaw('detail-fetch-crash-log.jsonl', lines.join('\n') + '\n', 'application/x-jsonlines');
+            console.log('crash log updated (' + lines.length + ' entries)');
+          })().catch(e => { console.log('crash-log append failed (non-fatal): ' + e.message); });
+          "
 
       - name: Run enrichment
         run: node .github/scripts/processing/lib/enrich-jobs.js
