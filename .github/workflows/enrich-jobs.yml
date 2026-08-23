@@ -145,7 +145,22 @@ jobs:
                     console.log('R2 download OK: ' + name + ' (' + (got / 1024 / 1024).toFixed(1) + ' MB, size-validated)');
                     ok = true;
                   } else {
-                    console.error('R2 download TRUNCATED: ' + name + ' — got ' + got + 'B vs listing ' + obj.size + 'B (attempt ' + attempt + '/3)');
+                    // 2026-08-23 false-positive fix: the pre-download LISTING can be STALE — AGG's
+                    // supplemental fetchers (qualcomm/microsoft/oracle custom) rewrite sidecars on their
+                    // own cadence with NO marker ENR waits on; a newer-bigger object mid-window makes
+                    // got > listing (measured live: 4,785,809B vs 939,239B, stable across retries = a
+                    // complete NEWER object, not a torn read). Discriminator: RE-PROBE the fresh size —
+                    // a torn/partial buffer mismatches the fresh probe too; a newer-complete object
+                    // matches it exactly and is ACCEPTED. Final failure still fails the run.
+                    const fresh = await r2.list(name);
+                    const freshSize = (fresh || []).find(k => (k.key || '').endsWith(name))?.size;
+                    if (freshSize !== undefined && got === freshSize) {
+                      fs.writeFileSync(path.join(dataDir, name), Buffer.from(raw));
+                      console.log('R2 download OK: ' + name + ' (' + (got / 1024 / 1024).toFixed(1) + ' MB, size-validated vs FRESH probe — object rewritten post-listing)');
+                      ok = true;
+                    } else {
+                      console.error('R2 download TRUNCATED: ' + name + ' — got ' + got + 'B vs listing ' + obj.size + 'B vs fresh ' + freshSize + 'B (attempt ' + attempt + '/3)');
+                    }
                   }
                 } catch (e) { console.error('R2 download ERR: ' + name + ' (attempt ' + attempt + '/3) — ' + e.message); }
               }
