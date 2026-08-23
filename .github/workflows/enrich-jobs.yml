@@ -129,13 +129,27 @@ jobs:
             const jsonlKeys = (keys || []).filter(k => k.key.endsWith('.jsonl'));
             for (const obj of jsonlKeys) {
               const name = obj.key.replace('data/', '');
-              try {
-                const raw = await r2.downloadRaw(name);
-                if (raw) {
-                  fs.writeFileSync(path.join(dataDir, name), Buffer.from(raw));
-                  console.log('R2 download OK: ' + name + ' (' + (obj.size / 1024 / 1024).toFixed(1) + ' MB)');
-                }
-              } catch (e) { console.error('R2 download ERR: ' + name + ' - ' + e.message); }
+              // ENR-GH-SIDECAR-BYTEVALIDATE-1: validate the DOWNLOADED BUFFER against the listing's
+              // obj.size — the old `if (raw)` check let a silent truncation (network reset / gzip cut)
+              // through invisibly while the log printed the LISTING size; a truncated JSONL tail line
+              // is then skipped by the loader = ~one-chunk of rows missing = the intermittent GH
+              // check-32 tier dips. Retry 3x (transient resets heal); final failure FAILS the run —
+              // proceeding with a stale local chunk would mix generations (what the gate exists to stop).
+              let ok = false;
+              for (let attempt = 1; attempt <= 3 && !ok; attempt++) {
+                try {
+                  const raw = await r2.downloadRaw(name);
+                  const got = raw ? Buffer.byteLength(Buffer.from(raw)) : 0;
+                  if (got > 0 && (!obj.size || got === obj.size)) {
+                    fs.writeFileSync(path.join(dataDir, name), Buffer.from(raw));
+                    console.log('R2 download OK: ' + name + ' (' + (got / 1024 / 1024).toFixed(1) + ' MB, size-validated)');
+                    ok = true;
+                  } else {
+                    console.error('R2 download TRUNCATED: ' + name + ' — got ' + got + 'B vs listing ' + obj.size + 'B (attempt ' + attempt + '/3)');
+                  }
+                } catch (e) { console.error('R2 download ERR: ' + name + ' (attempt ' + attempt + '/3) — ' + e.message); }
+              }
+              if (!ok) throw new Error('R2 download failed size validation: ' + name);
             }
             console.log('R2 download complete');
           }
@@ -165,14 +179,16 @@ jobs:
               try {
                 await downloadAll(r2);
               } catch (e) {
+                // ENR-GH-SIDECAR-BYTEVALIDATE-1: size-validation failure is FATAL — proceeding would
+                // enrich against a stale local chunk (mixed generation). The old non-fatal semantics
+                // (git fallback) stay for core-file errors only.
+                if (String(e.message).startsWith('R2 download failed size validation')) throw e;
                 // Non-fatal — matches the old continue-on-error download step (git fallback).
                 console.error('R2 download fatal (non-fatal for run): ' + e.message);
               }
               const after = await readMarkers(r2);
               const changed = diffGenerations(before, after);
               if (changed.length === 0) {
-                fs.writeFileSync('.github/data/.sidecar-markers-before.json', JSON.stringify(after));
-                console.log(`AGG sidecar generations stable across R2 download (attempt ${attempt})`);
                 return;
               }
               console.log(`AGG sidecar generation changed during R2 download (attempt ${attempt}): ${changed.join('; ')}`);
