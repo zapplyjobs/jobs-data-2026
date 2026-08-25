@@ -107,6 +107,20 @@ jobs:
           pip install -q boto3
           python3 -c "import boto3, os; s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']); s3.download_file(os.environ['R2_BUCKET_NAME'], 'data/sup-decay-baseline.json', '.github/data/sup-decay-baseline.json'); print('Downloaded sup-decay-baseline.json from R2')"
 
+
+      - name: Download jobs-metadata + tenants projection from R2 (new-tenant gap-check inputs)
+        if: steps.freshness.outputs.pipeline_fresh == 'true'
+        continue-on-error: true
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: |
+          pip install -q boto3
+          python3 -c "import boto3, os; s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']); s3.download_file(os.environ['R2_BUCKET_NAME'], 'data/jobs-metadata.json', '.github/data/jobs-metadata.json'); print('Downloaded jobs-metadata.json')"
+          python3 -c "import boto3, os; s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']); s3.download_file(os.environ['R2_BUCKET_NAME'], 'data/sup_tenants.json', '.github/data/sup_tenants.json'); print('Downloaded sup_tenants.json')"
+
       - name: Run yield decay monitor
         if: steps.freshness.outputs.pipeline_fresh == 'true'
         run: |
@@ -115,6 +129,8 @@ jobs:
             --jobs .github/data/all_jobs.json \
             --write .github/data/sup_yield_decay_monitor.json \
             --baseline-file .github/data/sup-decay-baseline.json \
+            --metadata .github/data/jobs-metadata.json \
+            --company-list .github/data/sup_tenants.json \
             --json
 
       - name: Refresh CSV auto-fields (SUP-CSV-AUTOFIELDS-REFRESH-1 — F4)
