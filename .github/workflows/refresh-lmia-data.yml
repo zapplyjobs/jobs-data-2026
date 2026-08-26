@@ -2,7 +2,15 @@ name: Refresh LMIA Data
 
 # Quarterly refresh of lmia-sponsors.json from ESDC Positive LMIA Employers List.
 # Downloads quarterly XLSX files, extracts employer names, rebuilds from scratch,
-# and uploads to Storage (pipeline-data/lmia-sponsors.json).
+# and uploads R2-canonical (data/lmia-sponsors.json) + Storage dual-write via the
+# standard uploader — mirrors refresh-lca-data.yml (INF-R2-STALERELIC-CLUSTER-1
+# single-homing fix pattern). The consumer enrich-jobs reads the input R2-first.
+#
+# INF-CANADA-LMIA-ARTIFACT-HEALTH-1: the previous Storage-only upload left the
+# input single-homed on a Supabase object that went missing (NoSuchKey since
+# ~2026-08-22) — enrich silently skipped the Canada visa lane for 4 days while
+# R2 canada-visa-stats.json stayed frozen and the publisher consumed the stale
+# artifact. R2 is now the canonical home; check-54 monitors artifact health.
 #
 # Trigger: manual (workflow_dispatch). Run quarterly when ESDC publishes new data
 # (typically April, July, October, January for the previous quarter).
@@ -28,6 +36,29 @@ jobs:
         uses: actions/checkout@v5
         with:
           fetch-depth: 1
+          submodules: recursive
+          token: ${{ secrets.GH_PAT }}
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Install transcrypt (vendored action — immune to raw-CDN 429s, INF-TRANSCRYPT-ACTION-1)
+        uses: zapplyjobs/.github/actions/setup-transcrypt@afcb5f41ec28fe10cefcf421fc455d0d89588b1f
+
+      - name: Unlock encrypted files
+        run: |
+          echo "Y" | transcrypt --cipher aes-256-cbc --password "$TRANSCRYPT_PASSWORD" --force
+          git checkout -- .
+          git submodule foreach --recursive '
+            echo "Y" | transcrypt --cipher aes-256-cbc --password "'"$TRANSCRYPT_PASSWORD"'" --force 2>/dev/null || true
+            rm -f "$(git rev-parse --git-dir)/index" 2>/dev/null || true
+            git checkout HEAD -- . 2>/dev/null || true
+          ' || true
+          git submodule sync --recursive
+          git submodule update --init --recursive
+        env:
+          TRANSCRYPT_PASSWORD: ${{ secrets.TRANSCRYPT_PASSWORD }}
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -43,16 +74,18 @@ jobs:
             --quarters ${{ inputs.quarters }} \
             --output lmia-sponsors.json
 
-      - name: Upload to Supabase Storage
+      - name: Install processing deps (uploader requires processing r2-client -> @aws-sdk; no root manifest exists to satisfy it via upward resolution)
+        run: cd .github/scripts/processing && npm install --no-audit --no-fund
+
+      - name: "Upload lmia-sponsors.json (R2 canonical + Storage dual-write — INF-CANADA-LMIA-ARTIFACT-HEALTH-1)"
         run: |
-          curl -sf -X PUT \
-            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
-            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
-            -H "Content-Type: application/json" \
-            --data-binary @lmia-sponsors.json \
-            "$SUPABASE_URL/storage/v1/object/pipeline-data/lmia-sponsors.json" \
-            && echo "=== Uploaded lmia-sponsors.json to Storage ===" \
-            || { echo "⚠️ Storage upload failed"; exit 1; }
+          mkdir -p .github/data
+          cp lmia-sponsors.json .github/data/lmia-sponsors.json
+          node scripts/upload-dashboard-data-to-r2.js lmia-sponsors.json
         env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
