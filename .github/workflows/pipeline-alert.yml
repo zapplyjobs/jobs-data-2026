@@ -181,6 +181,37 @@ jobs:
             console.log('check-54 probe: ' + names.map(n => n + '=' + (out[n].missing ? 'MISSING' : 'ok')).join(' '));
           })().catch(e => { console.error('LMIA probe pre-step failed (check-54 will skip): ' + e.message); require('fs').appendFileSync(process.env.GITHUB_ENV, 'LMIA_ARTIFACT_HEALTH=null\n'); });
           "
+      - name: Probe bridge phase health (check-55 input)
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: |
+          node -e "
+          const { createR2Client } = require('./.github/scripts/processing/lib/storage/r2-client');
+          (async () => {
+            const r2 = createR2Client({ prefix: 'data/' });
+            // Multi-cycle source: the R2 history (short-circuit bridge cycles skip the
+            // single-cycle Storage metrics write — E168 lesson). R2 egress is free.
+            const raw = await r2.downloadRaw('bridge-metrics-history.jsonl');
+            const lines = String(raw).trim().split('\n').filter(Boolean).slice(-6);
+            const entries = lines.map(l => {
+              try {
+                const d = JSON.parse(l);
+                const phases = d.r2_fetch_complete_at && d.upsert_complete_at;
+                let p5a = null;
+                if (phases && d.db_dedup_complete_at && d.company_normalize_complete_at) {
+                  p5a = (Date.parse(d.company_normalize_complete_at) - Date.parse(d.db_dedup_complete_at)) / 1000;
+                }
+                return { run_at: d.bridge_run_at, p5a_s: p5a, phases_present: !!phases };
+              } catch { return null; }
+            }).filter(Boolean);
+            const payload = JSON.stringify({ deployed_since: '2026-08-26T16:15:44Z', entries });
+            require('fs').appendFileSync(process.env.GITHUB_ENV, 'BRIDGE_PHASE_HEALTH=' + payload + '\n');
+            console.log('check-55 probe: ' + entries.length + ' tail entries, last instrumented p5a=' + (() => { const i = [...entries].reverse().find(e => e.phases_present); return i ? Math.round(i.p5a_s) + 's' : 'none'; })());
+          })().catch(e => { console.error('bridge phase probe pre-step failed (check-55 will skip): ' + e.message); require('fs').appendFileSync(process.env.GITHUB_ENV, 'BRIDGE_PHASE_HEALTH=null\n'); });
+          "
       - name: Run pipeline checks
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
