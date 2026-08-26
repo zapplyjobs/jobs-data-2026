@@ -87,12 +87,12 @@ jobs:
         id: parity
         continue-on-error: true
         run: |
-          PREV=""
-          [ -f .github/data/sup_board_parity_prev.json ] && PREV="--prev .github/data/sup_board_parity_prev.json"
+          PREV_ARGS=()
+          [ -f .github/data/sup_board_parity_prev.json ] && PREV_ARGS=(--prev .github/data/sup_board_parity_prev.json)
           node .github/scripts/processing/lib/sup-board-parity-monitor.js \
             --tenants .github/data/sup_tenants.json \
             --meta .github/data/jobs-metadata.json \
-            $PREV \
+            "${PREV_ARGS[@]}" \
             --out .github/data/sup_board_parity.json
 
       - name: Upload board-parity artifact to R2 + Storage
