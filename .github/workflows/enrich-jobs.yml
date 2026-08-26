@@ -303,11 +303,31 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
         run: |
-          curl -sf "$SUPABASE_URL/storage/v1/object/public/pipeline-data/lmia-sponsors.json" \
-            -o .github/data/lmia-sponsors.json && echo "LMIA data downloaded" \
-            || { echo "LMIA data not available — skipping Canada visa"; exit 0; }
+          # INF-CANADA-LMIA-ARTIFACT-HEALTH-1: input read R2-first (canonical home, written by
+          # refresh-lmia-data.yml); Storage public URL is the transition fallback. A skip is
+          # NEVER silent — canada-lmia-status.json is published to R2 alongside the artifacts
+          # and check-54 alerts on the differential (visa artifacts stale while feeds flow).
+          INPUT_SRC="none"
+          if node -e "const {createR2Client}=require('./.github/scripts/processing/lib/storage/r2-client');createR2Client({prefix:'data/'}).downloadToFile('lmia-sponsors.json','.github/data/lmia-sponsors.json').then(()=>console.log('ok')).catch(e=>{console.error(e.message);process.exit(1)})"; then
+            INPUT_SRC="r2"
+            echo "LMIA data downloaded (R2 canonical)"
+          elif curl -sf "$SUPABASE_URL/storage/v1/object/public/pipeline-data/lmia-sponsors.json" \
+            -o .github/data/lmia-sponsors.json; then
+            INPUT_SRC="storage-fallback"
+            echo "LMIA data downloaded (Storage fallback)"
+          else
+            echo "LMIA data not available (R2 + Storage both failed) — skipping Canada visa lane"
+            node -e "require('fs').writeFileSync('.github/data/canada-lmia-status.json',JSON.stringify({status:'skipped',reason:'input_missing_r2_and_storage',at:new Date().toISOString()},null,2))"
+            exit 0
+          fi
+          LMIA_AT=$(node -e "try{console.log(JSON.parse(require('fs').readFileSync('.github/data/lmia-sponsors.json','utf8')).generated_at||'unknown')}catch(e){console.log('unknown')}")
           node .github/scripts/processing/enrich-canada-visa.js
+          node -e "require('fs').writeFileSync('.github/data/canada-lmia-status.json',JSON.stringify({status:'ok',input_source:process.argv[1],input_generated_at:process.argv[2],at:new Date().toISOString()},null,2))" "$INPUT_SRC" "$LMIA_AT"
           for f in canada-jobs-enriched.json; do
             [ -f ".github/data/$f" ] && curl -sf -X PUT \
               -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
@@ -317,6 +337,7 @@ jobs:
               "$SUPABASE_URL/storage/v1/object/pipeline-data/$f" \
               && echo "Uploaded $f" || echo "Upload $f failed"
           done
+
       - name: Upload dashboard data to R2 (INF-R2-GITCUTOVER-1)
         if: success()
         continue-on-error: true
@@ -327,7 +348,7 @@ jobs:
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: node scripts/upload-dashboard-data-to-r2.js enrichment-stats.json enrichment-history.jsonl canada-visa-stats.json canada-jobs-enriched.json  # canada-jobs-enriched: OUT-CAVISA-SURFACING-1 — Canada LMIA markers consumed by the README publisher (R2-canonical, was Storage-only)  # AGG-METADATA-STALE-1: removed jobs-metadata.json — enrich-jobs was re-uploading stale copy (race condition with fetch-jobs's fresh upload); canada-visa-stats.json: ENR-CANADA-COVERAGE-SLICE-1 — publish lane stats to R2 canonical for the DASH Canada tab (was Storage-only)
+        run: node scripts/upload-dashboard-data-to-r2.js enrichment-stats.json enrichment-history.jsonl canada-visa-stats.json canada-jobs-enriched.json canada-lmia-status.json  # canada-jobs-enriched: OUT-CAVISA-SURFACING-1 — Canada LMIA markers consumed by the README publisher (R2-canonical, was Storage-only)  # AGG-METADATA-STALE-1: removed jobs-metadata.json — enrich-jobs was re-uploading stale copy (race condition with fetch-jobs's fresh upload); canada-visa-stats.json: ENR-CANADA-COVERAGE-SLICE-1 — publish lane stats to R2 canonical for the DASH Canada tab (was Storage-only)  # canada-lmia-status.json: INF-CANADA-LMIA-ARTIFACT-HEALTH-1 — lane skip/success status so a dead lane cannot masquerade as fresh
 
       - name: Publish to Supabase Edge (Phase 2 R2 elimination)
         if: success()
