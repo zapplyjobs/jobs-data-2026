@@ -118,6 +118,46 @@ jobs:
       - name: Syntax check pipeline-alert.js
         run: node -c .github/scripts/processing/lib/pipeline-alert.js
 
+      - name: Compute private-repo Actions usage (check-53 input)
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: |
+          node -e "
+          const https = require('https');
+          function api(path) {
+            return new Promise((resolve, reject) => {
+              https.get({ hostname: 'api.github.com', path, headers: { Authorization: 'token ' + process.env.GH_PAT, 'User-Agent': 'zjp-check53' } }, res => {
+                let d = ''; res.on('data', c => d += c);
+                res.on('end', () => { try { resolve(JSON.parse(d)); } catch (e) { reject(new Error('HTTP ' + res.statusCode)); } });
+              }).on('error', reject);
+            });
+          }
+          (async () => {
+            const since = new Date(Date.now() - 7 * 864e5).toISOString().slice(0, 19) + 'Z';
+            const q = encodeURIComponent('>=' + since);
+            const org = await api('/orgs/zapplyjobs/repos?per_page=100');
+            const privates = (org || []).filter(r => r.private).map(r => r.name);
+            const repos = []; let total = 0; const visible = [];
+            for (const name of privates) {
+              try {
+                const d = await api('/repos/zapplyjobs/' + name + '/actions/runs?created=' + q + '&per_page=100');
+                visible.push(name);
+                const runs = d.workflow_runs || [];
+                let mins = 0;
+                for (const run of runs) {
+                  const s = Date.parse(run.run_started_at || run.created_at);
+                  const u = Date.parse(run.updated_at);
+                  if (s && u && u > s) mins += (u - s) / 60000;
+                }
+                if (runs.length) { repos.push({ name, runs: runs.length, minutes: Math.round(mins) }); total += mins; }
+              } catch (e) { /* repo not in token allowlist — coverage gap recorded via visible[] */ }
+            }
+            const payload = JSON.stringify({ generated_at: new Date().toISOString(), repos, total_minutes: Math.round(total), visible });
+            require('fs').appendFileSync(process.env.GITHUB_ENV, 'ACTIONS_USAGE=' + payload + '\n');
+            console.log('check-53 usage: ' + Math.round(total) + ' min trailing 7d across ' + visible.length + '/' + privates.length + ' private repos');
+          })().catch(e => { console.error('usage pre-step failed (check-53 will skip): ' + e.message); require('fs').appendFileSync(process.env.GITHUB_ENV, 'ACTIONS_USAGE=null\n'); });
+          "
+
 
       - name: Run pipeline checks
         env:
