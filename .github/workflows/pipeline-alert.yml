@@ -158,7 +158,29 @@ jobs:
           })().catch(e => { console.error('usage pre-step failed (check-53 will skip): ' + e.message); require('fs').appendFileSync(process.env.GITHUB_ENV, 'ACTIONS_USAGE=null\n'); });
           "
 
-
+      - name: Probe Canada LMIA artifact health (check-54 input)
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: |
+          node -e "
+          const { createR2Client } = require('./.github/scripts/processing/lib/storage/r2-client');
+          (async () => {
+            const r2 = createR2Client({ prefix: 'data/' });
+            const names = ['lmia-sponsors.json', 'canada-visa-stats.json', 'canada-jobs.jsonl', 'canada-lmia-status.json'];
+            const out = {};
+            for (const n of names) {
+              try { const h = await r2.head(n); out[n] = { lastModified: h.lastModified }; }
+              catch (e) { out[n] = { missing: true, error: String(e.message || e).slice(0, 120) }; }
+            }
+            try { out.status = await r2.downloadJson('canada-lmia-status.json'); } catch (e) { /* absent pre-deploy */ }
+            const payload = JSON.stringify(out);
+            require('fs').appendFileSync(process.env.GITHUB_ENV, 'LMIA_ARTIFACT_HEALTH=' + payload + '\n');
+            console.log('check-54 probe: ' + names.map(n => n + '=' + (out[n].missing ? 'MISSING' : 'ok')).join(' '));
+          })().catch(e => { console.error('LMIA probe pre-step failed (check-54 will skip): ' + e.message); require('fs').appendFileSync(process.env.GITHUB_ENV, 'LMIA_ARTIFACT_HEALTH=null\n'); });
+          "
       - name: Run pipeline checks
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
