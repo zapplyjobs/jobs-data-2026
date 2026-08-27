@@ -2,6 +2,12 @@ name: Enrich Jobs
 
 on:
   workflow_dispatch:
+    inputs:
+      stale_tail_drain:
+        description: 'INF-ENR-STALE-DRAIN-TRIGGER-1: one-shot ENR stale-tail migration drain (admits only existing below-version enriched rows with retrievable text). Operator-controlled; leave false for normal runs. Requires ENR migration code landed in the submodule.'
+        required: false
+        default: false
+        type: boolean
   push:
     paths:
       - '.github/workflows/enrich-jobs.yml'
@@ -121,6 +127,13 @@ jobs:
       - name: Run enrichment
         run: node .github/scripts/processing/lib/enrich-jobs.js
         env:
+          # INF-ENR-STALE-DRAIN-TRIGGER-1 (2026-08-27): one-shot migration mode — dispatch-only
+          # input, false on every push/wave trigger (never default-on). Self-terminating: the
+          # mode admits only existing enriched rows below ENRICHER_VERSION; once drained they
+          # are current and normal runs never re-admit. Serialized against waves by this
+          # workflow's own concurrency group (enrich-jobs-v2) — no dual writers on enriched_jobs.
+          # Do NOT dispatch while the Supabase platform is unstable (drain adds description fetches).
+          ENR_STALE_EXISTING_MIGRATION: ${{ inputs.stale_tail_drain == true && '1' || '0' }}
           # ENR-DESCCACHE-OBSERVABILITY-1: enrich-jobs.js now syncs failCache to/from R2 inline (needs creds).
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
