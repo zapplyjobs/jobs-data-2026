@@ -3,10 +3,10 @@ name: OUT Health Check
 # Public repo = unlimited Actions minutes. Authenticated API = 5000 req/hr.
 # Checks:
 #   1. Board API health (softwarejobs.dev + zapply.jobs) — 200 + fresh data
-#   2. Settings drift (12 repos) — discussions on, wiki off, homepage set, topics present
-#   3. Exposed secrets scan (12 READMEs) — no secret patterns in public READMEs
-#   4. README freshness (8 pipeline repos) — last push <6h
-#   5. Workflow status (8 pipeline repos) — last run not failing
+#   2. Settings drift (14 repos) — discussions on, wiki off, homepage set, topics present
+#   3. Exposed secrets scan (14 READMEs) — no secret patterns in public READMEs
+#   4. README freshness (10 pipeline boards) — last push <6h
+#   5. Workflow status (critical jobs-data-2026 workflows) — last run not failing
 # On failure: updates tracking issue for operator visibility.
 on:
   schedule:
@@ -118,9 +118,21 @@ jobs:
             "New-Grad-Hardware-Engineering-Jobs-2027", "New-Grad-Healthcare-Jobs-2027",
             "New-Grad-IT-Jobs-2027",
             "Canada-Jobs-2027", "Canada-Internships-2027",
+            "awesome-ML-internships",
             "Research-Internships-for-Undergraduates", "underclassmen-internships",
             "resume-samples-2026", "interview-handbook-2026",
         ]
+
+        # Single source of truth for the 10 pipeline boards — matches board-counts.json /
+        # aggregator configs/_index.json (INF-OUT-HEALTH-SCOPE-1: freshness + peer-lag
+        # sets had drifted to 9, omitting awesome-ML-internships). Update when boards change.
+        _PIPELINE_REPOS = {
+            "New-Grad-Jobs-2027", "Internships-2027",
+            "New-Grad-Software-Engineering-Jobs-2027", "New-Grad-Data-Science-Jobs-2027",
+            "New-Grad-Hardware-Engineering-Jobs-2027", "New-Grad-Healthcare-Jobs-2027",
+            "New-Grad-IT-Jobs-2027", "awesome-ML-internships",
+            "Canada-Jobs-2027", "Canada-Internships-2027",
+        }
         secret_re = re.compile(r"goLiveSecrets|R2_ACCESS_KEY|R2_SECRET_KEY|R2_ENDPOINT|SUPABASE_SERVICE_KEY|SUPABASE_SERVICE_ROLE|DISCORD_WEBHOOK|GITHUB_TOKEN|ghp_[a-zA-Z0-9]")
 
         for repo in repos:
@@ -195,11 +207,7 @@ jobs:
                 print(f"WARNING: {repo}: README fetch failed — secrets scan skipped (non-fatal): {e}")
 
             # README freshness — flag pipeline repos with stale pushes (>6h)
-            pipeline_repos = repo in ("New-Grad-Jobs-2027", "Internships-2027",
-                "New-Grad-Software-Engineering-Jobs-2027", "New-Grad-Data-Science-Jobs-2027",
-                "New-Grad-Hardware-Engineering-Jobs-2027", "New-Grad-Healthcare-Jobs-2027",
-                "New-Grad-IT-Jobs-2027",
-                "Canada-Jobs-2027", "Canada-Internships-2027")
+            pipeline_repos = repo in _PIPELINE_REPOS
             if pushed_at and pipeline_repos:
                 try:
                     push_dt = datetime.datetime.fromisoformat(pushed_at.replace("Z", "+00:00"))
@@ -259,13 +267,9 @@ jobs:
         # reports "6 succeeded, 0 failed"). The absolute 6h threshold above only fires
         # 6h late; comparing each pipeline repo's push age to the FRESHEST peer catches
         # the partial-failure class within ~1h instead of ~6h of silent staleness.
-        _PIPELINE = {"New-Grad-Jobs-2027", "Internships-2027",
-            "New-Grad-Software-Engineering-Jobs-2027", "New-Grad-Data-Science-Jobs-2027",
-            "New-Grad-Hardware-Engineering-Jobs-2027", "New-Grad-Healthcare-Jobs-2027",
-            "New-Grad-IT-Jobs-2027",
-            "Canada-Jobs-2027", "Canada-Internships-2027"}
+        # Pipeline board set = _PIPELINE_REPOS defined above (single source; INF-OUT-HEALTH-SCOPE-1).
         _ages = [(r["repo"], r.get("last_push_age_h")) for r in results["repos"]
-                 if r["repo"] in _PIPELINE and isinstance(r.get("last_push_age_h"), (int, float))]
+                 if r["repo"] in _PIPELINE_REPOS and isinstance(r.get("last_push_age_h"), (int, float))]
         if len(_ages) >= 2:
             _freshest = min(a for _, a in _ages)
             for _repo, _age in _ages:
