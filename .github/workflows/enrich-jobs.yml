@@ -223,6 +223,7 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       - name: Verify R2 upload (ENR-R2PRIMARY-ENRICHWRITES-1)
+        id: r2_verify
         if: success()
         continue-on-error: true
         env:
@@ -245,6 +246,7 @@ jobs:
           echo "  descriptions-*.jsonl in R2: ${SIDECAR_COUNT} files"
 
       - name: Dual-write to Supabase Storage (SAFETY COPY -- R2 is canonical via r2-client above; ENR-R2ELIM-PHASE2-1 + ENR-R2PRIMARY-ENRICHWRITES-1)
+        id: dual_write
         if: success()
         continue-on-error: true
         run: |
@@ -280,24 +282,14 @@ jobs:
         env:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
-      - name: Commit enrichment stats
-        if: success()
-        continue-on-error: true
-        run: |
-          git config user.email "bot@zapplyjobs.com"
-          git config user.name "Aggregator Bot"
-          # Only commit tiny dashboard-facing/control-plane files. Big data files (sidecars, enriched_jobs, processed_ids)
-          # live in R2 only — INF-BLOAT-5.
-          [ -f .github/data/tech-us-truth.json ] && git add .github/data/tech-us-truth.json
-          git diff --cached --quiet && { echo "No changes to commit"; exit 0; }
-          git commit -m "chore: update enrichment stats [skip ci]" || exit 0
-          for i in 1 2 3; do
-            git stash --include-untracked && git pull --rebase --strategy-option=theirs origin main && git push && break
-            echo "Push attempt $i failed, retrying in 5s..."
-            sleep 5
-          done
+      # INF-ENR-FAILGREEN-1 (2026-08-27): the former "Commit enrichment stats" step was
+      # REMOVED — it has failed every run since INF-REPOCLEANUP-1's `.github/data/*`
+      # ignore rule (git add exit 1, masked by continue-on-error); tech-us-truth.json
+      # was never successfully committed and has no git consumer (written + consumed
+      # at runtime). Dead intent deleted rather than un-ignored.
 
       - name: Canada LMIA visa enrichment (ENR-CANADA-LMIA-VISA-LANE-1)
+        id: canada_lmia
         if: success()
         continue-on-error: true
         env:
@@ -339,6 +331,7 @@ jobs:
           done
 
       - name: Upload dashboard data to R2 (INF-R2-GITCUTOVER-1)
+        id: r2_dashboard
         if: success()
         continue-on-error: true
         env:
@@ -351,6 +344,7 @@ jobs:
         run: node scripts/upload-dashboard-data-to-r2.js enrichment-stats.json enrichment-history.jsonl canada-visa-stats.json canada-jobs-enriched.json canada-lmia-status.json  # canada-jobs-enriched: OUT-CAVISA-SURFACING-1 — Canada LMIA markers consumed by the README publisher (R2-canonical, was Storage-only)  # AGG-METADATA-STALE-1: removed jobs-metadata.json — enrich-jobs was re-uploading stale copy (race condition with fetch-jobs's fresh upload); canada-visa-stats.json: ENR-CANADA-COVERAGE-SLICE-1 — publish lane stats to R2 canonical for the DASH Canada tab (was Storage-only)  # canada-lmia-status.json: INF-CANADA-LMIA-ARTIFACT-HEALTH-1 — lane skip/success status so a dead lane cannot masquerade as fresh
 
       - name: Publish to Supabase Edge (Phase 2 R2 elimination)
+        id: edge_publish
         if: success()
         continue-on-error: true
         run: node .github/scripts/processing/lib/publish-metrics-to-edge.js --data-dir .github/data
@@ -359,6 +353,7 @@ jobs:
           PUBLISH_SECRET: ${{ secrets.PUBLISH_SECRET }}
 
       - name: Publish aspect-status (ENR-ASPECT-AUTOPUBLISH-1)
+        id: aspect_publish
         if: success()
         continue-on-error: true
         run: node .github/scripts/processing/lib/publish-aspect-status.js
@@ -372,6 +367,7 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
 
       - name: Publish quality-signal (INF-ENR-QUALITY-SIGNAL-WIRE-1)
+        id: quality_publish
         if: success()
         continue-on-error: true
         run: node .github/scripts/processing/lib/publish-quality-signal.js
@@ -392,6 +388,7 @@ jobs:
       # dispatch is push-consumer-readmes.yml (post board-counts upload, freshness-gated);
       # collect-metrics retains its own push trigger + INF's 45m R2 freshness gate.
       - name: Trigger consumer README push (wave link — fresh post-enrichment, INF-CONSUMER-PUSH-ENRICH-RACE-1)
+        id: consumer_dispatch
         if: success()
         continue-on-error: true
         run: |
@@ -400,3 +397,23 @@ jobs:
             || echo "Consumer push dispatch failed (non-blocking — fetch-jobs stale push is fallback)"
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
+
+      - name: Run-boundary failure honesty (INF-ENR-FAILGREEN-1)
+        if: always()
+        run: |
+          FAILED=""
+          check() { if [ "${1}" = "failure" ]; then FAILED="$FAILED $2"; fi }
+          check "${{ steps.detail_fetch.outcome }}" detail_fetch
+          check "${{ steps.r2_verify.outcome }}" r2_verify
+          check "${{ steps.dual_write.outcome }}" dual_write
+          check "${{ steps.canada_lmia.outcome }}" canada_lmia
+          check "${{ steps.r2_dashboard.outcome }}" r2_dashboard
+          check "${{ steps.edge_publish.outcome }}" edge_publish
+          check "${{ steps.aspect_publish.outcome }}" aspect_publish
+          check "${{ steps.quality_publish.outcome }}" quality_publish
+          check "${{ steps.consumer_dispatch.outcome }}" consumer_dispatch
+          if [ -n "$FAILED" ]; then
+            echo "::error::Enrich run masked step failure(s):$FAILED — side lanes continued (by design) but this run's conclusion is now honest (check-41 alerts)."
+            exit 1
+          fi
+          echo "All masked steps genuinely succeeded this run."
