@@ -214,6 +214,30 @@ jobs:
             console.log('check-55 probe: ' + entries.length + ' tail entries, last instrumented p5a=' + (() => { const i = [...entries].reverse().find(e => e.phases_present); return i ? Math.round(i.p5a_s) + 's' : 'none'; })());
           })().catch(e => { console.error('bridge phase probe pre-step failed (check-55 will skip): ' + e.message); require('fs').appendFileSync(process.env.GITHUB_ENV, 'BRIDGE_PHASE_HEALTH=null\n'); });
           "
+      - name: Probe Supabase platform status page (check-57 input)
+        run: |
+          node -e "
+          const https = require('https');
+          function get(p) { return new Promise((resolve, reject) => { https.get({ hostname: 'status.supabase.com', path: p, timeout: 10000, headers: { 'User-Agent': 'zjp-check57' } }, res => { let d=''; res.on('data',c=>d+=c); res.on('end',()=>{ try { resolve(JSON.parse(d)); } catch(e){ reject(new Error('HTTP ' + res.statusCode)); } }); }).on('error', reject).on('timeout', function(){ this.destroy(new Error('timeout')); }); }); }
+          (async () => {
+            const status = await get('/api/v2/status.json');
+            const incidents = await get('/api/v2/incidents/unresolved.json');
+            const out = {
+              generated_at: new Date().toISOString(),
+              indicator: status.status && status.status.indicator,
+              description: status.status && status.status.description,
+              incidents: (incidents.incidents || []).map(i => ({ name: i.name, status: i.status, updated_at: i.updated_at }))
+            };
+            try {
+              const comps = await get('/api/v2/components.json');
+              out.components = {};
+              for (const c of comps.components || []) if (c.status && c.status !== 'operational') out.components[c.name] = c.status;
+            } catch (e) { /* components optional */ }
+            const payload = JSON.stringify(out);
+            require('fs').appendFileSync(process.env.GITHUB_ENV, 'SUPABASE_PLATFORM_STATUS=' + payload + '\n');
+            console.log('check-57 probe: indicator=' + out.indicator + ' active_incidents=' + out.incidents.length + ' degraded_components=' + Object.keys(out.components || {}).length);
+          })().catch(e => { console.error('platform-status pre-step failed (check-57 will skip): ' + e.message); require('fs').appendFileSync(process.env.GITHUB_ENV, 'SUPABASE_PLATFORM_STATUS=null\n'); });
+          "
       - name: Run pipeline checks
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
