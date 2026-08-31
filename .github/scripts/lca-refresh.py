@@ -12,9 +12,10 @@ Usage:
   python3 lca-quarterly-refresh.py --quarter FY2026_Q2       # specify latest quarter
   python3 lca-quarterly-refresh.py --dry-run                 # show what would change
   python3 lca-quarterly-refresh.py --window 4                # use 4-quarter window
-
-Output: lca-sponsors.json — name-only: {"_meta": {...}, "employers": [...]}
-        Backward compatible with enrich-jobs.js loadLcaSponsors() (visa.js).
+Output: lca-sponsors.json — {"_meta": {...}, "employers": [...], "employer_counts": {...}}
+        employers[] stays name-only (backward compatible with enrich-jobs.js loadLcaSponsors()).
+        employer_counts{} (INF-LCA-COUNTS-INPUT-1): per-employer {filing_count, certified_count,
+        last_certified}, keyed by the same raw strings as employers[].
 
 After generating the file, upload to R2:
   aws s3 cp lca-sponsors.json s3://$R2_BUCKET_NAME/data/lca-sponsors.json \\
@@ -72,7 +73,18 @@ def download_quarter(quarter: str, dest: Path, prefix: str = "LCA") -> bool:
 
 
 def extract_employers(xlsx_path: Path, employer_col: str = EMPLOYER_COL,
-                      filters: dict = None) -> set[str]:
+                      filters: dict = None) -> tuple[set[str], dict]:
+    """Extract certified employer names + per-employer counts (INF-LCA-COUNTS-INPUT-1).
+
+    Returns (names, counts):
+      names  — employer names passing `filters` (unchanged semantics; feeds employers[])
+      counts — per employer name seen at all: {"filing_count", "certified_count",
+               "last_certified"}. filing_count counts every row for the employer
+               (any case status / visa class); certified_count only rows passing
+               `filters`; last_certified = max DECISION_DATE among certified rows
+               (None when the file lacks a DECISION_DATE column — verified present
+               in LCA + PERM FY2026_Q1 headers, 2026-08-31).
+    """
     if filters is None:
         filters = LCA_FILTER
     print(f"Extracting employers from {xlsx_path.name}...")
@@ -85,15 +97,34 @@ def extract_employers(xlsx_path: Path, employer_col: str = EMPLOYER_COL,
     if employer_col not in col_idx:
         print(f"  ERROR: {employer_col} column not found. Columns: {header[:20]}", file=sys.stderr)
         wb.close()
-        return set()
+        return set(), {}
 
     employer_idx = col_idx[employer_col]
+    date_idx = col_idx.get("DECISION_DATE")
+    if date_idx is None:
+        print("  NOTE: no DECISION_DATE column — last_certified will be null for this source", file=sys.stderr)
 
     employers = set()
+    counts: dict[str, dict] = {}
     total = 0
     filtered = 0
+
+    def iso_date(val) -> str | None:
+        if val is None:
+            return None
+        if isinstance(val, datetime.datetime):
+            return val.date().isoformat()
+        s = str(val).strip()
+        return s[:10] if len(s) >= 10 else None
+
     for row in ws.iter_rows(min_row=2, values_only=True):
         total += 1
+        name = row[employer_idx]
+        if not (name and isinstance(name, str)):
+            continue
+        name = name.strip()
+        rec = counts.setdefault(name, {"filing_count": 0, "certified_count": 0, "last_certified": None})
+        rec["filing_count"] += 1
         skip = False
         for filter_col, filter_val in filters.items():
             idx = col_idx.get(filter_col)
@@ -102,15 +133,17 @@ def extract_employers(xlsx_path: Path, employer_col: str = EMPLOYER_COL,
                 break
         if skip:
             continue
-        name = row[employer_idx]
-        if name and isinstance(name, str):
-            employers.add(name.strip())
-            filtered += 1
+        rec["certified_count"] += 1
+        filtered += 1
+        employers.add(name)
+        d = iso_date(row[date_idx]) if date_idx is not None else None
+        if d and (rec["last_certified"] is None or d > rec["last_certified"]):
+            rec["last_certified"] = d
 
     wb.close()
     filter_desc = ", ".join(f"{k}={v}" for k, v in filters.items())
     print(f"  Rows: {total:,}, {filter_desc}: {filtered:,}, Unique employers: {len(employers):,}")
-    return employers
+    return employers, counts
 
 
 def normalize_employer_name(name: str) -> str:
@@ -246,13 +279,24 @@ def main():
     # Two sources: LCA (H-1B, large ~72MB/quarter) + PERM (green card, ~11MB/quarter).
     # Both rebuilt from scratch each run — no merge with existing.
     all_employers: set[str] = set()
+    all_counts: dict[str, dict] = {}
+
+    def merge_counts(counts: dict[str, dict]) -> None:
+        for name, rec in counts.items():
+            agg = all_counts.setdefault(name, {"filing_count": 0, "certified_count": 0, "last_certified": None})
+            agg["filing_count"] += rec["filing_count"]
+            agg["certified_count"] += rec["certified_count"]
+            if rec["last_certified"] and (agg["last_certified"] is None or rec["last_certified"] > agg["last_certified"]):
+                agg["last_certified"] = rec["last_certified"]
+
     with tempfile.TemporaryDirectory() as tmpdir:
         for q in quarters:
             # LCA (H-1B)
             lca_path = Path(tmpdir) / f"LCA_Disclosure_Data_{q}.xlsx"
             if download_quarter(q, lca_path, prefix="LCA"):
-                employers = extract_employers(lca_path, employer_col=EMPLOYER_COL, filters=LCA_FILTER)
+                employers, counts = extract_employers(lca_path, employer_col=EMPLOYER_COL, filters=LCA_FILTER)
                 all_employers |= employers
+                merge_counts(counts)
             elif q == latest:
                 print(f"\nERROR: Could not download latest LCA quarter {q}", file=sys.stderr)
                 sys.exit(1)
@@ -262,8 +306,9 @@ def main():
             # PERM (green card)
             perm_path = Path(tmpdir) / f"PERM_Disclosure_Data_{q}.xlsx"
             if download_quarter(q, perm_path, prefix="PERM"):
-                employers = extract_employers(perm_path, employer_col=PERM_EMPLOYER_COL, filters=PERM_FILTER)
+                employers, counts = extract_employers(perm_path, employer_col=PERM_EMPLOYER_COL, filters=PERM_FILTER)
                 all_employers |= employers
+                merge_counts(counts)
             else:
                 print(f"  (PERM {q} not available — LCA-only for this quarter)\n", file=sys.stderr)
 
@@ -286,6 +331,11 @@ def main():
     if existing_employers:
         validate_match_rate(existing_employers, all_employers)
 
+    # Counts companion (INF-LCA-COUNTS-INPUT-1): keyed by the SAME raw employer strings
+    # as employers[] (certified set only), so readers join trivially and the names-only
+    # path stays intact. filing_count >= certified_count always.
+    employer_counts = {name: all_counts[name] for name in sorted(all_employers) if name in all_counts}
+
     # Build output
     output = {
         "_meta": {
@@ -295,14 +345,15 @@ def main():
             "generated": datetime.datetime.now().isoformat()[:10],
             "filter": "LCA: CASE_STATUS=Certified, VISA_CLASS=H-1B | PERM: CASE_STATUS=Certified",
             "total_employers": len(all_employers),
-            "format": "name-only (backward compatible with enrich-jobs.js loadLcaSponsors)",
+            "format": "employers[] name-only (backward compatible with enrich-jobs.js loadLcaSponsors) + employer_counts{} per-employer {filing_count, certified_count, last_certified}",
+            "counts_note": "filing_count = all rows for the employer in the window (any status/class); certified_count = rows passing the filter; last_certified = max DECISION_DATE among certified rows; keys = employers[] entries",
         },
         "employers": sorted(all_employers),
+        "employer_counts": employer_counts,
     }
 
     if args.dry_run:
-        print(f"\n=== DRY RUN ===")
-        print(f"Would write {len(all_employers):,} employers to {args.output}")
+        print(f"Would write {len(all_employers):,} employers (+ employer_counts for {len(employer_counts):,}) to {args.output}")
         print(f"Quarters: {quarters}")
         if existing_employers:
             delta_added = len(all_employers - existing_employers)
