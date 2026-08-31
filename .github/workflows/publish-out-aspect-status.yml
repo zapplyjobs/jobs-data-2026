@@ -3,7 +3,7 @@ name: OUT Aspect Status (verified)
 # OUT-ASPECT-VERIFY-1). Replaces the prior stale self-report read by the Quality Matrix (/api/aspect).
 on:
   schedule:
-    - cron: '0 */6 * * *'  # every 6h — keep status fresh (matrix flags >7d amber)
+    - cron: '0 * * * *'  # hourly (was 6h) — INF-CHECK40-ASPECT-STALENESS-1 (2026-08-31): a 6h publisher feeding a 10-min alerter left up-to-6h zombie RED after recovery (observed: out/infrastructure RED from 18:07Z persisted past the 23:07Z recovery). Public repo = free minutes. Matrix flags >7d amber.
   workflow_dispatch:
   push:
     paths:
