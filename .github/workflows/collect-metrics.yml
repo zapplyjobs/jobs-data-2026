@@ -70,7 +70,7 @@ jobs:
             const r2 = createR2Client({ prefix: 'data/' });
             const dataDir = '.github/data';
             if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-            const files = ['all_jobs.json', 'jobs-metadata.json', 'enrichment-stats.json', 'canada-tech-summary.json', 'canada-all-summary.json', 'board-counts.json', 'bridge-metrics.json', 'posted_jobs.json', 'traffic-history.jsonl', 'bridge-metrics-history.jsonl', 'daily-stats.json', 'history.jsonl', 'history-archive.jsonl', 'enrichment-history.jsonl', 'pipeline-alert.json', 'general-review.json', 'tag-history.jsonl', 'metrics/history.jsonl', 'latency-history.jsonl', 'zjp-metrics.json'];  // INF-TREND-DATA-EXPANSION-1: posted_jobs.json supplies the Discord channel snapshot for build-forward trend history. ENR-OTHER-WORKFLOWS-DLA-1: +metrics/history.jsonl — collect-metrics.js growth-trend history. AGG-CONSUMER-PERCOUNT-DATA-1: +board-counts.json — per-consumer job counts for DASH PipelineTree
+            const files = ['all_jobs.json', 'enriched_jobs.json', 'jobs-metadata.json', 'enrichment-stats.json', 'canada-tech-summary.json', 'canada-all-summary.json', 'board-counts.json', 'bridge-metrics.json', 'posted_jobs.json', 'traffic-history.jsonl', 'bridge-metrics-history.jsonl', 'daily-stats.json', 'history.jsonl', 'history-archive.jsonl', 'enrichment-history.jsonl', 'pipeline-alert.json', 'general-review.json', 'tag-history.jsonl', 'metrics/history.jsonl', 'latency-history.jsonl', 'zjp-metrics.json'];  // INF-TREND-DATA-EXPANSION-1: posted_jobs.json supplies the Discord channel snapshot for build-forward trend history. ENR-OTHER-WORKFLOWS-DLA-1: +metrics/history.jsonl — collect-metrics.js growth-trend history. AGG-CONSUMER-PERCOUNT-DATA-1: +board-counts.json — per-consumer board counts. INF-SJD-SCAN-PAUSE-1: +enriched_jobs.json — the R2-based sjd producer reads sponsors_visa/possible_sponsor from it (35MB, public-repo runner, free minutes).
             for (const file of files) {
               try {
                 const raw = await r2.downloadRaw(file);
@@ -149,27 +149,20 @@ jobs:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}  # INF-SUPABASE-HEALTH-CHECK: depth metrics (connections, rollback rate, cache hit) for dashboard display
         run: node .github/scripts/processing/lib/generate-zjp-metrics.js
 
-      # DISABLED 2026-08-31 (INF-SJD-SCAN-PAUSE-1, dev-team lead directive):
-      # produce-sjd-jobs.js fetches ALL active jobs from Supabase in 1,000-row
-      # Range pages ordered by posted_at DESC and filters client-side — full-table
-      # OFFSET pagination confirmed (run 33405815090: offset=85000 at ~15s/page,
-      # REST 500 past offset 102000) as a production Disk-I/O contributor and the
-      # source of the long PostgREST timeouts. Pausing ONLY this step.
-      # DO NOT delete/overwrite the existing sjd-jobs.json Storage artifact while
-      # paused — softwarejobs.dev keeps serving the last valid snapshot.
-      # Replacement (required before any re-enable): R2-based/precomputed source
-      # or a narrowly-scoped, indexed, keyset-paginated query. NEVER re-enable the
-      # offset-based scan.
-      # - name: Produce sjd-jobs.json (INF-SJD-PAGINATION-1)
-      #   if: success() && steps.r2fetch.outputs.pipeline_fresh == 'true'
-      #   continue-on-error: true  # Non-critical: sjd-jobs.json is a cache; don't break collect-metrics if the Supabase query times out
-      #   env:
-      #     SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      #     SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-      #   run: |
-      #     node scripts/produce-sjd-jobs.js
-      #     # INF-R2-STALERELIC-CLUSTER-1: sjd-jobs.json home = STORAGE cache (SJD consumer is kind=supabase; nothing reads the R2 copy — frozen Aug-4 relic, deletion approved separately). No R2_* env here BY DECISION: uploader writes Storage only.
-      #     node scripts/upload-dashboard-data-to-r2.js sjd-jobs.json
+      # INF-SJD-SCAN-PAUSE-1 history: this step was disabled 2026-08-31 (dev-team directive)
+      # because its Supabase full-table offset scan (1,000-row pages to offset 102K+,
+      # ~15s/page, REST 500; run 33405815090) was a confirmed Disk-I/O contributor and the
+      # long-PostgREST-timeout source. RE-ENABLED same day with the prescribed R2-based
+      # replacement: produce-sjd-jobs.js now builds the artifact from local R2-fetched
+      # all_jobs.json + enriched_jobs.json (zero Supabase queries). NEVER re-add a
+      # full-table Supabase offset scan here.
+      - name: Produce sjd-jobs.json (R2-based, INF-SJD-SCAN-PAUSE-1)
+        if: success() && steps.r2fetch.outputs.pipeline_fresh == 'true'
+        continue-on-error: true  # Non-critical: sjd-jobs.json is a cache; don't break collect-metrics if the build fails
+        run: |
+          node scripts/produce-sjd-jobs.js
+          # INF-R2-STALERELIC-CLUSTER-1: sjd-jobs.json home = STORAGE cache (SJD consumer is kind=supabase; nothing reads the R2 copy). No R2_* env here BY DECISION: uploader writes Storage only.
+          node scripts/upload-dashboard-data-to-r2.js sjd-jobs.json
 
 
       - name: Publish sjd serve count for the publisher funnel (INF-SJDZAPPLY-SERVECOUNTERS-1)
