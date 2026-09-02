@@ -133,7 +133,7 @@ jobs:
             --company-list .github/data/sup_tenants.json \
             --json
 
-            - name: Company visa-posture artifact (SUP-VISA-COMPANY-POSTURE-1)
+      - name: Company visa-posture artifact (SUP-VISA-COMPANY-POSTURE-1)
         if: steps.freshness.outputs.pipeline_fresh == 'true'
         run: |
           pip install -q boto3
@@ -149,7 +149,7 @@ jobs:
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
 
-- name: Refresh CSV auto-fields (SUP-CSV-AUTOFIELDS-REFRESH-1 — F4)
+      - name: Refresh CSV auto-fields (SUP-CSV-AUTOFIELDS-REFRESH-1 — F4)
         if: steps.freshness.outputs.pipeline_fresh == 'true'
         run: |
           python3 .github/scripts/processing/lib/csv-enrich-refresh.py \
