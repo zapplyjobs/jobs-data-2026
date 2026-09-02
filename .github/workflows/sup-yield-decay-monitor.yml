@@ -133,7 +133,23 @@ jobs:
             --company-list .github/data/sup_tenants.json \
             --json
 
-      - name: Refresh CSV auto-fields (SUP-CSV-AUTOFIELDS-REFRESH-1 — F4)
+            - name: Company visa-posture artifact (SUP-VISA-COMPANY-POSTURE-1)
+        if: steps.freshness.outputs.pipeline_fresh == 'true'
+        run: |
+          pip install -q boto3
+          python3 -c "import boto3, os; s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']); s3.download_file(os.environ['R2_BUCKET_NAME'], 'data/enrichment-stats.json', '.github/data/enrichment-stats.json'); s3.download_file(os.environ['R2_BUCKET_NAME'], 'data/lca-sponsors.json', '.github/data/lca-sponsors.json'); print('Downloaded posture inputs')"
+          node .github/scripts/processing/lib/sup-company-posture.js \
+            --stats .github/data/enrichment-stats.json \
+            --lca .github/data/lca-sponsors.json \
+            --out .github/data/sup-company-posture.json
+          python3 -c "import boto3, os; s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']); s3.put_object(Bucket=os.environ['R2_BUCKET_NAME'], Key='data/sup-company-posture.json', Body=open('.github/data/sup-company-posture.json','rb').read(), ContentType='application/json'); print('uploaded data/sup-company-posture.json to R2')"
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+
+- name: Refresh CSV auto-fields (SUP-CSV-AUTOFIELDS-REFRESH-1 — F4)
         if: steps.freshness.outputs.pipeline_fresh == 'true'
         run: |
           python3 .github/scripts/processing/lib/csv-enrich-refresh.py \
