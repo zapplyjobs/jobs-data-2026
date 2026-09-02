@@ -149,6 +149,30 @@ jobs:
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
 
+      - name: Posting archive ledger (SUP-POLICY-DECISIONS-2026-09-02 §7)
+        if: steps.freshness.outputs.pipeline_fresh == 'true'
+        run: |
+          pip install -q boto3
+          python3 -c "import boto3, os; s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']);
+          try:
+              s3.download_file(os.environ['R2_BUCKET_NAME'], 'data/sup-posting-ledger.jsonl', '.github/data/sup-posting-ledger.prev.jsonl'); print('Downloaded previous ledger')
+          except Exception as e:
+              print('No previous ledger (first run) — seeding from scratch:', e)"
+          node .github/scripts/processing/lib/sup-posting-ledger.js \
+            --pool .github/data/all_jobs.json \
+            --prev .github/data/sup-posting-ledger.prev.jsonl \
+            --out .github/data/sup-posting-ledger.jsonl \
+            --stats .github/data/sup-posting-ledger-stats.json
+          python3 -c "import boto3, os; s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']);
+          s3.put_object(Bucket=os.environ['R2_BUCKET_NAME'], Key='data/sup-posting-ledger.jsonl', Body=open('.github/data/sup-posting-ledger.jsonl','rb').read(), ContentType='application/x-ndjson')
+          s3.put_object(Bucket=os.environ['R2_BUCKET_NAME'], Key='data/sup-posting-ledger-stats.json', Body=open('.github/data/sup-posting-ledger-stats.json','rb').read(), ContentType='application/json')
+          print('uploaded data/sup-posting-ledger.jsonl + stats to R2')"
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+
       - name: Refresh CSV auto-fields (SUP-CSV-AUTOFIELDS-REFRESH-1 — F4)
         if: steps.freshness.outputs.pipeline_fresh == 'true'
         run: |
