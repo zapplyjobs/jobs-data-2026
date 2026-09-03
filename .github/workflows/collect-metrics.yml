@@ -157,6 +157,9 @@ jobs:
       - name: Produce sjd-jobs.json (R2-based, INF-SJD-SCAN-PAUSE-1)
         if: success() && steps.r2fetch.outputs.pipeline_fresh == 'true'
         continue-on-error: true  # Non-critical: sjd-jobs.json is a cache; don't break collect-metrics if the build fails
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}  # 2026-09-03: without these two, uploader putStorage returns false SILENTLY (green step, zero write, stale artifact)
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
           node scripts/produce-sjd-jobs.js
           # INF-R2-STALERELIC-CLUSTER-1: sjd-jobs.json home = STORAGE cache (SJD consumer is kind=supabase; nothing reads the R2 copy). No R2_* env here BY DECISION: uploader writes Storage only.
