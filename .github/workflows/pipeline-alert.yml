@@ -320,9 +320,9 @@ jobs:
             }
             try {
               const body = await r2.downloadJson('competitor_snapshot.json');
-              out.generated_at = (body && body.generated_at) || null;
-              out.simplify_count = body && body.simplify_internships_us_estimated && typeof body.simplify_internships_us_estimated.count === 'number' ? body.simplify_internships_us_estimated.count : null;
               out.competitors_n = body && Array.isArray(body.competitors) ? body.competitors.length : 0;
+              out.competitor_count_nulls = body && Array.isArray(body.competitors) ? body.competitors.filter(c => c && typeof c.count !== 'number').length : 0;
+              out.simplify_count = body && body.simplify_internships_us_estimated && typeof body.simplify_internships_us_estimated.count === 'number' ? body.simplify_internships_us_estimated.count : null;
             } catch (e) { out.error = String(e.message || e).slice(0, 120); }
             require('fs').appendFileSync(process.env.GITHUB_ENV, 'COMPETITOR_SNAPSHOT_HEALTH=' + JSON.stringify(out) + '\n');
             console.log('check-60 probe: generated_at=' + (out.generated_at || 'absent') + ' simplify=' + out.simplify_count + ' competitors=' + out.competitors_n);
