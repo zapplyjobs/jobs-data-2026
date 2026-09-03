@@ -39,6 +39,22 @@ def gh_runs(repo, workflow=None, limit=5):
     return [r for r in rows if r.get("status") == "completed"]
 
 
+def r2_get_json(key):
+    """Read a JSON artifact from R2 (same creds publish_r2 uses).
+    Returns (data, None) | (None, 'missing') | (None, 'error: <msg>')."""
+    try:
+        import boto3
+        s3 = boto3.client("s3", region_name="auto",
+                          endpoint_url=os.environ["R2_ENDPOINT"],
+                          aws_access_key_id=os.environ["R2_ACCESS_KEY_ID"],
+                          aws_secret_access_key=os.environ["R2_SECRET_ACCESS_KEY"])
+        return json.loads(s3.get_object(Bucket=os.environ["R2_BUCKET_NAME"], Key=key)["Body"].read()), None
+    except Exception as e:
+        if "NoSuchKey" in e.__class__.__name__ or "NoSuchKey" in str(e):
+            return None, "missing"
+        return None, f"error: {e}"
+
+
 def proxy_json(path):
     try:
         url = f"{PROXY}/{path}"
@@ -120,15 +136,49 @@ def c_verification():
 
 
 def c_monitoring():
-    """SUP yield-decay monitor workflow exists + zjp-metrics alerting surface available.
-    GREEN if decay monitor workflow is configured with recent runs.
-    Alert count is informational (zero alerts = healthy, not RED)."""
+    """SUP yield-decay monitor workflow + posting-ledger OUTPUT freshness + zjp-metrics alerts.
+    Ledger leg (SUP-LEDGER-FRESHNESS-MON-1): the posting ledger is measurement substrate
+    (TTL-loss, seasonal capture, lifetime counts); its input freshness is gated by the decay
+    monitor, but a silently dead WRITER was unmonitored. Artifact ground truth = generated_at.
+    RED: artifact missing / >48h stale / unparseable, or decay workflow missing.
+    YELLOW: 24-48h (aging) or transient read error (next hourly run corrects — a monitoring
+    check must not storm RED on its own transport flakes).
+    """
     decay_runs = gh_runs("zapplyjobs/jobs-data-2026", workflow="sup-yield-decay-monitor.yml", limit=1)
     has_decay = decay_runs is not None and len(decay_runs) > 0
-    metrics = proxy_json("zjp-metrics.json")
-    alert_count = len(metrics.get("alerts", [])) if metrics else None
-    alert_info = f"{alert_count} alerts" if alert_count is not None else "proxy unavailable"
-    return green_if(has_decay), f"decay-monitor workflow {'present' if has_decay else 'MISSING'}, zjp-metrics.alerts {alert_info}", "gh-api:workflows+proxy:zjp-metrics"
+    zjp = proxy_json("zjp-metrics.json")
+    alerts = (zjp or {}).get("alerts")
+    alert_info = f"{len(alerts)} open" if isinstance(alerts, list) else "n/a"
+
+    ledger, err = r2_get_json("data/sup-posting-ledger-stats.json")
+    if err == "missing":
+        ledger_status, ledger_detail = "RED", "ledger-stats artifact MISSING (writer dead?)"
+    elif err is not None:
+        ledger_status, ledger_detail = "YELLOW", f"ledger-stats read failed ({err})"
+    else:
+        gen = (ledger or {}).get("generated_at")
+        try:
+            age_h = (NOW - datetime.datetime.fromisoformat(gen.replace("Z", "+00:00"))).total_seconds() / 3600
+        except Exception:
+            ledger_status, ledger_detail = "RED", "ledger-stats generated_at unparseable"
+        else:
+            if age_h > 48:
+                ledger_status, ledger_detail = "RED", f"ledger-stats {age_h:.0f}h old (>48h — writer dead?)"
+            elif age_h > 24:
+                ledger_status, ledger_detail = "YELLOW", f"ledger-stats {age_h:.0f}h old (aging)"
+            else:
+                ledger_status, ledger_detail = "GREEN", f"ledger-stats {age_h:.1f}h old"
+
+    parts = [f"decay-monitor workflow {'present' if has_decay else 'MISSING'}",
+             ledger_detail,
+             f"zjp-metrics.alerts {alert_info}"]
+    if not has_decay or ledger_status == "RED":
+        status = "RED"
+    elif ledger_status == "YELLOW":
+        status = "YELLOW"
+    else:
+        status = "GREEN"
+    return status, "; ".join(parts), "gh-api:workflows+r2:sup-posting-ledger-stats+proxy:zjp-metrics"
 
 
 def c_security():
