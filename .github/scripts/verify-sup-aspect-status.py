@@ -135,50 +135,54 @@ def c_verification():
     return status, f"last ci-gate {latest.get('conclusion')} ({latest['createdAt'][:10]}), {len(fails)} fail in last 3", "gh-api:CI"
 
 
+def _artifact_staleness(label, key):
+    """Shared freshness band for R2 output artifacts (writer-death alarms).
+    Returns (status, detail): RED missing/>48h/unparseable; YELLOW 24-48h or transient
+    read error; GREEN fresh. A monitoring check must not storm RED on its own transport
+    flakes — transient errors degrade to YELLOW and the next hourly run corrects."""
+    data, err = r2_get_json(key)
+    if err == "missing":
+        return "RED", f"{label} artifact MISSING (writer dead?)"
+    if err is not None:
+        return "YELLOW", f"{label} read failed ({err})"
+    gen = (data or {}).get("generated_at")
+    try:
+        age_h = (NOW - datetime.datetime.fromisoformat(str(gen).replace("Z", "+00:00"))).total_seconds() / 3600
+    except Exception:
+        return "RED", f"{label} generated_at unparseable"
+    if age_h > 48:
+        return "RED", f"{label} {age_h:.0f}h old (>48h — writer dead?)"
+    if age_h > 24:
+        return "YELLOW", f"{label} {age_h:.0f}h old (aging)"
+    return "GREEN", f"{label} {age_h:.1f}h old"
+
+
 def c_monitoring():
-    """SUP yield-decay monitor workflow + posting-ledger OUTPUT freshness + zjp-metrics alerts.
-    Ledger leg (SUP-LEDGER-FRESHNESS-MON-1): the posting ledger is measurement substrate
-    (TTL-loss, seasonal capture, lifetime counts); its input freshness is gated by the decay
-    monitor, but a silently dead WRITER was unmonitored. Artifact ground truth = generated_at.
-    RED: artifact missing / >48h stale / unparseable, or decay workflow missing.
-    YELLOW: 24-48h (aging) or transient read error (next hourly run corrects — a monitoring
-    check must not storm RED on its own transport flakes).
-    """
+    """SUP yield-decay monitor workflow + OUTPUT-freshness legs (ledger + decay report)
+    + zjp-metrics alerts. Output artifacts get writer-death alarms because input
+    freshness gating cannot see a green-but-empty run (SUP-LEDGER-FRESHNESS-MON-1,
+    SUP-DECAYOUT-FRESH-1). Bands: RED missing/>48h/unparseable or workflow missing;
+    YELLOW 24-48h or transient read error."""
     decay_runs = gh_runs("zapplyjobs/jobs-data-2026", workflow="sup-yield-decay-monitor.yml", limit=1)
     has_decay = decay_runs is not None and len(decay_runs) > 0
     zjp = proxy_json("zjp-metrics.json")
     alerts = (zjp or {}).get("alerts")
     alert_info = f"{len(alerts)} open" if isinstance(alerts, list) else "n/a"
 
-    ledger, err = r2_get_json("data/sup-posting-ledger-stats.json")
-    if err == "missing":
-        ledger_status, ledger_detail = "RED", "ledger-stats artifact MISSING (writer dead?)"
-    elif err is not None:
-        ledger_status, ledger_detail = "YELLOW", f"ledger-stats read failed ({err})"
-    else:
-        gen = (ledger or {}).get("generated_at")
-        try:
-            age_h = (NOW - datetime.datetime.fromisoformat(gen.replace("Z", "+00:00"))).total_seconds() / 3600
-        except Exception:
-            ledger_status, ledger_detail = "RED", "ledger-stats generated_at unparseable"
-        else:
-            if age_h > 48:
-                ledger_status, ledger_detail = "RED", f"ledger-stats {age_h:.0f}h old (>48h — writer dead?)"
-            elif age_h > 24:
-                ledger_status, ledger_detail = "YELLOW", f"ledger-stats {age_h:.0f}h old (aging)"
-            else:
-                ledger_status, ledger_detail = "GREEN", f"ledger-stats {age_h:.1f}h old"
+    ledger_status, ledger_detail = _artifact_staleness("ledger-stats", "data/sup-posting-ledger-stats.json")
+    decay_status, decay_detail = _artifact_staleness("decay-report", "data/sup_yield_decay_monitor.json")
 
     parts = [f"decay-monitor workflow {'present' if has_decay else 'MISSING'}",
              ledger_detail,
+             decay_detail,
              f"zjp-metrics.alerts {alert_info}"]
-    if not has_decay or ledger_status == "RED":
+    if not has_decay or "RED" in (ledger_status, decay_status):
         status = "RED"
-    elif ledger_status == "YELLOW":
+    elif "YELLOW" in (ledger_status, decay_status):
         status = "YELLOW"
     else:
         status = "GREEN"
-    return status, "; ".join(parts), "gh-api:workflows+r2:sup-posting-ledger-stats+proxy:zjp-metrics"
+    return status, "; ".join(parts), "gh-api:workflows+r2:ledger+decay+proxy:zjp-metrics"
 
 
 def c_security():
