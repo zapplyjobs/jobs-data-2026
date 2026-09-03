@@ -275,6 +275,59 @@ jobs:
             console.log('check-59 probe: app=' + out.app_status + ' rows=' + (out.match_rows ?? 'n/a') + ' anon_policies=' + out.anon_policies);
           })().catch(e => { console.error('app-canary pre-step failed (check-59 will warn): ' + e.message); require('fs').appendFileSync(process.env.GITHUB_ENV, 'APP_CANARY_STATUS=null\n'); });
           "
+      - name: Probe data-proxy liveness (check-36 serving-path leg)
+        env:
+          DATA_PROXY_TOKEN: ${{ secrets.DATA_PROXY_TOKEN }}
+        run: |
+          node -e "
+          (async () => {
+            const base = 'https://zjp-data-proxy.wild-queen-069e.workers.dev';
+            const started = Date.now();
+            try {
+              const resp = await fetch(base + '/data/metrics/latest.json', {
+                headers: { 'X-Proxy-Token': process.env.DATA_PROXY_TOKEN || '', 'User-Agent': 'zjp-check36-proxy-liveness' },
+                signal: AbortSignal.timeout(10000),
+              });
+              const payload = { ok: resp.ok, http: resp.status, ms: Date.now() - started, file: 'metrics/latest.json' };
+              require('fs').appendFileSync(process.env.GITHUB_ENV, 'PROXY_LIVENESS=' + JSON.stringify(payload) + '\n');
+              console.log('check-36 proxy probe: ' + JSON.stringify(payload));
+            } catch (e) {
+              const payload = { ok: false, http: 0, ms: Date.now() - started, file: 'metrics/latest.json', error: String(e.message || e).slice(0, 120) };
+              require('fs').appendFileSync(process.env.GITHUB_ENV, 'PROXY_LIVENESS=' + JSON.stringify(payload) + '\n');
+              console.error('check-36 proxy probe FAILED: ' + JSON.stringify(payload));
+            }
+          })();
+          "
+      - name: Probe competitor snapshot health (check-60 input)
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: |
+          node -e "
+          const { createR2Client } = require('./.github/scripts/processing/lib/storage/r2-client');
+          (async () => {
+            const r2 = createR2Client({ prefix: 'data/' });
+            const out = {};
+            try {
+              const h = await r2.head('competitor_snapshot.json');
+              out.lastModified = h.lastModified;
+            } catch (e) {
+              require('fs').appendFileSync(process.env.GITHUB_ENV, 'COMPETITOR_SNAPSHOT_HEALTH=' + JSON.stringify({ missing: true }) + '\n');
+              console.log('check-60 probe: competitor_snapshot.json MISSING');
+              return;
+            }
+            try {
+              const body = await r2.downloadJson('competitor_snapshot.json');
+              out.generated_at = (body && body.generated_at) || null;
+              out.simplify_count = body && body.simplify_internships_us_estimated && typeof body.simplify_internships_us_estimated.count === 'number' ? body.simplify_internships_us_estimated.count : null;
+              out.competitors_n = body && Array.isArray(body.competitors) ? body.competitors.length : 0;
+            } catch (e) { out.error = String(e.message || e).slice(0, 120); }
+            require('fs').appendFileSync(process.env.GITHUB_ENV, 'COMPETITOR_SNAPSHOT_HEALTH=' + JSON.stringify(out) + '\n');
+            console.log('check-60 probe: generated_at=' + (out.generated_at || 'absent') + ' simplify=' + out.simplify_count + ' competitors=' + out.competitors_n);
+          })().catch(e => { console.error('competitor probe pre-step failed (check-60 will skip): ' + e.message); require('fs').appendFileSync(process.env.GITHUB_ENV, 'COMPETITOR_SNAPSHOT_HEALTH=null\n'); });
+          "
       - name: Run pipeline checks
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
@@ -286,6 +339,8 @@ jobs:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}  # INF-SUPABASE-HEALTH-CHECK: Management API for depth metrics (connections, rollback rate, cache hit)
           APP_CANARY_STATUS: ${{ env.APP_CANARY_STATUS }}  # OUT-APP-CANARY-1: check-59 probe payload
           SUPABASE_TOKEN_EXPIRES: ${{ vars.SUPABASE_TOKEN_EXPIRES }}  # INF-SUPABASE-TOKEN-EXPIRY-1: rotation date (YYYY-MM-DD) — check-42 warns <=14d. Update this variable at each token rotation.
+          PROXY_LIVENESS: ${{ env.PROXY_LIVENESS }}  # INF-DASHADV-IMPL-1 item 2: check-36 serving-path leg payload
+          COMPETITOR_SNAPSHOT_HEALTH: ${{ env.COMPETITOR_SNAPSHOT_HEALTH }}  # INF-DASHADV-IMPL-1 item 3: check-60 probe payload
         run: node .github/scripts/processing/lib/pipeline-alert.js
       - name: Build Tier A source coverage report
         run: node .github/scripts/source-coverage-audit.js
