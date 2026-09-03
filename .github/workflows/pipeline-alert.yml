@@ -320,6 +320,7 @@ jobs:
             }
             try {
               const body = await r2.downloadJson('competitor_snapshot.json');
+              out.generated_at = (body && body.generated_at) || null;
               out.competitors_n = body && Array.isArray(body.competitors) ? body.competitors.length : 0;
               out.competitor_count_nulls = body && Array.isArray(body.competitors) ? body.competitors.filter(c => c && typeof c.count !== 'number').length : 0;
               out.simplify_count = body && body.simplify_internships_us_estimated && typeof body.simplify_internships_us_estimated.count === 'number' ? body.simplify_internships_us_estimated.count : null;
