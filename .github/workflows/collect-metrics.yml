@@ -166,6 +166,20 @@ jobs:
           node scripts/upload-dashboard-data-to-r2.js sjd-jobs.json
 
 
+      - name: Produce thin-sync P0 app artifacts (R2-based, INF-DB-THINSYNC-DESIGN-1)
+        if: success() && steps.r2fetch.outputs.pipeline_fresh == 'true'
+        continue-on-error: true  # P0 proof leg: no consumers yet; never break the cycle
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}  # R2-only by design (single-homing; the zapply.jobs app consumes via zjp-data-proxy). No SUPABASE_* env here: Storage leg intentionally skipped.
+        run: |
+          node scripts/produce-app-artifacts.js
+          # Glob-driven: new AGG domains produce app-jobs-<domain>.json automatically (whitelist updates ride the next proxy change)
+          node scripts/upload-dashboard-data-to-r2.js $(ls .github/data/app-jobs-*.json | xargs -n1 basename | tr '\n' ' ')
+
+
       - name: Publish sjd serve count for the publisher funnel (INF-SJDZAPPLY-SERVECOUNTERS-1)
         if: success() && steps.r2fetch.outputs.pipeline_fresh == 'true'
         continue-on-error: true  # Fail-open: widget renders served=null honestly; never break the cycle
