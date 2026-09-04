@@ -162,10 +162,15 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}  # 2026-09-03: without these two, uploader putStorage returns false SILENTLY (green step, zero write, stale artifact)
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
         run: |
           node scripts/produce-sjd-jobs.js
-          # INF-R2-STALERELIC-CLUSTER-1: sjd-jobs.json home = STORAGE cache (SJD consumer is kind=supabase; nothing reads the R2 copy). No R2_* env here BY DECISION: uploader writes Storage only.
+          # INF-R2-STALERELIC-CLUSTER-1 historical note: sjd-jobs.json home was STORAGE-only ("nothing reads the R2 copy") — SUPERSEDED 09-04 by INF-SJD-STORAGE-READ-BREAK-1: the privacy flip (bucket now private) broke the sjd functions' unauthenticated Storage read, so the R2 copy is restored as the canonical read target and the functions repoint to it (jobs.ts:287, dev-team leg). Dual-write during transition.
           node scripts/upload-dashboard-data-to-r2.js sjd-jobs.json
+          python3 -c "import boto3, os; s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']); s3.upload_file('.github/data/sjd-jobs.json', os.environ['R2_BUCKET_NAME'], 'data/sjd-jobs.json'); print('uploaded data/sjd-jobs.json to R2 (canonical read target for sjd functions — INF-SJD-STORAGE-READ-BREAK-1)')"
 
 
       - name: Produce thin-sync P0 app artifacts (R2-based, INF-DB-THINSYNC-DESIGN-1)
