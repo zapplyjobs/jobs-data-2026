@@ -260,6 +260,50 @@ jobs:
             console.log('check-62 probe: ' + payload);
           })().catch(e => { console.error('posture probe pre-step failed (check-62 will skip): ' + e.message); require('fs').appendFileSync(process.env.GITHUB_ENV, 'POSTURE_HEALTH=null\n'); });
           "
+      - name: Probe sjd detail route (check-64 input)
+        env:
+          SUPABASE_URL: https://xxmhgagpbxjflajoaahy.supabase.co
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          node -e "
+          (async () => {
+            const out = {};
+            try {
+              const u = process.env.SUPABASE_URL + '/rest/v1/jobs?select=job_id,job_description&is_active=eq.true&job_description=not.is.null&order=created_at.desc&limit=5';
+              const r = await fetch(u, { headers: { apikey: process.env.SUPABASE_SERVICE_ROLE_KEY, Authorization: 'Bearer ' + process.env.SUPABASE_SERVICE_ROLE_KEY } });
+              out.pick_status = r.status;
+              if (r.ok) { const rows = await r.json(); const pick = rows.find(x => x.job_description && x.job_description.trim().length > 40); out.id = pick ? pick.job_id : null; }
+            } catch (e) { out.error = 'pick: ' + e.message; }
+            if (out.id) {
+              try {
+                const started = Date.now();
+                const d = await fetch('https://softwarejobs.dev/api/jobs/' + out.id, { headers: { 'User-Agent': 'zjp-check62-sjd-canary' }, signal: AbortSignal.timeout(10000) });
+                out.detail_status = d.status;
+                out.detail_ms = Date.now() - started;
+                if (d.ok) { const j = await d.json(); out.description_len = (j.description || '').length; }
+              } catch (e) { out.error = (out.error ? out.error + '; ' : '') + 'detail: ' + e.message; }
+            }
+            const payload = JSON.stringify(out);
+            require('fs').appendFileSync(process.env.GITHUB_ENV, 'SJD_DETAIL_CANARY=' + payload + '\n');
+            console.log('check-64 probe: ' + payload);
+          })().catch(e => { console.error('sjd canary probe pre-step failed (check-64 will skip): ' + e.message); require('fs').appendFileSync(process.env.GITHUB_ENV, 'SJD_DETAIL_CANARY=null\n'); });
+          "
+      - name: Probe outbox depth (check-65 input)
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          node -e "
+          (async () => {
+            const out = {};
+            const sql = \"SELECT (SELECT count(*) FROM notifications.notification_outbox WHERE status = 'pending') AS pending_count, (SELECT round(extract(epoch FROM (now() - min(created_at)))/3600.0)::int FROM notifications.notification_outbox WHERE status = 'pending') AS oldest_pending_age_h\";
+            const r = await fetch('https://api.supabase.com/v1/projects/xxmhgagpbxjflajoaahy/database/query', { method: 'POST', headers: { Authorization: 'Bearer ' + process.env.SUPABASE_ACCESS_TOKEN, 'Content-Type': 'application/json', 'User-Agent': 'zjp-check65' }, body: JSON.stringify({ query: sql }) });
+            if (r.ok) { const rows = await r.json(); Object.assign(out, rows[0] || {}); }
+            else out.error = 'query http ' + r.status;
+            const payload = JSON.stringify(out);
+            require('fs').appendFileSync(process.env.GITHUB_ENV, 'OUTBOX_HEALTH=' + payload + '\n');
+            console.log('check-65 probe: ' + payload);
+          })().catch(e => { console.error('outbox probe pre-step failed (check-65 will skip): ' + e.message); require('fs').appendFileSync(process.env.GITHUB_ENV, 'OUTBOX_HEALTH=null\n'); });
+          "
       - name: Probe Supabase platform status page (check-57 input)
         run: |
           node -e "
@@ -334,6 +378,8 @@ jobs:
                 headers: { 'X-Proxy-Token': process.env.DATA_PROXY_TOKEN || '', 'User-Agent': 'zjp-check36-proxy-liveness' },
                 signal: AbortSignal.timeout(10000),
               });
+              const un = await fetch(base + '/data/metrics/latest.json', { headers: { 'User-Agent': 'zjp-check36-proxy-liveness' }, signal: AbortSignal.timeout(10000) });
+              payload.unauth_status = un.status; // fail-open sentinel (INF-DATAPROXY-FAILOPEN-SENTINEL-1): 200 here = token guard open
               const payload = { ok: resp.ok, http: resp.status, ms: Date.now() - started, file: 'metrics/latest.json' };
               require('fs').appendFileSync(process.env.GITHUB_ENV, 'PROXY_LIVENESS=' + JSON.stringify(payload) + '\n');
               console.log('check-36 proxy probe: ' + JSON.stringify(payload));
