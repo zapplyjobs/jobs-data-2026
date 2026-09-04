@@ -213,6 +213,7 @@ jobs:
             require('fs').appendFileSync(process.env.GITHUB_ENV, 'BRIDGE_PHASE_HEALTH=' + payload + '\n');
             console.log('check-55 probe: ' + entries.length + ' tail entries, last instrumented p5a=' + (() => { const i = [...entries].reverse().find(e => e.phases_present); return i ? Math.round(i.p5a_s) + 's' : 'none'; })());
           })().catch(e => { console.error('bridge phase probe pre-step failed (check-55 will skip): ' + e.message); require('fs').appendFileSync(process.env.GITHUB_ENV, 'BRIDGE_PHASE_HEALTH=null\n'); });
+          "
       - name: Probe dashboard deploy freshness (check-61 input)
         env:
           DASH_ACCESS_CLIENT_ID: ${{ secrets.DASH_ACCESS_CLIENT_ID }}
@@ -240,8 +241,6 @@ jobs:
             require('fs').appendFileSync(process.env.GITHUB_ENV, 'DASH_DEPLOY_FRESH=' + payload + '\n');
             console.log('check-61 probe: ' + payload);
           })().catch(e => { console.error('deploy-fresh probe pre-step failed (check-61 will skip): ' + e.message); require('fs').appendFileSync(process.env.GITHUB_ENV, 'DASH_DEPLOY_FRESH=null\n'); });
-          "
-          "
       - name: Probe Supabase platform status page (check-57 input)
         run: |
           node -e "
