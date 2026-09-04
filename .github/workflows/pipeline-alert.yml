@@ -213,6 +213,34 @@ jobs:
             require('fs').appendFileSync(process.env.GITHUB_ENV, 'BRIDGE_PHASE_HEALTH=' + payload + '\n');
             console.log('check-55 probe: ' + entries.length + ' tail entries, last instrumented p5a=' + (() => { const i = [...entries].reverse().find(e => e.phases_present); return i ? Math.round(i.p5a_s) + 's' : 'none'; })());
           })().catch(e => { console.error('bridge phase probe pre-step failed (check-55 will skip): ' + e.message); require('fs').appendFileSync(process.env.GITHUB_ENV, 'BRIDGE_PHASE_HEALTH=null\n'); });
+      - name: Probe dashboard deploy freshness (check-61 input)
+        env:
+          DASH_ACCESS_CLIENT_ID: ${{ secrets.DASH_ACCESS_CLIENT_ID }}
+          DASH_ACCESS_CLIENT_SECRET: ${{ secrets.DASH_ACCESS_CLIENT_SECRET }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          node -e "
+          (async () => {
+            const out = {};
+            try {
+              const r = await fetch('https://dash.zapply.jobs/build-info.json', { headers: { 'CF-Access-Client-Id': process.env.DASH_ACCESS_CLIENT_ID, 'CF-Access-Client-Secret': process.env.DASH_ACCESS_CLIENT_SECRET } });
+              out.live_status = r.status;
+              if (r.ok) { const j = await r.json(); out.live_sha = String(j.sha || '').slice(0, 12); out.built_at = j.built_at || null; }
+            } catch (e) { out.error = 'live: ' + e.message; }
+            try {
+              const r2 = await fetch('https://api.github.com/repos/zapplyjobs/zjp-dashboard/commits/main', { headers: { 'User-Agent': 'zjp-pipeline-alert', 'Authorization': 'Bearer ' + process.env.GH_TOKEN } });
+              if (r2.ok) { const j2 = await r2.json(); out.origin_sha = String(j2.sha || '').slice(0, 12); out.origin_committed_at = j2.commit && j2.commit.committer ? j2.commit.committer.date : null; }
+              else { out.origin_status = r2.status; }
+            } catch (e) { out.error = (out.error ? out.error + '; ' : '') + 'origin: ' + e.message; }
+            if (out.live_sha && out.origin_sha) {
+              out.behind = out.live_sha !== out.origin_sha;
+              if (out.behind && out.origin_committed_at) out.origin_age_min = Math.round((Date.now() - new Date(out.origin_committed_at).getTime()) / 60000);
+            }
+            const payload = JSON.stringify(out);
+            require('fs').appendFileSync(process.env.GITHUB_ENV, 'DASH_DEPLOY_FRESH=' + payload + '\n');
+            console.log('check-61 probe: ' + payload);
+          })().catch(e => { console.error('deploy-fresh probe pre-step failed (check-61 will skip): ' + e.message); require('fs').appendFileSync(process.env.GITHUB_ENV, 'DASH_DEPLOY_FRESH=null\n'); });
+          "
           "
       - name: Probe Supabase platform status page (check-57 input)
         run: |
