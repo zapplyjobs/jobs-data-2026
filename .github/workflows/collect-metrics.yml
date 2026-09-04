@@ -1,6 +1,8 @@
 name: Collect Metrics
 
 on:
+  schedule:
+    - cron: '*/15 * * * *'  # INF-COLLECTMETRICS-TRIGGERGAP-1 (2026-09-04): the ONLY automated trigger after AGG-REDUNDANT-COLLECTMETRICS-DISPATCH-2 removed the fetch-jobs chain link — this workflow publishes zjp-metrics.json, bridge-metrics-history appends and the sjd artifact, and had been running on manual dispatches alone. GHA cron = fallback per INF-GHA-CRON-DUAL-TRIGGER-1; the Worker SUPPLEMENTAL entry is the intended primary (pending deploy).
   workflow_dispatch:
   push:
     paths:
