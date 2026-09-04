@@ -379,8 +379,7 @@ jobs:
                 signal: AbortSignal.timeout(10000),
               });
               const un = await fetch(base + '/data/metrics/latest.json', { headers: { 'User-Agent': 'zjp-check36-proxy-liveness' }, signal: AbortSignal.timeout(10000) });
-              payload.unauth_status = un.status; // fail-open sentinel (INF-DATAPROXY-FAILOPEN-SENTINEL-1): 200 here = token guard open
-              const payload = { ok: resp.ok, http: resp.status, ms: Date.now() - started, file: 'metrics/latest.json' };
+              const payload = { ok: resp.ok, http: resp.status, ms: Date.now() - started, file: 'metrics/latest.json', unauth_status: un.status };
               require('fs').appendFileSync(process.env.GITHUB_ENV, 'PROXY_LIVENESS=' + JSON.stringify(payload) + '\n');
               console.log('check-36 proxy probe: ' + JSON.stringify(payload));
             } catch (e) {
