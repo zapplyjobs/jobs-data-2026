@@ -1,0 +1,86 @@
+# DB Backup to R2 — INF-DB-R2-BACKUPS-1
+# Designed 2026-09-04 by LANE-DB session. Lands in zapplyjobs/jobs-data-2026 (public repo, free Actions)
+# via LANE-REPO advisory INF-REPO-DBBACKUP-LAND-1 (one commit to .github/workflows/). Secret SUPABASE_DB_URL
+# is ALREADY SET on the repo (09-04); R2_ACCESS_KEY_ID/R2_SECRET_ACCESS_KEY/R2_ENDPOINT/R2_BUCKET_NAME exist.
+#
+# Design decisions (evidence: research/DB_BACKUP_DESIGN_2026_09_04.md + task record):
+# - Session POOLER URI (not direct): GitHub runners are IPv4-only; direct is IPv6-only.
+# - Own prefix db-backups/ (NOT data/backups/ which carries the 3d artifact-expiry lifecycle rule).
+# - In-workflow rotation (no R2 lifecycle-API dependency): delete day-folders older than RETENTION_DAYS.
+# - Measured dump = 676MB (default gzip); -Z9 trims it; 5d retention ~= 3.3GB (R2 headroom ~4.9GB on 10GB plan).
+# - pg_restore --list smoke step every run: a backup that fails to open = failed backup.
+# - Restore drill (2026-09-04, PASSED): schema-only restore into scratch DB — public schema 34/34 tables,
+#   jobs 34/34 columns; 2 platform-internal entries skipped (pg_cron/realtime — platform reinstall owns them).
+
+name: DB Backup to R2
+on:
+  schedule:
+    - cron: "40 6 * * *" # daily 06:40Z — off-peak, after the 05:2xZ artifact backup completes
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: db-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      RETENTION_DAYS: "5"
+    steps:
+      - name: Install PostgreSQL 17 client
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -s -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt noble-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client-17
+
+      - name: Dump database (custom compressed format)
+        run: |
+          /usr/lib/postgresql/17/bin/pg_dump "$SUPABASE_DB_URL" -Fc -Z9 --no-owner --no-privileges -f db.dump
+          ls -la db.dump
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+
+      - name: Archive integrity smoke check
+        run: /usr/lib/postgresql/17/bin/pg_restore db.dump --list > /dev/null && echo "ARCHIVE OK"
+
+      - name: Upload to R2 (dated folder)
+        run: |
+          DAY=$(date -u +%F)
+          aws s3api put-object --bucket "$R2_BUCKET_NAME" \
+            --key "db-backups/${DAY}/db.dump" \
+            --body db.dump \
+            --endpoint-url "$R2_ENDPOINT"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          AWS_DEFAULT_REGION: auto
+
+      - name: Rotate (delete day-folders older than RETENTION_DAYS)
+        run: |
+          CUTOFF=$(date -u -d "-${RETENTION_DAYS} days" +%F)
+          aws s3api list-objects-v2 --bucket "$R2_BUCKET_NAME" --prefix "db-backups/" \
+            --query "Contents[?length(Key)>=14].Key" --output text \
+          | while read -r KEY; do
+              DAY=$(echo "$KEY" | cut -d/ -f2)
+              if [[ "$DAY" < "$CUTOFF" ]]; then
+                echo "deleting $KEY (older than $CUTOFF)"
+                aws s3api delete-object --bucket "$R2_BUCKET_NAME" --key "$KEY" --endpoint-url "$R2_ENDPOINT"
+              fi
+            done
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          AWS_DEFAULT_REGION: auto
+
+      - name: Summary
+        run: echo "backup db-backups/$(date -u +%F)/db.dump uploaded; retention ${RETENTION_DAYS}d"
