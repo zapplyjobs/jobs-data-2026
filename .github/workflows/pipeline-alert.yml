@@ -242,6 +242,24 @@ jobs:
             console.log('check-61 probe: ' + payload);
           })().catch(e => { console.error('deploy-fresh probe pre-step failed (check-61 will skip): ' + e.message); require('fs').appendFileSync(process.env.GITHUB_ENV, 'DASH_DEPLOY_FRESH=null\n'); });
           "
+      - name: Probe posture artifact + merge health (check-62 input)
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: |
+          node -e "
+          const { createR2Client } = require('./.github/scripts/processing/lib/storage/r2-client');
+          (async () => {
+            const r2 = createR2Client({ prefix: 'data/' });
+            let payload;
+            try { payload = JSON.stringify(await r2.downloadJson('posture-merge-stats.json')); }
+            catch (e) { payload = 'null'; }
+            require('fs').appendFileSync(process.env.GITHUB_ENV, 'POSTURE_HEALTH=' + payload + '\n');
+            console.log('check-62 probe: ' + payload);
+          })().catch(e => { console.error('posture probe pre-step failed (check-62 will skip): ' + e.message); require('fs').appendFileSync(process.env.GITHUB_ENV, 'POSTURE_HEALTH=null\n'); });
+          "
       - name: Probe Supabase platform status page (check-57 input)
         run: |
           node -e "
