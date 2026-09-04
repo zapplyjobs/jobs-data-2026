@@ -179,7 +179,13 @@ jobs:
         run: |
           node scripts/produce-app-artifacts.js
           # Glob-driven: new AGG domains produce app-jobs-<domain>.json automatically (whitelist updates ride the next proxy change)
-          node scripts/upload-dashboard-data-to-r2.js $(ls .github/data/app-jobs-*.json | xargs -n1 basename | tr '\n' ' ')
+          # shellcheck-clean arg build (INF-JOBSDATA-WORKFLOWLINT-RED-1): uploader contract = basenames relative to .github/data/
+          shopt -s nullglob
+          files=()
+          for f in .github/data/app-jobs-*.json; do
+            files+=("$(basename "$f")")
+          done
+          node scripts/upload-dashboard-data-to-r2.js "${files[@]}"
 
 
       - name: Publish sjd serve count for the publisher funnel (INF-SJDZAPPLY-SERVECOUNTERS-1)
