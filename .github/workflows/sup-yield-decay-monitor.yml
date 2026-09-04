@@ -76,11 +76,15 @@ jobs:
           main().catch(e => { console.error('gate fatal: ' + e.message); process.exit(1); });
           "
 
-      - name: Download company-research-log.csv from Supabase Storage
+      - name: Download company-research-log.csv from Supabase Storage (authenticated — bucket now private, INF-STORAGE-PUBLICACL-REVIEW-1)
         if: steps.freshness.outputs.pipeline_fresh == 'true'
+        env:
+          SUPABASE_URL: https://xxmhgagpbxjflajoaahy.supabase.co
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
           curl -sf -o .github/data/company-research-log.csv \
-            'https://xxmhgagpbxjflajoaahy.supabase.co/storage/v1/object/public/pipeline-data/company-research-log.csv' \
+            -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+            "$SUPABASE_URL/storage/v1/object/pipeline-data/company-research-log.csv" \
             && echo "CSV downloaded: $(wc -l < .github/data/company-research-log.csv) lines" \
             || { echo "FAILED to download CSV"; exit 1; }
 
