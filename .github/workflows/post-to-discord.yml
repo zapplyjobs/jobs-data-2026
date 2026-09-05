@@ -74,7 +74,7 @@ jobs:
             const dataDir = '.github/data';
             if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
 
-            const files = ['all_jobs.json', 'enriched_jobs.json', 'posted_jobs.json', 'global-dedupe-store.json', 'sup-company-posture.json'];
+            const files = ['all_jobs.json', 'enriched_jobs.json', 'posted_jobs.json', 'global-dedupe-store.json'];
             let ok = 0;
             for (const file of files) {
               try {
