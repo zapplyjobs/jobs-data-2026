@@ -204,6 +204,14 @@ jobs:
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
 
+      - name: Alert on pool hygiene anomalies (Discord, SUP-SENTINEL-DISCORD-WIRE-1)
+        if: steps.freshness.outputs.pipeline_fresh == 'true'
+        continue-on-error: true
+        env:
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TEAM_TOKEN }}
+          DISCORD_PIPELINE_ALERT_CHANNEL_ID: ${{ secrets.DISCORD_PIPELINE_ALERT_CHANNEL_ID }}
+        run: node .github/scripts/processing/lib/sup-pool-hygiene-alert.js
+
 
       - name: Refresh CSV auto-fields (SUP-CSV-AUTOFIELDS-REFRESH-1 — F4)
         if: steps.freshness.outputs.pipeline_fresh == 'true'
