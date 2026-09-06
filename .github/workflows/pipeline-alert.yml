@@ -304,6 +304,21 @@ jobs:
             console.log('check-65 probe: ' + payload);
           })().catch(e => { console.error('outbox probe pre-step failed (check-65 will skip): ' + e.message); require('fs').appendFileSync(process.env.GITHUB_ENV, 'OUTBOX_HEALTH=null\n'); });
           "
+      - name: Probe pg_cron freshness (check-66 input)
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          node -e "
+          (async () => {
+            const out = {};
+            const sql = \"with last_runs as (select jobid, max(start_time) filter (where status = 'succeeded') as last_ok, (array_agg(status order by start_time desc))[1] as last_status, (select count(*) from cron.job_run_details r2 where r2.jobid = r.jobid and r2.status <> 'succeeded' and r2.start_time > now() - interval '48 hours') as fails_48h from cron.job_run_details r group by jobid) select j.jobid, j.jobname, j.schedule, coalesce(l.last_ok::timestamp(0)::text,'never') as last_success, l.last_status, l.fails_48h, case j.jobname when 'daily-stale-purge' then 48 when 'refresh-company-analytics' then 2 when 'auto-approve-ambassador-payouts' then 2 when 'process-scheduled-account-deletions' then 48 when 'daily-signup-report' then 48 when 'expire-unverified-signups' then 48 else null end as fail_after_hours, round(extract(epoch from (now() - coalesce(l.last_ok, '1970-01-01'::timestamptz)))/3600.0, 1) as hours_since_success from cron.job j left join last_runs l using (jobid) where j.active order by j.jobid\";
+            const r = await fetch('https://api.supabase.com/v1/projects/xxmhgagpbxjflajoaahy/database/query', { method: 'POST', headers: { Authorization: 'Bearer ' + process.env.SUPABASE_ACCESS_TOKEN, 'Content-Type': 'application/json', 'User-Agent': 'zjp-check66' }, body: JSON.stringify({ query: sql }) });
+            if (r.ok) { out.rows = await r.json(); } else { out.error = 'query http ' + r.status; }
+            const payload = JSON.stringify(out);
+            require('fs').appendFileSync(process.env.GITHUB_ENV, 'PGCRON_FRESH=' + payload + '\n');
+            console.log('check-66 probe: jobs=' + (out.rows ? out.rows.length : 'err') + (out.error ? (' error=' + out.error) : ''));
+          })().catch(e => { console.error('pgcron probe pre-step failed (check-66 will skip): ' + e.message); require('fs').appendFileSync(process.env.GITHUB_ENV, 'PGCRON_FRESH=null\n'); });
+          "
       - name: Probe Supabase platform status page (check-57 input)
         run: |
           node -e "
