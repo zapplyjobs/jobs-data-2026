@@ -157,6 +157,31 @@ def _artifact_staleness(label, key):
     return "GREEN", f"{label} {age_h:.1f}h old"
 
 
+def _slow_artifact_staleness(label, key):
+    """Freshness band for QUARTERLY/wave-cadence R2 artifacts (SUP-ARTIFACT-FRESHNESS-COVERAGE-1):
+    sup_blocked_source_value.json (dispatch-refreshed quarterly convention + browser rows keep
+    measured dates), sup_competitor_p1_simplify.json (quarterly cron Jan/Apr/Jul/Oct + dispatch),
+    sup_tier2_employers.json (wave adds + 09-15 quarterly re-run). Timestamp field varies by
+    artifact: generated | generated_at | updated — first present wins. Bands: GREEN <=100d,
+    YELLOW <=190d, RED missing/>190d/unparseable (a missed quarter = writer dead)."""
+    data, err = r2_get_json(key)
+    if err == "missing":
+        return "RED", f"{label} artifact MISSING (writer dead?)"
+    if err is not None:
+        return "YELLOW", f"{label} read failed ({err})"
+    gen = next((str((data or {}).get(f)) for f in ("generated", "generated_at", "updated")
+                if (data or {}).get(f)), None)
+    try:
+        age_d = (NOW - datetime.datetime.fromisoformat(gen.replace("Z", "+00:00"))).days
+    except Exception:
+        return "RED", f"{label} timestamp unparseable ({gen!r})"
+    if age_d > 190:
+        return "RED", f"{label} {age_d}d old (>190d — quarterly writer dead?)"
+    if age_d > 100:
+        return "YELLOW", f"{label} {age_d}d old (quarter due)"
+    return "GREEN", f"{label} {age_d}d old"
+
+
 def c_monitoring():
     """SUP yield-decay monitor workflow + OUTPUT-freshness legs (ledger + decay report)
     + zjp-metrics alerts. Output artifacts get writer-death alarms because input
@@ -172,17 +197,24 @@ def c_monitoring():
     ledger_status, ledger_detail = _artifact_staleness("ledger-stats", "data/sup-posting-ledger-stats.json")
     decay_status, decay_detail = _artifact_staleness("decay-report", "data/sup_yield_decay_monitor.json")
 
+    blocked_status, blocked_detail = _slow_artifact_staleness("blocked-source", "data/sup_blocked_source_value.json")
+    p1_status, p1_detail = _slow_artifact_staleness("competitor-p1", "data/sup_competitor_p1_simplify.json")
+    tier2_status, tier2_detail = _slow_artifact_staleness("tier2-employers", "data/sup_tier2_employers.json")
+
     parts = [f"decay-monitor workflow {'present' if has_decay else 'MISSING'}",
              ledger_detail,
              decay_detail,
+             blocked_detail,
+             p1_detail,
+             tier2_detail,
              f"zjp-metrics.alerts {alert_info}"]
-    if not has_decay or "RED" in (ledger_status, decay_status):
+    if not has_decay or "RED" in (ledger_status, decay_status, blocked_status, p1_status, tier2_status):
         status = "RED"
-    elif "YELLOW" in (ledger_status, decay_status):
+    elif "YELLOW" in (ledger_status, decay_status, blocked_status, p1_status, tier2_status):
         status = "YELLOW"
     else:
         status = "GREEN"
-    return status, "; ".join(parts), "gh-api:workflows+r2:ledger+decay+proxy:zjp-metrics"
+    return status, "; ".join(parts), "gh-api:workflows+r2:ledger+decay+blocked+p1+tier2+proxy:zjp-metrics"
 
 
 def c_security():
