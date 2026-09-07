@@ -269,7 +269,7 @@ jobs:
           (async () => {
             const out = {};
             try {
-              const u = process.env.SUPABASE_URL + '/rest/v1/jobs?select=job_id,job_description&is_active=eq.true&job_description=not.is.null&order=created_at.desc&limit=5';
+              const u = process.env.SUPABASE_URL + '/rest/v1/jobs?select=job_id,job_description&is_active=eq.true&job_description=not.is.null&source=eq.GITHUB&order=created_at.desc&limit=5';
               const r = await fetch(u, { headers: { apikey: process.env.SUPABASE_SERVICE_ROLE_KEY, Authorization: 'Bearer ' + process.env.SUPABASE_SERVICE_ROLE_KEY } });
               out.pick_status = r.status;
               if (r.ok) { const rows = await r.json(); const pick = rows.find(x => x.job_description && x.job_description.trim().length > 40); out.id = pick ? pick.job_id : null; }
