@@ -25,6 +25,7 @@ jobs:
       - name: Count-level probe (Indeed public search page)
         run: |
           set -uo pipefail
+          mkdir -p .github/data
           UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
           URL="https://www.indeed.com/jobs?q=internship&l=United+States"
           http_code=$(curl -s -o /tmp/indeed.html -w "%{http_code}" -A "$UA" -H "Accept-Language: en-US,en;q=0.9" --max-time 30 -L "$URL" || echo "curl_error")
@@ -35,7 +36,7 @@ jobs:
             challenge="true"
           fi
           count_raw=""
-          mkdir -p .github/data
+          if [ "$challenge" = "false" ] && [ "$http_code" = "200" ]; then
             count_raw=$(grep -o '"searchCountPages"[^}]*}' /tmp/indeed.html | head -1 | grep -o '"COUNT":"[^"]*"' | head -1 | cut -d'"' -f4 || true)
             if [ -z "$count_raw" ]; then
               count_raw=$(grep -oE '[0-9,]+ jobs' /tmp/indeed.html | head -1 || true)
