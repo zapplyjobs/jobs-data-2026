@@ -1,0 +1,133 @@
+# Clicks Retention — INF-CLICKS-RETENTION-CRON-1
+# 180d raw retention on zapply_analytics_clicks (one row per outbound click, no PII).
+# Spec final 2026-09-07 per consumer consults: OUT (no forensics need beyond 180d; datacheck
+# needs Sep-4-onward; no dedupe interaction) + DASH (panels use windowDays=35; 180d raw more
+# than sufficient; no rollup needed for current views). Design basis: research/LINKTRACK_DESIGN_2026_09_04.md s4.
+# Pattern: jobs-retention.sh house pattern (export -> R2 -> delete -> reconcile); the R2 export
+# is the reconstruction source, so nothing is destroyed unarchived.
+#
+# FIRST-RUN GATE (purge policy 2026-09-06: first-ever execution of a NEW purge class needs the
+# operator word): lands workflow_dispatch-ONLY. The weekly cron line is pre-staged below,
+# commented. Operator go => uncomment the schedule block (that is the whole flip).
+# mode=dry_run exports + reports WITHOUT deleting — safe to run any time.
+
+name: Clicks Retention
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "dry_run = export + report only; execute = delete expired rows after export"
+        required: true
+        default: "dry_run"
+        type: choice
+        options:
+          - dry_run
+          - execute
+      days:
+        description: "Retention window in days (180 = consulted spec)"
+        required: true
+        default: "180"
+        type: string
+  # schedule:
+  #   - cron: "55 6 * * 1"  # weekly Mondays 06:55Z — ENABLE ON OPERATOR WORD (first-run gate)
+
+permissions:
+  contents: read
+
+concurrency:
+  group: clicks-retention
+  cancel-in-progress: false
+
+jobs:
+  retention:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      RETENTION_DAYS: ${{ github.event.inputs.days || '180' }}
+      MODE: ${{ github.event.inputs.mode || 'dry_run' }}
+    steps:
+      - name: Validate inputs
+        run: |
+          [[ "$RETENTION_DAYS" =~ ^[0-9]+$ ]] || { echo "days must be numeric, got: $RETENTION_DAYS"; exit 1; }
+          [[ "$MODE" == "dry_run" || "$MODE" == "execute" ]] || { echo "mode must be dry_run|execute"; exit 1; }
+          echo "mode=$MODE window=${RETENTION_DAYS}d"
+
+      - name: Install PostgreSQL 17 client
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -s -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt noble-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client-17
+
+      - name: Report expired class
+        run: |
+          /usr/lib/postgresql/17/bin/psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -At \
+            -c "SELECT count(*), COALESCE(min(created_at)::date::text,'-'), COALESCE(max(created_at)::date::text,'-') FROM zapply_analytics_clicks WHERE created_at < now() - ($RETENTION_DAYS || ' days')::interval" \
+          | while IFS='|' read -r ROWS OLDEST NEWEST; do
+              echo "expired class: rows=$ROWS oldest=$OLDEST newest=$NEWEST (cutoff = now() - ${RETENTION_DAYS}d)"
+            done
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+
+      - name: Export expired class to R2 (reconstruction source — runs before any delete)
+        run: |
+          DAY=$(date -u +%F)
+          mkdir -p export
+          /usr/lib/postgresql/17/bin/psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 \
+            -c "\copy (SELECT id, source, landing_page, referrer, user_agent, created_at FROM zapply_analytics_clicks WHERE created_at < now() - ($RETENTION_DAYS || ' days')::interval ORDER BY created_at) TO 'export/clicks-expired-${RETENTION_DAYS}d.csv' WITH (FORMAT csv, HEADER true)"
+          wc -l export/*.csv
+          aws s3api put-object --bucket "$R2_BUCKET_NAME" \
+            --key "clicks-retention/${DAY}/clicks-expired-${RETENTION_DAYS}d.csv" \
+            --body "export/clicks-expired-${RETENTION_DAYS}d.csv" \
+            --endpoint-url "$R2_ENDPOINT"
+          echo "exported -> clicks-retention/${DAY}/clicks-expired-${RETENTION_DAYS}d.csv"
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          AWS_DEFAULT_REGION: auto
+
+      - name: Rotate export files (keep 3 most recent day-folders)
+        run: |
+          CUTOFF=$(date -u -d "-3 days" +%F)
+          aws s3api list-objects-v2 --bucket "$R2_BUCKET_NAME" --prefix "clicks-retention/" \
+            --query "Contents[?length(Key)>=14].Key" --output text \
+          | while read -r KEY; do
+              DAY=$(echo "$KEY" | cut -d/ -f2)
+              if [[ "$DAY" < "$CUTOFF" ]]; then
+                echo "deleting old export $KEY (older than $CUTOFF)"
+                aws s3api delete-object --bucket "$R2_BUCKET_NAME" --key "$KEY" --endpoint-url "$R2_ENDPOINT"
+              fi
+            done
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          AWS_DEFAULT_REGION: auto
+
+      - name: Delete expired rows (execute mode only — first runs must be operator-gated)
+        if: env.MODE == 'execute'
+        run: |
+          DELETED=$(/usr/lib/postgresql/17/bin/psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -At \
+            -c "WITH d AS (DELETE FROM zapply_analytics_clicks WHERE created_at < now() - ($RETENTION_DAYS || ' days')::interval RETURNING 1) SELECT count(*) FROM d")
+          REMAINING=$(/usr/lib/postgresql/17/bin/psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -At \
+            -c "SELECT count(*) FROM zapply_analytics_clicks")
+          echo "deleted=${DELETED} remaining=${REMAINING}"
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "## Clicks retention — ${MODE}, window ${RETENTION_DAYS}d"
+            echo "- Expired-class report and export in the steps above; R2 key: clicks-retention/$(date -u +%F)/"
+            if [ "$MODE" = "execute" ]; then
+              echo "- DELETE executed (deleted/remaining counts in the delete step)."
+            else
+              echo "- DRY RUN — nothing deleted. Flip to mode=execute on operator word."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
