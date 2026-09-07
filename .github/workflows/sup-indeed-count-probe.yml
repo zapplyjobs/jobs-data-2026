@@ -35,8 +35,7 @@ jobs:
             challenge="true"
           fi
           count_raw=""
-          if [ "$challenge" = "false" ] && [ "$http_code" = "200" ]; then
-            # Indeed embeds the total in searchCountPages metadata: "COUNT":"<n>"
+          mkdir -p .github/data
             count_raw=$(grep -o '"searchCountPages"[^}]*}' /tmp/indeed.html | head -1 | grep -o '"COUNT":"[^"]*"' | head -1 | cut -d'"' -f4 || true)
             if [ -z "$count_raw" ]; then
               count_raw=$(grep -oE '[0-9,]+ jobs' /tmp/indeed.html | head -1 || true)
