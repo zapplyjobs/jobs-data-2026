@@ -1,11 +1,10 @@
 name: Refresh LCA Data
 
-# Quarterly refresh of lca-sponsors.json from DOL OFLC disclosure data.
-# Downloads all quarters in the rolling window, extracts certified H-1B employer
-# names, rebuilds from scratch, and uploads to R2 (data/lca-sponsors.json).
-#
-# Trigger: manual (workflow_dispatch). Run quarterly when DOL publishes new data.
-# INF-LCA-QUARTERLY-REFRESH-1
+# Refresh cadence: weekly (INF-LCA-REFRESH-SCHEDULE-1, INF decision 2026-09-06) —
+# DOL publishes quarterly but the weekly run is cheap insurance that keeps
+# lca-sponsors.json fresh so enrich never publishes lca_intensity=null between
+# manual runs (the ENR-measured wobble class). Manual dispatch with a custom
+# window stays available.
 
 on:
   workflow_dispatch:
@@ -14,6 +13,8 @@ on:
         description: 'Rolling window size (quarters, default 5)'
         required: false
         default: '5'
+  schedule:
+    - cron: '17 6 * * 1'  # Mondays 06:17Z — off-peak minute, low-frequency per the GHA cron governance
 
 jobs:
   refresh:
