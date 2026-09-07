@@ -1,0 +1,73 @@
+name: SUP Indeed Count Probe
+
+# P3 Indeed macro cell (SUP-COMPETITOR-INTEL-PROGRAM-1, INV-SUP-8A benchmark class):
+# bounded COUNT-LEVEL read of Indeed's public search results page from CI egress —
+# no ingestion, no scraping of listings, no row storage. WSL egress is 403-blocked
+# (blocked-with-basis 2026-09-05 + re-verified 2026-09-07); this probe tests whether
+# GitHub Actions egress passes. Dispatch-only until the cell is proven.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sup-indeed-count-probe
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Count-level probe (Indeed public search page)
+        run: |
+          set -uo pipefail
+          UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+          URL="https://www.indeed.com/jobs?q=internship&l=United+States"
+          http_code=$(curl -s -o /tmp/indeed.html -w "%{http_code}" -A "$UA" -H "Accept-Language: en-US,en;q=0.9" --max-time 30 -L "$URL" || echo "curl_error")
+          echo "http_status=$http_code"
+          body_bytes=$(wc -c < /tmp/indeed.html 2>/dev/null || echo 0)
+          challenge="false"
+          if [ "$http_code" != "200" ] || grep -qi "challenge\|cf-browser-verification\|Just a moment" /tmp/indeed.html 2>/dev/null; then
+            challenge="true"
+          fi
+          count_raw=""
+          if [ "$challenge" = "false" ] && [ "$http_code" = "200" ]; then
+            # Indeed embeds the total in searchCountPages metadata: "COUNT":"<n>"
+            count_raw=$(grep -o '"searchCountPages"[^}]*}' /tmp/indeed.html | head -1 | grep -o '"COUNT":"[^"]*"' | head -1 | cut -d'"' -f4 || true)
+            if [ -z "$count_raw" ]; then
+              count_raw=$(grep -oE '[0-9,]+ jobs' /tmp/indeed.html | head -1 || true)
+            fi
+          fi
+          python3 - <<PYEOF
+          import json, datetime
+          evidence = {
+              "schema_version": 1,
+              "artifact": "sup_indeed_count_probe",
+              "generated_at": datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
+              "url": "$URL",
+              "runner": "github-actions",
+              "http_status": "$http_code",
+              "challenge_detected": "$challenge" == "true",
+              "count_raw": "$count_raw" or None,
+              "body_bytes": int("$body_bytes" or 0),
+              "basis": "Indeed public SSR search-results page, count-level read (INV-SUP-8A benchmark class; no listing ingestion)",
+              "method_note": "WSL egress baseline: 403 (2026-09-05 and 2026-09-07). This probe answers whether CI egress passes; a 200 + parsed COUNT is a basis-labeled macro denominator.",
+          }
+          open(".github/data/sup_indeed_count_probe.json", "w").write(json.dumps(evidence, indent=1))
+          print(json.dumps(evidence, indent=1))
+          PYEOF
+
+      - name: Upload evidence to R2
+        if: hashFiles('.github/data/sup_indeed_count_probe.json') != ''
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: |
+          pip install -q boto3
+          python3 -c "import boto3, os; s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']); s3.put_object(Bucket=os.environ['R2_BUCKET_NAME'], Key='data/sup_indeed_count_probe.json', Body=open('.github/data/sup_indeed_count_probe.json','rb').read(), ContentType='application/json'); print('uploaded data/sup_indeed_count_probe.json to R2')"
