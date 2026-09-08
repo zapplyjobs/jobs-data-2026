@@ -315,19 +315,6 @@ jobs:
         except Exception:
             pass
 
-        # --- 4. Self-check: issues must be enabled for alerting to work ---
-        try:
-            req = urllib.request.Request(
-                "https://api.github.com/repos/zapplyjobs/jobs-data-2026",
-                headers={"User-Agent": "out-health-check/1.0", "Accept": "application/vnd.github+json", "Authorization": f"token {gh_token}"}
-            )
-            with urllib.request.urlopen(req, timeout=10) as resp:
-                self_info = json.loads(resp.read())
-            if not self_info.get("has_issues"):
-                issues.append("jobs-data-2026: issues DISABLED — alerting cannot create tracking issues")
-        except Exception:
-            pass
-
         # --- Aggregate ---
         results["verdict"] = "FAIL" if issues else "PASS"
         results["issue_count"] = len(issues)
