@@ -7,7 +7,7 @@ name: OUT Health Check
 #   3. Exposed secrets scan (14 READMEs) — no secret patterns in public READMEs
 #   4. README freshness (10 pipeline boards) — last push <6h
 #   5. Workflow status (critical jobs-data-2026 workflows) — last run not failing
-# On failure: updates tracking issue for operator visibility.
+# On failure: posts to #pipeline-alert (operator visibility; no public issue surface).
 on:
   schedule:
     - cron: '0 * * * *'  # Hourly
@@ -18,7 +18,6 @@ on:
 
 permissions:
   contents: read
-  issues: write
 
 jobs:
   health-check:
@@ -402,32 +401,14 @@ jobs:
             sys.exit(1)
         PYEOF
 
-    - name: Create or update tracking issue on failure
+    - name: Notify #pipeline-alert on failure
       if: failure()
-      uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
-      with:
-        script: |
-          const title = 'OUT Health Check Failed';
-          const body = `The hourly OUT health check failed on ${new Date().toISOString()}.\n\nSee [workflow run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}) for details.\n\nThis issue is auto-created and should be investigated.`;
-          // Check for existing open issue
-          const existing = await github.rest.issues.listForRepo({
-            ...context.repo,
-            state: 'open',
-            labels: 'out-health,auto-created',
-            per_page: 1
-          });
-          if (existing.data.length > 0) {
-            // Add comment to existing issue
-            await github.rest.issues.createComment({
-              ...context.repo,
-              issue_number: existing.data[0].number,
-              body
-            });
-          } else {
-            await github.rest.issues.create({
-              ...context.repo,
-              title,
-              body,
-              labels: ['out-health', 'auto-created']
-            });
-          }
+      env:
+        DISCORD_TEAM_TOKEN: ${{ secrets.DISCORD_TEAM_TOKEN }}
+        DISCORD_PIPELINE_ALERT_CHANNEL_ID: ${{ secrets.DISCORD_PIPELINE_ALERT_CHANNEL_ID }}
+      run: |
+        BODY=$(jq -n --arg t "OUT health check FAILED at $(date -u '+%Y-%m-%dT%H:%M:%SZ') — checks: board APIs, settings drift, secrets scan, README freshness, workflow status. Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" '{content: $t}')
+        curl -s -X POST "https://discord.com/api/v10/channels/${DISCORD_PIPELINE_ALERT_CHANNEL_ID}/messages" \
+          -H "Authorization: Bot ${DISCORD_TEAM_TOKEN}" \
+          -H "Content-Type: application/json" \
+          -d "$BODY" | jq -r '.id // "post-failed"' > /dev/null

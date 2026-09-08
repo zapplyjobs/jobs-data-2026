@@ -19,7 +19,6 @@ on:
 
 permissions:
   contents: read
-  issues: write
 
 jobs:
   dead-link-check:
@@ -40,30 +39,14 @@ jobs:
         DATA_PROXY_TOKEN: ${{ secrets.DATA_PROXY_TOKEN }}
       run: python3 .github/scripts/out_dead_link_scan.py
 
-    - name: Create or update tracking issue on failure
+    - name: Notify #pipeline-alert on failure
       if: failure()
-      uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
-      with:
-        script: |
-          const title = 'Dead links detected in consumer repos';
-          const body = `The weekly dead-link check found broken links on ${new Date().toISOString()}.\n\nSee [workflow run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}) for the full list.\n\nResults are published to Supabase Storage: pipeline-data/dead-links.json`;
-          const existing = await github.rest.issues.listForRepo({
-            ...context.repo,
-            state: 'open',
-            labels: 'dead-links,auto-created',
-            per_page: 1
-          });
-          if (existing.data.length > 0) {
-            await github.rest.issues.createComment({
-              ...context.repo,
-              issue_number: existing.data[0].number,
-              body
-            });
-          } else {
-            await github.rest.issues.create({
-              ...context.repo,
-              title,
-              body,
-              labels: ['dead-links', 'auto-created']
-            });
-          }
+      env:
+        DISCORD_TEAM_TOKEN: ${{ secrets.DISCORD_TEAM_TOKEN }}
+        DISCORD_PIPELINE_ALERT_CHANNEL_ID: ${{ secrets.DISCORD_PIPELINE_ALERT_CHANNEL_ID }}
+      run: |
+        BODY=$(jq -n --arg t "Dead-link check FAILED at $(date -u '+%Y-%m-%dT%H:%M:%SZ') — see run ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" '{content: $t}')
+        curl -s -X POST "https://discord.com/api/v10/channels/${DISCORD_PIPELINE_ALERT_CHANNEL_ID}/messages" \
+          -H "Authorization: Bot ${DISCORD_TEAM_TOKEN}" \
+          -H "Content-Type: application/json" \
+          -d "$BODY" | jq -r '.id // "post-failed"' > /dev/null
