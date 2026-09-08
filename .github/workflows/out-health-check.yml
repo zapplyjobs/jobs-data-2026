@@ -118,11 +118,12 @@ jobs:
             "New-Grad-IT-Jobs-2027",
             "Canada-Jobs-2027", "Canada-Internships-2027",
             "awesome-ML-internships",
+            "Retail-Jobs", "Spain-Jobs", "Spain-Internships",
             "Research-Internships-for-Undergraduates", "underclassmen-internships",
             "resume-samples-2026", "interview-handbook-2026",
         ]
 
-        # Single source of truth for the 10 pipeline boards — matches board-counts.json /
+        # Single source of truth for the 13 pipeline boards — matches board-counts.json /
         # aggregator configs/_index.json (INF-OUT-HEALTH-SCOPE-1: freshness + peer-lag
         # sets had drifted to 9, omitting awesome-ML-internships). Update when boards change.
         _PIPELINE_REPOS = {
@@ -131,6 +132,7 @@ jobs:
             "New-Grad-Hardware-Engineering-Jobs-2027", "New-Grad-Healthcare-Jobs-2027",
             "New-Grad-IT-Jobs-2027", "awesome-ML-internships",
             "Canada-Jobs-2027", "Canada-Internships-2027",
+            "Retail-Jobs", "Spain-Jobs", "Spain-Internships",
         }
         secret_re = re.compile(r"goLiveSecrets|R2_ACCESS_KEY|R2_SECRET_KEY|R2_ENDPOINT|SUPABASE_SERVICE_KEY|SUPABASE_SERVICE_ROLE|DISCORD_WEBHOOK|GITHUB_TOKEN|ghp_[a-zA-Z0-9]")
 
