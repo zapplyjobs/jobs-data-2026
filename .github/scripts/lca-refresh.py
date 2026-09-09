@@ -103,10 +103,17 @@ def extract_employers(xlsx_path: Path, employer_col: str = EMPLOYER_COL,
     header = [cell.value for cell in next(ws.iter_rows(min_row=1, max_row=1))]
     col_idx = {name: i for i, name in enumerate(header)}
 
+    # AGG-LCA-SOC-EXTRACTOR-MISSING-1 hotfix (09-09): DOL renamed the PERM employer
+    # column in fresh quarters (EMP_BUSINESS_NAME -> EMPLOYER_NAME) — try known
+    # fallbacks before failing, and always return the 4-tuple callers unpack.
     if employer_col not in col_idx:
-        print(f"  ERROR: {employer_col} column not found. Columns: {header[:20]}", file=sys.stderr)
-        wb.close()
-        return set(), {}
+        fallback = next((c for c in ("EMPLOYER_NAME", "EMP_BUSINESS_NAME") if c in col_idx), None)
+        if fallback is None:
+            print(f"  ERROR: no employer column found. Columns: {header[:20]}", file=sys.stderr)
+            wb.close()
+            return set(), {}, {"certified": 0, "with_soc": 0}, {}
+        employer_col = fallback
+        print(f"  NOTE: employer column fallback -> {fallback}", file=sys.stderr)
 
     employer_idx = col_idx[employer_col]
     date_idx = col_idx.get("DECISION_DATE")
