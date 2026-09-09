@@ -403,6 +403,29 @@ jobs:
               console.error('check-36 proxy probe FAILED: ' + JSON.stringify(payload));
             }
           })();
+          node -e "
+          (async () => {
+            // INF-DASHCHECK43-FACETSPROBE-1: DASH /api/jobs/facets supply leg. The dash
+            // route is Access-gated (unauth reads 302 regardless of health), so the
+            // per-cycle probe rides the artifact path: authed GET via the proxy, body
+            // cancelled after status — the artifact is ~19MB, only liveness matters.
+            const base = 'https://zjp-data-proxy.wild-queen-069e.workers.dev';
+            const started = Date.now();
+            try {
+              const resp = await fetch(base + '/data/company-directory-facets.json', {
+                headers: { 'X-Proxy-Token': process.env.DATA_PROXY_TOKEN || '', 'User-Agent': 'zjp-check36-proxy-liveness' },
+                signal: AbortSignal.timeout(15000),
+              });
+              if (resp.body) await resp.body.cancel(); // status captured; skip the 19MB body
+              const payload = { ok: resp.ok, http: resp.status, ms: Date.now() - started, file: 'company-directory-facets.json' };
+              require('fs').appendFileSync(process.env.GITHUB_ENV, 'FACETS_LIVENESS=' + JSON.stringify(payload) + '\n');
+              console.log('check-36 facets probe: ' + JSON.stringify(payload));
+            } catch (e) {
+              const payload = { ok: false, http: 0, ms: Date.now() - started, file: 'company-directory-facets.json', error: String(e.message || e).slice(0, 120) };
+              require('fs').appendFileSync(process.env.GITHUB_ENV, 'FACETS_LIVENESS=' + JSON.stringify(payload) + '\n');
+              console.error('check-36 facets probe FAILED: ' + JSON.stringify(payload));
+            }
+          })();
           "
       - name: Probe competitor snapshot health (check-60 input)
         env:
@@ -447,6 +470,7 @@ jobs:
           APP_CANARY_STATUS: ${{ env.APP_CANARY_STATUS }}  # OUT-APP-CANARY-1: check-59 probe payload
           SUPABASE_TOKEN_EXPIRES: ${{ vars.SUPABASE_TOKEN_EXPIRES }}  # INF-SUPABASE-TOKEN-EXPIRY-1: rotation date (YYYY-MM-DD) — check-42 warns <=14d. Update this variable at each token rotation.
           PROXY_LIVENESS: ${{ env.PROXY_LIVENESS }}  # INF-DASHADV-IMPL-1 item 2: check-36 serving-path leg payload
+          FACETS_LIVENESS: ${{ env.FACETS_LIVENESS }}  # INF-DASHCHECK43-FACETSPROBE-1: check-36 facets-supply leg payload
           COMPETITOR_SNAPSHOT_HEALTH: ${{ env.COMPETITOR_SNAPSHOT_HEALTH }}  # INF-DASHADV-IMPL-1 item 3: check-60 probe payload
         run: node .github/scripts/processing/lib/pipeline-alert.js
       - name: Build Tier A source coverage report
