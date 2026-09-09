@@ -64,7 +64,7 @@ jobs:
         run: |
           python3 .github/scripts/lca-refresh.py \
             --auto \
-            --window ${{ inputs.window }} \
+            --window ${{ inputs.window || '5' }} \
             --output lca-sponsors.json
 
       - name: Install processing deps (uploader requires processing r2-client -> @aws-sdk; no root manifest exists to satisfy it via upward resolution)
