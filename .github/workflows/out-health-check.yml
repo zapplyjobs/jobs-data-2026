@@ -29,6 +29,7 @@ jobs:
       id: checks
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_PAT: ${{ secrets.GH_PAT }}
         SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
         SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
@@ -109,31 +110,15 @@ jobs:
                 issues.append(f"{name}: fetch failed after retries ({last_err})")
             results["destinations"].append(r)
 
-        # --- 2. Settings drift + secrets scan (12 repos) ---
-        import re
-        repos = [
-            "New-Grad-Jobs-2027", "Internships-2027",
-            "New-Grad-Software-Engineering-Jobs-2027", "New-Grad-Data-Science-Jobs-2027",
-            "New-Grad-Hardware-Engineering-Jobs-2027", "New-Grad-Healthcare-Jobs-2027",
-            "New-Grad-IT-Jobs-2027",
-            "Canada-Jobs-2027", "Canada-Internships-2027",
-            "awesome-ML-internships",
-            "Retail-Jobs", "Spain-Jobs", "Spain-Internships",
-            "Research-Internships-for-Undergraduates", "underclassmen-internships",
-            "resume-samples-2026", "interview-handbook-2026",
-        ]
-
-        # Single source of truth for the 13 pipeline boards — matches board-counts.json /
-        # aggregator configs/_index.json (INF-OUT-HEALTH-SCOPE-1: freshness + peer-lag
-        # sets had drifted to 9, omitting awesome-ML-internships). Update when boards change.
-        _PIPELINE_REPOS = {
-            "New-Grad-Jobs-2027", "Internships-2027",
-            "New-Grad-Software-Engineering-Jobs-2027", "New-Grad-Data-Science-Jobs-2027",
-            "New-Grad-Hardware-Engineering-Jobs-2027", "New-Grad-Healthcare-Jobs-2027",
-            "New-Grad-IT-Jobs-2027", "awesome-ML-internships",
-            "Canada-Jobs-2027", "Canada-Internships-2027",
-            "Retail-Jobs", "Spain-Jobs", "Spain-Internships",
-        }
+        # --- 2. Settings drift + secrets scan (repos derived from board-registry.json at processing main — OUT-BOARDLIST-SINGLE-SOURCE-1) ---
+        import re, base64
+        reg_req = urllib.request.Request(
+            "https://api.github.com/repos/zapplyjobs/job-board-processing/contents/lib/board-registry.json",
+            headers={"Authorization": f"Bearer {os.environ.get('GH_PAT', '')}", "Accept": "application/vnd.github+json"})
+        with urllib.request.urlopen(reg_req, timeout=30) as resp:
+            registry = json.loads(base64.b64decode(json.load(resp)["content"]))
+        repos = [b["name"] for b in registry["boards"] if b.get("settings")]
+        _PIPELINE_REPOS = {b["name"] for b in registry["boards"] if b.get("freshness")}
         secret_re = re.compile(r"goLiveSecrets|R2_ACCESS_KEY|R2_SECRET_KEY|R2_ENDPOINT|SUPABASE_SERVICE_KEY|SUPABASE_SERVICE_ROLE|DISCORD_WEBHOOK|GITHUB_TOKEN|ghp_[a-zA-Z0-9]")
 
         for repo in repos:
