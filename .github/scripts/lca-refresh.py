@@ -49,6 +49,8 @@ LCA_FILTER = {"CASE_STATUS": "Certified", "VISA_CLASS": "H-1B"}
 PERM_FILTER = {"CASE_STATUS": "Certified"}
 EMPLOYER_COL = "EMPLOYER_NAME"
 PERM_EMPLOYER_COL = "EMP_BUSINESS_NAME"
+SOC_COL = "SOC_CODE"  # LCA disclosure carries it; PERM does not (verified 09-07, design §6.1)
+SOC_TOP = 16          # top-16 SOC prefixes kept per employer (design §6.1 cap)
 
 
 def download_quarter(quarter: str, dest: Path, prefix: str = "LCA") -> bool:
@@ -73,10 +75,12 @@ def download_quarter(quarter: str, dest: Path, prefix: str = "LCA") -> bool:
 
 
 def extract_employers(xlsx_path: Path, employer_col: str = EMPLOYER_COL,
-                      filters: dict = None) -> tuple[set[str], dict]:
-    """Extract certified employer names + per-employer counts (INF-LCA-COUNTS-INPUT-1).
+                      filters: dict = None) -> tuple[set[str], dict, dict, dict]:
+    """Extract certified employer names + per-employer counts (INF-LCA-COUNTS-INPUT-1)
+    + per-employer SOC prefix counts over certified rows (AGG-LCA-SOC-EXTRACTOR-MISSING-1,
+    design VISA_OCCUPATION_SIGNAL_DESIGN_2026_09_07 §6.1).
 
-    Returns (names, counts):
+    Returns (names, counts, soc_stats, soc_counts):
       names  — employer names passing `filters` (unchanged semantics; feeds employers[])
       counts — per employer name seen at all: {"filing_count", "certified_count",
                "last_certified"}. filing_count counts every row for the employer
@@ -84,6 +88,11 @@ def extract_employers(xlsx_path: Path, employer_col: str = EMPLOYER_COL,
                `filters`; last_certified = max DECISION_DATE among certified rows
                (None when the file lacks a DECISION_DATE column — verified present
                in LCA + PERM FY2026_Q1 headers, 2026-08-31).
+      soc_stats    — {"certified", "with_soc"} row counters for the coverage gate
+                     (zeros when the file has no SOC_CODE column — PERM).
+      soc_counts   — {employer: {SOC_PREFIX: count}} over CERTIFIED rows only;
+                     prefix = SOC_CODE up to the "." (e.g. "15-1252.00" → "15-1252").
+                     Empty when the file has no SOC_CODE column.
     """
     if filters is None:
         filters = LCA_FILTER
@@ -104,10 +113,17 @@ def extract_employers(xlsx_path: Path, employer_col: str = EMPLOYER_COL,
     if date_idx is None:
         print("  NOTE: no DECISION_DATE column — last_certified will be null for this source", file=sys.stderr)
 
+    soc_idx = col_idx.get(SOC_COL)
+    if soc_idx is None:
+        print(f"  NOTE: no {SOC_COL} column — soc_counts/coverage stay empty for this source", file=sys.stderr)
+
     employers = set()
     counts: dict[str, dict] = {}
     total = 0
     filtered = 0
+    soc_counts: dict[str, dict[str, int]] = {}
+    soc_certified = 0
+    soc_with = 0
 
     def iso_date(val) -> str | None:
         if val is None:
@@ -139,11 +155,25 @@ def extract_employers(xlsx_path: Path, employer_col: str = EMPLOYER_COL,
         d = iso_date(row[date_idx]) if date_idx is not None else None
         if d and (rec["last_certified"] is None or d > rec["last_certified"]):
             rec["last_certified"] = d
+        if soc_idx is not None:
+            soc_certified += 1
+            raw_code = row[soc_idx]
+            if raw_code:
+                code = str(raw_code).split(".")[0].strip()
+                if code:
+                    soc_with += 1
+                    empsoc = soc_counts.setdefault(name, {})
+                    empsoc[code] = empsoc.get(code, 0) + 1
 
     wb.close()
     filter_desc = ", ".join(f"{k}={v}" for k, v in filters.items())
     print(f"  Rows: {total:,}, {filter_desc}: {filtered:,}, Unique employers: {len(employers):,}")
-    return employers, counts
+    return employers, counts, {"certified": soc_certified, "with_soc": soc_with}, soc_counts
+
+
+def cap_soc(prefixes: dict, top: int = SOC_TOP) -> dict:
+    """Top-N SOC prefixes per employer, deterministic (count desc, then code asc)."""
+    return dict(sorted(prefixes.items(), key=lambda kv: (-kv[1], kv[0]))[:top])
 
 
 def normalize_employer_name(name: str) -> str:
@@ -250,6 +280,41 @@ def validate_match_rate(old_employers: set[str], new_employers: set[str], thresh
     return True
 
 
+
+def run_selftest() -> None:
+    """Synthetic-fixture check of the SOC extraction + top-16 cap (no network).
+    AGG-LCA-SOC-EXTRACTOR-MISSING-1: the 09-07 implementation was lost with its
+    scratch dir; this selftest keeps the re-implementation honest in-repo."""
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.append(["CASE_STATUS", "VISA_CLASS", "EMPLOYER_NAME", "DECISION_DATE", "SOC_CODE"])
+    data = [
+        ("Certified", "H-1B", "Acme Inc", "2026-01-05", "15-1252.00"),
+        ("Certified", "H-1B", "Acme Inc", "2026-01-06", "15-1252.00"),
+        ("Certified", "H-1B", "Acme Inc", "2026-01-07", "15-1251.00"),
+        ("Certified", "H-1B", "Acme Inc", "2026-01-08", "13-2011.00"),
+        ("Denied", "H-1B", "Acme Inc", "2026-01-09", "15-1252.00"),   # filtered: not certified
+        ("Certified", "H-1B", "Acme Inc", "2026-01-10", None),        # certified, no code
+        ("Certified", "H-1B", "Beta LLC", "2026-02-01", "15-1132.00"),
+    ]
+    data += [("Certified", "H-1B", "Gamma Corp", "2026-02-02", f"{20 + i:02d}-1111.00") for i in range(20)]
+    for r in data:
+        ws.append(list(r))
+    with tempfile.TemporaryDirectory() as td:
+        p = Path(td) / "fixture.xlsx"
+        wb.save(p)
+        employers, counts, soc_stats, soc_counts = extract_employers(p)
+    assert employers == {"Acme Inc", "Beta LLC", "Gamma Corp"}, employers
+    assert soc_stats == {"certified": 26, "with_soc": 25}, soc_stats
+    assert soc_counts["Acme Inc"] == {"15-1252": 2, "15-1251": 1, "13-2011": 1}, soc_counts.get("Acme Inc")
+    assert soc_counts["Beta LLC"] == {"15-1132": 1}
+    assert len(soc_counts["Gamma Corp"]) == 20, "extract returns raw prefix counts (cap is applied at output)"
+    capped = cap_soc(soc_counts["Gamma Corp"])
+    assert len(capped) == SOC_TOP, f"cap: {len(capped)}"
+    assert list(capped) == [f"{20 + i:02d}-1111" for i in range(SOC_TOP)], "cap order: count desc, then code asc"
+    assert counts["Acme Inc"]["certified_count"] == 5, counts["Acme Inc"]
+    print("  selftest PASS: filter, coverage counters, prefix split, top-16 cap")
+
 def main():
     parser = argparse.ArgumentParser(description="LCA Quarterly Data Refresh")
     parser.add_argument("--quarter", help="Latest quarter to include (e.g., FY2026_Q1)")
@@ -258,7 +323,12 @@ def main():
     parser.add_argument("--output", default="lca-sponsors.json", help="Output file path")
     parser.add_argument("--existing", help="Path to existing lca-sponsors.json (for validation comparison only)")
     parser.add_argument("--dry-run", action="store_true", help="Show what would change without writing")
+    parser.add_argument("--selftest", action="store_true", help="Run the synthetic SOC-extraction fixture (no network) and exit")
     args = parser.parse_args()
+
+    if args.selftest:
+        run_selftest()
+        return
 
     if not args.quarter and not args.auto:
         parser.error("Specify --quarter or --auto")
@@ -280,6 +350,10 @@ def main():
     # Both rebuilt from scratch each run — no merge with existing.
     all_employers: set[str] = set()
     all_counts: dict[str, dict] = {}
+    soc_by_employer: dict[str, dict[str, int]] = {}      # AGG-LCA-SOC-EXTRACTOR-MISSING-1: certified H-1B rows
+    soc_coverage = {"certified": 0, "with_soc": 0}
+    perm_soc_by_employer: dict[str, dict[str, int]] = {} # guarded: PERM file has no SOC_CODE today
+    perm_soc_coverage = {"certified": 0, "with_soc": 0}
 
     def merge_counts(counts: dict[str, dict]) -> None:
         for name, rec in counts.items():
@@ -289,14 +363,23 @@ def main():
             if rec["last_certified"] and (agg["last_certified"] is None or rec["last_certified"] > agg["last_certified"]):
                 agg["last_certified"] = rec["last_certified"]
 
+    def merge_soc(stats: dict, counts: dict, by_employer: dict, coverage: dict) -> None:
+        coverage["certified"] += stats.get("certified", 0)
+        coverage["with_soc"] += stats.get("with_soc", 0)
+        for name, prefixes in counts.items():
+            agg = by_employer.setdefault(name, {})
+            for code, n in prefixes.items():
+                agg[code] = agg.get(code, 0) + n
+
     with tempfile.TemporaryDirectory() as tmpdir:
         for q in quarters:
             # LCA (H-1B)
             lca_path = Path(tmpdir) / f"LCA_Disclosure_Data_{q}.xlsx"
             if download_quarter(q, lca_path, prefix="LCA"):
-                employers, counts = extract_employers(lca_path, employer_col=EMPLOYER_COL, filters=LCA_FILTER)
+                employers, counts, soc_stats, soc_counts = extract_employers(lca_path, employer_col=EMPLOYER_COL, filters=LCA_FILTER)
                 all_employers |= employers
                 merge_counts(counts)
+                merge_soc(soc_stats, soc_counts, soc_by_employer, soc_coverage)
             elif q == latest:
                 print(f"\nERROR: Could not download latest LCA quarter {q}", file=sys.stderr)
                 sys.exit(1)
@@ -306,9 +389,10 @@ def main():
             # PERM (green card)
             perm_path = Path(tmpdir) / f"PERM_Disclosure_Data_{q}.xlsx"
             if download_quarter(q, perm_path, prefix="PERM"):
-                employers, counts = extract_employers(perm_path, employer_col=PERM_EMPLOYER_COL, filters=PERM_FILTER)
+                employers, counts, soc_stats, soc_counts = extract_employers(perm_path, employer_col=PERM_EMPLOYER_COL, filters=PERM_FILTER)
                 all_employers |= employers
                 merge_counts(counts)
+                merge_soc(soc_stats, soc_counts, perm_soc_by_employer, perm_soc_coverage)
             else:
                 print(f"  (PERM {q} not available — LCA-only for this quarter)\n", file=sys.stderr)
 
@@ -336,6 +420,23 @@ def main():
     # path stays intact. filing_count >= certified_count always.
     employer_counts = {name: all_counts[name] for name in sorted(all_employers) if name in all_counts}
 
+    # SOC companion (AGG-LCA-SOC-EXTRACTOR-MISSING-1 / design §6.1): per-employer 4-digit
+    # SOC prefix counts over certified H-1B rows, top-16 cap per employer (deterministic:
+    # count desc, then code asc). Keys = raw employers[] strings — the consumer
+    # (job-board-processing enrich/visa.js buildLcaSocTech) normalizes both name forms itself.
+    def top_soc(by_employer: dict) -> dict:
+        out: dict[str, dict[str, int]] = {}
+        for name in sorted(all_employers):
+            prefixes = by_employer.get(name)
+            if not prefixes:
+                continue
+            out[name] = cap_soc(prefixes)
+        return out
+
+    employer_soc_counts = top_soc(soc_by_employer)
+    employer_soc_counts_perm = top_soc(perm_soc_by_employer)  # stays {} until PERM carries SOC_CODE
+    lca_cov_pct = round(soc_coverage["with_soc"] / soc_coverage["certified"] * 100, 1) if soc_coverage["certified"] else 0.0
+
     # Build output
     output = {
         "_meta": {
@@ -345,11 +446,27 @@ def main():
             "generated": datetime.datetime.now().isoformat()[:10],
             "filter": "LCA: CASE_STATUS=Certified, VISA_CLASS=H-1B | PERM: CASE_STATUS=Certified",
             "total_employers": len(all_employers),
-            "format": "employers[] name-only (backward compatible with enrich-jobs.js loadLcaSponsors) + employer_counts{} per-employer {filing_count, certified_count, last_certified}",
+            "format": "employers[] name-only (backward compatible with enrich-jobs.js loadLcaSponsors) + employer_counts{} per-employer {filing_count, certified_count, last_certified} + employer_soc_counts{} per-employer {SOC_PREFIX: count} top-16 over certified H-1B rows",
             "counts_note": "filing_count = all rows for the employer in the window (any status/class); certified_count = rows passing the filter; last_certified = max DECISION_DATE among certified rows; keys = employers[] entries",
+            "soc_note": "employer_soc_counts = 4-digit SOC prefix counts over CERTIFIED H-1B rows only, top-16 per employer (ENR v116 occupation-gate input); employer_soc_counts_perm guarded — the PERM disclosure file carries no SOC_CODE column (verified 09-07)",
+            "soc_coverage": {
+                "lca": {
+                    "certified": soc_coverage["certified"],
+                    "with_soc": soc_coverage["with_soc"],
+                    "coverage_pct": lca_cov_pct,
+                    "employers_with_soc": len(employer_soc_counts),
+                },
+                "perm": {
+                    "certified": perm_soc_coverage["certified"],
+                    "with_soc": perm_soc_coverage["with_soc"],
+                    "note": "no SOC_CODE column in PERM disclosure" if perm_soc_coverage["certified"] == 0 else "ok",
+                },
+            },
         },
         "employers": sorted(all_employers),
         "employer_counts": employer_counts,
+        "employer_soc_counts": employer_soc_counts,
+        "employer_soc_counts_perm": employer_soc_counts_perm,
     }
 
     if args.dry_run:
