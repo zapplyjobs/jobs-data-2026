@@ -303,6 +303,7 @@ jobs:
         # --- Aggregate ---
         results["verdict"] = "FAIL" if issues else "PASS"
         results["issue_count"] = len(issues)
+        results["issues"] = issues  # OUT-HEALTHCHECK-ARTIFACT-DEBUG-1: artifact must carry the issue texts, not just the count
 
         # Write step outputs (using Environment Files, not deprecated ::set-output)
         with open(os.environ.get("GITHUB_OUTPUT", "/dev/null"), "a") as gh_out:

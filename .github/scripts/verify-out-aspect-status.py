@@ -108,8 +108,9 @@ def c_infrastructure():
         failing.append(f"verdict={verdict}")
     if not dests and not repos:
         return "YELLOW", "no destinations/repos in health-check", "proxy:out-health-check"
+    _names = lambda lst: ", ".join(x for x in lst if x) or "none"
     return (green_if(not failing),
-            f"{len(dests)} destinations + {len(repos)} consumer repos, {len(failing)} failing"
+            f"{len(dests)} destinations + {len(repos)} consumer repos, {len(failing)} failing: {_names(failing)}"
             + (f" (incl. aggregate {verdict})" if verdict == "FAIL" else ""),
             "proxy:out-health-check")
 
