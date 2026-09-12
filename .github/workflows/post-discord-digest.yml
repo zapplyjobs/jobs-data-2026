@@ -1,0 +1,111 @@
+name: Post Discord Daily Digest
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Render digests to the step summary without posting'
+        type: boolean
+        default: false
+      only_channel:
+        description: 'Restrict to one channel name (pilot), e.g. spain-jobs'
+        default: ''
+  schedule:
+    # 13:00 UTC daily — digests summarize the previous 24h of postings
+    - cron: '0 13 * * *'
+
+concurrency:
+  group: post-discord-digest
+  cancel-in-progress: false
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 1
+          submodules: recursive
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Install transcrypt (vendored action — INF-TRANSCRYPT-ACTION-1)
+        uses: zapplyjobs/.github/actions/setup-transcrypt@afcb5f41ec28fe10cefcf421fc455d0d89588b1f
+
+      - name: Unlock encrypted files
+        run: |
+          echo "Y" | transcrypt --cipher aes-256-cbc --password "$TRANSCRYPT_PASSWORD" --force
+          git checkout -- .
+          git submodule foreach --recursive '
+            echo "Y" | transcrypt --cipher aes-256-cbc --password "'"$TRANSCRYPT_PASSWORD"'" --force 2>/dev/null || true
+            rm -f "$(git rev-parse --git-dir)/index" 2>/dev/null || true
+            git checkout HEAD -- . 2>/dev/null || true
+          ' || true
+          SAMPLE_JS=$(find .github/scripts -name '*.js' -print -quit 2>/dev/null)
+          if [ -n "$SAMPLE_JS" ]; then
+            if ! file -b "$SAMPLE_JS" | grep -qiE 'ASCII|UTF-8|text'; then
+              echo "::error::Submodule decryption FAILED — $SAMPLE_JS is ciphertext."
+              exit 1
+            fi
+          fi
+        env:
+          TRANSCRYPT_PASSWORD: ${{ secrets.TRANSCRYPT_PASSWORD }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: .github/scripts/processing/package-lock.json
+
+      - name: Install shared submodule dependencies (for R2 client + discord.js)
+        run: cd "$GITHUB_WORKSPACE"/.github/scripts/processing && npm install
+
+      - name: Download ledger from R2
+        id: r2fetch
+        if: success()
+        continue-on-error: true
+        run: |
+          echo "📥 Downloading posted_jobs.json from R2..."
+          node -e "
+          const { createR2Client } = require('./.github/scripts/processing/lib/storage/r2-client');
+          const fs = require('fs');
+          const path = require('path');
+          async function main() {
+            const r2 = createR2Client({ prefix: 'data/' });
+            const dataDir = '.github/data';
+            if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+            const raw = await r2.downloadRaw('posted_jobs.json');
+            if (!raw) throw new Error('posted_jobs.json not found on R2');
+            fs.writeFileSync(path.join(dataDir, 'posted_jobs.json'), Buffer.from(raw));
+            console.log('R2 download OK: posted_jobs.json');
+            const { checkFreshness } = require('./.github/scripts/processing/lib/storage/freshness-gate');
+            await checkFreshness({ r2, limitMinutes: 45, label: 'post-discord-digest' });
+          }
+          main().catch(e => { console.error('R2 fatal: ' + e.message); process.exit(1); });
+          "
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+
+      - name: Post channel digests
+        if: success() && steps.r2fetch.outputs.pipeline_fresh == 'true'
+        env:
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+        run: |
+          ARGS=""
+          if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
+          if [ -n "${{ inputs.only_channel }}" ]; then ARGS="$ARGS --only ${{ inputs.only_channel }}"; fi
+          node .github/scripts/processing/lib/discord-digest.js $ARGS
+
+      - name: Digest summary
+        if: always()
+        run: |
+          if [ -f .github/data/discord-digest-stats.json ]; then
+            cat .github/data/discord-digest-stats.json
+          else
+            echo "no digest stats written (dry run or early exit)"
+          fi
