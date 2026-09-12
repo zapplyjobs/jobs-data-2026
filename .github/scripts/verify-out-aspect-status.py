@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# CANONICAL: this jobs-data-2026 copy publishes the official artifact (pipeline-data/out-aspect-status.json). A session-side mirror exists at GenAI_Work projects/zjp/scripts/ and DRIFTS - never treat the mirror as truth (OUT-ASPECTVERIFIER-MIRROR-DRIFT-1, false RED 09-12).
 """
 verify-out-aspect-status.py — OUT aspect-status VERIFIER (ASPECT_STATUS_CONTRACT.md, verified model).
 
