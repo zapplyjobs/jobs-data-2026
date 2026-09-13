@@ -90,13 +90,18 @@ def gh_file_age_days(repo, filepath):
 
 
 def bucket_age(age, green_days, yellow_days):
+    # INF-ASPECTPUB-AGECAP-1 re-scope (2026-09-13): evidence strings carry their OWN bar
+    # so consumers cannot misread an old-by-design age as stale probe data (the AIH F68
+    # 14d-cap request misread the ratified 180d structural-README bar as staleness; the
+    # contract's staleness axis is generated_at freshness, covered by the 7d/30d flags).
+    basis = f" (bar: GREEN<={green_days}d, YELLOW<={yellow_days}d)"
     if age is None:
-        return "RED", "age unknown"
+        return "RED", "age unknown" + basis
     if age <= green_days:
-        return "GREEN", f"{age}d ago"
+        return "GREEN", f"{age}d ago" + basis
     if age <= yellow_days:
-        return "YELLOW", f"{age}d ago"
-    return "RED", f"{age}d ago"
+        return "YELLOW", f"{age}d ago" + basis
+    return "RED", f"{age}d ago" + basis
 
 
 def parse_iso(ts):
