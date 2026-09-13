@@ -24,6 +24,20 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          token: ${{ secrets.GH_PAT }}
+      - name: Unlock encrypted files
+        uses: zapplyjobs/.github/actions/setup-transcrypt@afcb5f41ec28fe10cefcf421fc455d0d89588b1f
+      - name: Decrypt working tree
+        run: |
+          echo "Y" | transcrypt --cipher aes-256-cbc --password "$TRANSCRYPT_PASSWORD" --force
+          git checkout -- .
+          if ! file -b scripts/indexnow-ping.js | grep -qiE 'ASCII|UTF-8|text'; then
+            echo "::error::Decryption FAILED - scripts/indexnow-ping.js is ciphertext. Check TRANSCRYPT_PASSWORD."
+            exit 1
+          fi
+        env:
+          TRANSCRYPT_PASSWORD: ${{ secrets.TRANSCRYPT_PASSWORD }}
 
       - name: Setup Node
         uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
