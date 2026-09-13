@@ -1,0 +1,39 @@
+# Daily IndexNow incremental ping (OUT-SEARCH-VISIBILITY-AUDIT-1).
+# Collects the live sitemap-jobs.xml URL set, diffs it against the prior state
+# in R2 data/indexnow-state.json, pings NEW urls to api.indexnow.org, writes
+# the new state. First run (no state object) seeds only - pings nothing.
+# No pipeline-alert wiring by design (SEO push signal, not an operational check;
+# failures surface via Action failure notifications + the OUT task).
+name: IndexNow Ping
+
+on:
+  schedule:
+    - cron: '0 6 * * *' # daily 06:00 UTC
+  workflow_dispatch: {}
+
+permissions: {}
+
+concurrency:
+  group: indexnow-ping
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Setup Node
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 22
+
+      - name: Diff sitemap + ping new urls
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: node scripts/indexnow-ping.js
