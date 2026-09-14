@@ -69,6 +69,8 @@ jobs:
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
         run: node scripts/download-dashboard-data-from-r2.js weekly-stats.json
+        node scripts/download-dashboard-data-from-r2.js posted_jobs.json
+
       - name: Post weekly summary to Discord
         env:
           DISCORD_TOKEN: ${{ secrets.DISCORD_TEAM_TOKEN }}
