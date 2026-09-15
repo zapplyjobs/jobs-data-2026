@@ -38,6 +38,7 @@ jobs:
       - name: Gather + post briefing
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          DATA_PROXY_TOKEN: ${{ secrets.DATA_PROXY_TOKEN }}
           DISCORD_TEAM_TOKEN: ${{ secrets.DISCORD_TEAM_TOKEN }}
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
