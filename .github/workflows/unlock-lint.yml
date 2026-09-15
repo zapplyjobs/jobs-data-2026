@@ -1,0 +1,17 @@
+name: Unlock Lint
+
+on:
+  push:
+    paths:
+      - '.github/workflows/**'
+      - 'scripts/unlock-lint.sh'
+  workflow_dispatch:
+  schedule:
+    - cron: '23 4 * * 1' # weekly Monday, defense against API-edited workflows
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - run: bash scripts/unlock-lint.sh
