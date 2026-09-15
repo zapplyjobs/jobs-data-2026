@@ -3,7 +3,13 @@ name: Daily Briefing
 on:
   schedule:
     - cron: '0 6 * * *' # Daily at 06:00 UTC
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      manual_text:
+        description: 'Pre-composed briefing text to post verbatim (skips auto-gathering)'
+        type: string
+        required: false
+        default: ''
 
 permissions: {}
 
@@ -44,4 +50,6 @@ jobs:
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        env:
+          MANUAL_TEXT: ${{ github.event.inputs.manual_text }}
         run: node scripts/daily-briefing.js
