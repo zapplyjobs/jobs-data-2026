@@ -46,10 +46,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
           DATA_PROXY_TOKEN: ${{ secrets.DATA_PROXY_TOKEN }}
           DISCORD_TEAM_TOKEN: ${{ secrets.DISCORD_TEAM_TOKEN }}
+          MANUAL_TEXT: ${{ github.event.inputs.manual_text }}
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
-        env:
-          MANUAL_TEXT: ${{ github.event.inputs.manual_text }}
         run: node scripts/daily-briefing.js
