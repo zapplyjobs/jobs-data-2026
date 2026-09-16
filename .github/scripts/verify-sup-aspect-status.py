@@ -69,7 +69,18 @@ def proxy_json(path):
 def green_if(cond):
     return "GREEN" if cond else "RED"
 
-VALID_ATS = {"greenhouse", "lever", "ashby", "workday", "smartrecruiters", "oracle", "tiktok", "deshaw", "custom-supplemental"}
+VALID_ATS = {"greenhouse", "lever", "ashby", "workday", "smartrecruiters", "oracle", "tiktok", "deshaw", "custom-supplemental",
+             # AGG Tier-A keyless families, live in the pool 2026-09-12 (AGG-ATSCOVERAGE-FAMILIES-1
+             # units 1/2/4; ENR-TIERA-NEW-SOURCES-FYI-1): spellings verified against canonical
+             # enrichment-stats by_source 2026-09-16 (pinpoint 130 / rippling 394 / workable 91 /
+             # breezy 25 enriched records) - ENR-VALIDATOR-TIERA-PLATFORMS-1.
+             "pinpoint", "rippling", "workable", "breezy",
+             # Second-wave families present in company-list with pool rows (AGG A289): bamboohr
+             # structural-no-sidecar set (INF ae813e2); paylocity census-supplied (AGG 09-12);
+             # successfactors + radancy PRE-PRODUCTION: pool-present, sidecars pending (AGG-owned
+             # Cloudflare-wall finding); deliberate onboarding, not a config error. Revisit the
+             # two pre-production entries when they go production (readiness checklist rider).
+             "bamboohr", "paylocity", "successfactors", "radancy"}
 
 
 
