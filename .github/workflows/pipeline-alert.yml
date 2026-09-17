@@ -137,6 +137,7 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           DATA_PROXY_TOKEN: ${{ secrets.DATA_PROXY_TOKEN }}
+          ZJP_ORG_SCANNER_READONLY_TOKEN: ${{ secrets.ZJP_ORG_SCANNER_READONLY_TOKEN }}  # INF-PAYLOADSHA-WATCH-1: check-82 sha-watch credential (read-only)
         run: node .github/scripts/processing/lib/pipeline-probes.js
       - name: Run pipeline checks
         env:
