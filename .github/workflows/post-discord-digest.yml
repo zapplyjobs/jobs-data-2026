@@ -99,6 +99,9 @@ jobs:
           ARGS=""
           if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
           if [ -n "${{ inputs.only_channel }}" ]; then ARGS="$ARGS --only ${{ inputs.only_channel }}"; fi
+          # word-splitting of ARGS is intended (multi-flag string); SC2086 is info-level
+          # shellcheck noise that has failed workflow-lint since 09-16 (INF-0918 weekly review)
+          # shellcheck disable=SC2086
           node .github/scripts/processing/lib/discord-digest.js $ARGS
 
       - name: Digest summary
