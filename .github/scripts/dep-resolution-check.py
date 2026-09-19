@@ -53,6 +53,10 @@ def is_external(spec: str) -> bool:
 
 
 def pkg_name(spec: str) -> str:
+    # node:fs / node:child_process = builtin scheme, always resolvable (INF-JOBSDATA-GATE-BASELINE-RED-1:
+    # the prefix reached this fn unstripped and fell through as an unresolvable package name)
+    if spec.startswith("node:"):
+        return spec[5:]
     # @scope/name/subpath -> @scope/name ; name/subpath -> name
     parts = spec.split("/")
     if spec.startswith("@"):
