@@ -149,6 +149,7 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}  # INF-SUPABASE-HEALTH-CHECK: Management API for depth metrics (connections, rollback rate, cache hit)
           LANEFEED_HEALTH: ${{ env.LANEFEED_HEALTH }}
+          LANE_SUCCESS_HEALTH: ${{ env.LANE_SUCCESS_HEALTH }}  # INF-ALERTGAPS-PROJECTIONS-1: check-84 per-lane 24h success-rate payload
           CONTRACT_VERSIONS: ${{ env.CONTRACT_VERSIONS }}  # INF-GLOBALPATTERNS-CANDIDATES-1 item 2: check-80 payload  # INF-LANEFEED-FRESHCHECK-1: check-81 lane artifact freshness payload
           RULESET_GUARD_HEALTH: ${{ env.RULESET_GUARD_HEALTH }}  # INF-RULESET-GUARDWATCH-1: check-82 all-branch guard presence payload
           APP_CANARY_STATUS: ${{ env.APP_CANARY_STATUS }}  # OUT-APP-CANARY-1: check-59 probe payload
