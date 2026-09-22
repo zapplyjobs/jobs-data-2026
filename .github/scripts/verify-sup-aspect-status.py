@@ -80,7 +80,14 @@ VALID_ATS = {"greenhouse", "lever", "ashby", "workday", "smartrecruiters", "orac
              # successfactors + radancy PRE-PRODUCTION: pool-present, sidecars pending (AGG-owned
              # Cloudflare-wall finding); deliberate onboarding, not a config error. Revisit the
              # two pre-production entries when they go production (readiness checklist rider).
-             "bamboohr", "paylocity", "successfactors", "radancy"}
+             "bamboohr", "paylocity", "successfactors", "radancy",
+             # All-families wave (AGG A294, SUP-VALIDATOR-PHENOM-PLATFORM-1): gem cutover
+             # landed 09-18/19 (SUP gem eval tranche); phenom + jobvite production connectors
+             # live 09-19 (manifest decision_refs entries 17/18). Arrays already present in
+             # the job-board-aggregator company-list this workflow validates (19 ATS,
+             # verified 09-22) - deliberate onboarding, not a config error. Keep in sync
+             # with projects/zjp/scripts/sup-company-list-validate.js.
+             "gem", "phenom", "jobvite"}
 
 
 
@@ -118,7 +125,9 @@ def validate_company_list(data):
             if not name or not str(name).strip():
                 errors.append("[%s][%d] missing or empty name" % (ats, i))
                 continue
-            id_field = "url" if ats == "workday" else ("base_url" if ats == "oracle" else "slug")
+            # workday/phenom/jobvite=url (supplemental lanes carry board URLs, no slugs -
+            # AGG A294 row shape), oracle=base_url, others=slug
+            id_field = "url" if ats in ("workday", "phenom", "jobvite") else ("base_url" if ats == "oracle" else "slug")
             idv = t.get(id_field)
             if not idv or not str(idv).strip():
                 errors.append('[%s][%d] "%s" missing required field "%s"' % (ats, i, name, id_field))
