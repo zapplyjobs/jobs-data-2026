@@ -112,7 +112,11 @@ def validate_company_list(data):
     total = 0
     for ats in ats_keys:
         if ats not in VALID_ATS:
-            errors.append('Unknown ATS platform: "%s"' % ats)
+            errors.append('Unknown ATS platform: "%s" - deliberate new family? add to '
+                          'VALID_ATS here AND refresh the workspace validator '
+                          '(projects/zjp/scripts/sup-company-list-validate.js derives from '
+                          'lib/family_registry.json) + registry row per SUP-FAMILY-REGISTRY-1'
+                          % ats)
             continue
         tenants = data[ats]
         if not isinstance(tenants, list):
