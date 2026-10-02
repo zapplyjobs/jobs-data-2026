@@ -71,6 +71,14 @@ def check_url(url, attempts=3):
     OUT-DEADLINK-SCAN-FP-1: network errors (timeout / connection refused / DNS / reset)
     are retried with backoff; only after all retries fail are they 'transient' (NOT 'dead').
     4xx HTTP codes are definitive (returned immediately, no retry); 5xx server errors are retried like network errors (transient, not dead)."""
+    # OUT-DEADLINK-CLICKSELFPOP-1 (2026-10-02): tracked links carry ?s=<source>
+    # attribution. Checking them verbatim logged one clicks-row per link per run into
+    # per-source analytics buckets (32,713 self-pollution rows by 09-28,
+    # INF-CLICKS-BOTPOLLUTION-1 investigation). The redirect route reads the job from
+    # the path only, so stripping the query leaves the landing page and the verdict
+    # unchanged while the rows we do create stay attributable via UA (out-deadlink/*).
+    if '/l/d/' in url:
+        url = url.split('?', 1)[0]
     last_err = None
     for attempt in range(attempts):
         try:
