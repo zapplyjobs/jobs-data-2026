@@ -1,27 +1,39 @@
-**Exec brief - Fri Oct 3** (full-coverage edition)
+**Assignments - Fri Oct 3** (from tagged messages across team channels; reply "done + item" to close)
 
-**Threats & market (from #war-room)**
-- Perplexity launched AI job-applications - team read Sep 23: "a real threat to our business model", "hard to beat". The deep analysis high_on_birb called for is still not done.
-- Boards are fighting autofill: Greenhouse + Workable now prefill and block (Ashby too) - microsoftword4934, Sep 23: "they are catching on". Extension impact not yet assessed.
-- Simplify revamped their site + shipped an iOS app (Sep 7-8). Competitor move, unassessed.
+**@obiikkenobi**
+- #legal - ToS contact email: admin@ vs support@ vs omit? (from microsoftword4934, Oct 2)
+- #legal - someone is scraping our job listings (from high_on_birb, Sep 30)
+- #legal - resume-service follow-ups flagged for you + duckerino2000 (high_on_birb, Oct 3)
+- #marketing - automated job lists for LinkedIn posts "we really need soon" (microsoftword4934, Aug 26)
+- #finance - fund-interest reel shared by high_on_birb (Sep 11)
 
-**Waiting on you**
-- @microsoftword4934 (3): scraping alert <- high_on_birb, Sep 30, no reply | finance: send limit rises to $1,690 from Dec (12-mo lease signed) <- high_on_birb, ack if needed | Perplexity Education plan: you asked who can buy it, then asked obiikkenobi/taihim0 to buy (50% off) - Sep 25, unresolved
-- @obiikkenobi (3): ToS contact email decision (admin@ vs support@ vs omit) <- microsoftword4934, Oct 2 | EQ10 officer docs: signed + uploaded Aug 21, never closed | weekend work cadence: two weekends lost to no-shows; high_on_birb wants day-before confirmations
+**@microsoftword4934**
+- #finance - send limit rises to $1,690 from Dec; 12-mo lease signed (high_on_birb, Sep 27)
+- #finance - annual review received; finance sheet updated with new numbers (high_on_birb, Oct 1)
+- #war-room - Perplexity Education plan purchase ask + Rustdesk USA-IP note (obiikkenobi, Sep 25)
 
-**Open asks (staff)**
-- Apple SSO test on test.zapply.jobs <- duckerino2000, Sep 30: devs/QAs have no Apple accounts; anyone with an Apple ID can test
-- Resume service: 2 legal-review items before charging starts <- obiikkenobi -> duckerino2000, Sep 28, unanswered 5d
-- QA queue: 4 merged PRs awaiting test (greenhouse, lever, oracle, amazon+mathworks); issue-0983 -> jawadajk_84679; Ashby extended companies -> jawadajk_84679; dev-complete column -> aliyan.me
+**@duckerino2000**
+- #legal - "what do you suggest?" on the ToS contact question (microsoftword4934, Oct 2)
+- #tech-team - short meeting request (jawadajk_84679, Oct 2)
 
-**Work states**
-- Play Store app is live (taihim0, Sep 21) | Fiverr animator video pending - everything else set up (microsoftword4934, Sep 19) | Feedback system: moving off Featurebase; aliyan building custom UI (Sep 14) | Devices: 3x Intel + 2x AMD mini-PCs idle, MacBook with Jalal, phone with Faizan (obiikkenobi, Sep 29)
+**@taihim0**
+- #war-room - buy Perplexity Education plan (50% off) for testing (microsoftword4934, Sep 26)
 
-**Decisions pending**
-- ProductHunt launch: proposed by obiikkenobi Sep 18, no resolution since
-- Meeting-transcript pipeline: the Sep 15 proposal (transcript files -> reader-readable channel feeding this digest) is still unrealized; #meetings channel unused since March
+**@bludddd**
+- #marketing - confirm you + mahdi can both post jobs (microsoftword4934, Sep 6)
+- #user-experience - voiceover script thoughts + mascot final vote (microsoftword4934, Sep 8)
 
-**Context**
-- MAU goal: 10,000 by end-2029 (high_on_birb, Oct 2) | USD/oil/electricity rising - solar/UPS consideration (obiikkenobi, Sep 17) | Gemini free for students (offer in #tech)
+**@amaarmuhammed**
+- #tech-team - tagged in 3 team roll-calls / meeting pings from aliyan.me and shah9545 (Sep 14-28)
 
-Sources: 14 readable team channels. Private/DM threads are not covered until the bot is added (INF ask filed). Reply "done + item" to close any line; corrections stick.
+**@Engineer + @QA Engineer (role)**
+- shah9545: daily updates with branch links; pull from the pinned branches; use the extended-companies sheet for daily tests; no extension popup on home pages; never use someone else's email (7 directives, Sep 14 - Oct 1)
+- shah9545: acknowledge today's 16:00 meeting (Oct 1)
+
+**@Executives (role)**
+- #tech - test Apple SSO on test.zapply.jobs; needs someone with an Apple account (duckerino2000, Sep 30)
+- #ideas - high_on_birb: "i have a plan" - note it down (Sep 25); extension-usage popup idea from microsoftword4934 (Sep 24)
+- #user-experience - update needed on the UX drive file (microsoftword4934, Sep 16); Borderless opinions (high_on_birb, Sep 15)
+- #sales - Simplify charges companies a %age, not per post (high_on_birb, Sep 28) - pricing implications unassessed
+
+Dropped as noise: jokes, bare links, answered questions. 51 open tagged items -> 27 real assignments above.
