@@ -1,12 +1,12 @@
 name: Daily Briefing
 
+# NO SCHEDULE (operator 10-03: on-demand only, never blind). One-time trigger =
+# workflow_dispatch (zapply-gh-pat.env token has actions:write) OR commit a
+# .github/exec-brief.md change - the push trigger fires the post within seconds.
 on:
-  # NO SCHEDULE (operator 10-03: on-demand only, never blind). One-time trigger =
-  # workflow_dispatch (zapply-gh-pat.env token has actions:write) OR commit a
-  # .github/exec-brief.md change - the push below fires the post within seconds.
-    push:
-      paths:
-        - '.github/exec-brief.md'
+  push:
+    paths:
+      - '.github/exec-brief.md'
   workflow_dispatch:
     inputs:
       manual_text:
