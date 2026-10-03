@@ -4,7 +4,8 @@ on:
   schedule:
     # 14:00 UTC = 9:00 AM CDT (operator send window 5AM-11PM CDT; was 06:00 UTC = 1AM CDT)
     # 21:15 UTC = 4:15 PM CDT, inside the operator window 5AM-11PM CDT
-    - cron: '15 21 * * *'
+    # 22:55 UTC = 5:55 PM CDT (in window 5AM-11PM CDT)
+    - cron: '55 22 * * *'
   workflow_dispatch:
     inputs:
       manual_text:
