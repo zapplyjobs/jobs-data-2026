@@ -1,11 +1,12 @@
 name: Daily Briefing
 
 on:
-  schedule:
-    # 14:00 UTC = 9:00 AM CDT (operator send window 5AM-11PM CDT; was 06:00 UTC = 1AM CDT)
-    # 21:15 UTC = 4:15 PM CDT, inside the operator window 5AM-11PM CDT
-    # 22:55 UTC = 5:55 PM CDT (in window 5AM-11PM CDT)
-    - cron: '55 22 * * *'
+  # NO SCHEDULE (operator 10-03: on-demand only, never blind). One-time trigger =
+  # workflow_dispatch (zapply-gh-pat.env token has actions:write) OR commit a
+  # .github/exec-brief.md change - the push below fires the post within seconds.
+    push:
+      paths:
+        - '.github/exec-brief.md'
   workflow_dispatch:
     inputs:
       manual_text:
