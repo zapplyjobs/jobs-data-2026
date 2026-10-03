@@ -3,7 +3,8 @@ name: Daily Briefing
 on:
   schedule:
     # 14:00 UTC = 9:00 AM CDT (operator send window 5AM-11PM CDT; was 06:00 UTC = 1AM CDT)
-    - cron: '0 14 * * *'
+    # 21:15 UTC = 4:15 PM CDT, inside the operator window 5AM-11PM CDT
+    - cron: '15 21 * * *'
   workflow_dispatch:
     inputs:
       manual_text:
