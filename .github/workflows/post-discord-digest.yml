@@ -11,10 +11,10 @@ on:
         description: 'Restrict to one channel name (pilot), e.g. spain-jobs'
         default: ''
   schedule:
+    # RESTORED 2026-10-03 (operator): the Oct-2 disable silenced the public job channels -
+    # this schedule was their only posting source since per-job posts retired Sep 12.
     # 13:00 UTC daily — digests summarize the previous 24h of postings
-    # DISABLED 2026-10-02 (operator GO, D108): demand probe FLAT, 0 tracked-link clicks
-    # in 19 days (contract GAP-5 verdict). Rollback = uncomment the cron line below.
-    # - cron: '0 13 * * *'
+    - cron: '0 13 * * *'
 
 concurrency:
   group: post-discord-digest

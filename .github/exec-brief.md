@@ -1,4 +1,4 @@
-**Team digest - Fri Oct 3** (full-coverage edition)
+**Exec brief - Fri Oct 3** (full-coverage edition)
 
 **Threats & market (from #war-room)**
 - Perplexity launched AI job-applications - team read Sep 23: "a real threat to our business model", "hard to beat". The deep analysis high_on_birb called for is still not done.
