@@ -128,17 +128,17 @@ def fetch_universe():
         band_b = rest_fetch_band(_iso_days_ago(30))
         bands['deep_lt_30d'] = len(band_b)
     else:
-        # Band-B rotation: the 2-7d window is five 1-day buckets keyed by floor(age_days)
-        # in {2,3,4,5,6}. Bucket index = (UTC day-of-year) % 5, mapping residues 0..4 ->
-        # buckets[0..4] (e.g. 2026-10-05 = doy 278 -> 278%5=3 -> the 5d bucket). Each UTC
-        # day picks exactly one bucket; residues cycle all five values every 5 days, so
-        # the full 2-7d window is covered once per 5 days while the 0-2d band is
-        # re-verified every run. Deterministic - same UTC day gives the same bucket.
-        buckets = [2, 3, 4, 5, 6]
-        band_b_selected = buckets[now.timetuple().tm_yday % 5]
+        # Band-B window: fixed age [5d, 4d). Every URL ages through this window exactly
+        # once, so each 2-7d posting gets exactly one nightly-band re-check per cycle
+        # (a URL that first 404s at band-A's edge gets its second sighting 2-3 days
+        # later). v1 rotated a day-of-year bucket instead; that was SELF-CANCELING -
+        # the bucket index and URL aging co-advance, pinning one calendar cohort for
+        # 5 straight nights while 4/5 of cohorts never got a nightly re-check
+        # (L3ScanReview finding 1, 2026-10-06) - replaced by this fixed window.
+        band_b_selected = 4
         try:
             band_b = rest_fetch_band(_iso_days_ago(band_b_selected + 1), _iso_days_ago(band_b_selected))
-            bands[f'b_2_7d_bucket_{band_b_selected}d'] = len(band_b)
+            bands['b_age_4_5d'] = len(band_b)
         except Exception as e:
             # Band A already verified non-empty -> degrade loudly to band A only.
             print(f"WARNING: band B ({band_b_selected}d bucket) fetch failed - continuing with band A only: {e}")
@@ -178,7 +178,7 @@ def check_url(url, attempts=3):
                 "User-Agent": "Mozilla/5.0 (out-deadlink/1.0)",
                 "Accept": "text/html,application/json"
             })
-            with urllib.request.urlopen(req, timeout=15) as resp:
+            with urllib.request.urlopen(req, timeout=10) as resp:
                 return ('code', resp.status)
         except urllib.error.HTTPError as e:
             if 500 <= e.code < 600:
@@ -314,6 +314,12 @@ try:
 except Exception as e:
     print(f"Previous artifact unavailable (carry-over skipped - self-heals on a later run): {e}")
 
+# Deaths already confirmed before this run - used to split total_dead into carried
+# tombstones vs newly-confirmed-this-run (total_dead_fresh; the aspect verifier's
+# dead-rate gate measures per-run findings, not accumulated memory). Defined AFTER
+# the try/except so it exists even when the prev artifact is unreachable.
+prev_confirmed = {u for u, s in http_sightings.items() if int(s.get('sightings') or 0) >= 2}
+
 # Carried ats-closed urls re-verify through the SAME verdict paths regardless of band
 # rotation (they are usually older than the deepest band). Appended AFTER the per-host
 # caps: they are few (bounded by the storm guard / CARRY_MAX_AGE_DAYS) and their
@@ -338,7 +344,12 @@ def _hstate(host):
     st = host_state.get(host)
     if st is None:
         st = host_state[host] = {'sem': Semaphore(3), 'lock': Lock(),
-                                 'next_ok': 0.0, 'consec': 0, 'broken': False}
+                                 'next_ok': 0.0, 'consec': 0, 'broken': False,
+                                 # wall-clock budget: a host whose URLs all time out
+                                 # must not serialize the whole run past the job
+                                 # timeout (L3ScanReview finding 3: worst case
+                                 # ~51s/URL x deep cap / 3 slots can exceed 300min)
+                                 'deadline_at': time.monotonic() + 900}
     return st
 
 def polite_check(url):
@@ -347,7 +358,13 @@ def polite_check(url):
     if st['broken']:
         return ('host-skipped', None)
     with st['sem']:
-        if st['broken']:  # breaker may have tripped while queued on the semaphore
+        if st['broken'] or time.monotonic() > st['deadline_at']:
+            # 403/429 breaker tripped, or the host exhausted its wall-clock budget
+            # (all-timeout hosts would otherwise serialize the whole run) - in both
+            # cases the remaining URLs are skipped, never classified dead.
+            if not st['broken']:
+                st['broken'] = True
+                print(f"  host budget: {host} exceeded 900s - skipping its remaining URLs this run")
             return ('host-skipped', None)
         with st['lock']:
             delay = st['next_ok'] - time.monotonic()
@@ -822,6 +839,16 @@ except Exception as e:
 # The scan exits 0 when it ran and published, whether or not dead links were
 # found; the workflow reads scan_summary.json to alert on findings. Exit 1
 # stays reserved for scan/publish errors (Storage failure above).
+# total_dead_fresh: deaths newly confirmed THIS run (http verdicts crossed >=2
+# sightings in-run + ats-closed rows published in-run). total_dead additionally
+# carries persisted tombstones for URLs the band rotation did not re-check - the
+# aspect verifier's dead-rate gate measures the fresh number, not the memory.
+http_fresh = sum(1 for u in http_dead_urls if u in results and u not in prev_confirmed)
+ats_fresh = sum(1 for r in dead_links if r.get('http_code') == 'ats-closed')
+output['total_dead_fresh'] = http_fresh + ats_fresh
+if isinstance(output.get('scan_scope'), dict):
+    output['scan_scope']['fresh_dead'] = output['total_dead_fresh']
+
 with open('scan_summary.json', 'w') as _sf:
     json.dump(output, _sf, indent=2)
 if dead_links:

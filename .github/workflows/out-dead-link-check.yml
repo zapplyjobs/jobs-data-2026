@@ -1,13 +1,20 @@
 name: OUT Dead Link Check
-# Weekly dead-link check across all consumer repos + ATS availability passes
-# (Workday tenant-listing membership via wd-fetch-proxy; Ashby posting API).
+# Nightly L3 liveness scan (daily 06:00 UTC; Saturdays take the deep 0-30d band
+# in-script) + ATS availability passes (Workday tenant-listing membership via
+# wd-fetch-proxy; Ashby posting API). Universe = served band from public.jobs
+# (is_active + source=GITHUB + posted_at windows) via PostgREST; per-host
+# politeness caps + circuit breaker; confirmed-dead = 2 sightings of 404/410.
 # Scanner logic lives in .github/scripts/out_dead_link_scan.py (extracted from
 # this file's heredoc 2026-08-16, OUT-DEADLINK-CODECLEANUP-1 — lintable/testable).
 # Publishes dead-links.json to Supabase Storage + R2 (data/ prefix, canonical).
-# Format: {generated_at, total_checked, total_dead, dead_links: [{repo, url, http_code, closed_via?, note?}],
+# Format (L3): {generated_at, total_checked, total_dead, total_dead_fresh,
+#          dead_links: [{repo=source_id, url, http_code, closed_via?, note?}],
 #          ats_watch: [{repo, url, note}], ats_stats: {judged, alive, dead, unknown, pass?},
-#          total_transient, transient_links: [{repo, url, http_code}]}
-# http_code is an int for status-code deaths and the string 'ats-closed' for ATS-listing deaths.
+#          total_transient, transient_links: [{repo, url, http_code}],
+#          http_sightings: {url: {code, first_seen, last_seen, sightings}},
+#          scan_scope: {mode, bands, requested, after_host_caps, checked, host_skipped, fresh_dead, generated_under}}
+# http_code is an int for status-code deaths (only published at sightings>=2) and
+# the string 'ats-closed' for ATS-listing deaths.
 on:
   schedule:
     - cron: '0 6 * * *'  # Daily 06:00 UTC (was weekly Monday; daily since OUT-ATSCLOSED-HIDE-1 — the consumer now hides ats-closed URLs each publisher cycle, so scan freshness = hide latency)

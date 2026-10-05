@@ -162,7 +162,10 @@ def c_data_quality():
     if not dl:
         issues.append(("warn", "dead-links.json unreachable"))
     else:
-        checked = dl.get("total_checked", 0); dead = dl.get("total_dead", 0)
+        checked = dl.get("total_checked", 0)
+        # L3 scanner persists confirmed-dead tombstones across runs (rotation memory);
+        # the gate measures PER-RUN findings, not accumulated memory.
+        dead = dl.get("total_dead_fresh", dl.get("total_dead", 0))
         rate = dead / checked if checked else 1
         if rate >= 0.05: issues.append(("red", f"dead-link {rate*100:.1f}% ({dead}/{checked})"))
         elif rate >= 0.01: issues.append(("warn", f"dead-link {rate*100:.1f}% ({dead}/{checked})"))
