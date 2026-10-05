@@ -1,0 +1,73 @@
+# Daily ENR headroom instrument (INF-PHASEB-TRIPWIRE-PREREQS-1 leg 2, INF-1012 2026-10-05).
+# Read-only collector against the DB + pipeline; publishes the per-run artifact and the
+# append-only ledger to R2 (data/enr-headroom-daily/ + data/enr-headroom-ledger.jsonl -
+# the canonical persisted series DASH charts render from). Restores prior artifacts first
+# so the leg-A 3-consecutive-DAILY streak survives runner ephemerality.
+# Deliberately NOT a pipeline-alert check and NOT paged (pipeline-alert owns paging).
+# GH docs: schedule events can be delayed under load (start of hours worst) - the streak
+# is day-granular, so delay/slippage degrades conservatively (streak waits, never fake-fires).
+name: ENR Headroom Daily
+
+on:
+  schedule:
+    - cron: '20 6 * * *' # daily 06:20 UTC, off-peak
+  workflow_dispatch: {}
+
+permissions: {}
+
+concurrency:
+  group: enr-headroom-daily
+  cancel-in-progress: false
+
+jobs:
+  headroom:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          token: ${{ secrets.GH_PAT }}
+      - name: Unlock encrypted files
+        uses: zapplyjobs/.github/actions/setup-transcrypt@afcb5f41ec28fe10cefcf421fc455d0d89588b1f
+      - name: Decrypt working tree
+        run: |
+          echo "Y" | transcrypt --cipher aes-256-cbc --password "$TRANSCRYPT_PASSWORD" --force
+          git checkout -- .
+          SAMPLE_JS=$(find scripts/enr-harness -name '*.js' -print -quit 2>/dev/null)
+          if [ -n "$SAMPLE_JS" ]; then
+            if ! file -b "$SAMPLE_JS" | grep -qiE 'ASCII|UTF-8|text'; then
+              echo "::error::Decryption FAILED - $SAMPLE_JS is ciphertext. Check TRANSCRYPT_PASSWORD."
+              exit 1
+            fi
+          fi
+        env:
+          TRANSCRYPT_PASSWORD: ${{ secrets.TRANSCRYPT_PASSWORD }}
+
+      - name: Setup Node
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 22
+
+      - name: Restore prior run artifacts from R2
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: node scripts/enr-headroom-daily.js restore
+
+      - name: Run instrument
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: node scripts/enr-harness/enr_headroom_balance.js --out "state/generated/enr-headroom-balance-$(date -u +%F).json"
+
+      - name: Publish artifact + append ledger to R2
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: node scripts/enr-headroom-daily.js publish
