@@ -8,6 +8,13 @@ on:
         required: false
         default: false
         type: boolean
+  schedule:
+    # INF-1007 B3 (operator GO 10-05): hourly reconciliation floor beside the
+    # fetch wave-link. The wave-link stays the primary trigger; this catches
+    # starvation when fetch cap-kills starve the wave (5 instances since Aug).
+    # A first-step guard below skips this run when a wave-linked enrich is
+    # already active or queued (the desc-backfill dual-trigger pattern, 08-13).
+    - cron: '43 * * * *'
   push:
     paths:
       - '.github/workflows/enrich-jobs.yml'
@@ -24,8 +31,26 @@ jobs:
     timeout-minutes: 20  # ENR-SIDECAR-MARKER-RACE-1: headroom for wait(≤7m)+repair(≤3m+re-download); normal path unchanged (~4-5m)
     permissions:
       contents: write
+      actions: read # schedule-floor guard: read own run list (INF-1007 B3)
 
     steps:
+      - name: Schedule-floor guard - skip if a wave-linked enrich is active or queued
+        if: github.event_name == 'schedule'
+        run: |
+          set -euo pipefail
+          REPO="${{ github.repository }}"
+          ACTIVE=$(gh api "repos/$REPO/actions/runs?workflow=enrich-jobs.yml&status=in_progress&per_page=1" --jq '.total_count // 0')
+          QUEUED=$(gh api "repos/$REPO/actions/runs?workflow=enrich-jobs.yml&status=queued&per_page=1" --jq '.total_count // 0')
+          # This scheduled run counts itself as in_progress; any additional
+          # active or queued run means the wave-link is alive - skip cleanly.
+          if [ "$((ACTIVE + QUEUED))" -gt 1 ]; then
+            echo "Schedule floor skipped: wave-linked enrich active/queued (active=$ACTIVE queued=$QUEUED)."
+            exit 0
+          fi
+          echo "No other enrich run active or queued - floor run proceeds."
+        env:
+          GH_TOKEN: ${{ github.token }}
+
       - name: Checkout repository
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
