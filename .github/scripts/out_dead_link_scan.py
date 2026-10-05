@@ -494,6 +494,12 @@ try:
 except Exception as e:
     print(f"R2 upload failed (non-blocking): {e}")
 
-# Exit 1 only if truly-dead links found (transient excluded — triggers the tracking issue)
+# OUT-DEADLINK-EXITCODE-ALERTCONV-1 (2026-10-04): findings are DATA, not failure.
+# The scan exits 0 when it ran and published, whether or not dead links were
+# found; the workflow reads scan_summary.json to alert on findings. Exit 1
+# stays reserved for scan/publish errors (Storage failure above).
+# Legacy wording: Exit 1 only if truly-dead links found (transient excluded — triggers the tracking issue)
+with open('scan_summary.json', 'w') as _sf:
+    json.dump(output, _sf, indent=2)
 if dead_links:
-    sys.exit(1)
+    print(f"Dead links found: {len(dead_links)} (written to scan_summary.json; exit 0 - findings alert is the workflow's job)")
