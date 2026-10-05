@@ -23,7 +23,7 @@ permissions:
 jobs:
   dead-link-check:
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 300  # was 50 (README-universe era); L3 deep pass scans a 30d universe with per-host politeness (0.5s same-host spacing)
 
     steps:
     - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
