@@ -771,6 +771,17 @@ output = {
     "http_sightings": http_sightings,
     "scan_scope": scan_scope,
 }
+# total_dead_fresh: deaths newly confirmed THIS run (http verdicts crossed >=2
+# sightings in-run + ats-closed rows published in-run). total_dead additionally
+# carries persisted tombstones for URLs the bands did not re-check - the aspect
+# verifier's dead-rate gate measures the fresh number, not the memory. MUST be
+# set BEFORE the Storage/R2 publish (the published artifact is what the
+# verifier reads - the scan_summary copy alone is not enough; ordering bug
+# caught on the first production run 2026-10-05T22:23Z, field was absent).
+http_fresh = sum(1 for u in http_dead_urls if u in results and u not in prev_confirmed)
+ats_fresh = sum(1 for r in dead_links if r.get('http_code') == 'ats-closed')
+output['total_dead_fresh'] = http_fresh + ats_fresh
+output['scan_scope']['fresh_dead'] = output['total_dead_fresh']
 
 # Print summary
 print(f"\n=== Dead Link Check Results ===")
@@ -839,16 +850,6 @@ except Exception as e:
 # The scan exits 0 when it ran and published, whether or not dead links were
 # found; the workflow reads scan_summary.json to alert on findings. Exit 1
 # stays reserved for scan/publish errors (Storage failure above).
-# total_dead_fresh: deaths newly confirmed THIS run (http verdicts crossed >=2
-# sightings in-run + ats-closed rows published in-run). total_dead additionally
-# carries persisted tombstones for URLs the band rotation did not re-check - the
-# aspect verifier's dead-rate gate measures the fresh number, not the memory.
-http_fresh = sum(1 for u in http_dead_urls if u in results and u not in prev_confirmed)
-ats_fresh = sum(1 for r in dead_links if r.get('http_code') == 'ats-closed')
-output['total_dead_fresh'] = http_fresh + ats_fresh
-if isinstance(output.get('scan_scope'), dict):
-    output['scan_scope']['fresh_dead'] = output['total_dead_fresh']
-
 with open('scan_summary.json', 'w') as _sf:
     json.dump(output, _sf, indent=2)
 if dead_links:
