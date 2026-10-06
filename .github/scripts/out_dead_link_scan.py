@@ -295,6 +295,33 @@ CARRY_MAX_AGE_DAYS = 35  # was 16 (README-universe era: covered the 14d pool TTL
                          # ats-closed rows must outlive a full deep cycle -> 35d.
 prev_dead = {}        # url -> {"repos": [...], "first_seen": iso}   (ats-closed class only)
 http_sightings = {}   # url -> {code, first_seen, last_seen, sightings}  (L3 N-observation memory)
+# OUT-LIFECYCLE-SINGLEAUTHORITY-1 stage-3a: alive-hold store. Carried from the
+# PREVIOUS scan-verdicts.json (its own proxy fetch below - dead-links.json keeps its
+# dashboard shape and carries NO verdict keys; the ship review caught the first draft
+# reading the wrong artifact). Only 'alive' entries carry; ALIVE_HOLD_DAYS prunes.
+ALIVE_HOLD_DAYS = 7
+url_verdicts = {}     # url -> ['alive', 'YYYY-MM-DD', 'ats'|'http']
+try:
+    _prev_sv_src = os.environ.get("PREV_SCAN_VERDICTS_URL",
+        "https://zjp-data-proxy.wild-queen-069e.workers.dev/data/scan-verdicts.json")
+    _req_sv = urllib.request.Request(_prev_sv_src,
+        headers={'X-Proxy-Token': os.environ.get('DATA_PROXY_TOKEN', '')})
+    with urllib.request.urlopen(_req_sv, timeout=20) as _r:
+        _prev_sv = json.loads(_r.read())
+    _n_carried = 0
+    for u, v in (_prev_sv.get('verdicts') or {}).items():
+        if not isinstance(u, str) or not isinstance(v, list) or len(v) < 2 or v[0] != 'alive':
+            continue
+        try:
+            _age = (time.time() - datetime.datetime.fromisoformat(str(v[1])).timestamp()) / 86400.0
+        except Exception:
+            continue
+        if _age <= ALIVE_HOLD_DAYS:
+            url_verdicts[u] = ['alive', str(v[1])] + ([v[2]] if len(v) > 2 else [])
+            _n_carried += 1
+    print(f"scan-verdicts carry-over: {_n_carried} alive entr(ies) within the {ALIVE_HOLD_DAYS}d hold")
+except Exception as _sv_err:
+    print(f"scan-verdicts carry-over skipped (first run or proxy miss - store self-heals next run): {_sv_err}")
 try:
     _prev_src = os.environ.get("PREV_DEAD_LINKS_URL",
         "https://zjp-data-proxy.wild-queen-069e.workers.dev/data/dead-links.json")
@@ -707,6 +734,15 @@ if ash_urls:
             ats_watch.append({"repo": url_src.get(u, '(carried)'), "url": u, "note": f"ashby-board-error-{st}"})
     print(f"  Ashby+WD verdicts: {ats_stats}")
 
+# ── OUT-LIFECYCLE-SINGLEAUTHORITY-1 stage-3a: alive-hold store carry-forward ──
+# url_verdicts = per-URL scan liveness, consumed by the sjd builder's reconciliation
+# guard (scripts/lib/sjd-liveness.js) and later the artifact-tail probe band. Only
+# 'alive' entries carry (deaths live in dead_links.json; ambiguity is not a hold);
+# entries older than ALIVE_HOLD_DAYS prune at load. Initialized outside the try so
+# a missing prev artifact degrades to an empty store, never a NameError.
+ALIVE_HOLD_DAYS = 7
+url_verdicts = {}
+
 # Storm guard: a listing-side anomaly (proxy outage, WD behavior change) must not
 # mass-close live jobs. Expected closure rate scales with display age: ~1.2% at
 # <=7d, measured 8.7% at 7-14d (out_deadzone_liveness.json 2026-08-21) - a 14d
@@ -763,6 +799,34 @@ for u in list(http_sightings):
         _pruned += 1
 if _pruned:
     print(f"http_sightings: pruned {_pruned} entry(ies) older than {CARRY_MAX_AGE_DAYS}d")
+
+# ── OUT-LIFECYCLE-SINGLEAUTHORITY-1 stage-3a: per-URL verdict build + merge ──
+# Classification: ats-closed/dead from dead_links; ambiguous from ats_watch, transient
+# and non-accept non-4xx codes; alive from ATS judged-alive and accepted HTTP codes.
+# Today's verdicts REPLACE carried ones (a fresh death must kill a stale alive-hold);
+# only alive entries publish (dead_links owns deaths; the builder parses alive-only).
+_dead_by_url = {d['url']: d.get('http_code') for d in dead_links}
+_watch_urls = {w.get('url') for w in ats_watch}
+_ats_urls = set(wd_urls) | set(ash_urls)
+today_verdicts = {}
+for u, (kind, val) in results.items():
+    if u in _dead_by_url:
+        today_verdicts[u] = ['ats-closed' if _dead_by_url[u] == 'ats-closed' else 'dead', TODAY]
+    elif u in _watch_urls:
+        today_verdicts[u] = ['ambiguous', TODAY]
+    elif u in _ats_urls:
+        today_verdicts[u] = ['alive', TODAY, 'ats']
+    elif kind == 'code' and val in ACCEPT_CODES:
+        today_verdicts[u] = ['alive', TODAY, 'http']
+    elif kind == 'code' and val in (404, 410):
+        today_verdicts[u] = ['dead', TODAY, 'http']
+    else:
+        today_verdicts[u] = ['ambiguous', TODAY]
+_alive_today = sum(1 for v in today_verdicts.values() if v[0] == 'alive')
+url_verdicts = {**{u: v for u, v in url_verdicts.items() if u not in today_verdicts},
+                **{u: v for u, v in today_verdicts.items() if v[0] == 'alive'}}
+print(f"url_verdicts: {len(today_verdicts)} judged today ({_alive_today} alive); "
+      f"{len(url_verdicts)} alive entries carried+fresh (hold {ALIVE_HOLD_DAYS}d)")
 
 scan_scope = {
     "mode": SCAN_MODE,
@@ -861,6 +925,24 @@ try:
     print("R2 upload OK: dead-links.json")
 except Exception as e:
     print(f"R2 upload failed (non-blocking): {e}")
+
+# OUT-LIFECYCLE-SINGLEAUTHORITY-1 stage-3a: the alive-hold store as its own artifact
+# (dead-links.json keeps its dashboard shape; this file is the builder/reconciliation
+# read - OUT_CONTRACT Outputs row added 2026-10-06). Non-blocking like the R2 dual-write:
+# absence degrades the builder's guard to verdicts_unavailable, never the filter.
+try:
+    _s3.put_object(Bucket=os.environ.get('R2_BUCKET_NAME', 'zjp-data'),
+                   Key='data/scan-verdicts.json',
+                   Body=json.dumps({
+                       'generated_at': now.isoformat(),
+                       'hold_window_days': ALIVE_HOLD_DAYS,
+                       'entry_shape': "[verdict, 'YYYY-MM-DD', 'ats'|'http'] - alive entries only",
+                       'verdicts': url_verdicts,
+                   }, separators=(',', ':')).encode(),
+                   ContentType='application/json')
+    print(f"R2 upload OK: scan-verdicts.json ({len(url_verdicts)} alive entries)")
+except Exception as e:
+    print(f"scan-verdicts upload failed (non-blocking): {e}")
 
 # OUT-DEADLINK-EXITCODE-ALERTCONV-1 (2026-10-04): findings are DATA, not failure.
 # The scan exits 0 when it ran and published, whether or not dead links were
