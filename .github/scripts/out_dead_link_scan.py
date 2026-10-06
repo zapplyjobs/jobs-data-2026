@@ -37,7 +37,9 @@ DRYRUN = os.environ.get('SCAN_DRYRUN') == '1'
 UNIVERSE_FILE = os.environ.get('SCAN_UNIVERSE_FILE', '')
 # Deep pass is decided in-script by UTC day-of-week (Monday=0 ... Saturday=5): the
 # workflow schedule stays daily 06:00 UTC; only Saturday runs take the 30d band.
-SCAN_MODE = 'deep' if now.weekday() == 5 else 'nightly'
+# SCAN_MODE_OVERRIDE: test knob only (local dry-runs of the deep path mid-week);
+# production never sets it - the schedule decides via UTC weekday.
+SCAN_MODE = os.environ.get('SCAN_MODE_OVERRIDE') or ('deep' if now.weekday() == 5 else 'nightly')
 TODAY = now.date().isoformat()
 
 # URLs to skip (always OK or not worth checking)
@@ -90,7 +92,7 @@ def _sb_creds():
                     key = v
     return url.rstrip('/'), key
 
-def rest_fetch_band(posted_gte, posted_lt=None):
+def rest_fetch_band(posted_gte, posted_lt=None, extra_query=None):
     """Page one posted_at band out of public.jobs (job_url, source_id, posted_at),
     ordered posted_at.asc, 1000 rows/page via the Range header."""
     sb, key = _sb_creds()
@@ -101,6 +103,8 @@ def rest_fetch_band(posted_gte, posted_lt=None):
          f"&posted_at=gte.{urllib.parse.quote(posted_gte, safe='')}")
     if posted_lt:
         q += f"&posted_at=lt.{urllib.parse.quote(posted_lt, safe='')}"
+    if extra_query:
+        q += "&" + extra_query  # pre-quoted by caller (e.g. an or=(...) group)
     rows, offset = [], 0
     while True:
         req = urllib.request.Request(q, headers={
@@ -127,6 +131,18 @@ def fetch_universe():
     if SCAN_MODE == 'deep':
         band_b = rest_fetch_band(_iso_days_ago(30))
         bands['deep_lt_30d'] = len(band_b)
+        # L3 rider (2026-10-06 audit): the sjd internship window serves 120d but the
+        # deep band capped at 30d (the app window) - measured 1,438 active rows in
+        # 30-120d were scan-blind. Deep pass now includes the internship band.
+        # Title pattern is boundary-safe: ilike '*intern*' alone matches 'Internal'.
+        try:
+            _iq = "or=" + urllib.parse.quote(
+                "(employment_type.ilike.*intern*,title.ilike.*internship*,title.ilike.* intern*)", safe='')
+            band_i = rest_fetch_band(_iso_days_ago(120), _iso_days_ago(30), extra_query=_iq)
+            bands['internships_30_120d'] = len(band_i)
+            band_b = band_b + band_i
+        except Exception as e:
+            print(f"WARNING: internship band (30-120d) fetch failed - continuing without it: {e}")
     else:
         # Band-B window: fixed age [5d, 4d). Every URL ages through this window exactly
         # once, so each 2-7d posting gets exactly one nightly-band re-check per cycle
