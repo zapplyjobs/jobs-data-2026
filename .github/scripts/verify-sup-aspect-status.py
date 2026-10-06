@@ -87,7 +87,11 @@ VALID_ATS = {"greenhouse", "lever", "ashby", "workday", "smartrecruiters", "orac
              # the job-board-aggregator company-list this workflow validates (19 ATS,
              # verified 09-22) - deliberate onboarding, not a config error. Keep in sync
              # with projects/zjp/scripts/sup-company-list-validate.js.
-             "gem", "phenom", "jobvite"}
+             "gem", "phenom", "jobvite",
+             # JazzHR supplemental lane (AGG A301, shipped 2026-10-06): 28-tenant seed in
+             # the engine company-list (url-keyed rows, *.applytojob.com boards). Registry
+             # row: projects/zjp/scripts/lib/family_registry.json families.jazzhr (SUP).
+             "jazzhr"}
 
 
 
@@ -129,9 +133,10 @@ def validate_company_list(data):
             if not name or not str(name).strip():
                 errors.append("[%s][%d] missing or empty name" % (ats, i))
                 continue
-            # workday/phenom/jobvite=url (supplemental lanes carry board URLs, no slugs -
-            # AGG A294 row shape), oracle=base_url, others=slug
-            id_field = "url" if ats in ("workday", "phenom", "jobvite") else ("base_url" if ats == "oracle" else "slug")
+            # workday/phenom/jobvite/jazzhr=url (supplemental lanes carry board URLs, no
+            # slugs - AGG A294 row shape; jazzhr = A301 applytojob.com boards),
+            # oracle=base_url, others=slug
+            id_field = "url" if ats in ("workday", "phenom", "jobvite", "jazzhr") else ("base_url" if ats == "oracle" else "slug")
             idv = t.get(id_field)
             if not idv or not str(idv).strip():
                 errors.append('[%s][%d] "%s" missing required field "%s"' % (ats, i, name, id_field))
