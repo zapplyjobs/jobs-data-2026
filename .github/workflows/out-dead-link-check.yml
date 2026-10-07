@@ -45,7 +45,12 @@ jobs:
         R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
         R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
         DATA_PROXY_TOKEN: ${{ secrets.DATA_PROXY_TOKEN }}
-      run: python3 .github/scripts/out_dead_link_scan.py
+      run: |
+        python3 .github/scripts/out_dead_link_scan.py
+        # OUT-LIFECYCLE-SINGLEAUTHORITY-1 stage-3b (INF decision 3 shared-spec clause):
+        # the transport's worker parsers (zapply-backend deadFlip.ts) depend on these
+        # artifact shapes - a violation here would silently zero the dead-flip transport.
+        python3 .github/scripts/out_dead_link_contract_check.py scan_summary.json
 
     # OUT-DEADLINK-EXITCODE-ALERTCONV-1 (2026-10-04): findings are informational,
     # not failure. The scanner exits 0 on findings (scan_summary.json carries the
