@@ -47,8 +47,13 @@ def main():
         code = row.get("http_code")
         if not isinstance(url, str) or not url.startswith(("http://", "https://")):
             fail(f"dead_links[{i}].url not an http(s) string: {url!r}")
-        if not isinstance(code, str):
-            fail(f"dead_links[{i}].http_code not a string (transport admits 'ats-closed' strings): {code!r}")
+        # http_code is a STRING for ats-closed rows and an INT for HTTP-class N-observation
+        # deaths (out_dead_link_scan.py emits int(s.get('code')) once sightings >= 2). Both
+        # shapes are producer-canonical; the worker's deadFlip.test.ts pins 'both shapes
+        # must parse'. Ship-review P1 fix 2026-10-07: the first draft required str-only and
+        # would have false-redned the first run with an HTTP-class death.
+        if not isinstance(code, (str, int)) or isinstance(code, bool):
+            fail(f"dead_links[{i}].http_code neither string nor int: {code!r}")
 
     sightings = artifact.get("http_sightings")
     if sightings is None:
