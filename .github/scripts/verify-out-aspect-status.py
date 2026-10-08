@@ -49,6 +49,23 @@ def proxy_json(path):
     except Exception:
         return None
 
+def guard_artifact():
+    """sjd-liveness-guard.json: data-proxy first, R2-direct fallback. The proxy path
+    whitelist is INF-owned and predates this artifact (D115: proxy 404s it), so CI
+    reads it straight from the canonical R2 key when the proxy has not caught up."""
+    g = proxy_json("sjd-liveness-guard.json")
+    if g:
+        return g
+    try:
+        import boto3
+        s3 = boto3.client("s3", endpoint_url=os.environ["R2_ENDPOINT"],
+                          aws_access_key_id=os.environ["R2_ACCESS_KEY_ID"],
+                          aws_secret_access_key=os.environ["R2_SECRET_ACCESS_KEY"], region_name="auto")
+        raw = s3.get_object(Bucket=os.environ["R2_BUCKET_NAME"], Key="data/sjd-liveness-guard.json")["Body"].read()
+        return json.loads(raw)
+    except Exception:
+        return None
+
 def green_if(cond): return "GREEN" if cond else "RED"
 
 def c_verification():
@@ -187,6 +204,35 @@ def c_data_quality():
                 # Canada boards have NO visa column (US-H1B is meaningless for Canada-located jobs, D67) — skip the visa check for them
                 if visa < 10 and not repo_name.startswith("Canada"): issues.append(("red", f"{repo_name} visa {visa}% (<10%)"))
                 if undated is not None and undated > 80: issues.append(("red", f"{repo_name} undated {undated}% (>80%)"))
+    # 3. Liveness agreement (family-closure checklist item 5, D115): the sjd build publishes
+    # store-vs-store guard metrics (R2 data/sjd-liveness-guard.json). Staleness or a degraded
+    # agreement means the two liveness stores (DB is_active vs served artifact) are drifting
+    # again: the OUT-SJD-ARTIFACT-LIVENESS-DESYNC-1 class, previously invisible to checks.
+    lg = guard_artifact()
+    if not lg:
+        issues.append(("warn", "sjd-liveness-guard.json unreachable (liveness agreement unmeasured)"))
+    else:
+        gen = lg.get("generated_at")
+        try:
+            dt = datetime.datetime.fromisoformat(str(gen).replace("Z", "+00:00"))
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=datetime.timezone.utc)
+            age_h = (NOW - dt).total_seconds() / 3600
+            if age_h > 48:
+                issues.append(("warn", f"liveness guard artifact stale ({age_h:.0f}h old)"))
+            matched = lg.get("full_time_db_matched") or 0
+            dropped = lg.get("full_time_dropped_db_dead")
+            # Post-mitigation measured band: 30.2% dead-of-matched (b53a731, D111). >40% warn,
+            # >60% red (pre-fix era measured ~78%, the regression this guards against).
+            try:
+                if matched and dropped is not None:
+                    frac = dropped / matched
+                    if frac > 0.60: issues.append(("red", f"sjd full-time DB-dead drops {frac*100:.0f}% ({dropped}/{matched}, >60%)"))
+                    elif frac > 0.40: issues.append(("warn", f"sjd full-time DB-dead drops {frac*100:.0f}% ({dropped}/{matched}, >40% band)"))
+            except TypeError:
+                issues.append(("warn", "liveness guard metric fields unreadable (type drift)"))
+        except (TypeError, ValueError):
+            issues.append(("warn", "liveness guard artifact has unreadable generated_at"))
     reds = [m for s, m in issues if s == "red"]
     warns = [m for s, m in issues if s == "warn"]
     if reds: status = "RED"
