@@ -222,13 +222,17 @@ def c_data_quality():
                 issues.append(("warn", f"liveness guard artifact stale ({age_h:.0f}h old)"))
             matched = lg.get("full_time_db_matched") or 0
             dropped = lg.get("full_time_dropped_db_dead")
-            # Post-mitigation measured band: 30.2% dead-of-matched (b53a731, D111). >40% warn,
-            # >60% red (pre-fix era measured ~78%, the regression this guards against).
+            # Bands on THIS metric's own basis (dropped/matched): healthy live reading
+            # 21.8% (2026-10-08); the recorded pre-fix state recomputes to ~39.2% on this
+            # basis from D111's drop record (the 78%/30.2% figures often cited were other
+            # bases: dead-share-of-drops and dead%-of-artifact). Warn >30% = above any
+            # healthy observation; red >45% = past the computed pre-fix state.
             try:
                 if matched and dropped is not None:
                     frac = dropped / matched
-                    if frac > 0.60: issues.append(("red", f"sjd full-time DB-dead drops {frac*100:.0f}% ({dropped}/{matched}, >60%)"))
-                    elif frac > 0.40: issues.append(("warn", f"sjd full-time DB-dead drops {frac*100:.0f}% ({dropped}/{matched}, >40% band)"))
+                    if frac > 0.45: issues.append(("red", f"sjd full-time DB-dead drops {frac*100:.0f}% ({dropped}/{matched}, >45%)"))
+                    elif frac > 0.30: issues.append(("warn", f"sjd full-time DB-dead drops {frac*100:.0f}% ({dropped}/{matched}, >30% band)"))
+                    elif age_h <= 48: issues.append(("ok", f"liveness guard armed: fresh {age_h:.1f}h, DB-dead drops {frac*100:.0f}% ({dropped}/{matched})"))
             except TypeError:
                 issues.append(("warn", "liveness guard metric fields unreadable (type drift)"))
         except (TypeError, ValueError):
