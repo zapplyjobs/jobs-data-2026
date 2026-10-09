@@ -247,14 +247,27 @@ def c_monitoring():
 
 
 def c_security():
-    """No critical/high Dependabot alerts across SUP repos."""
-    crit = 0
-    opens = 0
+    """No critical/high Dependabot alerts across SUP repos.
+
+    Per-repo breakdown in the evidence (the SUP list overlaps INF's at
+    jobs-aggregator-private - the identical aspect counts are that overlap,
+    not a bug). A repo whose alert fetch FAILS is UNVERIFIED (YELLOW),
+    never silently counted as a clean zero."""
+    total_open, crit, parts, failed = 0, 0, [], []
     for repo in SUP_REPOS:
-        alerts = gh_json(["api", f"/repos/{repo}/dependabot/alerts?state=open&per_page=50"]) or []
-        opens += len(alerts)
-        crit += sum(1 for a in alerts if a.get("security_advisory", {}).get("severity") in ("critical", "high"))
-    return green_if(crit == 0), f"{opens} open alerts, {crit} critical/high", "gh-api:dependabot"
+        alerts = gh_json(["api", f"/repos/{repo}/dependabot/alerts?state=open&per_page=100"])
+        name = repo.split("/")[-1]
+        if alerts is None:
+            failed.append(name)
+            continue
+        repo_crit = sum(1 for a in alerts if (a.get("security_advisory") or {}).get("severity") in ("critical", "high"))
+        total_open += len(alerts)
+        crit += repo_crit
+        parts.append(f"{name}:{len(alerts)}({repo_crit}c/h)")
+    detail = f"{total_open} open alerts, {crit} critical/high [{', '.join(parts)}]"
+    if failed:
+        return "YELLOW", f"{detail} | UNVERIFIED (fetch failed, not counted as clean): {', '.join(failed)}", "gh-api:dependabot"
+    return green_if(crit == 0), detail, "gh-api:dependabot"
 
 
 # --- CI-native checks (all aspects live — no carry-forward) ---

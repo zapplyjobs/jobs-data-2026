@@ -147,16 +147,28 @@ def c_monitoring():
 
 
 def c_security():
-    """No critical/high Dependabot alerts across INF pipeline repos."""
-    total_open, crit = 0, 0
+    """No critical/high Dependabot alerts across INF pipeline repos.
+
+    Evidence carries the per-repo breakdown (RD-20261004-01 item 3: the
+    WHERE is the first question any responder asks; jobs-aggregator-private
+    sits in both INF and SUP repo lists, so the two aspects legitimately
+    count the same alerts). A repo whose alert fetch FAILS is reported
+    UNVERIFIED (YELLOW), never silently counted as a clean zero."""
+    total_open, crit, parts, failed = 0, 0, [], []
     for repo in INF_REPOS:
-        alerts = gh_json(["api", f"/repos/{repo}/dependabot/alerts?state=open&per_page=50"]) or []
+        alerts = gh_json(["api", f"/repos/{repo}/dependabot/alerts?state=open&per_page=100"])
+        name = repo.split("/")[-1]
+        if alerts is None:
+            failed.append(name)
+            continue
+        repo_crit = sum(1 for a in alerts if (a.get("security_advisory") or {}).get("severity") in ("critical", "high"))
         total_open += len(alerts)
-        for a in alerts:
-            sev = (a.get("security_advisory") or {}).get("severity", "")
-            if sev in ("critical", "high"):
-                crit += 1
-    return green_if(crit == 0), f"{total_open} open alerts, {crit} critical/high", "gh-api:dependabot"
+        crit += repo_crit
+        parts.append(f"{name}:{len(alerts)}({repo_crit}c/h)")
+    detail = f"{total_open} open alerts, {crit} critical/high [{', '.join(parts)}]"
+    if failed:
+        return "YELLOW", f"{detail} | UNVERIFIED (fetch failed, not counted as clean): {', '.join(failed)}", "gh-api:dependabot"
+    return green_if(crit == 0), detail, "gh-api:dependabot"
 
 
 def c_data_quality():
