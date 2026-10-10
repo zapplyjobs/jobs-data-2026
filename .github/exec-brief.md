@@ -1,4 +1,4 @@
-exec-brief - Sat Oct 10 (current ledger state)
+exec-brief - Sat Oct 10, 21:55 UTC (current ledger state)
 
 - Send limit rises to $1,690 (Dec, 12-mo lease signed) - ack - open - src high_on_birb - in #finance - 13d - next: microsoftword4934 acks or flags action
 - Zapply+ checkout: 3 required changes before charging money (renewal-terms consent at buy button, in-app cancel button, 3rd item truncated in drain excerpt) - open - src obiikkenobi - in #legal - 3d - next: microsoftword4934 implements or assigns the 3 checkout changes; 3rd item cut by the 140-char ref - do not guess it
