@@ -1,3 +1,5 @@
+exec-brief - Sat Oct 10 (current ledger state)
+
 - Send limit rises to $1,690 (Dec, 12-mo lease signed) - ack - open - src high_on_birb - in #finance - 13d - next: microsoftword4934 acks or flags action
 - Zapply+ checkout: 3 required changes before charging money (renewal-terms consent at buy button, in-app cancel button, 3rd item truncated in drain excerpt) - open - src obiikkenobi - in #legal - 3d - next: microsoftword4934 implements or assigns the 3 checkout changes; 3rd item cut by the 140-char ref - do not guess it
 - 4 legal unblock items so nothing stays blocked (1st: IRS business-line call 800-829-4933 re EIN 39-2830717 / June 13 notice, tail truncated in drain) - waiting - src obiikkenobi - in #legal - 3d - next: high_on_birb runs the 4 items (IRS call first); items 2-4 cut by the 140-char ref - do not guess them
