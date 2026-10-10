@@ -1,12 +1,14 @@
 name: Daily Briefing
 
-# NO SCHEDULE (operator 10-03: on-demand only, never blind). One-time trigger =
-# workflow_dispatch (zapply-gh-pat.env token has actions:write) OR commit a
-# .github/exec-brief.md change - the push trigger fires the post within seconds.
+# DAILY SCHEDULE restored 2026-10-10 (operator: "It should give a daily digest, not a
+# one time or whenever we want one") - supersedes the 10-03 on-demand-only comment.
+# 21:15 UTC = 4:15 PM CDT, inside the operator's 5AM-11PM CDT send window.
+# Manual triggers: workflow_dispatch (immediate post of fresh R2 state; MANUAL_TEXT
+# posts verbatim). There is NO push trigger: digest state lives in private R2
+# (data/exec-brief/), never in this public repo.
 on:
-  push:
-    paths:
-      - '.github/exec-brief.md'
+  schedule:
+    - cron: '15 21 * * *'
   workflow_dispatch:
     inputs:
       manual_text:
@@ -15,7 +17,8 @@ on:
         required: false
         default: ''
 
-permissions: {}
+permissions:
+  contents: read
 
 concurrency:
   group: daily-briefing
@@ -45,7 +48,15 @@ jobs:
         with:
           node-version: 22
 
-      - name: Gather + post briefing
+      - name: Configure AWS credentials for R2
+        run: |
+          echo "AWS_ACCESS_KEY_ID=$R2_ACCESS_KEY_ID" >> "$GITHUB_ENV"
+          echo "AWS_SECRET_ACCESS_KEY=$R2_SECRET_ACCESS_KEY" >> "$GITHUB_ENV"
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+
+      - name: Judge + post exec-brief
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
           DATA_PROXY_TOKEN: ${{ secrets.DATA_PROXY_TOKEN }}
@@ -55,4 +66,5 @@ jobs:
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+          ZAI_API_KEY: ${{ secrets.ZAI_API_KEY }}
         run: node scripts/daily-briefing.js
