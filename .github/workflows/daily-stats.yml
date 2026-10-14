@@ -70,7 +70,7 @@ jobs:
             const dataDir = '.github/data';
             if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
 
-            const files = ['all_jobs.json', 'enriched_jobs.json', 'posted_jobs.json', 'jobs-metadata.json', 'daily-stats.json', 'board-counts.json', 'history.jsonl', 'history-archive.jsonl', 'traffic-history.jsonl'];
+            const files = ['all_jobs.json', 'enriched_jobs.json', 'posted_jobs.json', 'jobs-metadata.json', 'daily-stats.json', 'board-counts.json', 'history.jsonl', 'history-archive.jsonl', 'traffic-history.jsonl', 'enrichment-stats.json'];  // INF-METRICS-DAILYROLLUP-1: +enrichment-stats.json for the tech_us rollup field
             for (const file of files) {
               try {
                 const raw = await r2.downloadRaw(file);
