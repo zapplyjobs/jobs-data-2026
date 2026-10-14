@@ -67,4 +67,7 @@ jobs:
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
           ZAI_API_KEY: ${{ secrets.ZAI_API_KEY }}
+          # the key is plan-backed: the standard api.z.ai endpoint rejects it with 429 code 1113
+          # (insufficient balance); the coding-plan endpoint serves it (proven by A/B test 10-13)
+          ZAI_ENDPOINT: https://api.z.ai/api/coding/paas/v4/chat/completions
         run: node scripts/daily-briefing.js
