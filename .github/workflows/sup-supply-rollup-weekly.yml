@@ -1,0 +1,105 @@
+name: SUP Supply Trends Rollup (Weekly)
+
+# AGG-TRENDS-LEDGER-SLUG-1 (P8 design TRENDS_PHASE2_DESIGN_2026_09_19.md s2/s3):
+# weekly rollup of the posting ledger to R2 data/sup_supply_trends.json for the
+# SUP v2 reader (sup-supply-trends.py). AGG owns the cron; SUP owns schema +
+# reader. Runs AFTER the Monday 06:00 UTC decay-monitor ledger refresh so the
+# rollup sees the freshest ledger of the week.
+
+on:
+  schedule:
+    - cron: '30 6 * * 1'  # Mondays 06:30 UTC (after the 06:00 daily ledger write)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sup-supply-rollup
+  cancel-in-progress: false
+
+jobs:
+  rollup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 1
+          submodules: recursive
+          token: ${{ secrets.GH_PAT }}
+
+      # Vendored action immune to raw-CDN 429s (INF-TRANSCRYPT-ACTION-1).
+      - name: Install transcrypt
+        uses: zapplyjobs/.github/actions/setup-transcrypt@afcb5f41ec28fe10cefcf421fc455d0d89588b1f
+
+      - name: Unlock encrypted files
+        run: |
+          echo "Y" | transcrypt --cipher aes-256-cbc --password "$TRANSCRYPT_PASSWORD" --force
+          git checkout -- . 2>/dev/null || true
+          git submodule foreach --recursive '
+            echo "Y" | transcrypt --cipher aes-256-cbc --password "'"$TRANSCRYPT_PASSWORD"'" --force 2>/dev/null || true
+            rm -f "$(git rev-parse --git-dir)/index" 2>/dev/null || true
+            git checkout HEAD -- . 2>/dev/null || true
+          ' || true
+
+          # Verify submodule decryption succeeded (INF-TRANSCRYPT-KEY-BACKUP-1).
+          SAMPLE_PY=$(find .github/scripts -name 'sup-supply-rollup.py' -print -quit 2>/dev/null)
+          if [ -n "$SAMPLE_PY" ]; then
+            if ! file -b "$SAMPLE_PY" | grep -qiE 'ASCII|UTF-8|text'; then
+              echo "::error::Submodule decryption FAILED - $SAMPLE_PY is ciphertext. Rollup would run garbage. Check TRANSCRYPT_PASSWORD + transcrypt unlock."
+              exit 1
+            fi
+          fi
+        env:
+          TRANSCRYPT_PASSWORD: ${{ secrets.TRANSCRYPT_PASSWORD }}
+
+      - name: Setup Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+
+      - name: Install boto3
+        run: pip install -q boto3
+
+      - name: Download ledger, stats, and pool from R2
+        run: |
+          python3 -c "import boto3, os; s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']);
+          s3.download_file(os.environ['R2_BUCKET_NAME'], 'data/sup-posting-ledger.jsonl', '.github/data/sup-posting-ledger.jsonl'); print('Downloaded ledger')
+          s3.download_file(os.environ['R2_BUCKET_NAME'], 'data/sup-posting-ledger-stats.json', '.github/data/sup-posting-ledger-stats.json'); print('Downloaded ledger stats')
+          s3.download_file(os.environ['R2_BUCKET_NAME'], 'data/all_jobs.json', '.github/data/all_jobs.json'); print('Downloaded pool')"
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+
+      - name: Ledger staleness gate (weekly cadence expects a ledger <72h old)
+        run: |
+          python3 -c "
+          import json, datetime, sys
+          stats = json.load(open('.github/data/sup-posting-ledger-stats.json'))
+          gen = datetime.datetime.fromisoformat(stats['generated_at'].replace('Z', '+00:00'))
+          age_h = (datetime.datetime.now(datetime.timezone.utc) - gen).total_seconds() / 3600
+          if age_h > 72:
+              print(f'::error::Ledger stats are {age_h:.0f}h old (>72h) - the daily writer has likely been down; refusing to roll up stale data.')
+              sys.exit(1)
+          print(f'Ledger freshness OK ({age_h:.1f}h old, {stats[\"total_records\"]} records)')"
+
+      - name: Compute weekly rollup
+        run: |
+          python3 .github/scripts/processing/lib/sup-supply-rollup.py \
+            --ledger .github/data/sup-posting-ledger.jsonl \
+            --pool .github/data/all_jobs.json \
+            --out .github/data/sup_supply_trends.json
+
+      - name: Upload rollup to R2
+        run: |
+          python3 -c "import boto3, os; s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']); s3.put_object(Bucket=os.environ['R2_BUCKET_NAME'], Key='data/sup_supply_trends-branchproof.json', Body=open('.github/data/sup_supply_trends.json','rb').read(), ContentType='application/json'); print('uploaded data/sup_supply_trends-branchproof.json to R2 (BRANCH PROOF staging key; flip to data/sup_supply_trends.json at cutover)')"
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
