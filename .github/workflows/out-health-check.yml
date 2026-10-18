@@ -269,7 +269,7 @@ jobs:
                             r["verdict"] = "FAIL"
 
         # --- 3. Pipeline workflow status (critical jobs-data-2026 workflows) ---
-        critical_workflows = ["Post Jobs to Discord", "Verify Discord Posts", "Collect Metrics"]  # Refresh ZJP Public Snapshot removed: lane retired (OUT-OBSARRAY-DRIFT-1, D99) - workflow file deleted; keeping it here made the infrastructure aspect RED forever ("no recent run")
+        critical_workflows = ["Post Jobs to Discord", "Verify Discord Posts", "Collect Metrics", "OUT Aspect Status (verified)"]  # Refresh ZJP Public Snapshot removed: lane retired (OUT-OBSARRAY-DRIFT-1, D99) - workflow file deleted; keeping it here made the infrastructure aspect RED forever ("no recent run"). Aspect publisher added 2026-10-19 (OUT-UPTIME-CRON-1 disposition: its 6h publish is the only machine-verified aspect source; a silently-dead publish previously had no watcher).
         try:
             req = urllib.request.Request(
                 "https://api.github.com/repos/zapplyjobs/jobs-data-2026/actions/runs?per_page=30",
