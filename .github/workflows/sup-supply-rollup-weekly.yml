@@ -97,7 +97,7 @@ jobs:
 
       - name: Upload rollup to R2
         run: |
-          python3 -c "import boto3, os; s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']); s3.put_object(Bucket=os.environ['R2_BUCKET_NAME'], Key='data/sup_supply_trends-branchproof.json', Body=open('.github/data/sup_supply_trends.json','rb').read(), ContentType='application/json'); print('uploaded data/sup_supply_trends-branchproof.json to R2 (BRANCH PROOF staging key; flip to data/sup_supply_trends.json at cutover)')"
+          python3 -c "import boto3, os; s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']); s3.put_object(Bucket=os.environ['R2_BUCKET_NAME'], Key='data/sup_supply_trends.json', Body=open('.github/data/sup_supply_trends.json','rb').read(), ContentType='application/json'); print('uploaded data/sup_supply_trends.json to R2 (production key)')"
         env:
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
