@@ -14,7 +14,10 @@ import json, os, subprocess, urllib.request, datetime, sys
 NOW = datetime.datetime.now(datetime.timezone.utc)
 PROXY = "https://zjp-data-proxy.wild-queen-069e.workers.dev/data"
 SUP_REPO = "zapplyjobs/job-board-aggregator"
-SUP_REPOS = ["zapplyjobs/job-board-aggregator", "zapplyjobs/jobs-aggregator-private"]
+# INF-ALERT-STANDINGRED-1 re-baseline (2026-10-21): jobs-aggregator-private removed — it sat in
+# BOTH INF_REPOS (verify-inf) and SUP_REPOS, so the two security aspects reported identical counts
+# by construction (the 08-16 identical-counts class, settled 10-09). INF's verifier still covers it.
+SUP_REPOS = ["zapplyjobs/job-board-aggregator"]
 
 
 def gh_json(args, attempts=3):

@@ -320,9 +320,9 @@ jobs:
           DISCORD_PIPELINE_ALERT_CHANNEL_ID: ${{ secrets.DISCORD_PIPELINE_ALERT_CHANNEL_ID }}
         run: node .github/scripts/processing/lib/sup-decay-alert.js
 
-      - name: Fail run on parity findings (LAST step — never blocks decay outputs/alerts)
+      - name: Surface parity findings (non-blocking conclusion — INF-PARITYGATE-RUNCONCLUSION-1, 2026-10-21)
         if: steps.freshness.outputs.pipeline_fresh == 'true' && steps.parity.outcome == 'failure'
         run: |
-          echo "::error::SOURCE PARITY FINDINGS — see parity step output + data/sup_source_parity.json (fetched-vs-pool retention below 40% on custom sources)"
-          exit 1
+          COUNT=$(jq '.findings | length' .github/data/sup_source_parity.json 2>/dev/null || echo "unknown")
+          echo "::warning::SOURCE PARITY FINDINGS (non-blocking) — sources below the 40% fetched-vs-pool retention bar: ${COUNT}; full detail in the parity step output + data/sup_source_parity.json (R2 + Storage mirror). Red is reserved for real run failure; findings surface here and via the artifact/alert path."
 
