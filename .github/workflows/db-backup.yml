@@ -6,8 +6,12 @@
 # Design decisions (evidence: research/DB_BACKUP_DESIGN_2026_09_04.md + task record):
 # - Session POOLER URI (not direct): GitHub runners are IPv4-only; direct is IPv6-only.
 # - Own prefix db-backups/ (NOT data/backups/ which carries the 3d artifact-expiry lifecycle rule).
-# - In-workflow rotation (no R2 lifecycle-API dependency): delete day-folders older than RETENTION_DAYS.
-# - Measured dump = 676MB (default gzip); -Z9 trims it; 5d retention ~= 3.3GB (R2 headroom ~4.9GB on 10GB plan).
+# - Rotation: R2 LIFECYCLE RULE db-backups-expire-7d (applied 2026-10-21, operator word) — expire
+#   db-backups/* after 7 days, bucket-settings level, cannot rot with the script. The old in-workflow
+#   rotation step never deleted anything in 47 nights (root cause unproven) and was removed.
+# - Excludes audit data from OUR dumps (10-21, operator-approved): audit.logged_actions + jobs_retention_archive
+#   definitions kept, data skipped — Supabase managed daily backups still capture everything.
+# - Measured dump = 676MB (default gzip); -Z9 trims it; 7d retention ~= 10GB under the R2 lifecycle rule.
 # - pg_restore --list smoke step every run: a backup that fails to open = failed backup.
 # - Restore drill (2026-09-04, PASSED): schema-only restore into scratch DB — public schema 34/34 tables,
 #   jobs 34/34 columns; 2 platform-internal entries skipped (pg_cron/realtime — platform reinstall owns them).
@@ -29,8 +33,6 @@ jobs:
   backup:
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    env:
-      RETENTION_DAYS: "5"
     steps:
       - name: Install PostgreSQL 17 client
         run: |
@@ -41,7 +43,10 @@ jobs:
 
       - name: Dump database (custom compressed format)
         run: |
-          /usr/lib/postgresql/17/bin/pg_dump "$SUPABASE_DB_URL" -Fc -Z9 --no-owner --no-privileges -f db.dump
+          /usr/lib/postgresql/17/bin/pg_dump "$SUPABASE_DB_URL" -Fc -Z9 --no-owner --no-privileges \
+            --exclude-table-data=audit.logged_actions \
+            --exclude-table-data=public.jobs_retention_archive \
+            -f db.dump
           ls -la db.dump
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
@@ -63,24 +68,5 @@ jobs:
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           AWS_DEFAULT_REGION: auto
 
-      - name: Rotate (delete day-folders older than RETENTION_DAYS)
-        run: |
-          CUTOFF=$(date -u -d "-${RETENTION_DAYS} days" +%F)
-          aws s3api list-objects-v2 --bucket "$R2_BUCKET_NAME" --prefix "db-backups/" \
-            --query "Contents[?length(Key)>=14].Key" --output text \
-          | while read -r KEY; do
-              DAY=$(echo "$KEY" | cut -d/ -f2)
-              if [[ "$DAY" < "$CUTOFF" ]]; then
-                echo "deleting $KEY (older than $CUTOFF)"
-                aws s3api delete-object --bucket "$R2_BUCKET_NAME" --key "$KEY" --endpoint-url "$R2_ENDPOINT"
-              fi
-            done
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
-          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
-          AWS_DEFAULT_REGION: auto
-
       - name: Summary
-        run: echo "backup db-backups/$(date -u +%F)/db.dump uploaded; retention ${RETENTION_DAYS}d"
+        run: echo "backup db-backups/$(date -u +%F)/db.dump uploaded; retention 7d (R2 lifecycle rule db-backups-expire-7d)"
