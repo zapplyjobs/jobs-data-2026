@@ -326,3 +326,14 @@ jobs:
           COUNT=$(jq '.findings | length' .github/data/sup_source_parity.json 2>/dev/null || echo "unknown")
           echo "::warning::SOURCE PARITY FINDINGS (non-blocking) — sources below the 40% fetched-vs-pool retention bar: ${COUNT}; full detail in the parity step output + data/sup_source_parity.json (R2 + Storage mirror). Red is reserved for real run failure; findings surface here and via the artifact/alert path."
 
+      - name: SUP signals health (SUP F314 — armed on INF word 2026-10-22; stale signals = real red)
+        if: steps.freshness.outputs.pipeline_fresh == 'true'
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: |
+          pip install -q boto3
+          python3 .github/scripts/sup-signals-health.py
+
