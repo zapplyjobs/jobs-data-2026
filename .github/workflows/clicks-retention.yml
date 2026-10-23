@@ -55,7 +55,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      RETENTION_DAYS: ${{ github.event.inputs.days || (github.event_name == 'schedule' && '90') || '180' }}
+      RETENTION_DAYS: ${{ github.event.inputs.days || ((github.event_name == 'schedule' || github.event_name == 'push') && '90') || '180' }}
       MODE: ${{ github.event.inputs.mode || ((github.event_name == 'schedule' || github.event_name == 'push') && 'execute') || 'dry_run' }}
     steps:
       - name: Validate inputs
@@ -139,8 +139,10 @@ jobs:
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
 
-      - name: One-time space reclaim (policy-edit pushes — brief exclusive lock, analytics table only)
-        if: github.event_name == 'push'
+      # Scrutiny fix 2026-10-23: transient copy needs ~1.3GB free disk — NOT free on a routine
+      # policy edit. Run ONLY on an explicit [reclaim] sentinel in the push commit message.
+      - name: One-time space reclaim (push carrying [reclaim] in the commit message only)
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, '[reclaim]')
         run: |
           /usr/lib/postgresql/17/bin/psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 \
             -c "VACUUM (FULL, ANALYZE) zapply_analytics_clicks"
@@ -149,14 +151,15 @@ jobs:
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
 
-      - name: Delete expired rows (execute mode only — first runs must be operator-gated)
+      # Operator word 2026-10-23: "keep a few clicks each day from each source" - a record for each.
+      - name: Delete expired rows, keeping 3 sample rows per source per day
         if: env.MODE == 'execute'
         run: |
           DELETED=$(/usr/lib/postgresql/17/bin/psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -At \
-            -c "WITH d AS (DELETE FROM zapply_analytics_clicks WHERE created_at < now() - ($RETENTION_DAYS || ' days')::interval RETURNING 1) SELECT count(*) FROM d")
+            -c "WITH ranked AS (SELECT id, row_number() OVER (PARTITION BY source, date_trunc('day', created_at) ORDER BY id) rn FROM zapply_analytics_clicks WHERE created_at < now() - ($RETENTION_DAYS || ' days')::interval), d AS (DELETE FROM zapply_analytics_clicks c USING ranked r WHERE c.id = r.id AND r.rn > 3 RETURNING 1) SELECT count(*) FROM d")
           REMAINING=$(/usr/lib/postgresql/17/bin/psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -At \
             -c "SELECT count(*) FROM zapply_analytics_clicks")
-          echo "deleted=${DELETED} remaining=${REMAINING}"
+          echo "deleted=${DELETED} remaining=${REMAINING} (expired rows beyond 3 per source per day removed; samples stay forever)"
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
 
