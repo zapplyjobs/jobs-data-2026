@@ -10,6 +10,15 @@
 # operator word): lands workflow_dispatch-ONLY. The weekly cron line is pre-staged below,
 # commented. Operator go => uncomment the schedule block (that is the whole flip).
 # mode=dry_run exports + reports WITHOUT deleting — safe to run any time.
+#
+# BOT-TOOL PURGE (standing policy, operator word 2026-10-23 "clean bot clicks" + 2026-10-23
+# directive "why can't we clean bot clicks"): census that day found 3.02M rows of which ~53%
+# are tool traffic, not people: Go-http-client/2.0 ~1.37M (45pct of the table), SWE-Radar/1.0
+# personal-job-search ~320K, Yartchives/1.0 link-repair ~97K. These are deleted by exact UA
+# prefix every run WITHOUT R2 archive (tool noise, zero product value; the archived-export
+# reconstruction guarantee stays for human/expired classes). Browser-like rows are never
+# touched. Schedule/push events run in execute mode with the 90d window per the 2026-10-19 GO.
+# The one-time VACUUM FULL (policy-edit push only) hands the freed space back to the disk.
 
 name: Clicks Retention
 on:
@@ -30,6 +39,9 @@ on:
         type: string
   schedule:
     - cron: "55 6 * * 1"  # weekly Mondays 06:55Z — ENABLED 2026-10-19 on operator GO relayed via OUT D129-cont (INF-CLICKS-RETENTION-GO-1); first runs same day green: dry_run 38,988 exported, execute deleted=38,988, R2 archive verified
+  push:
+    paths:
+      - .github/workflows/clicks-retention.yml  # policy edits run themselves (standing bot purge; see header)
 
 permissions:
   contents: read
@@ -43,8 +55,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      RETENTION_DAYS: ${{ github.event.inputs.days || '180' }}
-      MODE: ${{ github.event.inputs.mode || 'dry_run' }}
+      RETENTION_DAYS: ${{ github.event.inputs.days || (github.event_name == 'schedule' && '90') || '180' }}
+      MODE: ${{ github.event.inputs.mode || ((github.event_name == 'schedule' || github.event_name == 'push') && 'execute') || 'dry_run' }}
     steps:
       - name: Validate inputs
         run: |
@@ -107,6 +119,35 @@ jobs:
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           AWS_DEFAULT_REGION: auto
+
+      - name: Purge tool/bot clicks (standing policy — exact UA prefixes only)
+        if: env.MODE == 'execute'
+        run: |
+          BEFORE=$(/usr/lib/postgresql/17/bin/psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -At \
+            -c "SELECT count(*) FROM zapply_analytics_clicks WHERE user_agent LIKE ANY (ARRAY['Go-http-client/2.0%','SWE-Radar/1.0%','Yartchives/1.0%'])")
+          echo "bot class rows before purge: $BEFORE"
+          TOTAL=0
+          for SLICE in "2000-01-01|2026-08-01" "2026-08-01|2026-09-01" "2026-09-01|2026-10-01" "2026-10-01|2026-10-15" "2026-10-15|2026-10-22" "2026-10-22|2999-01-01"; do
+            FROM="${SLICE%%|*}"; TO="${SLICE##*|}"
+            DEL=$(/usr/lib/postgresql/17/bin/psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -At \
+              -c "WITH d AS (DELETE FROM zapply_analytics_clicks WHERE created_at >= '$FROM' AND created_at < '$TO' AND (user_agent LIKE 'Go-http-client/2.0%' OR user_agent LIKE 'SWE-Radar/1.0%' OR user_agent LIKE 'Yartchives/1.0%') RETURNING 1) SELECT count(*) FROM d")
+            echo "slice $FROM..$TO deleted=$DEL"
+            TOTAL=$((TOTAL + DEL))
+          done
+          echo "bot purge total deleted=$TOTAL (of $BEFORE)"
+          echo "botpurge=$TOTAL" >> "$GITHUB_OUTPUT" || true
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+
+      - name: One-time space reclaim (policy-edit pushes — brief exclusive lock, analytics table only)
+        if: github.event_name == 'push'
+        run: |
+          /usr/lib/postgresql/17/bin/psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 \
+            -c "VACUUM (FULL, ANALYZE) zapply_analytics_clicks"
+          /usr/lib/postgresql/17/bin/psql "$SUPABASE_DB_URL" -At \
+            -c "SELECT pg_size_pretty(pg_total_relation_size('zapply_analytics_clicks'))"
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
 
       - name: Delete expired rows (execute mode only — first runs must be operator-gated)
         if: env.MODE == 'execute'
