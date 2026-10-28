@@ -89,10 +89,12 @@ jobs:
                                 continue
                             try:
                                 dt = datetime.datetime.fromisoformat(str(posted).replace("Z", "+00:00"))
+                                if dt.tzinfo is None:
+                                    dt = dt.replace(tzinfo=datetime.timezone.utc)
                                 age_h = (now - dt).total_seconds() / 3600
                                 if freshest is None or age_h < freshest:
                                     freshest = age_h
-                            except ValueError:
+                            except (ValueError, TypeError):
                                 continue
                         if freshest is None:
                             r["reason"] = "no parseable posted timestamp"
@@ -197,6 +199,8 @@ jobs:
             if pushed_at and pipeline_repos:
                 try:
                     push_dt = datetime.datetime.fromisoformat(pushed_at.replace("Z", "+00:00"))
+                    if push_dt.tzinfo is None:
+                        push_dt = push_dt.replace(tzinfo=datetime.timezone.utc)
                     push_age_h = (now - push_dt).total_seconds() / 3600
                     r["last_push_age_h"] = round(push_age_h, 1)
                     if push_age_h > 6:
@@ -209,6 +213,8 @@ jobs:
                 # only; no threshold: curated lists can legitimately go weeks between commits).
                 try:
                     commit_dt = datetime.datetime.fromisoformat(pushed_at.replace("Z", "+00:00"))
+                    if commit_dt.tzinfo is None:
+                        commit_dt = commit_dt.replace(tzinfo=datetime.timezone.utc)
                     r["last_commit_age_h"] = round((now - commit_dt).total_seconds() / 3600, 1)
                 except (ValueError, TypeError):
                     pass
