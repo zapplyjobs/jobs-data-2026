@@ -1,502 +1,495 @@
-#!/usr/bin/env python3
-"""
-LCA Quarterly Data Refresh Script
-
-Downloads quarterly LCA disclosure data from DOL OFLC, extracts certified
-H-1B employer names, and produces lca-sponsors.json with a rolling N-quarter
-window. REBUILDS from scratch each run (no incremental merge) so the rolling
-window is always exact — no stale employers from dropped quarters.
-
-Usage:
-  python3 lca-quarterly-refresh.py --auto                    # detect latest available quarter
-  python3 lca-quarterly-refresh.py --quarter FY2026_Q2       # specify latest quarter
-  python3 lca-quarterly-refresh.py --dry-run                 # show what would change
-  python3 lca-quarterly-refresh.py --window 4                # use 4-quarter window
-Output: lca-sponsors.json — {"_meta": {...}, "employers": [...], "employer_counts": {...}}
-        employers[] stays name-only (backward compatible with enrich-jobs.js loadLcaSponsors()).
-        employer_counts{} (INF-LCA-COUNTS-INPUT-1): per-employer {filing_count, certified_count,
-        last_certified}, keyed by the same raw strings as employers[].
-
-After generating the file, upload to R2:
-  aws s3 cp lca-sponsors.json s3://$R2_BUCKET_NAME/data/lca-sponsors.json \\
-    --endpoint-url $R2_ENDPOINT
-
-DOL source: https://www.dol.gov/agencies/eta/foreign-labor/performance
-File pattern: LCA_Disclosure_Data_FY{year}_Q{n}.xlsx
-"""
-
-import argparse
-import datetime
-import json
-import re
-import sys
-import tempfile
-from pathlib import Path
-
-try:
-    import openpyxl
-    import requests
-except ImportError as e:
-    print(f"Missing dependency: {e}", file=sys.stderr)
-    print("Install: pip install openpyxl requests", file=sys.stderr)
-    sys.exit(1)
-
-DOL_BASE_URL = "https://www.dol.gov/sites/dolgov/files/ETA/oflc/pdfs/{prefix}_Disclosure_Data_{quarter}.xlsx"
-DEFAULT_WINDOW = 5  # quarters to keep
-
-# Data sources: LCA (H-1B) + PERM (green card). Both filtered to Certified.
-LCA_FILTER = {"CASE_STATUS": "Certified", "VISA_CLASS": "H-1B"}
-PERM_FILTER = {"CASE_STATUS": "Certified"}
-EMPLOYER_COL = "EMPLOYER_NAME"
-PERM_EMPLOYER_COL = "EMP_BUSINESS_NAME"
-SOC_COL = "SOC_CODE"  # LCA disclosure carries it; PERM does not (verified 09-07, design §6.1)
-SOC_TOP = 16          # top-16 SOC prefixes kept per employer (design §6.1 cap)
-
-
-def download_quarter(quarter: str, dest: Path, prefix: str = "LCA") -> bool:
-    url = DOL_BASE_URL.format(prefix=prefix, quarter=quarter)
-    print(f"Downloading {prefix} {quarter} from DOL...")
-    try:
-        resp = requests.get(url, timeout=120, stream=True)
-        if resp.status_code == 404:
-            print(f"  NOT FOUND (404) — {prefix} {quarter} data not yet published", file=sys.stderr)
-            return False
-        resp.raise_for_status()
-        size_mb = int(resp.headers.get("content-length", 0)) / 1024 / 1024
-        print(f"  Size: {size_mb:.1f} MB")
-        with open(dest, "wb") as f:
-            for chunk in resp.iter_content(chunk_size=1024 * 1024):
-                f.write(chunk)
-        print(f"  Downloaded to {dest}")
-        return True
-    except requests.RequestException as e:
-        print(f"  Download failed: {e}", file=sys.stderr)
-        return False
-
-
-def extract_employers(xlsx_path: Path, employer_col: str = EMPLOYER_COL,
-                      filters: dict = None) -> tuple[set[str], dict, dict, dict]:
-    """Extract certified employer names + per-employer counts (INF-LCA-COUNTS-INPUT-1)
-    + per-employer SOC prefix counts over certified rows (AGG-LCA-SOC-EXTRACTOR-MISSING-1,
-    design VISA_OCCUPATION_SIGNAL_DESIGN_2026_09_07 §6.1).
-
-    Returns (names, counts, soc_stats, soc_counts):
-      names  — employer names passing `filters` (unchanged semantics; feeds employers[])
-      counts — per employer name seen at all: {"filing_count", "certified_count",
-               "last_certified"}. filing_count counts every row for the employer
-               (any case status / visa class); certified_count only rows passing
-               `filters`; last_certified = max DECISION_DATE among certified rows
-               (None when the file lacks a DECISION_DATE column — verified present
-               in LCA + PERM FY2026_Q1 headers, 2026-08-31).
-      soc_stats    — {"certified", "with_soc"} row counters for the coverage gate
-                     (zeros when the file has no SOC_CODE column — PERM).
-      soc_counts   — {employer: {SOC_PREFIX: count}} over CERTIFIED rows only;
-                     prefix = SOC_CODE up to the "." (e.g. "15-1252.00" → "15-1252").
-                     Empty when the file has no SOC_CODE column.
-    """
-    if filters is None:
-        filters = LCA_FILTER
-    print(f"Extracting employers from {xlsx_path.name}...")
-    wb = openpyxl.load_workbook(xlsx_path, read_only=True, data_only=True)
-    ws = wb.active
-
-    header = [cell.value for cell in next(ws.iter_rows(min_row=1, max_row=1))]
-    col_idx = {name: i for i, name in enumerate(header)}
-
-    # AGG-LCA-SOC-EXTRACTOR-MISSING-1 hotfix (09-09): DOL renamed the PERM employer
-    # column in fresh quarters (EMP_BUSINESS_NAME -> EMPLOYER_NAME) — try known
-    # fallbacks before failing, and always return the 4-tuple callers unpack.
-    if employer_col not in col_idx:
-        fallback = next((c for c in ("EMPLOYER_NAME", "EMP_BUSINESS_NAME") if c in col_idx), None)
-        if fallback is None:
-            print(f"  ERROR: no employer column found. Columns: {header[:20]}", file=sys.stderr)
-            wb.close()
-            return set(), {}, {"certified": 0, "with_soc": 0}, {}
-        employer_col = fallback
-        print(f"  NOTE: employer column fallback -> {fallback}", file=sys.stderr)
-
-    employer_idx = col_idx[employer_col]
-    date_idx = col_idx.get("DECISION_DATE")
-    if date_idx is None:
-        print("  NOTE: no DECISION_DATE column — last_certified will be null for this source", file=sys.stderr)
-
-    soc_idx = col_idx.get(SOC_COL)
-    if soc_idx is None:
-        print(f"  NOTE: no {SOC_COL} column — soc_counts/coverage stay empty for this source", file=sys.stderr)
-
-    employers = set()
-    counts: dict[str, dict] = {}
-    total = 0
-    filtered = 0
-    soc_counts: dict[str, dict[str, int]] = {}
-    soc_certified = 0
-    soc_with = 0
-
-    def iso_date(val) -> str | None:
-        if val is None:
-            return None
-        if isinstance(val, datetime.datetime):
-            return val.date().isoformat()
-        s = str(val).strip()
-        return s[:10] if len(s) >= 10 else None
-
-    for row in ws.iter_rows(min_row=2, values_only=True):
-        total += 1
-        name = row[employer_idx]
-        if not (name and isinstance(name, str)):
-            continue
-        name = name.strip()
-        rec = counts.setdefault(name, {"filing_count": 0, "certified_count": 0, "last_certified": None})
-        rec["filing_count"] += 1
-        skip = False
-        for filter_col, filter_val in filters.items():
-            idx = col_idx.get(filter_col)
-            if idx is not None and row[idx] != filter_val:
-                skip = True
-                break
-        if skip:
-            continue
-        rec["certified_count"] += 1
-        filtered += 1
-        employers.add(name)
-        d = iso_date(row[date_idx]) if date_idx is not None else None
-        if d and (rec["last_certified"] is None or d > rec["last_certified"]):
-            rec["last_certified"] = d
-        if soc_idx is not None:
-            soc_certified += 1
-            raw_code = row[soc_idx]
-            if raw_code:
-                code = str(raw_code).split(".")[0].strip()
-                if code:
-                    soc_with += 1
-                    empsoc = soc_counts.setdefault(name, {})
-                    empsoc[code] = empsoc.get(code, 0) + 1
-
-    wb.close()
-    filter_desc = ", ".join(f"{k}={v}" for k, v in filters.items())
-    print(f"  Rows: {total:,}, {filter_desc}: {filtered:,}, Unique employers: {len(employers):,}")
-    return employers, counts, {"certified": soc_certified, "with_soc": soc_with}, soc_counts
-
-
-def cap_soc(prefixes: dict, top: int = SOC_TOP) -> dict:
-    """Top-N SOC prefixes per employer, deterministic (count desc, then code asc)."""
-    return dict(sorted(prefixes.items(), key=lambda kv: (-kv[1], kv[0]))[:top])
-
-
-def normalize_employer_name(name: str) -> str:
-    if not name:
-        return ""
-    n = name.lower().strip()
-    n = re.sub(
-        r"\b(inc|llc|ltd|corp|co|lp|llp|plc|gmbh|ag|sa|nv|bv|pte|pvt|limited|incorporated|corporation|company|group|holdings?|technologies?|solutions?|services?|systems?)\.?",
-        "",
-        n,
-    )
-    n = re.sub(r"[^a-z0-9\s]", " ", n)
-    n = re.sub(r"\s+", " ", n).strip()
-    return n
-
-
-def parse_quarter(q: str) -> tuple[int, int]:
-    m = re.match(r"FY(\d{4})_Q(\d)", q)
-    if not m:
-        raise ValueError(f"Invalid quarter format: {q}. Expected FYXXXX_QN")
-    return int(m[1]), int(m[2])
-
-
-def next_quarter(q: str) -> str:
-    fy, qn = parse_quarter(q)
-    qn += 1
-    if qn > 4:
-        qn = 1
-        fy += 1
-    return f"FY{fy}_Q{qn}"
-
-
-def build_quarter_window(latest: str, window: int) -> list[str]:
-    quarters = [latest]
-    fy, qn = parse_quarter(latest)
-    for _ in range(window - 1):
-        qn -= 1
-        if qn < 1:
-            qn = 4
-            fy -= 1
-        quarters.append(f"FY{fy}_Q{qn}")
-    return quarters
-
-
-def load_existing(path: Path) -> dict:
-    if not path.exists():
-        return {"_meta": {}, "employers": []}
-    with open(path) as f:
-        return json.load(f)
-
-
-def detect_latest_available() -> str | None:
-    """Auto-detect the latest quarter with DOL data published.
-    DOL FY starts October: Q1=Oct-Dec, Q2=Jan-Mar, Q3=Apr-Jun, Q4=Jul-Sep.
-    DOL publishes ~2-3 months after quarter end, so the current quarter
-    is often not yet available — walks backwards until a 200 is found."""
-    now = datetime.datetime.now()
-    fiscal_month = (now.month - 10) % 12  # Oct=0, Nov=1, ... Sep=11
-    qn = fiscal_month // 3 + 1
-    fy = now.year + 1 if now.month >= 10 else now.year  # FY designation (not start year)
-
-    for _ in range(6):  # Try up to 6 quarters back (DOL can lag ~6 months)
-        candidate = f"FY{fy}_Q{qn}"
-        url = DOL_BASE_URL.format(prefix="LCA", quarter=candidate)  # INF-R2-STALERELIC-CLUSTER-1: detect path predates the {prefix} template param — KeyError'd every --auto run
-        print(f"Auto-detect: checking {candidate}...")
-        try:
-            resp = requests.head(url, timeout=30, allow_redirects=True)
-            if resp.status_code == 200:
-                print(f"  {candidate} available")
-                return candidate
-            print(f"  {candidate}: HTTP {resp.status_code}")
-        except requests.RequestException as e:
-            print(f"  {candidate}: {e}", file=sys.stderr)
-        qn -= 1
-        if qn < 1:
-            qn = 4
-            fy -= 1
-
-    return None
-
-
-def validate_match_rate(old_employers: set[str], new_employers: set[str], threshold: float = 0.02) -> bool:
-    if not old_employers:
-        print("  No existing data to compare against — skipping validation")
-        return True
-
-    old_norm = {normalize_employer_name(e) for e in old_employers}
-    new_norm = {normalize_employer_name(e) for e in new_employers}
-
-    retained = old_norm & new_norm
-    retention_rate = len(retained) / len(old_norm) if old_norm else 0
-
-    print(f"  Previous: {len(old_employers):,} employers ({len(old_norm):,} normalized)")
-    print(f"  New:      {len(new_employers):,} employers ({len(new_norm):,} normalized)")
-    print(f"  Retained: {len(retained):,} ({retention_rate:.1%})")
-    print(f"  Added:    {len(new_norm - old_norm):,}")
-    print(f"  Removed:  {len(old_norm - new_norm):,}")
-
-    if retention_rate < (1 - threshold):
-        print(f"  WARNING: Retention rate {retention_rate:.1%} is below {(1-threshold):.0%} threshold", file=sys.stderr)
-        print(f"  This may indicate a normalization regression or data format change", file=sys.stderr)
-        return False
-
-    return True
-
-
-
-def run_selftest() -> None:
-    """Synthetic-fixture check of the SOC extraction + top-16 cap (no network).
-    AGG-LCA-SOC-EXTRACTOR-MISSING-1: the 09-07 implementation was lost with its
-    scratch dir; this selftest keeps the re-implementation honest in-repo."""
-    wb = openpyxl.Workbook()
-    ws = wb.active
-    ws.append(["CASE_STATUS", "VISA_CLASS", "EMPLOYER_NAME", "DECISION_DATE", "SOC_CODE"])
-    data = [
-        ("Certified", "H-1B", "Acme Inc", "2026-01-05", "15-1252.00"),
-        ("Certified", "H-1B", "Acme Inc", "2026-01-06", "15-1252.00"),
-        ("Certified", "H-1B", "Acme Inc", "2026-01-07", "15-1251.00"),
-        ("Certified", "H-1B", "Acme Inc", "2026-01-08", "13-2011.00"),
-        ("Denied", "H-1B", "Acme Inc", "2026-01-09", "15-1252.00"),   # filtered: not certified
-        ("Certified", "H-1B", "Acme Inc", "2026-01-10", None),        # certified, no code
-        ("Certified", "H-1B", "Beta LLC", "2026-02-01", "15-1132.00"),
-    ]
-    data += [("Certified", "H-1B", "Gamma Corp", "2026-02-02", f"{20 + i:02d}-1111.00") for i in range(20)]
-    for r in data:
-        ws.append(list(r))
-    with tempfile.TemporaryDirectory() as td:
-        p = Path(td) / "fixture.xlsx"
-        wb.save(p)
-        employers, counts, soc_stats, soc_counts = extract_employers(p)
-    assert employers == {"Acme Inc", "Beta LLC", "Gamma Corp"}, employers
-    assert soc_stats == {"certified": 26, "with_soc": 25}, soc_stats
-    assert soc_counts["Acme Inc"] == {"15-1252": 2, "15-1251": 1, "13-2011": 1}, soc_counts.get("Acme Inc")
-    assert soc_counts["Beta LLC"] == {"15-1132": 1}
-    assert len(soc_counts["Gamma Corp"]) == 20, "extract returns raw prefix counts (cap is applied at output)"
-    capped = cap_soc(soc_counts["Gamma Corp"])
-    assert len(capped) == SOC_TOP, f"cap: {len(capped)}"
-    assert list(capped) == [f"{20 + i:02d}-1111" for i in range(SOC_TOP)], "cap order: count desc, then code asc"
-    assert counts["Acme Inc"]["certified_count"] == 5, counts["Acme Inc"]
-    print("  selftest PASS: filter, coverage counters, prefix split, top-16 cap")
-
-def main():
-    parser = argparse.ArgumentParser(description="LCA Quarterly Data Refresh")
-    parser.add_argument("--quarter", help="Latest quarter to include (e.g., FY2026_Q1)")
-    parser.add_argument("--auto", action="store_true", help="Auto-detect latest available quarter")
-    parser.add_argument("--window", type=int, default=DEFAULT_WINDOW, help=f"Rolling window size (default: {DEFAULT_WINDOW} quarters)")
-    parser.add_argument("--output", default="lca-sponsors.json", help="Output file path")
-    parser.add_argument("--existing", help="Path to existing lca-sponsors.json (for validation comparison only)")
-    parser.add_argument("--dry-run", action="store_true", help="Show what would change without writing")
-    parser.add_argument("--selftest", action="store_true", help="Run the synthetic SOC-extraction fixture (no network) and exit")
-    args = parser.parse_args()
-
-    if args.selftest:
-        run_selftest()
-        return
-
-    if not args.quarter and not args.auto:
-        parser.error("Specify --quarter or --auto")
-
-    # Determine the latest quarter
-    latest = args.quarter or detect_latest_available()
-    if not latest:
-        print("ERROR: No recent quarter data available from DOL", file=sys.stderr)
-        sys.exit(1)
-
-    # Build the rolling window of N quarters ending at latest
-    quarters = build_quarter_window(latest, args.window)
-    print(f"\n=== DOL Sponsor Data Refresh (LCA + PERM) ===")
-    print(f"Latest quarter: {latest}")
-    print(f"Window ({args.window} quarters): {quarters}\n")
-
-    # Download and extract employers from ALL quarters in the window.
-    # Two sources: LCA (H-1B, large ~72MB/quarter) + PERM (green card, ~11MB/quarter).
-    # Both rebuilt from scratch each run — no merge with existing.
-    all_employers: set[str] = set()
-    all_counts: dict[str, dict] = {}
-    soc_by_employer: dict[str, dict[str, int]] = {}      # AGG-LCA-SOC-EXTRACTOR-MISSING-1: certified H-1B rows
-    soc_coverage = {"certified": 0, "with_soc": 0}
-    perm_soc_by_employer: dict[str, dict[str, int]] = {} # guarded: PERM file has no SOC_CODE today
-    perm_soc_coverage = {"certified": 0, "with_soc": 0}
-
-    def merge_counts(counts: dict[str, dict]) -> None:
-        for name, rec in counts.items():
-            agg = all_counts.setdefault(name, {"filing_count": 0, "certified_count": 0, "last_certified": None})
-            agg["filing_count"] += rec["filing_count"]
-            agg["certified_count"] += rec["certified_count"]
-            if rec["last_certified"] and (agg["last_certified"] is None or rec["last_certified"] > agg["last_certified"]):
-                agg["last_certified"] = rec["last_certified"]
-
-    def merge_soc(stats: dict, counts: dict, by_employer: dict, coverage: dict) -> None:
-        coverage["certified"] += stats.get("certified", 0)
-        coverage["with_soc"] += stats.get("with_soc", 0)
-        for name, prefixes in counts.items():
-            agg = by_employer.setdefault(name, {})
-            for code, n in prefixes.items():
-                agg[code] = agg.get(code, 0) + n
-
-    with tempfile.TemporaryDirectory() as tmpdir:
-        for q in quarters:
-            # LCA (H-1B)
-            lca_path = Path(tmpdir) / f"LCA_Disclosure_Data_{q}.xlsx"
-            if download_quarter(q, lca_path, prefix="LCA"):
-                employers, counts, soc_stats, soc_counts = extract_employers(lca_path, employer_col=EMPLOYER_COL, filters=LCA_FILTER)
-                all_employers |= employers
-                merge_counts(counts)
-                merge_soc(soc_stats, soc_counts, soc_by_employer, soc_coverage)
-            elif q == latest:
-                print(f"\nERROR: Could not download latest LCA quarter {q}", file=sys.stderr)
-                sys.exit(1)
-            else:
-                print(f"  WARNING: LCA {q} unavailable — window may be smaller\n", file=sys.stderr)
-
-            # PERM (green card)
-            perm_path = Path(tmpdir) / f"PERM_Disclosure_Data_{q}.xlsx"
-            if download_quarter(q, perm_path, prefix="PERM"):
-                employers, counts, soc_stats, soc_counts = extract_employers(perm_path, employer_col=PERM_EMPLOYER_COL, filters=PERM_FILTER)
-                all_employers |= employers
-                merge_counts(counts)
-                merge_soc(soc_stats, soc_counts, perm_soc_by_employer, perm_soc_coverage)
-            else:
-                print(f"  (PERM {q} not available — LCA-only for this quarter)\n", file=sys.stderr)
-
-            print(f"  Running total: {len(all_employers):,} unique employers\n")
-
-    if not all_employers:
-        print("ERROR: No employers extracted from any quarter", file=sys.stderr)
-        sys.exit(1)
-
-    # Load existing data for validation (comparison only — output is built from scratch)
-    existing_path = Path(args.existing) if args.existing else Path(args.output)
-    existing_data = load_existing(existing_path)
-    existing_employers = set(existing_data.get("employers", []))
-    existing_quarters = existing_data.get("_meta", {}).get("quarters", [])
-
-    print(f"Existing data: {len(existing_employers):,} employers from {existing_quarters}")
-
-    # Validate retention rate (sanity check — informational, not a hard gate)
-    print("\nValidation:")
-    if existing_employers:
-        validate_match_rate(existing_employers, all_employers)
-
-    # Counts companion (INF-LCA-COUNTS-INPUT-1): keyed by the SAME raw employer strings
-    # as employers[] (certified set only), so readers join trivially and the names-only
-    # path stays intact. filing_count >= certified_count always.
-    employer_counts = {name: all_counts[name] for name in sorted(all_employers) if name in all_counts}
-
-    # SOC companion (AGG-LCA-SOC-EXTRACTOR-MISSING-1 / design §6.1): per-employer 4-digit
-    # SOC prefix counts over certified H-1B rows, top-16 cap per employer (deterministic:
-    # count desc, then code asc). Keys = raw employers[] strings — the consumer
-    # (job-board-processing enrich/visa.js buildLcaSocTech) normalizes both name forms itself.
-    def top_soc(by_employer: dict) -> dict:
-        out: dict[str, dict[str, int]] = {}
-        for name in sorted(all_employers):
-            prefixes = by_employer.get(name)
-            if not prefixes:
-                continue
-            out[name] = cap_soc(prefixes)
-        return out
-
-    employer_soc_counts = top_soc(soc_by_employer)
-    employer_soc_counts_perm = top_soc(perm_soc_by_employer)  # stays {} until PERM carries SOC_CODE
-    lca_cov_pct = round(soc_coverage["with_soc"] / soc_coverage["certified"] * 100, 1) if soc_coverage["certified"] else 0.0
-
-    # Build output
-    output = {
-        "_meta": {
-            "description": "DOL OFLC certified employer names — LCA (H-1B) + PERM (green card), rolling window",
-            "source": "DOL OFLC LCA + PERM Disclosure Data",
-            "quarters": quarters,
-            "generated": datetime.datetime.now().isoformat()[:10],
-            "filter": "LCA: CASE_STATUS=Certified, VISA_CLASS=H-1B | PERM: CASE_STATUS=Certified",
-            "total_employers": len(all_employers),
-            "format": "employers[] name-only (backward compatible with enrich-jobs.js loadLcaSponsors) + employer_counts{} per-employer {filing_count, certified_count, last_certified} + employer_soc_counts{} per-employer {SOC_PREFIX: count} top-16 over certified H-1B rows",
-            "counts_note": "filing_count = all rows for the employer in the window (any status/class); certified_count = rows passing the filter; last_certified = max DECISION_DATE among certified rows; keys = employers[] entries",
-            "soc_note": "employer_soc_counts = 4-digit SOC prefix counts over CERTIFIED H-1B rows only, top-16 per employer (ENR v116 occupation-gate input); employer_soc_counts_perm guarded — the PERM disclosure file carries no SOC_CODE column (verified 09-07)",
-            "soc_coverage": {
-                "lca": {
-                    "certified": soc_coverage["certified"],
-                    "with_soc": soc_coverage["with_soc"],
-                    "coverage_pct": lca_cov_pct,
-                    "employers_with_soc": len(employer_soc_counts),
-                },
-                "perm": {
-                    "certified": perm_soc_coverage["certified"],
-                    "with_soc": perm_soc_coverage["with_soc"],
-                    "note": "no SOC_CODE column in PERM disclosure" if perm_soc_coverage["certified"] == 0 else "ok",
-                },
-            },
-        },
-        "employers": sorted(all_employers),
-        "employer_counts": employer_counts,
-        "employer_soc_counts": employer_soc_counts,
-        "employer_soc_counts_perm": employer_soc_counts_perm,
-    }
-
-    if args.dry_run:
-        print(f"Would write {len(all_employers):,} employers (+ employer_counts for {len(employer_counts):,}) to {args.output}")
-        print(f"Quarters: {quarters}")
-        if existing_employers:
-            delta_added = len(all_employers - existing_employers)
-            delta_removed = len(existing_employers - all_employers)
-            print(f"New employers: +{delta_added:,}")
-            print(f"Removed employers: -{delta_removed:,}")
-        print(f"Meta: {json.dumps(output['_meta'], indent=2)}")
-        return
-
-    # Write output
-    out_path = Path(args.output)
-    with open(out_path, "w") as f:
-        json.dump(output, f, indent=2)
-    size_kb = out_path.stat().st_size / 1024
-    print(f"\nWritten to {out_path} ({size_kb:.0f} KB)")
-
-    print(f"\nNext step: upload to R2 (data/lca-sponsors.json)")
-    print(f"  aws s3 cp {out_path} s3://$R2_BUCKET_NAME/data/lca-sponsors.json --endpoint-url $R2_ENDPOINT")
-
-
-if __name__ == "__main__":
-    main()
+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
