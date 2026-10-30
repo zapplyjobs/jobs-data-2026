@@ -27,13 +27,13 @@ DASHBOARD_API = "https://dash.zapply.jobs/api/data"
 # INF-maintained pipeline repos (where INF's CI gates, configs, scripts live).
 INF_REPOS = [
     "zapplyjobs/jobs-data-2026",
-    "zapplyjobs/jobs-aggregator-private",
+    "zapplyjobs/jobs-aggregator-engine",
     "zapplyjobs/job-board-processing",
 ]
 # CI gate workflow per repo (verification + change_mgmt checks).
 GATE_WORKFLOW = {
     "zapplyjobs/jobs-data-2026": "gate.yml",
-    "zapplyjobs/jobs-aggregator-private": "gate.yml",
+    "zapplyjobs/jobs-aggregator-engine": "gate.yml",
     "zapplyjobs/job-board-processing": "ci-gate.yml",
 }
 
@@ -150,7 +150,7 @@ def c_security():
     """No critical/high Dependabot alerts across INF pipeline repos.
 
     Evidence carries the per-repo breakdown (RD-20261004-01 item 3: the
-    WHERE is the first question any responder asks; jobs-aggregator-private
+    WHERE is the first question any responder asks; jobs-aggregator-engine
     sits in both INF and SUP repo lists, so the two aspects legitimately
     count the same alerts). A repo whose alert fetch FAILS is reported
     UNVERIFIED (YELLOW), never silently counted as a clean zero."""
