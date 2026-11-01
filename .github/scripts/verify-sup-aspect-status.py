@@ -383,6 +383,22 @@ def verify():
         except Exception as e:
             status, evidence, source = "YELLOW", f"check error: {e}", "error"
         aspects[name] = {"status": status, "evidence": evidence, "source": source}
+    # SUP-ASPECT-COMPLETE-1 (2026-11-01, DASH G82-cont5 advisory): publish the full 10-aspect
+    # matrix contract — omitted aspects rendered silent N/A. TAG precedent: explicit N/A with
+    # a reason so the matrix cell is informative, not "omitted -> generic N/A text".
+    aspects["performance"] = {
+        "status": "N/A",
+        "evidence": "No SUP-owned pipeline stage to time — SUP is the data provider (SCOPE-1): "
+                    "company-list + research CSV + source verdicts. Runtime performance is measured "
+                    "at the lanes that run the stages (AGG fetch-jobs runtime, INF dispatch).",
+        "source": "N/A — no independently-owned runtime"
+    }
+    aspects["infrastructure"] = {
+        "status": "N/A",
+        "evidence": "No deploy — SUP ships data artifacts (CSV via sup-csv-sync to Supabase Storage, "
+                    "company-list via the AGG pipeline); no Worker/server/API of its own.",
+        "source": "N/A — no independent deploy"
+    }
     return {"module": "SUP", "generated_at": NOW.isoformat(), "aspects": aspects}
 
 
