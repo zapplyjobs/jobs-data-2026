@@ -10,18 +10,24 @@ gh-api (GH_TOKEN), and the zjp-data-proxy. Run from the jobs-data-2026 repo root
 Aspects (OUT-scoped, per OUT-ASPECT-VERIFY-1):
   verification, monitoring, performance, infrastructure, configuration, discoverability,
   security, documentation, change_mgmt, data_quality -> objective checks
+  readme_truth, liveness_canary -> objective checks (CI-ported surface riders 2026-11-05:
+    the weekly session-side sweep legs out-board-truth + out-liveness-canary check hourly
+    here, same rider semantics; asset-manifest drift + 12-run history stay session-side)
   content_quality, coordination -> OMITTED (subjective -> STATE narrative)
 
 v1 caveats (honest): data_quality reads the dead-link scan (known to undercount soft-404/IP-
 dependent dead links — TikTok; real rate higher than reported); configuration/discoverability/
 change_mgmt are structural-existence proxies (not deep validity); verification is a 3-run snapshot.
 """
-import json, os, subprocess, urllib.request, datetime, sys, time
+import base64, json, os, re, subprocess, urllib.request, urllib.parse, datetime, sys, time
+from concurrent.futures import ThreadPoolExecutor
 
 NOW = datetime.datetime.now(datetime.timezone.utc)
 PROXY = "https://zjp-data-proxy.wild-queen-069e.workers.dev/data"
 REPOS = ["zapplyjobs/jobs-data-2026", "zapplyjobs/job-board-processing"]
 PROC = ".github/scripts/processing/lib/src"  # processing submodule (job-board-processing)
+ORG = "zapplyjobs"
+REGISTRY = ".github/scripts/processing/lib/board-registry.json"  # membership single source (OUT-BOARDLIST-SINGLE-SOURCE-1)
 
 def gh_json(args, attempts=3):
     # Retry on transient gh-api failures (rate-limit/network) so a flaky call doesn't produce a
@@ -245,11 +251,158 @@ def c_data_quality():
     evidence = "; ".join(m for _, m in issues) if issues else "dead-link + visa + undated all healthy"
     return status, f"{evidence}", "proxy:dead-links+health-check"
 
+def _registry_boards():
+    # Consumer-board universe from the membership single source (OUT-BOARDLIST-SINGLE-SOURCE-1):
+    # every non-infra registry entry carries render checks; class 'board' additionally gets
+    # cover + cross-promo checks (curated/manual/community boards use their own heading
+    # assets, D139 asset-vocabulary convention). A board swap edits the registry, not this.
+    try:
+        with open(REGISTRY) as f:
+            reg = json.load(f)
+        entries = reg.get("boards", reg.get("repos", []))
+        return [(e["name"], e.get("class")) for e in entries if e.get("class") != "infra"]
+    except Exception:
+        return None
+
+def _truth_one(repo, is_pipeline, pipeline_names):
+    fails, warns = [], []
+    d = gh_json(["api", f"repos/{ORG}/{repo}/contents/README.md"])
+    if not isinstance(d, dict):
+        return ["README unreadable"], []
+    body = base64.b64decode(d.get("content", "")).decode("utf-8", "replace")
+    t = gh_json(["api", f"repos/{ORG}/{repo}/git/trees/HEAD?recursive=1"])
+    files = {e.get("path") for e in (t.get("tree", []) if isinstance(t, dict) else []) if e.get("type") == "blob"}
+    srcs = re.findall(r'<img[^>]*?src="([^"]+)"', body) + re.findall(r'!\[[^\]]*\]\(([^)]+\.png)\)', body)
+    broken = sorted({s for s in srcs if not s.startswith("http") and s not in files})
+    if broken:
+        fails.append(f"broken image refs: {', '.join(broken[:4])}")
+    if is_pipeline and "images/covers/cover.png" not in files:
+        fails.append("cover missing at images/covers/cover.png")
+    bad = re.findall(r"\b(\d{2,})mo\b", body)
+    if bad:
+        fails.append(f"broken month-age tokens: {', '.join(sorted(set(bad))[:4])}")
+    if is_pipeline:
+        targets = set(re.findall(r"github\.com/%s/([A-Za-z0-9-]+)" % ORG, body))
+        missing = [b for b in pipeline_names if b != repo and b not in targets]
+        if missing:
+            fails.append(f"cross-promo missing: {', '.join(missing[:4])}")
+    desc = gh_json(["api", f"repos/{ORG}/{repo}"])
+    if not ((desc or {}).get("description") or "").strip():
+        warns.append("description empty (SEO/link-preview)")
+    return fails, warns
+
+def c_readme_truth():
+    # Ported sweep leg (session out-board-truth.py ran weekly via out-ops sweep) -> CI hourly.
+    # Catches the "looks broken to a visitor" class the day it happens, not at the next
+    # session touch. Asset-manifest drift stays session-side (needs the job-board-assets
+    # clone; that repo's own CI syncs assets). gh api failure -> README unreadable -> FAIL:
+    # an unreadable README is exactly the visitor-visible subject of this aspect, and
+    # gh_json's 3-attempt retry guards transient 5xx/rate-limit flake.
+    universe = _registry_boards()
+    if universe is None:
+        return "YELLOW", "board-registry.json unreadable in processing submodule", "fs:board-registry"
+    pipeline = [n for n, c in universe if c == "board"]
+    fails, warns = [], []
+    with ThreadPoolExecutor(max_workers=6) as ex:
+        results = list(ex.map(lambda x: _truth_one(x[0], x[1] == "board", pipeline), universe))
+    for (repo, _cls), (f, w) in zip(universe, results):
+        fails += [f"{repo}: {m}" for m in f]
+        warns += [f"{repo}: {m}" for m in w]
+    status = "RED" if fails else ("YELLOW" if warns else "GREEN")
+    det = "; ".join((fails + warns)[:4])
+    return status, f"{len(universe)} boards checked, {len(fails)} FAIL, {len(warns)} WARN" + (f": {det}" if det else ""), "gh-api:readme-truth"
+
+def _fetch(url, timeout=60):
+    req = urllib.request.Request(url, headers={"User-Agent": "out-aspect-verifier/1.0"})
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return r.read().decode("utf-8", "replace")
+
+def _stride(ids, n):
+    ids = sorted(set(ids))
+    return ids[::max(1, len(ids) // n)][:n] if ids else []
+
+def _r2_json(key):
+    try:
+        import boto3
+        s3 = boto3.client("s3", endpoint_url=os.environ["R2_ENDPOINT"],
+                          aws_access_key_id=os.environ["R2_ACCESS_KEY_ID"],
+                          aws_secret_access_key=os.environ["R2_SECRET_ACCESS_KEY"], region_name="auto")
+        return json.loads(s3.get_object(Bucket=os.environ["R2_BUCKET_NAME"], Key=key)["Body"].read().decode("utf-8", "replace"))
+    except Exception:
+        return None
+
+def _supabase_live(ids):
+    url = (os.environ.get("SUPABASE_URL") or "").rstrip("/")
+    key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or ""
+    if not url or not key:
+        return None
+    q = urllib.parse.quote(",".join('"%s"' % i for i in ids), safe="")
+    req = urllib.request.Request(
+        f"{url}/rest/v1/jobs?select=source_id,is_active&source=eq.GITHUB&source_id=in.({q})",
+        headers={"apikey": key, "Authorization": f"Bearer {key}", "User-Agent": "out-aspect-verifier/1.0"})
+    with urllib.request.urlopen(req, timeout=60) as r:
+        rows = json.loads(r.read().decode("utf-8"))
+    lookup = {}
+    for row in rows if isinstance(rows, list) else []:
+        sid = row.get("source_id")
+        if sid:
+            lookup[sid] = lookup.get(sid, False) or bool(row.get("is_active"))
+    return lookup
+
+def c_liveness_canary():
+    # Ported rider (session out-liveness-canary.sh ran weekly) -> CI hourly, SAME rider rule:
+    # any surface < 0.70 live escalates (the 09-14 zombie-class monitor). Thresholds are the
+    # rider's own, not new policy (no operator sign-off needed); no YELLOW band above 0.70 is
+    # added because D116 readings 0.69-0.82 are disposed accepted-class decay - a band would
+    # put a permanent false-alarm color on the matrix. Session-side 12-run history/delta stays
+    # session-side; CI publishes the per-run rate.
+    canary = []
+    for name, repo in (("ngj_readme", "New-Grad-Jobs-2027"), ("healthcare_readme", "New-Grad-Healthcare-Jobs-2027")):
+        try:
+            text = _fetch(f"https://raw.githubusercontent.com/{ORG}/{repo}/main/README.md")
+            ids = re.findall(r"zapply\.jobs/l/d/([A-Za-z0-9._~-]+)", text)
+            canary.append((name, _stride(ids, 20), len(set(ids)), None))
+        except Exception as e:
+            canary.append((name, [], 0, str(e)[:120]))
+    try:
+        art = _r2_json("data/sjd-jobs.json")
+        if art is None:
+            raise RuntimeError("R2 read failed")
+        rows = art.get("jobs", art.get("data", [])) if isinstance(art, dict) else art
+        ids = [r.get("id") for r in rows if isinstance(r, dict) and r.get("id")]
+        canary.append(("sjd_artifact", _stride(ids, 60), len(set(ids)), None))
+    except Exception as e:
+        canary.append(("sjd_artifact", [], 0, str(e)[:120]))
+    all_ids = sorted({i for _, s, _, _ in canary for i in s})
+    lookup = _supabase_live(all_ids) if all_ids else {}
+    if lookup is None:
+        return "YELLOW", "SUPABASE_URL/SERVICE_ROLE_KEY unavailable to verifier step (canary unmeasured)", "supabase-rest"
+    reds, parts = [], []
+    for name, sampled, total, err in canary:
+        if err:
+            reds.append(f"{name} source-fail ({err})")
+            continue
+        known = [i for i in sampled if i in lookup]
+        live = sum(1 for i in known if lookup[i])
+        frac = (live / len(known)) if known else None
+        if frac is None or len(known) < 5:
+            reds.append(f"{name} insufficient sample (found {len(known)}/{len(sampled)})")
+            continue
+        parts.append(f"{name} {frac:.2f} ({live}/{len(known)}, missing {len(sampled) - len(known)})")
+        if frac < 0.70:
+            reds.append(f"{name} {frac:.2f} below rider 0.70")
+    status = "RED" if reds else "GREEN"
+    ev = "; ".join(parts) if parts else "no surface scored"
+    if reds:
+        ev = "; ".join(reds[:3]) + (" | " + ev if ev else "")
+    return status, ev, "supabase-rest+gh-raw+R2"
+
 CHECKS = {
     "verification": c_verification, "monitoring": c_monitoring, "performance": c_performance,
     "infrastructure": c_infrastructure, "configuration": c_configuration,
     "discoverability": c_discoverability, "security": c_security, "documentation": c_documentation,
     "change_mgmt": c_change_mgmt, "data_quality": c_data_quality,
+    "readme_truth": c_readme_truth, "liveness_canary": c_liveness_canary,
 }
 
 def verify():
