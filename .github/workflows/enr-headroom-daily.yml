@@ -67,8 +67,9 @@ jobs:
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
           # Storage structural move IN PLACE (operator word 2026-10-06: usage-billed
-          # autoscale accepted; disk already auto-grew 8 -> 12 GB, next grow at 90%).
-          # Leg-E numeric half runs against the 12 GiB CEIL in the harness (same commit).
+          # autoscale accepted; 12 GiB valve FIRED 2026-10-28, derived disk now 18 GiB
+          # (12 x 1.5, Supabase autoscale docs), next grow at 90% of 18 = 16.2 GiB).
+          # Leg-E numeric half runs against the 18 GiB CEIL in the harness (same commit).
           ENR_STRUCTURAL_MOVE: supabase_disk_valve
         run: node scripts/enr-harness/enr_headroom_balance.js --out "state/generated/enr-headroom-balance-$(date -u +%F).json"
 
