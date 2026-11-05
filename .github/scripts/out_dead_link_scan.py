@@ -20,9 +20,14 @@ nothing published - last-good artifact preserved).
 Output schema (additive vs pre-L3): {generated_at, total_checked, total_dead,
  dead_links:[{repo,url,http_code,closed_via?,note?,first_seen?,last_seen?}],
  ats_watch:[...], ats_stats:{judged,alive,dead,unknown,(pass?)},
+ ats_flip_suppressed (storm-guard deaths parked in ats_watch this run; 0 when none),
  total_transient, transient_links,
  http_sightings:{url:{code,first_seen,last_seen,sightings}},
  scan_scope:{mode,bands,band_b_selected,requested,after_host_caps,checked,host_skipped,generated_under}}
+Also publishes (R2 only): data/scan-verdicts.json (alive-hold store) and
+ data/dead-link-history.jsonl (OUT-DEADLINK-HISTORY-1: one JSON line per run day -
+ {date,total_checked,total_dead,total_dead_fresh,unique_count,run_id}; same-day runs
+ replace the day's line; an unparsable existing file is never overwritten).
 """
 import json, urllib.request, urllib.error, urllib.parse, re, os, sys, datetime, time
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -751,8 +756,10 @@ url_verdicts = {}
 # is all-or-nothing, so breaching 500 would drop the WHOLE batch; overflow rows
 # park in ats_watch instead of ever being published as dead.
 storm_cap = min(max(200, int(ats_stats["judged"] * 0.12)), 499)
+storm_suppressed = 0  # OUT-DEADLINK-STORMGUARD-SUPPRESSED-COUNT-1: published even when 0
 if len(ats_dead_pending) > storm_cap:
-    print(f"  ATS storm guard: {len(ats_dead_pending)} deaths > cap {storm_cap} - NOT flipping to dead_links")
+    storm_suppressed = len(ats_dead_pending)  # guard is all-or-nothing: EVERY pending death parks, none flip
+    print(f"  ATS storm guard: {len(ats_dead_pending)} deaths > cap {storm_cap} - NOT flipping to dead_links (suppressed: {storm_suppressed})")
     for u, via, note in ats_dead_pending:
         ats_watch.append({"repo": url_src.get(u, '(carried)'), "url": u, "note": f"storm-guard-held ({via}, {note})"})
 else:
@@ -846,6 +853,7 @@ output = {
     "total_dead": len(dead_links),
     "ats_watch": ats_watch,
     "ats_stats": ats_stats,
+    "ats_flip_suppressed": storm_suppressed,
     "total_transient": len(transient_links),
     "transient_links": transient_links,
     "http_sightings": http_sightings,
@@ -943,6 +951,33 @@ try:
     print(f"R2 upload OK: scan-verdicts.json ({len(url_verdicts)} alive entries)")
 except Exception as e:
     print(f"scan-verdicts upload failed (non-blocking): {e}")
+
+# OUT-DEADLINK-HISTORY-1 (2026-11-05): append-only per-day history - dead-links.json
+# is overwrite-only, so healed URLs and past backlog sizes were unrecoverable. One
+# JSON line per run day; same-day runs REPLACE the day's line (idempotent reruns).
+# An unparsable existing file is NEVER overwritten (data-loss guard - skip loudly).
+try:
+    _hist_key = 'data/dead-link-history.jsonl'
+    try:
+        _hist_obj = _s3.get_object(Bucket=os.environ.get('R2_BUCKET_NAME', 'zjp-data'), Key=_hist_key)
+        _hist_rows = [json.loads(_l) for _l in _hist_obj['Body'].read().decode().splitlines() if _l.strip()]
+    except _s3.exceptions.NoSuchKey:
+        _hist_rows = []
+    _hist_rows = [r for r in _hist_rows if r.get('date') != TODAY]
+    _hist_rows.append({
+        "date": TODAY,
+        "total_checked": len(results),
+        "total_dead": len(dead_links),
+        "total_dead_fresh": output['total_dead_fresh'],
+        "unique_count": len({d['url'] for d in dead_links}),
+        "run_id": os.environ.get('GITHUB_RUN_ID', 'local-' + now.strftime('%Y%m%dT%H%M%SZ')),
+    })
+    _hist_body = '\n'.join(json.dumps(r, separators=(',', ':')) for r in _hist_rows) + '\n'
+    _s3.put_object(Bucket=os.environ.get('R2_BUCKET_NAME', 'zjp-data'), Key=_hist_key,
+                   Body=_hist_body.encode(), ContentType='application/x-ndjson')
+    print(f"R2 upload OK: dead-link-history.jsonl ({len(_hist_rows)} day rows)")
+except Exception as e:
+    print(f"dead-link-history update SKIPPED - existing artifact left untouched ({e})")
 
 # OUT-DEADLINK-EXITCODE-ALERTCONV-1 (2026-10-04): findings are DATA, not failure.
 # The scan exits 0 when it ran and published, whether or not dead links were
