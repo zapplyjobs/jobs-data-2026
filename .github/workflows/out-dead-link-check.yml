@@ -10,9 +10,13 @@ name: OUT Dead Link Check
 # Format (L3): {generated_at, total_checked, total_dead, total_dead_fresh,
 #          dead_links: [{repo=source_id, url, http_code, closed_via?, note?}],
 #          ats_watch: [{repo, url, note}], ats_stats: {judged, alive, dead, unknown, pass?},
+#          ats_flip_suppressed: N (storm-guard-held deaths this run; 0 when none),
 #          total_transient, transient_links: [{repo, url, http_code}],
 #          http_sightings: {url: {code, first_seen, last_seen, sightings}},
 #          scan_scope: {mode, bands, requested, after_host_caps, checked, host_skipped, fresh_dead, generated_under}}
+# Also publishes data/dead-link-history.jsonl (R2): one JSON line per run day
+# {date,total_checked,total_dead,total_dead_fresh,unique_count,run_id}; same-day runs
+# replace the day line (OUT-DEADLINK-HISTORY-1).
 # http_code is an int for status-code deaths (only published at sightings>=2) and
 # the string 'ats-closed' for ATS-listing deaths.
 on:
