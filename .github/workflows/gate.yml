@@ -1,0 +1,70 @@
+name: Gate
+
+on:
+  push:
+    branches: ['**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 1
+          submodules: recursive  # INF-DEPRESOLUTION-ANALYZER-1: the dep-resolution check walks processing submodule scripts
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Install transcrypt (vendored action — immune to raw-CDN 429s, INF-TRANSCRYPT-ACTION-1)
+        uses: zapplyjobs/.github/actions/setup-transcrypt@afcb5f41ec28fe10cefcf421fc455d0d89588b1f
+
+      - name: Unlock encrypted files
+        run: |
+          echo "Y" | transcrypt --cipher aes-256-cbc --password "$TRANSCRYPT_PASSWORD" --force
+          git checkout -- .
+          git submodule foreach --recursive '
+            echo "Y" | transcrypt --cipher aes-256-cbc --password "'"$TRANSCRYPT_PASSWORD"'" --force 2>/dev/null || true
+            rm -f "$(git rev-parse --git-dir)/index" 2>/dev/null || true
+            git checkout HEAD -- . 2>/dev/null || true
+          ' || true
+          git submodule sync --recursive
+          git submodule update --init --recursive
+        env:
+          TRANSCRYPT_PASSWORD: ${{ secrets.TRANSCRYPT_PASSWORD }}
+
+
+      - name: Check for large files (>5MB)
+        run: |
+          LARGE_FILES=$(find . -not -path './.git/*' -not -path '*/node_modules/*' -type f -size +5M 2>/dev/null)
+          if [ -n "$LARGE_FILES" ]; then
+            echo "::error::Files larger than 5MB detected — use R2 or Git LFS instead of committing:"
+            echo "$LARGE_FILES" | while read f; do
+              SIZE=$(du -h "$f" | cut -f1)
+              echo "::error::$SIZE $f"
+            done
+            exit 1
+          else
+            echo "✅ No files larger than 5MB"
+          fi
+
+      - name: Check for data files in public repo
+        run: |
+          DATA_FILES=$(find .github/data -type f ! -name '.gitkeep' 2>/dev/null || true)
+          if [ -n "$DATA_FILES" ]; then
+            echo "::error::Data files detected in .github/data/ — these belong in R2/Supabase, not public git:"
+            echo "$DATA_FILES" | while read f; do echo "::error::$f"; done
+            echo "If this file MUST be in git, add an exception in this check."
+            exit 1
+          else
+            echo "✅ No data files in .github/data/"
+          fi
+
+      - name: DASH aspect verifier unit tests
+        run: python3 .github/scripts/verify-dash-aspect-status.test.py
+
+      - name: Dependency-resolution check (INF-DEPRESOLUTION-ANALYZER-1 — blocks the silent-missing-module class)
+        run: python3 .github/scripts/dep-resolution-check.py

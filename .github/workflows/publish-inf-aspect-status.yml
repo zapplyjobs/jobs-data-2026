@@ -1,0 +1,71 @@
+name: INF Aspect Status (verified)
+# Publishes INF's aspect-status as MACHINE-VERIFIED objective checks (CI-native,
+# zero carry-forward). Per ASPECT_STATUS_CONTRACT: 10 verified aspects; content_quality +
+# coordination are narrative (omitted). INF-ASPECT-VERIFIER-1.
+on:
+  schedule:
+    - cron: '0 * * * *'  # every hour — script is just API calls, negligible Actions cost
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/scripts/verify-inf-aspect-status.py'
+      - '.github/workflows/publish-inf-aspect-status.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 1
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Setup Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.x'
+
+      - name: Run verifier
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+          DATA_PROXY_TOKEN: ${{ secrets.DATA_PROXY_TOKEN }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: |
+          pip install -q boto3
+          python3 .github/scripts/verify-inf-aspect-status.py --publish > inf-aspect-status.json
+          python3 - <<'PY'
+          import json, os
+          d = json.load(open('inf-aspect-status.json'))
+          counts = {}
+          lines = [f"## INF Aspect Status (verified)\n\ngenerated {d['generated_at'][:19]}\n"]
+          for k, v in d['aspects'].items():
+              counts[v['status']] = counts.get(v['status'], 0) + 1
+              lines.append(f"- **{k}**: {v['status']} — {v['evidence']}")
+          lines.append(f"\n**Summary: {counts}**")
+          summary = "\n".join(lines) + "\n"
+          print(summary)
+          gss = os.environ.get('GITHUB_STEP_SUMMARY')
+          if gss:
+              open(gss, 'a').write(summary)
+          PY
+
+      - name: Upload to Supabase Storage (R2-elim Phase 5 dual-write)
+        continue-on-error: true
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          curl -sf -X PUT "${SUPABASE_URL}/storage/v1/object/pipeline-data/inf-aspect-status.json" \
+            -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
+            -H "Content-Type: application/json" \
+            --data-binary @inf-aspect-status.json \
+            && echo "uploaded inf-aspect-status.json to Storage" \
+            || echo "Storage upload failed (non-blocking)"

@@ -1,0 +1,133 @@
+name: Enrichment + Bridge Health Check
+
+# INF-GEMINI-CAP-MONITORING-1: Gemini cap early warning (job-processor errors/day).
+# INF-BRIDGEMETRICS-FROZEN-1: bridge-metrics freshness check (bridge_run_at must be <1h old).
+# Catches stale bridge data within 1 hour instead of 2+ days.
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # Every hour
+  workflow_dispatch:
+
+concurrency:
+  group: enrichment-health
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Query CF Workers Analytics + assess
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          DISCORD_TEAM_TOKEN: ${{ secrets.DISCORD_TEAM_TOKEN }}
+          DISCORD_PIPELINE_ALERT_CHANNEL_ID: ${{ secrets.DISCORD_PIPELINE_ALERT_CHANNEL_ID }}
+        run: |
+          ACCT="2bdd97b381a85ec2b9d40e7a0a7fde4c"
+          [ -n "$CLOUDFLARE_API_TOKEN" ] || { echo "ERROR: CLOUDFLARE_API_TOKEN not set"; exit 2; }
+
+          RESULT=$(python3 - "$ACCT" "$CLOUDFLARE_API_TOKEN" <<'PY'
+          import sys, json, urllib.request, datetime, collections
+          acct, tok = sys.argv[1], sys.argv[2]
+          today = datetime.date.today()
+          since = (today - datetime.timedelta(days=7)).isoformat()
+          q = ('{ viewer { accounts(filter:{accountTag:"%s"}) { workersInvocationsAdaptive'
+               '(limit:300, filter:{date_geq:"%s"}){ sum{requests errors} dimensions{scriptName date} } } } }') % (acct, since)
+          req = urllib.request.Request("https://api.cloudflare.com/client/v4/graphql",
+              data=json.dumps({"query": q}).encode(),
+              headers={"Authorization": "Bearer " + tok, "Content-Type": "application/json"})
+          d = json.load(urllib.request.urlopen(req))
+          rows = d["data"]["viewer"]["accounts"][0]["workersInvocationsAdaptive"]
+          agg = collections.defaultdict(lambda: {"r": 0, "e": 0})
+          for r in rows:
+              dn = r["dimensions"]
+              if dn.get("scriptName") != "job-processor-cron-service-worker":
+                  continue
+              agg[dn.get("date")]["r"] += r["sum"]["requests"]
+              agg[dn.get("date")]["e"] += r["sum"]["errors"]
+
+          print("=== job-processor errors/day, last 7d ===")
+          for dt in sorted(agg):
+              print(f"  {dt}: {agg[dt]['e']} errors / {agg[dt]['r']} requests")
+
+          last24 = sum(v["e"] for k, v in agg.items() if k == today.isoformat())
+          if last24 == 0 and agg:
+              last24 = agg[max(agg)]["e"]; daylbl = max(agg) + " (latest)"
+          else:
+              daylbl = today.isoformat()
+
+          if   last24 >  50: status = "CRITICAL"
+          elif last24 >  15: status = "WARN"
+          else:              status = "OK"
+
+          print(f"STATUS:{status}")
+          print(f"LAST24:{last24}")
+          print(f"DAY:{daylbl}")
+          PY
+          )
+
+          echo "$RESULT"
+          STATUS=$(echo "$RESULT" | grep '^STATUS:' | cut -d: -f2)
+          LAST24=$(echo "$RESULT" | grep '^LAST24:' | cut -d: -f2)
+          DAY=$(echo "$RESULT" | grep '^DAY:' | cut -d: -f2)
+
+          echo "Status: $STATUS, Errors: $LAST24 ($DAY)"
+
+          # Alert on Discord only if WARN or CRITICAL
+          if [ "$STATUS" = "WARN" ] || [ "$STATUS" = "CRITICAL" ]; then
+            EMOJI=$([ "$STATUS" = "CRITICAL" ] && echo "🚨" || echo "⚠️")
+            MSG="$EMOJI Enrichment Health: **$STATUS** — job-processor errors ${LAST24}/day ($DAY)."
+            if [ "$STATUS" = "CRITICAL" ]; then
+              MSG="$MSG Cap likely EXHAUSTED — enrichment failing."
+            else
+              MSG="$MSG Cap likely APPROACHING — check Gemini usage."
+            fi
+            MSG="$MSG Fix: summary.ts:91 — don't retry RESOURCE_EXHAUSTED 429s."
+
+            curl -sf -X POST \
+              "https://discord.com/api/v10/channels/${DISCORD_PIPELINE_ALERT_CHANNEL_ID}/messages" \
+              -H "Authorization: Bot ${DISCORD_TEAM_TOKEN}" \
+              -H "Content-Type: application/json" \
+              -d "{\"content\": \"${MSG}\"}" \
+              && echo "Discord alert sent" \
+              || echo "Discord alert failed (non-blocking)"
+          else
+            echo "Status OK — no alert needed"
+          fi
+
+      - name: Check bridge-metrics freshness
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          DISCORD_TEAM_TOKEN: ${{ secrets.DISCORD_TEAM_TOKEN }}
+          DISCORD_PIPELINE_ALERT_CHANNEL_ID: ${{ secrets.DISCORD_PIPELINE_ALERT_CHANNEL_ID }}
+        run: |
+          BRIDGE=$(curl -sf "${SUPABASE_URL}/storage/v1/object/pipeline-data/bridge-metrics.json" \
+            -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" 2>/dev/null || echo "{}")
+          BRIDGE_AT=$(echo "$BRIDGE" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('bridge_run_at',''))" 2>/dev/null)
+          if [ -z "$BRIDGE_AT" ]; then
+            echo "Bridge-metrics.json missing or unreadable"
+            STALE_HOURS=999
+          else
+            STALE_HOURS=$(python3 -c "
+          from datetime import datetime, timezone
+          bridge = datetime.fromisoformat('$BRIDGE_AT'.replace('Z','+00:00'))
+          age = (datetime.now(timezone.utc) - bridge).total_seconds() / 3600
+          print(f'{age:.1f}')
+          " 2>/dev/null || echo "999")
+          fi
+          echo "Bridge run_at: $BRIDGE_AT (stale: ${STALE_HOURS}h)"
+          if [ "$(echo "$STALE_HOURS > 1" | bc -l 2>/dev/null || echo 1)" = "1" ]; then
+            EMOJI=$([ "$(echo "$STALE_HOURS > 6" | bc -l 2>/dev/null || echo 0)" = "1" ] && echo "🚨" || echo "⚠️")
+            MSG="$EMOJI Bridge-metrics STALE: ${STALE_HOURS}h old (bridge_run_at=$BRIDGE_AT). Dashboard latency data is stale. The bridge Worker may not be writing metrics to Storage."
+            curl -sf -X POST \
+              "https://discord.com/api/v10/channels/${DISCORD_PIPELINE_ALERT_CHANNEL_ID}/messages" \
+              -H "Authorization: Bot ${DISCORD_TEAM_TOKEN}" \
+              -H "Content-Type: application/json" \
+              -d "{\"content\": \"${MSG}\"}" \
+              && echo "Discord alert sent" \
+              || echo "Discord alert failed (non-blocking)"
+          else
+            echo "Bridge-metrics fresh (<1h) — no alert needed"
+          fi

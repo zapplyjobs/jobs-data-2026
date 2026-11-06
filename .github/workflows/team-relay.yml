@@ -1,0 +1,35 @@
+name: Team Relay Post
+
+# INF-1044 (2026-10-29): the sanctioned Discord send path for staged team messages.
+# Dispatched by INF on operator word; posts input text as Zapply_Team_Bot.
+# Message content arrives via workflow inputs (jq-quoted -> injection-safe).
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_channel_id:
+        description: "Discord channel or thread ID to post into"
+        required: true
+        type: string
+      message:
+        description: "Message text (markdown supported; 2000 char Discord limit)"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  relay:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Relay message to Discord
+        env:
+          RELAY_MSG: ${{ inputs.message }}
+          RELAY_TARGET: ${{ inputs.target_channel_id }}
+          DISCORD_TEAM_TOKEN: ${{ secrets.DISCORD_TEAM_TOKEN }}
+        run: |
+          BODY=$(jq -n --arg c "$RELAY_MSG" '{content: $c}')
+          HTTP=$(curl -s -o /tmp/relay_resp.json -w '%{http_code}' -X POST             "https://discord.com/api/v10/channels/${RELAY_TARGET}/messages"             -H "Authorization: Bot ${DISCORD_TEAM_TOKEN}"             -H "Content-Type: application/json"             -d "$BODY")
+          echo "relay HTTP $HTTP"
+          [ "$HTTP" = "200" ] || { echo "::error::relay post failed:"; cat /tmp/relay_resp.json; exit 1; }

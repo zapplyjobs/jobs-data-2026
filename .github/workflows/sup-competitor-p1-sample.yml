@@ -1,0 +1,79 @@
+name: SUP Competitor P1 Sample
+
+on:
+  schedule:
+    - cron: '0 6 15 1,4,7,10 *'  # quarterly — 06:00Z on Jan/Apr/Jul/Oct 15
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sup-competitor-p1
+  cancel-in-progress: false
+
+jobs:
+  sample:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 1
+          submodules: recursive
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Install transcrypt (vendored action — INF-TRANSCRYPT-ACTION-1)
+        uses: zapplyjobs/.github/actions/setup-transcrypt@afcb5f41ec28fe10cefcf421fc455d0d89588b1f
+
+      - name: Unlock encrypted files
+        run: |
+          echo "Y" | transcrypt --cipher aes-256-cbc --password "$TRANSCRYPT_PASSWORD" --force
+          git checkout -- . 2>/dev/null || true
+          git submodule foreach --recursive '
+            echo "Y" | transcrypt --cipher aes-256-cbc --password "'"$TRANSCRYPT_PASSWORD"'" --force 2>/dev/null || true
+            rm -f "$(git rev-parse --git-dir)/index" 2>/dev/null || true
+            git checkout HEAD -- . 2>/dev/null || true
+          ' || true
+        env:
+          TRANSCRYPT_PASSWORD: ${{ secrets.TRANSCRYPT_PASSWORD }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: '22'
+
+      - name: Download previous artifact from R2 (if present)
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: |
+          pip install -q boto3
+          python3 -c "
+          import boto3, os
+          s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY'])
+          try:
+              obj = s3.get_object(Bucket=os.environ['R2_BUCKET_NAME'], Key='data/sup_competitor_p1_simplify.json')
+              open('.github/data/prev_p1.json','wb').write(obj['Body'].read())
+              print('downloaded previous artifact (history will accrue)')
+          except s3.exceptions.NoSuchKey:
+              print('no previous artifact — starting fresh history')
+          "
+
+      - name: Sample competitor P1 dimensions (SUP-COMPETITOR-P1-SIMPLIFY-REMAINDER-1)
+        run: node .github/scripts/processing/lib/sup-competitor-p1-sample.js .github/data/prev_p1.json .github/data/sup_competitor_p1_simplify.json
+
+      - name: Upload artifact to R2
+        if: hashFiles('.github/data/sup_competitor_p1_simplify.json') != ''
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: |
+          pip install -q boto3
+          python3 -c "import boto3, os; s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']); s3.put_object(Bucket=os.environ['R2_BUCKET_NAME'], Key='data/sup_competitor_p1_simplify.json', Body=open('.github/data/sup_competitor_p1_simplify.json','rb').read(), ContentType='application/json'); print('uploaded data/sup_competitor_p1_simplify.json to R2')"
