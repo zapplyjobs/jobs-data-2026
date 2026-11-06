@@ -94,7 +94,20 @@ VALID_ATS = {"greenhouse", "lever", "ashby", "workday", "smartrecruiters", "orac
              # JazzHR supplemental lane (AGG A301, shipped 2026-10-06): 28-tenant seed in
              # the engine company-list (url-keyed rows, *.applytojob.com boards). Registry
              # row: projects/zjp/scripts/lib/family_registry.json families.jazzhr (SUP).
-             "jazzhr"}
+             "jazzhr",
+             # TrakStar supplemental lane (TAG v171 shipped 2026-10-21, private pin
+             # 5a437a7; 10 url-keyed tenants) + ADP lane (AGG U7 agg/adp-lane, 24
+             # hash-keyed tenants; first R2 rows live 2026-11-04, cid dd2210b0,
+             # titles pending AGG-ADP-ROWQUALITY-1 - registry trued to r2-landed F326).
+             # Registry rows: projects/zjp/scripts/lib/family_registry.json
+             # families.trakstar/adp (SUP F316-cont + F326). url-keyed both - see idField.
+             "trakstar", "adp",
+             # Eightfold lane (AGG eightfold.js, production deepwalk 2026-11-04):
+             # 8 slug-keyed tenants. Registry row minted 2026-11-05 F327
+             # (families.eightfold; the family had pool rows + company-list membership
+             # but no registry row - workspace validator FAILED 'Unknown ATS platform').
+             # slug-keyed - default idField class.
+             "eightfold"}
 
 
 
@@ -136,10 +149,11 @@ def validate_company_list(data):
             if not name or not str(name).strip():
                 errors.append("[%s][%d] missing or empty name" % (ats, i))
                 continue
-            # workday/phenom/jobvite/jazzhr=url (supplemental lanes carry board URLs, no
-            # slugs - AGG A294 row shape; jazzhr = A301 applytojob.com boards),
+            # workday/phenom/jobvite/jazzhr/trakstar/adp=url (supplemental lanes carry
+            # board URLs, no slugs - AGG A294 row shape; jazzhr = A301 applytojob.com
+            # boards, trakstar/adp = F316-cont/F326 lanes),
             # oracle=base_url, others=slug
-            id_field = "url" if ats in ("workday", "phenom", "jobvite", "jazzhr") else ("base_url" if ats == "oracle" else "slug")
+            id_field = "url" if ats in ("workday", "phenom", "jobvite", "jazzhr", "trakstar", "adp") else ("base_url" if ats == "oracle" else "slug")
             idv = t.get(id_field)
             if not idv or not str(idv).strip():
                 errors.append('[%s][%d] "%s" missing required field "%s"' % (ats, i, name, id_field))
