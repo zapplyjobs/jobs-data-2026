@@ -12,8 +12,12 @@ name: Refresh LMIA Data
 # R2 canada-visa-stats.json stayed frozen and the publisher consumed the stale
 # artifact. R2 is now the canonical home; check-54 monitors artifact health.
 #
-# Trigger: manual (workflow_dispatch). Run quarterly when ESDC publishes new data
-# (typically April, July, October, January for the previous quarter).
+# Trigger: monthly schedule + manual dispatch. ESDC publishes quarterly (typically
+# April, July, October, January for the previous quarter); the monthly run keeps the
+# 90-day staleness bound with margin, and check-54 alerts any differential the rest
+# of the time. Schedule wired INF-LMIA-REFRESH-SCHEDULE-1 (ENR C303 + OUT D140 chain:
+# dispatch-only since 2026-08-08 structurally guaranteed the 08-26..10-30 64-day skip);
+# pattern: refresh-lca-data.yml weekly cron, off-peak minute per GHA cron governance.
 # ENR-CANADA-LMIA-VISA-LANE-1
 
 on:
@@ -23,6 +27,8 @@ on:
         description: 'Number of recent quarters to include (default 8 = 2 years)'
         required: false
         default: '8'
+  schedule:
+    - cron: '43 6 1 * *'  # Monthly, 1st 06:43Z
 
 jobs:
   refresh:
