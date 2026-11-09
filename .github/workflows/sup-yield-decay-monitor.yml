@@ -137,19 +137,10 @@ jobs:
           python3 -c "import boto3, os; s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']); s3.download_file(os.environ['R2_BUCKET_NAME'], 'data/jobs-metadata.json', '.github/data/jobs-metadata.json'); print('Downloaded jobs-metadata.json')"
           python3 -c "import boto3, os; s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']); s3.download_file(os.environ['R2_BUCKET_NAME'], 'data/sup_tenants.json', '.github/data/sup_tenants.json'); print('Downloaded sup_tenants.json')"
 
-      - name: Run yield decay monitor
-        if: steps.freshness.outputs.pipeline_fresh == 'true'
-        run: |
-          node .github/scripts/processing/lib/sup-yield-decay-monitor.js \
-            --csv .github/data/company-research-log.csv \
-            --jobs .github/data/all_jobs.json \
-            --write .github/data/sup_yield_decay_monitor.json \
-            --baseline-file .github/data/sup-decay-baseline.json \
-            --prev-artifact .github/data/sup-yield-decay-monitor.prev.json \
-            --metadata .github/data/jobs-metadata.json \
-            --company-list .github/data/sup_tenants.json \
-            --json
-
+      # ORDERING: posture -> refresh -> upload CSV run BEFORE the decay monitor
+      # so it consumes the POST-refresh CSV; stored baselines are no longer
+      # pre-refresh by construction and 21d rolls seed from healed auto-fields
+      # instead of stale corrupt tuples (decmon baseline-seed fix, 2026-11-09).
       - name: Company visa-posture artifact (SUP-VISA-COMPANY-POSTURE-1)
         if: steps.freshness.outputs.pipeline_fresh == 'true'
         run: |
@@ -165,6 +156,43 @@ jobs:
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+
+      - name: Refresh CSV auto-fields (SUP-CSV-AUTOFIELDS-REFRESH-1 — F4)
+        if: steps.freshness.outputs.pipeline_fresh == 'true'
+        run: |
+          python3 .github/scripts/processing/lib/csv-enrich-refresh.py \
+            --csv .github/data/company-research-log.csv \
+            --data-dir .github/data
+          echo "CSV auto-fields refreshed ($(grep -c '2026-' /dev/null || true); stamps verified below)"
+        env:
+          SUPABASE_URL: https://xxmhgagpbxjflajoaahy.supabase.co
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+      - name: Upload refreshed CSV back to Supabase Storage
+        if: steps.freshness.outputs.pipeline_fresh == 'true'
+        run: |
+          curl -sf -X POST \
+            'https://xxmhgagpbxjflajoaahy.supabase.co/storage/v1/object/pipeline-data/company-research-log.csv' \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: text/csv" \
+            -H "x-upsert: true" \
+            --data-binary @.github/data/company-research-log.csv \
+            && echo "Refreshed CSV uploaded to Storage" \
+            || { echo "::error::CSV upload FAILED — Storage would silently stay stale (SSOT surface; do not swallow)"; exit 1; }
+
+      - name: Run yield decay monitor
+        if: steps.freshness.outputs.pipeline_fresh == 'true'
+        run: |
+          node .github/scripts/processing/lib/sup-yield-decay-monitor.js \
+            --csv .github/data/company-research-log.csv \
+            --jobs .github/data/all_jobs.json \
+            --write .github/data/sup_yield_decay_monitor.json \
+            --baseline-file .github/data/sup-decay-baseline.json \
+            --prev-artifact .github/data/sup-yield-decay-monitor.prev.json \
+            --metadata .github/data/jobs-metadata.json \
+            --company-list .github/data/sup_tenants.json \
+            --json
 
       - name: Posting archive ledger (SUP-POLICY-DECISIONS-2026-09-02 §7)
         if: steps.freshness.outputs.pipeline_fresh == 'true'
@@ -212,30 +240,6 @@ jobs:
           DISCORD_PIPELINE_ALERT_CHANNEL_ID: ${{ secrets.DISCORD_PIPELINE_ALERT_CHANNEL_ID }}
         run: node .github/scripts/processing/lib/sup-pool-hygiene-alert.js
 
-
-      - name: Refresh CSV auto-fields (SUP-CSV-AUTOFIELDS-REFRESH-1 — F4)
-        if: steps.freshness.outputs.pipeline_fresh == 'true'
-        run: |
-          python3 .github/scripts/processing/lib/csv-enrich-refresh.py \
-            --csv .github/data/company-research-log.csv \
-            --data-dir .github/data
-          echo "CSV auto-fields refreshed ($(grep -c '2026-' /dev/null || true); stamps verified below)"
-        env:
-          SUPABASE_URL: https://xxmhgagpbxjflajoaahy.supabase.co
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-
-      - name: Upload refreshed CSV back to Supabase Storage
-        if: steps.freshness.outputs.pipeline_fresh == 'true'
-        run: |
-          curl -sf -X POST \
-            'https://xxmhgagpbxjflajoaahy.supabase.co/storage/v1/object/pipeline-data/company-research-log.csv' \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
-            -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
-            -H "Content-Type: text/csv" \
-            -H "x-upsert: true" \
-            --data-binary @.github/data/company-research-log.csv \
-            && echo "Refreshed CSV uploaded to Storage" \
-            || { echo "::error::CSV upload FAILED — Storage would silently stay stale (SSOT surface; do not swallow)"; exit 1; }
 
       - name: Download jobs-metadata.json from R2 (parity input)
         if: steps.freshness.outputs.pipeline_fresh == 'true'
