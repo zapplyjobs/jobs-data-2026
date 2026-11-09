@@ -66,5 +66,8 @@ jobs:
       - name: DASH aspect verifier unit tests
         run: python3 .github/scripts/verify-dash-aspect-status.test.py
 
+      - name: SUP aspect verifier unit tests
+        run: python3 .github/scripts/verify-sup-aspect-status.test.py
+
       - name: Dependency-resolution check (INF-DEPRESOLUTION-ANALYZER-1 — blocks the silent-missing-module class)
         run: python3 .github/scripts/dep-resolution-check.py

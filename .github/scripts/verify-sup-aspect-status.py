@@ -170,15 +170,52 @@ def validate_company_list(data):
 
 # --- CI-runnable checks ---
 
+CI_GATE_DECAY_HOURS = 48  # SUP-WINDOWDECAY-1: decay window for healed ci-gate failures.
+
+
+def _age_h(run, now):
+    """Hours since a run's createdAt, or None when missing/unparseable."""
+    try:
+        created = datetime.datetime.fromisoformat(str(run.get("createdAt")).replace("Z", "+00:00"))
+        return (now - created).total_seconds() / 3600
+    except Exception:
+        return None
+
+
+def verification_decision(runs, now):
+    """Pure ci-gate verdict for c_verification (unit-tested in gate.yml,
+    DASH-verifier test pattern). SUP-WINDOWDECAY-1: RED whenever the LATEST
+    completed run is non-success (fail-success-fail flaps stay RED). With a
+    green head, failures in the window decay to GREEN once older than
+    CI_GATE_DECAY_HOURS - without time-decay a healed first-red froze the
+    aspect RED forever on a quiet repo (3rd freeze occurrence 2026-11-09;
+    08-09 tag, 10-28 disposition). Unparseable fail ages never decay."""
+    if not runs:
+        return "RED", "no completed ci-gate runs found"
+    latest = runs[0]
+    n_fails = sum(1 for r in runs if r.get("conclusion") != "success")
+    date = str(latest.get("createdAt", ""))[:10]
+    if latest.get("conclusion") != "success":
+        return "RED", f"last ci-gate {latest.get('conclusion')} ({date}), {n_fails} fail in last 3"
+    fresh = []
+    for r in runs:
+        if r.get("conclusion") == "success":
+            continue
+        age = _age_h(r, now)
+        if age is None or age <= CI_GATE_DECAY_HOURS:
+            fresh.append((r, age))
+    if not fresh:
+        detail = f"{n_fails} fail in last 3, all decayed (>48h old)" if n_fails else "0 fail in last 3"
+        return "GREEN", f"last ci-gate success ({date}), {detail}"
+    ages = ", ".join("age unknown" if a is None else f"{a:.0f}h old" for _, a in fresh)
+    return "RED", f"last ci-gate success ({date}), {n_fails} fail in last 3 within 48h ({ages})"
+
+
 def c_verification():
     """CI Gate on job-board-aggregator succeeds (validates company-list + repo)."""
     runs = gh_runs(SUP_REPO, workflow="ci-gate.yml", limit=3)
-    if not runs:
-        return "RED", "no completed ci-gate runs found", "gh-api:CI"
-    fails = [r for r in runs if r.get("conclusion") != "success"]
-    latest = runs[0]
-    status = green_if(len(fails) == 0 and latest.get("conclusion") == "success")
-    return status, f"last ci-gate {latest.get('conclusion')} ({latest['createdAt'][:10]}), {len(fails)} fail in last 3", "gh-api:CI"
+    status, evidence = verification_decision(runs, NOW)
+    return status, evidence, "gh-api:CI"
 
 
 def _artifact_staleness(label, key):
