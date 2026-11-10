@@ -14,6 +14,9 @@ Aspects (OUT-scoped, per OUT-ASPECT-VERIFY-1):
     readme_truth + liveness_canary 2026-11-05; semantic_conformance 2026-11-06 = gated legs 1+2
     of the session deep-pass monitor, RED on WORSENING not presence - legs 3/4 + disposals stay
     session-side)
+  asset_drift (2026-11-10, PHASE2 leg-2) -> manifest-vs-board sha equality, presence-RED
+  discord_conformance (2026-11-10, hole#2 closer) -> posting latency/miss/repost/routing/
+    verifier-liveness classes; MONITORING ONLY, never mutates posting (operator-gated)
   content_quality, coordination -> OMITTED (subjective -> STATE narrative)
 
 v1 caveats (honest): data_quality reads the dead-link scan (known to undercount soft-404/IP-
@@ -265,14 +268,28 @@ def _registry_boards():
     except Exception:
         return None
 
+_TREE_MEMO = {}
+
+def _repo_tree(repo):
+    # Blob-sha map {path: sha} for one repo HEAD tree, memoized per run. Shared by
+    # readme_truth (path existence) and asset_drift (sha equality) so an hourly run makes
+    # ONE tree call per repo (~20 total) instead of one per check (430-call hazard if
+    # asset_drift ever fetched per-target contents).
+    if repo not in _TREE_MEMO:
+        t = gh_json(["api", f"repos/{ORG}/{repo}/git/trees/HEAD?recursive=1"])
+        _TREE_MEMO[repo] = ({e.get("path"): e.get("sha")
+                             for e in (t.get("tree", []) if isinstance(t, dict) else [])
+                             if e.get("type") == "blob"} if isinstance(t, dict) else None)
+    return _TREE_MEMO[repo]
+
 def _truth_one(repo, is_pipeline, pipeline_names):
     fails, warns = [], []
     d = gh_json(["api", f"repos/{ORG}/{repo}/contents/README.md"])
     if not isinstance(d, dict):
         return ["README unreadable"], []
     body = base64.b64decode(d.get("content", "")).decode("utf-8", "replace")
-    t = gh_json(["api", f"repos/{ORG}/{repo}/git/trees/HEAD?recursive=1"])
-    files = {e.get("path") for e in (t.get("tree", []) if isinstance(t, dict) else []) if e.get("type") == "blob"}
+    files = _repo_tree(repo)
+    files = set(files) if isinstance(files, dict) else set()
     srcs = re.findall(r'<img[^>]*?src="([^"]+)"', body) + re.findall(r'!\[[^\]]*\]\(([^)]+\.png)\)', body)
     broken = sorted({s for s in srcs if not s.startswith("http") and s not in files})
     if broken:
@@ -313,6 +330,52 @@ def c_readme_truth():
     det = "; ".join((fails + warns)[:4])
     return status, f"{len(universe)} boards checked, {len(fails)} FAIL, {len(warns)} WARN" + (f": {det}" if det else ""), "gh-api:readme-truth"
 
+def c_asset_drift():
+    # PHASE2 leg-2 (D148 port; design verdict Phase2Judge 2026-11-10): the unported check #6 of
+    # session out-board-truth.py - sha-equality of every job-board-assets MANIFEST.json-declared
+    # target against the asset canon. Presence-based instant-RED (NOT the leg-1 worsening class):
+    # drift is binary and each instance is visitor-visible breakage (broken covers/listings
+    # banners on live boards). Canon shas come from the manifest's own git_blob_sha field
+    # (content-addressed, repo-independent) - one manifest call + one memoized tree call per
+    # target repo; no local hashing, no clone (the session script hashed clone bytes; deriving
+    # from remote trees removes the D146 stale-clone citation hazard class). The manifest lives
+    # in the PRIVATE zapplyjobs/job-board-assets repo; the workflow's GH_TOKEN (secrets.GH_PAT)
+    # reads it - sync.yml reads the same repo with the same secret. Failure tiers: manifest or
+    # any target tree unreadable after gh_json's 3-attempt retry -> RED unmeasured (fail-closed,
+    # transient gh flake must never read as drift); a canon push completes before sync.yml lands
+    # -> possible 1-hour transient RED that self-heals next run (writer: job-board-assets
+    # sync.yml, on push).
+    d = gh_json(["api", f"repos/{ORG}/job-board-assets/contents/MANIFEST.json"])
+    if not isinstance(d, dict) or not d.get("content"):
+        return "RED", f"unmeasured: MANIFEST.json unreadable (gh api after retries) - drift check degraded", "gh-api:job-board-assets"
+    try:
+        manifest = json.loads(base64.b64decode(d["content"]).decode("utf-8", "replace"))
+    except Exception as e:
+        return "RED", f"unmeasured: MANIFEST.json unparseable ({str(e)[:80]})", "gh-api:job-board-assets"
+    assets = manifest.get("assets") if isinstance(manifest, dict) else None
+    if not isinstance(assets, list) or not assets:
+        return "RED", "unmeasured: manifest carries no assets array", "gh-api:job-board-assets"
+    drifts, unreadable, checked = [], [], 0
+    for a in assets:
+        canon_sha = a.get("git_blob_sha")
+        for t in a.get("targets", []) if isinstance(a, dict) else []:
+            repo = (t.get("repo") or "").removeprefix(f"{ORG}/")
+            path = t.get("path")
+            if not repo or not path or not canon_sha:
+                continue
+            tree = _repo_tree(repo)
+            if not isinstance(tree, dict):
+                unreadable.append(f"{repo} (tree)")
+                continue
+            checked += 1
+            if tree.get(path) != canon_sha:
+                drifts.append(f"{repo}:{path}")
+    if unreadable:
+        return "RED", f"unmeasured: target trees unreadable after retries: {'; '.join(unreadable[:3])}", "gh-api:trees"
+    if drifts:
+        return "RED", f"{len(drifts)} drifted target(s) of {checked}: {'; '.join(drifts[:4])}", "gh-api:manifest+trees"
+    return "GREEN", f"{checked} manifest targets sha-match canon ({len(assets)} assets)", "gh-api:manifest+trees"
+
 def _fetch(url, timeout=60):
     req = urllib.request.Request(url, headers={"User-Agent": "out-aspect-verifier/1.0"})
     with urllib.request.urlopen(req, timeout=timeout) as r:
@@ -350,6 +413,30 @@ def _supabase_live(ids):
             lookup[sid] = lookup.get(sid, False) or bool(row.get("is_active"))
     return lookup
 
+def _canary_thresholds():
+    # Registry-driven canary thresholds (PHASE2 leg-3, D148): one versioned JSON both runners
+    # read verbatim - CI here, session out-liveness-canary.sh from its canonical clone path.
+    # Operator word -> JSON edit -> both runners re-point; no code change (D147
+    # AlarmDoctrineResearcher choice 5). Defaults below mirror the pre-file settled law.
+    try:
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "out-canary-thresholds.json")) as f:
+            t = json.load(f)
+        if isinstance(t, dict) and t.get("rider_threshold"):
+            return t
+    except Exception:
+        pass
+    return {"rider_threshold": 0.70, "hc_floor": 0.7368, "day_rule": "last",
+            "escalation_class": "yellow", "history_depth": 72}
+
+def _consec_days(day_list, ref):
+    """Longest run of consecutive calendar days in day_list ending at or before ref."""
+    ds = {d for d in day_list if d <= ref}
+    n, cur = 0, ref
+    while cur in ds:
+        n += 1
+        cur -= datetime.timedelta(days=1)
+    return n
+
 def c_liveness_canary():
     # Ported rider (session out-liveness-canary.sh ran weekly) -> CI hourly, SAME rider rule:
     # any surface < 0.70 live escalates (the 09-14 zombie-class monitor). Thresholds are the
@@ -358,6 +445,7 @@ def c_liveness_canary():
     # put a permanent false-alarm color on the matrix. Session-side 12-run history/delta stays
     # session-side; CI publishes the per-run rate.
     canary = []
+    TH = _canary_thresholds()
     for name, repo in (("ngj_readme", "New-Grad-Jobs-2027"), ("healthcare_readme", "New-Grad-Healthcare-Jobs-2027")):
         try:
             text = _fetch(f"https://raw.githubusercontent.com/{ORG}/{repo}/main/README.md")
@@ -378,7 +466,7 @@ def c_liveness_canary():
     lookup = _supabase_live(all_ids) if all_ids else {}
     if lookup is None:
         return "YELLOW", "SUPABASE_URL/SERVICE_ROLE_KEY unavailable to verifier step (canary unmeasured)", "supabase-rest"
-    reds, parts = [], []
+    reds, parts, scores = [], [], {}
     for name, sampled, total, err in canary:
         if err:
             reds.append(f"{name} source-fail ({err})")
@@ -390,12 +478,47 @@ def c_liveness_canary():
             reds.append(f"{name} insufficient sample (found {len(known)}/{len(sampled)})")
             continue
         parts.append(f"{name} {frac:.2f} ({live}/{len(known)}, missing {len(sampled) - len(known)})")
-        if frac < 0.70:
-            reds.append(f"{name} {frac:.2f} below rider 0.70")
+        scores[name] = frac
+        if frac < TH["rider_threshold"]:
+            reds.append(f"{name} {frac:.2f} below rider {TH['rider_threshold']}")
     status = "RED" if reds else "GREEN"
     ev = "; ".join(parts) if parts else "no surface scored"
     if reds:
         ev = "; ".join(reds[:3]) + (" | " + ev if ev else "")
+
+    # PHASE2 leg-3 (D148 port; design verdict Phase2Judge): rolling intraday history + the
+    # mechanized hc-floor watch. CURRENT settled law only - the amended canary-semantics
+    # bundle stays operator-gated (11-16 decision pass); an operator word edits
+    # out-canary-thresholds.json (data), never this code. Watch consequence is session
+    # adjudication ("-> investigate", D146 pre-commitment), so it NEVER colors this aspect
+    # (no YELLOW band: D146 disposed that as a permanent false-alarm color) - it lands in
+    # rider_state + evidence for the next session touch and the sweep's rider legs.
+    now_d = NOW.date()
+    entry = {"ts": NOW.isoformat(), **{k: (round(v, 4) if isinstance(v, float) else None)
+                                       for k, v in scores.items()}}
+    prev_rider = (proxy_json("out-aspect-status.json") or _r2_json("data/out-aspect-status.json")
+                  or {}).get("rider_state", {}).get("liveness_canary", {})
+    prev_hist = prev_rider.get("history") or []
+    hist = (prev_hist + [entry])[-TH["history_depth"]:]
+    hc_by_day = {}
+    for h in hist:
+        if h.get("healthcare_readme") is None:
+            continue
+        hc_by_day[h["ts"][:10]] = h["healthcare_readme"]  # day_rule=last reading of the day wins
+    watch_days = [d for d, v in sorted(hc_by_day.items()) if v < TH["hc_floor"]]
+    consec = _consec_days(watch_days, now_d) >= 2
+    _RIDER_STATE["liveness_canary"] = {
+        "generated_at": NOW.isoformat(),
+        "scores": {k: round(v, 4) for k, v in scores.items()},
+        "hc_floor_watch": {"fired": bool(consec),
+                           "below_days": watch_days[-5:],
+                           "floor": TH["hc_floor"], "class": TH["escalation_class"]},
+        "history": hist,
+        "history_baseline_reset": prev_hist == [],
+    }
+    if consec:
+        ev += (f" | hc-floor watch FIRED ({_consec_days(watch_days, now_d)} consecutive days "
+               f"< {TH['hc_floor']}; class {TH['escalation_class']}: session adjudication, not a page)")
     return status, ev, "supabase-rest+gh-raw+R2"
 
 # ── semantic_conformance rider (D146-cont; design: workspace state/generated/out_conformance_port_design_2026-11-06.md) ──
@@ -411,6 +534,12 @@ def c_liveness_canary():
 _CONF = {"sample": 400, "companies": 150, "min_matched": 60, "ceiling": 0.25,
          "l4l": 0.20, "degrade_share": 0.20, "budget_s": 240,
          "landing": "https://zapply.jobs/api/jobs", "owner_row": "INF-LANDING-VISA-RAWCHAIN-1"}
+# Discord conformance thresholds (D148; contract SLA "within ~15 min of pool update" now
+# measured - the soft contract number is codified here, flagged for the operator's quarterly
+# threshold-audit visibility and the 11-16 decision pass; measurement only, no behavior change).
+_DISCORD = {"late_min": 15, "very_late_min": 45, "miss_min": 90,
+            "artifact_stale_warn_min": 60, "artifact_stale_red_min": 180,
+            "runs_post": 110, "runs_fetch": 130, "receipt_stride_h": 6}
 _CONF_TO_SJD = {"job_sponsor": "sponsor", "company_sponsor": "possible", "none": "none"}
 _SJD_MEMO = []
 _RIDER_STATE = {}
@@ -693,6 +822,172 @@ def c_semantic_conformance():
           f"owner: {_CONF['owner_row']} | {reason}")
     return status, ev, "py-port:legs1+2 of out-semantic-conformance.js (legs3+4 stay session-side)"
 
+def _runs_full(repo, workflow, limit, fields="status,conclusion,createdAt,startedAt,updatedAt,event"):
+    out = gh_json(["run", "list", "-R", repo, "-w", workflow, "-L", str(limit),
+                   "--json", fields])
+    return [r for r in (out or []) if r.get("status") == "completed"]
+
+def _supabase_metric(key):
+    # pipeline_metrics single row (key, data) - the DASH /api/data reader's exact shape.
+    url = (os.environ.get("SUPABASE_URL") or "").rstrip("/")
+    key_env = os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or ""
+    if not url or not key_env:
+        return None
+    try:
+        q = urllib.parse.quote(f"key=eq.{key}&select=key,data", safe="=&")
+        req = urllib.request.Request(
+            f"{url}/rest/v1/pipeline_metrics?{q}",
+            headers={"apikey": key_env, "Authorization": f"Bearer {key_env}",
+                     "User-Agent": "out-aspect-verifier/1.0"})
+        with urllib.request.urlopen(req, timeout=30) as r:
+            rows = json.loads(r.read().decode("utf-8"))
+        return (rows[0] or {}).get("data") if rows else None
+    except Exception:
+        return None
+
+def _iso_min(a, b):
+    """Minutes from ISO datetime a to b (b - a, negative if a later)."""
+    return (datetime.datetime.fromisoformat(b.replace("Z", "+00:00"))
+            - datetime.datetime.fromisoformat(a.replace("Z", "+00:00"))).total_seconds() / 60.0
+
+def c_discord_conformance():
+    # PHASE2 / hole#2 closer (D148; design DiscordDesigner): Discord posting conformance as a
+    # measured aspect. MONITORING ONLY - it must never mutate posting cadence/copy/routing
+    # (user-visible, operator-gated). Classes: LATE/VERY-LATE (pool->post latency, gh run
+    # pairing), MISS (fetch moving, Discord silent >=90m), REPOST + CONTENT-CRITICAL (R2
+    # discord-verification.json critical counts - the consumer that never existed), VERIFIER-
+    # DEAD (post-linked verification artifact staleness; the DAILY cron artifact is IGNORED by
+    # design - it is almost always >60m old and must not false-RED), ROUTE-ERR (receipt
+    # channelId vs expected-channels, 6h stride; residual: pre-deletion wrong-channel moves are
+    # invisible at receipt level - filling verify-discord's verifyRouting stub is a dev-team
+    # relay, not an OUT build). Transient late events are budget noise (GH runner jitter);
+    # sustained silence pages. Self-heal: a late post downgrades MISS to late evidence.
+    posts = _runs_full(f"{ORG}/jobs-data-2026", "post-to-discord.yml", _DISCORD["runs_post"])
+    if not posts:
+        return "RED", "unmeasured: no completed post-to-discord runs visible (gh api)", "gh-api:runs"
+    now_iso = NOW.isoformat()
+    window_start = (NOW - datetime.timedelta(hours=24)).isoformat()
+    all_posts = sorted(posts, key=lambda r: r["createdAt"])
+    win_posts = [r for r in all_posts if r["createdAt"] >= window_start]
+    fetches = _runs_full(f"{ORG}/jobs-aggregator-private", "fetch-jobs.yml",
+                         _DISCORD["runs_fetch"], fields="status,conclusion,createdAt,updatedAt")
+    fetch_read_ok = bool(fetches)
+    # The honest measured window is the INTERSECTION of what both run lists actually cover
+    # (at a ~15-min post cadence a fixed -L tail may not reach a full 24h; claiming 24h on a
+    # 6h sample manufactured false MISS windows on the first local run - D148 correction).
+    span_start = max(window_start,
+                     all_posts[0]["createdAt"] if all_posts else window_start,
+                     min((f.get("createdAt", window_start) for f in fetches), default=window_start))
+    win_posts = [r for r in all_posts if r["createdAt"] >= span_start]
+    win_fetch = [f for f in fetches if f.get("updatedAt") and f["updatedAt"] >= span_start]
+    span_h = round(_iso_min(span_start, now_iso) / 60, 1)
+    # LATE / VERY-LATE + pairing gaps: for each window post run, latency = post start minus
+    # the latest fetch COMPLETION at-or-before it (fetch wave-links enrich + discord).
+    lates, very_lates, latencies = 0, 0, []
+    f_done = sorted((f["updatedAt"] for f in win_fetch if f.get("conclusion") == "success"))
+    for p in sorted(win_posts, key=lambda r: r["createdAt"]):
+        prior = [t for t in f_done if t <= p["createdAt"]]
+        if not prior:
+            continue
+        gap = _iso_min(prior[-1], p["createdAt"])
+        latencies.append(gap)
+        if gap > _DISCORD["late_min"]:
+            lates += 1
+        if gap > _DISCORD["very_late_min"]:
+            very_lates += 1
+    # MISS: longest fetch-completion -> next-post-start gap in window (unrecovered silence).
+    miss_windows, max_gap = 0, 0.0
+    if f_done:
+        p_starts = sorted(p["createdAt"] for p in win_posts)
+        for t in f_done:
+            nxt = next((s for s in p_starts if s >= t), None)
+            g = _iso_min(t, nxt) if nxt else _iso_min(t, now_iso)
+            max_gap = max(max_gap, g)
+            if g > _DISCORD["miss_min"]:
+                miss_windows += 1
+    # REPOST + CONTENT-CRITICAL + artifact freshness (post-linked only).
+    art = _r2_json("data/discord-verification.json")
+    reposts = content_crit = 0
+    art_note = "artifact unreadable"
+    if isinstance(art, dict):
+        cc = art.get("criticalIssuesCount") or {}
+        reposts = cc.get("recentSameIdReposts") or 0
+        content_crit = sum(cc.get(k) or 0 for k in
+                           ("locationErrors", "injectionErrors", "routingErrors")) \
+                      + (1 if art.get("hasCriticalIssues") and not (reposts or cc.get("locationErrors")
+                         or cc.get("injectionErrors") or cc.get("routingErrors")) else 0)
+        art_note = f"artifact {art.get('timestamp', '?')}"
+    verify_runs = _runs_full(f"{ORG}/jobs-data-2026", "verify-discord.yml", 10)
+    linked = [r for r in verify_runs if r.get("event") == "workflow_run"]
+    vdead = ""
+    if linked and linked[0].get("conclusion") != "success":
+        vdead = "post-linked verify run FAILED"
+    latest_post_done = max((p["updatedAt"] for p in win_posts), default=None)
+    if latest_post_done and isinstance(art, dict):
+        age = _iso_min(latest_post_done, art.get("timestamp", now_iso))
+        if age > 0:  # artifact predates the newest post run = its verification never landed
+            if age > _DISCORD["artifact_stale_red_min"]:
+                vdead = vdead or f"verification artifact stale {age:.0f}m past newest post run"
+            elif age > _DISCORD["artifact_stale_warn_min"]:
+                vdead = vdead or f"verification artifact pending {age:.0f}m past newest post run"
+    # ROUTE-ERR receipt audit at stride (posted_jobs.json is MB-scale; 6h keeps egress small).
+    route_err, audited = 0, 0
+    prev_rider = (proxy_json("out-aspect-status.json") or _r2_json("data/out-aspect-status.json")
+                  or {}).get("rider_state", {}).get("discord_conformance", {})
+    last_audit = prev_rider.get("last_receipt_audit_at")
+    due = (not last_audit) or _iso_min(last_audit, now_iso) >= _DISCORD["receipt_stride_h"] * 60
+    if due:
+        exp = _supabase_metric("expected-channels")
+        if isinstance(exp, dict):
+            known_ids = {c.get("id") for c in exp.get("channels", []) if isinstance(c, dict)}
+            pj = _r2_json("data/posted_jobs.json")
+            for job in ((pj or {}).get("jobs") or [])[:500]:
+                for cid, meta in ((job.get("discordPosts") or {}).items()):
+                    audited += 1
+                    if cid not in known_ids:
+                        route_err += 1
+        last_audit = now_iso
+    reds, ylows = [], []
+    if miss_windows:
+        reds.append(f"MISS: {miss_windows} fetch->post gap(s) > {_DISCORD['miss_min']}m (max {max_gap:.0f}m)")
+    if reposts:
+        reds.append(f"REPOST: {reposts} sameIdReposts")
+    if content_crit:
+        reds.append(f"CONTENT-CRITICAL: {content_crit}")
+    if "FAILED" in vdead or "stale" in vdead:
+        reds.append(vdead)
+    elif vdead:
+        ylows.append(vdead)
+    if very_lates:
+        ylows.append(f"{very_lates} very-late post start(s) > {_DISCORD['very_late_min']}m after pool")
+    elif lates > 5:
+        ylows.append(f"{lates} late post starts > {_DISCORD['late_min']}m (budget 5/24h)")
+    if route_err:
+        reds.append(f"ROUTE-ERR: {route_err} receipt(s) to non-expected channel ids")
+    if not fetch_read_ok:
+        ylows.append("fetch runs unreadable (private repo scope) - latency/miss classes unmeasured this run")
+    p50 = sorted(latencies)[len(latencies) // 2] if latencies else None
+    status = "RED" if reds else ("YELLOW" if ylows else "GREEN")
+    ev = (f"{span_h}h window: {len(win_posts)} posts, {miss_windows} miss") \
+        + (f", p50 lat {p50:.0f}m" if p50 is not None else "") \
+        + f", {lates} late/{very_lates} very-late, {reposts} repost, {route_err} route-err" \
+        + f"; {art_note}" \
+        + (f"; receipts audited {audited} (stride {last_audit[:16] if last_audit else 'n/a'})") \
+        + f"; thresholds {_DISCORD['late_min']}/{_DISCORD['very_late_min']}/{_DISCORD['miss_min']}m" \
+        + (" | " + "; ".join((reds + ylows)[:3]) if (reds or ylows) else "")
+    _RIDER_STATE["discord_conformance"] = {
+        "generated_at": now_iso,
+        "window_hours": span_h,
+        "events": len(win_posts), "late": lates, "very_late": very_lates,
+        "miss_windows": miss_windows, "max_gap_min": round(max_gap, 1),
+        "repost": reposts, "route_err": route_err, "content_critical": content_crit,
+        "p50_latency_min": round(p50, 1) if p50 is not None else None,
+        "artifact": art_note, "fetch_runs_read": fetch_read_ok,
+        "last_receipt_audit_at": last_audit,
+        "thresholds": dict(_DISCORD),
+    }
+    return status, ev, "gh-api:runs+R2:discord-verification+supabase:expected-channels"
+
 CHECKS = {
     "verification": c_verification, "monitoring": c_monitoring, "performance": c_performance,
     "infrastructure": c_infrastructure, "configuration": c_configuration,
@@ -700,6 +995,7 @@ CHECKS = {
     "change_mgmt": c_change_mgmt, "data_quality": c_data_quality,
     "readme_truth": c_readme_truth, "liveness_canary": c_liveness_canary,
     "semantic_conformance": c_semantic_conformance,
+    "asset_drift": c_asset_drift, "discord_conformance": c_discord_conformance,
 }
 
 def verify():
