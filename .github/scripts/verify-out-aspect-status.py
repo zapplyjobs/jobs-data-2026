@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# CANONICAL: this jobs-data-2026 copy publishes the official artifact (pipeline-data/out-aspect-status.json). A session-side mirror exists at GenAI_Work projects/zjp/scripts/ and DRIFTS - never treat the mirror as truth (OUT-ASPECTVERIFIER-MIRROR-DRIFT-1, false RED 09-12).
+# CANONICAL: this jobs-data-2026 copy publishes the official artifact (data/out-aspect-status.json on R2; Supabase-storage mirror pipeline-data/). The old GenAI_Work workspace mirror at projects/zjp/scripts/ was TOMBSTONED 11-05 (16-line pointer, OUT-ASPECTVERIFIER-MIRROR-DRIFT-1) - never resurrect it; session-side instruments are deep-pass only (sole-measurer law, D148 leg-4). Session-side code-fact citations use the canonical clone /home/ahd/zjp-repos/jobs-data-2026 (clone discipline, D146). Header trued 11-10 D158: the pre-11-10 warning named the mirror as live, which it no longer is.
 """
 verify-out-aspect-status.py — OUT aspect-status VERIFIER (ASPECT_STATUS_CONTRACT.md, verified model).
 
