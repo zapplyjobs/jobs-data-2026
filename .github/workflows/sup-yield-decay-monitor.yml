@@ -101,7 +101,6 @@ jobs:
 
       - name: Download decay baseline from R2 (rolling snapshot store)
         if: steps.freshness.outputs.pipeline_fresh == 'true'
-        continue-on-error: true
         env:
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
@@ -109,11 +108,25 @@ jobs:
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
         run: |
           pip install -q boto3
-          python3 -c "import boto3, os; s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']); s3.download_file(os.environ['R2_BUCKET_NAME'], 'data/sup-decay-baseline.json', '.github/data/sup-decay-baseline.json'); print('Downloaded sup-decay-baseline.json from R2')"
+          # Outcome-gated: a MISSING baseline is a legitimate first-run state (the
+          # monitor bootstraps one), but a TRANSIENT R2/auth failure must fail the
+          # run — proceeding would silently re-anchor the 21d rolling baseline.
+          python3 -c "import boto3, os, sys
+          from botocore.exceptions import ClientError
+          s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY'])
+          try:
+              s3.download_file(os.environ['R2_BUCKET_NAME'], 'data/sup-decay-baseline.json', '.github/data/sup-decay-baseline.json')
+              print('Downloaded sup-decay-baseline.json from R2')
+          except ClientError as e:
+              code = e.response.get('Error', {}).get('Code', '')
+              if code in ('404', 'NoSuchKey', 'NotFound'):
+                  print('No stored sup-decay-baseline.json in R2 (first run) — monitor bootstraps a fresh baseline')
+              else:
+                  print('::error::R2 transfer failure on sup-decay-baseline.json (code %s) — proceeding would silently re-anchor the rolling baseline' % code)
+                  sys.exit(1)"
 
       - name: Download previous decay artifact from R2 (episode continuity — SUP-DECAY-FIRSTFLAG-1)
         if: steps.freshness.outputs.pipeline_fresh == 'true'
-        continue-on-error: true
         env:
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
@@ -121,12 +134,27 @@ jobs:
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
         run: |
           pip install -q boto3
-          python3 -c "import boto3, os; s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']); s3.download_file(os.environ['R2_BUCKET_NAME'], 'data/sup_yield_decay_monitor.json', '.github/data/sup-yield-decay-monitor.prev.json'); print('Downloaded previous sup_yield_decay_monitor.json (first_flagged episode continuity)')"
+          # Outcome-gated: absent prev artifact is legitimate on a first run, but a
+          # TRANSIENT R2/auth failure must fail the run — proceeding and then
+          # uploading a fresh artifact would silently destroy first_flagged
+          # episode continuity (SUP-DECAY-FIRSTFLAG-1).
+          python3 -c "import boto3, os, sys
+          from botocore.exceptions import ClientError
+          s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY'])
+          try:
+              s3.download_file(os.environ['R2_BUCKET_NAME'], 'data/sup_yield_decay_monitor.json', '.github/data/sup-yield-decay-monitor.prev.json')
+              print('Downloaded previous sup_yield_decay_monitor.json (first_flagged episode continuity)')
+          except ClientError as e:
+              code = e.response.get('Error', {}).get('Code', '')
+              if code in ('404', 'NoSuchKey', 'NotFound'):
+                  print('No previous sup_yield_decay_monitor.json in R2 (first run) — first_flagged episodes start fresh')
+              else:
+                  print('::error::R2 transfer failure on previous decay artifact (code %s) — proceeding would silently destroy first_flagged episode continuity on upload' % code)
+                  sys.exit(1)"
 
 
       - name: Download jobs-metadata + tenants projection from R2 (new-tenant gap-check inputs)
         if: steps.freshness.outputs.pipeline_fresh == 'true'
-        continue-on-error: true
         env:
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
@@ -134,8 +162,25 @@ jobs:
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
         run: |
           pip install -q boto3
-          python3 -c "import boto3, os; s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']); s3.download_file(os.environ['R2_BUCKET_NAME'], 'data/jobs-metadata.json', '.github/data/jobs-metadata.json'); print('Downloaded jobs-metadata.json')"
-          python3 -c "import boto3, os; s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']); s3.download_file(os.environ['R2_BUCKET_NAME'], 'data/sup_tenants.json', '.github/data/sup_tenants.json'); print('Downloaded sup_tenants.json')"
+          # Outcome-gated: absent inputs legitimately skip the monitor's gap checks
+          # (null-guarded there), but a TRANSIENT R2/auth failure must fail the run
+          # instead of silently amputating the zero-output/new-tenant gap checks.
+          python3 -c "import boto3, os, sys
+          from botocore.exceptions import ClientError
+          s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY'])
+          def fetch(key, out, missing_note):
+              try:
+                  s3.download_file(os.environ['R2_BUCKET_NAME'], key, out)
+                  print('Downloaded ' + key + ' from R2')
+              except ClientError as e:
+                  code = e.response.get('Error', {}).get('Code', '')
+                  if code in ('404', 'NoSuchKey', 'NotFound'):
+                      print(missing_note)
+                  else:
+                      print('::error::R2 transfer failure on %s (code %s) — proceeding would silently skip the new-tenant gap checks' % (key, code))
+                      sys.exit(1)
+          fetch('data/jobs-metadata.json', '.github/data/jobs-metadata.json', 'No jobs-metadata.json in R2 — new-tenant pool-gap check will be skipped this run')
+          fetch('data/sup_tenants.json', '.github/data/sup_tenants.json', 'No sup_tenants.json in R2 — zero-output + new-tenant gap checks will be skipped this run')"
 
       # ORDERING: posture -> refresh -> upload CSV run BEFORE the decay monitor
       # so it consumes the POST-refresh CSV; stored baselines are no longer
@@ -198,11 +243,21 @@ jobs:
         if: steps.freshness.outputs.pipeline_fresh == 'true'
         run: |
           pip install -q boto3
-          python3 -c "import boto3, os; s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']);
+          # Outcome-gated: absent previous ledger is a legitimate first run, but a
+          # TRANSIENT R2/auth failure must fail the run — proceeding would reseed
+          # from scratch and the upload below would overwrite the posting archive.
+          python3 -c "import boto3, os, sys
+          from botocore.exceptions import ClientError
+          s3 = boto3.client('s3', region_name='auto', endpoint_url=os.environ['R2_ENDPOINT'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY'])
           try:
               s3.download_file(os.environ['R2_BUCKET_NAME'], 'data/sup-posting-ledger.jsonl', '.github/data/sup-posting-ledger.prev.jsonl'); print('Downloaded previous ledger')
-          except Exception as e:
-              print('No previous ledger (first run) — seeding from scratch:', e)"
+          except ClientError as e:
+              code = e.response.get('Error', {}).get('Code', '')
+              if code in ('404', 'NoSuchKey', 'NotFound'):
+                  print('No previous ledger (first run) — seeding from scratch:', e)
+              else:
+                  print('::error::R2 transfer failure on previous posting ledger (code %s) — proceeding would reseed and overwrite the posting archive' % code)
+                  sys.exit(1)"
           node .github/scripts/processing/lib/sup-posting-ledger.js \
             --pool .github/data/all_jobs.json \
             --prev .github/data/sup-posting-ledger.prev.jsonl \
