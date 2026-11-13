@@ -77,7 +77,10 @@ def fetch_api_data():
     })
     t0 = time.monotonic()
     try:
-        with urllib.request.urlopen(req, timeout=20) as resp:
+        # 60s matches the route's own QUERY_TIMEOUT_MS cap: /api/data measurably
+        # serves 200 in 23-33s (Supabase ~31s+/query), so 20s timed out a healthy
+        # endpoint and rendered aspects RED on probe-timeout artifacts.
+        with urllib.request.urlopen(req, timeout=60) as resp:
             body = resp.read()
             elapsed = time.monotonic() - t0
             return elapsed, resp.status, json.loads(body), None
@@ -272,7 +275,10 @@ def c_security():
     try:
         opener = urllib.request.build_opener(_NoRedirect)
         req = urllib.request.Request(f"{DASH_URL}/api/data", headers={"User-Agent": "ZJP-DashAspectVerifier/1.0"})
-        opener.open(req, timeout=20)
+        # Same 60s headroom as the authenticated probe: if Access ever passes an
+        # unauthenticated request through, the origin handler runs 23-33s — a 20s
+        # timeout here would mask the exposure as YELLOW 'failed to resolve'.
+        opener.open(req, timeout=60)
         unauth = 200  # got a full response WITHOUT Access credentials — exposure
     except urllib.error.HTTPError as e:
         unauth = e.code  # 3xx (Access redirect) or 401/403 = denied — expected
