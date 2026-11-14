@@ -1,0 +1,74 @@
+name: Estate Exposure
+
+# A341 estate exposure enforcement — weekly machinery for the approved architecture:
+# detect -> auto-fix within GH_PAT scope -> record receipts -> escalate only what
+# cannot be fixed. Quiet = healthy: green run + findings artifact + job summary
+# table. A failing run IS the alert (no Discord layer, by design — the brief
+# explicitly routes findings to the run summary + artifact only).
+#
+# Exit contract (estate convention, org-malware-rescan.sh):
+#   0 = clean or all findings auto-fixed · 1 = unfixable findings (ALERT) ·
+#   2 = infra/coverage hole (fail-closed — never report a blind estate as healthy)
+#
+# The selftest runs FIRST and is fail-closed: broken machinery can never mutate
+# the live estate, because the scan step never starts.
+# Manifest baseline: estate-visibility-manifest.txt (.txt because *.json is
+# transcrypt filter=crypt in this repo — allowlist precedent).
+
+on:
+  schedule:
+    - cron: '37 8 * * 6'  # Saturdays 08:37Z — off the Mon-Fri 05:00-07:00Z cluster; zero 08:xx neighbors
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Detect + plan only; no auto-fix mutations (dress rehearsal)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: estate-exposure
+  cancel-in-progress: false
+
+jobs:
+  exposure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 1
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Selftest the machinery (fail-closed gate before any live mutation)
+        run: python3 scripts/estate-exposure-scan.py --selftest
+
+      - name: Scan estate + auto-fix within token scope
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+          ESTATE_DRY_RUN: ${{ inputs.dry_run }}  # env-indirection, never inline ${{ }} in run script
+        run: |
+          git config --unset-all http.https://github.com/.extraheader 2>/dev/null || true  # actions/checkout leaves GH_PAT auth here; it shadows GH_TOKEN on git calls (INF-RESCAN-SYNC-GAPS-1, 2026-11-10)
+          ARGS=""
+          if [ "$ESTATE_DRY_RUN" = "true" ]; then ARGS="--dry-run"; fi
+          ESTATE_ARTIFACTS_DIR=/tmp/estate-exposure-artifacts \
+            python3 scripts/estate-exposure-scan.py --scan $ARGS
+
+      - name: Upload findings artifact
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: estate-exposure-findings
+          path: /tmp/estate-exposure-artifacts/findings.json
+          if-no-files-found: warn
+
+      - name: Fail loudly if no findings artifact was produced
+        if: always()
+        run: |
+          if [ ! -s /tmp/estate-exposure-artifacts/findings.json ]; then
+            echo "::error::scanner produced no findings.json (timeout/hang class) — treating as failure for the alert layer"
+            exit 1
+          fi

@@ -1,0 +1,47 @@
+{
+  "_meta": {
+    "format": "estate-visibility-manifest v1 — JSON payload in a .txt file: *.json is transcrypt filter=crypt in this repo (ciphertext without the unlock step); .txt ships plaintext, per the org-malware-rescan-allowlist.txt precedent",
+    "generated": "2026-11-14",
+    "source": "operator-verified live estate visibility (A341 lead ground truth, 2026-11-14); live API probe was unavailable during the visibility-flip lock — the scanner reconciles this baseline against live state on every run, so any wrong row surfaces as a finding rather than being silently absorbed",
+    "scope": "the 11-repo estate (6 code + 5 content). The 15 board repos (Internships-2027 etc.) are product, out of scope. Scanning never enumerates the org: it probes exactly these named repos.",
+    "policy": "code-repo visibility fixes are estate-ops decisions (escalate, never auto-flip). Content repos are record-only by design. README auto-stub applies to public code repos only; content repos carry product branding legitimately."
+  },
+  "estate": {
+    "org": "zapplyjobs",
+    "code_repos": [
+      "jobs-aggregator-engine",
+      "job-board-aggregator",
+      "job-board-consumer",
+      "job-board-processing",
+      "job-board-shared",
+      "jobs-data-2026"
+    ],
+    "content_repos": [
+      "resume-samples-2026",
+      "interview-handbook-2026",
+      "release-scheduling-bot",
+      "underclassmen-internships",
+      "Research-Internships-for-Undergraduates"
+    ]
+  },
+  "expected_visibility": {
+    "jobs-aggregator-engine": "public",
+    "job-board-aggregator": "public",
+    "job-board-consumer": "public",
+    "job-board-processing": "public",
+    "job-board-shared": "public",
+    "jobs-data-2026": "public",
+    "resume-samples-2026": "public",
+    "interview-handbook-2026": "public",
+    "release-scheduling-bot": "public",
+    "underclassmen-internships": "public",
+    "Research-Internships-for-Undergraduates": "public"
+  },
+  "record_only": {
+    "resume-samples-2026": true,
+    "interview-handbook-2026": true,
+    "release-scheduling-bot": true,
+    "underclassmen-internships": true,
+    "Research-Internships-for-Undergraduates": true
+  }
+}
