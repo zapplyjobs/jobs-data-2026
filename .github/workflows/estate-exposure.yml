@@ -79,29 +79,33 @@ jobs:
       - name: Rolling estate-exposure ALERT issue (open-or-update on ALERT; comment-and-close on green)
         if: always()
         env:
-          GH_TOKEN: ${{ github.token }}  # default token, issues:write only — no new secret
+          GH_TOKEN: ${{ secrets.GH_PAT }}  # default github.token is repo-scoped — the ALERT issue homes on zapplyjobs/.github (live-learned run 43658797461: jobs-data-2026 has issues disabled; only .github has them)
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           # Tree-hole 5 (A341 round-two): one rolling issue so a persisted ALERT is
           # visible beyond the Actions tab; the next green run comments and closes it.
+          # Home: zapplyjobs/.github (only estate repo with issues enabled).
+          # Non-fatal by design: the failing run IS the primary alert; this is a
+          # persistence layer and must never repaint a green/red scan verdict.
           VERDICT="$(cat /tmp/estate-exposure-artifacts/verdict.txt 2>/dev/null || echo MISSING)"
           TITLE="estate-exposure ALERT"
+          HOME_REPO="zapplyjobs/.github"
           BODY=/tmp/estate-exposure-artifacts/issue-body.md
-          NUM="$(gh issue list --state open --search "$TITLE in:title" --json number --jq '.[0].number // empty')"
+          if ! NUM="$(gh issue list -R "$HOME_REPO" --state open --search "$TITLE in:title" --json number --jq '.[0].number // empty' 2>/dev/null)"; then
+            echo "::warning::rolling ALERT issue unavailable (issues disabled or unreachable on $HOME_REPO) — the run verdict above remains the alert"
+            exit 0
+          fi
           if [ "$VERDICT" = "ALERT" ]; then
             { cat /tmp/estate-exposure-artifacts/summary.md; echo; echo "---"; echo "_Opened/updated by run $RUN_URL. This issue stays open until a green run closes it._"; } > "$BODY"
             if [ -n "$NUM" ]; then
-              gh issue edit "$NUM" --title "$TITLE" --body-file "$BODY"
-              echo "rolling ALERT issue #$NUM updated"
+              gh issue edit -R "$HOME_REPO" "$NUM" --title "$TITLE" --body-file "$BODY" && echo "rolling ALERT issue #$NUM updated"
             else
-              gh issue create --title "$TITLE" --body-file "$BODY"
-              echo "rolling ALERT issue created"
+              gh issue create -R "$HOME_REPO" --title "$TITLE" --body-file "$BODY" && echo "rolling ALERT issue created"
             fi
           elif [ "$VERDICT" = "CLEAN" ] || [ "$VERDICT" = "ALL-FIXED" ]; then
             if [ -n "$NUM" ]; then
-              gh issue comment "$NUM" --body "Resolved by green run (verdict $VERDICT): $RUN_URL"
-              gh issue close "$NUM"
-              echo "rolling ALERT issue #$NUM closed by green run"
+              gh issue comment -R "$HOME_REPO" "$NUM" --body "Resolved by green run (verdict $VERDICT): $RUN_URL"
+              gh issue close -R "$HOME_REPO" "$NUM" && echo "rolling ALERT issue #$NUM closed by green run"
             else
               echo "green run, no open ALERT issue"
             fi
