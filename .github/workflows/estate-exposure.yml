@@ -13,8 +13,9 @@ name: Estate Exposure
 #
 # The selftest runs FIRST and is fail-closed: broken machinery can never mutate
 # the live estate, because the scan step never starts.
-# Manifest baseline: estate-visibility-manifest.txt (.txt because *.json is
-# transcrypt filter=crypt in this repo — allowlist precedent).
+# Manifest baseline: scripts/estate-visibility-manifest.txt (in scripts/** because
+# *.json is transcrypt filter=crypt in this repo — allowlist precedent — and the
+# repo content gate is deny-by-default outside allowlisted paths).
 
 on:
   schedule:

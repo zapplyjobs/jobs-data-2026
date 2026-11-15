@@ -151,7 +151,12 @@ SEVERITY = {
     "waiver-stale": "low",
 }
 
-MANIFEST_PATH = Path(__file__).resolve().parent.parent / "estate-visibility-manifest.txt"
+# Lives beside the scanner inside scripts/** — the repo content gate (INF-REPO-C
+# ONTENT-GATE-1, allowlist scripts/repo_content_gate.json in zapplyjobs/.github)
+# is deny-by-default for tracked paths on gated repos; scripts/** is allowlisted,
+# a root-level manifest is not. Same-dir derivation also removes checkout-root
+# coupling.
+MANIFEST_PATH = Path(__file__).resolve().parent / "estate-visibility-manifest.txt"
 
 
 # --------------------------------------------------------------------------
