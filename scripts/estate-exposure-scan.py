@@ -205,23 +205,22 @@ def evaluate_state(state, manifest, now):
     """
     findings = []
 
-    # (f) token expiry
+    # (f) token expiry — normalized (days_remaining) by collect_live_state, which
+    # owns the header parsing and the fail-closed infra path for unparseable values
     tok = state.get("token_expiry") or {}
-    expires = tok.get("expires")
-    if expires:
-        exp_dt = datetime.fromisoformat(expires.replace("Z", "+00:00"))
-        days = (exp_dt - now).total_seconds() / 86400.0
-        if days < TOKEN_EXPIRY_WARN_DAYS:
-            findings.append({
-                "id": "token-expiry:gh-pat",
-                "class": "token-expiry",
-                "repo": "-",
-                "severity": SEVERITY["token-expiry"],
-                "fixable": False,
-                "action": "record-only",
-                "detail": f"GH_PAT expires {expires} ({days:.1f}d < {TOKEN_EXPIRY_WARN_DAYS:.0f}d) — renew at github.com/settings/personal-access-tokens; header-probe receipt in findings artifact",
-                "days_remaining": round(days, 2),
-            })
+    days = tok.get("days_remaining")
+    if days is not None and days < TOKEN_EXPIRY_WARN_DAYS:
+        expires = tok.get("expires", "?")
+        findings.append({
+            "id": "token-expiry:gh-pat",
+            "class": "token-expiry",
+            "repo": "-",
+            "severity": SEVERITY["token-expiry"],
+            "fixable": False,
+            "action": "record-only",
+            "detail": f"GH_PAT expires {expires} ({days}d < {TOKEN_EXPIRY_WARN_DAYS:.0f}d) — renew at github.com/settings/personal-access-tokens; header-probe receipt in findings artifact",
+            "days_remaining": days,
+        })
 
     repos = state.get("repos") or {}
     for repo, estate in _manifest_repos(manifest).items():
@@ -483,6 +482,22 @@ def _gh_json(args, **kw):
     return json.loads(out)
 
 
+def _parse_expiry(raw):
+    """Parse a GitHub token-expiration header value -> aware UTC datetime (None if
+    unparseable). Handles both observed shapes: '2026-11-30T17:40:22Z' and the live
+    '2026-11-30 17:40:22 UTC'. GitHub expirations are always UTC."""
+    s = (raw or "").strip()
+    s = re.sub(r"\s+UTC$", "+00:00", s, flags=re.IGNORECASE)
+    s = re.sub(r"(\d) (\d{2}:\d{2})", r"\1T\2", s, count=1)  # space date-time separator
+    try:
+        dt = datetime.fromisoformat(s)
+    except ValueError:
+        return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(timezone.utc)
+
+
 def collect_live_state():
     """Probe the estate via GH_PAT (from GH_TOKEN env). Returns (state, infra[]).
 
@@ -498,10 +513,22 @@ def collect_live_state():
         try:
             # -i: headers ride stdout ahead of the body; the fine-grained PAT puts its
             # expiry in github-authentication-token-expiration on every response.
+            # REAL header shape (live-verified 2026-11-15, run 43658142137):
+            #   "Github-Authentication-Token-Expiration: 2026-11-30 17:40:22 UTC"
+            # — spaced, UTC suffix, title-cased name. The \S+ variant captured only
+            # the date and crashed the aware/naive subtraction on run 1.
             out_i, _ = gh(["api", f"repos/{ORG}/{repo}", "-i"])
-            m = re.search(r"(?im)^github-authentication-token-expiration:\s*(\S+)", out_i)
+            m = re.search(r"(?im)^github-authentication-token-expiration:\s*(.+)$", out_i)
             if m and state["token_expiry"] is None:
-                state["token_expiry"] = {"expires": m.group(1), "probed_on": repo}
+                exp_dt = _parse_expiry(m.group(1))
+                if exp_dt is None:
+                    infra.append(f"GH_PAT expiry header unparseable (fail-closed): {m.group(1)!r}")
+                else:
+                    state["token_expiry"] = {
+                        "expires": exp_dt.isoformat().replace("+00:00", "Z"),
+                        "days_remaining": round((exp_dt - datetime.now(timezone.utc)).total_seconds() / 86400.0, 2),
+                        "probed_on": repo,
+                    }
             meta = _gh_json(["api", f"repos/{ORG}/{repo}"])
             rs.update(reachable=True, visibility=meta.get("visibility"),
                       archived=bool(meta.get("archived")),
@@ -826,7 +853,7 @@ def build_fixtures():
     state1.update({r: _repo_state() for r in CONTENT_REPOS})
     state1["job-board-shared"] = _probed_code_state(visibility="private")
     F["F1-code-visibility"] = (_transition_form(state1),
-                               {"token_expiry": {"expires": "2026-12-30T00:00:00Z"}}, fm,
+                               {"token_expiry": {"expires": "2026-12-30T00:00:00Z", "days_remaining": 45.5}}, fm,
                                {"code-visibility:job-board-shared"})
 
     # F2 (b): planted open PR -> auto-close plan
@@ -834,14 +861,14 @@ def build_fixtures():
     state2.update({r: _repo_state() for r in CONTENT_REPOS})
     state2["job-board-aggregator"] = _probed_code_state(
         open_prs=[{"number": 5, "title": "Bump actions/checkout from 5 to 6", "author": "dependabot[bot]"}])
-    F["F2-open-pr"] = (_transition_form(state2), {"token_expiry": {"expires": "2026-12-30T00:00:00Z"}}, fm,
+    F["F2-open-pr"] = (_transition_form(state2), {"token_expiry": {"expires": "2026-12-30T00:00:00Z", "days_remaining": 45.5}}, fm,
                        {"open-pr:job-board-aggregator:5"})
 
     # F3 (c): missing ruleset on a NON-exempt repo -> auto-add
     state3 = {r: _probed_code_state() for r in CODE_REPOS}
     state3.update({r: _repo_state() for r in CONTENT_REPOS})
     state3["job-board-consumer"] = _probed_code_state(rulesets=[])
-    F["F3-ruleset-missing"] = (_transition_form(state3), {"token_expiry": {"expires": "2026-12-30T00:00:00Z"}}, fm,
+    F["F3-ruleset-missing"] = (_transition_form(state3), {"token_expiry": {"expires": "2026-12-30T00:00:00Z", "days_remaining": 45.5}}, fm,
                                {"ruleset-missing:job-board-consumer"})
 
     # F3b: guard ruleset present but enforcement=disabled -> drift (record-only, NO add)
@@ -849,7 +876,7 @@ def build_fixtures():
     state3b = {r: _probed_code_state() for r in CODE_REPOS}
     state3b.update({r: _repo_state() for r in CONTENT_REPOS})
     state3b["job-board-shared"] = _probed_code_state(rulesets=[drifted])
-    F["F3b-ruleset-drift"] = (_transition_form(state3b), {"token_expiry": {"expires": "2026-12-30T00:00:00Z"}}, fm,
+    F["F3b-ruleset-drift"] = (_transition_form(state3b), {"token_expiry": {"expires": "2026-12-30T00:00:00Z", "days_remaining": 45.5}}, fm,
                               {"ruleset-drift:job-board-shared"})
 
     # F3c: canonical + unknown extra fields -> NO finding (tolerant predicate; first-run FP guard)
@@ -859,7 +886,7 @@ def build_fixtures():
     state3c = {r: _probed_code_state() for r in CODE_REPOS}
     state3c.update({r: _repo_state() for r in CONTENT_REPOS})
     state3c["jobs-aggregator-engine"] = _probed_code_state(rulesets=[tolerant])
-    F["F3c-ruleset-tolerant"] = (_transition_form(state3c), {"token_expiry": {"expires": "2026-12-30T00:00:00Z"}}, fm,
+    F["F3c-ruleset-tolerant"] = (_transition_form(state3c), {"token_expiry": {"expires": "2026-12-30T00:00:00Z", "days_remaining": 45.5}}, fm,
                                  set())
 
     # F4 (d): describing README (variant path readme.md to pin F3 fix) -> auto-stub
@@ -868,22 +895,22 @@ def build_fixtures():
     state4["job-board-processing"] = _probed_code_state(
         readme={"present": True, "path": "readme.md", "sha": "deadbeef",
                 "text": "Part of the [Zapply](https://zapply.jobs) job board infrastructure.\n"})
-    F["F4-describing-readme"] = (_transition_form(state4), {"token_expiry": {"expires": "2026-12-30T00:00:00Z"}}, fm,
+    F["F4-describing-readme"] = (_transition_form(state4), {"token_expiry": {"expires": "2026-12-30T00:00:00Z", "days_remaining": 45.5}}, fm,
                                  {"describing-readme:job-board-processing"})
 
     # F5 (e): content repo private -> record-only; code side fully clean
     state5 = {r: _probed_code_state() for r in CODE_REPOS}
     state5.update({r: _repo_state() for r in CONTENT_REPOS})
     state5["resume-samples-2026"] = _repo_state(visibility="private")
-    F["F5-content-visibility"] = (_transition_form(state5), {"token_expiry": {"expires": "2026-12-30T00:00:00Z"}}, fm,
+    F["F5-content-visibility"] = (_transition_form(state5), {"token_expiry": {"expires": "2026-12-30T00:00:00Z", "days_remaining": 45.5}}, fm,
                                   {"content-visibility:resume-samples-2026"})
 
     # F6 (f): token expiry boundary — 13.9d fires; 14.0d does not
     base = {r: _probed_code_state() for r in CODE_REPOS}
     base.update({r: _repo_state() for r in CONTENT_REPOS})
-    F["F6a-token-expiry-fires"] = (_transition_form(dict(base)), {"token_expiry": {"expires": "2026-11-28T02:24:00Z"}}, fm,
+    F["F6a-token-expiry-fires"] = (_transition_form(dict(base)), {"token_expiry": {"expires": "2026-11-28T02:24:00Z", "days_remaining": 13.9}}, fm,
                                    {"token-expiry:gh-pat"})  # NOW + 13.9d
-    F["F6b-token-expiry-boundary-clean"] = (_transition_form(dict(base)), {"token_expiry": {"expires": "2026-11-28T12:00:01Z"}}, fm,
+    F["F6b-token-expiry-boundary-clean"] = (_transition_form(dict(base)), {"token_expiry": {"expires": "2026-11-28T12:00:01Z", "days_remaining": 14.0}}, fm,
                                             set())  # NOW + 14.000d
 
     # F7: clean baseline in the TRANSITION designated state — zero findings, zero actions
@@ -891,7 +918,7 @@ def build_fixtures():
                                            "text": "Docs for the public job listings pipeline.\n", "sha": "x"})
              for r in CODE_REPOS}
     clean.update({r: _repo_state() for r in CONTENT_REPOS})
-    F["F7-clean-baseline"] = (_transition_form(clean), {"token_expiry": {"expires": "2026-12-14T12:00:00Z"}}, fm, set())
+    F["F7-clean-baseline"] = (_transition_form(clean), {"token_expiry": {"expires": "2026-12-14T12:00:00Z", "days_remaining": 30.0}}, fm, set())
 
     # F8: clean + fully absent readmes + content repos unprobed (None fields —
     # evaluator must not probe-fall-back)
@@ -900,14 +927,14 @@ def build_fixtures():
     clean2.update({r: {"reachable": True, "visibility": "public", "archived": False,
                        "default_branch": "main", "open_prs": None, "rulesets": None, "readme": None}
                    for r in CONTENT_REPOS})
-    F["F8-clean-no-readme"] = (_transition_form(clean2), {"token_expiry": {"expires": "2026-12-14T12:00:00Z"}}, fm, set())
+    F["F8-clean-no-readme"] = (_transition_form(clean2), {"token_expiry": {"expires": "2026-12-14T12:00:00Z", "days_remaining": 30.0}}, fm, set())
 
     # F9 (F1-fold): guard ruleset APPEARS on the exempt repo -> HIGH violation
     # (production-breaking; visibility is waived so this is the only finding)
     state9 = {r: _probed_code_state() for r in CODE_REPOS}
     state9.update({r: _repo_state() for r in CONTENT_REPOS})
     state9["jobs-data-2026"] = _probed_code_state(visibility="private", rulesets=[_canonical_ruleset()])
-    F["F9-exemption-violated"] = (state9, {"token_expiry": {"expires": "2026-12-30T00:00:00Z"}}, fm,
+    F["F9-exemption-violated"] = (state9, {"token_expiry": {"expires": "2026-12-30T00:00:00Z", "days_remaining": 45.5}}, fm,
                                   {"ruleset-exemption-violated:jobs-data-2026"})
 
     # F10 (F1-fold): drifted ruleset on the exempt repo -> still a violation (and NOT
@@ -915,7 +942,7 @@ def build_fixtures():
     state10 = {r: _probed_code_state() for r in CODE_REPOS}
     state10.update({r: _repo_state() for r in CONTENT_REPOS})
     state10["jobs-data-2026"] = _probed_code_state(visibility="private", rulesets=[drifted])
-    F["F10-exemption-violated-drifted"] = (state10, {"token_expiry": {"expires": "2026-12-30T00:00:00Z"}}, fm,
+    F["F10-exemption-violated-drifted"] = (state10, {"token_expiry": {"expires": "2026-12-30T00:00:00Z", "days_remaining": 45.5}}, fm,
                                            {"ruleset-exemption-violated:jobs-data-2026"})
 
     # F11 (F2-fold): waived repo back to public (ruleset still absent = exempt state
@@ -923,7 +950,7 @@ def build_fixtures():
     state11 = {r: _probed_code_state() for r in CODE_REPOS}
     state11.update({r: _repo_state() for r in CONTENT_REPOS})
     state11["jobs-data-2026"] = _probed_code_state(visibility="public", rulesets=[])
-    F["F11-waiver-stale"] = (state11, {"token_expiry": {"expires": "2026-12-30T00:00:00Z"}}, fm,
+    F["F11-waiver-stale"] = (state11, {"token_expiry": {"expires": "2026-12-30T00:00:00Z", "days_remaining": 45.5}}, fm,
                              {"waiver-stale:jobs-data-2026"})
 
     # F12 (F3-fold + missed-case f): EMPTY readme (benign, was INFRA) + lowercase
@@ -934,7 +961,7 @@ def build_fixtures():
         readme={"present": True, "path": "README.md", "text": "", "sha": "e1"})
     state12["job-board-consumer"] = _probed_code_state(
         readme={"present": True, "path": "readme.md", "sha": "v1", "text": "Neutral.\n"})
-    F["F12-empty-and-variant-readme"] = (_transition_form(state12), {"token_expiry": {"expires": "2026-12-30T00:00:00Z"}}, fm,
+    F["F12-empty-and-variant-readme"] = (_transition_form(state12), {"token_expiry": {"expires": "2026-12-30T00:00:00Z", "days_remaining": 45.5}}, fm,
                                          set())
 
     return F
@@ -1048,6 +1075,15 @@ def selftest(log=print):
     bad_exempt["ruleset_exemptions"] = {"resume-samples-2026": {"until": "x"}}
     problems = validate_manifest(bad_exempt)
     check("T6b-content-repo-exemption-caught", any("only code repos" in p for p in problems), str(problems))
+
+    # 6c. run-1 live bug pin: real header value is "2026-11-30 17:40:22 UTC" (spaced,
+    # UTC suffix) — the \S+ capture crashed aware/naive subtraction on run 43658142137
+    live = _parse_expiry("2026-11-30 17:40:22 UTC")
+    check("T6c-parse-live-header-shape",
+          live == datetime(2026, 11, 30, 17, 40, 22, tzinfo=timezone.utc), repr(live))
+    check("T6c-parse-compact-shape",
+          _parse_expiry("2026-11-30T17:40:22Z") == live, repr(_parse_expiry("2026-11-30T17:40:22Z")))
+    check("T6c-parse-garbage-is-none", _parse_expiry("not-a-date") is None)
 
     # 7. summary renders for every verdict shape without crashing
     for name, (repos, extra, manifest, _) in build_fixtures().items():
