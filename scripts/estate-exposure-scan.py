@@ -22,20 +22,38 @@ Exit contract (house convention, org-malware-rescan.sh):
 Check classes (manifest drives repo set + expected visibility):
   code-visibility    code repo visibility != expected  -> RECORD/ESCALATE ONLY
                      (flipping visibility is an estate-ops decision, never automated)
+  visibility waivers jobs-data-2026 is WAIVED to private during the visibility-flip
+                     lock window (round-two F2): observed-private = no finding (shown
+                     as WAIVED in coverage); observed-public while waived = LOW
+                     waiver-stale finding so waiver rows can never become permanent
+                     furniture; any third state falls through to the normal class.
   open-pr            open PR on a code repo            -> AUTO-CLOSE (silent: no comment,
                      no Discord; the closure event itself notifies the PR author)
   ruleset-missing    guard-required-main ruleset absent-> AUTO-ADD (template below)
+  ruleset exemption  jobs-data-2026 is EXEMPT from the guard ruleset (round-two F1):
+                     ungated wave pushes ~every 10 min — a required-check ruleset
+                     there would reject every wave push and break production. Its
+                     designated state is NO guard ruleset; the auto-add refuses this
+                     repo (defense in depth), and a guard ruleset APPEARING there is
+                     a HIGH ruleset-exemption-violated finding (production-breaking,
+                     escalate immediately).
   ruleset-drift      guard ruleset present but off-template (inactive, no guard
                      context, not main, bypass actors, strict=true) -> RECORD ONLY
   ruleset-duplicate  >1 guard ruleset on main          -> RECORD ONLY
-  describing-readme  README on a public code repo containing the brand token
-                     ("zapply", case-insensitive)      -> AUTO-STUB (one-line neutral
-                     replacement; the FULL original text is preserved in the receipt.
-                     NOTE: the old blob remains reachable in git history until a
-                     history rewrite, which is an estate-ops decision — recorded in
-                     the receipt, not hidden)
+  describing-readme  README (any common variant: README.md/readme.md/README.rst/
+                     readme.rst/README/README.txt) on a public code repo containing
+                     the brand token ("zapply", case-insensitive) -> AUTO-STUB (one-
+                     line neutral replacement; the FULL original text is preserved
+                     in the receipt. NOTE: the old blob remains reachable in git
+                     history until a history rewrite, which is an estate-ops
+                     decision — recorded in the receipt, not hidden)
   content-visibility content repo visibility drift     -> RECORD ONLY (by design)
   token-expiry       GH_PAT expires in <14d (header probe) -> RECORD ONLY
+                     (round-two F4: the estate PAT is fine-grained per the secrets
+                     inventory, so the github-authentication-token-expiration header
+                     is always present; a CLASSIC token would trip the fail-closed
+                     INFRA path BY DESIGN — no fallback, a token whose expiry cannot
+                     be observed is a coverage hole)
 
 Anti-false-positive pins:
   - The ruleset predicate accepts every known main-ref form (~DEFAULT_BRANCH, ~MAIN,
@@ -93,6 +111,10 @@ ESTATE_REPOS = CODE_REPOS + CONTENT_REPOS
 DESCRIBING_README_RE = re.compile(r"zapply", re.IGNORECASE)
 NEUTRAL_STUB = "Public job board repository.\n"
 TOKEN_EXPIRY_WARN_DAYS = 14.0
+# README variants probed in order (round-two F3: hardcoding README.md left
+# readme.md/README.rst/... silently unprobed). The stub rewrites the MATCHED path.
+README_CANDIDATES = ("README.md", "readme.md", "README.rst", "readme.rst", "README", "README.txt")
+README_SIZE_LIMIT = 1_000_000  # contents API stops returning content past 1MB
 
 MAIN_REF_FORMS = {"refs/heads/main", "~DEFAULT_BRANCH", "~MAIN"}
 
@@ -120,11 +142,13 @@ SEVERITY = {
     "code-visibility": "high",
     "describing-readme": "high",
     "ruleset-missing": "high",
+    "ruleset-exemption-violated": "high",
     "ruleset-drift": "medium",
     "ruleset-duplicate": "medium",
     "open-pr": "medium",
     "content-visibility": "medium",
     "token-expiry": "medium",
+    "waiver-stale": "low",
 }
 
 MANIFEST_PATH = Path(__file__).resolve().parent.parent / "estate-visibility-manifest.txt"
@@ -204,30 +228,45 @@ def evaluate_state(state, manifest, now):
             # at the exit-code layer, not as a finding class).
             continue
 
-        # (a)/(e) visibility vs designated baseline
+        # (a)/(e) visibility vs designated baseline, honoring waivers (round-two F2).
+        # A waiver ONLY waives the visibility finding — it must never suppress the
+        # repo's other probes (F9/F10 exist precisely to pin that).
         expected = estate["expected_visibility"]
         actual = rs.get("visibility")
-        if actual != expected:
-            if cls == "code":
+        waiver = (manifest.get("visibility_waivers") or {}).get(repo)
+        waived_ok = bool(waiver) and actual == waiver.get("expected_during_waiver")
+        if not waived_ok:
+            if waiver and actual == expected:
                 findings.append({
-                    "id": f"code-visibility:{repo}",
-                    "class": "code-visibility",
+                    "id": f"waiver-stale:{repo}",
+                    "class": "waiver-stale",
                     "repo": repo,
-                    "severity": SEVERITY["code-visibility"],
+                    "severity": SEVERITY["waiver-stale"],
                     "fixable": False,
                     "action": "record-only",
-                    "detail": f"visibility={actual}, expected={expected} — flipping visibility is an estate-ops decision, never automated",
+                    "detail": f"visibility waiver no longer matches live state (actual={actual}, baseline={expected}) — remove the waiver row to keep the manifest honest; waivers must never become permanent furniture",
                 })
-            else:
-                findings.append({
-                    "id": f"content-visibility:{repo}",
-                    "class": "content-visibility",
-                    "repo": repo,
-                    "severity": SEVERITY["content-visibility"],
-                    "fixable": False,
-                    "action": "record-only",
-                    "detail": f"visibility={actual}, expected={expected} — content repos are record-only by design",
-                })
+            elif actual != expected:
+                if cls == "code":
+                    findings.append({
+                        "id": f"code-visibility:{repo}",
+                        "class": "code-visibility",
+                        "repo": repo,
+                        "severity": SEVERITY["code-visibility"],
+                        "fixable": False,
+                        "action": "record-only",
+                        "detail": f"visibility={actual}, expected={expected} — flipping visibility is an estate-ops decision, never automated",
+                    })
+                else:
+                    findings.append({
+                        "id": f"content-visibility:{repo}",
+                        "class": "content-visibility",
+                        "repo": repo,
+                        "severity": SEVERITY["content-visibility"],
+                        "fixable": False,
+                        "action": "record-only",
+                        "detail": f"visibility={actual}, expected={expected} — content repos are record-only by design",
+                    })
 
         if cls != "code" or rs.get("archived"):
             continue  # content repos: visibility only; archived repos: no mutation probes
@@ -245,10 +284,24 @@ def evaluate_state(state, manifest, now):
                 "pr_number": pr["number"],
             })
 
-        # (c) guard ruleset
+        # (c) guard ruleset — with data-2026 exemption (round-two F1: ungated wave
+        # pushes; a required-check ruleset there breaks production on arrival)
         guard_rulesets = [r for r in (rs.get("rulesets") or []) if ruleset_guard_status(r) in ("canonical", "drifted")]
-        canonical = [r for r in guard_rulesets if ruleset_guard_status(r) == "canonical"]
-        if not guard_rulesets:
+        exempt = (manifest.get("ruleset_exemptions") or {}).get(repo)
+        if exempt:
+            if guard_rulesets:
+                names = "; ".join(f"{r.get('name')}#{r.get('id')}({r.get('enforcement')})" for r in guard_rulesets)
+                findings.append({
+                    "id": f"ruleset-exemption-violated:{repo}",
+                    "class": "ruleset-exemption-violated",
+                    "repo": repo,
+                    "severity": SEVERITY["ruleset-exemption-violated"],
+                    "fixable": False,
+                    "action": "record-only",
+                    "detail": f"PRODUCTION RISK: guard ruleset present on exempt repo ({exempt.get('until', 'no until recorded')}): {names} — required checks reject this repo's ungated wave pushes; remove via estate-ops immediately",
+                })
+            # designated state = no guard ruleset: missing/drift/duplicate checks skipped
+        elif not guard_rulesets:
             findings.append({
                 "id": f"ruleset-missing:{repo}",
                 "class": "ruleset-missing",
@@ -259,7 +312,8 @@ def evaluate_state(state, manifest, now):
                 "detail": f"no guard-required-main ruleset — auto-add from template (shared id 21692193 shape)",
             })
         else:
-            if len(canonical) == 0:
+            canonical = [r for r in guard_rulesets if ruleset_guard_status(r) == "canonical"]
+            if not canonical:
                 names = "; ".join(f"{r.get('name')}#{r.get('id')}({r.get('enforcement')})" for r in guard_rulesets)
                 findings.append({
                     "id": f"ruleset-drift:{repo}",
@@ -293,6 +347,7 @@ def evaluate_state(state, manifest, now):
                     "severity": SEVERITY["describing-readme"],
                     "fixable": True,
                     "action": "auto-stub",
+                    "readme_path": readme.get("path") or "README.md",
                     "detail": "README describes the operation (brand token match) — auto-stub to one-line neutral; original preserved in receipt; old blob stays in git history until estate-ops history rewrite",
                 })
 
@@ -300,8 +355,9 @@ def evaluate_state(state, manifest, now):
     return findings
 
 
-def plan_actions(findings):
+def plan_actions(findings, manifest=None):
     """Pure: findings -> mutation plan (only fixable classes; payload per class)."""
+    exempt_repos = set((manifest or {}).get("ruleset_exemptions") or {})
     actions = []
     for f in findings:
         if f["class"] == "open-pr":
@@ -310,6 +366,12 @@ def plan_actions(findings):
                 "payload": {"pr_number": f["pr_number"]},
             })
         elif f["class"] == "ruleset-missing":
+            if f["repo"] in exempt_repos:
+                # defense in depth: the evaluator suppresses ruleset-missing on exempt
+                # repos, so reaching this line means manifest drifted mid-run — refuse
+                # the loaded gun (round-two F1: a required-check ruleset on data-2026
+                # rejects every ungated wave push and breaks production)
+                continue
             actions.append({
                 "finding": f["id"], "type": "add-ruleset", "repo": f["repo"],
                 "payload": dict(RULESET_BODY),
@@ -318,7 +380,7 @@ def plan_actions(findings):
             actions.append({
                 "finding": f["id"], "type": "stub-readme", "repo": f["repo"],
                 "payload": {
-                    "path": "README.md",
+                    "path": f.get("readme_path", "README.md"),
                     "content_b64": base64.b64encode(NEUTRAL_STUB.encode()).decode(),
                     "message": "estate-exposure: stub describing README (auto-fix, receipt keeps original)",
                 },
@@ -371,6 +433,19 @@ def validate_manifest(manifest):
     extra = (set(expected) | set(record_only)) - set(ESTATE_REPOS)
     if extra:
         problems.append(f"unknown repos in manifest: {sorted(extra)}")
+    waivers = manifest.get("visibility_waivers") or {}
+    for name, w in waivers.items():
+        if name not in ESTATE_REPOS:
+            problems.append(f"visibility_waivers[{name}]: unknown repo")
+            continue
+        if w.get("expected_during_waiver") not in ("public", "private"):
+            problems.append(f"visibility_waivers[{name}].expected_during_waiver={w.get('expected_during_waiver')!r} invalid")
+        elif w.get("expected_during_waiver") == expected.get(name):
+            problems.append(f"visibility_waivers[{name}] is redundant (equals the baseline expectation) — a waiver must differ or it is furniture")
+    exemptions = manifest.get("ruleset_exemptions") or {}
+    for name in exemptions:
+        if name not in CODE_REPOS:
+            problems.append(f"ruleset_exemptions[{name}]: only code repos carry guard rulesets")
     return problems
 
 
@@ -428,12 +503,13 @@ def collect_live_state():
                       default_branch=meta.get("default_branch") or "main")
             if not rs["archived"]:
                 if repo in CODE_REPOS:
-                    prs = _gh_json(["api", f"repos/{ORG}/{repo}/pulls?state=open&per_page=100"])
-                    rs["open_prs"] = [{"number": p["number"], "title": (p.get("title") or "")[:120],
-                                       "author": ((p.get("user") or {}).get("login") or "?")}
-                                      for p in prs]
+                    rs["open_prs"] = [
+                        {"number": p["number"], "title": (p.get("title") or "")[:120],
+                         "author": ((p.get("user") or {}).get("login") or "?")}
+                        for p in _paginate(repo, "open PRs", f"repos/{ORG}/{repo}/pulls?state=open", infra)
+                    ]
                     # rulesets list then detail-fetch candidates (list omits rules)
-                    summaries = _gh_json(["api", f"repos/{ORG}/{repo}/rulesets"]) or []
+                    summaries = _paginate(repo, "rulesets", f"repos/{ORG}/{repo}/rulesets", infra)
                     details = []
                     for s in summaries:
                         if s.get("target") and s.get("target") != "branch":
@@ -457,21 +533,45 @@ def collect_live_state():
 
 
 def _fetch_readme(repo, default_branch, infra):
-    """README text + sha via contents API. 404/absent -> present=False."""
-    try:
-        out, _ = gh(["api", f"repos/{ORG}/{repo}/contents/README.md?ref={default_branch}"])
-        meta = json.loads(out)
-        content = meta.get("content") or ""
-        if not content:
-            infra.append(f"{repo}: README.md >1MB via contents API — unprobeable (fail-closed)")
-            return {"present": True, "text": None, "sha": meta.get("sha")}
-        text = base64.b64decode(content).decode("utf-8", "replace")
-        return {"present": True, "text": text, "sha": meta.get("sha")}
-    except GhError as e:
-        if "404" in str(e) or "Not Found" in str(e):
-            return {"present": False, "text": None, "sha": None}
-        infra.append(f"{repo}: README probe failed (fail-closed): {e}")
-        return {"present": True, "text": None, "sha": None}
+    """README probe across common variants (round-two F3: hardcoding README.md left
+    readme.md/README.rst/... silently unprobed). Returns {present, path, sha, text}.
+    Empty file (content=="" with size 0) is benign -> text "" (round-two missed-case f:
+    it used to be misfiled as >1MB -> INFRA on a benign state). >1MB stays fail-closed.
+    """
+    for path in README_CANDIDATES:
+        try:
+            out, _ = gh(["api", f"repos/{ORG}/{repo}/contents/{path}?ref={default_branch}"])
+            meta = json.loads(out)
+            content = meta.get("content") or ""
+            size = meta.get("size") or 0
+            sha = meta.get("sha")
+            if not content:
+                if size > README_SIZE_LIMIT:
+                    infra.append(f"{repo}: {path} >1MB via contents API — unprobeable (fail-closed)")
+                    return {"present": True, "path": path, "text": None, "sha": sha}
+                return {"present": True, "path": path, "text": "", "sha": sha}  # empty file: benign
+            text = base64.b64decode(content).decode("utf-8", "replace")
+            return {"present": True, "path": path, "text": text, "sha": sha}
+        except GhError as e:
+            if "404" in str(e) or "Not Found" in str(e):
+                continue  # try the next variant
+            infra.append(f"{repo}: README probe failed ({path}) (fail-closed): {e}")
+            return {"present": True, "path": path, "text": None, "sha": None}
+    return {"present": False, "path": None, "text": None, "sha": None}
+
+
+def _paginate(repo, what, path, infra, cap=10, per_page=100):
+    """Page through a list endpoint; truncation at cap pages is fail-closed (round-two
+    F5: silent truncation read PR #101 as green and hid page-2 rulesets as missing)."""
+    sep = "&" if "?" in path else "?"
+    items = []
+    for page in range(1, cap + 1):
+        batch = _gh_json(["api", f"{path}{sep}per_page={per_page}&page={page}"])
+        items.extend(batch)
+        if len(batch) < per_page:
+            return items
+    infra.append(f"{repo}: {what} truncated at {cap * per_page} items (fail-closed)")
+    return items
 
 
 # --------------------------------------------------------------------------
@@ -510,7 +610,7 @@ def apply_actions(actions, state, dry_run):
                 body = json.dumps({"message": a["payload"]["message"],
                                    "content": a["payload"]["content_b64"], "sha": sha})
                 proc = subprocess.run(
-                    ["gh", "api", f"repos/{ORG}/{a['repo']}/contents/README.md", "-X", "PUT",
+                    ["gh", "api", f"repos/{ORG}/{a['repo']}/contents/{a['payload']['path']}", "-X", "PUT",
                      "--input", "-", "--jq", ".commit.sha"],
                     input=body, capture_output=True, text=True,
                     env={**os.environ, "GH_TOKEN": os.environ.get("GH_TOKEN", "")}, timeout=60)
@@ -576,15 +676,24 @@ def render_summary(mode, verdict, findings, receipts, infra, state, manifest, no
     lines.append(f"| GH_PAT expiry | {tok.get('expires', 'NOT OBSERVED (infra)')}"
                  + (f" ({tok.get('days_remaining', '?')}d remaining)" if tok.get("days_remaining") is not None else "") + " |")
     repos = state.get("repos") or {}
+    waivers = manifest.get("visibility_waivers") or {}
+    exemptions = manifest.get("ruleset_exemptions") or {}
     for repo in ESTATE_REPOS:
         rs = repos.get(repo) or {}
         vis = rs.get("visibility") or "UNREACHABLE"
+        w = waivers.get(repo)
+        if w and vis == w.get("expected_during_waiver"):
+            vis += f" WAIVED (until: {w.get('until', 'unrecorded')})"
         probes = []
         if rs.get("reachable"):
             if repo in CODE_REPOS and not rs.get("archived"):
+                if repo in exemptions:
+                    probes.append("rulesets=EXEMPT (guard ruleset must NOT exist here)")
+                else:
+                    probes.append(f"rulesets={len(rs.get('rulesets') or [])}")
                 probes.append(f"prs={len(rs.get('open_prs') or [])}")
-                probes.append(f"rulesets={len(rs.get('rulesets') or [])}")
-                probes.append("readme=yes" if (rs.get("readme") or {}).get("present") else "readme=absent")
+                rd = rs.get("readme") or {}
+                probes.append(f"readme={rd.get('path') or 'absent'}")
         lines.append(f"| {repo} | vis={vis} {' '.join(probes)} |")
     if infra:
         lines.append("")
@@ -647,7 +756,25 @@ def _fixture_manifest():
     expected = {r: "public" for r in ESTATE_REPOS}
     record_only = {r: True for r in CONTENT_REPOS}
     return {"estate": {"org": ORG, "code_repos": list(CODE_REPOS), "content_repos": list(CONTENT_REPOS)},
-            "expected_visibility": expected, "record_only": record_only}
+            "expected_visibility": expected, "record_only": record_only,
+            # mirrors the real manifest's round-two rows (F1/F2)
+            "visibility_waivers": {"jobs-data-2026": {
+                "expected_during_waiver": "private",
+                "until": "visibility revert lands (lead unlock signal)",
+                "reason": "temporarily private pending revert"}},
+            "ruleset_exemptions": {"jobs-data-2026": {
+                "until": "gated-push migration exists for wave-push producers",
+                "reason": "ungated wave pushes ~every 10 min"}}}
+
+
+def _transition_form(state):
+    """Put jobs-data-2026 into its designated TRANSITION form: private (waived),
+    no guard ruleset (exempt), stubbed neutral README. This is what 'clean' means
+    for that repo until gated-push migration + visibility revert land."""
+    state["jobs-data-2026"] = _probed_code_state(
+        visibility="private", rulesets=[],
+        readme={"present": True, "path": "README.md", "text": NEUTRAL_STUB, "sha": "stub"})
+    return state
 
 
 def _repo_state(visibility="public", open_prs=None, rulesets=None, readme=None, archived=False):
@@ -681,41 +808,43 @@ NOW = datetime(2026, 11, 14, 12, 0, 0, tzinfo=timezone.utc)
 
 
 def build_fixtures():
-    """Named fixture states. Deterministic; NOW pinned. Each = (name, state, expected_ids)."""
+    """Named fixture states. Deterministic; NOW pinned. Each = (state, extra, manifest, expected_ids).
+    Every fixture ends in _transition_form: jobs-data-2026's designated state during the
+    lock/migration window is private (waived) + no guard ruleset (exempt) + stub README.
+    Fixtures that deliberately violate the transition form override AFTER it."""
     fm = _fixture_manifest()
     F = {}
 
-    # F1 (a): fake public-expected code repo that is actually private -> record-only
-    F["F1-code-visibility"] = (
-        {r: _probed_code_state() for r in CODE_REPOS}
-        | {r: _repo_state() for r in CONTENT_REPOS}
-        | {"jobs-data-2026": _probed_code_state(visibility="private")},
-        {"token_expiry": {"expires": "2026-12-30T00:00:00Z"}}, fm,
-        {"code-visibility:jobs-data-2026"},
-    )
+    # F1 (a): non-exempt code repo private -> record-only (data-2026 is waived, so the
+    # class fixture must live on another repo)
+    state1 = {r: _probed_code_state() for r in CODE_REPOS}
+    state1.update({r: _repo_state() for r in CONTENT_REPOS})
+    state1["job-board-shared"] = _probed_code_state(visibility="private")
+    F["F1-code-visibility"] = (_transition_form(state1),
+                               {"token_expiry": {"expires": "2026-12-30T00:00:00Z"}}, fm,
+                               {"code-visibility:job-board-shared"})
 
     # F2 (b): planted open PR -> auto-close plan
     state2 = {r: _probed_code_state() for r in CODE_REPOS}
     state2.update({r: _repo_state() for r in CONTENT_REPOS})
-    state2["job-board-aggregator"] = _repo_state(
-        open_prs=[{"number": 5, "title": "Bump actions/checkout from 5 to 6", "author": "dependabot[bot]"}],
-        rulesets=[_canonical_ruleset()], readme={"present": True, "text": "Job listings pipeline.\n", "sha": "abc"})
-    F["F2-open-pr"] = (state2, {"token_expiry": {"expires": "2026-12-30T00:00:00Z"}}, fm,
+    state2["job-board-aggregator"] = _probed_code_state(
+        open_prs=[{"number": 5, "title": "Bump actions/checkout from 5 to 6", "author": "dependabot[bot]"}])
+    F["F2-open-pr"] = (_transition_form(state2), {"token_expiry": {"expires": "2026-12-30T00:00:00Z"}}, fm,
                        {"open-pr:job-board-aggregator:5"})
 
-    # F3 (c): missing ruleset -> auto-add (only on that repo)
+    # F3 (c): missing ruleset on a NON-exempt repo -> auto-add
     state3 = {r: _probed_code_state() for r in CODE_REPOS}
-    state3["jobs-data-2026"] = _probed_code_state(rulesets=[])
     state3.update({r: _repo_state() for r in CONTENT_REPOS})
-    F["F3-ruleset-missing"] = (state3, {"token_expiry": {"expires": "2026-12-30T00:00:00Z"}}, fm,
-                               {"ruleset-missing:jobs-data-2026"})
+    state3["job-board-consumer"] = _probed_code_state(rulesets=[])
+    F["F3-ruleset-missing"] = (_transition_form(state3), {"token_expiry": {"expires": "2026-12-30T00:00:00Z"}}, fm,
+                               {"ruleset-missing:job-board-consumer"})
 
     # F3b: guard ruleset present but enforcement=disabled -> drift (record-only, NO add)
     drifted = _canonical_ruleset(id=777, name="guard-required-main", enforcement="disabled")
     state3b = {r: _probed_code_state() for r in CODE_REPOS}
-    state3b["job-board-shared"] = _probed_code_state(rulesets=[drifted])
     state3b.update({r: _repo_state() for r in CONTENT_REPOS})
-    F["F3b-ruleset-drift"] = (state3b, {"token_expiry": {"expires": "2026-12-30T00:00:00Z"}}, fm,
+    state3b["job-board-shared"] = _probed_code_state(rulesets=[drifted])
+    F["F3b-ruleset-drift"] = (_transition_form(state3b), {"token_expiry": {"expires": "2026-12-30T00:00:00Z"}}, fm,
                               {"ruleset-drift:job-board-shared"})
 
     # F3c: canonical + unknown extra fields -> NO finding (tolerant predicate; first-run FP guard)
@@ -723,48 +852,85 @@ def build_fixtures():
     tolerant["rules"][0]["parameters"]["extra_unknown"] = {"whatever": 1}
     tolerant["some_future_field"] = "ignored"
     state3c = {r: _probed_code_state() for r in CODE_REPOS}
-    state3c["jobs-aggregator-engine"] = _probed_code_state(rulesets=[tolerant])
     state3c.update({r: _repo_state() for r in CONTENT_REPOS})
-    F["F3c-ruleset-tolerant"] = (state3c, {"token_expiry": {"expires": "2026-12-30T00:00:00Z"}}, fm, set())
+    state3c["jobs-aggregator-engine"] = _probed_code_state(rulesets=[tolerant])
+    F["F3c-ruleset-tolerant"] = (_transition_form(state3c), {"token_expiry": {"expires": "2026-12-30T00:00:00Z"}}, fm,
+                                 set())
 
-    # F4 (d): describing README -> auto-stub; F4b neutral -> none
+    # F4 (d): describing README (variant path readme.md to pin F3 fix) -> auto-stub
     state4 = {r: _probed_code_state() for r in CODE_REPOS}
-    state4["jobs-data-2026"] = _probed_code_state(
-        readme={"present": True, "sha": "deadbeef",
-                "text": "Part of the [Zapply](https://zapply.jobs) job board infrastructure. See [zapplyjobs](https://github.com/zapplyjobs) for the public job boards.\n"})
     state4.update({r: _repo_state() for r in CONTENT_REPOS})
-    F["F4-describing-readme"] = (state4, {"token_expiry": {"expires": "2026-12-30T00:00:00Z"}}, fm,
-                                 {"describing-readme:jobs-data-2026"})
+    state4["job-board-processing"] = _probed_code_state(
+        readme={"present": True, "path": "readme.md", "sha": "deadbeef",
+                "text": "Part of the [Zapply](https://zapply.jobs) job board infrastructure.\n"})
+    F["F4-describing-readme"] = (_transition_form(state4), {"token_expiry": {"expires": "2026-12-30T00:00:00Z"}}, fm,
+                                 {"describing-readme:job-board-processing"})
 
     # F5 (e): content repo private -> record-only; code side fully clean
     state5 = {r: _probed_code_state() for r in CODE_REPOS}
     state5.update({r: _repo_state() for r in CONTENT_REPOS})
     state5["resume-samples-2026"] = _repo_state(visibility="private")
-    F["F5-content-visibility"] = (state5, {"token_expiry": {"expires": "2026-12-30T00:00:00Z"}}, fm,
+    F["F5-content-visibility"] = (_transition_form(state5), {"token_expiry": {"expires": "2026-12-30T00:00:00Z"}}, fm,
                                   {"content-visibility:resume-samples-2026"})
 
-    # F6 (f): token expiry boundary — 13.9d fires; 14.0d does not; 30d does not
+    # F6 (f): token expiry boundary — 13.9d fires; 14.0d does not
     base = {r: _probed_code_state() for r in CODE_REPOS}
     base.update({r: _repo_state() for r in CONTENT_REPOS})
-    F["F6a-token-expiry-fires"] = (dict(base), {"token_expiry": {"expires": "2026-11-28T02:24:00Z"}}, fm,
+    F["F6a-token-expiry-fires"] = (_transition_form(dict(base)), {"token_expiry": {"expires": "2026-11-28T02:24:00Z"}}, fm,
                                    {"token-expiry:gh-pat"})  # NOW + 13.9d
-    F["F6b-token-expiry-boundary-clean"] = (dict(base), {"token_expiry": {"expires": "2026-11-28T12:00:01Z"}}, fm,
+    F["F6b-token-expiry-boundary-clean"] = (_transition_form(dict(base)), {"token_expiry": {"expires": "2026-11-28T12:00:01Z"}}, fm,
                                             set())  # NOW + 14.000d
 
-    # F7: clean baseline — zero findings, zero actions
-    clean = {r: _probed_code_state(readme={"present": True, "text": "Docs for the public job listings pipeline.\n", "sha": "x"})
+    # F7: clean baseline in the TRANSITION designated state — zero findings, zero actions
+    clean = {r: _probed_code_state(readme={"present": True, "path": "README.md",
+                                           "text": "Docs for the public job listings pipeline.\n", "sha": "x"})
              for r in CODE_REPOS}
     clean.update({r: _repo_state() for r in CONTENT_REPOS})
-    F["F7-clean-baseline"] = (clean, {"token_expiry": {"expires": "2026-12-14T12:00:00Z"}}, fm, set())
+    F["F7-clean-baseline"] = (_transition_form(clean), {"token_expiry": {"expires": "2026-12-14T12:00:00Z"}}, fm, set())
 
-    # F8: clean baseline + fully absent readmes + no rulesets probed on content repos
-    # (content repos carry open_prs=None etc. — evaluator must not probe-fall-back)
-    clean2 = {r: _probed_code_state(readme={"present": False, "text": None, "sha": None})
+    # F8: clean + fully absent readmes + content repos unprobed (None fields —
+    # evaluator must not probe-fall-back)
+    clean2 = {r: _probed_code_state(readme={"present": False, "path": None, "text": None, "sha": None})
               for r in CODE_REPOS}
     clean2.update({r: {"reachable": True, "visibility": "public", "archived": False,
                        "default_branch": "main", "open_prs": None, "rulesets": None, "readme": None}
                    for r in CONTENT_REPOS})
-    F["F8-clean-no-readme"] = (clean2, {"token_expiry": {"expires": "2026-12-14T12:00:00Z"}}, fm, set())
+    F["F8-clean-no-readme"] = (_transition_form(clean2), {"token_expiry": {"expires": "2026-12-14T12:00:00Z"}}, fm, set())
+
+    # F9 (F1-fold): guard ruleset APPEARS on the exempt repo -> HIGH violation
+    # (production-breaking; visibility is waived so this is the only finding)
+    state9 = {r: _probed_code_state() for r in CODE_REPOS}
+    state9.update({r: _repo_state() for r in CONTENT_REPOS})
+    state9["jobs-data-2026"] = _probed_code_state(visibility="private", rulesets=[_canonical_ruleset()])
+    F["F9-exemption-violated"] = (state9, {"token_expiry": {"expires": "2026-12-30T00:00:00Z"}}, fm,
+                                  {"ruleset-exemption-violated:jobs-data-2026"})
+
+    # F10 (F1-fold): drifted ruleset on the exempt repo -> still a violation (and NOT
+    # ruleset-drift: the exemption suppresses the drift class, the presence is the crime)
+    state10 = {r: _probed_code_state() for r in CODE_REPOS}
+    state10.update({r: _repo_state() for r in CONTENT_REPOS})
+    state10["jobs-data-2026"] = _probed_code_state(visibility="private", rulesets=[drifted])
+    F["F10-exemption-violated-drifted"] = (state10, {"token_expiry": {"expires": "2026-12-30T00:00:00Z"}}, fm,
+                                           {"ruleset-exemption-violated:jobs-data-2026"})
+
+    # F11 (F2-fold): waived repo back to public (ruleset still absent = exempt state
+    # holds) -> waiver-stale only (anti-furniture guard)
+    state11 = {r: _probed_code_state() for r in CODE_REPOS}
+    state11.update({r: _repo_state() for r in CONTENT_REPOS})
+    state11["jobs-data-2026"] = _probed_code_state(visibility="public", rulesets=[])
+    F["F11-waiver-stale"] = (state11, {"token_expiry": {"expires": "2026-12-30T00:00:00Z"}}, fm,
+                             {"waiver-stale:jobs-data-2026"})
+
+    # F12 (F3-fold + missed-case f): EMPTY readme (benign, was INFRA) + lowercase
+    # readme.md present -> the variant probe reads it; no finding from the empty one
+    state12 = {r: _probed_code_state() for r in CODE_REPOS}
+    state12.update({r: _repo_state() for r in CONTENT_REPOS})
+    state12["job-board-shared"] = _probed_code_state(
+        readme={"present": True, "path": "README.md", "text": "", "sha": "e1"})
+    state12["job-board-consumer"] = _probed_code_state(
+        readme={"present": True, "path": "readme.md", "sha": "v1", "text": "Neutral.\n"})
+    F["F12-empty-and-variant-readme"] = (_transition_form(state12), {"token_expiry": {"expires": "2026-12-30T00:00:00Z"}}, fm,
+                                         set())
 
     return F
 
@@ -811,36 +977,52 @@ def selftest(log=print):
               f"expected {sorted(expected_ids)}, got {sorted(got)}")
 
     # 2. clean baselines produce zero actions (no accidental mutation plan)
-    for name in ("F7-clean-baseline", "F8-clean-no-readme", "F3c-ruleset-tolerant", "F6b-token-expiry-boundary-clean"):
+    for name in ("F7-clean-baseline", "F8-clean-no-readme", "F3c-ruleset-tolerant",
+                 "F6b-token-expiry-boundary-clean", "F11-waiver-stale", "F12-empty-and-variant-readme"):
         repos, extra, manifest, expected_ids = build_fixtures()[name]
         state = {"repos": repos, **extra}
-        actions = plan_actions(evaluate_state(state, manifest, NOW))
+        actions = plan_actions(evaluate_state(state, manifest, NOW), manifest)
         check(f"T2-{name}-zero-actions", not actions, f"planned {actions}")
 
     # 3. action-plan payload pins
     f2 = build_fixtures()["F2-open-pr"]
-    acts = plan_actions(evaluate_state({"repos": f2[0], **f2[1]}, f2[2], NOW))
+    acts = plan_actions(evaluate_state({"repos": f2[0], **f2[1]}, f2[2], NOW), f2[2])
     check("T3-close-pr-payload", acts and acts[0]["type"] == "close-pr"
           and acts[0]["payload"] == {"pr_number": 5}, json.dumps(acts))
 
     f3 = build_fixtures()["F3-ruleset-missing"]
-    acts = plan_actions(evaluate_state({"repos": f3[0], **f3[1]}, f3[2], NOW))
+    acts = plan_actions(evaluate_state({"repos": f3[0], **f3[1]}, f3[2], NOW), f3[2])
     ok = (len(acts) == 1 and acts[0]["type"] == "add-ruleset"
+          and acts[0]["repo"] == "job-board-consumer"
           and json.dumps(acts[0]["payload"], sort_keys=True) == json.dumps(RULESET_BODY, sort_keys=True))
     check("T3-add-ruleset-body-pinned-to-template", ok, json.dumps(acts))
 
     f4 = build_fixtures()["F4-describing-readme"]
-    acts = plan_actions(evaluate_state({"repos": f4[0], **f4[1]}, f4[2], NOW))
+    acts = plan_actions(evaluate_state({"repos": f4[0], **f4[1]}, f4[2], NOW), f4[2])
     stub = [a for a in acts if a["type"] == "stub-readme"]
     ok = (len(stub) == 1
           and base64.b64decode(stub[0]["payload"]["content_b64"]).decode() == NEUTRAL_STUB
-          and stub[0]["payload"]["path"] == "README.md")
+          and stub[0]["payload"]["path"] == "readme.md")  # round-two F3: stub the MATCHED variant
     check("T3-stub-readme-payload", ok, json.dumps(acts))
 
     # 4. boundary: drifted ruleset must NOT plan an add (machinery never creates its own duplicate)
     f3b = build_fixtures()["F3b-ruleset-drift"]
-    acts = plan_actions(evaluate_state({"repos": f3b[0], **f3b[1]}, f3b[2], NOW))
+    acts = plan_actions(evaluate_state({"repos": f3b[0], **f3b[1]}, f3b[2], NOW), f3b[2])
     check("T4-drift-plans-no-add", not acts, json.dumps(acts))
+
+    # 4b. round-two F1 LOADED-GUN GUARD: plan_actions refuses auto-add on the exempt
+    # repo even if a ruleset-missing finding somehow reaches the planner (manifest
+    # drift mid-run class). Direct finding-level pin — the evaluator never emits it.
+    finding = {"id": "ruleset-missing:jobs-data-2026", "class": "ruleset-missing",
+               "repo": "jobs-data-2026", "severity": "high", "fixable": True,
+               "action": "auto-add", "pr_number": None, "detail": "synthetic"}
+    acts = plan_actions([finding], fm)
+    check("T4b-exempt-repo-add-refused", not acts, json.dumps(acts))
+
+    # 4c. round-two F1: exempt repo with a PRESENT guard ruleset plans no add either
+    f9 = build_fixtures()["F9-exemption-violated"]
+    acts = plan_actions(evaluate_state({"repos": f9[0], **f9[1]}, f9[2], NOW), f9[2])
+    check("T4c-exemption-violation-plans-no-mutation", not acts, json.dumps(acts))
 
     # 5. tampered manifest = infra (validate_manifest catches)
     bad = dict(fm)
@@ -851,6 +1033,16 @@ def selftest(log=print):
     # 6. README brand-token boundary
     check("T6-token-match-case-insensitive", bool(DESCRIBING_README_RE.search("ZAPPLY board infra")))
     check("T6-token-no-false-match", not DESCRIBING_README_RE.search("apply to jobs; zucchini recipes"))
+
+    # 6b. round-two F1/F2: waiver/exemption rows must be structurally sound
+    bad_waiver = dict(fm)
+    bad_waiver["visibility_waivers"] = {"jobs-data-2026": {"expected_during_waiver": "public"}}
+    problems = validate_manifest(bad_waiver)
+    check("T6b-redundant-waiver-caught", any("redundant" in p for p in problems), str(problems))
+    bad_exempt = dict(fm)
+    bad_exempt["ruleset_exemptions"] = {"resume-samples-2026": {"until": "x"}}
+    problems = validate_manifest(bad_exempt)
+    check("T6b-content-repo-exemption-caught", any("only code repos" in p for p in problems), str(problems))
 
     # 7. summary renders for every verdict shape without crashing
     for name, (repos, extra, manifest, _) in build_fixtures().items():
@@ -903,17 +1095,17 @@ def main(argv):
 
     state, infra = collect_live_state()
     findings = evaluate_state(state, manifest, now)
-    actions = plan_actions(findings)
+    actions = plan_actions(findings, manifest)
     receipts = apply_actions(actions, state, dry_run)
     verdict = verdict_of(findings, receipts, infra)
     mode = "scan-dry-run" if dry_run else "scan"
 
     summary = render_summary(mode, verdict, findings, receipts, infra, state, manifest, now)
+    (Path(artifacts_dir) / "summary.md").write_text(summary)
+    (Path(artifacts_dir) / "verdict.txt").write_text(verdict + "\n")
     if summary_path:
         with open(summary_path, "a") as f:
             f.write(summary)
-    else:
-        (Path(artifacts_dir) / "summary.md").write_text(summary)
     write_findings_artifact(Path(artifacts_dir) / "findings.json", mode, verdict, findings, receipts, infra, state)
 
     print(f"estate-exposure {mode}: verdict={verdict} findings={len(findings)} "
