@@ -275,8 +275,12 @@ def evaluate_state(state, manifest, now):
         if cls != "code" or rs.get("archived"):
             continue  # content repos: visibility only; archived repos: no mutation probes
 
-        # (b) open PRs -> auto-close
+        # (b) open PRs -> auto-close. Machinery-authored stub PRs (head estate-exposure/*)
+        # are exempt — the machinery must never close its own fix PRs (live-learned:
+        # run 1's stub PRs would otherwise be auto-closed on the next run).
         for pr in rs.get("open_prs") or []:
+            if (pr.get("head_ref") or "").startswith("estate-exposure/"):
+                continue
             findings.append({
                 "id": f"open-pr:{repo}:{pr['number']}",
                 "class": "open-pr",
@@ -537,7 +541,8 @@ def collect_live_state():
                 if repo in CODE_REPOS:
                     rs["open_prs"] = [
                         {"number": p["number"], "title": (p.get("title") or "")[:120],
-                         "author": ((p.get("user") or {}).get("login") or "?")}
+                         "author": ((p.get("user") or {}).get("login") or "?"),
+                         "head_ref": ((p.get("head") or {}).get("ref") or "")}
                         for p in _paginate(repo, "open PRs", f"repos/{ORG}/{repo}/pulls?state=open", infra)
                     ]
                     # rulesets list then detail-fetch candidates (list omits rules)
@@ -641,17 +646,23 @@ def apply_actions(actions, state, dry_run):
                     raise GhError("README sha unknown — cannot PUT contents (state stale)")
                 body = json.dumps({"message": a["payload"]["message"],
                                    "content": a["payload"]["content_b64"], "sha": sha})
-                proc = subprocess.run(
-                    ["gh", "api", f"repos/{ORG}/{a['repo']}/contents/{a['payload']['path']}", "-X", "PUT",
-                     "--input", "-", "--jq", ".commit.sha"],
-                    input=body, capture_output=True, text=True,
-                    env={**os.environ, "GH_TOKEN": os.environ.get("GH_TOKEN", "")}, timeout=60)
-                if proc.returncode != 0:
-                    raise GhError(proc.stderr.strip()[:400])
-                orig = ((state.get("repos", {}).get(a["repo"]) or {}).get("readme") or {}).get("text") or ""
-                rec["result"] = "applied"
-                rec["detail"] = f"README stubbed (commit {proc.stdout.strip()[:12]}); original preserved below"
-                rec["original_readme"] = orig
+                path_q = a["payload"]["path"]
+                rec["original_readme"] = ((state.get("repos", {}).get(a["repo"]) or {}).get("readme") or {}).get("text") or ""
+                direct = _gh_proc(["api", f"repos/{ORG}/{a['repo']}/contents/{path_q}", "-X", "PUT",
+                                   "--input", "-", "--jq", ".commit.sha"], body)
+                if direct.returncode == 0:
+                    rec["result"] = "applied"
+                    rec["detail"] = f"README stubbed direct-to-main (commit {direct.stdout.strip()[:12]}); original preserved below"
+                else:
+                    # Gated repo (live-learned, run 43658448660): the guard ruleset rejects
+                    # direct-to-main writes (HTTP 409 'required status check guard').
+                    # Route through the PR flow: branch -> commit -> PR -> wait for the
+                    # guard check on the PR head -> merge. The check runs because
+                    # repo-guard.yml triggers on pull_request to main.
+                    if "409" not in (direct.stderr or "") and "rule" not in (direct.stderr or "").lower():
+                        raise GhError(direct.stderr.strip()[:400])
+                    rec["result"] = "applied"
+                    rec["detail"] = _stub_via_pr(a, state, rec)
             else:
                 raise GhError(f"unknown action type {a['type']}")
         except GhError as e:
@@ -659,6 +670,76 @@ def apply_actions(actions, state, dry_run):
             rec["detail"] = f"auto-fix failed (escalated): {e}"
         receipts.append(rec)
     return receipts
+
+
+def _gh_proc(args, stdin_body):
+    return subprocess.run(["gh"] + args, input=stdin_body, capture_output=True, text=True,
+                          env={**os.environ, "GH_TOKEN": os.environ.get("GH_TOKEN", "")}, timeout=120)
+
+
+STUB_BRANCH = "estate-exposure/stub-readme"
+
+
+def _stub_via_pr(action, state, receipt):
+    """Branch + commit + PR + guard-check wait + merge. Returns receipt detail.
+    Raises GhError (receipt escalates) when the PR flow cannot complete."""
+    repo = action["repo"]
+    path_q = action["payload"]["path"]
+    branch = STUB_BRANCH
+
+    # reuse an already-open machinery PR if one exists (re-run while a PR is pending)
+    existing = [p for p in (state.get("repos", {}).get(repo, {}).get("open_prs") or [])
+                if (p.get("head_ref") or "") == branch]
+    pr_number = existing[0]["number"] if existing else None
+
+    if not pr_number:
+        base_sha = _gh_json(["api", f"repos/{ORG}/{repo}/git/ref/heads/{state['repos'][repo]['default_branch']}"])["object"]["sha"]
+        proc = _gh_proc(["api", f"repos/{ORG}/{repo}/git/refs", "-X", "POST", "--input", "-"],
+                        json.dumps({"ref": f"refs/heads/{branch}", "sha": base_sha}))
+        if proc.returncode != 0 and "422" not in (proc.stderr or "") and "already exists" not in (proc.stderr or ""):
+            raise GhError(f"branch create failed: {proc.stderr.strip()[:300]}")
+        # PUT onto the branch (sha is the file state on that branch; refetch)
+        meta = _gh_json(["api", f"repos/{ORG}/{repo}/contents/{path_q}?ref={branch}"])
+        body = json.dumps({"message": action["payload"]["message"],
+                           "content": action["payload"]["content_b64"],
+                           "sha": meta.get("sha"), "branch": branch})
+        proc = _gh_proc(["api", f"repos/{ORG}/{repo}/contents/{path_q}", "-X", "PUT",
+                         "--input", "-", "--jq", ".commit.sha"], body)
+        if proc.returncode != 0:
+            raise GhError(f"branch commit failed: {proc.stderr.strip()[:300]}")
+        head_sha = proc.stdout.strip()
+        pr_body = (f"estate-exposure auto-fix: stubs a describing README (brand-token match) with a "
+                   f"one-line neutral replacement.\n\nOriginal text preserved for the record:\n\n```\n"
+                   f"{(receipt.get('original_readme') or '')[:800]}\n```\n\n"
+                   f"Opened by the estate-exposure workflow; merged automatically once the guard check passes.")
+        proc = _gh_proc(["api", f"repos/{ORG}/{repo}/pulls", "-X", "POST", "--input", "-", "--jq", ".number"],
+                        json.dumps({"title": "estate-exposure: stub describing README",
+                                    "head": branch, "base": state["repos"][repo]["default_branch"],
+                                    "body": pr_body}))
+        if proc.returncode != 0:
+            raise GhError(f"PR create failed: {proc.stderr.strip()[:300]}")
+        pr_number = int(proc.stdout.strip())
+    else:
+        head_sha = _gh_json(["api", f"repos/{ORG}/{repo}/pulls/{pr_number}"])["head"]["sha"]
+
+    # wait for the required "guard" check on the PR head (repo-guard.yml on pull_request)
+    deadline = time.time() + 300
+    guard = None
+    while time.time() < deadline:
+        time.sleep(15)
+        runs = _gh_json(["api", f"repos/{ORG}/{repo}/commits/{head_sha}/check-runs?check_name=guard"])
+        items = runs.get("check_runs") or []
+        if items and items[0].get("status") == "completed":
+            guard = items[0].get("conclusion")
+            break
+    if guard != "success":
+        raise GhError(f"guard check on stub PR #{pr_number} did not pass within 5m (conclusion={guard}) — escalated")
+
+    proc = _gh_proc(["api", f"repos/{ORG}/{repo}/pulls/{pr_number}/merge", "-X", "PUT", "--input", "-",
+                     "--jq", ".merged"], json.dumps({"merge_method": "squash"}))
+    if proc.returncode != 0 or proc.stdout.strip() != "true":
+        raise GhError(f"stub PR #{pr_number} merge failed: {proc.stderr.strip()[:300]}")
+    return f"README stubbed via PR #{pr_number} (branch {branch}, guard check passed, squash-merged); original preserved below"
 
 
 # --------------------------------------------------------------------------
@@ -963,6 +1044,16 @@ def build_fixtures():
         readme={"present": True, "path": "readme.md", "sha": "v1", "text": "Neutral.\n"})
     F["F12-empty-and-variant-readme"] = (_transition_form(state12), {"token_expiry": {"expires": "2026-12-30T00:00:00Z", "days_remaining": 45.5}}, fm,
                                          set())
+
+    # F13 (live-learned): the machinery's OWN stub PR (head estate-exposure/*) must be
+    # exempt from auto-close — the machinery never closes its own fix PRs
+    state13 = {r: _probed_code_state() for r in CODE_REPOS}
+    state13.update({r: _repo_state() for r in CONTENT_REPOS})
+    state13["job-board-aggregator"] = _probed_code_state(
+        open_prs=[{"number": 9, "title": "estate-exposure: stub describing README",
+                   "author": "z-apply", "head_ref": STUB_BRANCH}])
+    F["F13-machinery-pr-exempt"] = (_transition_form(state13), {"token_expiry": {"expires": "2026-12-30T00:00:00Z", "days_remaining": 45.5}}, fm,
+                                    set())
 
     return F
 
