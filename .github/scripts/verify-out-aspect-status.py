@@ -512,6 +512,10 @@ def c_liveness_canary():
     if lookup is None:
         return "YELLOW", "SUPABASE_URL/SERVICE_ROLE_KEY unavailable to verifier step (canary unmeasured)", "supabase-rest"
     reds, parts, scores, detail = score_liveness(canary, lookup, TH)
+    if "alarm_floor" not in TH:
+        # D163: silent-default fallback class - the crypt-filtered JSON is unreadable in this
+        # environment (CI without transcrypt unlock). Observable in evidence, never silent.
+        parts.append("thresholds: built-in defaults (canary JSON unreadable here)")
     # Zombie side-car inputs: dead-links.json is the nightly scan's real store (checked
     # universe ~8.5k); its 'repo' field is the source id (D163 live-verified: exact joins
     # against the sjd id universe). The alive-hold store (scan-verdicts.json) is URL-keyed
