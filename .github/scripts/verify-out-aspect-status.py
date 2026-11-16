@@ -437,12 +437,57 @@ def _consec_days(day_list, ref):
         cur -= datetime.timedelta(days=1)
     return n
 
+def score_liveness(canary, lookup, th):
+    """Pure scoring core (D163 re-anchor bundle, row OUT-CANARY-REANCHOR-BUILD-1; fixtures drive
+    it workspace-side - this repo carries no test harness). Returns (reds, parts, scores, detail)
+    where detail[name] = {live, known, missing, frac}. Alarm law (operator word 2026-11-14):
+    RED iff a surface reads below alarm_floor (the boundary moved BELOW the accepted baseline
+    band) OR a surface misses >= missing_fire sampled ids (the already-collected
+    missing_from_jobs removal signature: quiet baseline 0-1, fire >=4). In-band readings stay
+    off the alarm channel and carry an in-band note. alarm_floor is PROVISIONAL until the
+    11-20 recalibration ratifies constants by JSON edit (data, never code)."""
+    alarm_floor = th.get("alarm_floor", th.get("rider_threshold", 0.70))
+    missing_fire = th.get("missing_fire", 4)
+    reds, parts, scores, detail = [], [], {}, {}
+    for name, sampled, total, err in canary:
+        if err:
+            reds.append(f"{name} source-fail ({err})")
+            continue
+        known = [i for i in sampled if i in lookup]
+        live = sum(1 for i in known if lookup[i])
+        frac = (live / len(known)) if known else None
+        if frac is None or len(known) < 5:
+            reds.append(f"{name} insufficient sample (found {len(known)}/{len(sampled)})")
+            continue
+        missing = len(sampled) - len(known)
+        detail[name] = {"live": live, "known": len(known), "missing": missing, "frac": frac}
+        band = th.get("accepted_band") or [0.69, 0.82]
+        in_band = bool(band[0] <= frac <= band[1])
+        parts.append(f"{name} {frac:.2f} ({live}/{len(known)}, missing {missing}"
+                     + (", in accepted band" if in_band else "") + ")")
+        scores[name] = frac
+        if frac < alarm_floor:
+            reds.append(f"{name} {frac:.2f} below alarm floor {alarm_floor}")
+        if missing >= missing_fire:
+            reds.append(f"{name} removal-signature (missing {missing} >= fire {missing_fire})")
+    return reds, parts, scores, detail
+
+
+def zombie_candidates(sampled_ids, lookup, dead_repos):
+    """One-line zombie side-car (operator word 2026-11-14; the founding 09-14 class): a job the
+    boards render, the DB keeps active, and the nightly scan reports dead (dead-links.json
+    'repo' field IS the source id - D163 fixture-verified). Candidate evidence only: session
+    adjudication (class yellow, never pages), same law as the hc-floor watch."""
+    return sorted(i for i in sampled_ids if lookup.get(i) and i in dead_repos)
+
+
 def c_liveness_canary():
-    # Ported rider (session out-liveness-canary.sh ran weekly) -> CI hourly, SAME rider rule:
-    # any surface < 0.70 live escalates (the 09-14 zombie-class monitor). Thresholds are the
-    # rider's own, not new policy (no operator sign-off needed); no YELLOW band above 0.70 is
-    # added because D116 readings 0.69-0.82 are disposed accepted-class decay - a band would
-    # put a permanent false-alarm color on the matrix. Session-side 12-run history/delta stays
+    # Ported rider (session out-liveness-canary.sh ran weekly) -> CI hourly. Re-anchored per the
+    # operator word 2026-11-14 (D163): the alarm boundary lives BELOW the accepted baseline band
+    # (out-canary-thresholds.json alarm_floor, provisional), the missing_from_jobs removal
+    # signature fires the alarm, and the zombie class gets its own candidate side-car below.
+    # Accepted-band readings stay off the alarm channel (D116 disposals). No YELLOW band is
+    # added (D146: permanent false-alarm color). Session-side 12-run history/delta stays
     # session-side; CI publishes the per-run rate.
     canary = []
     TH = _canary_thresholds()
@@ -466,30 +511,25 @@ def c_liveness_canary():
     lookup = _supabase_live(all_ids) if all_ids else {}
     if lookup is None:
         return "YELLOW", "SUPABASE_URL/SERVICE_ROLE_KEY unavailable to verifier step (canary unmeasured)", "supabase-rest"
-    reds, parts, scores = [], [], {}
-    for name, sampled, total, err in canary:
-        if err:
-            reds.append(f"{name} source-fail ({err})")
-            continue
-        known = [i for i in sampled if i in lookup]
-        live = sum(1 for i in known if lookup[i])
-        frac = (live / len(known)) if known else None
-        if frac is None or len(known) < 5:
-            reds.append(f"{name} insufficient sample (found {len(known)}/{len(sampled)})")
-            continue
-        parts.append(f"{name} {frac:.2f} ({live}/{len(known)}, missing {len(sampled) - len(known)})")
-        scores[name] = frac
-        if frac < TH["rider_threshold"]:
-            reds.append(f"{name} {frac:.2f} below rider {TH['rider_threshold']}")
+    reds, parts, scores, detail = score_liveness(canary, lookup, TH)
+    # Zombie side-car inputs: dead-links.json is the nightly scan's real store (checked
+    # universe ~8.5k); its 'repo' field is the source id (D163 live-verified: exact joins
+    # against the sjd id universe). The alive-hold store (scan-verdicts.json) is URL-keyed
+    # and records alive verdicts only - source ids cannot join against it, so absence there
+    # proves nothing and it is NOT the side-car input.
+    dead = _r2_json("data/dead-links.json")
+    dead_repos = ({e.get("repo") for e in (dead or {}).get("dead_links", []) if isinstance(e, dict)}
+                  if isinstance(dead, dict) else set())
+    zombies = zombie_candidates(all_ids, lookup, dead_repos) if dead_repos else []
     status = "RED" if reds else "GREEN"
     ev = "; ".join(parts) if parts else "no surface scored"
     if reds:
         ev = "; ".join(reds[:3]) + (" | " + ev if ev else "")
 
     # PHASE2 leg-3 (D148 port; design verdict Phase2Judge): rolling intraday history + the
-    # mechanized hc-floor watch. CURRENT settled law only - the amended canary-semantics
-    # bundle stays operator-gated (11-16 decision pass); an operator word edits
-    # out-canary-thresholds.json (data), never this code. Watch consequence is session
+    # mechanized hc-floor watch. AMENDED 11-14 (D163, operator word on the semantics verdict):
+    # the re-anchor bundle is LANDED LAW - alarm_floor (provisional, 11-20 ratifies via JSON
+    # edit) + missing_fire + the zombie side-car below. The watch consequence stays session
     # adjudication ("-> investigate", D146 pre-commitment), so it NEVER colors this aspect
     # (no YELLOW band: D146 disposed that as a permanent false-alarm color) - it lands in
     # rider_state + evidence for the next session touch and the sweep's rider legs.
@@ -510,6 +550,9 @@ def c_liveness_canary():
     _RIDER_STATE["liveness_canary"] = {
         "generated_at": NOW.isoformat(),
         "scores": {k: round(v, 4) for k, v in scores.items()},
+        "alarm_floor": TH.get("alarm_floor"),
+        "zombie_sidecar": {"candidates": zombies[:10], "checked": len(all_ids),
+                           "dead_store": bool(dead_repos), "class": "yellow"},
         "hc_floor_watch": {"fired": bool(consec),
                            "below_days": watch_days[-5:],
                            "floor": TH["hc_floor"], "class": TH["escalation_class"]},
@@ -519,6 +562,9 @@ def c_liveness_canary():
     if consec:
         ev += (f" | hc-floor watch FIRED ({_consec_days(watch_days, now_d)} consecutive days "
                f"< {TH['hc_floor']}; class {TH['escalation_class']}: session adjudication, not a page)")
+    if zombies:
+        ev += (f" | zombie side-car candidates {len(zombies)} (DB-active + rendered + scan-dead; "
+               f"class yellow: session adjudication, not a page)")
     return status, ev, "supabase-rest+gh-raw+R2"
 
 # ── semantic_conformance rider (D146-cont; design: workspace state/generated/out_conformance_port_design_2026-11-06.md) ──
