@@ -189,6 +189,26 @@ jobs:
         run: |
           node scripts/estate-exposure-liveness.js --selftest
           node scripts/estate-exposure-liveness.js
+      - name: Fetch-jobs dispatch-liveness detector (AGG-FETCHJOBS-DISPATCH-GAP-1, 2026-11-17 incident)
+        # Third miss-detector instance (estate-exposure cron, bump-cancelled, dispatch
+        # cadence). Watches the DIRECT signal the 2026-11-17 outage proved missing: age
+        # of the latest z-apply-actor workflow_dispatch run of fetch-jobs.yml in
+        # jobs-aggregator-engine. The CF job-board-cron-worker suppressed every dispatch
+        # 02:45Z→07:00Z on a dead GH_PAT (401, fail-closed guard) while the pipeline ran
+        # on manual dispatches and only check-78's INDIRECT enrich-gap caught it 4h late.
+        # Bar 30 min = 3 missed 10-min slots (guard busy-skip worst case ~22 min).
+        # Manual dispatches via the trigger token DO reset the clock (chain-level signal;
+        # worker-vs-human attribution does not exist GitHub-side — documented masking).
+        # Same discipline as the estate-exposure detector: selftest FIRST, gates the
+        # probe, fail-closed. Exit 1 = stall (failing step = the alert) · 2 = cannot-know.
+        # Planted arms include the exact incident class: worker alive + token dead +
+        # dispatches suppressed, and manual-only masking (other-actor runs don't reset).
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          node scripts/fetch-jobs-dispatch-liveness.js --selftest
+          node scripts/fetch-jobs-dispatch-liveness.js
       - name: Upload to R2 (Phase 1 cleanup — removed redundant git commits)
         if: always()  # CRITICAL: upload alert JSON EVEN when checks fail — the JSON CONTAINS the failures (that's its purpose). if:success() caused the structured alert data to go stale DURING incidents (when it's most needed).
         # INF-PGDIAG-FOLD-1: continue-on-error removed - the uploader is
