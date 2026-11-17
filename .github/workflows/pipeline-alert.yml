@@ -71,7 +71,13 @@ jobs:
         run: cd .github/scripts/processing && npm install
 
       - name: Download data from R2
-        continue-on-error: true
+        # INF-PGDIAG-FOLD-1 (F2 class instance 3): continue-on-error removed -
+        # a swallowed transfer failure made the alert family silently analyze
+        # absent/stale data. Per-file outcome gating via downloadRawStrict:
+        # 404/NoSuchKey = bootstrap-allowed loud SKIP; any other failure =
+        # ::error:: + exit 1 (network failures land in the same gate after
+        # client retries exhaust). The sidecar list() call was already strict
+        # and now fails the run instead of being masked by the step flag.
         run: |
           echo "📥 Downloading pipeline data from R2..."
           node -e "
@@ -93,15 +99,19 @@ jobs:
               if (name.endsWith('.jsonl')) files.push(name);
             }
             for (const file of files) {
+              let raw;
               try {
-                const raw = await r2.downloadRaw(file);
-                if (raw) {
-                  const dest = path.join(dataDir, file);
-                  fs.mkdirSync(path.dirname(dest), { recursive: true });  // ENR-PAL-DATA-AUDIT-1: support nested paths like metrics/latest.json
-                  fs.writeFileSync(dest, Buffer.from(raw));
-                  console.log('R2 download OK: ' + file);
-                } else { console.log('R2 SKIP: ' + file + ' (not found)'); }
-              } catch (e) { console.error('R2 ERR: ' + file + ' - ' + e.message); }
+                raw = await r2.downloadRawStrict(file);  // INF-PGDIAG-FOLD-1: absence -> null, other failure -> throw
+              } catch (e) {
+                console.error('::error::R2 transfer failure on ' + file + ' (' + ((e && e.name) || 'Error') + ') - failing the run instead of silently analyzing absent data');
+                process.exit(1);
+              }
+              if (raw) {
+                const dest = path.join(dataDir, file);
+                fs.mkdirSync(path.dirname(dest), { recursive: true });  // ENR-PAL-DATA-AUDIT-1: support nested paths like metrics/latest.json
+                fs.writeFileSync(dest, Buffer.from(raw));
+                console.log('R2 download OK: ' + file);
+              } else { console.log('R2 SKIP: ' + file + ' (not found)'); }
             }
             console.log('R2 download complete');
           }
@@ -163,7 +173,9 @@ jobs:
 
       - name: Upload to R2 (Phase 1 cleanup — removed redundant git commits)
         if: always()  # CRITICAL: upload alert JSON EVEN when checks fail — the JSON CONTAINS the failures (that's its purpose). if:success() caused the structured alert data to go stale DURING incidents (when it's most needed).
-        continue-on-error: true
+        # INF-PGDIAG-FOLD-1: continue-on-error removed - the uploader is
+        # fail-closed on canonical R2 writes, so a swallowed step flag would
+        # only re-hide the staleness this leg exists to prevent.
         env:
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
