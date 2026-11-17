@@ -158,6 +158,8 @@ jobs:
           FACETS_LIVENESS: ${{ env.FACETS_LIVENESS }}  # INF-DASHCHECK43-FACETSPROBE-1: check-36 facets-supply leg payload
           COMPETITOR_SNAPSHOT_HEALTH: ${{ env.COMPETITOR_SNAPSHOT_HEALTH }}  # INF-DASHADV-IMPL-1 item 3: check-60 probe payload
         run: node .github/scripts/processing/lib/pipeline-alert.js
+      - name: Build Tier A source coverage report
+        run: node .github/scripts/source-coverage-audit.js
       - name: Estate-exposure missed-run detector (AGG-WORKFLOW-DISPATCH-AUDIT-1, A341 fold 7)
         # The Sat 08:37Z weekly slot silently missed 2026-11-15 (workflow 418750799: zero
         # schedule-event runs ever). This adds the monitoring leg of "schedule + monitored":
@@ -166,15 +168,17 @@ jobs:
         # first-slot grace. Cause-agnostic (root cause open). Fold 7a: selftest runs FIRST
         # and gates the probe, fail-closed — broken detection cannot report healthy cadence.
         # Exit 1 = missed slot (failing step = the alert) · 2 = cannot-know (fail-closed).
+        # F3 blast-radius: placed AFTER the Tier A build so a detector alert (exit 1/2)
+        # never skips downstream report steps — Tier A always publishes, even mid-incident.
+        # F5 sync-warning: thresholds 169h (=7d slot spacing + 1h grace) and the 8d/192h
+        # first-slot grace derive from estate-exposure.yml cron '37 8 * * 6' (Sat 08:37Z);
+        # re-derive BOTH if the estate cadence moves.
         if: always()
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
           node scripts/estate-exposure-liveness.js --selftest
           node scripts/estate-exposure-liveness.js
-      - name: Build Tier A source coverage report
-        run: node .github/scripts/source-coverage-audit.js
-
       - name: Upload to R2 (Phase 1 cleanup — removed redundant git commits)
         if: always()  # CRITICAL: upload alert JSON EVEN when checks fail — the JSON CONTAINS the failures (that's its purpose). if:success() caused the structured alert data to go stale DURING incidents (when it's most needed).
         continue-on-error: true
