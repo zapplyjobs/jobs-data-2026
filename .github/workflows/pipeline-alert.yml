@@ -158,6 +158,20 @@ jobs:
           FACETS_LIVENESS: ${{ env.FACETS_LIVENESS }}  # INF-DASHCHECK43-FACETSPROBE-1: check-36 facets-supply leg payload
           COMPETITOR_SNAPSHOT_HEALTH: ${{ env.COMPETITOR_SNAPSHOT_HEALTH }}  # INF-DASHADV-IMPL-1 item 3: check-60 probe payload
         run: node .github/scripts/processing/lib/pipeline-alert.js
+      - name: Estate-exposure missed-run detector (AGG-WORKFLOW-DISPATCH-AUDIT-1, A341 fold 7)
+        # The Sat 08:37Z weekly slot silently missed 2026-11-15 (workflow 418750799: zero
+        # schedule-event runs ever). This adds the monitoring leg of "schedule + monitored":
+        # fires when the latest schedule-event run of estate-exposure is older than 7d
+        # spacing + grace (a slot was missed), or no scheduled run ever landed past the
+        # first-slot grace. Cause-agnostic (root cause open). Fold 7a: selftest runs FIRST
+        # and gates the probe, fail-closed — broken detection cannot report healthy cadence.
+        # Exit 1 = missed slot (failing step = the alert) · 2 = cannot-know (fail-closed).
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          node scripts/estate-exposure-liveness.js --selftest
+          node scripts/estate-exposure-liveness.js
       - name: Build Tier A source coverage report
         run: node .github/scripts/source-coverage-audit.js
 
