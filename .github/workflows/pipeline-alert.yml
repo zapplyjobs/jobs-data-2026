@@ -196,7 +196,8 @@ jobs:
         # jobs-aggregator-engine. The CF job-board-cron-worker suppressed every dispatch
         # 02:45Z→07:00Z on a dead GH_PAT (401, fail-closed guard) while the pipeline ran
         # on manual dispatches and only check-78's INDIRECT enrich-gap caught it 4h late.
-        # Bar 30 min = 3 missed 10-min slots (guard busy-skip worst case ~22 min).
+        # Bar 45 min (A279 fold 2026-11-17: measured clean-day gap 35 min beat the
+        # ~22-min estimate; matches check-31 workerDispatchMaxMinutes:45).
         # Manual dispatches via the trigger token DO reset the clock (chain-level signal;
         # worker-vs-human attribution does not exist GitHub-side — documented masking).
         # Same discipline as the estate-exposure detector: selftest FIRST, gates the
