@@ -3,6 +3,7 @@ name: Post Jobs to Discord
 on:
   workflow_dispatch:
   push:
+    branches: [main]
     paths:
       - '.github/workflows/post-to-discord.yml'
 
@@ -139,6 +140,7 @@ jobs:
           DISCORD_OTHER_USA_INT_CHANNEL_ID: ${{ secrets.DISCORD_OTHER_USA_INT_CHANNEL_ID }}
           MAX_POSTS_PER_RUN: ${{ vars.MAX_POSTS_PER_RUN || 10 }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DOWNLOAD_SOURCE: r2  # OUT-D170-DEGREE-FIELDS (AD2): enriched_jobs.json provenance for degree-fields run metadata
         run: node .github/scripts/processing/lib/discord-poster.js
 
       - name: Upload dedupe data to R2
@@ -164,6 +166,19 @@ jobs:
                 if (await r2.uploadRaw(file, data, 'application/json')) ok++;
               } catch (e) { console.error('ERR: ' + file + ' - ' + e.message); }
             }
+            const dfDir = path.join(dataDir, 'degree-fields');
+            if (fs.existsSync(dfDir)) {
+              const dated = fs.readdirSync(dfDir).filter(f => f.endsWith('.json')).sort().pop();
+              if (dated) {
+                try {
+                  const data = fs.readFileSync(path.join(dfDir, dated), 'utf8');
+                  // OUT-D170-DEGREE-FIELDS, R2-ONLY (AD5): full rows
+                  // (degreeResult/enricherVersion/enrichedAt + run meta) never
+                  // ride the public Storage leg.
+                  if (await r2.uploadRaw('degree-fields/' + dated, data, 'application/json')) ok++;
+                } catch (e) { console.error('ERR: degree-fields/' + dated + ' - ' + e.message); }
+              }
+            }
             console.log('R2 upload done: ' + ok + ' files');
           }
           main().catch(e => { console.error('R2 fatal: ' + e.message); process.exit(1); });
@@ -179,7 +194,12 @@ jobs:
       - name: Upload degree fields to R2 + Storage (OUT-D170-DEGREE-FIELDS, dual-write)
         if: always()
         continue-on-error: true
-        run: node scripts/upload-dashboard-data-to-r2.js degree-fields.json
+        run: |
+          PUB=$(ls -t .github/data/degree-fields/public/*.json 2>/dev/null | head -1)
+          if [ -z "$PUB" ]; then echo "SKIP(missing): degree-fields/public"; exit 0; fi
+          REL="degree-fields/public/$(basename "$PUB")"
+          echo "Shipping public subset: $REL"
+          node scripts/upload-dashboard-data-to-r2.js "$REL"
         env:
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
