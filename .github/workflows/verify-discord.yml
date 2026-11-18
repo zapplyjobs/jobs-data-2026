@@ -118,6 +118,14 @@ jobs:
             exit 0
           fi
           cp /tmp/verification-summary.json "$FILE"
+          # OUT-D169-EMBED-MIRROR-1: stage the wire-rendered embeds evidence file.
+          # Absence is normal (capture skipped or verifier early-exit) — never fail here.
+          FILE2=".github/data/embed-evidence.json"
+          if [ -f "/tmp/embed-evidence.json" ]; then
+            cp /tmp/embed-evidence.json "$FILE2"
+          else
+            echo "No embed evidence file (mirror capture skipped)"
+          fi
       - name: Upload dashboard data to R2 (INF-R2-GITCUTOVER-1)
         if: success()
         continue-on-error: true
@@ -128,7 +136,7 @@ jobs:
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: node scripts/upload-dashboard-data-to-r2.js discord-verification.json
+        run: node scripts/upload-dashboard-data-to-r2.js discord-verification.json embed-evidence.json
 
       - name: Delete temporary files
         if: always()
