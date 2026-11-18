@@ -107,7 +107,12 @@ VALID_ATS = {"greenhouse", "lever", "ashby", "workday", "smartrecruiters", "orac
              # (families.eightfold; the family had pool rows + company-list membership
              # but no registry row - workspace validator FAILED 'Unknown ATS platform').
              # slug-keyed - default idField class.
-             "eightfold"}
+             "eightfold",
+             # BrassRing family (SUP F346 GA landing 2026-11-18; registry family
+             # minted same day): source='brassring' pool rows live since the
+             # Supplemental Ingest 8 wire 2026-11-17 (fetch-supplemental-brassring.js,
+             # GA only - BAE held). url-keyed lanes: see fetcher config_boundary.
+             "brassring"}
 
 
 
