@@ -105,7 +105,9 @@ jobs:
                         else:
                             r["verdict"] = "PASS"
                             r["job_count"] = count
-                            r["freshest_age_h"] = round(freshest, 1)
+                            r["freshest_age_h"] = round(max(freshest, 0.0), 1)
+                            if freshest < 0:
+                                r["future_dated_skew"] = True
             else:
                 # All retries failed
                 r["reason"] = f"fetch failed after 3 retries: {last_err}"
