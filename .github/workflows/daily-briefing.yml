@@ -8,7 +8,7 @@ name: Daily Briefing
 # (data/exec-brief/), never in this public repo.
 on:
   schedule:
-    - cron: '15 21 * * *'
+    - cron: '0 18 * * *'  # 12:00 PM America/Chicago (CST; 1 PM during CDT - operator-accepted drift; INF-1065: moved from 21:15Z per operator - GLM quota-window conflict avoidance)
   workflow_dispatch:
     inputs:
       manual_text:
