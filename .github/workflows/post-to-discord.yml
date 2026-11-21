@@ -199,7 +199,24 @@ jobs:
           if [ -z "$PUB" ]; then echo "SKIP(missing): degree-fields/public"; exit 0; fi
           REL="degree-fields/public/$(basename "$PUB")"
           echo "Shipping public subset: $REL"
-          node scripts/upload-dashboard-data-to-r2.js "$REL"
+          # OUT-E1-SUBSET-ENUM-1 (D176 E1 gap, out-e1-judge-verdict-2026-11-20.md:116): the
+          # messageId->subset join needs a durable enumeration of WHICH public subset each
+          # poster run shipped. Emitted into the run's own log artifacts AFTER the upload
+          # verifies (Adversary attack A347 amendment 1: emissions before the upload would
+          # announce phantom subsets on upload failure and, under bash -e + an unguarded
+          # append, could kill the step before the upload ran): a structured ::notice
+          # (greppable via the actions/jobs/<id>/logs API path, the STATE_INF.md:22 working
+          # pattern) + GITHUB_STEP_SUMMARY (persists on the run page). Notice present =
+          # upload succeeded; executed step without notice = upload failed (continue-on-error
+          # keeps it a warning). Run-log surface only - no new R2 object (11-26
+          # addition-freeze). REL is the script input; the canonical R2 key is data/$REL
+          # (upload script prepends data/ - listing data/degree-fields/public/ corroborates
+          # any notice). Joiner dedup rule: key on (run_id, max run_attempt) - re-run
+          # attempts emit duplicate notices.
+          : "${GITHUB_STEP_SUMMARY:=/dev/null}"
+          node scripts/upload-dashboard-data-to-r2.js "$REL" \
+            && echo "::notice title=degree-fields-public-subset::run_id=${GITHUB_RUN_ID} run_attempt=${GITHUB_RUN_ATTEMPT} subset=${REL} r2_key=data/${REL} shipped_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            && echo "degree-fields public subset shipped: \`${REL}\` (run ${GITHUB_RUN_ID})" >> "${GITHUB_STEP_SUMMARY}"
         env:
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
