@@ -204,15 +204,16 @@ jobs:
           # poster run shipped. Emitted into the run's own log artifacts AFTER the upload
           # verifies (Adversary attack A347 amendment 1: emissions before the upload would
           # announce phantom subsets on upload failure and, under bash -e + an unguarded
-          # append, could kill the step before the upload ran): a structured ::notice
-          # (greppable via the actions/jobs/<id>/logs API path, the STATE_INF.md:22 working
-          # pattern) + GITHUB_STEP_SUMMARY (persists on the run page). Notice present =
-          # upload succeeded; executed step without notice = upload failed (continue-on-error
-          # keeps it a warning). Run-log surface only - no new R2 object (11-26
-          # addition-freeze). REL is the script input; the canonical R2 key is data/$REL
-          # (upload script prepends data/ - listing data/degree-fields/public/ corroborates
-          # any notice). Joiner dedup rule: key on (run_id, max run_attempt) - re-run
-          # attempts emit duplicate notices.
+          # append, could kill the step before the upload ran): a structured ::notice -
+          # GHA consumes the raw line but registers it as a check-run ANNOTATION, the
+          # API-addressable surface: GET /repos/<org>/<repo>/check-runs/<job_id>/annotations
+          # (live-proven on run 44859143797 03:06Z) - plus GITHUB_STEP_SUMMARY (persists on
+          # the run page). Notice present = upload succeeded; executed step without notice =
+          # upload failed (continue-on-error keeps it a warning). Run-log surface only - no
+          # new R2 object (11-26 addition-freeze). REL is the script input; the canonical R2
+          # key is data/$REL (upload script prepends data/ - listing data/degree-fields/
+          # public/ corroborates any notice). Joiner dedup rule: key on
+          # (run_id, max run_attempt) - re-run attempts emit duplicate notices.
           : "${GITHUB_STEP_SUMMARY:=/dev/null}"
           node scripts/upload-dashboard-data-to-r2.js "$REL" \
             && echo "::notice title=degree-fields-public-subset::run_id=${GITHUB_RUN_ID} run_attempt=${GITHUB_RUN_ATTEMPT} subset=${REL} r2_key=data/${REL} shipped_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
