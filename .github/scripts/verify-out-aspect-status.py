@@ -429,12 +429,17 @@ def _canary_thresholds():
             "escalation_class": "yellow", "history_depth": 72}
 
 def _consec_days(day_list, ref):
-    """Longest run of consecutive calendar days in day_list ending at or before ref."""
-    ds = {d for d in day_list if d <= ref}
-    n, cur = 0, ref
+    """Longest run of consecutive calendar days in day_list ending at or before ref.
+    String-domain throughout (OUT-LIVENESS-CONSECDAYS-TYPEBUG-1): day_list carries
+    h['ts'][:10] day STRINGS while ref is now_d = NOW.date() (a datetime.date); the old
+    mixed-type filter `d <= ref` raised TypeError uncaught -> whole liveness_canary check
+    false-RED once history carried healthcare readings (live 11-21, runs 44847685489+)."""
+    ref_s = ref.isoformat() if isinstance(ref, datetime.date) else str(ref)[:10]
+    ds = {str(d)[:10] for d in day_list}
+    n, cur = 0, ref_s
     while cur in ds:
         n += 1
-        cur -= datetime.timedelta(days=1)
+        cur = (datetime.date.fromisoformat(cur) - datetime.timedelta(days=1)).isoformat()
     return n
 
 def score_liveness(canary, lookup, th):
@@ -798,10 +803,24 @@ def _conformance_verdict(prev, cur):
         return "RED", "U", False, era, zero_streak, "unmeasured: no comparisons resolved (sources/join dead)"
     if cur.get("unmeasured"):
         return "RED", "U", False, era, zero_streak, f"unmeasured: {cur['unmeasured']}"
-    if leg1["drift"] > 0 or leg1["parity"] > 0:
+    # OUT-SEMCONF-LEG1-PROPWINDOW-1: leg-1 zero-tolerance keeps instant-RED for real drift
+    # (>1 row, any parity - parity is artifact-internal, a propagation window cannot cause it),
+    # but an EXACTLY-1-row drift first runs the caller's propagation guard (grace re-fetch +
+    # strike). Caller writes cur["leg1_strike"]: 0 = healed-or-clean, n = n-th consecutive
+    # unhealed 1-row drift run. RED only on strike >= 2 (second consecutive hourly run).
+    # The grace branch sits BELOW trigger Z so a CLEAN-era leg-2 mismatch still REDs instantly
+    # (original A-before-Z priority preserved for every instant-RED class).
+    if leg1["drift"] > 1 or leg1["parity"] > 0:
         return "RED", "A", False, era, zero_streak, "leg1 drift/parity > 0 (zero-tolerance, OUT-side)"
     if armed and leg2["mismatches"] > 0:
         return "RED", "Z", False, era, zero_streak, "post-fix zero-tolerance: mismatch in CLEAN era"
+    if leg1["drift"] == 1:
+        strike = int(cur.get("leg1_strike") or 0)
+        if strike >= 2:
+            return "RED", "A", False, era, zero_streak, \
+                f"leg1 1-row drift persisted strike {strike}/2 (propagation window ruled out)"
+        return "YELLOW", "A1", False, era, zero_streak, \
+            f"leg1 1-row drift: propagation guard, grace re-fetch not healed, strike {strike}/2 (next run adjudicates)"
     l4l = bool(prev and prev_established and prev.get("leg2") and
                abs(leg2["compared"] - prev["leg2"]["compared"]) <= _CONF["l4l"] * max(1, prev["leg2"]["compared"]))
     prev_rate_ge = bool(l4l and prev["leg2"]["compared"] and
@@ -843,12 +862,36 @@ def c_semantic_conformance():
         }
         return "RED", f"unmeasured: {str(e)[:160]} | owner: {_CONF['owner_row']}", \
             "py-port:legs1+2 of out-semantic-conformance.js (legs3+4 stay session-side)"
-    cur = {"leg1": leg1, "leg2": leg2}
     prev_payload = proxy_json("out-aspect-status.json") or _r2_json("data/out-aspect-status.json")
     prev = (prev_payload.get("rider_state", {}).get("semantic_conformance")
             if isinstance(prev_payload, dict) else None)
     if prev is not None and prev.get("baseline_established") is None:
         prev = None  # malformed prev = baseline restart (fail-closed, design Decision 3)
+    # OUT-SEMCONF-LEG1-PROPWINDOW-1 propagation guard: an hourly enrichment sweep can land
+    # after the sjd-jobs.json artifact build, leaving EXACTLY-1-row leg1 drift as a transient
+    # propagation window (live 11-20 23:04Z RED, healed by the next artifact build 00:04Z).
+    # On drift==1/parity==0: one in-run grace re-fetch of sjd-jobs.json (memo bypassed) and a
+    # re-test of the SAME sampled rows; healed -> no RED, strike reset. Still drifted -> strike
+    # = consecutive unhealed runs (rider_state leg1_strike); verdict REDs at strike >= 2.
+    # Re-check failure == cannot prove healing (original leg1 stands, strike accrues).
+    strike = 0
+    if leg1["drift"] == 1 and leg1["parity"] == 0:
+        try:
+            _SJD_MEMO.clear()
+            art2 = _sjd_artifact()
+            if art2 is None:
+                raise RuntimeError("grace re-fetch returned nothing")
+            rows2 = art2 if isinstance(art2, list) else art2.get("jobs") or art2.get("data") or []
+            by_id = {r.get("id"): r for r in rows2 if isinstance(r, dict)}
+            sampled2 = [by_id.get(r.get("id")) or r for r in sampled]
+            leg1 = _conf_leg1(sampled2, sid, canon)
+        except Exception:
+            pass
+        if leg1["drift"] == 0 and leg1["parity"] == 0:
+            strike = 0  # healed in-run: no RED, no strike
+        else:
+            strike = int((prev or {}).get("leg1_strike") or 0) + 1
+    cur = {"leg1": leg1, "leg2": leg2, "leg1_strike": strike}
     status, trigger, l4l, era, zero_streak, reason = _conformance_verdict(prev, cur)
     prev_l2 = (prev or {}).get("leg2") or {}
     prev_txt = (f"{prev_l2.get('mismatches')}/{prev_l2.get('compared')}"
@@ -857,7 +900,7 @@ def c_semantic_conformance():
     _RIDER_STATE["semantic_conformance"] = {
         "generated_at": NOW.isoformat(),
         "baseline_established": cur.get("baseline_established", bool(prev)),
-        "era": era, "zero_streak": zero_streak,
+        "era": era, "zero_streak": zero_streak, "leg1_strike": strike,
         "prev_run_rate_ge_ceiling": bool(l4l and prev_l2 and prev_l2.get("compared") and
                                          prev_l2["mismatches"] / prev_l2["compared"] >= _CONF["ceiling"]),
         "leg1": {k: leg1[k] for k in ("compared", "drift", "parity", "lag", "unresolved")},
