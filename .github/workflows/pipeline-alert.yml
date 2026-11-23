@@ -158,6 +158,10 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}  # INF-SUPABASE-HEALTH-CHECK: Management API for depth metrics (connections, rollback rate, cache hit)
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}  # INF-1068: checks-process R2 reads (check-90/56/40 arms) - was missing here while pre-step/upload had it, so ctx.r2 built null and R2-dependent checks failed open silently every cycle
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}  # INF-1068
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}  # INF-1068
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}  # INF-1068
           LANEFEED_HEALTH: ${{ env.LANEFEED_HEALTH }}
           LANE_SUCCESS_HEALTH: ${{ env.LANE_SUCCESS_HEALTH }}  # INF-ALERTGAPS-PROJECTIONS-1: check-84 per-lane 24h success-rate payload
           CONTRACT_VERSIONS: ${{ env.CONTRACT_VERSIONS }}  # INF-GLOBALPATTERNS-CANDIDATES-1 item 2: check-80 payload  # INF-LANEFEED-FRESHCHECK-1: check-81 lane artifact freshness payload
