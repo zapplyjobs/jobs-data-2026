@@ -579,7 +579,7 @@ def c_liveness_canary():
 # ── semantic_conformance rider (D146-cont; design: workspace state/generated/out_conformance_port_design_2026-11-06.md) ──
 # CI owns gated legs 1+2 of out-semantic-conformance.js (legs 3/4 + judgment disposals stay
 # session-side weekly). RED on WORSENING, not presence: leg-2 has been non-zero since 10-18
-# (INF-LANDING-VISA-RAWCHAIN-1 owns the fix), so zero-tolerance hourly RED pages nobody
+# (INF-EXTERNAL-WAITS-1 L16 carries the fix wait), so zero-tolerance hourly RED pages nobody
 # usefully. Trigger: deduped leg-2 RATE, 2-strike ceiling, like-for-like denominator guard,
 # era-aware zero-tolerance (resumes the session script's own gate law once the defect clears).
 # Leg-1 (OUT-side artifact) instant-RED. Constants provisional; recalibrate on ~2 weeks of
@@ -588,7 +588,10 @@ def c_liveness_canary():
 # not from identical draws (artifact arrays churn hourly).
 _CONF = {"sample": 400, "companies": 150, "min_matched": 60, "ceiling": 0.25,
          "l4l": 0.20, "degrade_share": 0.20, "budget_s": 240,
-         "landing": "https://zapply.jobs/api/jobs", "owner_row": "INF-LANDING-VISA-RAWCHAIN-1"}
+         "landing": "https://zapply.jobs/api/jobs",
+         # Owner is a durable surface (module, lane, carrier line), never a task row: task rows close.
+         "owner": {"module": "OUT", "lane": "visa signal conformance (leg-2 landing labels)",
+                   "carrier": "INF-EXTERNAL-WAITS-1 L16", "fix_owner": "dev team (RD-20261103-03)"}}
 # Discord conformance thresholds (D148; contract SLA "within ~15 min of pool update" now
 # measured - the soft contract number is codified here, flagged for the operator's quarterly
 # threshold-audit visibility and the 11-16 decision pass; measurement only, no behavior change).
@@ -860,7 +863,8 @@ def c_semantic_conformance():
             "generated_at": NOW.isoformat(), "baseline_established": None,
             "era": "DIRTY", "unmeasured": str(e)[:160], "verdict": "RED", "trigger": "U",
         }
-        return "RED", f"unmeasured: {str(e)[:160]} | owner: {_CONF['owner_row']}", \
+        return "RED", f"unmeasured: {str(e)[:160]} | " \
+                      f"owner: {'; '.join(f'{k}={v}' for k, v in _CONF['owner'].items())}", \
             "py-port:legs1+2 of out-semantic-conformance.js (legs3+4 stay session-side)"
     prev_payload = proxy_json("out-aspect-status.json") or _r2_json("data/out-aspect-status.json")
     prev = (prev_payload.get("rider_state", {}).get("semantic_conformance")
@@ -912,7 +916,7 @@ def c_semantic_conformance():
     ev = (f"leg1 {leg1['drift']}/{leg1['compared']} drift, {leg1['parity']} parity ({leg1['lag']} lag) | "
           f"leg2 {leg2['mismatches']}/{leg2['compared']} distinct ({rate:.1%}) "
           f"prev {prev_txt} | trigger {trigger} | "
-          f"owner: {_CONF['owner_row']} | {reason}")
+          f"owner: {'; '.join(f'{k}={v}' for k, v in _CONF['owner'].items())} | {reason}")
     return status, ev, "py-port:legs1+2 of out-semantic-conformance.js (legs3+4 stay session-side)"
 
 def _runs_full(repo, workflow, limit, fields="status,conclusion,createdAt,startedAt,updatedAt,event"):
