@@ -80,6 +80,13 @@ class Reading:
 
     def _install(self):
         v = voas
+        # Gate passes no secrets: with SUPABASE_URL absent the lag-classify URL is built as a
+        # relative path and urllib's Request raises "unknown url type" before the patched
+        # lookup. Stub both variables (saved, restored in __exit__) so the suite runs - and
+        # stays hermetic - with or without a Supabase environment.
+        self._env_saved = (v.os.environ.get("SUPABASE_URL"), v.os.environ.get("SUPABASE_SERVICE_ROLE_KEY"))
+        v.os.environ["SUPABASE_URL"] = "https://supabase.invalid"
+        v.os.environ["SUPABASE_SERVICE_ROLE_KEY"] = "test-only-key"
 
         def fake_urlopen(req, timeout=60):
             url = req.full_url if hasattr(req, "full_url") else str(req)
@@ -110,7 +117,11 @@ class Reading:
         return self._install()
 
     def __exit__(self, *a):
-        pass
+        for name, value in zip(("SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"), self._env_saved):
+            if value is None:
+                v.os.environ.pop(name, None)
+            else:
+                v.os.environ[name] = value
 
     def run(self):
         self._install()
