@@ -23,7 +23,7 @@ v1 caveats (honest): data_quality reads the dead-link scan (known to undercount 
 dependent dead links — TikTok; real rate higher than reported); configuration/discoverability/
 change_mgmt are structural-existence proxies (not deep validity); verification is a 3-run snapshot.
 """
-import base64, json, os, re, subprocess, urllib.request, urllib.parse, datetime, sys, time
+import base64, hashlib, json, os, re, subprocess, urllib.request, urllib.parse, datetime, sys, time
 from concurrent.futures import ThreadPoolExecutor
 
 NOW = datetime.datetime.now(datetime.timezone.utc)
@@ -582,8 +582,10 @@ def c_liveness_canary():
 # (INF-EXTERNAL-WAITS-1 L16 carries the fix wait), so zero-tolerance hourly RED pages nobody
 # usefully. Trigger: deduped leg-2 RATE, 2-strike ceiling, like-for-like denominator guard,
 # era-aware zero-tolerance (resumes the session script's own gate law once the defect clears).
-# Leg-1 (OUT-side artifact) instant-RED. Constants provisional; recalibrate on ~2 weeks of
-# hourly rider_state. Sampling is LCG-seed-identical to the session script (20260830) for
+# Leg-1 (OUT-side artifact) is judged by ROW across readings, not by count in one reading
+# (OUT-SEMCONF-LEG1-PROPWINDOW-2; the policy sits at _conformance_verdict). Constants are
+# provisional; recalibrate on hourly rider_state (the ring is capped at history_depth).
+# Sampling is LCG-seed-identical to the session script (20260830) for
 # reproducibility; comparability across runs comes from the like-for-like denominator gate,
 # not from identical draws (artifact arrays churn hourly).
 _CONF = {"sample": 400, "companies": 150, "min_matched": 60, "ceiling": 0.25,
@@ -599,6 +601,13 @@ _DISCORD = {"late_min": 15, "very_late_min": 45, "miss_min": 90,
             "artifact_stale_warn_min": 60, "artifact_stale_red_min": 180,
             "runs_post": 110, "runs_fetch": 130, "receipt_stride_h": 6}
 _CONF_TO_SJD = {"job_sponsor": "sponsor", "company_sponsor": "possible", "none": "none"}
+# Leg-1 policy + payload constants (OUT-SEMCONF-LEG1-PROPWINDOW-2). persist_min: persistence
+# is judged only against a previous reading at least this many minutes old, so a push-triggered
+# or dispatched run minutes beside the hourly one is not "the next hourly reading". ids_cap
+# bounds the PUBLISHED id list only; the re-test reads the uncapped set (leg1_retest_ids), so a
+# persisting fault outside the cap cannot wait an extra reading. history_depth caps the
+# rider_state ring (hourly readings).
+_CONF_LEG1 = {"ids_cap": 50, "history_depth": 72, "persist_min": 30}
 _SJD_MEMO = []
 _RIDER_STATE = {}
 _UUID_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", re.I)
@@ -688,6 +697,15 @@ def _conf_leg1(sampled, sid, canon):
                                 "canonical": c.get("visa_signal"), "sjd": row.get("visaSignal")})
         if bool(row.get("h1bSponsor")) != (row.get("visaSignal") == "sponsor"):
             parity += 1
+    # lag/drift split = DIAGNOSTIC ONLY (OUT-SEMCONF-LEG1-PROPWINDOW-2: it no longer feeds the
+    # verdict; every label mismatch above is judged by row across readings). Origin, from the
+    # session monitor: LAG = the artifact equals the Supabase details->enriched derivation
+    # ("bridge lag", routed to INF); DRIFT = it does not. The producer has read R2 only since
+    # INF-SJD-SCAN-PAUSE-1 (2026-08-31), so the split now says only whether Supabase agrees with
+    # the artifact. Kept because the session twin still gates on it and both twins publish the
+    # same leg-1 numbers. Known gap, unchanged: a mismatch whose lookup returns no row is in
+    # neither count (seen live 11-06: 1/374, lag=0 drift=0). A lookup failure still routes to
+    # the unmeasured RED (D146 Decision 3 / F9).
     if mismatch_ids:
         url = (os.environ.get("SUPABASE_URL") or "").rstrip("/")
         key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or ""
@@ -717,8 +735,74 @@ def _conf_leg1(sampled, sid, canon):
                         lag += 1
                     else:
                         drift += 1
-    return {"compared": compared, "drift": drift, "parity": parity, "lag": lag,
-            "unresolved": unresolved, "samples": samples}
+    return {"compared": compared, "mismatches": mismatches, "drift": drift, "parity": parity,
+            "lag": lag, "unresolved": unresolved, "ids": mismatch_ids, "samples": samples}
+
+def _conf_leg1_retest(ids, by_id, sid, canon):
+    """Explicit re-test of the ids that disagreed at the previous reading, against the FULL
+    current artifact and the current canonical. The 400-sample is re-drawn on nearly every
+    artifact build (measured 11-25: 265/400 ids kept between two builds a minute apart), so
+    waiting for the sampler to pick a row again is not a test. Pure: no Supabase, no lag/drift
+    classify. gone = id no longer in the artifact (nothing rendered, nothing to disagree with).
+    """
+    out = {"tested": 0, "still": [], "healed": 0, "gone": 0, "unresolved": 0, "parity": 0}
+    for i in ids:
+        row = by_id.get(i)
+        if not isinstance(row, dict):
+            out["gone"] += 1
+            continue
+        c = canon.get(sid.get(i))
+        if not c:
+            out["unresolved"] += 1
+            continue
+        out["tested"] += 1
+        expected = _CONF_TO_SJD.get(c.get("visa_signal"), c.get("visa_signal"))
+        if row.get("visaSignal") == expected:
+            out["healed"] += 1
+        else:
+            out["still"].append(i)
+        if bool(row.get("h1bSponsor")) != (row.get("visaSignal") == "sponsor"):
+            out["parity"] += 1
+    return out
+
+def _artifact_fp(rows):
+    """Content fingerprint of the artifact rows. Equal across two readings = the artifact
+    content did not change between them. Diagnostic only (never gates a verdict)."""
+    try:
+        return hashlib.sha256(json.dumps(rows, sort_keys=True, separators=(",", ":")).encode()).hexdigest()[:16]
+    except Exception:
+        return None
+
+def _conf_leg1_run(prev_hist, disagreeing_now):
+    """Consecutive HOURLY readings, ending at this one, that carried a leg-1 label
+    disagreement; 0 when this reading has none (a clean reading ends the run). Bucketed by
+    hour so two runs minutes apart count once; stops at the first malformed or clean entry.
+    Informational: it makes a chronic rotation of fresh transients visible (such a rotation
+    never REDs - every row is seen in one reading only)."""
+    if not disagreeing_now:
+        return 0
+    hours = {NOW.isoformat()[:13]}
+    for h in reversed(prev_hist[-_CONF_LEG1["history_depth"]:]):
+        if not isinstance(h, dict) or not isinstance(h.get("leg1_mismatches"), int):
+            break
+        if h["leg1_mismatches"] <= 0 or not isinstance(h.get("ts"), str):
+            break
+        hours.add(h["ts"][:13])
+    return len(hours)
+
+def _conf_leg1_evidence(carried, new_ids, trigger):
+    """Trailing leg-1 clause for the evidence line: the explicit re-test outcome (so a healed
+    prior sighting is closed visibly, even on a GREEN reading) and, when the trigger label is
+    not already A1, a first sighting."""
+    parts = []
+    if carried:
+        parts.append(f"leg-1 prior ids re-tested: {carried['tested']} tested, {carried['healed']} healed, "
+                     f"{len(carried['still'])} still wrong, {carried['gone']} gone, "
+                     f"{carried['unresolved']} not comparable")
+    if new_ids and trigger not in ("A", "A1"):
+        parts.append(f"leg-1 first sighting (propagating): {len(new_ids)} row(s) "
+                     f"[{', '.join(new_ids[:5])}]")
+    return (" | " + "; ".join(parts)) if parts else ""
 
 def _conf_leg2(sampled, sid, canon, rng):
     companies = []
@@ -806,24 +890,31 @@ def _conformance_verdict(prev, cur):
         return "RED", "U", False, era, zero_streak, "unmeasured: no comparisons resolved (sources/join dead)"
     if cur.get("unmeasured"):
         return "RED", "U", False, era, zero_streak, f"unmeasured: {cur['unmeasured']}"
-    # OUT-SEMCONF-LEG1-PROPWINDOW-1: leg-1 zero-tolerance keeps instant-RED for real drift
-    # (>1 row, any parity - parity is artifact-internal, a propagation window cannot cause it),
-    # but an EXACTLY-1-row drift first runs the caller's propagation guard (grace re-fetch +
-    # strike). Caller writes cur["leg1_strike"]: 0 = healed-or-clean, n = n-th consecutive
-    # unhealed 1-row drift run. RED only on strike >= 2 (second consecutive hourly run).
-    # The grace branch sits BELOW trigger Z so a CLEAN-era leg-2 mismatch still REDs instantly
-    # (original A-before-Z priority preserved for every instant-RED class).
-    if leg1["drift"] > 1 or leg1["parity"] > 0:
-        return "RED", "A", False, era, zero_streak, "leg1 drift/parity > 0 (zero-tolerance, OUT-side)"
+    # OUT-SEMCONF-LEG1-PROPWINDOW-2 (supersedes the PROPWINDOW-1 count guard). Leg-1 label
+    # disagreements are judged by ROW, across readings - never by count in one reading:
+    #   parity > 0 on any tested row -> RED A now (artifact-internal; timing cannot cause it)
+    #   a prior id still wrong        -> RED A "persisted" (a frozen artifact included)
+    #   otherwise, any disagreement   -> first sighting: non-RED, published as "propagating"
+    #       with count + ids (the A1 branch below); RED only if the same row is still wrong at
+    #       the next reading.
+    # So a one-reading transient cannot RED. Every RED trigger sits ABOVE the non-RED leg-1
+    # state (the PROPWINDOW-1 A1 branch sat above T1 and masked a leg-2 ceiling RED).
+    # Caller writes cur["leg1_carried"] = explicit re-test of the previous reading's ids (or
+    # None) and cur["leg1_persisted"] = its still-wrong ids ([] when the previous reading is too
+    # recent to be "the next reading", or when nothing was carried).
+    carried = cur.get("leg1_carried") or {}
+    if leg1["parity"] > 0 or carried.get("parity"):
+        return "RED", "A", False, era, zero_streak, "leg1 parity > 0 (artifact-internal, instant RED)"
+    persisted = cur.get("leg1_persisted") or []
+    if persisted:
+        same = cur.get("artifact_same")
+        note = ("artifact content unchanged since the prior reading" if same
+                else "artifact rebuilt since the prior reading" if same is False
+                else "artifact change since the prior reading unknown")
+        return "RED", "A", False, era, zero_streak, (
+            f"leg1 {len(persisted)} row(s) still wrong at a 2nd reading [{', '.join(persisted[:5])}] ({note})")
     if armed and leg2["mismatches"] > 0:
         return "RED", "Z", False, era, zero_streak, "post-fix zero-tolerance: mismatch in CLEAN era"
-    if leg1["drift"] == 1:
-        strike = int(cur.get("leg1_strike") or 0)
-        if strike >= 2:
-            return "RED", "A", False, era, zero_streak, \
-                f"leg1 1-row drift persisted strike {strike}/2 (propagation window ruled out)"
-        return "YELLOW", "A1", False, era, zero_streak, \
-            f"leg1 1-row drift: propagation guard, grace re-fetch not healed, strike {strike}/2 (next run adjudicates)"
     l4l = bool(prev and prev_established and prev.get("leg2") and
                abs(leg2["compared"] - prev["leg2"]["compared"]) <= _CONF["l4l"] * max(1, prev["leg2"]["compared"]))
     prev_rate_ge = bool(l4l and prev["leg2"]["compared"] and
@@ -837,10 +928,38 @@ def _conformance_verdict(prev, cur):
         return "YELLOW", "thin", l4l, era, zero_streak, f"thin leg-2 ({leg2['compared']} < {_CONF['min_matched']})"
     if deg:
         return "YELLOW", "degraded", l4l, era, zero_streak, "degraded (fetch failures / budget)"
+    # First sighting (non-RED). Sits below thin/degraded on purpose: those labels are unchanged,
+    # and the evidence line still carries the sighting (_conf_leg1_evidence).
+    new_ids = cur.get("leg1_new_ids") or []
+    if new_ids:
+        run_n = int(cur.get("leg1_run") or 1)
+        age = cur.get("prev_age_min")
+        recent = age is not None and age < _CONF_LEG1["persist_min"]
+        recent_still = recent and bool((cur.get("leg1_carried") or {}).get("still"))
+        head = (f"leg1 {len(new_ids)} row(s) still wrong ({age:.0f} min since the prior reading; "
+                f"persistence not judged yet)" if recent_still else
+                f"leg1 {len(new_ids)} row(s) disagree, first sighting (propagating)")
+        return "YELLOW", "A1", l4l, era, zero_streak, (
+            f"{head} [{', '.join(new_ids[:5])}]; "
+            f"RED only if still wrong at the next hourly reading"
+            + (f"; {run_n} consecutive hourly reading(s) with a leg-1 disagreement" if run_n > 1 else "")
+            + ("" if recent_still else
+               (f"; previous reading only {age:.0f} min old, persistence not judged yet"
+                if recent else "")))
     return "GREEN", "none", l4l, era, zero_streak, f"leg2 rate {cur_rate:.1%} < 25% 2-strike ceiling"
 
 def c_semantic_conformance():
     rng = _conf_lcg()
+    # The previous reading is read first: its leg-1 ids are resolved together with the sample's
+    # (inside the unmeasured machinery, so a resolve failure stays a fail-closed RED).
+    prev_payload = proxy_json("out-aspect-status.json") or _r2_json("data/out-aspect-status.json")
+    prev_rider = prev_payload.get("rider_state") if isinstance(prev_payload, dict) else None
+    prev = prev_rider.get("semantic_conformance") if isinstance(prev_rider, dict) else None
+    prev = prev if isinstance(prev, dict) else None  # malformed prev = baseline restart (Decision 3)
+    if prev is not None and prev.get("baseline_established") is None:
+        prev = None
+    prev_ids_raw = prev.get("leg1_retest_ids") if prev else None
+    prev_ids = sorted({i for i in prev_ids_raw if isinstance(i, str)}) if isinstance(prev_ids_raw, list) else []
     try:
         enriched = _r2_json_or_jsonl("data/enriched_jobs.json")
         if enriched is None:
@@ -852,7 +971,7 @@ def c_semantic_conformance():
             raise RuntimeError("sjd artifact R2 read failed")
         sjd_rows = art if isinstance(art, list) else art.get("jobs") or art.get("data") or []
         sampled = _conf_pick(rng, sjd_rows, _CONF["sample"])
-        sid = _conf_resolve_ids([r.get("id") for r in sampled if isinstance(r, dict) and r.get("id")])
+        sid = _conf_resolve_ids([r.get("id") for r in sampled if isinstance(r, dict) and r.get("id")] + prev_ids)
         leg1 = _conf_leg1(sampled, sid, canon)
         leg2 = _conf_leg2(sampled, sid, canon, rng)
     except Exception as e:
@@ -866,51 +985,67 @@ def c_semantic_conformance():
         return "RED", f"unmeasured: {str(e)[:160]} | " \
                       f"owner: {'; '.join(f'{k}={v}' for k, v in _CONF['owner'].items())}", \
             "py-port:legs1+2 of out-semantic-conformance.js (legs3+4 stay session-side)"
-    prev_payload = proxy_json("out-aspect-status.json") or _r2_json("data/out-aspect-status.json")
-    prev = (prev_payload.get("rider_state", {}).get("semantic_conformance")
-            if isinstance(prev_payload, dict) else None)
-    if prev is not None and prev.get("baseline_established") is None:
-        prev = None  # malformed prev = baseline restart (fail-closed, design Decision 3)
-    # OUT-SEMCONF-LEG1-PROPWINDOW-1 propagation guard: an hourly enrichment sweep can land
-    # after the sjd-jobs.json artifact build, leaving EXACTLY-1-row leg1 drift as a transient
-    # propagation window (live 11-20 23:04Z RED, healed by the next artifact build 00:04Z).
-    # On drift==1/parity==0: one in-run grace re-fetch of sjd-jobs.json (memo bypassed) and a
-    # re-test of the SAME sampled rows; healed -> no RED, strike reset. Still drifted -> strike
-    # = consecutive unhealed runs (rider_state leg1_strike); verdict REDs at strike >= 2.
-    # Re-check failure == cannot prove healing (original leg1 stands, strike accrues).
-    strike = 0
-    if leg1["drift"] == 1 and leg1["parity"] == 0:
+    # OUT-SEMCONF-LEG1-PROPWINDOW-2: persistence by ROW. The previous reading's disagreeing ids
+    # are re-tested explicitly against the full artifact (the 400-sample is re-drawn on nearly
+    # every build, so a sampler hit is luck, not a test). Still wrong -> this reading REDs as
+    # "persisted" (a frozen artifact included: nothing else watches whether sjd-jobs.json is
+    # rebuilt). Healed or gone -> closed. Any disagreement in this reading is a first sighting
+    # ("propagating") and never RED by itself. Cause-agnostic on purpose: the 11-20 and 11-24
+    # incidents are "timing" only by hypothesis.
+    by_id = {r.get("id"): r for r in sjd_rows if isinstance(r, dict)}
+    carried = _conf_leg1_retest(prev_ids, by_id, sid, canon) if prev_ids else None
+    still = carried["still"] if carried else []
+    prev_age = None
+    if prev and isinstance(prev.get("generated_at"), str):
         try:
-            _SJD_MEMO.clear()
-            art2 = _sjd_artifact()
-            if art2 is None:
-                raise RuntimeError("grace re-fetch returned nothing")
-            rows2 = art2 if isinstance(art2, list) else art2.get("jobs") or art2.get("data") or []
-            by_id = {r.get("id"): r for r in rows2 if isinstance(r, dict)}
-            sampled2 = [by_id.get(r.get("id")) or r for r in sampled]
-            leg1 = _conf_leg1(sampled2, sid, canon)
+            prev_age = _iso_min(prev["generated_at"], NOW.isoformat())
         except Exception:
-            pass
-        if leg1["drift"] == 0 and leg1["parity"] == 0:
-            strike = 0  # healed in-run: no RED, no strike
-        else:
-            strike = int((prev or {}).get("leg1_strike") or 0) + 1
-    cur = {"leg1": leg1, "leg2": leg2, "leg1_strike": strike}
+            prev_age = None  # unparseable stamp: judge persistence (fail-closed)
+    judged = bool(still) and not (prev_age is not None and prev_age < _CONF_LEG1["persist_min"])
+    persisted = still if judged else []
+    new_ids = sorted((set(leg1["ids"]) | set(still)) - set(persisted))
+    artifact_fp = _artifact_fp(sjd_rows)
+    hist_raw = prev.get("history") if prev else None
+    prev_hist = [h for h in hist_raw if isinstance(h, dict)] if isinstance(hist_raw, list) else []
+    cur = {"leg1": leg1, "leg2": leg2, "leg1_carried": carried, "leg1_persisted": persisted,
+           "leg1_new_ids": new_ids,
+           "leg1_run": _conf_leg1_run(prev_hist, bool(new_ids or persisted)),
+           "artifact_same": ((prev["artifact_fp"] == artifact_fp)
+                             if prev and artifact_fp and prev.get("artifact_fp") else None),
+           "prev_age_min": prev_age}
     status, trigger, l4l, era, zero_streak, reason = _conformance_verdict(prev, cur)
     prev_l2 = (prev or {}).get("leg2") or {}
     prev_txt = (f"{prev_l2.get('mismatches')}/{prev_l2.get('compared')}"
                 if prev_l2.get("compared") is not None else "n/a")
     rate = leg2["mismatches"] / leg2["compared"] if leg2["compared"] else 0.0
+    reason += _conf_leg1_evidence(carried, new_ids, trigger)
     _RIDER_STATE["semantic_conformance"] = {
         "generated_at": NOW.isoformat(),
         "baseline_established": cur.get("baseline_established", bool(prev)),
-        "era": era, "zero_streak": zero_streak, "leg1_strike": strike,
+        "era": era, "zero_streak": zero_streak,
         "prev_run_rate_ge_ceiling": bool(l4l and prev_l2 and prev_l2.get("compared") and
                                          prev_l2["mismatches"] / prev_l2["compared"] >= _CONF["ceiling"]),
-        "leg1": {k: leg1[k] for k in ("compared", "drift", "parity", "lag", "unresolved")},
+        "leg1": {k: leg1[k] for k in ("compared", "mismatches", "drift", "parity", "lag", "unresolved")},
+        "leg1_state": "persisted" if persisted else ("propagating" if new_ids else "clean"),
+        "leg1_ids": sorted(set(leg1["ids"]) | set(still))[:_CONF_LEG1["ids_cap"]],
+        "leg1_retest_ids": sorted(set(leg1["ids"]) | set(still)),
+        "leg1_run": cur["leg1_run"],
+        "leg1_carried": ({k: (len(v) if k == "still" else v) for k, v in carried.items()}
+                         if carried else None),
+        "artifact_fp": artifact_fp,
+        "artifact_same": cur["artifact_same"],
         "leg2": {k: leg2[k] for k in ("compared", "mismatches", "companies_attempted",
                                       "company_fetch_failures", "company_name_misses", "distinct")},
         "verdict": status, "trigger": trigger, "like_for_like": l4l,
+        "history": (prev_hist + [{"ts": NOW.isoformat(),
+                                  "leg1_compared": leg1["compared"],
+                                  "leg1_mismatches": len(set(leg1["ids"]) | set(still)),
+                                  "leg1_parity": leg1["parity"] + (carried["parity"] if carried else 0),
+                                  "leg1_persisted": len(persisted),
+                                  "leg2_compared": leg2["compared"], "leg2_mismatches": leg2["mismatches"],
+                                  "leg2_fetch_failures": leg2["company_fetch_failures"],
+                                  "verdict": status, "trigger": trigger}])[-_CONF_LEG1["history_depth"]:],
+        "history_baseline_reset": prev_hist == [],
         "samples": (leg1["samples"] + leg2["samples"])[:5],
     }
     ev = (f"leg1 {leg1['drift']}/{leg1['compared']} drift, {leg1['parity']} parity ({leg1['lag']} lag) | "
