@@ -601,6 +601,15 @@ _DISCORD = {"late_min": 15, "very_late_min": 45, "miss_min": 90,
             "artifact_stale_warn_min": 60, "artifact_stale_red_min": 180,
             "runs_post": 110, "runs_fetch": 130, "receipt_stride_h": 6}
 _CONF_TO_SJD = {"job_sponsor": "sponsor", "company_sponsor": "possible", "none": "none"}
+# Timing-class owner label for discord_conformance (lead word 2026-11-25: the evidence carried
+# no owner, so the check-40 alert family pinned every posting stall on OUT). The fetch wave is
+# AGG's (its wall bar is pipeline-alert check-13 "aggregator runtime"); fetch runs that were
+# CANCELLED surface in INF's pipeline-alert check-28 "aggregator cancel rate". Evidence-only:
+# no verdict change. Appended only when a LATE / VERY-LATE / MISS class actually fires; if the
+# wave itself is healthy the residual owner is the OUT poster.
+_DISCORD_OWNER_TIMING = ("AGG fetch wave (fetch-jobs wall: pipeline-alert check-13 aggregator runtime); "
+                         "cancelled fetch runs: INF (pipeline-alert check-28 aggregator cancel rate); "
+                         "if the fetch wave is healthy, the OUT poster (post-to-discord)")
 # Leg-1 policy + payload constants (OUT-SEMCONF-LEG1-PROPWINDOW-2). persist_min: persistence
 # is judged only against a previous reading at least this many minutes old, so a push-triggered
 # or dispatched run minutes beside the hourly one is not "the next hourly reading". ids_cap
@@ -1207,6 +1216,13 @@ def c_discord_conformance():
         + (f"; receipts audited {audited} (stride {last_audit[:16] if last_audit else 'n/a'})") \
         + f"; thresholds {_DISCORD['late_min']}/{_DISCORD['very_late_min']}/{_DISCORD['miss_min']}m" \
         + (" | " + "; ".join((reds + ylows)[:3]) if (reds or ylows) else "")
+    if miss_windows or very_lates or lates > 5:
+        # Owner label for the timing classes, same "| owner:" pattern as semantic_conformance:
+        # check-40 passes the evidence to Discord verbatim, and without it every fetch-wave
+        # stall was attributed to OUT. AGG owns the fetch wave wall; cancelled fetch runs are
+        # the cancel-cascade class INF's check-28 watches; with the wave healthy the residual
+        # owner is this module's poster.
+        ev += f" | owner: {_DISCORD_OWNER_TIMING}"
     _RIDER_STATE["discord_conformance"] = {
         "generated_at": now_iso,
         "window_hours": span_h,

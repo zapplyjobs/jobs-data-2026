@@ -478,5 +478,61 @@ class PriorIdGoneTest(unittest.TestCase):
         self.assertIn("0 tested, 0 healed, 0 still wrong, 1 gone", ev)
 
 
+class DiscordOwnerLabelTest(unittest.TestCase):
+    """Evidence-only owner label on the timing classes (lead word 2026-11-25)."""
+
+    def test_timing_classes_name_their_owners(self):
+        posts = [
+            dict(status="completed", conclusion="success", createdAt="2026-11-25T10:05:00Z",
+                 updatedAt="2026-11-25T10:06:00Z", event="schedule"),
+            dict(status="completed", conclusion="success", createdAt="2026-11-25T10:10:00Z",
+                 updatedAt="2026-11-25T10:11:00Z", event="schedule"),
+            dict(status="completed", conclusion="success", createdAt="2026-11-25T11:50:00Z",
+                 updatedAt="2026-11-25T11:51:00Z", event="schedule"),
+        ]
+        fetches = [
+            dict(status="completed", conclusion="success", createdAt="2026-11-25T09:55:00Z",
+                 updatedAt="2026-11-25T10:12:00Z", event="schedule"),
+        ]
+        verify_runs = [dict(status="completed", conclusion="success", createdAt="2026-11-25T10:00:00Z",
+                            updatedAt="2026-11-25T10:01:00Z", event="push")]
+        art = {"timestamp": "2026-11-25T11:55:00Z", "criticalIssuesCount": {},
+               "hasCriticalIssues": False}
+        voas._runs_full = lambda repo, workflow, limit, fields="status,conclusion,createdAt,updatedAt,event": {
+            ("zapplyjobs/jobs-data-2026", "post-to-discord.yml"): posts,
+            ("zapplyjobs/jobs-data-2026", "verify-discord.yml"): verify_runs,
+            ("zapplyjobs/jobs-aggregator-private", "fetch-jobs.yml"): fetches,
+        }.get((repo, workflow), [])
+        voas._r2_json = lambda key: art if key == "data/discord-verification.json" else None
+        voas._supabase_metric = lambda key: None
+        voas.proxy_json = lambda path: None
+        voas.NOW = datetime.datetime(2026, 11, 25, 12, 0, tzinfo=datetime.timezone.utc)
+        status, ev, src = voas.c_discord_conformance()
+        self.assertEqual(status, "RED")
+        self.assertIn("owner: AGG fetch wave (fetch-jobs wall: pipeline-alert check-13 aggregator runtime)", ev)
+        self.assertIn("cancelled fetch runs: INF (pipeline-alert check-28 aggregator cancel rate)", ev)
+        self.assertIn("if the fetch wave is healthy, the OUT poster (post-to-discord)", ev)
+
+    def test_quiet_window_carries_no_owner_label(self):
+        posts = [dict(status="completed", conclusion="success",
+                      createdAt=f"2026-11-25T10:0{i}:30Z", updatedAt=f"2026-11-25T10:0{i}:40Z",
+                      event="schedule") for i in range(4)]
+        fetches = [dict(status="completed", conclusion="success", createdAt="2026-11-25T10:00:20Z",
+                        updatedAt="2026-11-25T10:00:45Z", event="schedule")]
+        art = {"timestamp": "2026-11-25T10:07:00Z", "criticalIssuesCount": {},
+               "hasCriticalIssues": False}
+        voas._runs_full = lambda repo, workflow, limit, fields="status,conclusion,createdAt,updatedAt,event": {
+            ("zapplyjobs/jobs-data-2026", "post-to-discord.yml"): posts,
+            ("zapplyjobs/jobs-aggregator-private", "fetch-jobs.yml"): fetches,
+        }.get((repo, workflow), [])
+        voas._r2_json = lambda key: art if key == "data/discord-verification.json" else None
+        voas._supabase_metric = lambda key: None
+        voas.proxy_json = lambda path: None
+        voas.NOW = datetime.datetime(2026, 11, 25, 12, 0, tzinfo=datetime.timezone.utc)
+        status, ev, src = voas.c_discord_conformance()
+        self.assertEqual(status, "GREEN")
+        self.assertNotIn("owner:", ev)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
