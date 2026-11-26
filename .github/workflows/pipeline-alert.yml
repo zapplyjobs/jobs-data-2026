@@ -166,6 +166,7 @@ jobs:
           LANE_SUCCESS_HEALTH: ${{ env.LANE_SUCCESS_HEALTH }}  # INF-ALERTGAPS-PROJECTIONS-1: check-84 per-lane 24h success-rate payload
           CONTRACT_VERSIONS: ${{ env.CONTRACT_VERSIONS }}  # INF-GLOBALPATTERNS-CANDIDATES-1 item 2: check-80 payload  # INF-LANEFEED-FRESHCHECK-1: check-81 lane artifact freshness payload
           RULESET_GUARD_HEALTH: ${{ env.RULESET_GUARD_HEALTH }}  # INF-RULESET-GUARDWATCH-1: check-82 all-branch guard presence payload
+          API_BUDGET_PROBES: ${{ env.API_BUDGET_PROBES }}  # per-cycle GitHub API budget meter: probe-phase summary from the pre-probes step
           APP_CANARY_STATUS: ${{ env.APP_CANARY_STATUS }}  # OUT-APP-CANARY-1: check-59 probe payload
           SUPABASE_TOKEN_EXPIRES: ${{ vars.SUPABASE_TOKEN_EXPIRES }}  # INF-SUPABASE-TOKEN-EXPIRY-1: rotation date (YYYY-MM-DD) — check-42 warns <=14d. Update this variable at each token rotation.
           PROXY_LIVENESS: ${{ env.PROXY_LIVENESS }}  # INF-DASHADV-IMPL-1 item 2: check-36 serving-path leg payload
