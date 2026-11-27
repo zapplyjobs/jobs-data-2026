@@ -195,7 +195,7 @@ jobs:
         if: always()
         continue-on-error: true
         run: |
-          PUB=$(ls -t .github/data/degree-fields/public/*.json 2>/dev/null | head -1)
+          PUB=$(find .github/data/degree-fields/public -maxdepth 1 -type f -name '*.json' -printf '%T@ %p\n' 2>/dev/null | sort -rn | head -1 | cut -d' ' -f2-)
           if [ -z "$PUB" ]; then echo "SKIP(missing): degree-fields/public"; exit 0; fi
           REL="degree-fields/public/$(basename "$PUB")"
           echo "Shipping public subset: $REL"
