@@ -28,6 +28,15 @@
 # uploaded LAST; later runs skip while any */manifest.csv exists under the prefix. Holds
 # (out-deadlink, curl, personal-job-tracker, career-engine) are excluded from every class.
 # Rollback contract: re-import a class file by uuid id (no sequence to fix), then ANALYZE.
+#
+# BOT-CLASS PURGE (delete): runs ONLY on an explicit workflow_dispatch with mode=execute +
+# bot_purge=execute — never on push or schedule. Deletes strictly by primary-key ids proven
+# present in the baseline archive (manifest + downloaded line-count verified first), every
+# statement capped at the baseline export timestamp; post-baseline regrowth is archived to
+# the non-rotated clicks-bot-archive-ongoing/ prefix BEFORE its delete slice, and the last
+# slice's upper bound is that export's own timestamp. Per-class reconcile counts are written
+# to the run summary. Adding a class at dispatch time requires no code change: pass its name
+# in bot_purge_classes (it must already exist in the baseline manifest).
 
 name: Clicks Retention
 on:
@@ -45,6 +54,19 @@ on:
         description: "Retention window in days (90 = operator GO 2026-10-19 via OUT D129-cont; supersedes the 09-07 180d consult; schedule events use this default)"
         required: true
         default: "90"
+        type: string
+      bot_purge:
+        description: "off = never delete the new bot classes; execute = delete archived bot-purge classes by id (requires the baseline archive; ignored unless mode=execute)"
+        required: false
+        default: "off"
+        type: choice
+        options:
+          - off
+          - execute
+      bot_purge_classes:
+        description: "Comma list of archived classes to purge when bot_purge=execute (selfdeclared is archived and available; add it here when approved)"
+        required: false
+        default: "null_ua,bare_mozilla,headless,malformed_chrome_ver,malformed_truncated"
         type: string
   schedule:
     - cron: "55 6 * * 1"  # weekly Mondays 06:55Z — ENABLED 2026-10-19 on operator GO relayed via OUT D129-cont (INF-CLICKS-RETENTION-GO-1); first runs same day green: dry_run 38,988 exported, execute deleted=38,988, R2 archive verified
@@ -68,12 +90,19 @@ jobs:
     env:
       RETENTION_DAYS: ${{ github.event.inputs.days || ((github.event_name == 'schedule' || github.event_name == 'push') && '90') || '180' }}
       MODE: ${{ github.event.inputs.mode || ((github.event_name == 'schedule' || github.event_name == 'push') && 'execute') || 'dry_run' }}
+      BOT_PURGE: ${{ github.event.inputs.bot_purge || 'off' }}
+      PURGE_CLASSES: ${{ github.event.inputs.bot_purge_classes || 'null_ua,bare_mozilla,headless,malformed_chrome_ver,malformed_truncated' }}
     steps:
       - name: Validate inputs
         run: |
           [[ "$RETENTION_DAYS" =~ ^[0-9]+$ ]] || { echo "days must be numeric, got: $RETENTION_DAYS"; exit 1; }
           [[ "$MODE" == "dry_run" || "$MODE" == "execute" ]] || { echo "mode must be dry_run|execute"; exit 1; }
-          echo "mode=$MODE window=${RETENTION_DAYS}d"
+          [[ "$BOT_PURGE" == "off" || "$BOT_PURGE" == "execute" ]] || { echo "bot_purge must be off|execute"; exit 1; }
+          if [ "$BOT_PURGE" = "execute" ]; then
+            # deletes of archived bot classes run ONLY from an explicit dispatch, never on push/schedule
+            [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" && "$MODE" == "execute" ]] || { echo "bot_purge=execute requires a manual workflow_dispatch with mode=execute"; exit 1; }
+          fi
+          echo "mode=$MODE window=${RETENTION_DAYS}d bot_purge=$BOT_PURGE classes=[$PURGE_CLASSES]"
 
       - name: Install PostgreSQL 17 client
         run: |
@@ -168,6 +197,135 @@ jobs:
             cat "$MANIFEST"
           } > export/baseline-summary.txt
           echo "baseline stamp=$STAMP complete — manifest is the completion marker"
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          AWS_DEFAULT_REGION: auto
+
+      # DELETE of the new bot classes — ONLY on an explicit workflow_dispatch with
+      # mode=execute + bot_purge=execute. Push/schedule NEVER reach this step. For each
+      # selected class: verify the downloaded archive line count against the manifest,
+      # delete by exported primary-key ids (10k chunks) capped at the baseline export
+      # timestamp with the hold exclusions re-applied per statement, then archive the
+      # post-baseline regrowth to the non-rotated clicks-bot-archive-ongoing/ prefix
+      # BEFORE deleting it in one slice whose upper bound is that export's timestamp.
+      # Per-class reconcile counts go to the run summary. Rollback: re-import the
+      # archived CSV by uuid id, then ANALYZE.
+      - name: Purge archived bot classes (dispatch only, id-based, archive-verified)
+        if: env.MODE == 'execute' && env.BOT_PURGE == 'execute' && github.event_name == 'workflow_dispatch'
+        run: |
+          set -euo pipefail
+          PSQL=/usr/lib/postgresql/17/bin/psql
+          NOTHOLD="(NOT (coalesce(user_agent,'') = 'Mozilla/5.0 (out-deadlink/1.0)' OR coalesce(user_agent,'') LIKE 'curl/%' OR coalesce(user_agent,'') LIKE '%personal-job-tracker%' OR coalesce(user_agent,'') LIKE '%career-engine%'))"
+          declare -A PRED
+          PRED[null_ua]="coalesce(user_agent,'') = ''"
+          PRED[selfdeclared]="user_agent ~* '(gaia/|summer2027internshiptracker|meta-webindexer|eternalindexer|searchtern|dailyjobmatchalert|laithearlyjobwatcher|bytespider|python-httpx|python-requests|amazon-quick-on-behalf-of|claude-user|claudebot|bingbot|meta-externalagent|shapbot|reflectionbot|internshipradarbot|publicjobmonitor|gradboard|grepjobs|jobradar/|job-application-agent|job-hq-discovery|job-tracker;|jobbo/|jobdrop|jobsearch-mvp|hiremeforjobs|jobapps-discovery|ilmi/|jobagent/|jobscraper/|jobfetch/|^node\$|^anpc\$|deno/)'"
+          PRED[bare_mozilla]="user_agent = 'Mozilla/5.0' AND coalesce(referrer,'') = ''"
+          PRED[headless]="user_agent ~* 'headlesschrome' AND coalesce(referrer,'') = ''"
+          PRED[malformed_chrome_ver]="user_agent ~ 'Chrome/[0-9]{1,3}(\.[0-9]+){0,2} Safari' AND coalesce(referrer,'') = ''"
+          PRED[malformed_truncated]="user_agent LIKE 'Mozilla/5.0%' AND user_agent NOT LIKE '%compatible;%' AND user_agent !~ '(Safari/[0-9]|Firefox/[0-9]|Chrome/[0-9]|Edg[A-Za-z]*/[0-9])' AND coalesce(referrer,'') = ''"
+          mkdir -p export/purge-tmp export/ongoing
+          echo "class,baseline_exported,baseline_deleted,already_missing,regrowth_exported,regrowth_deleted,residual_after" > export/reconcile.csv
+          RT_STAMP=$(date -u +%Y%m%dT%H%M%SZ)
+          RT_TS=$(date -u '+%Y-%m-%d %H:%M:%S+00')
+          OM="export/ongoing/manifest.csv"
+          echo "class,forecast,exported,min_id,max_id,export_started_utc" > "$OM"
+          KEY=$(aws s3api list-objects-v2 --bucket "$R2_BUCKET_NAME" --prefix "clicks-bot-archive-baseline/" \
+            --query "reverse(sort(Contents[?ends_with(Key, '/manifest.csv')].Key || \`[]\`))[0]" --output text --endpoint-url "$R2_ENDPOINT" || true)
+          if [ -z "$KEY" ] || [ "$KEY" = "None" ]; then
+            echo "REFUSING: no baseline manifest under clicks-bot-archive-baseline/ — the archive commit must land and complete first"; exit 1
+          fi
+          STAMP=$(echo "$KEY" | cut -d/ -f2)
+          aws s3api get-object --bucket "$R2_BUCKET_NAME" --key "$KEY" --endpoint-url "$R2_ENDPOINT" export/baseline-manifest.csv >/dev/null
+          echo "baseline stamp=$STAMP — purging classes: $PURGE_CLASSES"
+          IFS=',' read -ra SELECTED <<< "$PURGE_CLASSES"
+          for CLASS in "${SELECTED[@]}"; do
+            ROW=$(awk -F, -v c="$CLASS" '$1==c{print; exit}' export/baseline-manifest.csv)
+            if [ -z "$ROW" ]; then echo "REFUSING: class '$CLASS' not in baseline manifest"; exit 1; fi
+            EXPORTED=$(echo "$ROW" | cut -d, -f3)
+            MIN_ID=$(echo "$ROW" | cut -d, -f4)
+            MAX_ID=$(echo "$ROW" | cut -d, -f5)
+            BASELINE_TS=$(echo "$ROW" | cut -d, -f6)
+            WHERE="${PRED[$CLASS]} AND $NOTHOLD"
+            aws s3api get-object --bucket "$R2_BUCKET_NAME" --key "clicks-bot-archive-baseline/${STAMP}/${CLASS}.csv.gz" --endpoint-url "$R2_ENDPOINT" export/purge-tmp/${CLASS}.csv.gz >/dev/null
+            gunzip -f export/purge-tmp/${CLASS}.csv.gz
+            LOCAL_N=$(python3 -c 'import csv, sys; print(sum(1 for _ in csv.reader(open(sys.argv[1]))) - 1)' export/purge-tmp/${CLASS}.csv)
+            if [ "$LOCAL_N" -ne "$EXPORTED" ]; then
+              echo "REFUSING: $CLASS archive holds $LOCAL_N rows, manifest says $EXPORTED"; exit 1
+            fi
+            echo "class=$CLASS baseline=$EXPORTED rows (min=$MIN_ID max=$MAX_ID, exported_at=$BASELINE_TS) — deleting by exported id"
+            tail -n +2 export/purge-tmp/${CLASS}.csv | cut -d, -f1 > export/purge-tmp/${CLASS}.ids
+            DELETED=0
+            for CHUNKFILE in $(split -l 10000 export/purge-tmp/${CLASS}.ids export/purge-tmp/${CLASS}.chunk_); do
+              IDS=$(sed "s/^/'/; s/\$/'/" "$CHUNKFILE" | paste -sd, -)
+              DEL=$($PSQL "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -At \
+                -c "WITH d AS (DELETE FROM zapply_analytics_clicks WHERE id = ANY(ARRAY[$IDS]::uuid[]) AND created_at <= '$BASELINE_TS' AND $NOTHOLD RETURNING 1) SELECT count(*) FROM d")
+              DELETED=$((DELETED + DEL))
+              rm -f "$CHUNKFILE"
+            done
+            echo "  class=$CLASS baseline ids deleted=$DELETED already_missing=$((EXPORTED - DELETED))"
+            RCOUNT=$($PSQL "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -At \
+              -c "SELECT count(*) FROM zapply_analytics_clicks WHERE $WHERE AND created_at > '$BASELINE_TS' AND created_at <= '$RT_TS'")
+            RDEL=0; REXP=0
+            if [ "$RCOUNT" -gt 0 ]; then
+              echo "  class=$CLASS regrowth rows=$RCOUNT since baseline — archiving before delete"
+              RCSV="export/ongoing/${CLASS}.csv"
+              echo "id,source,landing_page,referrer,user_agent,created_at" > "$RCSV"
+              LAST=""; RMIN=""; RMAX=""; REXP=0
+              while : ; do
+                COND="$WHERE AND created_at > '$BASELINE_TS' AND created_at <= '$RT_TS'"
+                if [ -n "$LAST" ]; then COND="$COND AND id > '$LAST'"; fi
+                # tuples-only CSV: no header row — never strip a "header" here
+                CHUNK=$($PSQL "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -At --csv \
+                  -c "SELECT id, source, landing_page, referrer, user_agent, created_at FROM zapply_analytics_clicks WHERE $COND ORDER BY id LIMIT 10000")
+                read -r N FIRST_ID LAST_ID < <(printf '%s' "$CHUNK" | python3 -c 'import sys, csv; rows = list(csv.reader(sys.stdin)); csv.writer(open(sys.argv[1], "a", newline="")).writerows(rows); print(len(rows), rows[0][0] if rows else "-", rows[-1][0] if rows else "-")' "$RCSV") || { echo "regrowth chunk parse failed for $CLASS"; exit 1; }
+                if [ "$N" -eq 0 ]; then break; fi
+                REXP=$((REXP + N))
+                if [ -z "$RMIN" ]; then RMIN="$FIRST_ID"; fi
+                RMAX="$LAST_ID"; LAST="$LAST_ID"
+                if [ "$N" -lt 10000 ]; then break; fi
+              done
+              if [ "$REXP" -ne "$RCOUNT" ]; then
+                echo "COUNT PARITY FAILED for $CLASS regrowth: exported=$REXP forecast=$RCOUNT — aborting before its delete"; exit 1
+              fi
+              gzip -f "$RCSV"
+              aws s3api put-object --bucket "$R2_BUCKET_NAME" \
+                --key "clicks-bot-archive-ongoing/${RT_STAMP}/${CLASS}.csv.gz" --body "$RCSV.gz" \
+                --endpoint-url "$R2_ENDPOINT" >/dev/null
+              UP=$(aws s3api head-object --bucket "$R2_BUCKET_NAME" \
+                --key "clicks-bot-archive-ongoing/${RT_STAMP}/${CLASS}.csv.gz" \
+                --query ContentLength --output text --endpoint-url "$R2_ENDPOINT")
+              SZ=$(stat -c%s "$RCSV.gz")
+              [ "$UP" = "$SZ" ] || { echo "upload verify failed for $CLASS regrowth"; exit 1; }
+              echo "$CLASS,$RCOUNT,$REXP,$RMIN,$RMAX,$RT_TS" >> "$OM"
+              RDEL=$($PSQL "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -At \
+                -c "WITH d AS (DELETE FROM zapply_analytics_clicks WHERE $WHERE AND created_at > '$BASELINE_TS' AND created_at <= '$RT_TS' RETURNING 1) SELECT count(*) FROM d")
+              if [ "$RDEL" -ne "$RCOUNT" ]; then
+                echo "RECONCILE FAILED for $CLASS regrowth: deleted=$RDEL archived=$RCOUNT"; exit 1
+              fi
+              rm -f "$RCSV.gz"
+              echo "  class=$CLASS regrowth archived=$REXP deleted=$RDEL"
+            fi
+            RESIDUAL=$($PSQL "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -At \
+              -c "SELECT count(*) FROM zapply_analytics_clicks WHERE $WHERE")
+            echo "$CLASS,$EXPORTED,$DELETED,$((EXPORTED - DELETED)),$REXP,$RDEL,$RESIDUAL" >> export/reconcile.csv
+            rm -f export/purge-tmp/${CLASS}.csv export/purge-tmp/${CLASS}.ids
+          done
+          OKEY=$(awk 'NR>1{c++} END{print c+0}' "$OM")
+          if [ "$OKEY" -gt 0 ]; then
+            aws s3api put-object --bucket "$R2_BUCKET_NAME" \
+              --key "clicks-bot-archive-ongoing/${RT_STAMP}/manifest.csv" --body "$OM" \
+              --endpoint-url "$R2_ENDPOINT" >/dev/null
+          fi
+          rmdir export/purge-tmp 2>/dev/null || true
+          { echo "## Bot-class purge reconcile (baseline $STAMP, ongoing archive ${RT_STAMP})"
+            cat export/reconcile.csv
+            echo "already_missing = archived ids already gone via the expired-class path (>90d); residual_after = rows matching class predicate post-purge (post-timestamp inserts only)"
+          } > export/reconcile.txt
+          cat export/reconcile.txt
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
           AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
